@@ -22,7 +22,7 @@ class Segment:
 
 		print(powerline.render(TerminalSegmentRenderer))
 	'''
-	separators = {
+	dividers = {
 		'l': {
 			'hard': '⮀',
 			'soft': '⮁',
@@ -37,11 +37,11 @@ class Segment:
 	ATTR_ITALIC = 2
 	ATTR_UNDERLINE = 4
 
-	def __init__(self, content='', fg=None, bg=None, attr=None, side=None, padding=None, separate=None):
+	def __init__(self, content='', fg=None, bg=None, attr=None, side=None, padding=None, divide=None):
 		'''Create a new segment.
 
 		No arguments are required when creating new segments, as
-		empty/colorless segments can be used e.g.  as left/right separators.
+		empty/colorless segments can be used e.g. as left/right dividers.
 		'''
 		self.content = content
 		self.parent = None
@@ -67,7 +67,7 @@ class Segment:
 		self._attr = attr
 		self._side = side
 		self._padding = padding
-		self._separate = separate
+		self._divide = divide
 
 	@property
 	def fg(self):
@@ -122,7 +122,7 @@ class Segment:
 		'''Segment padding property.
 
 		Return which string is used to pad the segment before and after the
-		separator symbol.
+		divider symbol.
 
 		Recursively searches for the property or the parent segments' property
 		until one is found. If this property is not defined anywhere in the
@@ -133,35 +133,35 @@ class Segment:
 		return self._padding if self._padding is not None else ' '
 
 	@property
-	def separate(self):
-		'''Segment separation property.
+	def divide(self):
+		'''Segment divider property.
 
-		Returns whether a separator symbol should be drawn before/after the
+		Returns whether a divider symbol should be drawn before/after the
 		segment.
 
 		Recursively searches for the property or the parent segments' property
 		until one is found. If this property is not defined anywhere in the
-		tree, then separators will be drawn around all segments.
+		tree, then dividers will be drawn around all segments.
 		'''
-		if self.parent and self._separate is None:
-			return self.parent.separate
-		return self._separate if self._separate is not None else True
+		if self.parent and self._divide is None:
+			return self.parent.divide
+		return self._divide if self._divide is not None else True
 
 	@property
-	def separator(self):
-		'''Segment separator property.
+	def divider(self):
+		'''Segment divider property.
 
-		Returns the separator symbol to be used, depending on which side this
+		Returns the divider symbol to be used, depending on which side this
 		segment is on.
 		'''
-		return self.separators[self.side]
+		return self.dividers[self.side]
 
 	def render(self, renderer):
 		'''Render the segment and all child segments.
 
 		This method flattens the segment and all its child segments into
 		a one-dimensional array. It then loops through this array and compares
-		the foreground/background colors and separator/padding properties and
+		the foreground/background colors and divider/padding properties and
 		returns the rendered statusline as a string.
 		'''
 		def flatten(segment):
@@ -183,7 +183,7 @@ class Segment:
 		output = ''
 
 		# Loop through the segment array and create the segments, colors and
-		# separators
+		# dividers
 		#
 		# TODO Make this prettier
 		for idx, segment in enumerate(segments):
@@ -200,32 +200,32 @@ class Segment:
 				output += renderer.hl(attr=False)
 				if segment.content:
 					if segment.next.bg == segment.bg:
-						if segment.next.content and segment.separate:
+						if segment.next.content and segment.divide:
 							output += segment.padding
 							if segment.next.side == segment.side:
-								# Only draw the soft separator if this segment is on the same side
-								# No need to draw the soft separator if there's e.g. a vim divider in the next segment
-								output += segment.separator['soft']
-					# Don't draw a hard separator if the next segment is on
+								# Only draw the soft divider if this segment is on the same side
+								# No need to draw the soft divider if there's e.g. a vim separation point in the next segment
+								output += segment.divider['soft']
+					# Don't draw a hard divider if the next segment is on
 					# the opposite side, it screws up the coloring
 					elif segment.next.side == segment.side:
 						output += segment.padding
 						output += renderer.hl(segment.bg, segment.next.bg)
-						output += segment.separator['hard']
+						output += segment.divider['hard']
 			else:
 				pad_pre = False
 				if segment.content:
 					if segment.prev.bg == segment.bg:
-						if segment.prev.content and segment.separate:
+						if segment.prev.content and segment.divide:
 							pad_pre = True
 							if segment.prev.side == segment.side:
-								# Only draw the soft separator if this segment is on the same side
-								# No need to draw the soft separator if there's e.g. a vim divider in the previous segment
-								output += segment.separator['soft']
+								# Only draw the soft divider if this segment is on the same side
+								# No need to draw the soft divider if there's e.g. a vim separation point in the previous segment
+								output += segment.divider['soft']
 					else:
 						pad_pre = True
 						output += renderer.hl(segment.bg, segment.prev.bg)
-						output += segment.separator['hard']
+						output += segment.divider['hard']
 				output += renderer.hl(segment.fg, segment.bg, segment.attr)
 				if pad_pre:
 					output += segment.padding

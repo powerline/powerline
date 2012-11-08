@@ -11,7 +11,7 @@ powerline = Segment([
 	Segment([
 		Segment(' ~/projects/powerline/lib/'),
 		Segment('core.py ', 231, attr=Segment.ATTR_BOLD),
-	], 250, 240, separate=False, padding=''),
+	], 250, 240, divide=False, padding=''),
 	Segment('%<%='),
 	Segment([
 		Segment('unix'),
@@ -22,7 +22,7 @@ powerline = Segment([
 			Segment(' ⭡ ', 239),
 			Segment('23', attr=Segment.ATTR_BOLD),
 			Segment(':1 ', 244),
-		], 235, 252, separate=False, padding=''),
+		], 235, 252, divide=False, padding=''),
 	], 245, side='r'),
 ], bg=236)
 
