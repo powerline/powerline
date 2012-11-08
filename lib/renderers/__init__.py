@@ -3,3 +3,4 @@ class SegmentRenderer:
 		raise NotImplementedError
 
 from lib.renderers.terminal import TerminalSegmentRenderer
+from lib.renderers.vim import VimSegmentRenderer
