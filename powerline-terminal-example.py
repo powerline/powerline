@@ -15,4 +15,4 @@ powerline = Segment([
 	], 248, 239),
 ])
 
-print(powerline.render(TerminalSegmentRenderer))
+print(powerline.render(TerminalSegmentRenderer()))

@@ -26,4 +26,4 @@ powerline = Segment([
 	], 245, side='r'),
 ], bg=236)
 
-print(powerline.render(TerminalSegmentRenderer))
+print(powerline.render(TerminalSegmentRenderer()))

@@ -1,8 +1,5 @@
 class SegmentRenderer:
-	def fg(col):
-		raise NotImplementedError
-
-	def bg(col):
+	def hl(self, fg=None, bg=None, attr=None):
 		raise NotImplementedError
 
 from lib.renderers.terminal import TerminalSegmentRenderer

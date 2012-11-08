@@ -79,7 +79,7 @@ class Segment:
 		'''
 		if self.parent and self._fg[0] is None:
 			return self.parent.fg
-		return self._fg if self._fg[0] is not None else [None, None]
+		return self._fg if self._fg[0] is not None else False
 
 	@property
 	def bg(self):
@@ -91,7 +91,7 @@ class Segment:
 		'''
 		if self.parent and self._bg[0] is None:
 			return self.parent.bg
-		return self._bg if self._bg[0] is not None else [None, None]
+		return self._bg if self._bg[0] is not None else False
 
 	@property
 	def attr(self):
@@ -194,12 +194,10 @@ class Segment:
 			segment.next = segments[idx + 1] if idx < len(segments) - 1 else Segment()
 
 			if segment.side == 'l':
-				output += renderer.fg(segment.fg[0])
-				output += renderer.bg(segment.bg[0])
+				output += renderer.hl(segment.fg, segment.bg, segment.attr)
 				output += segment.padding
-				output += renderer.attr(segment.attr)
 				output += segment.content
-				output += renderer.attr(None)
+				output += renderer.hl(attr=False)
 				if segment.content:
 					if segment.next.bg == segment.bg:
 						if segment.next.content and segment.separate:
@@ -212,8 +210,7 @@ class Segment:
 					# the opposite side, it screws up the coloring
 					elif segment.next.side == segment.side:
 						output += segment.padding
-						output += renderer.fg(segment.bg[0])
-						output += renderer.bg(segment.next.bg[0])
+						output += renderer.hl(segment.bg, segment.next.bg)
 						output += segment.separator['hard']
 			else:
 				pad_pre = False
@@ -227,16 +224,13 @@ class Segment:
 								output += segment.separator['soft']
 					else:
 						pad_pre = True
-						output += renderer.fg(segment.bg[0])
-						output += renderer.bg(segment.prev.bg[0])
+						output += renderer.hl(segment.bg, segment.prev.bg)
 						output += segment.separator['hard']
-				output += renderer.fg(segment.fg[0])
-				output += renderer.bg(segment.bg[0])
+				output += renderer.hl(segment.fg, segment.bg, segment.attr)
 				if pad_pre:
 					output += segment.padding
-				output += renderer.attr(segment.attr)
 				output += segment.content
-				output += renderer.attr(None)
+				output += renderer.hl(attr=False)
 				output += segment.padding
 
 		return output

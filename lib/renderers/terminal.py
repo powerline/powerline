@@ -7,42 +7,32 @@ from lib.renderers import SegmentRenderer
 class TerminalSegmentRenderer(SegmentRenderer):
 	'''Powerline terminal segment renderer.
 	'''
-	def fg(col):
-		'''Return ANSI escape code for foreground colors.
+	def hl(self, fg=None, bg=None, attr=None):
+		'''Highlight a segment.
 
-		If no color is provided, the color is reset to the terminal default.
+		If an argument is None, the argument is ignored. If an argument is
+		False, the argument is reset to the terminal defaults. If an argument
+		is a valid color or attribute, it's added to the ANSI escape code.
 		'''
-		if col:
-			return '[38;5;{0}m'.format(col)
-		else:
-			return '[39m'
+		ansi = []
 
-	def bg(col):
-		'''Return ANSI escape code for background colors.
+		if fg is not None:
+			if fg is False:
+				ansi += [39]
+			else:
+				ansi += [38, 5, fg[0]]
 
-		If no color is provided, the color is reset to the terminal default.
-		'''
-		if col:
-			return '[48;5;{0}m'.format(col)
-		else:
-			return '[49m'
+		if bg is not None:
+			if bg is False:
+				ansi += [49]
+			else:
+				ansi += [48, 5, bg[0]]
 
-	def attr(attrs):
-		'''Return ANSI escape code for attributes.
+		if attr is not None:
+			if attr is False:
+				ansi += [22]
+			else:
+				if attr & Segment.ATTR_BOLD:
+					ansi += [1]
 
-		Accepts a flag with attributes defined in Segment.
-
-		If no attributes are provided, the attributes are reset to the terminal
-		defaults.
-		'''
-		if not attrs:
-			return '[22m'
-
-		ansi_attrs = []
-		if attrs & Segment.ATTR_BOLD:
-			ansi_attrs.append('1')
-
-		if ansi_attrs:
-			return '[{0}m'.format(';'.join(ansi_attrs))
-
-		return ''
+		return '[{0}m'.format(';'.join(str(attr) for attr in ansi))
