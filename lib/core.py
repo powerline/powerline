@@ -103,7 +103,7 @@ class Segment:
 		'''
 		if self.parent and self._attr is None:
 			return self.parent.attr
-		return self._attr if self._attr is not None else 0
+		return self._attr if self._attr is not None else False
 
 	@property
 	def side(self):
