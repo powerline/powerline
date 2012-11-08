@@ -204,7 +204,10 @@ class Segment:
 					if segment.next.bg == segment.bg:
 						if segment.next.content and segment.separate:
 							output += segment.padding
-							output += segment.separator['soft']
+							if segment.next.side == segment.side:
+								# Only draw the soft separator if this segment is on the same side
+								# No need to draw the soft separator if there's e.g. a vim divider in the next segment
+								output += segment.separator['soft']
 					# Don't draw a hard separator if the next segment is on
 					# the opposite side, it screws up the coloring
 					elif segment.next.side == segment.side:
@@ -218,7 +221,10 @@ class Segment:
 					if segment.prev.bg == segment.bg:
 						if segment.prev.content and segment.separate:
 							pad_pre = True
-							output += segment.separator['soft']
+							if segment.prev.side == segment.side:
+								# Only draw the soft separator if this segment is on the same side
+								# No need to draw the soft separator if there's e.g. a vim divider in the previous segment
+								output += segment.separator['soft']
 					else:
 						pad_pre = True
 						output += renderer.fg(segment.bg[0])
