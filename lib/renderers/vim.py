@@ -57,3 +57,20 @@ class VimSegmentRenderer(SegmentRenderer):
 		self.hl_groups[hl_group_name] = hl_group
 
 		return '%#{0}#'.format(hl_group_name)
+
+	def get_hl_statements(self):
+		'''Return vimscript highlight statements.
+
+		Returns a string with all the required highlight statements for vim.
+		Requires the statusline to be rendered using the Segment.render()
+		method first as this method generates all the necessary highlighting
+		information.
+		'''
+		return '\n'.join(['hi {group} ctermfg={ctermfg} guifg={guifg} guibg={guibg} ctermbg={ctermbg} cterm={attr} gui={attr}'.format(
+				group=group,
+				ctermfg=hl['ctermfg'],
+				guifg='#{0:06x}'.format(hl['guifg']) if hl['guifg'] != 'NONE' else 'NONE',
+				ctermbg=hl['ctermbg'],
+				guibg='#{0:06x}'.format(hl['guibg']) if hl['guibg'] != 'NONE' else 'NONE',
+				attr=','.join(hl['attr']),
+			) for group, hl in self.hl_groups.items()])

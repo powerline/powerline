@@ -29,14 +29,5 @@ powerline = Segment([
 renderer = VimSegmentRenderer()
 stl = powerline.render(renderer)
 
-for group, hl in renderer.hl_groups.items():
-	print('hi {group} ctermfg={ctermfg} guifg={guifg} guibg={guibg} ctermbg={ctermbg} cterm={attr} gui={attr}'.format(
-		group=group,
-		ctermfg=hl['ctermfg'],
-		guifg='#{0:06x}'.format(hl['guifg']) if hl['guifg'] != 'NONE' else 'NONE',
-		ctermbg=hl['ctermbg'],
-		guibg='#{0:06x}'.format(hl['guibg']) if hl['guibg'] != 'NONE' else 'NONE',
-		attr=','.join(hl['attr']),
-	))
-
+print(renderer.get_hl_statements())
 print('let &stl = "{0}"'.format(stl))
