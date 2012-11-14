@@ -2,20 +2,6 @@
 " Run with :source %
 
 let s:did_highlighting = 0
-let s:segments = [
-	\ { 'contents': 'mode()',                  'fg': 22,  'bg': 148, 'attr': 1 },
-	\ { 'contents': '"⭠ develop"',             'fg': 247, 'bg': 240, 'priority': 10 },
-	\ { 'contents': '" ".expand("%:p:h")."/"', 'fg': 250, 'bg': 240, 'padding': '', 'draw_divider': 0, 'priority': 5 },
-	\ { 'contents': 'expand("%:p:t")." "',     'fg': 231, 'bg': 240, 'padding': '', 'attr': 1 },
-	\ { 'filler': 1 },
-	\ { 'contents': '&ff',                     'fg': 245, 'bg': 236, 'side': 'r', 'priority': 50 },
-	\ { 'contents': '&fenc',                   'fg': 245, 'bg': 236, 'side': 'r', 'priority': 50 },
-	\ { 'contents': '&ft',                     'fg': 245, 'bg': 236, 'side': 'r', 'priority': 50 },
-	\ { 'contents': '(line(".") * 100 / line("$") * 100) / 100 . "%%"', 'fg': 247, 'bg': 240, 'side': 'r', 'priority': 30 },
-	\ { 'contents': '"⭡"',                     'fg': 239, 'bg': 252, 'side': 'r' },
-	\ { 'contents': 'line(".")',               'fg': 239, 'bg': 252, 'side': 'r', 'attr': 1, 'padding': '', 'draw_divider': 0 },
-	\ { 'contents': '":". col(".")',           'fg': 244, 'bg': 252, 'side': 'r', 'padding': '', 'draw_divider': 0, 'priority': 30 },
-\ ]
 
 function! DynStl()
 	python <<EOF
@@ -27,19 +13,31 @@ from lib.core import Segment
 from lib.renderers import VimSegmentRenderer
 
 winwidth = int(vim.eval('winwidth(0)'))
-segments = [{
-		'contents': vim.eval(s.get('contents', '""')),
-		'fg': int(s.get('fg', 0)) or None,
-		'bg': int(s.get('bg', 0)) or None,
-		'attr': int(s.get('attr', 0)),
-		'priority': int(s.get('priority', -1)),
-		'padding': s.get('padding', ' '),
-		'draw_divider': int(s.get('draw_divider', 1)),
-		'filler': bool(s.get('filler', 0)),
-		'side': s.get('side', 'l'),
-	} for s in vim.eval('s:segments')]
 
-powerline = Segment([Segment(**segment) for segment in segments], 236, 236)
+line_current = int(vim.eval('line(".")'))
+line_end = int(vim.eval('line("$")'))
+line_percent = int(float(line_current) / float(line_end) * 100)
+
+powerline = Segment([
+	Segment(vim.eval('mode()'), 22, 148, attr=Segment.ATTR_BOLD),
+	Segment('⭠ develop', 247, 240, priority=10),
+	Segment([
+		Segment(vim.eval('" ".expand("%:p:h")."/"'), draw_divider=False, priority=5),
+		Segment(vim.eval('expand("%:p:t")." "'), 231, attr=Segment.ATTR_BOLD),
+	], 250, 240, padding=''),
+	Segment(filler=True),
+	Segment([
+		Segment(vim.eval('&ff'), priority=50),
+		Segment(vim.eval('&fenc'), priority=50),
+		Segment(vim.eval('&ft'), priority=50),
+		Segment(str(line_percent) + '%%', 247, 240, priority=30),
+		Segment([
+			Segment('⭡', 239),
+			Segment(str(line_current), attr=Segment.ATTR_BOLD, padding='', draw_divider=False),
+			Segment(vim.eval('":".col(".")." "'), 244, priority=30, padding='', draw_divider=False),
+		], 235, 252),
+	], 245, side='r'),
+], fg=236, bg=236)
 
 renderer = VimSegmentRenderer()
 stl = powerline.render(renderer, winwidth)
