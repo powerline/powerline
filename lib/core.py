@@ -37,7 +37,7 @@ class Segment:
 	ATTR_ITALIC = 2
 	ATTR_UNDERLINE = 4
 
-	def __init__(self, contents=None, fg=None, bg=None, attr=None, side=None, padding=None, draw_divider=None, priority=None, filler=None):
+	def __init__(self, contents=None, fg=None, bg=None, attr=None, side=None, draw_divider=None, priority=None, filler=None):
 		'''Create a new Powerline segment.
 		'''
 		self.parent = None
@@ -47,7 +47,6 @@ class Segment:
 		self.bg = bg
 		self.attr = attr
 		self.side = side
-		self.padding = padding
 		self.draw_divider = draw_divider
 		self.priority = priority
 		self.filler = filler
@@ -93,7 +92,6 @@ class Segment:
 		self.bg = lookup_attr('bg', False)
 		self.attr = lookup_attr('attr', False)
 		self.side = lookup_attr('side', 'l')
-		self.padding = lookup_attr('padding', ' ')
 		self.draw_divider = lookup_attr('draw_divider', True)
 		self.priority = lookup_attr('priority', -1)
 		self.filler = lookup_attr('filler', False)
@@ -119,8 +117,8 @@ class Segment:
 
 		This method flattens the segment and all its child segments into
 		a one-dimensional array. It then loops through this array and compares
-		the foreground/background colors and divider/padding properties and
-		returns the rendered statusline as a string.
+		the foreground/background colors and divider properties and returns the
+		rendered statusline as a string.
 
 		When a width is provided, low-priority segments are dropped one at
 		a time until the line is shorter than the width, or only segments
@@ -170,12 +168,12 @@ class Segment:
 					# the opposite side only draw the divider if it's a hard
 					# divider
 					if segment.side == 'l':
-						segment_format = '{segment_hl}{padding}{contents}{padding}{divider_hl}{divider}'
+						segment_format = '{segment_hl}{outer_padding}{contents} {divider_hl}{divider} '
 					else:
-						segment_format = '{divider_hl}{divider}{segment_hl}{padding}{contents}{padding}'
+						segment_format = ' {divider_hl}{divider}{segment_hl} {contents}{outer_padding}'
 				elif segment.contents:
-					# Soft divided segments
-					segment_format = '{segment_hl}{padding}{contents}{padding}'
+					# Segments without divider
+					segment_format = '{segment_hl}{contents}{outer_padding}'
 				else:
 					# Unknown segment type, skip it
 					continue
@@ -185,20 +183,20 @@ class Segment:
 					# %=%< segment which disappears), so they will be skipped
 					# when calculating the width using the raw rendering
 					rendered_raw += segment_format.format(
-						padding=segment.padding,
 						divider=divider,
 						contents=segment.contents,
 						divider_hl='',
 						segment_hl='',
+						outer_padding=' ' if idx == 0 or idx == len(segments) - 1 else '',
 					)
 
 				if render_highlighted is True:
 					rendered_highlighted += segment_format.format(
-						padding=segment.padding,
 						divider=divider,
 						contents=segment.contents,
 						divider_hl='' if divider_type == 'soft' else renderer.hl(segment.bg, compare_segment.bg),
 						segment_hl=renderer.hl(segment.fg, segment.bg, segment.attr),
+						outer_padding=' ' if idx == 0 or idx == len(segments) - 1 else '',
 					)
 
 			return {
