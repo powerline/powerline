@@ -22,9 +22,9 @@ powerline = Segment([
 	Segment(vim.eval('mode()'), 22, 148, attr=Segment.ATTR_BOLD),
 	Segment('⭠ develop', 247, 240, priority=10),
 	Segment([
-		Segment(vim.eval('" ".expand("%:p:h")."/"'), draw_divider=False, priority=5),
-		Segment(vim.eval('expand("%:p:t")." "'), 231, attr=Segment.ATTR_BOLD),
-	], 250, 240, padding=''),
+		Segment(vim.eval('expand("%:p:h")."/"'), draw_divider=False, priority=5),
+		Segment(vim.eval('expand("%:p:t")'), 231, attr=Segment.ATTR_BOLD),
+	], 250, 240),
 	Segment(filler=True),
 	Segment([
 		Segment(vim.eval('&ff'), priority=50),
@@ -32,9 +32,9 @@ powerline = Segment([
 		Segment(vim.eval('&ft'), priority=50),
 		Segment(str(line_percent) + '%%', 247, 240, priority=30),
 		Segment([
-			Segment('⭡', 239),
-			Segment(str(line_current), attr=Segment.ATTR_BOLD, padding='', draw_divider=False),
-			Segment(vim.eval('":".col(".")." "'), 244, priority=30, padding='', draw_divider=False),
+			Segment('⭡ ', 239),
+			Segment(str(line_current), attr=Segment.ATTR_BOLD, draw_divider=False),
+			Segment(vim.eval('":".col(".")'), 244, priority=30, draw_divider=False),
 		], 235, 252),
 	], 245, side='r'),
 ], fg=236, bg=236)
