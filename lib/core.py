@@ -212,8 +212,6 @@ class Segment:
 			# No width specified, so we don't need to crop or pad anything
 			return rendered['highlighted']
 
-		import math
-
 		# Create an ordered list of segments that can be dropped
 		segments_priority = [segment for segment in sorted(segments, key=lambda segment: segment.priority, reverse=True) if segment.priority > 0]
 
@@ -225,9 +223,10 @@ class Segment:
 
 		# Distribute the remaining space on the filler segments
 		segments_fillers = [segment for segment in segments if segment.filler is True]
-		segments_fillers_contents = ' ' * math.floor((width - len(rendered['raw'])) / len(segments_fillers))
-		for segment in segments_fillers:
-			segment.contents = segments_fillers_contents
+		if segments_fillers:
+			segments_fillers_contents = ' ' * int((width - len(rendered['raw'])) / len(segments_fillers))
+			for segment in segments_fillers:
+				segment.contents = segments_fillers_contents
 
 		# Do a final render now that we have handled the cropping and padding
 		rendered = render_segments(segments, render_raw=False)
