@@ -17,13 +17,13 @@ class TerminalSegmentRenderer(SegmentRenderer):
 		ansi = []
 
 		if fg is not None:
-			if fg is False:
+			if fg[0] is False:
 				ansi += [39]
 			else:
 				ansi += [38, 5, fg[0]]
 
 		if bg is not None:
-			if bg is False:
+			if bg[0] is False:
 				ansi += [49]
 			else:
 				ansi += [48, 5, bg[0]]
