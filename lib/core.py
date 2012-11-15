@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+
+
 class Segment:
 	'''Powerline segment renderer.
 
@@ -213,7 +216,7 @@ class Segment:
 		# Create an ordered list of segments that can be dropped
 		segments_priority = [segment for segment in sorted(segments, key=lambda segment: segment.priority, reverse=True) if segment.priority > 0]
 
-		while len(rendered['raw']) > width and len(segments_priority):
+		while len(rendered['raw'].decode('utf-8')) > width and len(segments_priority):
 			segments.remove(segments_priority[0])
 			segments_priority.pop(0)
 
@@ -222,7 +225,7 @@ class Segment:
 		# Distribute the remaining space on the filler segments
 		segments_fillers = [segment for segment in segments if segment.filler is True]
 		if segments_fillers:
-			segments_fillers_contents = ' ' * int((width - len(rendered['raw'])) / len(segments_fillers))
+			segments_fillers_contents = ' ' * int((width - len(rendered['raw'].decode('utf-8'))) / len(segments_fillers))
 			for segment in segments_fillers:
 				segment.contents = segments_fillers_contents
 
