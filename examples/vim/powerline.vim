@@ -15,7 +15,7 @@ else
 endif
 
 function! DynStl()
-    return s:pyeval('statusline()')
+	return s:pyeval('statusline()')
 endfunction
 
 set stl=%!DynStl()

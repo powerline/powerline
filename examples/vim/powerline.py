@@ -49,13 +49,13 @@ def statusline():
 
 	col_current = vim.bindeval('col(".")')
 
-	filepath = os.path.split(vim.bindeval('expand("%:~:.")'))
+	filepath, filename = os.path.split(vim.bindeval('expand("%:~:.")'))
 	filename_color = 231
-	if filepath[0]:
-		filepath[0] += os.sep
+	if filepath:
+		filepath += os.sep
 
-	if not filepath[1]:
-		filepath = ('', '[No Name]')
+	if not filename:
+		filename = '[No Name]'
 		filename_color = 250
 
 	readonly = vim.bindeval('&ro ? "⭤ " : ""')
@@ -73,8 +73,8 @@ def statusline():
 		Segment(vim.bindeval('&paste ? "PASTE" : ""'), 231, 166, attr=Segment.ATTR_BOLD),
 		Segment(branch, 250, 240, priority=10),
 		Segment(readonly, 196, 240, draw_divider=False),
-		Segment(filepath[0], 250, 240, draw_divider=False, priority=5),
-		Segment(filepath[1], filename_color, 240, attr=Segment.ATTR_BOLD, draw_divider=not len(modified)),
+		Segment(filepath, 250, 240, draw_divider=False, priority=5),
+		Segment(filename, filename_color, 240, attr=Segment.ATTR_BOLD, draw_divider=not len(modified)),
 		Segment(modified, 220, 240, attr=Segment.ATTR_BOLD),
 		Segment(currenttag, 246, 236, draw_divider=False, priority=100),
 		Segment(filler=True, fg=236, bg=236),
