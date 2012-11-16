@@ -2,6 +2,10 @@
 '''Powerline terminal prompt example.
 '''
 
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
+
 from lib.core import Powerline, Segment
 from lib.renderers import TerminalSegmentRenderer
 
