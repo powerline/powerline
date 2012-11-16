@@ -2,17 +2,16 @@
 '''Powerline terminal prompt example.
 '''
 
-from lib.core import Segment
+from lib.core import Powerline, Segment
 from lib.renderers import TerminalSegmentRenderer
 
-powerline = Segment([
+powerline = Powerline([
 	Segment('⭤ SSH', 220, 166, attr=Segment.ATTR_BOLD),
 	Segment('username', 153, 31),
-	Segment([
-		Segment('~'),
-		Segment('projects'),
-		Segment('powerline', 231, attr=Segment.ATTR_BOLD),
-	], 248, 239),
+	Segment('~', 248, 239),
+	Segment('projects', 248, 239),
+	Segment('powerline', 231, 239, attr=Segment.ATTR_BOLD),
+	Segment(filler=True),
 ])
 
 print(powerline.render(TerminalSegmentRenderer()))

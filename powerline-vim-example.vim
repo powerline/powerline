@@ -12,7 +12,7 @@ import re
 import sys
 sys.path.append('.')
 
-from lib.core import Segment
+from lib.core import Powerline, Segment
 from lib.renderers import VimSegmentRenderer
 
 winwidth = int(vim.eval('winwidth(0)'))
@@ -47,26 +47,20 @@ filepath = os.path.split(vim.eval('expand("%:~:.")'))
 if filepath[0]:
 	filepath[0] += os.sep
 
-powerline = Segment([
+powerline = Powerline([
 	Segment(mode, 22, 148, attr=Segment.ATTR_BOLD),
 	Segment('⭠ ' + branch, 250, 240, priority=10),
-	Segment([
-		Segment(filepath[0], draw_divider=False, priority=5),
-		Segment(filepath[1], 231, attr=Segment.ATTR_BOLD),
-	], 250, 240),
-	Segment(filler=True),
-	Segment([
-		Segment(vim.eval('&ff'), priority=50),
-		Segment(vim.eval('&fenc'), priority=50),
-		Segment(vim.eval('&ft'), priority=50),
-		Segment(str(line_percent).rjust(3) + '%', line_percent_color, 240, priority=30),
-		Segment([
-			Segment('⭡ ', 239),
-			Segment(str(line_current).rjust(3), attr=Segment.ATTR_BOLD, draw_divider=False),
-			Segment(':' + str(col_current).ljust(2), 244, priority=30, draw_divider=False),
-		], 235, 252),
-	], 247, side='r'),
-], fg=236, bg=236)
+	Segment(filepath[0], 250, 240, draw_divider=False, priority=5),
+	Segment(filepath[1], 231, 240, attr=Segment.ATTR_BOLD),
+	Segment(filler=True, fg=236, bg=236),
+	Segment(vim.eval('&ff'), 247, 236, side='r', priority=50),
+	Segment(vim.eval('&fenc'), 247, 236, side='r', priority=50),
+	Segment(vim.eval('&ft'), 247, 236, side='r', priority=50),
+	Segment(str(line_percent).rjust(3) + '%', line_percent_color, 240, side='r', priority=30),
+	Segment('⭡ ', 239, 252, side='r'),
+	Segment(str(line_current).rjust(3), 235, 252, attr=Segment.ATTR_BOLD, side='r', draw_divider=False),
+	Segment(':' + str(col_current).ljust(2), 244, 252, side='r', priority=30, draw_divider=False),
+])
 
 renderer = VimSegmentRenderer()
 stl = powerline.render(renderer, winwidth)
