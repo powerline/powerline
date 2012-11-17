@@ -33,7 +33,7 @@ if hasattr(vim, 'bindeval'):
 
 	def get_vim_func(f, rettype=None):
 		try:
-			return vim.bindeval('function("'+f+'")')
+			return vim.bindeval('function("' + f + '")')
 		except vim.error:
 			return None
 
@@ -43,34 +43,37 @@ if hasattr(vim, 'bindeval'):
 		vim_globals[var] = val
 else:
 	import json
+
 	class VimFunc(object):
-		__slots__ = ('f','rettype')
+		__slots__ = ('f', 'rettype')
+
 		def __init__(self, f, rettype=None):
-			self.f       = f
+			self.f = f
 			self.rettype = rettype
 
 		def __call__(self, *args):
-			r = vim.eval(self.f+'('+json.dumps(args)[1:-1]+')')
+			r = vim.eval(self.f + '(' + json.dumps(args)[1:-1] + ')')
 			if self.rettype:
 				return self.rettype(r)
 			return r
 
 	get_vim_func = VimFunc
 
-	def set_global_var(var, val):
+	def set_global_var(var, val):  # NOQA
 		vim.command('let g:{0}={1}'.format(var, json.dumps(val)))
 
 vim_funcs = {
-		'winwidth' : get_vim_func('winwidth', rettype=int),
-		'mode'     : get_vim_func('mode'),
-		'fghead'   : get_vim_func('fugitive#head'),
-		'line'     : get_vim_func('line', rettype=int),
-		'col'      : get_vim_func('col', rettype=int),
-		'expand'   : get_vim_func('expand'),
-		'tbcurtag' : get_vim_func('tagbar#currenttag'),
-		'sstlflag' : get_vim_func('SyntasticStatuslineFlag'),
-		'hlexists' : get_vim_func('hlexists', rettype=int),
+	'winwidth': get_vim_func('winwidth', rettype=int),
+	'mode': get_vim_func('mode'),
+	'fghead': get_vim_func('fugitive#head'),
+	'line': get_vim_func('line', rettype=int),
+	'col': get_vim_func('col', rettype=int),
+	'expand': get_vim_func('expand'),
+	'tbcurtag': get_vim_func('tagbar#currenttag'),
+	'sstlflag': get_vim_func('SyntasticStatuslineFlag'),
+	'hlexists': get_vim_func('hlexists', rettype=int),
 }
+
 
 def statusline():
 	winwidth = vim_funcs['winwidth'](0)
@@ -89,7 +92,7 @@ def statusline():
 		branch = '⭠ ' + branch
 
 	line_current = vim_funcs['line']('.')
-	line_end     = vim_funcs['line']('$')
+	line_end = vim_funcs['line']('$')
 	line_percent = line_current * 100 // line_end
 
 	# Fun gradient colored percent segment
