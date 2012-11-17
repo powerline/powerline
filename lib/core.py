@@ -115,9 +115,12 @@ class Powerline:
 		# Distribute the remaining space on the filler segments
 		segments_fillers = [segment for segment in self.segments if segment.filler is True]
 		if segments_fillers:
-			segments_fillers_contents = ' ' * int((width - len(rendered['raw'])) / len(segments_fillers))
+			segments_fillers_len, segments_fillers_remainder = divmod((width - len(rendered['raw'])), len(segments_fillers))
+			segments_fillers_contents = ' ' * segments_fillers_len
 			for segment in segments_fillers:
 				segment.contents = segments_fillers_contents
+			# Add remainder whitespace to the first filler segment
+			segments_fillers[0].contents += ' ' * segments_fillers_remainder
 
 		# Do a final render now that we have handled the cropping and padding
 		rendered = render_segments(self.segments, render_raw=False)
