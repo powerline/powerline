@@ -1,10 +1,11 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
 '''Powerline terminal prompt example.
 '''
 
 import os
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 from lib.core import Powerline, Segment
 from lib.renderers import TerminalSegmentRenderer
