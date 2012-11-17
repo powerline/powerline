@@ -55,8 +55,7 @@ else:
 				return self.rettype(r)
 			return r
 
-	def get_vim_func(f):
-		return VimFunc(f)
+	get_vim_func = VimFunc
 
 	def set_global_var(var, val):
 		vim.command('let g:{0}={1}'.format(var, json.dumps(val)))
