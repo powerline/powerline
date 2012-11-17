@@ -9,7 +9,7 @@ if exists('*pyeval')
 	let s:pyeval=function('pyeval')
 else
 	python import json
-	function s:pyeval(e)
+	function! s:pyeval(e)
 		python vim.command('return ' + json.dumps(eval(vim.eval('a:e'))))
 	endfunction
 endif
