@@ -93,8 +93,8 @@ class Powerline:
 					)
 
 			return {
-				'highlighted': rendered_highlighted,
-				'raw': rendered_raw,
+				'highlighted': rendered_highlighted.decode('utf-8'),
+				'raw': rendered_raw.decode('utf-8'),
 			}
 
 		rendered = render_segments(self.segments)
@@ -106,7 +106,7 @@ class Powerline:
 		# Create an ordered list of segments that can be dropped
 		segments_priority = [segment for segment in sorted(self.segments, key=lambda segment: segment.priority, reverse=True) if segment.priority > 0]
 
-		while len(rendered['raw'].decode('utf-8')) > width and len(segments_priority):
+		while len(rendered['raw']) > width and len(segments_priority):
 			self.segments.remove(segments_priority[0])
 			segments_priority.pop(0)
 
@@ -115,7 +115,7 @@ class Powerline:
 		# Distribute the remaining space on the filler segments
 		segments_fillers = [segment for segment in self.segments if segment.filler is True]
 		if segments_fillers:
-			segments_fillers_contents = ' ' * int((width - len(rendered['raw'].decode('utf-8'))) / len(segments_fillers))
+			segments_fillers_contents = ' ' * int((width - len(rendered['raw'])) / len(segments_fillers))
 			for segment in segments_fillers:
 				segment.contents = segments_fillers_contents
 
