@@ -1,15 +1,21 @@
 # -*- coding: utf-8 -*-
 
+from lib.colors import cterm_to_hex
 
-class Powerline:
+
+class Powerline(object):
+	ATTR_BOLD = 1
+	ATTR_ITALIC = 2
+	ATTR_UNDERLINE = 4
+
 	dividers = {
 		'l': {
-			'hard': '⮀',
-			'soft': '⮁',
+			'hard': u'⮀',
+			'soft': u'⮁',
 		},
 		'r': {
-			'hard': '⮂',
-			'soft': '⮃',
+			'hard': u'⮂',
+			'soft': u'⮃',
 		},
 	}
 
@@ -19,7 +25,8 @@ class Powerline:
 		Segments that have empty contents and aren't filler segments are
 		dropped from the segment array.
 		'''
-		self.segments = [segment for segment in segments if segment.contents or segment.filler]
+		self.segments = [segment for segment in segments if segment['contents'] or segment['filler']]
+		self._hl = {}
 
 	def render(self, renderer, width=None):
 		'''Render all the segments with the specified renderer.
@@ -34,7 +41,7 @@ class Powerline:
 		provided they will fill the remaining space until the desired width is
 		reached.
 		'''
-		def render_segments(segments, render_raw=True, render_highlighted=True):
+		def render_segments(segments, render_highlighted=True):
 			'''Render a segment array.
 
 			By default this function renders both raw (un-highlighted segments
@@ -42,125 +49,114 @@ class Powerline:
 			rendering is used for calculating the total width for dropping
 			low-priority segments.
 			'''
-			rendered_raw = ''
-			rendered_highlighted = ''
+			rendered_highlighted = u''
+			segments_len = len(segments)
+			empty_segment = mksegment()
 
 			for idx, segment in enumerate(segments):
-				prev = segments[idx - 1] if idx > 0 else Segment()
-				next = segments[idx + 1] if idx < len(segments) - 1 else Segment()
+				prev = segments[idx - 1] if idx > 0 else empty_segment
+				next = segments[idx + 1] if idx < segments_len - 1 else empty_segment
 
-				compare_segment = next if segment.side == 'l' else prev
-				divider_type = 'soft' if compare_segment.bg == segment.bg else 'hard'
-				divider = self.dividers[segment.side][divider_type]
+				segment['rendered_raw'] = u''
+				compare = next if segment['side'] == 'l' else prev
+				outer_padding = ' ' if idx == 0 or idx == segments_len - 1 else ''
+				divider_type = 'soft' if compare['bg'] == segment['bg'] else 'hard'
+				divider = self.dividers[segment['side']][divider_type]
+				divider_hl = ''
+				segment_hl = ''
 
-				if segment.filler:
+				if render_highlighted:
+					# Generate and cache renderer highlighting
+					if divider_type == 'hard':
+						hl_key = (segment['bg'], compare['bg'])
+						if not hl_key in self._hl:
+							self._hl[hl_key] = renderer.hl(*hl_key)
+						divider_hl = self._hl[hl_key]
+
+					hl_key = (segment['fg'], segment['bg'], segment['attr'])
+					if not hl_key in self._hl:
+						self._hl[hl_key] = renderer.hl(*hl_key)
+					segment_hl = self._hl[hl_key]
+
+				if segment['filler']:
 					# Filler segments shouldn't be padded
-					segment_format = '{contents}'
-				elif segment.draw_divider and (divider_type == 'hard' or segment.side == compare_segment.side):
+					rendered_highlighted += segment['contents']
+				elif segment['draw_divider'] and (divider_type == 'hard' or segment['side'] == compare['side']):
 					# Draw divider if specified, and if the next segment is on
 					# the opposite side only draw the divider if it's a hard
 					# divider
-					if segment.side == 'l':
-						segment_format = '{segment_hl}{outer_padding}{contents} {divider_hl}{divider} '
+					if segment['side'] == 'l':
+						segment['rendered_raw'] += outer_padding + segment['contents'] + ' ' + divider + ' '
+						rendered_highlighted += segment_hl + outer_padding + segment['contents'] + ' ' + divider_hl + divider + ' '
 					else:
-						segment_format = ' {divider_hl}{divider}{segment_hl} {contents}{outer_padding}'
-				elif segment.contents:
+						segment['rendered_raw'] += ' ' + divider + ' ' + segment['contents'] + outer_padding
+						rendered_highlighted += ' ' + divider_hl + divider + segment_hl + ' ' + segment['contents'] + outer_padding
+				elif segment['contents']:
 					# Segments without divider
-					segment_format = '{segment_hl}{contents}{outer_padding}'
+					if segment['side'] == 'l':
+						segment['rendered_raw'] += outer_padding + segment['contents']
+						rendered_highlighted += segment_hl + outer_padding + segment['contents']
+					else:
+						segment['rendered_raw'] += segment['contents'] + outer_padding
+						rendered_highlighted += segment_hl + segment['contents'] + outer_padding
 				else:
 					# Unknown segment type, skip it
 					continue
 
-				if render_raw is True and segment.filler is False:
-					# Filler segments must be empty when used e.g. in vim (the
-					# %=%< segment which disappears), so they will be skipped
-					# when calculating the width using the raw rendering
-					rendered_raw += segment_format.format(
-						divider=divider,
-						contents=segment.contents,
-						divider_hl='',
-						segment_hl='',
-						outer_padding=' ' if idx == 0 or idx == len(segments) - 1 else '',
-					)
+			return rendered_highlighted
 
-				if render_highlighted is True:
-					rendered_highlighted += segment_format.format(
-						divider=divider,
-						contents=segment.contents,
-						divider_hl='' if divider_type == 'soft' else renderer.hl(segment.bg, compare_segment.bg),
-						segment_hl=renderer.hl(segment.fg, segment.bg, segment.attr),
-						outer_padding=' ' if idx == 0 or idx == len(segments) - 1 else '',
-					)
-
-			return {
-				'highlighted': rendered_highlighted.decode('utf-8'),
-				'raw': rendered_raw.decode('utf-8'),
-			}
-
-		rendered = render_segments(self.segments)
+		rendered_highlighted = render_segments(self.segments)
 
 		if not width:
 			# No width specified, so we don't need to crop or pad anything
-			return rendered['highlighted']
+			return rendered_highlighted
 
 		# Create an ordered list of segments that can be dropped
-		segments_priority = [segment for segment in sorted(self.segments, key=lambda segment: segment.priority, reverse=True) if segment.priority > 0]
+		segments_priority = [segment for segment in sorted(self.segments, key=lambda segment: segment['priority'], reverse=True) if segment['priority'] > 0]
 
-		while len(rendered['raw']) > width and len(segments_priority):
+		while self._total_len() > width and len(segments_priority):
 			self.segments.remove(segments_priority[0])
 			segments_priority.pop(0)
 
-			rendered = render_segments(self.segments, render_highlighted=False)
+		# Do another render pass so we can calculate the correct amount of filler space
+		render_segments(self.segments)
 
 		# Distribute the remaining space on the filler segments
-		segments_fillers = [segment for segment in self.segments if segment.filler is True]
+		segments_fillers = [segment for segment in self.segments if segment['filler'] is True]
 		if segments_fillers:
-			segments_fillers_len, segments_fillers_remainder = divmod((width - len(rendered['raw'])), len(segments_fillers))
+			segments_fillers_len, segments_fillers_remainder = divmod((width - self._total_len()), len(segments_fillers))
 			segments_fillers_contents = ' ' * segments_fillers_len
 			for segment in segments_fillers:
-				segment.contents = segments_fillers_contents
+				segment['contents'] = segments_fillers_contents
 			# Add remainder whitespace to the first filler segment
-			segments_fillers[0].contents += ' ' * segments_fillers_remainder
+			segments_fillers[0]['contents'] += ' ' * segments_fillers_remainder
 
-		# Do a final render now that we have handled the cropping and padding
-		rendered = render_segments(self.segments, render_raw=False)
+		return render_segments(self.segments)
 
-		return rendered['highlighted']
+	def _total_len(self):
+		'''Return total/rendered length of all segments.
 
-
-class Segment:
-	ATTR_BOLD = 1
-	ATTR_ITALIC = 2
-	ATTR_UNDERLINE = 4
-
-	def __init__(self, contents=None, fg=False, bg=False, attr=False, side='l', draw_divider=True, priority=-1, filler=False):
-		'''Create a new Powerline segment.
+		This method uses the rendered_raw property of the segments and requires
+		that the segments have been rendered using the render() method first.
 		'''
-		self.contents = str(contents or '')
-		self.fg = fg
-		self.bg = bg
-		self.attr = attr
-		self.side = side
-		self.draw_divider = draw_divider
-		self.priority = priority
-		self.filler = filler
+		return len(''.join([segment['rendered_raw'] for segment in self.segments]))
 
-		if self.filler:
-			# Filler segments should never have any dividers
-			self.draw_divider = False
 
-		try:
-			if len(self.fg) != 2:
-				raise TypeError
-		except TypeError:
-			# Only the terminal color is defined, so we need to get the hex color
-			from lib.colors import cterm_to_hex
-			self.fg = [self.fg, cterm_to_hex(self.fg)]
+def mksegment(contents=None, cterm_fg=False, cterm_bg=False, attr=False, hex_fg=False, hex_bg=False, side='l', draw_divider=True, priority=-1, filler=False):
+	'''Convenience wrapper for segment generation.
+	'''
+	try:
+		contents = unicode(contents or u'')
+	except UnicodeDecodeError:
+		contents = contents.decode('utf-8') or u''
 
-		try:
-			if len(self.bg) != 2:
-				raise TypeError
-		except TypeError:
-			# Only the terminal color is defined, so we need to get the hex color
-			from lib.colors import cterm_to_hex
-			self.bg = [self.bg, cterm_to_hex(self.bg)]
+	return {
+		'contents': contents,
+		'fg': (cterm_fg, hex_fg or cterm_to_hex.get(cterm_fg, 0xffffff)),
+		'bg': (cterm_bg, hex_bg or cterm_to_hex.get(cterm_bg, 0x000000)),
+		'attr': attr,
+		'side': side,
+		'draw_divider': False if filler else draw_divider,
+		'priority': priority,
+		'filler': filler,
+	}
