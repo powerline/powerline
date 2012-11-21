@@ -176,13 +176,13 @@ def statusline(winnr):
 	stl = re.sub('(\w+)\%(?![-{()<=#*%])', '\\1%%', stl)
 
 	# Create highlighting groups
-	for group, hl in renderer.hl_groups.items():
-		if vim_funcs['hlexists'](group):
+	for idx, hl in renderer.hl_groups.items():
+		if vim_funcs['hlexists'](hl['name']):
 			# Only create hl group if it doesn't already exist
 			continue
 
 		vim.command('hi {group} ctermfg={ctermfg} guifg={guifg} guibg={guibg} ctermbg={ctermbg} cterm={attr} gui={attr}'.format(
-				group=group,
+				group=hl['name'],
 				ctermfg=hl['ctermfg'],
 				guifg='#{0:06x}'.format(hl['guifg']) if hl['guifg'] != 'NONE' else 'NONE',
 				ctermbg=hl['ctermbg'],
