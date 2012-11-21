@@ -2,7 +2,6 @@
 
 import vim
 import os
-import re
 
 from lib.core import Powerline, mksegment
 from lib.renderers import VimSegmentRenderer
@@ -29,7 +28,7 @@ modes = {
 }
 
 # We need to replace this private use glyph with a double-percent later
-percent_placeholder = ''.decode('utf-8')
+percent_placeholder = u''
 
 if hasattr(vim, 'bindeval'):
 	# This branch is used to avoid invoking vim parser as much as possible
@@ -100,7 +99,7 @@ def statusline(winnr):
 		except TypeError:
 			branch = ''
 		if branch:
-			branch = '⭠ ' + branch
+			branch = u'⭠ ' + branch
 
 		# Fun gradient colored percent segment
 		line_percent_gradient = [160, 166, 172, 178, 184, 190]
@@ -156,9 +155,9 @@ def statusline(winnr):
 	powerline = Powerline([
 		mksegment(mode, 22, 148, attr=Powerline.ATTR_BOLD),
 		mksegment(windata['paste'], 231, 166, attr=Powerline.ATTR_BOLD),
-		mksegment(windata['branch'], 250, 240, priority=10),
+		mksegment(windata['branch'], 250, 240, priority=60),
 		mksegment(windata['readonly'], 196, 240, draw_divider=False),
-		mksegment(windata['filepath'], 250, 240, draw_divider=False, priority=5),
+		mksegment(windata['filepath'], 250, 240, draw_divider=False, priority=40),
 		mksegment(windata['filename'], windata['filename_color'], 240, attr=Powerline.ATTR_BOLD, draw_divider=not len(windata['modified'])),
 		mksegment(windata['modified'], 220, 240, attr=Powerline.ATTR_BOLD),
 		mksegment(windata['currenttag'], 246, 236, draw_divider=False, priority=100),

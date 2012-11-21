@@ -57,6 +57,7 @@ class Powerline(object):
 				prev = segments[idx - 1] if idx > 0 else empty_segment
 				next = segments[idx + 1] if idx < segments_len - 1 else empty_segment
 
+				segment['rendered_raw'] = u''
 				compare = next if segment['side'] == 'l' else prev
 				outer_padding = ' ' if idx == 0 or idx == segments_len - 1 else ''
 				divider_type = 'soft' if compare['bg'] == segment['bg'] else 'hard'
@@ -117,6 +118,9 @@ class Powerline(object):
 			self.segments.remove(segments_priority[0])
 			segments_priority.pop(0)
 
+		# Do another render pass so we can calculate the correct amount of filler space
+		render_segments(self.segments)
+
 		# Distribute the remaining space on the filler segments
 		segments_fillers = [segment for segment in self.segments if segment['filler'] is True]
 		if segments_fillers:
@@ -155,5 +159,4 @@ def mksegment(contents=None, cterm_fg=False, cterm_bg=False, attr=False, hex_fg=
 		'draw_divider': False if filler else draw_divider,
 		'priority': priority,
 		'filler': filler,
-		'rendered_raw': u'',
 	}
