@@ -4,7 +4,7 @@ import vim
 import os
 import re
 
-from lib.core import Powerline, Segment
+from lib.core import Powerline, mksegment
 from lib.renderers import VimSegmentRenderer
 
 modes = {
@@ -27,6 +27,9 @@ modes = {
 	'r?': 'CONFIRM',
 	'!': 'SHELL',
 }
+
+# We need to replace this private use glyph with a double-percent later
+percent_placeholder = ''.decode('utf-8')
 
 if hasattr(vim, 'bindeval'):
 	# This branch is used to avoid invoking vim parser as much as possible
@@ -137,7 +140,7 @@ def statusline(winnr):
 			'fileformat': vim.eval('&ff'),
 			'fileencoding': vim.eval('&fenc'),
 			'filetype': vim.eval('&ft'),
-			'line_percent': str(line_percent).rjust(3) + '%',
+			'line_percent': str(line_percent).rjust(3) + percent_placeholder,
 			'line_percent_color': line_percent_color,
 			'linecurrent': str(line_current).rjust(3),
 			'colcurrent': ':' + str(col_current).ljust(2),
@@ -151,29 +154,29 @@ def statusline(winnr):
 		mode = None
 
 	powerline = Powerline([
-		Segment(mode, 22, 148, attr=Segment.ATTR_BOLD),
-		Segment(windata['paste'], 231, 166, attr=Segment.ATTR_BOLD),
-		Segment(windata['branch'], 250, 240, priority=10),
-		Segment(windata['readonly'], 196, 240, draw_divider=False),
-		Segment(windata['filepath'], 250, 240, draw_divider=False, priority=5),
-		Segment(windata['filename'], windata['filename_color'], 240, attr=Segment.ATTR_BOLD, draw_divider=not len(windata['modified'])),
-		Segment(windata['modified'], 220, 240, attr=Segment.ATTR_BOLD),
-		Segment(windata['currenttag'], 246, 236, draw_divider=False, priority=100),
-		Segment(filler=True, fg=236, bg=236),
-		Segment(windata['fileformat'], 247, 236, side='r', priority=50),
-		Segment(windata['fileencoding'], 247, 236, side='r', priority=50),
-		Segment(windata['filetype'], 247, 236, side='r', priority=50),
-		Segment(windata['line_percent'], windata['line_percent_color'], 240, side='r', priority=30),
-		Segment('⭡ ', 239, 252, side='r'),
-		Segment(windata['linecurrent'], 235, 252, attr=Segment.ATTR_BOLD, side='r', draw_divider=False),
-		Segment(windata['colcurrent'], 244, 252, side='r', priority=30, draw_divider=False),
+		mksegment(mode, 22, 148, attr=Powerline.ATTR_BOLD),
+		mksegment(windata['paste'], 231, 166, attr=Powerline.ATTR_BOLD),
+		mksegment(windata['branch'], 250, 240, priority=10),
+		mksegment(windata['readonly'], 196, 240, draw_divider=False),
+		mksegment(windata['filepath'], 250, 240, draw_divider=False, priority=5),
+		mksegment(windata['filename'], windata['filename_color'], 240, attr=Powerline.ATTR_BOLD, draw_divider=not len(windata['modified'])),
+		mksegment(windata['modified'], 220, 240, attr=Powerline.ATTR_BOLD),
+		mksegment(windata['currenttag'], 246, 236, draw_divider=False, priority=100),
+		mksegment(filler=True, cterm_fg=236, cterm_bg=236),
+		mksegment(windata['fileformat'], 247, 236, side='r', priority=50),
+		mksegment(windata['fileencoding'], 247, 236, side='r', priority=50),
+		mksegment(windata['filetype'], 247, 236, side='r', priority=50),
+		mksegment(windata['line_percent'], windata['line_percent_color'], 240, side='r', priority=30),
+		mksegment(u'⭡ ', 239, 252, side='r'),
+		mksegment(windata['linecurrent'], 235, 252, attr=Powerline.ATTR_BOLD, side='r', draw_divider=False),
+		mksegment(windata['colcurrent'], 244, 252, side='r', priority=30, draw_divider=False),
 	])
 
 	renderer = VimSegmentRenderer()
 	stl = powerline.render(renderer, winwidth)
 
-	# Escape percent chars in the statusline, but only if they aren't part of any stl escape sequence
-	stl = re.sub('(\w+)\%(?![-{()<=#*%])', '\\1%%', stl)
+	# Replace percent placeholders
+	stl = stl.replace(percent_placeholder, '%%')
 
 	# Create highlighting groups
 	for idx, hl in renderer.hl_groups.items():

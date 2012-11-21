@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from lib.core import Segment
+from lib.core import Powerline
 from lib.renderers import SegmentRenderer
 
 
@@ -41,11 +41,11 @@ class VimSegmentRenderer(SegmentRenderer):
 
 			if attr:
 				hl_group['attr'] = []
-				if attr & Segment.ATTR_BOLD:
+				if attr & Powerline.ATTR_BOLD:
 					hl_group['attr'].append('bold')
-				if attr & Segment.ATTR_ITALIC:
+				if attr & Powerline.ATTR_ITALIC:
 					hl_group['attr'].append('italic')
-				if attr & Segment.ATTR_UNDERLINE:
+				if attr & Powerline.ATTR_UNDERLINE:
 					hl_group['attr'].append('underline')
 
 			hl_group['name'] = 'Pl_' + \

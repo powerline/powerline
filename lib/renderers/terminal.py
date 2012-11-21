@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from lib.core import Segment
+from lib.core import Powerline
 from lib.renderers import SegmentRenderer
 
 
@@ -32,7 +32,7 @@ class TerminalSegmentRenderer(SegmentRenderer):
 			if attr is False:
 				ansi += [22]
 			else:
-				if attr & Segment.ATTR_BOLD:
+				if attr & Powerline.ATTR_BOLD:
 					ansi += [1]
 
 		return '[{0}m'.format(';'.join(str(attr) for attr in ansi))
