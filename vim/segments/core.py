@@ -47,10 +47,13 @@ def mode(override=None):
 	'''
 	mode = vim_funcs['mode']()
 
+	if not override:
+		return (mode, vim_modes[mode])
+
 	try:
-		return override[mode]
-	except TypeError:
-		return vim_modes[mode]
+		return (mode, override[mode])
+	except IndexError:
+		return (mode, vim_modes[mode])
 
 
 def modified_indicator(text=u'+'):
