@@ -81,10 +81,10 @@ class Powerline(object):
 				if segment['filler']:
 					# Filler segments shouldn't be padded
 					rendered_highlighted += segment['contents']
-				elif segment['draw_divider'] and (divider_type == 'hard' or segment['side'] == compare['side']):
-					# Draw divider if specified, and if the next segment is on
-					# the opposite side only draw the divider if it's a hard
-					# divider
+				elif segment['draw_divider'] or divider_type == 'hard':
+					# Draw divider if specified, or if it's a hard divider
+					# Note: Hard dividers are always drawn, regardless of
+					# the draw_divider option
 					if segment['side'] == 'l':
 						segment['rendered_raw'] += outer_padding + segment['contents'] + ' ' + divider + ' '
 						rendered_highlighted += segment_hl + outer_padding + segment['contents'] + ' ' + divider_hl + divider + ' '
