@@ -1,0 +1,57 @@
+{
+	"name": "default",
+	"colors": {
+		"black": 16,
+		"white": 231,
+
+		"darkestgreen": 22,
+		"darkgreen": 28,
+		"mediumgreen": 70,
+		"brightgreen": 148,
+
+		"darkestcyan": 23,
+		"mediumcyan": 117,
+
+		"darkestblue": 24,
+		"darkblue": 31,
+
+		"darkestred": 52,
+		"darkred": 88,
+		"mediumred": 124,
+		"brightred": 160,
+		"brightestred": 196,
+
+		"darkestpurple": 55,
+		"mediumpurple": 98,
+		"brightpurple": 189,
+
+		"brightorange": 208,
+		"brightestorange": 214,
+
+		"gray0": 233,
+		"gray1": 235,
+		"gray2": 236,
+		"gray3": 239,
+		"gray4": 240,
+		"gray5": 241,
+		"gray6": 244,
+		"gray7": 245,
+		"gray8": 247,
+		"gray9": 250,
+		"gray10": 252
+	}
+	"groups": {
+		"background": { "fg": "white", "bg": "gray2" },
+		"mode_indicator": { "fg": "darkestgreen", "bg": "brightgreen", "attr": ["bold"] }
+	}
+	"mode_translations": {
+		"i": {
+			"colors": {
+				"gray2": "darkestblue"
+			},
+			"groups": {
+				"mode_indicator": { "fg": "darkestcyan", "bg": "white", "attr": ["bold"] }
+			}
+		}
+	}
+}
