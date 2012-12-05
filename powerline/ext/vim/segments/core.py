@@ -74,7 +74,7 @@ def readonly_indicator(text=u'⭤'):
 	return text if int(vim.eval('&readonly')) else None
 
 
-def branch(symbol=u'⭠'):
+def branch():
 	'''Return VCS branch.
 
 	TODO: Expand this function to handle several VCS plugins.
@@ -87,7 +87,7 @@ def branch(symbol=u'⭠'):
 	except TypeError:
 		pass
 
-	return symbol + ' ' + branch if branch else None
+	return branch if branch else None
 
 
 def file_directory():
