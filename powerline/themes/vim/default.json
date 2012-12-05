@@ -1,0 +1,99 @@
+{
+	"name": "default",
+	"segments": {
+		"left": [
+			{
+				"type": "function",
+				"name": "mode"
+			},
+			{
+				"type": "function",
+				"name": "paste_indicator",
+				"exclude_modes": ["nc"],
+				"priority": 10
+			},
+			{
+				"type": "function",
+				"name": "branch",
+				"exclude_modes": ["nc"],
+				"priority": 60,
+				"before": "⭠ "
+			},
+			{
+				"type": "function",
+				"name": "readonly_indicator",
+				"exclude_modes": ["nc"],
+				"draw_divider": false
+			},
+			{
+				"type": "function",
+				"name": "file_directory",
+				"priority" 40,
+				"draw_divider": false
+			},
+			{
+				"type": "function",
+				"name": "file_name",
+				"draw_divider": false
+			},
+			{
+				"type": "function",
+				"name": "modified_indicator",
+				"draw_divider": false
+			},
+			{
+				"type": "function",
+				"name": "modified_indicator",
+				"args": { "text": "+" },
+				"exclude_modes": ["nc"]
+			},
+			{
+				"type": "filler",
+				"highlight": ["background"]
+			},
+		],
+		"right": [
+			{
+				"type": "function",
+				"name": "file_format",
+				"draw_divider": false,
+				"exclude_modes": ["nc"],
+				"priority" 50
+			},
+			{
+				"type": "function",
+				"name": "file_encoding",
+				"exclude_modes": ["nc"],
+				"priority" 50
+			},
+			{
+				"type": "function",
+				"name": "file_type",
+				"exclude_modes": ["nc"],
+				"priority" 50
+			},
+			{
+				"type": "function",
+				"name": "line_percent",
+				"args": { "gradient": true },
+				"priority": 30
+			},
+			{
+				"type": "string",
+				"contents": "⭡ ",
+				"highlight": ["line_current_symbol", "line_current"]
+			},
+			{
+				"type": "function",
+				"name": "line_current",
+				"draw_divider": false
+			},
+			{
+				"type": "function",
+				"name": "col_current",
+				"draw_divider": false,
+				"priority": 30
+			},
+		]
+	}
+}
