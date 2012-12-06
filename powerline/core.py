@@ -8,9 +8,10 @@ class Powerline(object):
 		Segments that aren't filler segments and whose contents aren't None are
 		dropped from the segment array.
 		'''
+		self.renderer = None  # FIXME This should be assigned here based on the current configuration
 		self.segments = [segment for segment in segments if segment['contents'] is not None or segment['filler']]
 
 	def render(self, renderer, width=None):
-		r = renderer(self.segments)
+		self.renderer = renderer(self.segments)
 
-		return r.render(width)
+		return self.renderer.render(width)
