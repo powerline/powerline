@@ -6,10 +6,11 @@ from colorscheme import cterm_to_hex
 def mksegment(contents=None, cterm_fg=False, cterm_bg=False, attr=False, hex_fg=False, hex_bg=False, side='l', draw_divider=True, priority=-1, filler=False):
 	'''Convenience wrapper for segment generation.
 	'''
-	try:
-		contents = unicode(contents or u'')
-	except UnicodeDecodeError:
-		contents = contents.decode('utf-8') or u''
+	if contents is not None or filler:
+		try:
+			contents = unicode(contents or u'')
+		except UnicodeDecodeError:
+			contents = contents.decode('utf-8') or u''
 
 	return {
 		'contents': contents,
