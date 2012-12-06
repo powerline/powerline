@@ -1,13 +1,13 @@
-#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
-from lib.core import Powerline
-from lib.renderers import SegmentRenderer
+from powerline.renderer import Renderer
 
 
-class VimSegmentRenderer(SegmentRenderer):
+class VimRenderer(Renderer):
 	'''Powerline vim segment renderer.
 	'''
-	def __init__(self):
+	def __init__(self, segments):
+		super(VimRenderer, self).__init__(segments)
 		self.hl_groups = {}
 
 	def hl(self, fg=None, bg=None, attr=None):
@@ -41,11 +41,11 @@ class VimSegmentRenderer(SegmentRenderer):
 
 			if attr:
 				hl_group['attr'] = []
-				if attr & Powerline.ATTR_BOLD:
+				if attr & Renderer.ATTR_BOLD:
 					hl_group['attr'].append('bold')
-				if attr & Powerline.ATTR_ITALIC:
+				if attr & Renderer.ATTR_ITALIC:
 					hl_group['attr'].append('italic')
-				if attr & Powerline.ATTR_UNDERLINE:
+				if attr & Renderer.ATTR_UNDERLINE:
 					hl_group['attr'].append('underline')
 
 			hl_group['name'] = 'Pl_' + \

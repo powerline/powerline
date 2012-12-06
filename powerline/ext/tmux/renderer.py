@@ -1,10 +1,9 @@
-#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
-from lib.core import Powerline
-from lib.renderers import SegmentRenderer
+from powerline.renderer import Renderer
 
 
-class TmuxSegmentRenderer(SegmentRenderer):
+class TmuxRenderer(Renderer):
 	'''Powerline tmux segment renderer.
 	'''
 	def hl(self, fg=None, bg=None, attr=None):
@@ -22,15 +21,15 @@ class TmuxSegmentRenderer(SegmentRenderer):
 			if attr is False:
 				tmux_attr += ['nobold', 'noitalics', 'nounderscore']
 			else:
-				if attr & Powerline.ATTR_BOLD:
+				if attr & Renderer.ATTR_BOLD:
 					tmux_attr += ['bold']
 				else:
 					tmux_attr += ['nobold']
-				if attr & Powerline.ATTR_ITALIC:
+				if attr & Renderer.ATTR_ITALIC:
 					tmux_attr += ['italics']
 				else:
 					tmux_attr += ['noitalics']
-				if attr & Powerline.ATTR_UNDERLINE:
+				if attr & Renderer.ATTR_UNDERLINE:
 					tmux_attr += ['underscore']
 				else:
 					tmux_attr += ['nounderscore']

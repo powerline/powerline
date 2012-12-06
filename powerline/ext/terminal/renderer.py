@@ -1,10 +1,9 @@
-#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
-from lib.core import Powerline
-from lib.renderers import SegmentRenderer
+from powerline.renderer import Renderer
 
 
-class TerminalSegmentRenderer(SegmentRenderer):
+class TerminalRenderer(Renderer):
 	'''Powerline terminal segment renderer.
 	'''
 	def hl(self, fg=None, bg=None, attr=None):
@@ -32,7 +31,7 @@ class TerminalSegmentRenderer(SegmentRenderer):
 			if attr is False:
 				ansi += [22]
 			else:
-				if attr & Powerline.ATTR_BOLD:
+				if attr & Renderer.ATTR_BOLD:
 					ansi += [1]
 
 		return '[{0}m'.format(';'.join(str(attr) for attr in ansi))
