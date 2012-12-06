@@ -3,8 +3,10 @@
 import vim
 import os
 
-from lib.core import Powerline, mksegment
-from lib.renderers import VimSegmentRenderer
+from powerline.core import Powerline
+from powerline.segment import mksegment
+from powerline.ext.vim import VimRenderer
+from powerline.ext.vim.bindings import vim_get_func
 
 modes = {
 	'n': 'NORMAL',
@@ -30,53 +32,19 @@ modes = {
 # We need to replace this private use glyph with a double-percent later
 percent_placeholder = u''
 
-if hasattr(vim, 'bindeval'):
-	# This branch is used to avoid invoking vim parser as much as possible
-
-	def get_vim_func(f, rettype=None):
-		try:
-			return vim.bindeval('function("' + f + '")')
-		except vim.error:
-			return None
-
-	vim_globals = vim.bindeval('g:')
-
-	def set_global_var(var, val):
-		vim_globals[var] = val
-else:
-	import json
-
-	class VimFunc(object):
-		__slots__ = ('f', 'rettype')
-
-		def __init__(self, f, rettype=None):
-			self.f = f
-			self.rettype = rettype
-
-		def __call__(self, *args):
-			r = vim.eval(self.f + '(' + json.dumps(args)[1:-1] + ')')
-			if self.rettype:
-				return self.rettype(r)
-			return r
-
-	get_vim_func = VimFunc
-
-	def set_global_var(var, val):  # NOQA
-		vim.command('let g:{0}={1}'.format(var, json.dumps(val)))
-
 vim_funcs = {
-	'winwidth': get_vim_func('winwidth', rettype=int),
-	'mode': get_vim_func('mode'),
-	'fghead': get_vim_func('fugitive#head'),
-	'line': get_vim_func('line', rettype=int),
-	'col': get_vim_func('col', rettype=int),
-	'expand': get_vim_func('expand'),
-	'tbcurtag': get_vim_func('tagbar#currenttag'),
-	'hlexists': get_vim_func('hlexists', rettype=int),
+	'winwidth': vim_get_func('winwidth', rettype=int),
+	'mode': vim_get_func('mode'),
+	'fghead': vim_get_func('fugitive#head'),
+	'line': vim_get_func('line', rettype=int),
+	'col': vim_get_func('col', rettype=int),
+	'expand': vim_get_func('expand'),
+	'tbcurtag': vim_get_func('tagbar#currenttag'),
+	'hlexists': vim_get_func('hlexists', rettype=int),
 }
 
-getwinvar = get_vim_func('getwinvar')
-setwinvar = get_vim_func('setwinvar')
+getwinvar = vim_get_func('getwinvar')
+setwinvar = vim_get_func('setwinvar')
 
 
 def statusline(winnr):
@@ -85,7 +53,7 @@ def statusline(winnr):
 	current = getwinvar(winnr, 'current')
 	windata = getwinvar(winnr, 'powerline')
 
-	if current:
+	if current or not windata.keys():
 		# Recreate segment data for each redraw if we're in the current window
 		line_current = vim_funcs['line']('.')
 		line_end = vim_funcs['line']('$')
@@ -128,7 +96,7 @@ def statusline(winnr):
 			currenttag = ''
 
 		windata = {
-			'paste': vim.eval('&paste ? "PASTE" : ""'),
+			'paste': vim.eval('&paste ? "PASTE" : ""') or None,
 			'branch': branch,
 			'readonly': readonly,
 			'filepath': filepath,
@@ -145,6 +113,9 @@ def statusline(winnr):
 			'colcurrent': ':' + str(col_current).ljust(2),
 		}
 
+		# Horrible workaround for missing None type for vimdicts
+		windata = {k: v if v is not None else '__None__' for k, v in windata.items()}
+
 		setwinvar(winnr, 'powerline', windata)
 
 	mode = modes[vim_funcs['mode']()]
@@ -152,14 +123,17 @@ def statusline(winnr):
 	if not current:
 		mode = None
 
+	# Horrible workaround for missing None type for vimdicts
+	windata = {k: windata[k] if windata[k] != '__None__' else None for k in windata.keys()}
+
 	powerline = Powerline([
-		mksegment(mode, 22, 148, attr=Powerline.ATTR_BOLD),
-		mksegment(windata['paste'], 231, 166, attr=Powerline.ATTR_BOLD),
+		mksegment(mode, 22, 148, attr=VimRenderer.ATTR_BOLD),
+		mksegment(windata['paste'], 231, 166, attr=VimRenderer.ATTR_BOLD),
 		mksegment(windata['branch'], 250, 240, priority=60),
 		mksegment(windata['readonly'], 196, 240, draw_divider=False),
 		mksegment(windata['filepath'], 250, 240, draw_divider=False, priority=40),
-		mksegment(windata['filename'], windata['filename_color'], 240, attr=Powerline.ATTR_BOLD, draw_divider=False),
-		mksegment(windata['modified'], 220, 240, attr=Powerline.ATTR_BOLD),
+		mksegment(windata['filename'], windata['filename_color'], 240, attr=VimRenderer.ATTR_BOLD, draw_divider=False),
+		mksegment(windata['modified'], 220, 240, attr=VimRenderer.ATTR_BOLD),
 		mksegment(windata['currenttag'], 246, 236, draw_divider=False, priority=100),
 		mksegment(filler=True, cterm_fg=236, cterm_bg=236),
 		mksegment(windata['fileformat'], 247, 236, side='r', priority=50, draw_divider=False),
@@ -167,18 +141,18 @@ def statusline(winnr):
 		mksegment(windata['filetype'], 247, 236, side='r', priority=50),
 		mksegment(windata['line_percent'], windata['line_percent_color'], 240, side='r', priority=30),
 		mksegment(u'⭡ ', 239, 252, side='r'),
-		mksegment(windata['linecurrent'], 235, 252, attr=Powerline.ATTR_BOLD, side='r', draw_divider=False),
+		mksegment(windata['linecurrent'], 235, 252, attr=VimRenderer.ATTR_BOLD, side='r', draw_divider=False),
 		mksegment(windata['colcurrent'], 244, 252, side='r', priority=30, draw_divider=False),
 	])
 
-	renderer = VimSegmentRenderer()
+	renderer = VimRenderer
 	stl = powerline.render(renderer, winwidth)
 
 	# Replace percent placeholders
 	stl = stl.replace(percent_placeholder, '%%')
 
 	# Create highlighting groups
-	for idx, hl in renderer.hl_groups.items():
+	for idx, hl in powerline.renderer.hl_groups.items():
 		if vim_funcs['hlexists'](hl['name']):
 			# Only create hl group if it doesn't already exist
 			continue

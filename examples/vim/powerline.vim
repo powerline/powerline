@@ -3,7 +3,7 @@
 
 python import sys, vim, os
 python sys.path.append(vim.eval('expand("<sfile>:h:h:h")'))
-python from examples.vim.powerline import statusline
+python from examples.vim.pl import statusline
 
 if exists('*pyeval')
 	let s:pyeval = function('pyeval')
