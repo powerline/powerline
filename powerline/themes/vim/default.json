@@ -28,7 +28,7 @@
 			{
 				"type": "function",
 				"name": "file_directory",
-				"priority" 40,
+				"priority": 40,
 				"draw_divider": false
 			},
 			{
@@ -50,7 +50,7 @@
 			{
 				"type": "filler",
 				"highlight": ["background"]
-			},
+			}
 		],
 		"right": [
 			{
@@ -58,25 +58,27 @@
 				"name": "file_format",
 				"draw_divider": false,
 				"exclude_modes": ["nc"],
-				"priority" 50
+				"priority": 50
 			},
 			{
 				"type": "function",
 				"name": "file_encoding",
 				"exclude_modes": ["nc"],
-				"priority" 50
+				"priority": 50
 			},
 			{
 				"type": "function",
 				"name": "file_type",
 				"exclude_modes": ["nc"],
-				"priority" 50
+				"priority": 50
 			},
 			{
 				"type": "function",
 				"name": "line_percent",
 				"args": { "gradient": true },
-				"priority": 30
+				"priority": 30,
+				"after": "",
+				"rjust": 4
 			},
 			{
 				"type": "string",
@@ -86,14 +88,17 @@
 			{
 				"type": "function",
 				"name": "line_current",
-				"draw_divider": false
+				"draw_divider": false,
+				"rjust": 3
 			},
 			{
 				"type": "function",
 				"name": "col_current",
 				"draw_divider": false,
-				"priority": 30
-			},
+				"priority": 30,
+				"before": ":",
+				"ljust": 3
+			}
 		]
 	}
 }
