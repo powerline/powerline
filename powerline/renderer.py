@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from colorscheme import Colorscheme
+
 
 class Renderer(object):
 	ATTR_BOLD = 1
@@ -61,6 +63,7 @@ class Renderer(object):
 		'''
 		rendered_highlighted = u''
 		segments_len = len(self.segments)
+		mode = mode if mode in self.segments[0]['highlight'] else Colorscheme.default_mode_key
 
 		for index, segment in enumerate(self.segments):
 			prev_segment = self.segments[index - 1] if index > 0 else None
