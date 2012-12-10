@@ -2,8 +2,78 @@
 
 
 class Colorscheme(object):
+	default_mode_key = '__default__'
+
 	def __init__(self, colorscheme):
-		pass
+		'''Initialize a colorscheme.
+		'''
+		self.colors = {}
+		self.modes_groups = {
+			self.default_mode_key: {}
+		}
+
+		# Create a dict of color tuples with both a cterm and hex value
+		for color_name, color in colorscheme['colors'].items():
+			try:
+				self.colors[color_name] = (color[0], color[1])
+			except TypeError:
+				self.colors[color_name] = (color, cterm_to_hex[color])
+
+		# Create highlighting groups for all modes
+		for group_name, group_props in colorscheme['groups'].items():
+			group_attr_flag = self._get_attr_flag(group_props.get('attr', []))
+
+			self.modes_groups[self.default_mode_key][group_name] = {
+				'fg': self.colors[group_props['fg']],
+				'bg': self.colors[group_props['bg']],
+				'attr': group_attr_flag,
+			}
+
+			# Create mode-specific highlighting for this group
+			for mode, translations in colorscheme['mode_translations'].items():
+				if not mode in self.modes_groups:
+					self.modes_groups[mode] = {}
+
+				if group_name in translations['groups']:
+					# Override entire group if present in the translations group dict
+					self.modes_groups[mode][group_name] = {
+						'fg': self.colors[translations['groups'][group_name]['fg']],
+						'bg': self.colors[translations['groups'][group_name]['bg']],
+						'attr': self._get_attr_flag(translations['groups'][group_name].get('attr', [])),
+					}
+				else:
+					# Fallback to color translations from the translations colors dict
+					self.modes_groups[mode][group_name] = {
+						'fg': self.colors[translations['colors'].get(group_props['fg'], group_props['fg'])],
+						'bg': self.colors[translations['colors'].get(group_props['bg'], group_props['bg'])],
+						'attr': group_attr_flag,
+					}
+
+	def get_highlighting(self, group, mode=None):
+		'''Return highlighting information for a highlighting group and mode.
+
+		If no mode is specified, or the mode doesn't exist, highlighting for
+		the default mode is returned.
+		'''
+		if not mode or mode not in self.modes_groups:
+			mode = self.default_mode_key
+
+		return self.modes_groups[mode][group]
+
+	def _get_attr_flag(self, attributes):
+		'''Convert an attribute array to a renderer flag.
+		'''
+		from powerline.renderer import Renderer
+
+		attr_flag = 0
+		if 'bold' in attributes:
+			attr_flag |= Renderer.ATTR_BOLD
+		if 'italic' in attributes:
+			attr_flag |= Renderer.ATTR_ITALIC
+		if 'underline' in attributes:
+			attr_flag |= Renderer.ATTR_UNDERLINE
+
+		return attr_flag
 
 cterm_to_hex = {
 	16: 0x000000, 17: 0x00005f, 18: 0x000087, 19: 0x0000af, 20: 0x0000d7, 21: 0x0000ff,
