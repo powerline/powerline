@@ -75,6 +75,29 @@
 		"col_current": { "fg": "gray6", "bg": "gray10" }
 	},
 	"mode_translations": {
+		"nc": {
+			"colors": {
+				"gray0": "gray0",
+				"gray1": "gray0",
+				"gray2": "gray0",
+				"gray3": "gray1",
+				"gray4": "gray1",
+				"gray5": "gray1",
+				"gray6": "gray1",
+				"gray7": "gray4",
+				"gray8": "gray4",
+				"gray9": "gray4",
+				"gray10": "gray5",
+				"white": "gray6",
+				"gradient1": "gray5",
+				"gradient2": "gray5",
+				"gradient3": "gray5",
+				"gradient4": "gray5",
+				"gradient5": "gray5",
+				"gradient6": "gray5"
+			},
+			"groups": {}
+		},
 		"i": {
 			"colors": {
 				"gray0": "darkestblue",
@@ -87,7 +110,13 @@
 				"gray7": "darkestcyan",
 				"gray8": "mediumcyan",
 				"gray9": "mediumcyan",
-				"gray10": "mediumcyan"
+				"gray10": "mediumcyan",
+				"gradient1": "mediumcyan",
+				"gradient2": "mediumcyan",
+				"gradient3": "mediumcyan",
+				"gradient4": "mediumcyan",
+				"gradient5": "mediumcyan",
+				"gradient6": "mediumcyan"
 			},
 			"groups": {
 				"mode": { "fg": "darkestcyan", "bg": "white", "attr": ["bold"] }
