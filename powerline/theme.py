@@ -4,11 +4,12 @@ import importlib
 
 
 class Theme(object):
-	def __init__(self, ext, theme):
+	def __init__(self, ext, theme_config, common_config):
+		self.dividers = theme_config.get('dividers', common_config['dividers'])
 		self.segments = []
 
 		for side in ['left', 'right']:
-			for segment in theme['segments'].get(side, []):
+			for segment in theme_config['segments'].get(side, []):
 				contents = None
 				segment_type = segment.get('type', 'function')
 
@@ -39,6 +40,9 @@ class Theme(object):
 					'exclude_modes': segment.get('exclude_modes', []),
 					'include_modes': segment.get('include_modes', []),
 				})
+
+	def get_divider(self, side='left', type='soft'):
+		return self.dividers[side][type]
 
 	def get_segments(self):
 		return self.segments

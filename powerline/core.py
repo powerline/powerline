@@ -33,7 +33,7 @@ class Powerline(object):
 
 		# Load and initialize extension theme
 		theme_config = self._load_json_config(os.path.join('themes', ext, self.config_ext['theme']))
-		self.theme = Theme(ext, theme_config)
+		self.theme = Theme(ext, theme_config, self.config)
 
 		# Load and initialize extension renderer
 		renderer_module_name = 'powerline.ext.{0}.renderer'.format(ext)
