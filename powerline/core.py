@@ -29,17 +29,17 @@ class Powerline(object):
 
 		# Load and initialize colorscheme
 		colorscheme_config = self._load_json_config(os.path.join('colorschemes', self.config_ext['colorscheme']))
-		self.colorscheme = Colorscheme(colorscheme_config)
+		colorscheme = Colorscheme(colorscheme_config)
 
 		# Load and initialize extension theme
 		theme_config = self._load_json_config(os.path.join('themes', ext, self.config_ext['theme']))
-		self.theme = Theme(ext, theme_config, self.config)
+		self.theme = Theme(ext, colorscheme, theme_config, self.config)
 
 		# Load and initialize extension renderer
 		renderer_module_name = 'powerline.ext.{0}.renderer'.format(ext)
 		renderer_class_name = '{0}Renderer'.format(ext.capitalize())
 		renderer_class = getattr(importlib.import_module(renderer_module_name), renderer_class_name)
-		self.renderer = renderer_class(self.colorscheme, self.theme)
+		self.renderer = renderer_class(self.theme)
 
 	def _load_json_config(self, config_file):
 		config_file += '.json'
@@ -50,3 +50,6 @@ class Powerline(object):
 					return json.load(config_file_fp)
 
 		raise IOError('Config file not found in search path: {0}'.format(config_file))
+
+	def render(self, mode, width=None):
+		return self.renderer.render(mode, width)

@@ -1,23 +1,17 @@
 # -*- coding: utf-8 -*-
 
-from segment import mksegment
-
 
 class Renderer(object):
 	ATTR_BOLD = 1
 	ATTR_ITALIC = 2
 	ATTR_UNDERLINE = 4
 
-
-	def __init__(self, colorscheme, theme):
-		pass
+	def __init__(self, theme):
+		self.segments = []
+		self.theme = theme
 
 	def render(self, mode, width=None):
-		'''Render all the segments with the specified renderer.
-
-		This method loops through the segment array and compares the
-		foreground/background colors and divider properties and returns the
-		rendered statusline as a string.
+		'''Render all segments.
 
 		When a width is provided, low-priority segments are dropped one at
 		a time until the line is shorter than the width, or only segments
@@ -25,71 +19,8 @@ class Renderer(object):
 		provided they will fill the remaining space until the desired width is
 		reached.
 		'''
-		def render_segments(segments, render_highlighted=True):
-			'''Render a segment array.
-
-			By default this function renders both raw (un-highlighted segments
-			used for calculating final width) and highlighted segments. The raw
-			rendering is used for calculating the total width for dropping
-			low-priority segments.
-			'''
-			rendered_highlighted = u''
-			segments_len = len(segments)
-			empty_segment = mksegment()
-
-			for idx, segment in enumerate(segments):
-				prev = segments[idx - 1] if idx > 0 else empty_segment
-				next = segments[idx + 1] if idx < segments_len - 1 else empty_segment
-
-				segment['rendered_raw'] = u''
-				compare = next if segment['side'] == 'l' else prev
-				outer_padding = ' ' if idx == 0 or idx == segments_len - 1 else ''
-				divider_type = 'soft' if compare['bg'] == segment['bg'] else 'hard'
-				divider = self.dividers[segment['side']][divider_type]
-				divider_hl = ''
-				segment_hl = ''
-
-				if render_highlighted:
-					# Generate and cache renderer highlighting
-					if divider_type == 'hard':
-						hl_key = (segment['bg'], compare['bg'])
-						if not hl_key in self._hl:
-							self._hl[hl_key] = self.hl(*hl_key)
-						divider_hl = self._hl[hl_key]
-
-					hl_key = (segment['fg'], segment['bg'], segment['attr'])
-					if not hl_key in self._hl:
-						self._hl[hl_key] = self.hl(*hl_key)
-					segment_hl = self._hl[hl_key]
-
-				if segment['filler']:
-					# Filler segments shouldn't be padded
-					rendered_highlighted += segment['contents']
-				elif segment['draw_divider'] or divider_type == 'hard':
-					# Draw divider if specified, or if it's a hard divider
-					# Note: Hard dividers are always drawn, regardless of
-					# the draw_divider option
-					if segment['side'] == 'l':
-						segment['rendered_raw'] += outer_padding + segment['contents'] + ' ' + divider + ' '
-						rendered_highlighted += segment_hl + outer_padding + segment['contents'] + ' ' + divider_hl + divider + ' '
-					else:
-						segment['rendered_raw'] += ' ' + divider + ' ' + segment['contents'] + outer_padding
-						rendered_highlighted += ' ' + divider_hl + divider + segment_hl + ' ' + segment['contents'] + outer_padding
-				elif segment['contents']:
-					# Segments without divider
-					if segment['side'] == 'l':
-						segment['rendered_raw'] += outer_padding + segment['contents']
-						rendered_highlighted += segment_hl + outer_padding + segment['contents']
-					else:
-						segment['rendered_raw'] += segment['contents'] + outer_padding
-						rendered_highlighted += segment_hl + segment['contents'] + outer_padding
-				else:
-					# Unknown segment type, skip it
-					continue
-
-			return rendered_highlighted
-
-		rendered_highlighted = render_segments(self.segments)
+		self.segments = self.theme.get_segments()
+		rendered_highlighted = self._render_segments(mode)
 
 		if not width:
 			# No width specified, so we don't need to crop or pad anything
@@ -103,10 +34,10 @@ class Renderer(object):
 			segments_priority.pop(0)
 
 		# Do another render pass so we can calculate the correct amount of filler space
-		render_segments(self.segments)
+		self._render_segments(mode, False)
 
 		# Distribute the remaining space on the filler segments
-		segments_fillers = [segment for segment in self.segments if segment['filler'] is True]
+		segments_fillers = [segment for segment in self.segments if segment['type'] == 'filler']
 		if segments_fillers:
 			segments_fillers_len, segments_fillers_remainder = divmod((width - self._total_len()), len(segments_fillers))
 			segments_fillers_contents = ' ' * segments_fillers_len
@@ -115,7 +46,65 @@ class Renderer(object):
 			# Add remainder whitespace to the first filler segment
 			segments_fillers[0]['contents'] += ' ' * segments_fillers_remainder
 
-		return render_segments(self.segments)
+		return self._render_segments(mode)
+
+	def _render_segments(self, mode, render_highlighted=True):
+		'''Internal segment rendering method.
+
+		This method loops through the segment array and compares the
+		foreground/background colors and divider properties and returns the
+		rendered statusline as a string.
+
+		The method always renders the raw segment contents (i.e. without
+		highlighting strings added), and only renders the highlighted
+		statusline if render_highlighted is True.
+		'''
+		rendered_highlighted = u''
+		segments_len = len(self.segments)
+
+		for index, segment in enumerate(self.segments):
+			prev_segment = self.segments[index - 1] if index > 0 else None
+			next_segment = self.segments[index + 1] if index < segments_len - 1 else None
+			compare_segment = next_segment if segment['side'] == 'left' else prev_segment
+
+			segment['rendered_raw'] = u''
+			outer_padding = ' ' if index == 0 or index == segments_len - 1 else ''
+			divider_type = 'soft' if compare_segment['highlight'][mode]['bg'] == segment['highlight'][mode]['bg'] else 'hard'
+			divider = self.theme.get_divider(segment['side'], divider_type)
+
+			divider_hl = ''
+			segment_hl = ''
+
+			if render_highlighted:
+				if divider_type == 'hard':
+					divider_hl = self.hl(segment['highlight'][mode]['bg'], compare_segment['highlight'][mode]['bg'], False)
+
+				segment_hl = self.hl(**segment['highlight'][mode])
+
+			if segment['type'] == 'filler':
+				rendered_highlighted += segment['contents'] or ''
+			elif segment['draw_divider'] or divider_type == 'hard':
+				# Draw divider if specified, or if it's a hard divider
+				# Note: Hard dividers are always drawn, regardless of
+				# the draw_divider option
+				if segment['side'] == 'left':
+					segment['rendered_raw'] += outer_padding + segment['contents'] + ' ' + divider + ' '
+					rendered_highlighted += segment_hl + outer_padding + segment['contents'] + ' ' + divider_hl + divider + ' '
+				else:
+					segment['rendered_raw'] += ' ' + divider + ' ' + segment['contents'] + outer_padding
+					rendered_highlighted += ' ' + divider_hl + divider + segment_hl + ' ' + segment['contents'] + outer_padding
+			elif segment['contents']:
+				# Segments without divider
+				if segment['side'] == 'left':
+					segment['rendered_raw'] += outer_padding + segment['contents']
+					rendered_highlighted += segment_hl + outer_padding + segment['contents']
+				else:
+					segment['rendered_raw'] += segment['contents'] + outer_padding
+					rendered_highlighted += segment_hl + segment['contents'] + outer_padding
+			else:
+				raise ValueError('Unknown segment type')
+
+		return rendered_highlighted
 
 	def _total_len(self):
 		'''Return total/rendered length of all segments.

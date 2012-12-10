@@ -6,8 +6,8 @@ from powerline.renderer import Renderer
 class VimRenderer(Renderer):
 	'''Powerline vim segment renderer.
 	'''
-	def __init__(self, colorscheme, theme):
-		super(VimRenderer, self).__init__(colorscheme, theme)
+	def __init__(self, theme):
+		super(VimRenderer, self).__init__(theme)
 		self.hl_groups = {}
 
 	def hl(self, fg=None, bg=None, attr=None):
@@ -41,11 +41,11 @@ class VimRenderer(Renderer):
 
 			if attr:
 				hl_group['attr'] = []
-				if attr & Renderer.ATTR_BOLD:
+				if attr & self.ATTR_BOLD:
 					hl_group['attr'].append('bold')
-				if attr & Renderer.ATTR_ITALIC:
+				if attr & self.ATTR_ITALIC:
 					hl_group['attr'].append('italic')
-				if attr & Renderer.ATTR_UNDERLINE:
+				if attr & self.ATTR_UNDERLINE:
 					hl_group['attr'].append('underline')
 
 			hl_group['name'] = 'Pl_' + \

@@ -49,6 +49,23 @@ class Colorscheme(object):
 						'attr': group_attr_flag,
 					}
 
+	def get_group_highlighting(self, group):
+		'''Return highlighting information for all modes of a highlighting group.
+		'''
+		group_highlighting = {}
+		for mode, mode_group in self.modes_groups.items():
+			try:
+				group_highlighting[mode] = mode_group[group]
+			except TypeError:
+				for try_group in group:
+					if try_group in self.modes_groups[mode]:
+						group_highlighting[mode] = mode_group[try_group]
+						break
+			finally:
+				if mode not in group_highlighting:
+					raise KeyError('Highlighting groups not found in colorscheme: {0}'.format(group))
+		return group_highlighting
+
 	def get_highlighting(self, group, mode=None):
 		'''Return highlighting information for a highlighting group and mode.
 
@@ -57,6 +74,14 @@ class Colorscheme(object):
 		'''
 		if not mode or mode not in self.modes_groups:
 			mode = self.default_mode_key
+
+		try:
+			return self.modes_groups[mode][group]
+		except TypeError:
+			for try_group in group:
+				if try_group in self.modes_groups[mode]:
+					return self.modes_groups[mode][try_group]
+			raise KeyError('Highlighting groups not found in colorscheme: {0}'.format(group))
 
 		return self.modes_groups[mode][group]
 
