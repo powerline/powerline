@@ -19,7 +19,7 @@ class Renderer(object):
 		provided they will fill the remaining space until the desired width is
 		reached.
 		'''
-		self.segments = self.theme.get_segments()
+		self.segments = self.theme.get_segments(mode)
 		rendered_highlighted = self._render_segments(mode)
 
 		if not width:

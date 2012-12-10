@@ -51,7 +51,7 @@ class Theme(object):
 		'''
 		return self.dividers[side][type]
 
-	def get_segments(self):
+	def get_segments(self, mode):
 		'''Return all segments.
 
 		Function segments are called, and all segments get their before/after
@@ -59,6 +59,9 @@ class Theme(object):
 		'''
 		return_segments = []
 		for segment in self.segments:
+			if mode in segment['exclude_modes'] or (segment['include_modes'] and segment not in segment['include_modes']):
+				continue
+
 			if segment['type'] == 'function':
 				contents_func_ret = segment['contents_func'](**segment['args'])
 
