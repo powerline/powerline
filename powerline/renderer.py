@@ -19,11 +19,11 @@ class Renderer(object):
 		},
 	}
 
-	def __init__(self, segments):
-		self.segments = segments
-		self._hl = {}
 
-	def render(self, width=None):
+	def __init__(self, colorscheme, theme):
+		pass
+
+	def render(self, mode, width=None):
 		'''Render all the segments with the specified renderer.
 
 		This method loops through the segment array and compares the

@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 
+
+class Colorscheme(object):
+	def __init__(self, colorscheme):
+		pass
+
 cterm_to_hex = {
 	16: 0x000000, 17: 0x00005f, 18: 0x000087, 19: 0x0000af, 20: 0x0000d7, 21: 0x0000ff,
 	22: 0x005f00, 23: 0x005f5f, 24: 0x005f87, 25: 0x005faf, 26: 0x005fd7, 27: 0x005fff,

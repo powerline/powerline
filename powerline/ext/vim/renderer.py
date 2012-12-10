@@ -6,8 +6,8 @@ from powerline.renderer import Renderer
 class VimRenderer(Renderer):
 	'''Powerline vim segment renderer.
 	'''
-	def __init__(self, segments):
-		super(VimRenderer, self).__init__(segments)
+	def __init__(self, colorscheme, theme):
+		super(VimRenderer, self).__init__(colorscheme, theme)
 		self.hl_groups = {}
 
 	def hl(self, fg=None, bg=None, attr=None):
