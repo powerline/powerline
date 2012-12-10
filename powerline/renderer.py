@@ -8,17 +8,6 @@ class Renderer(object):
 	ATTR_ITALIC = 2
 	ATTR_UNDERLINE = 4
 
-	dividers = {
-		'l': {
-			'hard': u'⮀',
-			'soft': u'⮁',
-		},
-		'r': {
-			'hard': u'⮂',
-			'soft': u'⮃',
-		},
-	}
-
 
 	def __init__(self, colorscheme, theme):
 		pass

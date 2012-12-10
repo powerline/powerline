@@ -1,0 +1,20 @@
+{
+	"common": {
+		"dividers": {
+			"left": {
+				"hard": "⮀",
+				"soft": "⮁"
+			},
+			"right": {
+				"hard": "⮂",
+				"soft": "⮃"
+			}
+		}
+	},
+	"ext": {
+		"vim": {
+			"colorscheme": "default",
+			"theme": "default"
+		}
+	}
+}

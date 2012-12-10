@@ -22,15 +22,17 @@ class Powerline(object):
 
 		sys.path[:0] = self.search_paths
 
-		# Load main config file, limited to the current extension
-		self.config = self._load_json_config('config')[ext]
+		# Load main config file
+		config = self._load_json_config('config')
+		self.config = config['common']
+		self.config_ext = config['ext'][ext]
 
 		# Load and initialize colorscheme
-		colorscheme_config = self._load_json_config(os.path.join('colorschemes', self.config['colorscheme']))
+		colorscheme_config = self._load_json_config(os.path.join('colorschemes', self.config_ext['colorscheme']))
 		self.colorscheme = Colorscheme(colorscheme_config)
 
 		# Load and initialize extension theme
-		theme_config = self._load_json_config(os.path.join('themes', ext, self.config['theme']))
+		theme_config = self._load_json_config(os.path.join('themes', ext, self.config_ext['theme']))
 		self.theme = Theme(ext, theme_config)
 
 		# Load and initialize extension renderer
