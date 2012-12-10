@@ -50,6 +50,3 @@ class Powerline(object):
 					return json.load(config_file_fp)
 
 		raise IOError('Config file not found in search path: {0}'.format(config_file))
-
-	def render(self, mode, width=None):
-		return self.renderer.render(mode, width)

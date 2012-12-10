@@ -25,7 +25,7 @@ def statusline(winnr):
 		if mode == 'n':
 			mode = '__default__'
 
-		stl = pl.render(mode, winwidth)
+		stl = pl.renderer.render(mode, winwidth)
 
 		vim_setwinvar(winnr, 'powerline', stl)
 	else:
