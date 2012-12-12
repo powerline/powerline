@@ -4,6 +4,8 @@
 python import sys, vim, os
 python sys.path.append(vim.eval('expand("<sfile>:h:h:h")'))
 python from examples.vim.pl import statusline
+python from powerline.core import Powerline
+python pl = Powerline('vim')
 
 if exists('*pyeval')
 	let s:pyeval = function('pyeval')
@@ -15,7 +17,7 @@ else
 endif
 
 function! Powerline(winnr)
-	return s:pyeval('statusline('. a:winnr .')')
+	return s:pyeval('pl.renderer.render('. a:winnr .')')
 endfunction
 
 function! s:WinDoPowerline()

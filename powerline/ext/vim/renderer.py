@@ -1,8 +1,14 @@
 # -*- coding: utf-8 -*-
 
+from powerline.ext.vim.bindings import vim_get_func
 from powerline.renderer import Renderer
 
 import vim
+
+vim_mode = vim_get_func('mode')
+vim_winwidth = vim_get_func('winwidth', rettype=int)
+vim_getwinvar = vim_get_func('getwinvar')
+vim_setwinvar = vim_get_func('setwinvar')
 
 
 class VimRenderer(Renderer):
@@ -14,9 +20,17 @@ class VimRenderer(Renderer):
 		super(VimRenderer, self).__init__(theme)
 		self.hl_groups = {}
 
-	def render(self, mode, width=None):
-		statusline = super(VimRenderer, self).render(mode, width)
+	def render(self, winnr):
+		current = vim_getwinvar(winnr, 'current')
+		winwidth = vim_winwidth(winnr)
+
+		mode = vim_mode()
+		if not current:
+			mode = 'nc'
+
+		statusline = super(VimRenderer, self).render(mode, winwidth)
 		statusline = statusline.replace(self.PERCENT_PLACEHOLDER, '%%')
+
 		return statusline
 
 	def hl(self, fg=None, bg=None, attr=None):
