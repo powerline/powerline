@@ -2,13 +2,22 @@
 
 from powerline.renderer import Renderer
 
+import vim
+
 
 class VimRenderer(Renderer):
 	'''Powerline vim segment renderer.
 	'''
+	PERCENT_PLACEHOLDER = u''
+
 	def __init__(self, theme):
 		super(VimRenderer, self).__init__(theme)
 		self.hl_groups = {}
+
+	def render(self, mode, width=None):
+		statusline = super(VimRenderer, self).render(mode, width)
+		statusline = statusline.replace(self.PERCENT_PLACEHOLDER, '%%')
+		return statusline
 
 	def hl(self, fg=None, bg=None, attr=None):
 		'''Highlight a segment.
@@ -56,5 +65,15 @@ class VimRenderer(Renderer):
 				''.join(hl_group['attr'])
 
 			self.hl_groups[(fg, bg, attr)] = hl_group
+
+			# Create highlighting group in vim
+			vim.command('hi {group} ctermfg={ctermfg} guifg={guifg} guibg={guibg} ctermbg={ctermbg} cterm={attr} gui={attr}'.format(
+					group=hl_group['name'],
+					ctermfg=hl_group['ctermfg'],
+					guifg='#{0:06x}'.format(hl_group['guifg']) if hl_group['guifg'] != 'NONE' else 'NONE',
+					ctermbg=hl_group['ctermbg'],
+					guibg='#{0:06x}'.format(hl_group['guibg']) if hl_group['guibg'] != 'NONE' else 'NONE',
+					attr=','.join(hl_group['attr']),
+				))
 
 		return '%#' + self.hl_groups[(fg, bg, attr)]['name'] + '#'
