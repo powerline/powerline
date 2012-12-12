@@ -4,7 +4,8 @@
 		"left": [
 			{
 				"type": "function",
-				"name": "mode"
+				"name": "mode",
+				"exclude_modes": ["nc"]
 			},
 			{
 				"type": "function",
@@ -39,13 +40,9 @@
 			{
 				"type": "function",
 				"name": "modified_indicator",
-				"draw_divider": false
-			},
-			{
-				"type": "function",
-				"name": "modified_indicator",
 				"args": { "text": "+" },
-				"exclude_modes": ["nc"]
+				"exclude_modes": ["nc"],
+				"before": " "
 			},
 			{
 				"type": "filler",
