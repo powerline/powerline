@@ -5,6 +5,10 @@ Powerline
    :maxdepth: 3
    :glob:
 
+   introduction
+   installation
+   configuration
+
 Indices and tables
 ==================
 
