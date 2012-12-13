@@ -66,7 +66,11 @@ class Theme(object):
 				continue
 
 			if segment['type'] == 'function':
-				contents = contents_override.get(segment['key'], segment['contents_func'](**segment['args']))
+				contents = contents_override.get(segment['key'])
+				if contents is None:
+					if contents_override:
+						continue
+					contents = segment['contents_func'](**segment['args'])
 
 				if contents is None:
 					continue
