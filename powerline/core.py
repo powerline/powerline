@@ -11,10 +11,7 @@ from theme import Theme
 
 class Powerline(object):
 	def __init__(self, ext):
-		try:
-			config_home = os.environ['XDG_CONFIG_HOME']
-		except KeyError:
-			config_home = os.path.expanduser('~/.config')
+		config_home = os.environ.get('XDG_CONFIG_HOME', os.path.expanduser('~/.config'))
 
 		config_path = os.path.join(config_home, 'powerline')
 		plugin_path = os.path.realpath(os.path.dirname(__file__))
