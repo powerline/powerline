@@ -19,16 +19,23 @@ function! Powerline(winnr)
 	return s:pyeval('pl.renderer.render('. a:winnr .')')
 endfunction
 
-function! s:WinDoPowerline()
-	if ! exists('w:powerline')
-		let w:powerline = {}
-	endif
+function! s:UpdateAllWindows()
+	for w in range(1, winnr('$'))
+		" getwinvar() returns empty string for undefined variables.
+		" Use has_key(getwinvar(w, ''), 'powerline') if you care about variable 
+		" being really defined (currently with w:powerline=='' it will throw 
+		" E706: variable type mismatch).
+		if getwinvar(w, 'powerline') is# ''
+			call setwinvar(w, 'powerline', {})
+		endif
 
-	let &l:stl = '%!Powerline('. winnr() .')'
+		call setwinvar(w, '&statusline', '%!Powerline('.w.')')
+	endfor
 endfunction
 
 augroup Powerline
 	autocmd!
-	autocmd BufEnter,BufWinEnter,WinEnter * let w:current = 1 | let currwin = winnr() | windo call s:WinDoPowerline() | exec currwin . 'wincmd w'
+	autocmd BufEnter,BufWinEnter,WinEnter * let w:current = 1 | call s:UpdateAllWindows()
 	autocmd BufLeave,BufWinLeave,WinLeave * let w:current = 0
 augroup END
+" vim: ft=vim noet
