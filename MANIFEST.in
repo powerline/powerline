@@ -1,0 +1,2 @@
+recursive-include powerline *.json
+exclude powerline/tests/*.xml
