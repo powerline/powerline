@@ -7,16 +7,17 @@ import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from lib.core import Powerline, mksegment
-from lib.renderers import TerminalSegmentRenderer
+from powerline.core import Powerline
+from powerline.segment import mksegment
+from powerline.ext.terminal import TerminalRenderer
 
 powerline = Powerline([
-	mksegment('⭤ SSH', 220, 166, attr=Powerline.ATTR_BOLD),
+	mksegment('⭤ SSH', 220, 166, attr=TerminalRenderer.ATTR_BOLD),
 	mksegment('username', 153, 31),
 	mksegment('~', 248, 239),
 	mksegment('projects', 248, 239),
-	mksegment('powerline', 231, 239, attr=Powerline.ATTR_BOLD),
+	mksegment('powerline', 231, 239, attr=TerminalRenderer.ATTR_BOLD),
 	mksegment(filler=True),
 ])
 
-print(powerline.render(TerminalSegmentRenderer()))
+print(powerline.render(TerminalRenderer))

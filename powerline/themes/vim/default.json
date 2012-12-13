@@ -1,0 +1,88 @@
+{
+	"name": "default",
+	"segments": {
+		"left": [
+			{
+				"name": "mode",
+				"exclude_modes": ["nc"]
+			},
+			{
+				"name": "paste_indicator",
+				"exclude_modes": ["nc"],
+				"priority": 10
+			},
+			{
+				"name": "branch",
+				"exclude_modes": ["nc"],
+				"priority": 60,
+				"before": "⭠ "
+			},
+			{
+				"name": "readonly_indicator",
+				"exclude_modes": ["nc"],
+				"draw_divider": false
+			},
+			{
+				"name": "file_directory",
+				"priority": 40,
+				"draw_divider": false
+			},
+			{
+				"name": "file_name",
+				"draw_divider": false
+			},
+			{
+				"name": "modified_indicator",
+				"args": { "text": "+" },
+				"exclude_modes": ["nc"],
+				"before": " "
+			},
+			{
+				"type": "filler",
+				"highlight": ["background"]
+			}
+		],
+		"right": [
+			{
+				"name": "file_format",
+				"draw_divider": false,
+				"exclude_modes": ["nc"],
+				"priority": 50
+			},
+			{
+				"name": "file_encoding",
+				"exclude_modes": ["nc"],
+				"priority": 50
+			},
+			{
+				"name": "file_type",
+				"exclude_modes": ["nc"],
+				"priority": 50
+			},
+			{
+				"name": "line_percent",
+				"args": { "gradient": true },
+				"priority": 30,
+				"after": "",
+				"rjust": 4
+			},
+			{
+				"type": "string",
+				"contents": "⭡ ",
+				"highlight": ["line_current_symbol", "line_current"]
+			},
+			{
+				"name": "line_current",
+				"draw_divider": false,
+				"rjust": 3
+			},
+			{
+				"name": "col_current",
+				"draw_divider": false,
+				"priority": 30,
+				"before": ":",
+				"ljust": 3
+			}
+		]
+	}
+}

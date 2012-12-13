@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import os
 import vim
 
-from bindings import vim_get_func
+from powerline.ext.vim.bindings import vim_get_func
 
 vim_funcs = {
 	'col': vim_get_func('col', rettype=int),
@@ -15,24 +16,24 @@ vim_funcs = {
 }
 
 vim_modes = {
-	'n': 'NORMAL',
-	'no': 'N·OPER',
-	'v': 'VISUAL',
-	'V': 'V·LINE',
-	'': 'V·BLCK',
-	's': 'SELECT',
-	'S': 'S·LINE',
-	'': 'S·BLCK',
-	'i': 'INSERT',
-	'R': 'REPLACE',
-	'Rv': 'V·RPLCE',
-	'c': 'COMMND',
-	'cv': 'VIM EX',
-	'ce': 'EX',
-	'r': 'PROMPT',
-	'rm': 'MORE',
-	'r?': 'CONFIRM',
-	'!': 'SHELL',
+	'n': u'NORMAL',
+	'no': u'N·OPER',
+	'v': u'VISUAL',
+	'V': u'V·LINE',
+	'': u'V·BLCK',
+	's': u'SELECT',
+	'S': u'S·LINE',
+	'': u'S·BLCK',
+	'i': u'INSERT',
+	'R': u'REPLACE',
+	'Rv': u'V·RPLCE',
+	'c': u'COMMND',
+	'cv': u'VIM EX',
+	'ce': u'EX',
+	'r': u'PROMPT',
+	'rm': u'MORE',
+	'r?': u'CONFIRM',
+	'!': u'SHELL',
 }
 
 
@@ -48,12 +49,12 @@ def mode(override=None):
 	mode = vim_funcs['mode']()
 
 	if not override:
-		return (mode, vim_modes[mode])
+		return vim_modes[mode]
 
 	try:
-		return (mode, override[mode])
+		return override[mode]
 	except IndexError:
-		return (mode, vim_modes[mode])
+		return vim_modes[mode]
 
 
 def modified_indicator(text=u'+'):
@@ -74,7 +75,7 @@ def readonly_indicator(text=u'⭤'):
 	return text if int(vim.eval('&readonly')) else None
 
 
-def branch(symbol=u'⭠'):
+def branch():
 	'''Return VCS branch.
 
 	TODO: Expand this function to handle several VCS plugins.
@@ -87,13 +88,13 @@ def branch(symbol=u'⭠'):
 	except TypeError:
 		pass
 
-	return symbol + ' ' + branch if branch else None
+	return branch if branch else None
 
 
 def file_directory():
 	'''Return file directory (head component of the file path).
 	'''
-	return vim_funcs['expand']('%:~:.:h')
+	return vim_funcs['expand']('%:~:.:h') + os.sep
 
 
 def file_name():
@@ -126,13 +127,20 @@ def file_type():
 	return vim.eval('&filetype') or None
 
 
-def line_percent():
+def line_percent(gradient=False):
 	'''Return the cursor position in the file as a percentage.
 	'''
 	line_current = vim_funcs['line']('.')
 	line_last = vim_funcs['line']('$')
+	percentage = int(line_current * 100 // line_last)
 
-	return line_current * 100 // line_last
+	if not gradient:
+		return percentage
+
+	return {
+		'contents': percentage,
+		'highlight': 'line_percent_gradient' + str(int(5 * percentage // 100) + 1),
+	}
 
 
 def line_current():
