@@ -30,13 +30,11 @@ class VimRenderer(Renderer):
 		current = vim_getwinvar(winnr, 'current')
 		winwidth = vim_winwidth(winnr)
 
-		if current or not vim_getwinvar(winnr, 'powerline'):
-			contents_cached = {segment['key']: segment['contents'] for segment in self.segments if segment['type'] == 'function'}
-			vim_setwinvar(winnr, 'powerline', contents_cached)
-
 		if current:
 			mode = vim_mode()
 			contents_override = None
+			contents_cached = {segment['key']: segment['contents'] for segment in self.segments if segment['type'] == 'function'}
+			vim_setwinvar(winnr, 'powerline', contents_cached)
 		else:
 			mode = 'nc'
 			contents_cached = vim_getwinvar(winnr, 'powerline')
