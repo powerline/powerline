@@ -34,7 +34,7 @@ class Colorscheme(object):
 				if not mode in self.modes_groups:
 					self.modes_groups[mode] = {}
 
-				if group_name in translations['groups']:
+				if group_name in translations.get('groups', {}):
 					# Override entire group if present in the translations group dict
 					self.modes_groups[mode][group_name] = {
 						'fg': self.colors[translations['groups'][group_name]['fg']],
@@ -44,8 +44,8 @@ class Colorscheme(object):
 				else:
 					# Fallback to color translations from the translations colors dict
 					self.modes_groups[mode][group_name] = {
-						'fg': self.colors[translations['colors'].get(group_props['fg'], group_props['fg'])],
-						'bg': self.colors[translations['colors'].get(group_props['bg'], group_props['bg'])],
+						'fg': self.colors[translations.get('colors', {}).get(group_props['fg'], group_props['fg'])],
+						'bg': self.colors[translations.get('colors', {}).get(group_props['bg'], group_props['bg'])],
 						'attr': group_attr_flag,
 					}
 
