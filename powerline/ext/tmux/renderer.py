@@ -12,10 +12,16 @@ class TmuxRenderer(Renderer):
 		tmux_attr = []
 
 		if fg is not None:
-			tmux_attr += ['fg=colour' + str(fg[0])]
+			if fg[0] is False:
+				tmux_attr += ['fg=default']
+			else:
+				tmux_attr += ['fg=colour' + str(fg[0])]
 
 		if bg is not None:
-			tmux_attr += ['bg=colour' + str(bg[0])]
+			if bg[0] is False:
+				tmux_attr += ['bg=default']
+			else:
+				tmux_attr += ['bg=colour' + str(bg[0])]
 
 		if attr is not None:
 			if attr is False:
