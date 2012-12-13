@@ -21,14 +21,28 @@ class VimRenderer(Renderer):
 		self.hl_groups = {}
 
 	def render(self, winnr):
+		'''Render all segments.
+
+		This method handles replacing of the percent placeholder for vim
+		statuslines, and it caches segment contents which are retrieved and
+		used in non-current windows.
+		'''
 		current = vim_getwinvar(winnr, 'current')
 		winwidth = vim_winwidth(winnr)
 
-		mode = vim_mode()
-		if not current:
-			mode = 'nc'
+		if current or not vim_getwinvar(winnr, 'powerline'):
+			contents_cached = {segment['key']: segment['contents'] for segment in self.segments if segment['type'] == 'function'}
+			vim_setwinvar(winnr, 'powerline', contents_cached)
 
-		statusline = super(VimRenderer, self).render(mode, winwidth)
+		if current:
+			mode = vim_mode()
+			contents_override = None
+		else:
+			mode = 'nc'
+			contents_cached = vim_getwinvar(winnr, 'powerline')
+			contents_override = {k: contents_cached[k].decode('utf-8') for k in contents_cached.keys()}
+
+		statusline = super(VimRenderer, self).render(mode, winwidth, contents_override)
 		statusline = statusline.replace(self.PERCENT_PLACEHOLDER, '%%')
 
 		return statusline

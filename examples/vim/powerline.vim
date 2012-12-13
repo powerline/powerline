@@ -22,7 +22,7 @@ endfunction
 
 function! s:WinDoPowerline()
 	if ! exists('w:powerline')
-		let w:powerline = ''
+		let w:powerline = {}
 	endif
 
 	let &l:stl = '%!Powerline('. winnr() .')'
