@@ -14,10 +14,11 @@ class Theme(object):
 				contents = None
 				contents_func = None
 				segment_type = segment.get('type', 'function')
+				segment_module = segment.get('module', 'core')
 
 				if segment_type == 'function':
 					# Import segment function and assign it to the contents
-					function_module = 'powerline.ext.{0}.segments'.format(ext)
+					function_module = 'powerline.ext.{0}.segments.{1}'.format(ext, segment_module)
 					function_name = segment['name']
 					contents_func = getattr(importlib.import_module(function_module), function_name)
 				elif segment_type == 'string':
