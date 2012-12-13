@@ -1,0 +1,10 @@
+{
+	"name": "default",
+	"segments": {
+		"left": [
+			{
+				"name": "user_name"
+			}
+		]
+	}
+}
