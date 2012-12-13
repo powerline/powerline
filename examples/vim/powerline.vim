@@ -3,7 +3,6 @@
 
 python import sys, vim, os
 python sys.path.append(vim.eval('expand("<sfile>:h:h:h")'))
-python from examples.vim.pl import statusline
 python from powerline.core import Powerline
 python pl = Powerline('vim')
 
