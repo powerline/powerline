@@ -94,13 +94,25 @@ def branch():
 def file_directory():
 	'''Return file directory (head component of the file path).
 	'''
-	return vim_funcs['expand']('%:~:.:h') + os.sep
+	file_directory = vim_funcs['expand']('%:~:.:h')
+	return file_directory + os.sep if file_directory else None
 
 
-def file_name():
+def file_name(display_no_file=False, no_file_text='[No file]'):
 	'''Return file name (tail component of the file path).
 	'''
-	return vim_funcs['expand']('%:~:.:t')
+	file_name = vim_funcs['expand']('%:~:.:t')
+
+	if not file_name and not display_no_file:
+		return None
+
+	if not file_name:
+		return {
+			'contents': no_file_text,
+			'highlight': ['file_name_no_file', 'file_name'],
+		}
+
+	return file_name
 
 
 def file_format():
