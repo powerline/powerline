@@ -4,6 +4,7 @@ import os
 import vim
 
 from powerline.ext.vim.bindings import vim_get_func
+from powerline.lib.memoize import memoize
 
 vim_funcs = {
 	'col': vim_get_func('col', rettype=int),
@@ -75,6 +76,7 @@ def readonly_indicator(text=u'⭤'):
 	return text if int(vim.eval('&readonly')) else None
 
 
+@memoize(2)
 def branch():
 	'''Return VCS branch.
 
