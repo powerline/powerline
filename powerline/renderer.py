@@ -63,11 +63,11 @@ class Renderer(object):
 		'''
 		rendered_highlighted = u''
 		segments_len = len(self.segments)
-		mode = mode if mode in self.segments[0]['highlight'] else Colorscheme.default_mode_key
+		mode = mode if mode in self.segments[0]['highlight'] else Colorscheme.DEFAULT_MODE_KEY
 
 		for index, segment in enumerate(self.segments):
-			prev_segment = self.segments[index - 1] if index > 0 else None
-			next_segment = self.segments[index + 1] if index < segments_len - 1 else None
+			prev_segment = self.segments[index - 1] if index > 0 else self.theme.EMPTY_SEGMENT
+			next_segment = self.segments[index + 1] if index < segments_len - 1 else self.theme.EMPTY_SEGMENT
 			compare_segment = next_segment if segment['side'] == 'left' else prev_segment
 
 			segment['rendered_raw'] = u''

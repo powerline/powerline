@@ -2,14 +2,14 @@
 
 
 class Colorscheme(object):
-	default_mode_key = '__default__'
+	DEFAULT_MODE_KEY = '__default__'
 
 	def __init__(self, colorscheme):
 		'''Initialize a colorscheme.
 		'''
 		self.colors = {}
 		self.modes_groups = {
-			self.default_mode_key: {}
+			self.DEFAULT_MODE_KEY: {}
 		}
 
 		# Create a dict of color tuples with both a cterm and hex value
@@ -23,7 +23,7 @@ class Colorscheme(object):
 		for group_name, group_props in colorscheme['groups'].items():
 			group_attr_flag = self._get_attr_flag(group_props.get('attr', []))
 
-			self.modes_groups[self.default_mode_key][group_name] = {
+			self.modes_groups[self.DEFAULT_MODE_KEY][group_name] = {
 				'fg': self.colors[group_props['fg']],
 				'bg': self.colors[group_props['bg']],
 				'attr': group_attr_flag,
@@ -73,7 +73,7 @@ class Colorscheme(object):
 		the default mode is returned.
 		'''
 		if not mode or mode not in self.modes_groups:
-			mode = self.default_mode_key
+			mode = self.DEFAULT_MODE_KEY
 
 		try:
 			return self.modes_groups[mode][group]

@@ -9,6 +9,11 @@ class Theme(object):
 		self.dividers = theme_config.get('dividers', common_config['dividers'])
 		self.segments = []
 
+		self.EMPTY_SEGMENT = {
+			'contents': None,
+			'highlight': {self.colorscheme.DEFAULT_MODE_KEY: {'fg': (False, False), 'bg': (False, False), 'attr': 0}}
+		}
+
 		for side in ['left', 'right']:
 			for segment in theme_config['segments'].get(side, []):
 				contents = None
