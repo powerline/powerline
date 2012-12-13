@@ -31,6 +31,7 @@ class Theme(object):
 				highlighting_group = segment.get('highlight', segment.get('name'))
 
 				self.segments.append({
+					'key': None if segment_type != 'function' else '{0}.{1}'.format(segment_module, function_name),
 					'type': segment_type,
 					'highlight': self.colorscheme.get_group_highlighting(highlighting_group),
 					'before': segment.get('before', ''),
@@ -52,36 +53,39 @@ class Theme(object):
 		'''
 		return self.dividers[side][type]
 
-	def get_segments(self, mode):
+	def get_segments(self, mode, contents_override=None):
 		'''Return all segments.
 
 		Function segments are called, and all segments get their before/after
 		and ljust/rjust properties applied.
 		'''
+		contents_override = contents_override or {}
 		return_segments = []
 		for segment in self.segments:
 			if mode in segment['exclude_modes'] or (segment['include_modes'] and segment not in segment['include_modes']):
 				continue
 
 			if segment['type'] == 'function':
-				contents_func_ret = segment['contents_func'](**segment['args'])
+				contents = contents_override.get(segment['key'], segment['contents_func'](**segment['args']))
 
-				if contents_func_ret is None:
+				if contents is None:
 					continue
 
 				try:
-					segment['highlight'] = self.colorscheme.get_group_highlighting(contents_func_ret['highlight'])
-					segment['contents'] = contents_func_ret['contents']
+					segment['highlight'] = self.colorscheme.get_group_highlighting(contents['highlight'])
+					segment['contents'] = contents['contents']
 				except TypeError:
-					segment['contents'] = contents_func_ret
+					segment['contents'] = contents
 			elif segment['type'] == 'filler' or (segment['type'] == 'string' and segment['contents'] is not None):
 				pass
 			else:
 				continue
 
-			segment['contents'] = unicode(segment['before'] + unicode(segment['contents']) + segment['after'])\
-				.ljust(segment['ljust'])\
-				.rjust(segment['rjust'])
+			if not segment['key'] in contents_override:
+				# Only apply before/after/just to non-overridden segments
+				segment['contents'] = unicode(segment['before'] + unicode(segment['contents']) + segment['after'])\
+					.ljust(segment['ljust'])\
+					.rjust(segment['rjust'])
 
 			return_segments.append(segment)
 

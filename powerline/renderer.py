@@ -12,7 +12,7 @@ class Renderer(object):
 		self.segments = []
 		self.theme = theme
 
-	def render(self, mode, width=None):
+	def render(self, mode, width=None, contents_override=None):
 		'''Render all segments.
 
 		When a width is provided, low-priority segments are dropped one at
@@ -21,7 +21,7 @@ class Renderer(object):
 		provided they will fill the remaining space until the desired width is
 		reached.
 		'''
-		self.segments = self.theme.get_segments(mode)
+		self.segments = self.theme.get_segments(mode, contents_override)
 		rendered_highlighted = self._render_segments(mode)
 
 		if not width:
