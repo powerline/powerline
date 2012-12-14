@@ -16,8 +16,8 @@ class VimRenderer(Renderer):
 	'''
 	PERCENT_PLACEHOLDER = u''
 
-	def __init__(self, theme):
-		super(VimRenderer, self).__init__(theme)
+	def __init__(self, *args, **kwargs):
+		super(VimRenderer, self).__init__(*args, **kwargs)
 		self.hl_groups = {}
 
 	def render(self, winnr):
@@ -27,6 +27,7 @@ class VimRenderer(Renderer):
 		statuslines, and it caches segment contents which are retrieved and
 		used in non-current windows.
 		'''
+
 		current = vim_getwinvar(winnr, 'current')
 		winwidth = vim_winwidth(winnr)
 
@@ -40,7 +41,7 @@ class VimRenderer(Renderer):
 			contents_cached = vim_getwinvar(winnr, 'powerline')
 			contents_override = {k: contents_cached[k].decode('utf-8') for k in contents_cached.keys()}
 
-		statusline = super(VimRenderer, self).render(mode, winwidth, contents_override)
+		statusline = super(VimRenderer, self).render(mode, width=winwidth, contents_override=contents_override)
 		statusline = statusline.replace(self.PERCENT_PLACEHOLDER, '%%')
 
 		return statusline

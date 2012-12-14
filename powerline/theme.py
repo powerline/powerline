@@ -4,7 +4,7 @@ from powerline.segments import Segments
 
 
 class Theme(object):
-	def __init__(self, ext, colorscheme, theme_config, common_config):
+	def __init__(self, ext, colorscheme, theme_config, common_config, get_segment):
 		self.colorscheme = colorscheme
 		self.dividers = theme_config.get('dividers', common_config['dividers'])
 		self.segments = []
@@ -13,8 +13,6 @@ class Theme(object):
 			'contents': None,
 			'highlight': {self.colorscheme.DEFAULT_MODE_KEY: {'fg': (False, False), 'bg': (False, False), 'attr': 0}}
 		}
-
-		get_segment = Segments(ext, common_config, colorscheme).get
 
 		for side in ['left', 'right']:
 			self.segments.extend((get_segment(segment, side) for segment in theme_config['segments'].get(side, [])))
@@ -65,3 +63,4 @@ class Theme(object):
 			return_segments.append(segment)
 
 		return return_segments
+# vim: noet tw=120

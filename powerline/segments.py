@@ -2,13 +2,12 @@
 
 from importlib import import_module
 import sys
-import os
 
 
 class Segments(object):
-	def __init__(self, ext, common_config, colorscheme):
+	def __init__(self, ext, path, colorscheme):
 		self.ext = ext
-		self.path = [os.path.expanduser(path) for path in common_config.get('paths', [])]
+		self.path = path
 		self.colorscheme = colorscheme
 
 	def get_function(self, segment):
