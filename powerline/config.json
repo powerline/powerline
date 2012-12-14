@@ -22,7 +22,10 @@
 		},
 		"vim": {
 			"colorscheme": "default",
-			"theme": "default"
+			"theme": "default",
+			"local_themes": {
+				"help": "help"
+			}
 		}
 	}
 }
