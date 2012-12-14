@@ -6,7 +6,8 @@ import os
 import sys
 
 from colorscheme import Colorscheme
-from theme import Theme
+from segments import Segments
+from matchers import Matchers
 
 
 class Powerline(object):
@@ -29,14 +30,33 @@ class Powerline(object):
 		colorscheme = Colorscheme(colorscheme_config)
 
 		# Load and initialize extension theme
-		theme_config = self._load_json_config(os.path.join('themes', ext, self.config_ext['theme']))
-		self.theme = Theme(ext, colorscheme, theme_config, self.config)
+		theme_config = self._load_theme_config(ext, self.config_ext.get('theme', 'default'))
+
+		path = [os.path.expanduser(path) for path in self.config.get('paths', [])]
+
+		get_segment = Segments(ext, path, colorscheme).get
+		get_matcher = Matchers(ext, path).get
+
+		theme_kwargs = {
+			'ext': ext,
+			'colorscheme': colorscheme,
+			'common_config': self.config,
+			'get_segment': get_segment
+		}
+
+		local_themes = {}
+		for key, local_theme_name in self.config_ext.get('local_themes', {}).iteritems():
+			key = get_matcher(key)
+			local_themes[key] = {'config': self._load_theme_config(ext, local_theme_name)}
 
 		# Load and initialize extension renderer
 		renderer_module_name = 'powerline.ext.{0}.renderer'.format(ext)
 		renderer_class_name = '{0}Renderer'.format(ext.capitalize())
-		renderer_class = getattr(importlib.import_module(renderer_module_name), renderer_class_name)
-		self.renderer = renderer_class(self.theme)
+		Renderer = getattr(importlib.import_module(renderer_module_name), renderer_class_name)
+		self.renderer = Renderer(theme_config, local_themes, theme_kwargs)
+
+	def _load_theme_config(self, ext, name):
+		return self._load_json_config(os.path.join('themes', ext, name))
 
 	def _load_json_config(self, config_file):
 		config_file += '.json'
