@@ -1,5 +1,11 @@
+Overview
+========
+
+Requirements
+------------
+
 Installation
-============
+------------
 
 Powerline is intended to be installed as a system-wide Python package that 
 can be easily included in other projects.
@@ -8,3 +14,6 @@ can be easily included in other projects.
    conflict with an unrelated project.
 
 .. include:: installation/vim.rst
+
+Usage
+-----

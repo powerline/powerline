@@ -6,7 +6,7 @@ Powerline
    :glob:
 
    introduction
-   installation
+   overview
    configuration
 
 Indices and tables
