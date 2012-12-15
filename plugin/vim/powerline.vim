@@ -7,6 +7,7 @@
 
 python import sys, vim, os
 python sys.path.append(vim.eval('expand("<sfile>:h:h:h")'))
+python import uuid
 python from powerline.core import Powerline
 python pl = Powerline('vim')
 
@@ -24,16 +25,16 @@ function! Powerline(winnr)
 endfunction
 
 function! s:UpdateAllWindows()
-	for w in range(1, winnr('$'))
-		" getwinvar() returns empty string for undefined variables.
-		" Use has_key(getwinvar(w, ''), 'powerline') if you care about variable
-		" being really defined (currently with w:powerline=='' it will throw
-		" E706: variable type mismatch).
-		if getwinvar(w, 'powerline') is# ''
-			call setwinvar(w, 'powerline', {})
+	for winnr in range(1, winnr('$'))
+		" getwinvar() returns empty string for undefined variables. Use
+		" has_key(getwinvar(winnr, ''), 'window_id') if you care about
+		" variable being really defined (currently with w:window_id=='' it
+		" will throw E706: variable type mismatch).
+		if getwinvar(winnr, 'window_id') is# ''
+			call setwinvar(winnr, 'window_id', s:pyeval('str(uuid.uuid4())'))
 		endif
 
-		call setwinvar(w, '&statusline', '%!Powerline('. w .')')
+		call setwinvar(winnr, '&statusline', '%!Powerline('. winnr .')')
 	endfor
 endfunction
 
