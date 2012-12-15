@@ -26,10 +26,6 @@ endfunction
 
 function! s:UpdateAllWindows()
 	for winnr in range(1, winnr('$'))
-		" getwinvar() returns empty string for undefined variables. Use
-		" has_key(getwinvar(winnr, ''), 'window_id') if you care about
-		" variable being really defined (currently with w:window_id=='' it
-		" will throw E706: variable type mismatch).
 		if getwinvar(winnr, 'window_id') is# ''
 			call setwinvar(winnr, 'window_id', s:pyeval('str(uuid.uuid4())'))
 		endif

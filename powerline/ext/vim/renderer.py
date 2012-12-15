@@ -36,8 +36,7 @@ class VimRenderer(Renderer):
 		if current:
 			mode = vim_mode()
 			contents_override = None
-			contents_cached = {segment['key']: segment['contents'] for segment in self.segments if segment['type'] == 'function'}
-			self.window_cache[window_id] = contents_cached
+			self.window_cache[window_id] = {segment['key']: segment['contents'] for segment in self.segments if segment['type'] == 'function'}
 		else:
 			mode = 'nc'
 			contents_override = self.window_cache.get(window_id)

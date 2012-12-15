@@ -34,7 +34,6 @@ class Renderer(object):
 		provided they will fill the remaining space until the desired width is
 		reached.
 		'''
-
 		theme = self.get_theme()
 
 		segments = theme.get_segments(mode, contents_override)
