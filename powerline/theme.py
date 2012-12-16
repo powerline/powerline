@@ -52,7 +52,7 @@ class Theme(object):
 			else:
 				continue
 
-			if not segment['key'] in contents_override:
+			if segment['key'] not in contents_override:
 				# Only apply before/after/just to non-overridden segments
 				segment['contents'] = unicode(segment['before'] + unicode(segment['contents']) + segment['after'])\
 					.ljust(segment['ljust'])\
