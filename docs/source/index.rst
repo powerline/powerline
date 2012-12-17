@@ -7,7 +7,10 @@ Powerline
 
    introduction
    overview
+   fontpatching
    configuration
+   troubleshooting
+   license-credits
 
 Indices and tables
 ==================

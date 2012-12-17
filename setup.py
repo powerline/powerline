@@ -19,7 +19,7 @@ docs_extras = [
 ]
 
 setup(name='Powerline',
-	version='β',
+	version='beta',
 	description='The ultimate statusline/prompt utility.',
 	long_description=README,
 	classifiers=[],
