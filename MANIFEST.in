@@ -1,3 +1,2 @@
-recursive-include powerline *.json
-recursive-include plugin *.vim
+recursive-include powerline *.json *.vim
 exclude powerline/tests/*.xml
