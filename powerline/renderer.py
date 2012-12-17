@@ -13,7 +13,6 @@ class Renderer(object):
 		self.theme = Theme(theme_config=theme_config, **theme_kwargs)
 		self.local_themes = local_themes
 		self.theme_kwargs = theme_kwargs
-		self.segments = []
 
 	def get_theme(self):
 		for matcher in self.local_themes.iterkeys():
@@ -25,7 +24,7 @@ class Renderer(object):
 		else:
 			return self.theme
 
-	def render(self, mode, width=None, contents_override=None):
+	def render(self, mode, width=None, theme=None, segments=None):
 		'''Render all segments.
 
 		When a width is provided, low-priority segments are dropped one at
@@ -34,10 +33,13 @@ class Renderer(object):
 		provided they will fill the remaining space until the desired width is
 		reached.
 		'''
-		theme = self.get_theme()
+		theme = theme or self.get_theme()
+		segments = segments or theme.get_segments()
 
-		segments = theme.get_segments(mode, contents_override)
-		self.segments = segments
+		# Handle excluded/included segments for the current mode
+		segments = [segment for segment in segments\
+			if mode not in segment['exclude_modes'] or (segment['include_modes'] and segment in segment['include_modes'])]
+
 		rendered_highlighted = self._render_segments(mode, theme, segments)
 
 		if not width:

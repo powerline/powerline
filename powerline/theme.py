@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import copy
+
 
 class Theme(object):
 	def __init__(self, ext, colorscheme, theme_config, common_config, get_segment):
@@ -20,24 +22,15 @@ class Theme(object):
 		'''
 		return self.dividers[side][type]
 
-	def get_segments(self, mode, contents_override=None):
+	def get_segments(self):
 		'''Return all segments.
 
 		Function segments are called, and all segments get their before/after
 		and ljust/rjust properties applied.
 		'''
-		contents_override = contents_override or {}
-		return_segments = []
 		for segment in self.segments:
-			if mode in segment['exclude_modes'] or (segment['include_modes'] and segment not in segment['include_modes']):
-				continue
-
 			if segment['type'] == 'function':
-				contents = contents_override.get(segment['key'])
-				if contents is None:
-					if contents_override:
-						continue
-					contents = segment['contents_func'](**segment['args'])
+				contents = segment['contents_func'](**segment['args'])
 
 				if contents is None:
 					continue
@@ -52,12 +45,11 @@ class Theme(object):
 			else:
 				continue
 
-			if segment['key'] not in contents_override:
-				# Only apply before/after/just to non-overridden segments
-				segment['contents'] = unicode(segment['before'] + unicode(segment['contents']) + segment['after'])\
-					.ljust(segment['ljust'])\
-					.rjust(segment['rjust'])
+			segment['contents'] = unicode(segment['before'] + unicode(segment['contents']) + segment['after'])\
+				.ljust(segment['ljust'])\
+				.rjust(segment['rjust'])
 
-			return_segments.append(segment)
-
-		return return_segments
+			# We need to yield a copy of the segment, or else mode-dependent
+			# segment contents can't be cached correctly e.g. when caching
+			# non-current window contents for vim statuslines
+			yield copy.copy(segment)
