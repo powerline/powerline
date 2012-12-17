@@ -36,13 +36,15 @@ class VimRenderer(Renderer):
 		if current:
 			mode = vim_mode()
 			contents_override = None
-			self.window_cache[window_id] = {segment['key']: segment['contents'] for segment in self.segments if segment['type'] == 'function'}
 		else:
 			mode = 'nc'
 			contents_override = self.window_cache.get(window_id)
 
 		statusline = super(VimRenderer, self).render(mode, width=winwidth, contents_override=contents_override)
 		statusline = statusline.replace(self.PERCENT_PLACEHOLDER, '%%')
+
+		if current:
+			self.window_cache[window_id] = {segment['key']: segment['contents'] for segment in self.segments if segment['type'] == 'function'}
 
 		return statusline
 
