@@ -32,5 +32,5 @@ gh-pages:
 	rm -rf _build ${GH_PAGES_SOURCES}
 	git add ..
 	git commit -m "Create gh-pages for '`git log develop -1 --pretty=oneline --abbrev-commit`'"
-	#git push origin gh-pages
+	git push origin gh-pages
 	git checkout ${GH_SOURCE_BRANCH}
