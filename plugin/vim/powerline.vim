@@ -31,6 +31,7 @@ function! s:UpdateWindows()
 	for winnr in range(1, winnr('$'))
 		call setwinvar(winnr, '&statusline', '%!Powerline('. winnr .', '. (w:window_id == getwinvar(winnr, 'window_id')) .')')
 	endfor
+	redrawstatus
 endfunction
 
 augroup Powerline
