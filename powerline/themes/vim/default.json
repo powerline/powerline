@@ -19,8 +19,8 @@
 			},
 			{
 				"name": "readonly_indicator",
-				"exclude_modes": ["nc"],
-				"draw_divider": false
+				"draw_divider": false,
+				"after": " "
 			},
 			{
 				"name": "file_directory",
@@ -34,7 +34,6 @@
 			{
 				"name": "modified_indicator",
 				"args": { "text": "+" },
-				"exclude_modes": ["nc"],
 				"before": " "
 			},
 			{

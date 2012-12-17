@@ -83,6 +83,8 @@
 	"mode_translations": {
 		"nc": {
 			"colors": {
+				"brightyellow": "darkorange",
+				"brightestred": "darkred",
 				"gray0": "gray0",
 				"gray1": "gray0",
 				"gray2": "gray0",
