@@ -20,22 +20,20 @@ else
 	endfunction
 endif
 
-function! Powerline(winnr)
-	return s:pyeval('pl.renderer.render('. a:winnr .')')
+function! Powerline(winnr, current)
+	return s:pyeval('pl.renderer.render('. a:winnr .', '. a:current .')')
 endfunction
 
-function! s:UpdateAllWindows()
+function! s:UpdateWindows()
+	if ! exists('w:window_id')
+		let w:window_id = s:pyeval('str(uuid.uuid4())')
+	endif
 	for winnr in range(1, winnr('$'))
-		if getwinvar(winnr, 'window_id') is# ''
-			call setwinvar(winnr, 'window_id', s:pyeval('str(uuid.uuid4())'))
-		endif
-
-		call setwinvar(winnr, '&statusline', '%!Powerline('. winnr .')')
+		call setwinvar(winnr, '&statusline', '%!Powerline('. winnr .', '. (w:window_id == getwinvar(winnr, 'window_id')) .')')
 	endfor
 endfunction
 
 augroup Powerline
 	autocmd!
-	autocmd BufEnter,BufWinEnter,WinEnter * let w:current = 1 | call s:UpdateAllWindows()
-	autocmd BufLeave,BufWinLeave,WinLeave * let w:current = 0
+	autocmd BufEnter,BufWinEnter,WinEnter * call s:UpdateWindows()
 augroup END
