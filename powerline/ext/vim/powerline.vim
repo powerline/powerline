@@ -1,10 +1,3 @@
-" Powerline vim plugin
-"
-" If Powerline is installed in a Python search path, load the plugin by
-" adding the following line to your .vimrc:
-"
-" python import powerline.plugin.vim.load_vim_plugin
-
 python import sys, vim, os
 python sys.path.append(vim.eval('expand("<sfile>:h:h:h:h")'))
 python import uuid

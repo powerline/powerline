@@ -36,7 +36,7 @@ Vim usage
 If Powerline is installed as a system-wide Python package, you can enable 
 the plugin by adding the following line to your ``vimrc``::
 
-    python import powerline.plugin.vim.load_vim_plugin
+    python from powerline.ext.vim import source_plugin; source_plugin()
 
 If Powerline is installed outside Python's search path (e.g. by having the 
 git repo in your dotfiles folder) you'll have to source the vim plugin file 
@@ -45,4 +45,4 @@ with an absolute path to the plugin location.
 Add the following line to your ``vimrc``, where ``{path}`` is the path to 
 the main Powerline project folder::
 
-    source {path}/powerline/plugin/vim/powerline.vim
+    source {path}/powerline/ext/vim/powerline.vim
