@@ -37,6 +37,9 @@ class FontPatcher(object):
 		for target_font in self.target_fonts:
 			source_font = self.source_font
 
+			target_font_em_original = target_font.em
+			target_font.em = 2048
+
 			target_font.encoding = 'ISO10646'
 
 			# Rename font
@@ -74,8 +77,7 @@ class FontPatcher(object):
 
 			# Find source and target midpoints for translating
 			x_diff = target_bb[0] - source_bb[0]
-			y_diff = (target_bb[3] + target_bb[1]) - (source_bb[3] + source_bb[1])
-
+			y_diff = target_bb[1] - source_bb[1]
 			translate = psMat.translate(x_diff, y_diff)
 
 			transform = psMat.compose(scale, translate)
@@ -96,6 +98,8 @@ class FontPatcher(object):
 
 				# Transform the glyph
 				target_font.transform(transform)
+
+			target_font.em = target_font_em_original
 
 			# Generate patched font
 			target_font.generate('{0}.otf'.format(target_font.fullname))
