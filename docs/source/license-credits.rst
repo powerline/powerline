@@ -16,6 +16,11 @@ Credits
 :Main contributors:
     * `ZyX-I <https://github.com/ZyX-I>`_
 
+The glyphs in the font patcher are created by Fabrizio Schiavi, creator of 
+the excellent coding font `Pragmata Pro`_.
+
+.. _`Pragmata Pro`: http://www.fsd.it/fonts/pragmatapro.htm
+
 Contributing
 ============
 
