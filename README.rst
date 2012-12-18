@@ -34,3 +34,7 @@ Screenshots
      :alt: Truncation illustration
 * .. image:: https://raw.github.com/Lokaltog/powerline/develop/docs/source/_static/img/pl-truncate3.png
      :alt: Truncation illustration
+
+Installation
+------------
+``easy_install https://github.com/Lokaltog/powerline/tarball/develop``
