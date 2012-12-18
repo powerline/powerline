@@ -2,12 +2,12 @@
 	"common": {
 		"dividers": {
 			"left": {
-				"hard": "⮀",
-				"soft": "⮁"
+				"hard": "",
+				"soft": ""
 			},
 			"right": {
-				"hard": "⮂",
-				"soft": "⮃"
+				"hard": "",
+				"soft": ""
 			}
 		}
 	},

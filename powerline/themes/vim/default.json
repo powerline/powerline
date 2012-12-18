@@ -15,7 +15,7 @@
 				"name": "branch",
 				"exclude_modes": ["nc"],
 				"priority": 60,
-				"before": "⭠ "
+				"before": " "
 			},
 			{
 				"name": "readonly_indicator",
@@ -67,7 +67,7 @@
 			},
 			{
 				"type": "string",
-				"contents": "⭡ ",
+				"contents": " ",
 				"highlight": ["line_current_symbol", "line_current"]
 			},
 			{

@@ -70,7 +70,7 @@ def paste_indicator(text='PASTE'):
 	return text if int(vim.eval('&paste')) else None
 
 
-def readonly_indicator(text=u'⭤'):
+def readonly_indicator(text=u''):
 	'''Return a read-only indicator.
 	'''
 	return text if int(vim.eval('&readonly')) else None
