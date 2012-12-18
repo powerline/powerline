@@ -19,13 +19,20 @@ Installation
 ------------
 
 Powerline is intended to be installed as a system-wide Python package that 
-can be easily included in other projects.
+can be easily included in other projects. It can be installed by running the 
+following command as root::
+
+    pip install https://github.com/Lokaltog/powerline/tarball/develop
+
+Or, if you use ``easy_install``::
+
+    easy_install https://github.com/Lokaltog/powerline/tarball/develop
+
+.. note:: Make sure that you install the package for Python 2. For distros 
+   like Arch Linux you'll have to run ``pip2`` instead of ``pip``.
 
 Powerline is available `on the AUR 
 <https://aur.archlinux.org/packages/powerline-git/>`_ for Arch Linux users.
-
-.. note:: This project is currently unavailable on the PyPI due to a naming 
-   conflict with an unrelated project.
 
 Usage
 -----
