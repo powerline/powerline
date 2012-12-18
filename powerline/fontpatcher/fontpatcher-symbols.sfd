@@ -9,8 +9,8 @@ Version: 001.000
 ItalicAngle: 0
 UnderlinePosition: -100
 UnderlineWidth: 50
-Ascent: 800
-Descent: 200
+Ascent: 1638
+Descent: 410
 LayerCount: 2
 Layer: 0 0 "Back"  1
 Layer: 1 0 "Fore"  0
@@ -19,7 +19,7 @@ OS2Version: 0
 OS2_WeightWidthSlopeOnly: 0
 OS2_UseTypoMetrics: 1
 CreationTime: 1355758773
-ModificationTime: 1355765025
+ModificationTime: 1355865048
 OS2TypoAscent: 0
 OS2TypoAOffset: 1
 OS2TypoDescent: 0
@@ -51,7 +51,6 @@ BeginChars: 65536 8
 StartChar: uniE0A0
 Encoding: 57504 57504 0
 Width: 1060
-VWidth: 2048
 Flags: HW
 LayerCount: 2
 Fore
@@ -87,7 +86,6 @@ EndChar
 StartChar: uniE0A1
 Encoding: 57505 57505 1
 Width: 1060
-VWidth: 2048
 Flags: HW
 LayerCount: 2
 Fore
@@ -118,7 +116,6 @@ EndChar
 StartChar: uniE0A2
 Encoding: 57506 57506 2
 Width: 1060
-VWidth: 2048
 Flags: HW
 LayerCount: 2
 Fore
@@ -161,7 +158,6 @@ EndChar
 StartChar: uniE0B0
 Encoding: 57520 57520 3
 Width: 1060
-VWidth: 2048
 Flags: HW
 LayerCount: 2
 Fore
@@ -176,7 +172,6 @@ EndChar
 StartChar: uniE0B1
 Encoding: 57521 57521 4
 Width: 1060
-VWidth: 2048
 Flags: HW
 LayerCount: 2
 Fore
@@ -194,7 +189,6 @@ EndChar
 StartChar: uniE0B2
 Encoding: 57522 57522 5
 Width: 1060
-VWidth: 2048
 Flags: HW
 LayerCount: 2
 Fore
@@ -209,7 +203,6 @@ EndChar
 StartChar: uniE0B3
 Encoding: 57523 57523 6
 Width: 1060
-VWidth: 2048
 Flags: HW
 LayerCount: 2
 Fore
@@ -227,7 +220,6 @@ EndChar
 StartChar: block
 Encoding: 9608 9608 7
 Width: 1060
-VWidth: 2048
 Flags: HW
 LayerCount: 2
 Fore
