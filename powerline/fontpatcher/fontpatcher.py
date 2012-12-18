@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import argparse
-import os
-import re
 import sys
 
 try:
@@ -60,10 +58,14 @@ class FontPatcher(object):
 				except TypeError:
 					continue
 
-				if bbox[0] < target_bb[0]: target_bb[0] = bbox[0]
-				if bbox[1] < target_bb[1]: target_bb[1] = bbox[1]
-				if bbox[2] > target_bb[2]: target_bb[2] = bbox[2]
-				if bbox[3] > target_bb[3]: target_bb[3] = bbox[3]
+				if bbox[0] < target_bb[0]:
+					target_bb[0] = bbox[0]
+				if bbox[1] < target_bb[1]:
+					target_bb[1] = bbox[1]
+				if bbox[2] > target_bb[2]:
+					target_bb[2] = bbox[2]
+				if bbox[3] > target_bb[3]:
+					target_bb[3] = bbox[3]
 
 			# Find source and target size difference for scaling
 			x_ratio = (target_bb[2] - target_bb[0]) / (source_bb[2] - source_bb[0])
