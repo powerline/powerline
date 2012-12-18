@@ -52,6 +52,7 @@ class FontPatcher(object):
 
 			source_bb = source_font['block'].boundingBox()
 			target_bb = [0, 0, 0, 0]
+			target_font_width = 0
 
 			# Find the biggest char width and height in the Latin-1 extended range and the box drawing range
 			# This isn't ideal, but it works fairly well - some fonts may need tuning after patching
@@ -60,6 +61,9 @@ class FontPatcher(object):
 					bbox = target_font[cp].boundingBox()
 				except TypeError:
 					continue
+
+				if not target_font_width:
+					target_font_width = target_font[cp].width
 
 				if bbox[0] < target_bb[0]:
 					target_bb[0] = bbox[0]
@@ -98,6 +102,9 @@ class FontPatcher(object):
 
 				# Transform the glyph
 				target_font.transform(transform)
+
+				# Reset the font's glyph width so it's still considered monospaced
+				target_font[source_glyph.unicode].width = target_font_width
 
 			target_font.em = target_font_em_original
 
