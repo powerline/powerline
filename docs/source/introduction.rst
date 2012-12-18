@@ -9,6 +9,33 @@ in some way (e.g. shell prompts and tmux themes).
 The project is currently in beta, and most of the functionality in the old 
 vimscript project is already implemented.
 
+Screenshots
+-----------
+
+**Mode-dependent highlighting**
+
+* .. image:: _static/img/pl-mode-normal.png
+     :alt: Normal mode
+* .. image:: _static/img/pl-mode-insert.png
+     :alt: Insert mode
+* .. image:: _static/img/pl-mode-visual.png
+     :alt: Visual mode
+* .. image:: _static/img/pl-mode-replace.png
+     :alt: Replace mode
+
+**Automatic truncation of segments in small windows**
+
+* .. image:: _static/img/pl-truncate1.png
+     :alt: Truncation illustration
+* .. image:: _static/img/pl-truncate2.png
+     :alt: Truncation illustration
+* .. image:: _static/img/pl-truncate3.png
+     :alt: Truncation illustration
+
+The font in the screenshots is `Pragmata Pro`_ by Fabrizio Schiavi.
+
+.. _`Pragmata Pro`: http://www.fsd.it/fonts/pragmatapro.htm
+
 Feature highlights
 ------------------
 
