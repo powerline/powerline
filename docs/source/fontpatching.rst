@@ -65,7 +65,7 @@ Linux
 
 4. Update your font cache::
 
-       $ sudo fc-cache -vf
+       $ fc-cache -vf ~/.fonts
 
    If you're using vim in a terminal you may need to close all open terminal 
    windows after updating the font cache.
