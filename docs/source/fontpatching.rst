@@ -1,12 +1,15 @@
-Font patcher
-============
+.. _font-patching:
+
+Font patching
+=============
 
 Powerline provides a font patcher for custom glyphs like the segment 
 dividers (arrows), branch symbol, padlock symbol, etc. The font patcher 
 requires FontForge with Python bindings to work.
 
-Powerline stores all special glyphs in the Unicode *Private Use Area* 
-(``U+E000``-``U+F8FF``).
+Check out the `powerline-fonts 
+<https://github.com/Lokaltog/powerline-fonts>`_ repository on GitHub for 
+patched versions of some popular programming fonts.
 
 .. warning:: The code points have changed in this version of Powerline! This 
    means that you either have to patch your font again, or change the glyphs 
@@ -19,6 +22,9 @@ Powerline stores all special glyphs in the Unicode *Private Use Area*
 
 Glyph table
 -----------
+
+Powerline stores all special glyphs in the Unicode *Private Use Area* 
+(``U+E000``-``U+F8FF``).
 
 ==========  =====  ===========
 Code point  Glyph  Description

@@ -34,3 +34,7 @@ Screenshots
      :alt: Truncation illustration
 * .. image:: https://raw.github.com/Lokaltog/powerline/develop/docs/source/_static/img/pl-truncate3.png
      :alt: Truncation illustration
+
+The font in the screenshots is `Pragmata Pro`_ by Fabrizio Schiavi.
+
+.. _`Pragmata Pro`: http://www.fsd.it/fonts/pragmatapro.htm

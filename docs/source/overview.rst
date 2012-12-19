@@ -18,21 +18,26 @@ Vim version 7.3.661 or newer is recommended for performance reasons.
 Installation
 ------------
 
-Powerline is intended to be installed as a system-wide Python package that 
-can be easily included in other projects. It can be installed by running the 
-following command as root::
+Installing with ``pip``
+^^^^^^^^^^^^^^^^^^^^^^^
+
+To install Powerline system-wide, run the following command as root::
 
     pip install https://github.com/Lokaltog/powerline/tarball/develop
 
-Or, if you use ``easy_install``::
-
-    easy_install https://github.com/Lokaltog/powerline/tarball/develop
+If you don't have root access or don't want to install Powerline 
+system-wide, install with ``pip install --user`` instead.
 
 .. note:: Make sure that you install the package for Python 2. For distros 
    like Arch Linux you'll have to run ``pip2`` instead of ``pip``.
 
-Powerline is available `on the AUR 
-<https://aur.archlinux.org/packages/powerline-git/>`_ for Arch Linux users.
+Distribution-specific packages
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The following distribution-specific packages are officially supported, and 
+they provide an easy way of installing and upgrading Powerline:
+
+* `Arch Linux (AUR) <https://aur.archlinux.org/packages/powerline-git/>`_
 
 Usage
 -----
@@ -40,16 +45,17 @@ Usage
 Vim usage
 ^^^^^^^^^
 
-If Powerline is installed as a system-wide Python package, you can enable 
-the plugin by adding the following line to your ``vimrc``::
+If Powerline is installed as a Python package, you can enable the vim plugin 
+by adding the following line to your ``vimrc``::
 
     python from powerline.ext.vim import source_plugin; source_plugin()
 
-If Powerline is installed outside Python's search path (e.g. by having the 
-git repo in your dotfiles folder) you'll have to source the vim plugin file 
-with an absolute path to the plugin location.
+If Powerline is installed somewhere other than Python's site-packages 
+directories (e.g. by having the git repo in your dotfiles directory) you'll 
+have to source the vim plugin file with an absolute path to the plugin 
+location.
 
 Add the following line to your ``vimrc``, where ``{path}`` is the path to 
-the main Powerline project folder::
+the main Powerline project directory::
 
     source {path}/powerline/ext/vim/powerline.vim
