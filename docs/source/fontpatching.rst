@@ -41,8 +41,8 @@ Code point  Glyph  Description
 Usage
 -----
 
-The font patcher is located at ``powerline/fontpatcher/fontpatcher.py``. It 
-requires Python 2.7 and FontForge compiled with Python bindings to work.
+The font patcher is located at :file:`powerline/fontpatcher/fontpatcher.py`.  
+It requires Python 2.7 and FontForge compiled with Python bindings to work.
 
 Patched fonts are renamed by default (" for Powerline" is added to the font 
 name) so they don't conflict with existing fonts. Use the ``--no-rename`` 
@@ -65,7 +65,7 @@ Linux
 
        $ /path/to/fontpatcher.py MyFontFile.ttf
 
-3. Copy the font file into ``~/.fonts`` (or another X font directory)::
+3. Copy the font file into :file:`~/.fonts` (or another X font directory)::
 
        $ cp "MyFontFile for Powerline.otf" ~/.fonts
 
@@ -76,7 +76,7 @@ Linux
    If you're using vim in a terminal you may need to close all open terminal 
    windows after updating the font cache.
 
-5. **Gvim users:** Update the GUI font in your ``vimrc`` file::
+5. **Gvim users:** Update the GUI font in your :file:`vimrc` file::
 
        set guifont=MyFont\ for\ Powerline
 
@@ -124,7 +124,7 @@ OS X
 5. Install the font by double-clicking the font file in Finder and click 
    "Install this font" from the preview window.
 
-6. **Gvim users:** Update the GUI font in your ``vimrc`` file::
+6. **Gvim users:** Update the GUI font in your :file:`vimrc` file::
 
        set guifont=MyFont\ for\ Powerline
 

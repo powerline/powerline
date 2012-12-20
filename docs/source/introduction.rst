@@ -61,4 +61,4 @@ Feature highlights
   are now written in JSON, with a much cleaner syntax that's easier to learn 
   and work with. Themes and colorschemes are also much more configurable, 
   and it's easy to write your own and store them in your home config 
-  directory (usually ``~/.config/powerline``).
+  directory.

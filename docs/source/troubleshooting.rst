@@ -37,7 +37,7 @@ The colors are weird in the default OS X Terminal app!
 
 I'm using tmux and Powerline looks like crap, what's wrong?
     You need to tell tmux that it has 256-color capabilities. Add this to 
-    your ``.tmux.conf`` to solve this issue::
+    your :file:`.tmux.conf` to solve this issue::
 
         set -g default-terminal "screen-256color"
 
@@ -48,14 +48,14 @@ Vim-specific issues
 -------------------
 
 The statusline has strange characters like ``^B`` in it!
-    Please add ``set encoding=utf-8`` to your ``vimrc``.
+    Please add ``set encoding=utf-8`` to your :file:`vimrc`.
 
 The statusline has a lot of ``^`` or underline characters in it!
     You need to configure the ``fillchars`` setting to disable statusline 
     fillchars (see ``:h fillchars`` for details). Add this to your 
-    ``vimrc`` to solve this issue::
+    :file:`vimrc` to solve this issue::
 
         set fillchars+=stl:\ ,stlnc:\ 
 
 The statusline is hidden/only appears in split windows!
-    Make sure that you have ``set laststatus=2`` in your ``vimrc``.
+    Make sure that you have ``set laststatus=2`` in your :file:`vimrc`.

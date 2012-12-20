@@ -9,16 +9,16 @@ written in Python.
 Powerline provides default configurations in the following locations:
 
 `Main configuration`_
-    ``powerline/config.json``
+    :file:`powerline/config.json`
 `Colorschemes`_
-    ``powerline/colorschemes/default.json``
+    :file:`powerline/colorschemes/default.json`
 `Themes`_
-    ``powerline/themes/{extension}/default.json``
+    :file:`powerline/themes/{extension}/default.json`
 
 The default configuration files are stored in the main package. User 
-configuration files are stored in ``$XDG_CONFIG_HOME/powerline`` for Linux 
-users, and in ``~/.config/powerline`` for OS X users. This usually 
-corresponds to ``~/.config/powerline`` on both platforms.
+configuration files are stored in :file:`$XDG_CONFIG_HOME/powerline` for 
+Linux users, and in :file:`~/.config/powerline` for OS X users. This usually 
+corresponds to :file:`~/.config/powerline` on both platforms.
 
 The easiest way of creating your own version of any configuration file is to 
 copy the configuration file from the main package to the corresponding path 
@@ -39,7 +39,7 @@ file. Example:
 Main configuration
 ------------------
 
-:Location: ``powerline/config.json``
+:Location: :file:`powerline/config.json`
 
 The main configuration file defines some common options that applies to all 
 extensions, as well as some extension-specific options like themes and 
@@ -73,7 +73,7 @@ Extension-specific configuration
 Colorschemes
 ------------
 
-:Location: ``powerline/colorschemes/{name}.json``
+:Location: :file:`powerline/colorschemes/{name}.json`
 
 ``name``
     Name of the colorscheme.
@@ -128,7 +128,7 @@ Colorschemes
 Themes
 ------
 
-:Location: ``powerline/themes/{extension}/{name}.json``
+:Location: :file:`powerline/themes/{extension}/{name}.json`
 
 ``name``
     Name of the theme.
@@ -227,9 +227,10 @@ Segments
 --------
 
 Segments are written in Python, and the default segments provided with 
-Powerline are located in ``powerline/ext/{extension}/segments/{module}.py``. 
-User-defined segments can be defined in the corresponding path in the user's 
-config directory.
+Powerline are located in 
+:file:`powerline/ext/{extension}/segments/{module}.py`. User-defined 
+segments can be defined in the corresponding path in the user's config 
+directory.
 
 Segments are regular Python functions, and they may accept arguments. All 
 arguments should have a default value which will be used for themes that 
