@@ -1,5 +1,7 @@
 if ! has('python')
-	echoe 'You need vim compiled with Python 2 support for Powerline to work. Please consult the documentation for more details.'
+	echohl ErrorMsg
+	echomsg 'You need vim compiled with Python 2 support for Powerline to work. Please consult the documentation for more details.'
+	echohl None
 	finish
 endif
 
