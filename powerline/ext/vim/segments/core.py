@@ -153,7 +153,7 @@ def line_percent(gradient=False):
 
 	return {
 		'contents': percentage,
-		'highlight': 'line_percent_gradient' + str(int(5 * percentage // 100) + 1),
+		'highlight': ['line_percent_gradient' + str(int(5 * percentage // 100) + 1), 'line_percent'],
 	}
 
 
