@@ -13,6 +13,12 @@ The vim plugin requires a vim version with Python 2.7 support compiled in.
 You can check if your vim supports Python 2 by running ``vim --version 
 | grep +python``.
 
+If your vim version doesn't have support for Python 2, you'll have to 
+compile it with the ``--enable-pythoninterp`` flag (this also requires the 
+Python headers to be installed on your system). Please consult your 
+distribution's documentation for details on how to compile and install 
+packages.
+
 Vim version 7.3.661 or newer is recommended for performance reasons.
 
 Installation
