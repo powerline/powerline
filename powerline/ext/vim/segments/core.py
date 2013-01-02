@@ -164,12 +164,10 @@ def line_current():
 	return vim_funcs['line']('.')
 
 
-def col_current():
-	'''Return the current cursor column (byte offset from the start of line).
+def col_current(virtcol=True):
 	'''
-	return vim_funcs['col']('.')
-
-def virtcol_current():
-	'''Return the current cursor virtual column (visual column, concealed characters ignored).
+	Return the current cursor column. If the optional argument is True then 
+	returns visual column with concealed characters ignored (default), else 
+	returns byte offset.
 	'''
-	return vim_funcs['virtcol']('.')
+	return vim_funcs['virtcol' if virtcol else 'col']('.')

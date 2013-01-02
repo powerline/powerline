@@ -76,7 +76,7 @@
 				"rjust": 3
 			},
 			{
-				"name": "virtcol_current",
+				"name": "col_current",
 				"draw_divider": false,
 				"priority": 30,
 				"before": ":",

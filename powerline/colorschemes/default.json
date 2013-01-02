@@ -76,7 +76,6 @@
 		"line_current": { "fg": "gray1", "bg": "gray10", "attr": ["bold"] },
 		"line_current_symbol": { "fg": "gray1", "bg": "gray10" },
 		"col_current": { "fg": "gray6", "bg": "gray10" },
-		"virtcol_current": { "fg": "gray6", "bg": "gray10" },
 
 		"user_name": { "fg": "brightcyan", "bg": "darkblue", "attr": ["bold"] },
 		"user_name_root": { "fg": "white", "bg": "brightred", "attr": ["bold"] }
