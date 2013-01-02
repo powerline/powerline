@@ -8,6 +8,7 @@ from powerline.lib.memoize import memoize
 
 vim_funcs = {
 	'col': vim_get_func('col', rettype=int),
+	'virtcol': vim_get_func('virtcol', rettype=int),
 	'expand': vim_get_func('expand'),
 	'line': vim_get_func('line', rettype=int),
 	'mode': vim_get_func('mode'),
@@ -164,6 +165,11 @@ def line_current():
 
 
 def col_current():
-	'''Return the current cursor column.
+	'''Return the current cursor column (byte offset from the start of line).
 	'''
 	return vim_funcs['col']('.')
+
+def virtcol_current():
+	'''Return the current cursor virtual column (visual column, concealed characters ignored).
+	'''
+	return vim_funcs['virtcol']('.')
