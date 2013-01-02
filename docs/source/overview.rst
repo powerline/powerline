@@ -64,4 +64,4 @@ location.
 Add the following line to your ``vimrc``, where ``{path}`` is the path to 
 the main Powerline project directory::
 
-    source {path}/powerline/ext/vim/powerline.vim
+    source {path}/powerline/ext/vim/source_plugin.vim

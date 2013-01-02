@@ -1,13 +1,4 @@
-if ! has('python')
-	echohl ErrorMsg
-	echomsg 'You need vim compiled with Python 2 support for Powerline to work. Please consult the documentation for more details.'
-	echohl None
-	finish
-endif
-
-python import sys, vim, os
-python sys.path.append(vim.eval('expand("<sfile>:h:h:h:h")'))
-python import uuid
+python import uuid, vim
 python from powerline.core import Powerline
 python pl = Powerline('vim')
 
