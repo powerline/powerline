@@ -1,18 +1,18 @@
-python import uuid, vim
+python import uuid
 python from powerline.core import Powerline
-python pl = Powerline('vim')
+python powerline = Powerline('vim')
 
 if exists('*pyeval')
 	let s:pyeval = function('pyeval')
 else
-	python import json
+	python import json, vim
 	function! s:pyeval(e)
 		python vim.command('return ' + json.dumps(eval(vim.eval('a:e'))))
 	endfunction
 endif
 
 function! Powerline(winnr, current)
-	return s:pyeval('pl.renderer.render('. a:winnr .', '. a:current .')')
+	return s:pyeval('powerline.renderer.render('. a:winnr .', '. a:current .')')
 endfunction
 
 function! s:UpdateWindows()
