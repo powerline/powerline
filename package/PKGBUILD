@@ -1,17 +1,17 @@
 # Maintainer: Kim Silkebækken <kim.silkebaekken+aur@gmail.com>
 
 pkgname=powerline-git
-pkgver=20121217
+pkgver=20130102
 pkgrel=1
 pkgdesc='The ultimate statusline/prompt utility.'
 url='https://github.com/Lokaltog/powerline'
 license=('CC BY-SA 3.0')
 arch=('any')
-depends=('vim' 'python2>=2.7')
-makedepends=('git')
+depends=('python2>=2.7')
+makedepends=('git' 'python2-distribute')
 source=()
 
-_gitroot="git://github.com/Lokaltog/powerline.git"
+_gitroot="https://github.com/Lokaltog/powerline.git"
 _gitname="powerline"
 _gitbranch="develop"
 
@@ -21,16 +21,16 @@ build() {
 	msg "Connecting to GitHub..."
 
 	if [ -d ${srcdir}/${_gitname} ]; then
-		cd ${_gitname} && git pull origin ${_gitbranch}
+		cd ${_gitname}
+		git pull origin ${_gitbranch}
 		msg "The local files are updated."
 	else
 		git clone ${_gitroot}
+		cd ${_gitname}
 		git checkout ${_gitbranch}
 	fi
 
 	msg "Git checkout done or server timeout."
-
-	cd ${srcdir}/${_gitname}
 
 	python2 setup.py build || return 1
 	python2 setup.py install --root=${pkgdir} || return 1
