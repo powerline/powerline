@@ -8,4 +8,4 @@ endif
 python import sys, vim
 python sys.path.append(vim.eval('expand("<sfile>:h:h:h:h")'))
 
-exec 'source '. fnameescape(expand('<sfile>:h') . '/powerline.vim')
+source <sfile>:h/powerline.vim
