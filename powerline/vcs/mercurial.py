@@ -1,7 +1,5 @@
-import importlib
-hg = importlib.import_module('mercurial.hg')
-ui = importlib.import_module('mercurial.ui')
-match = importlib.import_module('mercurial.match')
+from __future__ import absolute_import
+from mercurial import hg, ui, match
 
 class Repository(object):
 	__slots__ = ('directory', 'ui')
