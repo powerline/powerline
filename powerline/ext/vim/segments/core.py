@@ -5,6 +5,7 @@ import vim
 
 from powerline.ext.vim.bindings import vim_get_func
 from powerline.lib.memoize import memoize
+from powerline.vcs import guess
 
 vim_funcs = {
 	'col': vim_get_func('col', rettype=int),
@@ -12,9 +13,6 @@ vim_funcs = {
 	'expand': vim_get_func('expand'),
 	'line': vim_get_func('line', rettype=int),
 	'mode': vim_get_func('mode'),
-	'vcs': {
-		'fugitive': vim_get_func('fugitive#head'),
-	},
 }
 
 vim_modes = {
@@ -75,24 +73,6 @@ def readonly_indicator(text=u''):
 	'''Return a read-only indicator.
 	'''
 	return text if int(vim.eval('&readonly')) else None
-
-
-@memoize(2)
-def branch():
-	'''Return VCS branch.
-
-	TODO: Expand this function to handle several VCS plugins.
-	'''
-	branch = None
-	try:
-		branch = vim_funcs['vcs']['fugitive'](5)
-	except vim.error:
-		vim_funcs['vcs']['fugitive'] = None
-	except TypeError:
-		pass
-
-	return branch if branch else None
-
 
 def file_directory():
 	'''Return file directory (head component of the file path).
@@ -171,3 +151,19 @@ def col_current(virtcol=True):
 	characters ignored (default), else returns byte offset.
 	'''
 	return vim_funcs['virtcol' if virtcol else 'col']('.')
+
+@memoize(2)
+def branch():
+	repo = guess(os.path.abspath(vim.current.buffer.name or os.getcwd()))
+	if repo:
+		return repo.branch()
+	return None
+
+# TODO Drop cache on BufWrite event
+@memoize(2)
+def file_vcs_status():
+	if vim.current.buffer.name and not vim.eval('&buftype'):
+		repo = guess(os.path.abspath(vim.current.buffer.name))
+		if repo:
+			return repo.status(os.path.relpath(vim.current.buffer.name, repo.directory))
+	return None

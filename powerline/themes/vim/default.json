@@ -32,6 +32,11 @@
 				"draw_divider": false
 			},
 			{
+				"name": "file_vcs_status",
+				"draw_divider": false,
+				"before": " "
+			},
+			{
 				"name": "modified_indicator",
 				"args": { "text": "+" },
 				"before": " "
