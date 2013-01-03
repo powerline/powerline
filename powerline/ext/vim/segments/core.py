@@ -9,6 +9,7 @@ from powerline.vcs import guess
 
 vim_funcs = {
 	'col': vim_get_func('col', rettype=int),
+	'virtcol': vim_get_func('virtcol', rettype=int),
 	'expand': vim_get_func('expand'),
 	'line': vim_get_func('line', rettype=int),
 	'mode': vim_get_func('mode'),
@@ -143,15 +144,13 @@ def line_current():
 	return vim_funcs['line']('.')
 
 
-def col_current():
+def col_current(virtcol=True):
 	'''Return the current cursor column.
-	'''
-	return vim_funcs['col']('.')
 
-def virtcol_current():
-	'''Return the current cursor virtual column (visual column, concealed characters ignored).
+	If the optional argument is True then returns visual column with concealed
+	characters ignored (default), else returns byte offset.
 	'''
-	return vim_funcs['virtcol']('.')
+	return vim_funcs['virtcol' if virtcol else 'col']('.')
 
 @memoize(2)
 def branch():
