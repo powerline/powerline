@@ -168,5 +168,12 @@ def file_vcs_status():
 	if vim.current.buffer.name and not vim.eval('&buftype'):
 		repo = guess(os.path.abspath(vim.current.buffer.name))
 		if repo:
-			return repo.status(os.path.relpath(vim.current.buffer.name, repo.directory))
+			status = repo.status(os.path.relpath(vim.current.buffer.name, repo.directory))
+			if not status:
+				return None
+			status = status.strip()
+			return {
+				'contents': status,
+				'highlight': ['file_vcs_status_' + status, 'file_vcs_status'],
+			}
 	return None
