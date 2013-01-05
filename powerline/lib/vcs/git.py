@@ -2,11 +2,13 @@ try:
 	import pygit2 as git
 
 	class Repository(object):
-		__slots__ = ('repo', 'directory')
+		__slots__ = ('directory')
 
 		def __init__(self, directory):
 			self.directory = directory
-			self.repo = git.Repository(directory)
+
+		def _repo(self):
+			return git.Repository(self.directory)
 
 		def status(self, path=None):
 			'''Return status of repository or file.
@@ -23,7 +25,7 @@ try:
 			(except for merge statuses as they are not supported by libgit2).
 			'''
 			if path:
-				status = self.repo.status_file(path)
+				status = self._repo().status_file(path)
 
 				if status == git.GIT_STATUS_CURRENT:
 					return None
@@ -54,7 +56,7 @@ try:
 				wt_column = ' '
 				index_column = ' '
 				untracked_column = ' '
-				for status in self.repo.status():
+				for status in self._repo().status():
 					if status & (git.GIT_STATUS_WT_DELETED
 							| git.GIT_STATUS_WT_MODIFIED):
 						wt_column = 'D'
@@ -68,7 +70,7 @@ try:
 
 		def branch(self):
 			try:
-				ref = self.repo.lookup_reference('HEAD')
+				ref = self._repo().lookup_reference('HEAD')
 			except KeyError:
 				return None
 
