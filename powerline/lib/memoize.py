@@ -20,7 +20,7 @@ class memoize(object):
 		for func in self._caches:
 			cache = {}
 			for key in self._caches[func]:
-				if (time.time() - self._caches[func][key][1]) < self._timeouts[func]:
+				if (time.clock() - self._caches[func][key][1]) < self._timeouts[func]:
 					cache[key] = self._caches[func][key]
 			self._caches[func] = cache
 
@@ -34,10 +34,10 @@ class memoize(object):
 			key = (args, tuple(kw))
 			try:
 				v = self.cache[key]
-				if (time.time() - v[1]) > self.timeout:
+				if (time.clock() - v[1]) > self.timeout:
 					raise KeyError
 			except KeyError:
-				v = self.cache[key] = f(*args, **kwargs), time.time()
+				v = self.cache[key] = f(*args, **kwargs), time.clock()
 			return v[0]
 		func.func_name = f.func_name
 
