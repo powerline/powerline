@@ -8,7 +8,7 @@ try:
 			self.directory = directory
 
 		def _repo(self):
-			return git.Repository(directory)
+			return git.Repository(self.directory)
 
 		def status(self, path=None):
 			'''Return status of repository or file.
