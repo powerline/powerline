@@ -11,8 +11,9 @@ class memoize(object):
 	_caches = {}
 	_timeouts = {}
 
-	def __init__(self, timeout):
+	def __init__(self, timeout, additional_key=None):
 		self.timeout = timeout
+		self.additional_key = additional_key
 
 	def collect(self):
 		'''Clear cache of results which have timed out.
@@ -31,7 +32,10 @@ class memoize(object):
 		def func(*args, **kwargs):
 			kw = kwargs.items()
 			kw.sort()
-			key = (args, tuple(kw))
+			if self.additional_key:
+				key = (args, tuple(kw), self.additional_key())
+			else:
+				key = (args, tuple(kw))
 			try:
 				v = self.cache[key]
 				if (time.time() - v[1]) > self.timeout:
