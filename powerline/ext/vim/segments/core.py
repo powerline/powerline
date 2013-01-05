@@ -163,7 +163,7 @@ def branch():
 
 
 # TODO Drop cache on BufWrite event
-@memoize(2)
+@memoize(2, additional_key=lambda: vim.current.buffer.number)
 def file_vcs_status():
 	if vim.current.buffer.name and not vim.eval('&buftype'):
 		repo = guess(os.path.abspath(vim.current.buffer.name))
