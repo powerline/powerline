@@ -23,7 +23,10 @@ try:
 			(except for merge statuses as they are not supported by libgit2).
 			'''
 			if path:
-				status = self.repo.status_file(path)
+				try:
+					status = self.repo.status_file(path)
+				except KeyError, ValueError:
+					return None
 
 				if status == git.GIT_STATUS_CURRENT:
 					return None
