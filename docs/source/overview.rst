@@ -37,6 +37,9 @@ system-wide, install with ``pip install --user`` instead.
 .. note:: Make sure that you install the package for Python 2. For distros 
    like Arch Linux you'll have to run ``pip2`` instead of ``pip``.
 
+.. note:: This project is currently unavailable on the PyPI due to a naming 
+   conflict with an unrelated project.
+
 Distribution-specific packages
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
