@@ -13,7 +13,7 @@ class Segments(object):
 	def get_function(self, segment):
 		oldpath = sys.path
 		sys.path = self.path + sys.path
-		segment_module = str(segment.get('module', 'powerline.ext.{0}.segments.core'.format(self.ext)))
+		segment_module = str(segment.get('module', 'powerline.ext.{0}.segments'.format(self.ext)))
 
 		try:
 			return None, getattr(import_module(segment_module), segment['name']), '{0}.{1}'.format(segment_module, segment['name'])
