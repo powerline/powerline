@@ -1,5 +1,5 @@
 {
-	"name": "terminal_default",
+	"name": "Default color scheme for terminal prompts",
 	"colors": {
 		"black": 16,
 		"white": 231,
