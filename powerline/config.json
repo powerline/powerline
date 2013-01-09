@@ -13,7 +13,7 @@
 	},
 	"ext": {
 		"terminal": {
-			"colorscheme": "default",
+			"colorscheme": "terminal_default",
 			"theme": "default"
 		},
 		"tmux": {
