@@ -59,3 +59,7 @@ The statusline has a lot of ``^`` or underline characters in it!
 
 The statusline is hidden/only appears in split windows!
     Make sure that you have ``set laststatus=2`` in your :file:`vimrc`.
+
+I'm using gVim for Windows, and ``cmd`` windows keep popping up when working in git repos!
+    Either install ``libgit2`` and ``pygit2``, or disable the VCS segment in 
+    your user configuration to resolve this issue.
