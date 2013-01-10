@@ -15,8 +15,8 @@ def user_name():
 
 
 def date(fmt='%Y-%m-%d'):
-    from datetime.datetime import now
-    return now().strftime(fmt)
+    from datetime import datetime
+    return datetime.now().strftime(fmt)
 
 
 def day():
