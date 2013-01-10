@@ -1,9 +1,36 @@
 {
-	"segments": {
-		"left": [
-			{
-				"name": "user_name"
-			}
-		]
-	}
+  "segments": {
+    "left": [
+      {
+        "name": "user_name"
+      },
+      {
+        "name": "external_ip"
+      },
+      {
+        "name": "uptime"
+      }
+    ],
+    "right": [
+      {
+        "name": "system_load"
+      },
+      {
+        "name": "forecast",
+        "args": {"zipcode": "21122", "units": "c"}
+      },
+      {
+        "name": "date",
+        "args": {"format": "%a"}
+      },
+      {
+        "name": "date"
+      },
+      {
+        "name": "date",
+        "args": {"format": "%H:%M"}
+      }
+    ]
+  }
+
 }

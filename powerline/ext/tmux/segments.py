@@ -14,17 +14,9 @@ def user_name():
     }
 
 
-def date(fmt='%Y-%m-%d'):
+def date(format='%Y-%m-%d'):
     from datetime import datetime
-    return datetime.now().strftime(fmt)
-
-
-def day():
-    return date('%a')
-
-
-def time():
-    return date('%H:%M')
+    return datetime.now().strftime(format)
 
 
 @memoize(600, filename='/tmp/powerline-externalip.tmp')
