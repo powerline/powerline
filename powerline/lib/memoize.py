@@ -1,4 +1,5 @@
 import cPickle as pickle
+import os
 import time
 
 
@@ -18,8 +19,8 @@ class memoize(object):
 
         def func(*args, **kwargs):
 
-            if self.filename:
-                with open(self.filename, 'rb') as fileobj:
+            if self.filename and os.path.exists(self.filename):
+                with open(self.filename, 'r+b') as fileobj:
                     try:
                         self.caches = pickle.load(fileobj)
                     except EOFError:
