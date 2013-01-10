@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
-
+import cPickle as pickle
 import time
-import shelve
 
 
 class memoize(object):
@@ -18,18 +16,31 @@ class memoize(object):
 
     def __call__(self, f):
 
-        if self.filename:
-            self.caches = shelve.open(self.filename)
-
         def func(*args, **kwargs):
-            key = (args, tuple(kwargs.items().sort()))
+
+            if self.filename:
+                with open(self.filename, 'rb') as fileobj:
+                    try:
+                        self.caches = pickle.load(fileobj)
+                    except EOFError:
+                        pass
+
+            key = (args, tuple(kwargs.items()))
+
             if self.additional_key:
                 key += (self.additional_key(), )
+
+            key = str(key)
             result = self.caches.get(key, None)
+
             if result is None or time.time() - result[1] > self.timeout:
                 result = self.caches[key] = f(*args, **kwargs), time.time()
-                if self.filename:
-                    self.caches.close()
+
+            if self.filename:
+                with open(self.filename, 'wb') as fileobj:
+                    pickle.dump(self.caches, fileobj)
+                    fileobj.close()
+
             return result[0]
 
         func.func_name = f.func_name
