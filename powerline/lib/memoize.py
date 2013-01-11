@@ -1,48 +1,56 @@
 # -*- coding: utf-8 -*-
 
+import cPickle as pickle
+import functools
+import os
+import tempfile
 import time
 
 
 class memoize(object):
-	'''Memoization decorator with timout.
-
-	http://code.activestate.com/recipes/325905-memoize-decorator-with-timeout/
+	'''Memoization decorator with timeout.
 	'''
-	_caches = {}
-	_timeouts = {}
+	_cache = {}
 
-	def __init__(self, timeout, additional_key=None):
+	def __init__(self, timeout, additional_key=None, persistent=False, persistent_file=None):
 		self.timeout = timeout
 		self.additional_key = additional_key
+		self.persistent = persistent
+		self.persistent_file = persistent_file or os.path.join(tempfile.gettempdir(), 'powerline-cache')
 
-	def collect(self):
-		'''Clear cache of results which have timed out.
-		'''
-		for func in self._caches:
-			cache = {}
-			for key in self._caches[func]:
-				if (time.time() - self._caches[func][key][1]) < self._timeouts[func]:
-					cache[key] = self._caches[func][key]
-			self._caches[func] = cache
-
-	def __call__(self, f):
-		self.cache = self._caches[f] = {}
-		self._timeouts[f] = self.timeout
-
-		def func(*args, **kwargs):
-			kw = kwargs.items()
-			kw.sort()
+	def __call__(self, func):
+		@functools.wraps(func)
+		def decorated_function(*args, **kwargs):
 			if self.additional_key:
-				key = (args, tuple(kw), self.additional_key())
+				key = (func.__name__, args, tuple(kwargs.items()), self.additional_key())
 			else:
-				key = (args, tuple(kw))
-			try:
-				v = self.cache[key]
-				if (time.time() - v[1]) > self.timeout:
-					raise KeyError
-			except KeyError:
-				v = self.cache[key] = f(*args, **kwargs), time.time()
-			return v[0]
-		func.func_name = f.func_name
+				key = (func.__name__, args, tuple(kwargs.items()))
 
-		return func
+			if self.persistent:
+				try:
+					with open(self.persistent_file, 'rb') as fileobj:
+						self._cache = pickle.load(fileobj)
+				except (IOError, EOFError):
+					pass
+
+			cached = self._cache.get(key, None)
+
+			if cached is None or time.time() - cached['time'] > self.timeout:
+				cached = self._cache[key] = {
+					'result': func(*args, **kwargs),
+					'time': time.time(),
+				}
+
+				if self.persistent:
+					try:
+						with open(self.persistent_file, 'wb') as fileobj:
+							pickle.dump(self._cache, fileobj)
+					except IOError:
+						# Unable to write to file
+						pass
+					except TypeError:
+						# Unable to pickle function result
+						pass
+
+			return cached['result']
+		return decorated_function
