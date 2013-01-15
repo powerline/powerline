@@ -22,9 +22,8 @@ def date(format='%Y-%m-%d'):
 @memoize(600, filename='/tmp/powerline-externalip.tmp')
 def external_ip():
     import urllib2
-    url = 'http://automation.whatismyip.com/n09230945.asp'
     try:
-        return u'ⓦ  ' + urllib2.urlopen(url).read()
+        return u'ⓦ  ' + urllib2.urlopen('http://icanhazip.com/').read()
     except urllib2.HTTPError:
         return
 
