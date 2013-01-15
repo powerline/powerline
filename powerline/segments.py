@@ -14,7 +14,6 @@ class Segments(object):
 		oldpath = sys.path
 		sys.path = self.path + sys.path
 		segment_module = str(segment.get('module', 'powerline.ext.{0}.segments'.format(self.ext)))
-
 		try:
 			return None, getattr(import_module(segment_module), segment['name']), '{0}.{1}'.format(segment_module, segment['name'])
 		finally:
@@ -30,14 +29,11 @@ class Segments(object):
 
 	def get(self, segment, side):
 		segment_type = segment.get('type', 'function')
-
 		try:
 			contents, contents_func, key = getattr(self, 'get_{0}'.format(segment_type))(segment)
 		except AttributeError:
 			raise TypeError('Unknown segment type: {0}'.format(segment_type))
-
 		highlighting_group = segment.get('highlight', segment.get('name'))
-
 		return {
 			'key': key,
 			'type': segment_type,
@@ -54,4 +50,4 @@ class Segments(object):
 			'side': side,
 			'exclude_modes': segment.get('exclude_modes', []),
 			'include_modes': segment.get('include_modes', []),
-		}
+			}

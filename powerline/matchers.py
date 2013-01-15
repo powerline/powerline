@@ -14,10 +14,8 @@ class Matchers(object):
 		if not separator:
 			match_module = 'powerline.ext.{0}.matchers'.format(self.ext)
 			match_function = match_name
-
 		oldpath = sys.path
 		sys.path = self.path + sys.path
-
 		try:
 			return getattr(import_module(match_module), match_function)
 		finally:

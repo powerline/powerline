@@ -47,10 +47,8 @@ def mode(override=None):
 		mode = mode({ 'n': 'NORM' })
 	'''
 	mode = vim_funcs['mode']()
-
 	if not override:
 		return vim_modes[mode]
-
 	try:
 		return override[mode]
 	except IndexError:
@@ -58,44 +56,36 @@ def mode(override=None):
 
 
 def modified_indicator(text=u'+'):
-	'''Return a file modified indicator.
-	'''
+	'''Return a file modified indicator.'''
 	return text if int(vim.eval('&modified')) else None
 
 
 def paste_indicator(text='PASTE'):
-	'''Return a paste mode indicator.
-	'''
+	'''Return a paste mode indicator.'''
 	return text if int(vim.eval('&paste')) else None
 
 
 def readonly_indicator(text=u''):
-	'''Return a read-only indicator.
-	'''
+	'''Return a read-only indicator.'''
 	return text if int(vim.eval('&readonly')) else None
 
 
 def file_directory():
-	'''Return file directory (head component of the file path).
-	'''
+	'''Return file directory (head component of the file path).'''
 	file_directory = vim_funcs['expand']('%:~:.:h')
 	return file_directory + os.sep if file_directory else None
 
 
 def file_name(display_no_file=False, no_file_text='[No file]'):
-	'''Return file name (tail component of the file path).
-	'''
+	'''Return file name (tail component of the file path).'''
 	file_name = vim_funcs['expand']('%:~:.:t')
-
 	if not file_name and not display_no_file:
 		return None
-
 	if not file_name:
 		return {
 			'contents': no_file_text,
 			'highlight': ['file_name_no_file', 'file_name'],
-		}
-
+			}
 	return file_name
 
 
@@ -124,24 +114,20 @@ def file_type():
 
 
 def line_percent(gradient=False):
-	'''Return the cursor position in the file as a percentage.
-	'''
+	'''Return the cursor position in the file as a percentage.'''
 	line_current = vim_funcs['line']('.')
 	line_last = vim_funcs['line']('$')
 	percentage = int(line_current * 100 // line_last)
-
 	if not gradient:
 		return percentage
-
 	return {
 		'contents': percentage,
 		'highlight': ['line_percent_gradient' + str(int(5 * percentage // 100) + 1), 'line_percent'],
-	}
+		}
 
 
 def line_current():
-	'''Return the current cursor line.
-	'''
+	'''Return the current cursor line.'''
 	return vim_funcs['line']('.')
 
 
@@ -175,5 +161,5 @@ def file_vcs_status():
 			return {
 				'contents': status,
 				'highlight': ['file_vcs_status_' + status, 'file_vcs_status'],
-			}
+				}
 	return None

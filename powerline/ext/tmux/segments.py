@@ -8,4 +8,4 @@ def user_name():
 	return {
 		'contents': user_name,
 		'highlight': 'user_name' if user_name != 'root' else ['user_name_root', 'user_name'],
-	}
+		}

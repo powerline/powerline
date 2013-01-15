@@ -9,21 +9,17 @@ try:
 	import psMat
 except ImportError:
 	sys.stderr.write('The required FontForge modules could not be loaded.\n\n')
-
 	if sys.version_info.major > 2:
 		sys.stderr.write('FontForge only supports Python 2. Please run this script with the Python 2 executable - e.g. "python2 {0}"\n'.format(sys.argv[0]))
 	else:
 		sys.stderr.write('You need FontForge with Python bindings for this script to work.\n')
-
 	sys.exit(1)
 
 # Handle command-line arguments
 parser = argparse.ArgumentParser(description='Font patcher for Powerline. Requires FontForge with Python bindings. Stores the patched font as a new, renamed font file by default.')
-
 parser.add_argument('target_fonts', help='font files to patch', metavar='font', nargs='+', type=argparse.FileType('rb'))
 parser.add_argument('--no-rename', help='don\'t add " for Powerline" to the font name', default=True, action='store_false', dest='rename_font')
 parser.add_argument('--source-font', help='source symbol font', metavar='font', dest='source_font', default='{0}/fontpatcher-symbols.sfd'.format(sys.path[0]), type=argparse.FileType('rb'))
-
 args = parser.parse_args()
 
 
@@ -36,10 +32,8 @@ class FontPatcher(object):
 	def patch(self):
 		for target_font in self.target_fonts:
 			source_font = self.source_font
-
 			target_font_em_original = target_font.em
 			target_font.em = 2048
-
 			target_font.encoding = 'ISO10646'
 
 			# Rename font
@@ -61,10 +55,8 @@ class FontPatcher(object):
 					bbox = target_font[cp].boundingBox()
 				except TypeError:
 					continue
-
 				if not target_font_width:
 					target_font_width = target_font[cp].width
-
 				if bbox[0] < target_bb[0]:
 					target_bb[0] = bbox[0]
 				if bbox[1] < target_bb[1]:
@@ -83,7 +75,6 @@ class FontPatcher(object):
 			x_diff = target_bb[0] - source_bb[0]
 			y_diff = target_bb[1] - source_bb[1]
 			translate = psMat.translate(x_diff, y_diff)
-
 			transform = psMat.compose(scale, translate)
 
 			# Create new glyphs from symbol font

@@ -27,7 +27,7 @@ try:
 			if path:
 				try:
 					status = self._repo().status_file(path)
-				except KeyError, ValueError:
+				except (KeyError, ValueError):
 					return None
 
 				if status == git.GIT_STATUS_CURRENT:
