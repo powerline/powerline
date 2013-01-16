@@ -24,7 +24,7 @@ class Powerline(object):
 		self.config_ext = config['ext'][ext]
 
 		# Load and initialize colorscheme
-		colorscheme_config = self._load_json_config(os.path.join('colorschemes', self.config_ext['colorscheme']))
+		colorscheme_config = self._load_json_config(os.path.join('colorschemes', ext, self.config_ext['colorscheme']))
 		colorscheme = Colorscheme(colorscheme_config)
 
 		# Load and initialize extension theme

@@ -73,7 +73,7 @@ Extension-specific configuration
 Colorschemes
 ------------
 
-:Location: :file:`powerline/colorschemes/{name}.json`
+:Location: :file:`powerline/colorschemes/{extension}/{name}.json`
 
 ``name``
     Name of the colorscheme.

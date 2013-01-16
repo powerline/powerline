@@ -13,15 +13,15 @@
 	},
 	"ext": {
 		"terminal": {
-			"colorscheme": "terminal_default",
+			"colorscheme": "default",
 			"theme": "default"
 		},
 		"tmux": {
-			"colorscheme": "tmux_default",
+			"colorscheme": "default",
 			"theme": "default"
 		},
 		"vim": {
-			"colorscheme": "vim_default",
+			"colorscheme": "default",
 			"theme": "default",
 			"local_themes": {
 				"help": "help"
