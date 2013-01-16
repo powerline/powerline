@@ -14,6 +14,11 @@ class Renderer(object):
 		self.local_themes = local_themes
 		self.theme_kwargs = theme_kwargs
 
+	def add_local_theme(self, matcher, theme):
+		if matcher in self.local_themes:
+			raise KeyError('There is already a local theme with given matcher')
+		self.local_themes[matcher] = theme
+
 	def get_theme(self):
 		for matcher in self.local_themes.iterkeys():
 			if matcher():

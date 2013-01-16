@@ -31,7 +31,7 @@ class Powerline(object):
 		theme_config = self._load_theme_config(ext, self.config_ext.get('theme', 'default'))
 		path = [os.path.expanduser(path) for path in self.config.get('paths', [])]
 		get_segment = Segments(ext, path, colorscheme).get
-		get_matcher = Matchers(ext, path).get
+		self.get_matcher = Matchers(ext, path).get
 		theme_kwargs = {
 			'ext': ext,
 			'colorscheme': colorscheme,
@@ -40,7 +40,7 @@ class Powerline(object):
 			}
 		local_themes = {}
 		for key, local_theme_name in self.config_ext.get('local_themes', {}).iteritems():
-			key = get_matcher(key)
+			key = self.get_matcher(key)
 			local_themes[key] = {'config': self._load_theme_config(ext, local_theme_name)}
 
 		# Load and initialize extension renderer
@@ -48,6 +48,24 @@ class Powerline(object):
 		renderer_class_name = '{0}Renderer'.format(ext.capitalize())
 		Renderer = getattr(importlib.import_module(renderer_module_name), renderer_class_name)
 		self.renderer = Renderer(theme_config, local_themes, theme_kwargs)
+
+	def add_local_theme(self, key, config):
+		'''Add local themes at runtime (e.g. during vim session).
+
+		Accepts key as first argument (same as keys in config.json:
+		ext/*/local_themes) and configuration dictionary as the second (has
+		format identical to themes/*/*.json)
+
+		Returns True if theme was added successfully and False if theme with
+		the same matcher already exists
+		'''
+		key = self.get_matcher(key)
+		try:
+			self.renderer.add_local_theme(key, {'config': config})
+		except KeyError:
+			return False
+		else:
+			return True
 
 	def _load_theme_config(self, ext, name):
 		return self._load_json_config(os.path.join('themes', ext, name))
