@@ -2,7 +2,35 @@
 	"segments": {
 		"left": [
 			{
-				"name": "user_name"
+				"module": "powerline.ext.terminal.segments",
+				"name": "user"
+			},
+			{
+				"name": "external_ip",
+				"before": "ⓦ  "
+			},
+			{
+				"name": "uptime",
+				"before": "⇑  "
+			}
+		],
+		"right": [
+			{
+				"name": "system_load"
+			},
+			{
+				"name": "forecast"
+			},
+			{
+				"name": "date",
+				"args": {"format": "%a"}
+			},
+			{
+				"name": "date"
+			},
+			{
+				"name": "date",
+				"args": {"format": "%H:%M"}
 			}
 		]
 	}

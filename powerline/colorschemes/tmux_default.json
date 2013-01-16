@@ -1,0 +1,29 @@
+{
+	"name": "Default color scheme for terminal prompts",
+	"colors": {
+		"black": 16,
+		"white": 231,
+
+		"darkestblue": 24,
+		"darkblue": 31,
+		"mediumblue": 38,
+		"brightblue": 117,
+		"brightestblue": 153,
+
+		"green": 148,
+		"yellow": 220,
+		"red": 202
+	},
+	"groups": {
+		"user": { "fg": "white", "bg": "mediumblue", "attr": ["bold"] },
+		"date": { "fg": "white", "bg": "mediumblue" },
+		"forecast": { "fg": "brightestblue", "bg": "darkblue" },
+		"external_ip": { "fg": "brightestblue", "bg": "darkblue" },
+		"system_load": { "fg": "brightblue", "bg": "darkestblue" },
+		"system_load_good": { "fg": "green", "bg": "darkestblue" },
+		"system_load_bad": { "fg": "yellow", "bg": "darkestblue" },
+		"system_load_ugly": { "fg": "red", "bg": "darkestblue" },
+		"uptime": { "fg": "brightblue", "bg": "darkestblue" }
+	},
+	"mode_translations": { }
+}

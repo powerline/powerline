@@ -17,11 +17,11 @@
 			"theme": "default"
 		},
 		"tmux": {
-			"colorscheme": "default",
+			"colorscheme": "tmux_default",
 			"theme": "default"
 		},
 		"vim": {
-			"colorscheme": "default",
+			"colorscheme": "vim_default",
 			"theme": "default",
 			"local_themes": {
 				"help": "help"
