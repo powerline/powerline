@@ -11,13 +11,6 @@ try:
 except IOError:
 	README = ''
 
-install_requires = []
-
-docs_extras = [
-	'Sphinx',
-	'docutils',
-]
-
 setup(name='Powerline',
 	version='beta',
 	description='The ultimate statusline/prompt utility.',
@@ -31,8 +24,11 @@ setup(name='Powerline',
 	include_package_data=True,
 	zip_safe=False,
 	test_suite='powerline',
-	install_requires=install_requires,
+	install_requires=[],
 	extras_require={
-		'docs': docs_extras,
-	},
-)
+		'docs': [
+			'Sphinx',
+			'docutils',
+			],
+		},
+	)

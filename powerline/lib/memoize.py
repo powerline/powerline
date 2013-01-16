@@ -8,8 +8,7 @@ import time
 
 
 class memoize(object):
-	'''Memoization decorator with timeout.
-	'''
+	'''Memoization decorator with timeout.'''
 	_cache = {}
 
 	def __init__(self, timeout, additional_key=None, persistent=False, persistent_file=None):
@@ -25,22 +24,18 @@ class memoize(object):
 				key = (func.__name__, args, tuple(kwargs.items()), self.additional_key())
 			else:
 				key = (func.__name__, args, tuple(kwargs.items()))
-
 			if self.persistent:
 				try:
 					with open(self.persistent_file, 'rb') as fileobj:
 						self._cache = pickle.load(fileobj)
 				except (IOError, EOFError):
 					pass
-
 			cached = self._cache.get(key, None)
-
 			if cached is None or time.time() - cached['time'] > self.timeout:
 				cached = self._cache[key] = {
 					'result': func(*args, **kwargs),
 					'time': time.time(),
-				}
-
+					}
 				if self.persistent:
 					try:
 						with open(self.persistent_file, 'wb') as fileobj:
@@ -51,6 +46,5 @@ class memoize(object):
 					except TypeError:
 						# Unable to pickle function result
 						pass
-
 			return cached['result']
 		return decorated_function

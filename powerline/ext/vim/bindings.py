@@ -6,13 +6,11 @@ try:
 	_vim_globals = vim.bindeval('g:')
 
 	def vim_set_global_var(var, val):
-		'''Set a global var in vim using bindeval().
-		'''
+		'''Set a global var in vim using bindeval().'''
 		_vim_globals[var] = val
 
 	def vim_get_func(f, rettype=None):
-		'''Return a vim function binding.
-		'''
+		'''Return a vim function binding.'''
 		try:
 			return vim.bindeval('function("' + f + '")')
 		except vim.error:

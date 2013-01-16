@@ -32,7 +32,6 @@ class Repository(object):
 		"U"nknown, "I"gnored, (None)Clean.
 		'''
 		repo = self._repo()
-
 		if path:
 			m = match.match(None, None, [path], exact=True)
 			statuses = repo.status(match=m, unknown=True, ignored=True)

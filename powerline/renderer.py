@@ -39,16 +39,13 @@ class Renderer(object):
 		# Handle excluded/included segments for the current mode
 		segments = [segment for segment in segments\
 			if mode not in segment['exclude_modes'] or (segment['include_modes'] and segment in segment['include_modes'])]
-
 		rendered_highlighted = self._render_segments(mode, theme, segments)
-
 		if not width:
 			# No width specified, so we don't need to crop or pad anything
 			return rendered_highlighted
 
 		# Create an ordered list of segments that can be dropped
 		segments_priority = [segment for segment in sorted(segments, key=lambda segment: segment['priority'], reverse=True) if segment['priority'] > 0]
-
 		while self._total_len(segments) > width and len(segments_priority):
 			segments.remove(segments_priority[0])
 			segments_priority.pop(0)
@@ -65,7 +62,6 @@ class Renderer(object):
 				segment['contents'] = segments_fillers_contents
 			# Add remainder whitespace to the first filler segment
 			segments_fillers[0]['contents'] += ' ' * segments_fillers_remainder
-
 		return self._render_segments(mode, theme, segments)
 
 	def _render_segments(self, mode, theme, segments, render_highlighted=True):
@@ -87,19 +83,16 @@ class Renderer(object):
 			prev_segment = segments[index - 1] if index > 0 else theme.EMPTY_SEGMENT
 			next_segment = segments[index + 1] if index < segments_len - 1 else theme.EMPTY_SEGMENT
 			compare_segment = next_segment if segment['side'] == 'left' else prev_segment
-
 			segment['rendered_raw'] = u''
 			outer_padding = ' ' if index == 0 or (index == segments_len - 1 and segment['side'] == 'right') else ''
 			divider_type = 'soft' if compare_segment['highlight'][mode]['bg'] == segment['highlight'][mode]['bg'] else 'hard'
 			divider = theme.get_divider(segment['side'], divider_type)
-
 			divider_hl = ''
 			segment_hl = ''
 
 			if render_highlighted:
 				if divider_type == 'hard':
 					divider_hl = self.hl(segment['highlight'][mode]['bg'], compare_segment['highlight'][mode]['bg'], False)
-
 				segment_hl = self.hl(**segment['highlight'][mode])
 
 			if segment['type'] == 'filler':
@@ -124,7 +117,6 @@ class Renderer(object):
 					rendered_highlighted += segment_hl + segment['contents'] + outer_padding
 			else:
 				raise ValueError('Unknown segment type')
-
 		return rendered_highlighted
 
 	def _total_len(self, segments):
