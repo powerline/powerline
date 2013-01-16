@@ -21,7 +21,7 @@
 			"theme": "default"
 		},
 		"vim": {
-			"colorscheme": "default",
+			"colorscheme": "vim_default",
 			"theme": "default",
 			"local_themes": {
 				"help": "help"
