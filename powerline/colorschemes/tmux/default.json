@@ -24,6 +24,5 @@
 		"system_load_bad": { "fg": "yellow", "bg": "darkestblue" },
 		"system_load_ugly": { "fg": "red", "bg": "darkestblue" },
 		"uptime": { "fg": "brightblue", "bg": "darkestblue" }
-	},
-	"mode_translations": { }
+	}
 }

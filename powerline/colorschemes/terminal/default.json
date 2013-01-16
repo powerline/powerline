@@ -58,6 +58,5 @@
 		"branch": { "fg": "gray9", "bg": "gray4" },
 		"cwd": { "fg": "gray10", "bg": "gray4" },
 		"hostname": { "fg": "brightyellow", "bg": "mediumorange" }
-	},
-	"mode_translations": { }
+	}
 }

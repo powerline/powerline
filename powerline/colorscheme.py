@@ -26,7 +26,7 @@ class Colorscheme(object):
 				}
 
 			# Create mode-specific highlighting for this group
-			for mode, translations in colorscheme['mode_translations'].items():
+			for mode, translations in colorscheme.get('mode_translations', {}).items():
 				if not mode in self.modes_groups:
 					self.modes_groups[mode] = {}
 				if group_name in translations.get('groups', {}):
