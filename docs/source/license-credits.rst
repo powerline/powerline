@@ -15,6 +15,7 @@ Credits
 :Author: `Kim Silkebækken <https://github.com/Lokaltog>`_
 :Main contributors:
     * `ZyX-I <https://github.com/ZyX-I>`_
+    * `Liam Curry <https://github.com/liamcurry>`_
 
 The glyphs in the font patcher are created by Fabrizio Schiavi, creator of 
 the excellent coding font `Pragmata Pro`_.
