@@ -5,15 +5,15 @@ import sys
 
 
 class Segments(object):
-	def __init__(self, ext, path, colorscheme):
-		self.ext = ext
+	def __init__(self, ext, path, colorscheme, default_module=None):
+		self.default_module = default_module or 'powerline.ext.{0}.segments'.format(ext)
 		self.path = path
 		self.colorscheme = colorscheme
 
 	def get_function(self, segment):
 		oldpath = sys.path
 		sys.path = self.path + sys.path
-		segment_module = str(segment.get('module', 'powerline.ext.{0}.segments'.format(self.ext)))
+		segment_module = str(segment.get('module', self.default_module))
 		try:
 			return None, getattr(import_module(segment_module), segment['name']), '{0}.{1}'.format(segment_module, segment['name'])
 		finally:
