@@ -1,18 +1,17 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
-'''Powerline tmux statusline example.
-
-Run with `tmux -f tmux.conf`.
-'''
+'''Powerline tmux statusline.'''
 import argparse
-import os
-import sys
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+try:
+	from powerline.core import Powerline
+except ImportError:
+	import os
+	import sys
+	sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
+	from powerline.core import Powerline
 
-from powerline.core import Powerline
-
-parser = argparse.ArgumentParser(description='powerline outputter')
+parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('side', nargs='?', default='all', choices=('all', 'left', 'right'))
 parser.add_argument('--ext', default='tmux')
 
