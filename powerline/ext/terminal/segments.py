@@ -38,7 +38,7 @@ def cwd(dir_shorten_len=None, dir_limit_depth=None):
 	cwd_split_len = len(cwd_split)
 	if cwd_split_len > dir_limit_depth + 1:
 		del(cwd_split[0:-dir_limit_depth])
-		cwd_split.insert(0, u'…')
+		cwd_split.insert(0, u'⋯')
 	cwd = [i[0:dir_shorten_len] if dir_shorten_len and i else i for i in cwd_split[:-1]] + [cwd_split[-1]]
 	cwd = os.path.join(*cwd)
 	return cwd
