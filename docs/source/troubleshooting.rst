@@ -67,3 +67,14 @@ The statusline is hidden/only appears in split windows!
 I'm using gVim for Windows, and ``cmd`` windows keep popping up when working in git repos!
     Either install ``libgit2`` and ``pygit2``, or disable the VCS segment in 
     your user configuration to resolve this issue.
+
+I receive a ``NameError`` when trying to use Powerline with MacVim!
+    Please install MacVim using this command::
+
+        brew install macvim --env-std --override-system-vim
+
+    Then install Powerline locally with ``pip install --user``, or by 
+    running these commands in the ``powerline`` directory::
+
+        ./setup.py build
+        ./setup.py install --user
