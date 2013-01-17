@@ -56,14 +56,13 @@ def uptime(format='{days:02d}d {hours:02d}h {minutes:02d}m'):
 			minutes, seconds = divmod(seconds, 60)
 			hours, minutes = divmod(minutes, 60)
 			days, hours = divmod(hours, 24)
-
 			return format.format(days=int(days), hours=hours, minutes=minutes)
 	except IOError:
 		pass
 
 
 @memoize(600, persistent=True)
-def forecast(unit='c', location_query=None):
+def weather(unit='c', location_query=None):
 	import json
 	import urllib
 	import urllib2
@@ -74,7 +73,6 @@ def forecast(unit='c', location_query=None):
 			location_query = ','.join([location['city'], location['region_name'], location['country_name']])
 		except ValueError:
 			return None
-
 	query_data = {
 		'q':
 			'use "http://github.com/yql/yql-tables/raw/master/weather/weather.bylocation.xml" as we;'
@@ -83,13 +81,10 @@ def forecast(unit='c', location_query=None):
 	}
 	url = 'http://query.yahooapis.com/v1/public/yql?' + urllib.urlencode(query_data)
 	response = json.loads(urllib2.urlopen(url).read())
-
 	condition = response['query']['results']['weather']['rss']['channel']['item']['condition']
 	condition_code = int(condition['code'])
 	icon = u'〇'
-
 	for icon, codes in weather_conditions_codes.items():
 		if condition_code in codes:
 			break
-
 	return u'{0}  {1}°{2}'.format(icon, condition['temp'], unit.upper())
