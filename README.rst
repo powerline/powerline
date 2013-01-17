@@ -5,15 +5,19 @@ Powerline
 :Source: https://github.com/Lokaltog/powerline
 :Version: beta
 
-This is the next version of Powerline, implemented in Python. The project is 
-currently in beta, and most of the functionality in the old vimscript 
-project is already implemented.
+This is the upcoming version of Powerline, implemented in Python. The 
+project is currently in a stable beta and almost ready for release.
 
-Check out the `documentation <http://lokaltog.github.com/powerline/>`_ for 
-more information and installation instructions.
+* Consult the `documentation <http://lokaltog.github.com/powerline/>`_ for 
+  more information and installation instructions.
+* Check out `powerline-fonts <https://github.com/Lokaltog/powerline-fonts>`_ 
+  for pre-patched versions of popular coding fonts.
 
 Screenshots
 -----------
+
+Vim statusline
+^^^^^^^^^^^^^^
 
 **Mode-dependent highlighting**
 
@@ -34,6 +38,8 @@ Screenshots
      :alt: Truncation illustration
 * .. image:: https://raw.github.com/Lokaltog/powerline/develop/docs/source/_static/img/pl-truncate3.png
      :alt: Truncation illustration
+
+----
 
 The font in the screenshots is `Pragmata Pro`_ by Fabrizio Schiavi.
 
