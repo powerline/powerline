@@ -88,3 +88,26 @@ def weather(unit='c', location_query=None):
 		if condition_code in codes:
 			break
 	return u'{0}  {1}°{2}'.format(icon, condition['temp'], unit.upper())
+
+
+def network_load(interface='eth0', measure_interval=1, suffix='B/s', binary_prefix=False):
+	import time
+	from powerline.lib import humanize_bytes
+
+	def get_bytes():
+		try:
+			with open('/sys/class/net/{interface}/statistics/rx_bytes'.format(interface=interface), 'rb') as file_obj:
+				rx = int(file_obj.read())
+			with open('/sys/class/net/{interface}/statistics/tx_bytes'.format(interface=interface), 'rb') as file_obj:
+				tx = int(file_obj.read())
+			return (rx, tx)
+		except IOError:
+			return (0, 0)
+
+	b1 = get_bytes()
+	time.sleep(measure_interval)
+	b2 = get_bytes()
+	return u'⬇ {rx_diff} ⬆ {tx_diff}'.format(
+		rx_diff=humanize_bytes((b2[0] - b1[0]) / measure_interval, suffix, binary_prefix),
+		tx_diff=humanize_bytes((b2[1] - b1[1]) / measure_interval, suffix, binary_prefix),
+		)

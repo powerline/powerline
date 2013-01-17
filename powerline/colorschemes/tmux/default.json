@@ -18,6 +18,7 @@
 		"user": { "fg": "white", "bg": "mediumblue", "attr": ["bold"] },
 		"date": { "fg": "white", "bg": "mediumblue" },
 		"weather": { "fg": "brightestblue", "bg": "darkblue" },
+		"network_load": { "fg": "brightestblue", "bg": "darkblue" },
 		"external_ip": { "fg": "brightestblue", "bg": "darkblue" },
 		"system_load": { "fg": "brightblue", "bg": "darkestblue" },
 		"system_load_good": { "fg": "green", "bg": "darkestblue" },

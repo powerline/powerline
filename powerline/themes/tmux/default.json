@@ -10,6 +10,9 @@
 				"before": "ⓦ  "
 			},
 			{
+				"name": "network_load"
+			},
+			{
 				"name": "uptime",
 				"before": "⇑  "
 			}
