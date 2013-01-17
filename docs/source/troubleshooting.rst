@@ -10,6 +10,10 @@ I can't see any fancy symbols, what's wrong?
     If you're using rxvt-unicode, make sure that it's compiled with the 
     ``--enable-unicode3`` flag.
 
+    If you're using iTerm2, please update to `this revision 
+    <https://github.com/gnachman/iTerm2/commit/8e3ad6dabf83c60b8cf4a3e3327c596401744af6>`_ 
+    or newer.
+
     You need to set your ``LANG`` and ``LC_*`` environment variables to 
     a UTF-8 locale (e.g. ``LANG=en_US.utf8``). Consult your Linux distro's 
     documentation for information about setting these variables correctly.
