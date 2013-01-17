@@ -4,7 +4,7 @@ import os
 import vim
 
 from powerline.ext.vim.bindings import vim_get_func
-from powerline.lib.memoize import memoize
+from powerline.lib import memoize
 from powerline.lib.vcs import guess
 
 vim_funcs = {

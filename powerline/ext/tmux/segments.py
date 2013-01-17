@@ -2,7 +2,7 @@
 
 import os
 
-from powerline.lib.memoize import memoize
+from powerline.lib import memoize
 
 # Weather condition code descriptions available at http://developer.yahoo.com/weather/#codes
 weather_conditions_codes = {
