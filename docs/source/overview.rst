@@ -51,6 +51,11 @@ they provide an easy way of installing and upgrading Powerline:
 Usage
 -----
 
+.. note:: If Powerline is installed somewhere other than Python's 
+   site-packages directories (e.g. by having the git repo in your dotfiles 
+   directory) you'll have to use the absolute path to the scripts in the 
+   examples below.
+
 Vim statusline
 ^^^^^^^^^^^^^^
 
@@ -60,26 +65,36 @@ by adding the following line to your ``vimrc``::
     python from powerline.ext.vim import source_plugin; source_plugin()
 
 If Powerline is installed somewhere other than Python's site-packages 
-directories (e.g. by having the git repo in your dotfiles directory) you'll 
-have to source the vim plugin file with an absolute path to the plugin 
-location.
+directories you'll have to source the vim plugin file with an absolute path 
+to the plugin location.
 
 Add the following line to your ``vimrc``, where ``{path}`` is the path to 
 the main Powerline project directory::
 
     source {path}/powerline/ext/vim/source_plugin.vim
 
-Terminal prompt
-^^^^^^^^^^^^^^^
+Terminal prompts
+^^^^^^^^^^^^^^^^
 
-Add the following to your ``.bashrc``/``.zshrc``::
+Bash prompt
+***********
 
+Add the following to your ``.bashrc``::
+
+    function _update_ps1() {
+       export PS1="$(powerline-prompt)"
+    }
+
+    export PROMPT_COMMAND="_update_ps1"
+
+
+Zsh prompt
+**********
+
+Add the following to your ``.zshrc``::
+
+    setopt prompt_subst
     export PS1=\`powerline-prompt\`
-
-If Powerline is installed somewhere other than Python's site-packages you'll 
-have to specify the full path to the script::
-
-    export PS1=\`/path/to/powerline/scripts/powerline-prompt\`
 
 Tmux statusline
 ^^^^^^^^^^^^^^^
@@ -96,7 +111,3 @@ Add the following to your ``tmux.conf``::
     set-option -g status-justify "centre"
     set-option -g status-bg "colour235"
     set-option -g status-fg "colour249"
-
-If Powerline is installed somewhere other than Python's site-packages you'll 
-have to specify the full path to the script in the ``status-left`` and 
-``status-right`` options.
