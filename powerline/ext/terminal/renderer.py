@@ -9,14 +9,13 @@ class TerminalRenderer(Renderer):
 	'''Powerline terminal segment renderer.'''
 	_color_templates = {
 		'default': '[{code}m',
-		'bash': '\[[{code}m\]',
 		'zsh': '%{{[{code}m%}}',
 	}
 
 	def __init__(self, *args, **kwargs):
 		super(TerminalRenderer, self).__init__(*args, **kwargs)
-		shell = os.path.basename(os.environ.get('SHELL', 'default'))
-		self.color_template = self._color_templates[shell]
+		shell = os.path.basename(os.environ.get('SHELL'))
+		self.color_template = self._color_templates.get(shell, self._color_templates['default'])
 
 	def hl(self, fg=None, bg=None, attr=None):
 		'''Highlight a segment.
