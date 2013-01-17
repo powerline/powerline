@@ -51,8 +51,8 @@ they provide an easy way of installing and upgrading Powerline:
 Usage
 -----
 
-Vim usage
-^^^^^^^^^
+Vim statusline
+^^^^^^^^^^^^^^
 
 If Powerline is installed as a Python package, you can enable the vim plugin 
 by adding the following line to your ``vimrc``::
@@ -68,3 +68,35 @@ Add the following line to your ``vimrc``, where ``{path}`` is the path to
 the main Powerline project directory::
 
     source {path}/powerline/ext/vim/source_plugin.vim
+
+Terminal prompt
+^^^^^^^^^^^^^^^
+
+Add the following to your ``.bashrc``/``.zshrc``::
+
+    export PS1=`powerline-prompt`
+
+If Powerline is installed somewhere other than Python's site-packages you'll 
+have to specify the full path to the script::
+
+    export PS1=`/path/to/powerline/scripts/powerline-prompt`
+
+Tmux statusline
+^^^^^^^^^^^^^^^
+
+Add the following to your ``tmux.conf``::
+
+    set-option -g status on
+    set-option -g status-interval 2
+    set-option -g status-utf8 on
+    set-option -g status-left-length 100
+    set-option -g status-left "#(powerline-tmux left)"
+    set-option -g status-right-length 100
+    set-option -g status-right "#(powerline-tmux right)"
+    set-option -g status-justify "centre"
+    set-option -g status-bg "colour235"
+    set-option -g status-fg "colour249"
+
+If Powerline is installed somewhere other than Python's site-packages you'll 
+have to specify the full path to the script in the ``status-left`` and 
+``status-right`` options.
