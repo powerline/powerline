@@ -7,6 +7,9 @@ class TmuxRenderer(Renderer):
 	'''Powerline tmux segment renderer.'''
 	def hl(self, fg=None, bg=None, attr=None):
 		'''Highlight a segment.'''
+		# We don't need to explicitly reset attributes, so skip those calls
+		if not attr and not bg and not fg:
+			return ''
 		tmux_attr = []
 		if fg is not None:
 			if fg[0] is False:
