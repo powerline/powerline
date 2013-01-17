@@ -78,3 +78,9 @@ I receive a ``NameError`` when trying to use Powerline with MacVim!
 
         ./setup.py build
         ./setup.py install --user
+
+I receive an ``ImportError`` when trying to use Powerline on OS X!
+    This is caused by an invalid ``sys.path`` when using system vim and 
+    system Python. Please try to select another Python distribution::
+
+        sudo port select python python27-apple
