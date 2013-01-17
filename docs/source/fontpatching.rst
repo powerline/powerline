@@ -106,7 +106,7 @@ OS X
 
        $ brew uninstall fontforge
        $ brew update
-       $ brew install --use-gcc fontforge
+       $ brew install fontforge
 
    **Note:** You may have to use ``--use-clang`` instead of ``--use-gcc`` 
    when compiling FontForge.
@@ -114,7 +114,7 @@ OS X
 3. If you don't have FontForge, install it with Homebrew::
 
        $ brew update
-       $ brew install --use-gcc fontforge
+       $ brew install fontforge
 
 4. Patch your fonts by passing the ``fontpatcher`` script as a parameter to 
    FontForge::
