@@ -122,6 +122,7 @@ class Renderer(object):
 					rendered_highlighted += segment_hl + segment['contents'] + outer_padding
 			else:
 				raise ValueError('Unknown segment type')
+		rendered_highlighted += self.hl()
 		return rendered_highlighted
 
 	def _total_len(self, segments):
