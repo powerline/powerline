@@ -74,12 +74,12 @@ Terminal prompt
 
 Add the following to your ``.bashrc``/``.zshrc``::
 
-    export PS1=`powerline-prompt`
+    export PS1=\`powerline-prompt\`
 
 If Powerline is installed somewhere other than Python's site-packages you'll 
 have to specify the full path to the script::
 
-    export PS1=`/path/to/powerline/scripts/powerline-prompt`
+    export PS1=\`/path/to/powerline/scripts/powerline-prompt\`
 
 Tmux statusline
 ^^^^^^^^^^^^^^^
