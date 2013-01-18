@@ -1,7 +1,7 @@
 # Maintainer: Kim Silkebækken <kim.silkebaekken+aur@gmail.com>
 
 pkgname=powerline-git
-pkgver=20130102
+pkgver=20130118
 pkgrel=1
 pkgdesc='The ultimate statusline/prompt utility.'
 url='https://github.com/Lokaltog/powerline'
@@ -9,6 +9,7 @@ license=('CC BY-SA 3.0')
 arch=('any')
 depends=('python2>=2.7')
 makedepends=('git' 'python2-distribute')
+install='powerline.install'
 source=()
 
 _gitroot="https://github.com/Lokaltog/powerline.git"
@@ -34,4 +35,7 @@ build() {
 
 	python2 setup.py build || return 1
 	python2 setup.py install --root=${pkgdir} || return 1
+
+	install -d "${pkgdir}/usr/share/fonts/TTF/"
+	install -m644 "powerline/fontpatcher/PowerlineSymbols.otf" "${pkgdir}/usr/share/fonts/TTF/PowerlineSymbols.otf"
 }

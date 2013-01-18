@@ -1,0 +1,21 @@
+post_install() {
+	echo "Updating font cache..."
+	fc-cache -f
+
+	echo "
+IMPORTANT
+---------
+
+Powerline requires custom glyphs to work properly. A font with these symbols 
+has been installed, and Powerline may work out of the box for you. If it 
+doesn't, please see the font installation instructions at 
+http://lokaltog.github.com/powerline/overview.html#font-installation for more 
+details (you can skip the first steps since the font has already been 
+installed on your system).
+"
+}
+
+post_remove() {
+	echo "Updating font cache..."
+	fc-cache -f
+}
