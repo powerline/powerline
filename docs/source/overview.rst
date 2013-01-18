@@ -71,36 +71,18 @@ but some fonts may look terrible, in which case you'll have to use a patched
 font (see :ref:`font-patching` for details).
 
 1. Download the `latest version of PowerlineSymbols 
-   <https://github.com/Lokaltog/powerline/raw/develop/powerline/fontpatcher/PowerlineSymbols.otf>`_.
-2. Move :file:`PowerlineSymbols.otf` to :file:`~/.fonts`.
+   <https://github.com/Lokaltog/powerline/raw/develop/font/PowerlineSymbols.otf>`_  
+   and the `latest version of the fontconfig file 
+   <https://github.com/Lokaltog/powerline/raw/develop/font/10-powerline-symbols.conf>`_.
+2. Move :file:`PowerlineSymbols.otf` to :file:`~/.fonts/`.
 3. Run ``fc-cache -vf ~/.fonts`` to update your font cache.
-4. Edit your fontconfig file, located in either :file:`~/.fonts.conf` or 
-   :file:`~/.config/fontconfig/fonts.conf`, depending on your fontconfig 
-   version.  If your fontconfig file is empty, add the entire code block 
-   below. If you already have a custom font configuration, only add the 
-   ``<alias>`` block to your font configuration:
-
-   .. code-block:: xml
-
-      <?xml version="1.0"?>
-      <!DOCTYPE fontconfig SYSTEM "fonts.dtd">
-
-      <fontconfig>
-          <alias>
-              <family>monospace</family>
-              <prefer>
-                  <family>PowerlineSymbols</family>
-                  <family>YOUR MONOSPACE FONT HERE</family>
-              </prefer>
-          </alias>
-      </fontconfig>
-
-   Remember to replace ``YOUR MONOSPACE FONT HERE`` with your preferred 
-   coding font.
-5. Configure your terminal emulator or gvim to use the ``monospace`` font.
-6. If you still don't see the arrow symbols, please close all instances of 
-   your terminal emulator or gvim. You may also have to restart X for the 
-   changes to take effect.
+4. Move :file:`10-powerline-symbols.conf` to either :file:`~/.fonts.conf.d/` 
+   or :file:`~/.config/fontconfig/conf.d/`, depending on your fontconfig 
+   version.
+5. If you don't see the arrow symbols, please close all instances of your 
+   terminal emulator or gvim. You may also have to restart X for the changes 
+   to take effect. If you *still* don't see the arrow symbols, please submit 
+   an issue on GitHub.
 
 OS X and Windows
 ****************
