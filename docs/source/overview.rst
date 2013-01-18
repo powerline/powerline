@@ -6,6 +6,11 @@ Requirements
 
 Powerline requires Python 2.7 to work.
 
+Powerline uses several special glyphs to get the arrow effect and some 
+custom symbols for developers. This requires that you either have the symbol 
+font or a patched font on your system. See `Font installation`_ for more 
+details.
+
 Vim plugin requirements
 ^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -47,6 +52,61 @@ The following distribution-specific packages are officially supported, and
 they provide an easy way of installing and upgrading Powerline:
 
 * `Arch Linux (AUR) <https://aur.archlinux.org/packages/powerline-git/>`_
+
+.. _font-installation:
+
+Font installation
+^^^^^^^^^^^^^^^^^
+
+Linux
+*****
+
+If you're running Linux, you may be able to avoid patching your coding font 
+to get the special glyphs required by Powerline. This works by utilizing 
+fontconfig's fallback font feature, which replaces missing glyphs in a font 
+with another font on your system.
+
+This has been tested and works very well with many different coding fonts, 
+but some fonts may look terrible, in which case you'll have to use a patched 
+font (see :ref:`font-patching` for details).
+
+1. Download the `latest version of PowerlineSymbols 
+   <https://github.com/Lokaltog/powerline/raw/develop/powerline/fontpatcher/PowerlineSymbols.otf>`_.
+2. Move :file:`PowerlineSymbols.otf` to :file:`~/.fonts`.
+3. Run ``fc-cache -vf ~/.fonts`` to update your font cache.
+4. Edit your fontconfig file, located in either :file:`~/.fonts.conf` or 
+   :file:`~/.config/fontconfig/fonts.conf`, depending on your fontconfig 
+   version.  If your fontconfig file is empty, add the entire code block 
+   below. If you already have a custom font configuration, only add the 
+   ``<alias>`` block to your font configuration:
+
+   .. code-block:: xml
+
+      <?xml version="1.0"?>
+      <!DOCTYPE fontconfig SYSTEM "fonts.dtd">
+
+      <fontconfig>
+          <alias>
+              <family>monospace</family>
+              <prefer>
+                  <family>PowerlineSymbols</family>
+                  <family>YOUR MONOSPACE FONT HERE</family>
+              </prefer>
+          </alias>
+      </fontconfig>
+
+   Remember to replace ``YOUR MONOSPACE FONT HERE`` with your preferred 
+   coding font.
+5. Configure your terminal emulator or gvim to use the ``monospace`` font.
+6. If you still don't see the arrow symbols, please close all instances of 
+   your terminal emulator or gvim. You may also have to restart X for the 
+   changes to take effect.
+
+OS X and Windows
+****************
+
+You'll have to use a patched font to use the Powerline symbols. See 
+:ref:`font-patching` for details on font patching and pre-patched fonts.
 
 Usage
 -----
