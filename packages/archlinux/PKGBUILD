@@ -36,6 +36,11 @@ build() {
 	python2 setup.py build || return 1
 	python2 setup.py install --root=${pkgdir} || return 1
 
-	install -d "${pkgdir}/usr/share/fonts/TTF/"
-	install -m644 "powerline/fontpatcher/PowerlineSymbols.otf" "${pkgdir}/usr/share/fonts/TTF/PowerlineSymbols.otf"
+	install -dm755 "${pkgdir}/usr/share/fonts/TTF/"
+	install -dm755 "${pkgdir}/etc/fonts/conf.avail"
+	install -dm755 "${pkgdir}/etc/fonts/conf.d"
+
+	install -m644 "font/PowerlineSymbols.otf" "${pkgdir}/usr/share/fonts/TTF/PowerlineSymbols.otf"
+	install -m644 "font/10-powerline-symbols.conf" "${pkgdir}/etc/fonts/conf.avail/10-powerline-symbols.conf"
+	ln -s "../conf.avail/10-powerline-symbols.conf" "${pkgdir}/etc/fonts/conf.d/10-powerline-symbols.conf"
 }
