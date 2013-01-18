@@ -32,7 +32,9 @@ To install Powerline system-wide, run the following command as root::
     pip install https://github.com/Lokaltog/powerline/tarball/develop
 
 If you don't have root access or don't want to install Powerline 
-system-wide, install with ``pip install --user`` instead.
+system-wide, install with this command instead::
+
+    pip install --install-option="--user" https://github.com/Lokaltog/powerline/tarball/develop
 
 .. note:: Make sure that you install the package for Python 2. For distros 
    like Arch Linux you'll have to run ``pip2`` instead of ``pip``.
