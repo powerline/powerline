@@ -39,6 +39,9 @@ The colors are weird in the default OS X Terminal app!
     The arrows may have the wrong colors if you have changed the "minimum 
     contrast" slider in the color tab of  your OS X settings.
 
+The colors are weird in iTerm2!
+    Please disable background transparency to resolve this issue.
+
 I'm using tmux and Powerline looks like crap, what's wrong?
     You need to tell tmux that it has 256-color capabilities. Add this to 
     your :file:`.tmux.conf` to solve this issue::
