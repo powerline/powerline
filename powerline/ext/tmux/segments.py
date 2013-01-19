@@ -24,7 +24,7 @@ def date(format='%Y-%m-%d'):
 
 
 @memoize(600, persistent=True)
-def external_ip(query_url='http://icanhazip.com/'):
+def external_ip(query_url='http://ipv4.icanhazip.com/'):
 	import urllib2
 	try:
 		return urllib2.urlopen(query_url).read().strip()
