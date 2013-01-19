@@ -2,6 +2,13 @@
 
 import vim
 
+
+def source_plugin():
+	import os
+	from powerline.bindings.vim import vim_get_func
+	fnameescape = vim_get_func('fnameescape')
+	vim.command('source ' + fnameescape(os.path.join(os.path.abspath(os.path.dirname(__file__)), 'powerline.vim')))
+
 try:
 	_vim_globals = vim.bindeval('g:')
 

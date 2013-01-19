@@ -6,8 +6,8 @@ import os
 import sys
 
 from colorscheme import Colorscheme
-from segments import Segments
-from matchers import Matchers
+from segment import Segment
+from matcher import Matcher
 
 
 class Powerline(object):
@@ -30,8 +30,8 @@ class Powerline(object):
 		# Load and initialize extension theme
 		theme_config = self._load_theme_config(ext, self.config_ext.get('theme', 'default'))
 		path = [os.path.expanduser(path) for path in self.config.get('paths', [])]
-		get_segment = Segments(ext, path, colorscheme, theme_config.get('default_module')).get
-		self.get_matcher = Matchers(ext, path).get
+		get_segment = Segment(ext, path, colorscheme, theme_config.get('default_module')).get
+		self.get_matcher = Matcher(ext, path).get
 		theme_kwargs = {
 			'ext': ext,
 			'colorscheme': colorscheme,
@@ -44,7 +44,7 @@ class Powerline(object):
 			local_themes[key] = {'config': self._load_theme_config(ext, local_theme_name)}
 
 		# Load and initialize extension renderer
-		renderer_module_name = 'powerline.ext.{0}.renderer'.format(ext)
+		renderer_module_name = 'powerline.renderers.{0}'.format(ext)
 		renderer_class_name = '{0}Renderer'.format(ext.capitalize())
 		Renderer = getattr(importlib.import_module(renderer_module_name), renderer_class_name)
 		self.renderer = Renderer(theme_config, local_themes, theme_kwargs)

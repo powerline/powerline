@@ -4,9 +4,9 @@ from importlib import import_module
 import sys
 
 
-class Segments(object):
+class Segment(object):
 	def __init__(self, ext, path, colorscheme, default_module=None):
-		self.default_module = default_module or 'powerline.ext.{0}.segments'.format(ext)
+		self.default_module = default_module or 'powerline.segments.{0}'.format(ext)
 		self.path = path
 		self.colorscheme = colorscheme
 

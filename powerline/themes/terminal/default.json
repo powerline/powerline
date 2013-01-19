@@ -1,5 +1,5 @@
 {
-	"default_module": "powerline.ext.common.segments",
+	"default_module": "powerline.segments.common",
 	"segments": {
 		"left": [
 			{

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from powerline.ext.vim.bindings import vim_get_func
+from __future__ import absolute_import
+
+from powerline.bindings.vim import vim_get_func
 from powerline.renderer import Renderer
 
 import vim

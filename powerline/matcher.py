@@ -4,7 +4,7 @@ from importlib import import_module
 import sys
 
 
-class Matchers(object):
+class Matcher(object):
 	def __init__(self, ext, path):
 		self.ext = ext
 		self.path = path
@@ -12,7 +12,7 @@ class Matchers(object):
 	def get(self, match_name):
 		match_module, separator, match_function = match_name.rpartition('.')
 		if not separator:
-			match_module = 'powerline.ext.{0}.matchers'.format(self.ext)
+			match_module = 'powerline.matchers.{0}'.format(self.ext)
 			match_function = match_name
 		oldpath = sys.path
 		sys.path = self.path + sys.path

@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+
 import os
 import vim
 
-from powerline.ext.vim.bindings import vim_get_func
+from powerline.bindings.vim import vim_get_func
 from powerline.lib import memoize
 from powerline.lib.vcs import guess
 
