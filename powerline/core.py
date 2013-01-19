@@ -13,7 +13,7 @@ class Powerline(object):
 	def __init__(self, ext):
 		config_home = os.environ.get('XDG_CONFIG_HOME', os.path.expanduser('~/.config'))
 		config_path = os.path.join(config_home, 'powerline')
-		plugin_path = os.path.realpath(os.path.dirname(__file__))
+		plugin_path = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'config_files')
 		self.search_paths = [config_path, plugin_path]
 		sys.path[:0] = self.search_paths
 
