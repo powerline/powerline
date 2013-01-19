@@ -30,7 +30,7 @@ class Powerline(object):
 		# Load and initialize extension theme
 		theme_config = self._load_theme_config(ext, self.config_ext.get('theme', 'default'))
 		path = [os.path.expanduser(path) for path in self.config.get('paths', [])]
-		get_segment = Segments(ext, path, colorscheme, theme_config.get('default_module')).get
+		get_segment = Segments(ext, path, colorscheme).get
 		self.get_matcher = Matchers(ext, path).get
 		theme_kwargs = {
 			'ext': ext,

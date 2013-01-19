@@ -133,11 +133,6 @@ Themes
 ``name``
     Name of the theme.
 
-``default_module``
-    .. _config-themes-default_module:
-
-    Python module where segments will be looked by default.
-
 ``segments``
     A dict with a ``left`` and a ``right`` list, consisting of segment 
     dicts. Each segment has the following options:
@@ -166,8 +161,7 @@ Themes
         .. _config-themes-seg-module:
 
         Function module, only required for function segments. Defaults to 
-        ``powerline.ext.{extension}.segments``. Default is overriden by 
-        :ref:`theme option <config-themes-default_module>`.
+        ``core``.
 
     ``name``
         .. _config-themes-seg-name:
