@@ -34,6 +34,10 @@ DEPEND="doc? ( dev-python/sphinx dev-python/docutils )"
 FONT_SUFFIX="otf"
 FONT_S="${S}/font"
 
+FONT_CONF=(
+	"${FONT_S}/10-powerline-symbols.conf"
+)
+
 src_compile() {
 	distutils-r1_src_compile
 	if use doc ; then
