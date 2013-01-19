@@ -30,9 +30,10 @@ class Segments(object):
 	def get(self, segment, side):
 		segment_type = segment.get('type', 'function')
 		try:
-			contents, contents_func, key = getattr(self, 'get_{0}'.format(segment_type))(segment)
+			get_segment_info = getattr(self, 'get_{0}'.format(segment_type))
 		except AttributeError:
 			raise TypeError('Unknown segment type: {0}'.format(segment_type))
+		contents, contents_func, key = get_segment_info(segment)
 		highlighting_group = segment.get('highlight', segment.get('name'))
 		return {
 			'key': key,
