@@ -13,11 +13,14 @@ def generate_directories(path):
 		yield path
 
 
+vcs_props = (('git', '.git', os.path.exists),
+			 ('mercurial', '.hg', os.path.isdir))
+
 @memoize(100)
 def guess(path):
 	for directory in generate_directories(path):
-		for vcs, vcs_dir in (('git', '.git'), ('mercurial', '.hg')):
-			if os.path.isdir(os.path.join(directory, vcs_dir)):
+		for vcs, vcs_dir, check in vcs_props:
+			if check(os.path.join(directory, vcs_dir)):
 				try:
 					if vcs not in globals():
 						globals()[vcs] = importlib.import_module('powerline.lib.vcs.' + vcs)
