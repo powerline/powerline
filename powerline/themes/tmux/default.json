@@ -1,8 +1,8 @@
 {
+	"default_module": "powerline.ext.common.segments",
 	"segments": {
 		"left": [
 			{
-				"module": "powerline.ext.terminal.segments",
 				"name": "user"
 			},
 			{
