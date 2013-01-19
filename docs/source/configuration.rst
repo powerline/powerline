@@ -48,6 +48,9 @@ colorschemes.
 Common configuration
 ^^^^^^^^^^^^^^^^^^^^
 
+Common configuration is a subdictionary that is a value of ``common`` key in 
+:file:`powerline/config.json` file.
+
 ``dividers``
     Defines the dividers used in all Powerline extensions. This option 
     should usually only be changed if you don't have a patched font, or if 
@@ -57,8 +60,18 @@ Common configuration
     background colors, while the ``soft`` dividers are used to divide 
     segments with the same background color.
 
+``paths``
+    .. _config-common-paths
+
+    Defines additional paths which will be searched for modules when using 
+    :ref:`module segment option <config-themes-seg-module>`. Paths defined here 
+    have priority when searching for modules.
+
 Extension-specific configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Common configuration is a subdictionary that is a value of ``ext`` key in 
+:file:`powerline/config.json` file.
 
 ``colorscheme``
     Defines the colorscheme used for this extension.
@@ -167,7 +180,7 @@ Themes
 
         Function module, only required for function segments. Defaults to 
         ``powerline.ext.{extension}.segments``. Default is overriden by 
-        :ref:`theme option <config-themes-default_module>`.
+        :ref:`default_module theme option <config-themes-default_module>`.
 
     ``name``
         .. _config-themes-seg-name:
@@ -234,9 +247,9 @@ Segments
 
 Segments are written in Python, and the default segments provided with 
 Powerline are located in 
-:file:`powerline/ext/{extension}/segments/{module}.py`. User-defined 
-segments can be defined in the corresponding path in the user's config 
-directory.
+:file:`powerline/ext/{extension}/segments/{module}.py`. User-defined segments 
+can be defined in any module in ``sys.path`` or :ref:`paths common configuration 
+option <config-common-paths>`, import is always absolute.
 
 Segments are regular Python functions, and they may accept arguments. All 
 arguments should have a default value which will be used for themes that 
