@@ -13,7 +13,7 @@ class Theme(object):
 			'highlight': {self.colorscheme.DEFAULT_MODE_KEY: {'fg': (False, False), 'bg': (False, False), 'attr': 0}}
 			}
 		for side in ['left', 'right']:
-			self.segments.extend((get_segment(segment, side) for segment in theme_config['segments'].get(side, [])))
+			self.segments.extend((get_segment(segment, side, theme_config.get('default_module')) for segment in theme_config['segments'].get(side, [])))
 
 	def get_divider(self, side='left', type='soft'):
 		'''Return segment divider.'''
