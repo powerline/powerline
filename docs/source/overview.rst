@@ -104,7 +104,7 @@ Vim statusline
 If Powerline is installed as a Python package, you can enable the vim plugin 
 by adding the following line to your ``vimrc``::
 
-    python from powerline.ext.vim import source_plugin; source_plugin()
+    python from powerline.bindings.vim import source_plugin; source_plugin()
 
 If Powerline is installed somewhere other than Python's site-packages 
 directories you'll have to source the vim plugin file with an absolute path 
@@ -113,7 +113,7 @@ to the plugin location.
 Add the following line to your ``vimrc``, where ``{path}`` is the path to 
 the main Powerline project directory::
 
-    source {path}/powerline/ext/vim/source_plugin.vim
+    source {path}/powerline/bindings/vim/source_plugin.vim
 
 Terminal prompts
 ^^^^^^^^^^^^^^^^
