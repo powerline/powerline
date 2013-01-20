@@ -72,22 +72,6 @@ def external_ip(query_url='http://ipv4.icanhazip.com/'):
 		return
 
 
-def system_load(format='{avg[0]:.1f}, {avg[1]:.1f}, {avg[2]:.1f}'):
-	from multiprocessing import cpu_count
-	averages = os.getloadavg()
-	normalized = averages[1] / cpu_count()
-	if normalized < 1:
-		gradient = 'system_load_good'
-	elif normalized < 2:
-		gradient = 'system_load_bad'
-	else:
-		gradient = 'system_load_ugly'
-	return {
-		'contents': format.format(avg=averages),
-		'highlight': [gradient, 'system_load']
-	}
-
-
 def uptime(format='{days:02d}d {hours:02d}h {minutes:02d}m'):
 	# TODO: make this work with operating systems without /proc/uptime
 	try:
@@ -128,6 +112,22 @@ def weather(unit='c', location_query=None):
 		if condition_code in codes:
 			break
 	return u'{0}  {1}°{2}'.format(icon, condition['temp'], unit.upper())
+
+
+def system_load(format='{avg[0]:.1f}, {avg[1]:.1f}, {avg[2]:.1f}'):
+	from multiprocessing import cpu_count
+	averages = os.getloadavg()
+	normalized = averages[1] / cpu_count()
+	if normalized < 1:
+		gradient = 'system_load_good'
+	elif normalized < 2:
+		gradient = 'system_load_bad'
+	else:
+		gradient = 'system_load_ugly'
+	return {
+		'contents': format.format(avg=averages),
+		'highlight': [gradient, 'system_load']
+	}
 
 
 def network_load(interface='eth0', measure_interval=1, suffix='B/s', binary_prefix=False):
