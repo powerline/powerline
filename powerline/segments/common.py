@@ -145,15 +145,25 @@ def network_load(interface='eth0', measure_interval=1, suffix='B/s', binary_pref
 
 	def get_bytes():
 		try:
-			with open('/sys/class/net/{interface}/statistics/rx_bytes'.format(interface=interface), 'rb') as file_obj:
-				rx = int(file_obj.read())
-			with open('/sys/class/net/{interface}/statistics/tx_bytes'.format(interface=interface), 'rb') as file_obj:
-				tx = int(file_obj.read())
-			return (rx, tx)
-		except IOError:
-			return (0, 0)
+			import psutil
+			io_counters = psutil.network_io_counters(pernic=True)
+			if_io = io_counters.get(interface)
+			if not if_io:
+				return None
+			return (if_io.bytes_recv, if_io.bytes_sent)
+		except ImportError:
+			try:
+				with open('/sys/class/net/{interface}/statistics/rx_bytes'.format(interface=interface), 'rb') as file_obj:
+					rx = int(file_obj.read())
+				with open('/sys/class/net/{interface}/statistics/tx_bytes'.format(interface=interface), 'rb') as file_obj:
+					tx = int(file_obj.read())
+				return (rx, tx)
+			except IOError:
+				return None
 
 	b1 = get_bytes()
+	if b1 is None:
+		return None
 	time.sleep(measure_interval)
 	b2 = get_bytes()
 	return u'⬇ {rx_diff} ⬆ {tx_diff}'.format(
