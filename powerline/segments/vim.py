@@ -22,10 +22,10 @@ vim_modes = {
 	'no': u'N·OPER',
 	'v': u'VISUAL',
 	'V': u'V·LINE',
-	'': u'V·BLCK',
+	'^V': u'V·BLCK',
 	's': u'SELECT',
 	'S': u'S·LINE',
-	'': u'S·BLCK',
+	'^S': u'S·BLCK',
 	'i': u'INSERT',
 	'R': u'REPLACE',
 	'Rv': u'V·RPLCE',
@@ -36,6 +36,11 @@ vim_modes = {
 	'rm': u'MORE',
 	'r?': u'CONFIRM',
 	'!': u'SHELL',
+}
+
+mode_translations = {
+	chr(ord('V')-0x40): '^V',
+	chr(ord('S')-0x40): '^S',
 }
 
 
@@ -49,11 +54,12 @@ def mode(override=None):
 		mode = mode({ 'n': 'NORM' })
 	'''
 	mode = vim_funcs['mode']()
+	mode = mode_translations.get(mode, mode)
 	if not override:
 		return vim_modes[mode]
 	try:
 		return override[mode]
-	except IndexError:
+	except KeyError:
 		return vim_modes[mode]
 
 
