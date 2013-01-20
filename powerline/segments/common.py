@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-import re
-import socket
 
-from powerline.lib.vcs import guess
 from powerline.lib import memoize
 
 # Weather condition code descriptions available at http://developer.yahoo.com/weather/#codes
@@ -22,6 +19,7 @@ weather_conditions_codes = {
 
 
 def hostname():
+	import socket
 	if not os.environ.get('SSH_CLIENT'):
 		return None
 	return socket.gethostname()
@@ -37,6 +35,7 @@ def user():
 
 
 def branch():
+	from powerline.lib.vcs import guess
 	repo = guess(os.path.abspath(os.getcwd()))
 	if repo:
 		return repo.branch()
@@ -44,6 +43,7 @@ def branch():
 
 
 def cwd(dir_shorten_len=None, dir_limit_depth=None):
+	import re
 	cwd = os.getcwdu()
 	home = os.environ.get('HOME')
 	if home:
