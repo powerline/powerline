@@ -6,7 +6,6 @@ import os
 import sys
 
 from colorscheme import Colorscheme
-from segment import Segment
 from matcher import Matcher
 
 
@@ -29,14 +28,12 @@ class Powerline(object):
 
 		# Load and initialize extension theme
 		theme_config = self._load_theme_config(ext, self.config_ext.get('theme', 'default'))
-		path = [os.path.expanduser(path) for path in self.config.get('paths', [])]
-		get_segment = Segment(ext, path, colorscheme, theme_config.get('default_module')).get
-		self.get_matcher = Matcher(ext, path).get
+		self.config['paths'] = [os.path.expanduser(path) for path in self.config.get('paths', [])]
+		self.get_matcher = Matcher(ext, self.config['paths']).get
 		theme_kwargs = {
 			'ext': ext,
 			'colorscheme': colorscheme,
 			'common_config': self.config,
-			'get_segment': get_segment,
 			}
 		local_themes = {}
 		for key, local_theme_name in self.config_ext.get('local_themes', {}).iteritems():

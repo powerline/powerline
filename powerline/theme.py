@@ -3,9 +3,10 @@
 import copy
 
 from collections import defaultdict
+from segment import Segment
 
 class Theme(object):
-	def __init__(self, ext, colorscheme, theme_config, common_config, get_segment):
+	def __init__(self, ext, colorscheme, theme_config, common_config):
 		self.colorscheme = colorscheme
 		self.dividers = theme_config.get('dividers', common_config['dividers'])
 		self.segments = []
@@ -13,6 +14,7 @@ class Theme(object):
 			'contents': None,
 			'highlight': defaultdict(lambda : {'fg': False, 'bg': False, 'attr': 0})
 			}
+		get_segment = Segment(ext, common_config['paths'], colorscheme, theme_config.get('default_module')).get
 		for side in ['left', 'right']:
 			self.segments.extend((get_segment(segment, side) for segment in theme_config['segments'].get(side, [])))
 
