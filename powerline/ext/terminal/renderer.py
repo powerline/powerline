@@ -26,12 +26,12 @@ class TerminalRenderer(Renderer):
 		'''
 		ansi = []
 		if fg is not None:
-			if fg[0] is False:
+			if fg is False or fg[0] is False:
 				ansi += [39]
 			else:
 				ansi += [38, 5, fg[0]]
 		if bg is not None:
-			if bg[0] is False:
+			if bg is False or bg[0] is False:
 				ansi += [49]
 			else:
 				ansi += [48, 5, bg[0]]

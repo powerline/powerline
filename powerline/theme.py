@@ -2,6 +2,7 @@
 
 import copy
 
+from collections import defaultdict
 
 class Theme(object):
 	def __init__(self, ext, colorscheme, theme_config, common_config, get_segment):
@@ -10,7 +11,7 @@ class Theme(object):
 		self.segments = []
 		self.EMPTY_SEGMENT = {
 			'contents': None,
-			'highlight': {self.colorscheme.DEFAULT_MODE_KEY: {'fg': (False, False), 'bg': (False, False), 'attr': 0}}
+			'highlight': defaultdict(lambda : {'fg': False, 'bg': False, 'attr': 0})
 			}
 		for side in ['left', 'right']:
 			self.segments.extend((get_segment(segment, side) for segment in theme_config['segments'].get(side, [])))
