@@ -52,6 +52,7 @@ The following distribution-specific packages are officially supported, and
 they provide an easy way of installing and upgrading Powerline:
 
 * `Arch Linux (AUR) <https://aur.archlinux.org/packages/powerline-git/>`_
+* Gentoo Live ebuild (:file:`packages/gentoo/app-misc/powerline/`)
 
 .. _font-installation:
 
