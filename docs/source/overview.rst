@@ -34,7 +34,7 @@ Installing with ``pip``
 
 To install Powerline system-wide, run the following command as root::
 
-    pip install https://github.com/Lokaltog/powerline/tarball/develop
+    pip install git+git://github.com/Lokaltog/powerline
 
 If you don't have root access or don't want to install Powerline 
 system-wide, install with ``pip install --user`` instead.
