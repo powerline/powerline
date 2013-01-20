@@ -2,9 +2,10 @@
 
 import copy
 
+from segments import Segments
 
 class Theme(object):
-	def __init__(self, ext, colorscheme, theme_config, common_config, get_segment):
+	def __init__(self, ext, colorscheme, theme_config, common_config):
 		self.colorscheme = colorscheme
 		self.dividers = theme_config.get('dividers', common_config['dividers'])
 		self.segments = []
@@ -12,6 +13,7 @@ class Theme(object):
 			'contents': None,
 			'highlight': {self.colorscheme.DEFAULT_MODE_KEY: {'fg': (False, False), 'bg': (False, False), 'attr': 0}}
 			}
+		get_segment = Segments(ext, common_config['paths'], colorscheme, theme_config.get('default_module')).get
 		for side in ['left', 'right']:
 			self.segments.extend((get_segment(segment, side) for segment in theme_config['segments'].get(side, [])))
 
