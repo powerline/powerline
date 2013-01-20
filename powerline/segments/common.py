@@ -130,6 +130,15 @@ def system_load(format='{avg[0]:.1f}, {avg[1]:.1f}, {avg[2]:.1f}'):
 	}
 
 
+def cpu_load_percent(measure_interval=.5):
+	try:
+		import psutil
+	except ImportError:
+		return None
+	cpu_percent = int(psutil.cpu_percent(interval=measure_interval))
+	return u'{0}%'.format(cpu_percent)
+
+
 def network_load(interface='eth0', measure_interval=1, suffix='B/s', binary_prefix=False):
 	import time
 	from powerline.lib import humanize_bytes

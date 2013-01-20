@@ -22,6 +22,9 @@
 				"name": "system_load"
 			},
 			{
+				"name": "cpu_load_percent"
+			},
+			{
 				"name": "weather"
 			},
 			{
