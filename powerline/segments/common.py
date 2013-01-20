@@ -85,7 +85,7 @@ def uptime(format='{days:02d}d {hours:02d}h {minutes:02d}m'):
 		pass
 
 
-@memoize(600, persistent=True)
+@memoize(1800, persistent=True)
 def weather(unit='c', location_query=None):
 	import json
 	import urllib
