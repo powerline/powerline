@@ -114,7 +114,7 @@ to the plugin location.
 Add the following line to your ``vimrc``, where ``{path}`` is the path to 
 the main Powerline project directory::
 
-    source {path}/powerline/bindings/vim/source_plugin.vim
+    source {path}/powerline/bindings/vim/plugin/source_plugin.vim
 
 Terminal prompts
 ^^^^^^^^^^^^^^^^
