@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from colorscheme import Colorscheme
-from theme import Theme
+from powerline.colorscheme import Colorscheme
+from powerline.theme import Theme
 
 
 class Renderer(object):
@@ -20,7 +20,7 @@ class Renderer(object):
 		self.local_themes[matcher] = theme
 
 	def get_theme(self):
-		for matcher in self.local_themes.iterkeys():
+		for matcher in self.local_themes.keys():
 			if matcher():
 				match = self.local_themes[matcher]
 				if 'config' in match:

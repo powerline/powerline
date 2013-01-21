@@ -5,8 +5,8 @@ import json
 import os
 import sys
 
-from colorscheme import Colorscheme
-from matcher import Matcher
+from powerline.colorscheme import Colorscheme
+from powerline.matcher import Matcher
 from powerline.lib import underscore_to_camelcase
 
 
@@ -37,7 +37,7 @@ class Powerline(object):
 			'common_config': self.config,
 			}
 		local_themes = {}
-		for key, local_theme_name in self.config_ext.get('local_themes', {}).iteritems():
+		for key, local_theme_name in self.config_ext.get('local_themes', {}).items():
 			key = self.get_matcher(key)
 			local_themes[key] = {'config': self._load_theme_config(ext, local_theme_name)}
 
@@ -74,6 +74,6 @@ class Powerline(object):
 		for path in self.search_paths:
 			config_file_path = os.path.join(path, config_file)
 			if os.path.isfile(config_file_path):
-				with open(config_file_path, 'rb') as config_file_fp:
+				with open(config_file_path, 'r') as config_file_fp:
 					return json.load(config_file_fp)
 		raise IOError('Config file not found in search path: {0}'.format(config_file))

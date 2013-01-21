@@ -1,13 +1,17 @@
-python import uuid
-python from powerline.core import Powerline
-python powerline = Powerline('vim')
+let s:pycmd = has('python3') ? 'python3' : 'python'
 
-if exists('*pyeval')
+exec s:pycmd ' import uuid'
+exec s:pycmd ' from powerline.core import Powerline'
+exec s:pycmd ' powerline = Powerline("vim")'
+
+if exists('*py3eval')
+	let s:pyeval = function('py3eval')
+elseif exists('*pyeval')
 	let s:pyeval = function('pyeval')
 else
-	python import json, vim
+	exec s:pycmd ' import json, vim'
 	function! s:pyeval(e)
-		python vim.command('return ' + json.dumps(eval(vim.eval('a:e'))))
+		exec s:pycmd ' vim.command("return " + json.dumps(eval(vim.eval("a:e"))))'
 	endfunction
 endif
 

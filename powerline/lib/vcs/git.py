@@ -93,7 +93,7 @@ except ImportError:
 		p = Popen(cmd, shell=False, stdout=PIPE, stderr=PIPE, cwd=cwd)
 		p.stderr.close()
 		for line in p.stdout:
-			yield line[:-1]
+			yield line[:-1].decode('utf-8')
 
 	class Repository(object):
 		__slots__ = ('directory',)
@@ -107,10 +107,10 @@ except ImportError:
 		def status(self, path=None):
 			if path:
 				try:
-					return self._gitcmd('status', '--porcelain', '--', path).next()[:2]
+					return next(self._gitcmd('status', '--porcelain', '--', path))[:2]
 				except StopIteration:
 					try:
-						self._gitcmd('ls-files', '--ignored', '--exclude-standard', '--others', '--', path).next()
+						next(self._gitcmd('ls-files', '--ignored', '--exclude-standard', '--others', '--', path))
 						return '!!'
 					except StopIteration:
 						return None

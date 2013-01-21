@@ -18,6 +18,31 @@ weather_conditions_codes = {
 }
 
 
+def _urllib_read(url):
+	try:
+		import urllib.error
+		import urllib.request
+		try:
+			return urllib.request.urlopen(url).read().decode('utf-8')
+		except urllib.error.HTTPError:
+			return
+	except ImportError:
+		import urllib2
+		try:
+			return urllib2.urlopen(url).read()
+		except urllib2.HTTPError:
+			return
+
+
+def _urllib_urlencode(string):
+	try:
+		import urllib.parse
+		return urllib.parse.urlencode(string)
+	except ImportError:
+		import urllib
+		return urllib.urlencode(string)
+
+
 def hostname():
 	import socket
 	if not os.environ.get('SSH_CLIENT'):
@@ -44,7 +69,10 @@ def branch():
 
 def cwd(dir_shorten_len=None, dir_limit_depth=None):
 	import re
-	cwd = os.getcwdu()
+	try:
+		cwd = os.getcwdu()
+	except AttributeError:
+		cwd = os.getcwd()
 	home = os.environ.get('HOME')
 	if home:
 		cwd = re.sub('^' + re.escape(home), '~', cwd, 1)
@@ -65,11 +93,7 @@ def date(format='%Y-%m-%d'):
 
 @memoize(600, persistent=True)
 def external_ip(query_url='http://ipv4.icanhazip.com/'):
-	import urllib2
-	try:
-		return urllib2.urlopen(query_url).read().strip()
-	except urllib2.HTTPError:
-		return
+	return _urllib_read(query_url).strip()
 
 
 def uptime(format='{days:02d}d {hours:02d}h {minutes:02d}m'):
@@ -92,12 +116,10 @@ def uptime(format='{days:02d}d {hours:02d}h {minutes:02d}m'):
 @memoize(1800, persistent=True)
 def weather(unit='c', location_query=None):
 	import json
-	import urllib
-	import urllib2
 
 	if not location_query:
 		try:
-			location = json.loads(urllib2.urlopen('http://freegeoip.net/json/' + external_ip()).read())
+			location = json.loads(_urllib_read('http://freegeoip.net/json/' + external_ip()))
 			location_query = ','.join([location['city'], location['region_name'], location['country_name']])
 		except ValueError:
 			return None
@@ -107,8 +129,8 @@ def weather(unit='c', location_query=None):
 			'select * from we where location="{0}" and unit="{1}"'.format(location_query, unit),
 		'format': 'json'
 	}
-	url = 'http://query.yahooapis.com/v1/public/yql?' + urllib.urlencode(query_data)
-	response = json.loads(urllib2.urlopen(url).read())
+	url = 'http://query.yahooapis.com/v1/public/yql?' + _urllib_urlencode(query_data)
+	response = json.loads(_urllib_read(url))
 	condition = response['query']['results']['weather']['rss']['channel']['item']['condition']
 	condition_code = int(condition['code'])
 	icon = u'〇'

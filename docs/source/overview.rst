@@ -4,7 +4,7 @@ Overview
 Requirements
 ------------
 
-Powerline requires Python 2.7 to work.
+Powerline requires Python 3.3 or Python 2.7 to work.
 
 Powerline uses several special glyphs to get the arrow effect and some 
 custom symbols for developers. This requires that you either have the symbol 
@@ -14,13 +14,14 @@ details.
 Vim plugin requirements
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-The vim plugin requires a vim version with Python 2.7 support compiled in.  
-You can check if your vim supports Python 2 by running ``vim --version 
-| grep +python``.
+The vim plugin requires a vim version with Python support compiled in.  You 
+can check if your vim supports Python by running ``vim --version | grep 
++python``.
 
-If your vim version doesn't have support for Python 2, you'll have to 
-compile it with the ``--enable-pythoninterp`` flag (this also requires the 
-Python headers to be installed on your system). Please consult your 
+If your vim version doesn't have support for Python, you'll have to compile 
+it with the ``--enable-python3interp`` flag (``--enable-pythoninterp`` if 
+you want Python 2 support instead). Note that this also requires the related 
+Python headers to be installed on your system. Please consult your 
 distribution's documentation for details on how to compile and install 
 packages.
 
@@ -47,9 +48,6 @@ To install Powerline system-wide, run the following command as root::
 
 If you don't have root access or don't want to install Powerline 
 system-wide, install with ``pip install --user`` instead.
-
-.. note:: Make sure that you install the package for Python 2. For distros 
-   like Arch Linux you'll have to run ``pip2`` instead of ``pip``.
 
 .. note:: This project is currently unavailable on the PyPI due to a naming 
    conflict with an unrelated project.

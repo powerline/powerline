@@ -39,8 +39,8 @@ vim_modes = {
 }
 
 mode_translations = {
-	chr(ord('V')-0x40): '^V',
-	chr(ord('S')-0x40): '^S',
+	chr(ord('V') - 0x40): '^V',
+	chr(ord('S') - 0x40): '^S',
 }
 
 
@@ -53,7 +53,7 @@ def mode(override=None):
 
 		mode = mode({ 'n': 'NORM' })
 	'''
-	mode = vim_funcs['mode']()
+	mode = vim_funcs['mode']().decode('utf-8')
 	mode = mode_translations.get(mode, mode)
 	if not override:
 		return vim_modes[mode]
@@ -80,7 +80,7 @@ def readonly_indicator(text=u''):
 
 def file_directory():
 	'''Return file directory (head component of the file path).'''
-	file_directory = vim_funcs['expand']('%:~:.:h')
+	file_directory = vim_funcs['expand']('%:~:.:h').decode('utf-8')
 	return file_directory + os.sep if file_directory else None
 
 

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
+from collections import defaultdict
 import copy
 
-from collections import defaultdict
-from segment import Segment
+from .segment import Segment
 
 class Theme(object):
 	def __init__(self, ext, colorscheme, theme_config, common_config):
@@ -42,7 +42,11 @@ class Theme(object):
 				pass
 			else:
 				continue
-			segment['contents'] = unicode(segment['before'] + unicode(segment['contents']) + segment['after'])\
+			try:
+				contents = unicode(segment['contents'])
+			except NameError:
+				contents = str(segment['contents'])
+			segment['contents'] = (segment['before'] + contents + segment['after'])\
 				.ljust(segment['ljust'])\
 				.rjust(segment['rjust'])
 			# We need to yield a copy of the segment, or else mode-dependent

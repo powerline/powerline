@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import cPickle as pickle
+try:
+	import cPickle as pickle
+except ImportError:
+	import pickle
 import functools
 import os
 import tempfile

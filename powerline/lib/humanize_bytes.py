@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from math import log
-unit_list = zip(['', 'k', 'M', 'G', 'T', 'P'], [0, 0, 1, 2, 2, 2])
+unit_list = tuple(zip(['', 'k', 'M', 'G', 'T', 'P'], [0, 0, 1, 2, 2, 2]))
 
 
 def humanize_bytes(num, suffix='B', binary_prefix=False):

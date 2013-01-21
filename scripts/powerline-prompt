@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''Powerline prompt script.'''
 import argparse
@@ -22,4 +22,4 @@ if __name__ == '__main__':
 	segments = pl.renderer.get_theme().get_segments()
 	if args.side != 'all':
 		segments = [s for s in segments if s['side'] == args.side]
-	print(pl.renderer.render(None, segments=segments).encode('utf-8'))
+	print(pl.renderer.render(None, segments=segments))

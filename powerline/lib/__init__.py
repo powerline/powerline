@@ -1,5 +1,5 @@
-from memoize import memoize  # NOQA
-from humanize_bytes import humanize_bytes  # NOQA
+from powerline.lib.memoize import memoize  # NOQA
+from powerline.lib.humanize_bytes import humanize_bytes  # NOQA
 
 
 def underscore_to_camelcase(string):
