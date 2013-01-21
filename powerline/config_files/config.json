@@ -12,7 +12,7 @@
 		}
 	},
 	"ext": {
-		"terminal": {
+		"shell": {
 			"colorscheme": "default",
 			"theme": "default"
 		},

@@ -1,22 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import os
-
 from powerline.renderer import Renderer
 
 
-class TerminalRenderer(Renderer):
-	'''Powerline terminal segment renderer.'''
-	_color_templates = {
-		'default': '[{code}m',
-		'zsh': '%{{[{code}m%}}',
-	}
-
-	def __init__(self, *args, **kwargs):
-		super(TerminalRenderer, self).__init__(*args, **kwargs)
-		shell = os.path.basename(os.environ.get('SHELL'))
-		self.color_template = self._color_templates.get(shell, self._color_templates['default'])
-
+class ShellRenderer(Renderer):
+	'''Powerline shell segment renderer.'''
 	def hl(self, fg=None, bg=None, attr=None):
 		'''Highlight a segment.
 
@@ -41,4 +29,4 @@ class TerminalRenderer(Renderer):
 			else:
 				if attr & Renderer.ATTR_BOLD:
 					ansi += [1]
-		return self.color_template.format(code=';'.join(str(attr) for attr in ansi))
+		return '[{0}m'.format(';'.join(str(attr) for attr in ansi))
