@@ -80,13 +80,13 @@ def readonly_indicator(text=u''):
 
 def file_directory():
 	'''Return file directory (head component of the file path).'''
-	file_directory = vim_funcs['expand']('%:~:.:h').decode('utf-8')
-	return file_directory + os.sep if file_directory else None
+	file_directory = vim_funcs['expand']('%:~:.:h')
+	return file_directory.decode('utf-8') + os.sep if file_directory else None
 
 
 def file_name(display_no_file=False, no_file_text='[No file]'):
 	'''Return file name (tail component of the file path).'''
-	file_name = vim_funcs['expand']('%:~:.:t').decode('utf-8')
+	file_name = vim_funcs['expand']('%:~:.:t')
 	if not file_name and not display_no_file:
 		return None
 	if not file_name:
@@ -94,7 +94,7 @@ def file_name(display_no_file=False, no_file_text='[No file]'):
 			'contents': no_file_text,
 			'highlight': ['file_name_no_file', 'file_name'],
 			}
-	return file_name
+	return file_name.decode('utf-8')
 
 
 def file_format():
