@@ -102,19 +102,36 @@ Usage
 Vim statusline
 ^^^^^^^^^^^^^^
 
-If Powerline is installed as a Python package, you can enable the vim plugin 
-by adding the following line to your ``vimrc``::
+Regular installation
+********************
 
-    python from powerline.bindings.vim import source_plugin; source_plugin()
+**The recommended way of installing Powerline is as a Python package.**
+You can then enable the vim plugin by adding the following line to your 
+``vimrc``:
+
+.. code-block:: vim
+
+   python from powerline.bindings.vim import source_plugin; source_plugin()
 
 If Powerline is installed somewhere other than Python's site-packages 
-directories you'll have to source the vim plugin file with an absolute path 
-to the plugin location.
+directories you'll either have to use a plugin manager like Vundle, or 
+source the vim plugin file with an absolute path to the plugin location.
 
 Add the following line to your ``vimrc``, where ``{path}`` is the path to 
-the main Powerline project directory::
+the main Powerline project directory:
 
-    source {path}/powerline/bindings/vim/plugin/source_plugin.vim
+.. code-block:: vim
+
+   source {path}/powerline/bindings/vim/plugin/source_plugin.vim
+
+Vundle installation
+*******************
+
+If you're using Vundle you can add the following line to your ``vimrc``:
+
+.. code-block:: vim
+
+   Bundle 'Lokaltog/powerline', {'rtp': 'powerline/bindings/vim/'}
 
 Terminal prompts
 ^^^^^^^^^^^^^^^^
