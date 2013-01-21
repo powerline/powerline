@@ -5,6 +5,12 @@ import copy
 
 from .segment import Segment
 
+try:
+	unicode()
+except NameError:
+	unicode = str
+
+
 class Theme(object):
 	def __init__(self, ext, colorscheme, theme_config, common_config):
 		self.colorscheme = colorscheme
@@ -12,7 +18,7 @@ class Theme(object):
 		self.segments = []
 		self.EMPTY_SEGMENT = {
 			'contents': None,
-			'highlight': defaultdict(lambda : {'fg': False, 'bg': False, 'attr': 0})
+			'highlight': defaultdict(lambda: {'fg': False, 'bg': False, 'attr': 0})
 			}
 		get_segment = Segment(ext, common_config['paths'], colorscheme, theme_config.get('default_module')).get
 		for side in ['left', 'right']:
@@ -42,11 +48,7 @@ class Theme(object):
 				pass
 			else:
 				continue
-			try:
-				contents = unicode(segment['contents'])
-			except NameError:
-				contents = str(segment['contents'])
-			segment['contents'] = (segment['before'] + contents + segment['after'])\
+			segment['contents'] = (segment['before'] + unicode(segment['contents']) + segment['after'])\
 				.ljust(segment['ljust'])\
 				.rjust(segment['rjust'])
 			# We need to yield a copy of the segment, or else mode-dependent

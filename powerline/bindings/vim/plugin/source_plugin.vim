@@ -5,9 +5,9 @@ if ! has('python') && ! has('python3')
 	finish
 endif
 
-let s:pycmd = has('python3') ? 'python3' : 'python'
-
-exec s:pycmd ' import sys, vim'
-exec s:pycmd ' sys.path.append(vim.eval(''expand("<sfile>:h:h:h:h:h")''))'
-
-source <sfile>:h:h/powerline.vim
+python <<EOF
+import sys, vim
+sys.path.append(vim.eval('expand("<sfile>:h:h:h:h:h")'))
+from powerline.bindings.vim import source_plugin
+source_plugin()
+EOF
