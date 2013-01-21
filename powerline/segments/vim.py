@@ -86,7 +86,7 @@ def file_directory():
 
 def file_name(display_no_file=False, no_file_text='[No file]'):
 	'''Return file name (tail component of the file path).'''
-	file_name = vim_funcs['expand']('%:~:.:t')
+	file_name = vim_funcs['expand']('%:~:.:t').decode('utf-8')
 	if not file_name and not display_no_file:
 		return None
 	if not file_name:
