@@ -120,6 +120,10 @@ You can then enable the vim plugin by adding the following line to your
 
    python from powerline.bindings.vim import source_plugin; source_plugin()
 
+If you want to enable Python 3 support, substitute the ``python`` command 
+above with ``python3``. Note that this is somewhat experimental as some 
+segments don't have support for Python 3 yet.
+
 If Powerline is installed somewhere other than Python's site-packages 
 directories you'll either have to use a plugin manager like Vundle, or 
 source the vim plugin file with an absolute path to the plugin location.
