@@ -157,7 +157,7 @@ Add the following to your ``.zshrc``:
 .. code-block:: bash
 
    setopt prompt_subst
-   export PS1=\`powerline-prompt --renderer_module=zsh_prompt\`
+   export PS1='$(powerline-prompt --renderer_module=zsh_prompt)'
 
 Tmux statusline
 ^^^^^^^^^^^^^^^
