@@ -118,13 +118,13 @@ def weather(unit='c', location_query=None):
 	return u'{0}  {1}°{2}'.format(icon, condition['temp'], unit.upper())
 
 
-def system_load(format='{avg[0]:.1f}, {avg[1]:.1f}, {avg[2]:.1f}'):
+def system_load(format='{avg[0]:.1f}, {avg[1]:.1f}, {avg[2]:.1f}', threshold_good=1, threshold_bad=2):
 	from multiprocessing import cpu_count
 	averages = os.getloadavg()
 	normalized = averages[1] / cpu_count()
-	if normalized < 1:
+	if normalized < threshold_good:
 		gradient = 'system_load_good'
-	elif normalized < 2:
+	elif normalized < threshold_bad:
 		gradient = 'system_load_bad'
 	else:
 		gradient = 'system_load_ugly'
