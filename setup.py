@@ -32,7 +32,6 @@ setup(name='Powerline',
 	extras_require={
 		'docs': [
 			'Sphinx',
-			'docutils',
 			],
 		},
 	)
