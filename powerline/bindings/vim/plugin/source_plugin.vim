@@ -6,6 +6,6 @@ if ! has('python')
 endif
 
 python import sys, vim
-python sys.path.append(vim.eval('expand("<sfile>:h:h:h:h")'))
+python sys.path.append(vim.eval('expand("<sfile>:h:h:h:h:h")'))
 
-source <sfile>:h/powerline.vim
+source <sfile>:h:h/powerline.vim
