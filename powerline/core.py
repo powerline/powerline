@@ -7,10 +7,11 @@ import sys
 
 from colorscheme import Colorscheme
 from matcher import Matcher
+from powerline.lib import underscore_to_camelcase
 
 
 class Powerline(object):
-	def __init__(self, ext):
+	def __init__(self, ext, renderer_module=None):
 		config_home = os.environ.get('XDG_CONFIG_HOME', os.path.expanduser('~/.config'))
 		config_path = os.path.join(config_home, 'powerline')
 		plugin_path = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'config_files')
@@ -41,9 +42,10 @@ class Powerline(object):
 			local_themes[key] = {'config': self._load_theme_config(ext, local_theme_name)}
 
 		# Load and initialize extension renderer
-		renderer_module_name = 'powerline.renderers.{0}'.format(ext)
-		renderer_class_name = '{0}Renderer'.format(ext.capitalize())
-		Renderer = getattr(importlib.import_module(renderer_module_name), renderer_class_name)
+		renderer_module_name = renderer_module or ext
+		renderer_module_import = 'powerline.renderers.{0}'.format(renderer_module_name)
+		renderer_class_name = '{0}Renderer'.format(underscore_to_camelcase(renderer_module_name))
+		Renderer = getattr(importlib.import_module(renderer_module_import), renderer_class_name)
 		self.renderer = Renderer(theme_config, local_themes, theme_kwargs)
 
 	def add_local_theme(self, key, config):
