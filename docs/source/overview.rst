@@ -139,22 +139,25 @@ Terminal prompts
 Bash prompt
 ***********
 
-Add the following to your ``.bashrc``::
+Add the following to your ``.bashrc``:
 
-    function _update_ps1() {
-       export PS1="$(powerline-prompt)"
-    }
+.. code-block:: bash
 
-    export PROMPT_COMMAND="_update_ps1"
+   function _update_ps1() {
+      export PS1="$(powerline-prompt)"
+   }
 
+   export PROMPT_COMMAND="_update_ps1"
 
 Zsh prompt
 **********
 
-Add the following to your ``.zshrc``::
+Add the following to your ``.zshrc``:
 
-    setopt prompt_subst
-    export PS1=\`powerline-prompt\`
+.. code-block:: bash
+
+   setopt prompt_subst
+   export PS1=\`powerline-prompt\`
 
 Tmux statusline
 ^^^^^^^^^^^^^^^
