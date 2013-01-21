@@ -73,16 +73,20 @@ def external_ip(query_url='http://ipv4.icanhazip.com/'):
 
 
 def uptime(format='{days:02d}d {hours:02d}h {minutes:02d}m'):
-	# TODO: make this work with operating systems without /proc/uptime
 	try:
-		with open('/proc/uptime', 'r') as f:
-			seconds = int(float(f.readline().split()[0]))
-			minutes, seconds = divmod(seconds, 60)
-			hours, minutes = divmod(minutes, 60)
-			days, hours = divmod(hours, 24)
-			return format.format(days=int(days), hours=hours, minutes=minutes)
-	except IOError:
-		pass
+		import psutil
+		from datetime import datetime
+		seconds = (datetime.now() - datetime.fromtimestamp(psutil.BOOT_TIME)).seconds
+	except ImportError:
+		try:
+			with open('/proc/uptime', 'r') as f:
+				seconds = int(float(f.readline().split()[0]))
+		except IOError:
+			return None
+	minutes, seconds = divmod(seconds, 60)
+	hours, minutes = divmod(minutes, 60)
+	days, hours = divmod(hours, 24)
+	return format.format(days=int(days), hours=hours, minutes=minutes)
 
 
 @memoize(1800, persistent=True)
