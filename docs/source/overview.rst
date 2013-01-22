@@ -156,7 +156,7 @@ path to your Powerline installation directory:
 
 .. code-block:: bash
 
-   . {path}/powerline/bindings/bash/prompt.sh
+   . {path}/powerline/bindings/bash/powerline.sh
 
 Zsh prompt
 **********
@@ -166,7 +166,7 @@ path to your Powerline installation directory:
 
 .. code-block:: bash
 
-   . {path}/powerline/bindings/zsh/prompt.zsh
+   . {path}/powerline/bindings/zsh/powerline.zsh
 
 Tmux statusline
 ^^^^^^^^^^^^^^^
