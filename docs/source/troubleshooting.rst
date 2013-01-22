@@ -87,3 +87,6 @@ I receive an ``ImportError`` when trying to use Powerline on OS X!
     system Python. Please try to select another Python distribution::
 
         sudo port select python python27-apple
+
+    See the `issue #39 <https://github.com/Lokaltog/powerline/issues/39>`_ 
+    for a discussion and other possible solutions for this issue.
