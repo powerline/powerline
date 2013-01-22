@@ -4,7 +4,6 @@ try:
 	import cPickle as pickle
 except ImportError:
 	import pickle
-import functools
 import os
 import tempfile
 import time
@@ -21,7 +20,6 @@ class memoize(object):
 		self.persistent_file = persistent_file or os.path.join(tempfile.gettempdir(), 'powerline-cache')
 
 	def __call__(self, func):
-		@functools.wraps(func)
 		def decorated_function(*args, **kwargs):
 			if self.additional_key:
 				key = (func.__name__, args, tuple(kwargs.items()), self.additional_key())
