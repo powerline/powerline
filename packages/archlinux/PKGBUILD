@@ -9,6 +9,10 @@ license=('CC BY-SA 3.0')
 arch=('any')
 depends=('python2>=2.7')
 makedepends=('git' 'python2-distribute')
+optdepends=('python2-psutil: improved system information'
+	'python2-pygit2: improved git support'
+	'mercurial: improved mercurial support'
+	'zsh: better shell prompt')
 install='powerline.install'
 source=()
 
@@ -36,13 +40,23 @@ build() {
 	python2 setup.py build || return 1
 	python2 setup.py install --root=${pkgdir} || return 1
 
+	msg2 "Installing fonts..."
 	install -dm755 "${pkgdir}/usr/share/fonts/TTF/"
 	install -dm755 "${pkgdir}/etc/fonts/conf.avail"
 	install -dm755 "${pkgdir}/etc/fonts/conf.d"
-	install -dm755 "${pkgdir}/usr/share/vim/vimfiles/plugin"
-
 	install -m644 "font/PowerlineSymbols.otf" "${pkgdir}/usr/share/fonts/TTF/PowerlineSymbols.otf"
 	install -m644 "font/10-powerline-symbols.conf" "${pkgdir}/etc/fonts/conf.avail/10-powerline-symbols.conf"
 	ln -s "../conf.avail/10-powerline-symbols.conf" "${pkgdir}/etc/fonts/conf.d/10-powerline-symbols.conf"
-	install -m644 "powerline/bindings/vim/plugin/source_plugin.vim" "${pkgdir}/usr/share/vim/vimfiles/plugin/powerline.vim"
+
+	msg2 "Installing vim plugin..."
+	install -dm755 "${pkgdir}/usr/share/vim/vimfiles/plugin"
+	install -m644 "powerline/bindings/vim/powerline.vim" "${pkgdir}/usr/share/vim/vimfiles/plugin/powerline.vim"
+
+	msg2 "Installing zsh plugin..."
+	install -dm755 "${pkgdir}/usr/share/zsh/site-contrib"
+	install -m644 "powerline/bindings/zsh/powerline.zsh" "${pkgdir}/usr/share/zsh/site-contrib/powerline.zsh"
+
+	msg2 "Installing tmux configuration..."
+	install -dm755 "${pkgdir}/usr/share/tmux"
+	install -m644 "powerline/bindings/tmux/powerline.conf" "${pkgdir}/usr/share/tmux/powerline.conf"
 }
