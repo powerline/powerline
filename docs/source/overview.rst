@@ -145,44 +145,33 @@ If you're using Vundle you can add the following line to your ``vimrc``:
 
    Bundle 'Lokaltog/powerline', {'rtp': 'powerline/bindings/vim/'}
 
-Terminal prompts
-^^^^^^^^^^^^^^^^
+Shell prompts
+^^^^^^^^^^^^^
 
 Bash prompt
 ***********
 
-Add the following to your ``.bashrc``:
+Add the following line to your ``.bashrc``, where ``{path}`` is the absolute 
+path to your Powerline installation directory:
 
 .. code-block:: bash
 
-   function _update_ps1() {
-      export PS1="$(powerline-prompt)"
-   }
-
-   export PROMPT_COMMAND="_update_ps1"
+   . {path}/powerline/bindings/bash/prompt.sh
 
 Zsh prompt
 **********
 
-Add the following to your ``.zshrc``:
+Add the following line to your ``.zshrc``, where ``{path}`` is the absolute 
+path to your Powerline installation directory:
 
 .. code-block:: bash
 
-   setopt prompt_subst
-   export PS1='$(powerline-prompt --renderer_module=zsh_prompt)'
+   . {path}/powerline/bindings/zsh/prompt.zsh
 
 Tmux statusline
 ^^^^^^^^^^^^^^^
 
-Add the following to your ``tmux.conf``::
+Add the following line to your ``.tmux.conf``, where ``{path}`` is the 
+absolute path to your Powerline installation directory::
 
-    set-option -g status on
-    set-option -g status-interval 2
-    set-option -g status-utf8 on
-    set-option -g status-left-length 100
-    set-option -g status-left "#(powerline-tmux left)"
-    set-option -g status-right-length 100
-    set-option -g status-right "#(powerline-tmux right)"
-    set-option -g status-justify "centre"
-    set-option -g status-bg "colour235"
-    set-option -g status-fg "colour249"
+   source '{path}/powerline/bindings/tmux/powerline.conf'
