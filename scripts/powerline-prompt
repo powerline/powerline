@@ -16,7 +16,7 @@ parser.add_argument('side', nargs='?', default=None, choices=('left', 'right'))
 parser.add_argument('--renderer_module', default='shell', choices=('shell', 'zsh_prompt'))
 parser.add_argument('--ext', default='shell')
 parser.add_argument('--last_exit_code', default=None, type=int)
-parser.add_argument('--last_pipe_status', default=None, type=int)
+parser.add_argument('--last_pipe_status', default=None)
 
 if __name__ == '__main__':
 	args = parser.parse_args()
