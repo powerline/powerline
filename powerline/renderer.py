@@ -29,7 +29,7 @@ class Renderer(object):
 		else:
 			return self.theme
 
-	def render(self, mode, width=None, theme=None, segments=None, side=None):
+	def render(self, mode=None, width=None, theme=None, segments=None, side=None):
 		'''Render all segments.
 
 		When a width is provided, low-priority segments are dropped one at

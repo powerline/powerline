@@ -19,7 +19,7 @@ parser.add_argument('--ext', default='shell')
 if __name__ == '__main__':
 	args = parser.parse_args()
 	powerline = Powerline(ext=args.ext, renderer_module=args.renderer_module)
-	rendered = powerline.renderer.render(None, side=args.side)
+	rendered = powerline.renderer.render(side=args.side)
 	try:
 		sys.stdout.write(rendered)
 	except UnicodeEncodeError:

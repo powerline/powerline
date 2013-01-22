@@ -18,7 +18,7 @@ parser.add_argument('--ext', default='tmux')
 if __name__ == '__main__':
 	args = parser.parse_args()
 	powerline = Powerline(args.ext)
-	rendered = powerline.renderer.render(None, side=args.side)
+	rendered = powerline.renderer.render(side=args.side)
 	try:
 		sys.stdout.write(rendered)
 	except UnicodeEncodeError:
