@@ -6,6 +6,7 @@ if ! has('python') && ! has('python3')
 endif
 
 python <<EOF
+from __future__ import absolute_import
 import sys, vim
 sys.path.append(vim.eval('expand("<sfile>:h:h:h:h:h")'))
 from powerline.bindings.vim import source_plugin
