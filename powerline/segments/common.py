@@ -82,8 +82,13 @@ def cwd(dir_shorten_len=None, dir_limit_depth=None):
 		del(cwd_split[0:-dir_limit_depth])
 		cwd_split.insert(0, u'⋯')
 	cwd = [i[0:dir_shorten_len] if dir_shorten_len and i else i for i in cwd_split[:-1]] + [cwd_split[-1]]
-	cwd = os.path.join(*cwd)
-	return cwd
+	ret = []
+	for part in cwd:
+		ret.append({
+			'contents': part,
+			})
+	ret[-1]['highlight_group'] = ['cwd:current_folder', 'cwd']
+	return ret
 
 
 def date(format='%Y-%m-%d'):
