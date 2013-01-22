@@ -3,7 +3,7 @@
 # $Header: /var/cvsroot/gentoo-x86/dev-python/setuptools/setuptools-9999.ebuild,v 1.1 2013/01/11 09:59:31 mgorny Exp $
 
 EAPI="5"
-PYTHON_COMPAT=( python2_7 )
+PYTHON_COMPAT=( python{2_7,3_3} )
 
 #if LIVE
 EGIT_REPO_URI="https://github.com/Lokaltog/${PN}"
@@ -19,7 +19,7 @@ SRC_URI=""
 LICENSE="CC-Attribution-ShareAlike-3.0"
 SLOT="0"
 KEYWORDS="~alpha ~amd64 arm ~hppa ~ia64 ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc ~x86 ~ppc-aix ~amd64-fbsd ~sparc-fbsd ~x86-fbsd ~x64-freebsd ~x86-freebsd ~hppa-hpux ~ia64-hpux ~x86-interix ~amd64-linux ~ia64-linux ~x86-linux ~ppc-macos ~x64-macos ~x86-macos ~m68k-mint ~sparc-solaris ~sparc64-solaris ~x64-solaris ~x86-solaris"
-IUSE="vim doc"
+IUSE="vim zsh doc"
 
 #if LIVE
 SRC_URI=
@@ -49,10 +49,19 @@ src_compile() {
 src_install() {
 	unset DOCS
 	font_src_install
-	distutils-r1_src_install
-	use doc && dohtml -r docs_output/*
 	if use vim ; then
 		insinto /usr/share/vim/vimfiles/plugin
 		doins powerline/bindings/vim/powerline.vim
 	fi
+	# rm powerline/bindings/vim/powerline.vim
+	if use zsh ; then
+		insinto /usr/share/zsh/site-contrib
+		doins powerline/bindings/zsh/powerline.zsh
+		einfo "To enable powerline prompt add"
+		einfo "    . /usr/share/zsh/site-contrib/powerline.zsh"
+		einfo "to your zshrc."
+	fi
+	rm powerline/bindings/zsh/powerline.zsh
+	distutils-r1_src_install
+	use doc && dohtml -r docs_output/*
 }
