@@ -1,13 +1,21 @@
-exec g:powerline_pycmd 'import uuid'
-exec g:powerline_pycmd 'from powerline.core import Powerline'
-exec g:powerline_pycmd 'powerline = Powerline("vim")'
+if exists('g:powerline_loaded')
+    finish
+endif
+let g:powerline_loaded = 1
 
-if exists('*'. g:powerline_pyeval)
-	let s:pyeval = function(g:powerline_pyeval)
+let s:powerline_pycmd = substitute(get(g:, 'powerline_pycmd', 'py'), '\v^(py)%[thon](3?)$', '\1\2', '')
+let s:powerline_pyeval = get(g:, 'powerline_pyeval', s:powerline_pycmd.'eval')
+
+exec s:powerline_pycmd 'import uuid'
+exec s:powerline_pycmd 'from powerline.core import Powerline'
+exec s:powerline_pycmd 'powerline = Powerline("vim")'
+
+if exists('*'. s:powerline_pyeval)
+	let s:pyeval = function(s:powerline_pyeval)
 else
-	exec g:powerline_pycmd 'import json, vim'
+	exec s:powerline_pycmd 'import json, vim'
 	function! s:pyeval(e)
-		exec g:powerline_pycmd 'vim.command("return " + json.dumps(eval(vim.eval("a:e"))))'
+		exec s:powerline_pycmd 'vim.command("return " + json.dumps(eval(vim.eval("a:e"))))'
 	endfunction
 endif
 
