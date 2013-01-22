@@ -35,11 +35,14 @@ class Segment(object):
 			raise TypeError('Unknown segment type: {0}'.format(segment_type))
 		contents, contents_func, key = get_segment_info(segment)
 		highlight_group = segment.get('highlight_group', segment.get('name'))
+		divider_highlight_group = segment.get('divider_highlight_group')
 		return {
 			'key': key,
 			'type': segment_type,
 			'highlight_group': highlight_group,
 			'highlight': self.colorscheme.get_group_highlighting(highlight_group),
+			'divider_highlight_group': divider_highlight_group,
+			'divider_highlight': self.colorscheme.get_group_highlighting(divider_highlight_group) if divider_highlight_group else None,
 			'before': segment.get('before', ''),
 			'after': segment.get('after', ''),
 			'contents_func': contents_func,

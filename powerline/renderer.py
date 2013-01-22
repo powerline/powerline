@@ -96,7 +96,9 @@ class Renderer(object):
 			segment_hl = ''
 
 			if render_highlighted:
-				if divider_type == 'hard':
+				if divider_type == 'soft' and segment['divider_highlight_group'] is not None:
+					divider_hl = self.hl(segment['divider_highlight'][mode]['fg'], segment['divider_highlight'][mode]['bg'], False)
+				elif divider_type == 'hard':
 					divider_hl = self.hl(segment['highlight'][mode]['bg'], compare_segment['highlight'][mode]['bg'], False)
 				segment_hl = self.hl(**segment['highlight'][mode])
 
