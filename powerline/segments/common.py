@@ -43,9 +43,9 @@ def _urllib_urlencode(string):
 		return urllib.urlencode(string)
 
 
-def hostname():
+def hostname(only_if_ssh=False):
 	import socket
-	if not os.environ.get('SSH_CLIENT'):
+	if only_if_ssh and not os.environ.get('SSH_CLIENT'):
 		return None
 	return socket.gethostname()
 
@@ -146,7 +146,17 @@ def weather(unit='c', location_query=None):
 	for icon, codes in weather_conditions_codes.items():
 		if condition_code in codes:
 			break
-	return u'{0}  {1}°{2}'.format(icon, condition['temp'], unit.upper())
+	return [
+			{
+			'contents': icon + ' ',
+			'highlight_group': ['weather_condition_' + icon, 'weather_condition', 'weather'],
+			},
+			{
+			'contents': '{0}°{1}'.format(condition['temp'], unit.upper()),
+			'highlight_group': ['weather_temp_cold' if int(condition['temp']) < 0 else 'weather_temp_hot', 'weather_temp', 'weather'],
+			'draw_divider': False,
+			},
+		]
 
 
 def system_load(format='{avg:.1f}', threshold_good=1, threshold_bad=2):
@@ -166,6 +176,7 @@ def system_load(format='{avg:.1f}', threshold_good=1, threshold_bad=2):
 			'highlight_group': [hl, 'system_load'],
 			'draw_divider': False,
 			})
+	ret[0]['draw_divider'] = True
 	ret[0]['contents'] += ' '
 	ret[1]['contents'] += ' '
 	return ret
@@ -208,8 +219,8 @@ def network_load(interface='eth0', measure_interval=1, suffix='B/s', binary_pref
 	time.sleep(measure_interval)
 	b2 = get_bytes()
 	return u'⬇ {rx_diff} ⬆ {tx_diff}'.format(
-		rx_diff=humanize_bytes((b2[0] - b1[0]) / measure_interval, suffix, binary_prefix),
-		tx_diff=humanize_bytes((b2[1] - b1[1]) / measure_interval, suffix, binary_prefix),
+		rx_diff=humanize_bytes((b2[0] - b1[0]) / measure_interval, suffix, binary_prefix).rjust(8),
+		tx_diff=humanize_bytes((b2[1] - b1[1]) / measure_interval, suffix, binary_prefix).rjust(8),
 		)
 
 

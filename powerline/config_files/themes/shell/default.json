@@ -4,7 +4,10 @@
 		"left": [
 			{
 				"name": "hostname",
-				"before": " "
+				"before": " ",
+				"args": {
+					"only_if_ssh": true
+				}
 			},
 			{
 				"name": "user"
