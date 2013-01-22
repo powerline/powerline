@@ -51,4 +51,8 @@ src_install() {
 	font_src_install
 	distutils-r1_src_install
 	use doc && dohtml -r docs_output/*
+	if use vim ; then
+		insinto /usr/share/vim/vimfiles/plugin
+		doins powerline/bindings/vim/powerline.vim
+	fi
 }
