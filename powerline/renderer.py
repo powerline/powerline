@@ -82,7 +82,10 @@ class Renderer(object):
 		'''
 		rendered_highlighted = u''
 		segments_len = len(segments)
-		mode = mode if mode in segments[0]['highlight'] else Colorscheme.DEFAULT_MODE_KEY
+		try:
+			mode = mode if mode in segments[0]['highlight'] else Colorscheme.DEFAULT_MODE_KEY
+		except IndexError:
+			return ''
 
 		for index, segment in enumerate(segments):
 			prev_segment = segments[index - 1] if index > 0 else theme.EMPTY_SEGMENT
