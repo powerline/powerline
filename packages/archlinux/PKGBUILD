@@ -1,7 +1,7 @@
 # Maintainer: Kim Silkebækken <kim.silkebaekken+aur@gmail.com>
 
 pkgname=powerline-git
-pkgver=20130118
+pkgver=20130122
 pkgrel=1
 pkgdesc='The ultimate statusline/prompt utility.'
 url='https://github.com/Lokaltog/powerline'
@@ -39,8 +39,10 @@ build() {
 	install -dm755 "${pkgdir}/usr/share/fonts/TTF/"
 	install -dm755 "${pkgdir}/etc/fonts/conf.avail"
 	install -dm755 "${pkgdir}/etc/fonts/conf.d"
+	install -dm755 "${pkgdir}/usr/share/vim/vimfiles/plugin"
 
 	install -m644 "font/PowerlineSymbols.otf" "${pkgdir}/usr/share/fonts/TTF/PowerlineSymbols.otf"
 	install -m644 "font/10-powerline-symbols.conf" "${pkgdir}/etc/fonts/conf.avail/10-powerline-symbols.conf"
 	ln -s "../conf.avail/10-powerline-symbols.conf" "${pkgdir}/etc/fonts/conf.d/10-powerline-symbols.conf"
+	install -m644 "powerline/bindings/vim/plugin/source_plugin.vim" "${pkgdir}/usr/share/vim/vimfiles/plugin/powerline.vim"
 }
