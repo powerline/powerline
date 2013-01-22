@@ -29,7 +29,7 @@ class Renderer(object):
 		else:
 			return self.theme
 
-	def render(self, mode, width=None, theme=None, segments=None):
+	def render(self, mode, width=None, theme=None, segments=None, side=None):
 		'''Render all segments.
 
 		When a width is provided, low-priority segments are dropped one at
@@ -39,7 +39,7 @@ class Renderer(object):
 		reached.
 		'''
 		theme = theme or self.get_theme()
-		segments = segments or theme.get_segments()
+		segments = segments or theme.get_segments(side)
 
 		# Handle excluded/included segments for the current mode
 		segments = [segment for segment in segments\
