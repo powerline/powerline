@@ -10,7 +10,8 @@
 				"name": "user"
 			},
 			{
-				"name": "virtualenv"
+				"name": "virtualenv",
+				"before": "ⓔ  "
 			},
 			{
 				"name": "branch",
