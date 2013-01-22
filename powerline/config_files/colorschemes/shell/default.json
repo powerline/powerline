@@ -1,5 +1,5 @@
 {
-	"name": "Default color scheme for terminal prompts",
+	"name": "Default color scheme for shell prompts",
 	"colors": {
 		"black": 16,
 		"white": 231,
@@ -10,6 +10,7 @@
 		"brightgreen": 148,
 
 		"darkestcyan": 23,
+		"darkcyan": 74,
 		"mediumcyan": 117,
 		"brightcyan": 159,
 
@@ -55,6 +56,7 @@
 	"groups": {
 		"user": { "fg": "white", "bg": "darkblue", "attr": ["bold"] },
 		"superuser": { "fg": "white", "bg": "brightred", "attr": ["bold"] },
+		"virtualenv": { "fg": "white", "bg": "darkcyan" },
 		"branch": { "fg": "gray9", "bg": "gray2" },
 		"cwd": { "fg": "gray9", "bg": "gray4" },
 		"cwd:current_folder": { "fg": "gray10", "bg": "gray4", "attr": ["bold"] },

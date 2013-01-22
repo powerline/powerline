@@ -211,3 +211,7 @@ def network_load(interface='eth0', measure_interval=1, suffix='B/s', binary_pref
 		rx_diff=humanize_bytes((b2[0] - b1[0]) / measure_interval, suffix, binary_prefix),
 		tx_diff=humanize_bytes((b2[1] - b1[1]) / measure_interval, suffix, binary_prefix),
 		)
+
+
+def virtualenv():
+	return os.path.basename(os.environ.get('VIRTUAL_ENV', '')) or None
