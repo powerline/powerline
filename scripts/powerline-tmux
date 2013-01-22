@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 '''Powerline tmux statusline.'''
 import argparse
+import sys
 
 try:
 	from powerline.core import Powerline
 except ImportError:
 	import os
-	import sys
 	sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 	from powerline.core import Powerline  # NOQA
 
@@ -17,8 +17,12 @@ parser.add_argument('--ext', default='tmux')
 
 if __name__ == '__main__':
 	args = parser.parse_args()
-	pl = Powerline(args.ext)
-	segments = pl.renderer.get_theme().get_segments()
+	powerline = Powerline(args.ext)
+	segments = powerline.renderer.get_theme().get_segments()
 	if args.side != 'all':
 		segments = [s for s in segments if s['side'] == args.side]
-	print(pl.renderer.render(None, segments=segments))
+	rendered = powerline.renderer.render(None, segments=segments)
+	try:
+		sys.stdout.write(rendered)
+	except UnicodeEncodeError:
+		sys.stdout.write(rendered.encode('utf-8'))
