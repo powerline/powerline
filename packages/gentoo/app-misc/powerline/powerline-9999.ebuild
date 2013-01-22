@@ -57,9 +57,11 @@ src_install() {
 	if use zsh ; then
 		insinto /usr/share/zsh/site-contrib
 		doins powerline/bindings/zsh/powerline.zsh
-		einfo "To enable powerline prompt add"
-		einfo "    . /usr/share/zsh/site-contrib/powerline.zsh"
-		einfo "to your zshrc."
+		elog ""
+		elog "To enable powerline prompt add"
+		elog "    . /usr/share/zsh/site-contrib/powerline.zsh"
+		elog "to your zshrc."
+		elog ""
 	fi
 	rm powerline/bindings/zsh/powerline.zsh
 	distutils-r1_src_install
