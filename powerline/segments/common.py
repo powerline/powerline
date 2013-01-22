@@ -83,7 +83,11 @@ def cwd(dir_shorten_len=None, dir_limit_depth=None):
 		cwd_split.insert(0, u'⋯')
 	cwd = [i[0:dir_shorten_len] if dir_shorten_len and i else i for i in cwd_split[:-1]] + [cwd_split[-1]]
 	ret = []
+	if not cwd[0]:
+		cwd[0] = '/'
 	for part in cwd:
+		if not part:
+			continue
 		ret.append({
 			'contents': part,
 			})
