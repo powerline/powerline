@@ -27,13 +27,14 @@ packages.
 
 Vim version 7.3.661 or newer is recommended for performance reasons.
 
-Additional dependencies
-^^^^^^^^^^^^^^^^^^^^^^^
+Optional dependencies
+^^^^^^^^^^^^^^^^^^^^^
 
 The following Python packages are not required by all segments, but 
 recommended for optimal performance:
 
 * ``pygit2``
+* ``mercurial``
 * ``psutil``
 
 Installation
