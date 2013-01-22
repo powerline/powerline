@@ -12,17 +12,14 @@ except ImportError:
 	from powerline.core import Powerline  # NOQA
 
 parser = argparse.ArgumentParser(description=__doc__)
-parser.add_argument('side', nargs='?', default='all', choices=('all', 'left', 'right'))
+parser.add_argument('side', nargs='?', default=None, choices=('left', 'right'))
 parser.add_argument('--renderer_module', default='shell', choices=('shell', 'zsh_prompt'))
 parser.add_argument('--ext', default='shell')
 
 if __name__ == '__main__':
 	args = parser.parse_args()
 	powerline = Powerline(ext=args.ext, renderer_module=args.renderer_module)
-	segments = powerline.renderer.get_theme().get_segments()
-	if args.side != 'all':
-		segments = [s for s in segments if s['side'] == args.side]
-	rendered = powerline.renderer.render(None, segments=segments)
+	rendered = powerline.renderer.render(None, side=args.side)
 	try:
 		sys.stdout.write(rendered)
 	except UnicodeEncodeError:
