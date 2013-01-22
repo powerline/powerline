@@ -10,6 +10,7 @@
 		"brightgreen": 148,
 
 		"darkestcyan": 23,
+		"darkcyan": 74,
 		"mediumcyan": 117,
 		"brightcyan": 159,
 
@@ -54,11 +55,13 @@
 	},
 	"groups": {
 		"background": { "fg": "white", "bg": "gray2" },
+		"background:divider": { "fg": "gray6", "bg": "gray2" },
 		"mode": { "fg": "darkestgreen", "bg": "brightgreen", "attr": ["bold"] },
 		"modified_indicator": { "fg": "brightyellow", "bg": "gray4", "attr": ["bold"] },
 		"paste_indicator": { "fg": "white", "bg": "mediumorange", "attr": ["bold"] },
 		"readonly_indicator": { "fg": "brightestred", "bg": "gray4" },
 		"branch": { "fg": "gray9", "bg": "gray4" },
+		"branch:divider": { "fg": "gray7", "bg": "gray4" },
 		"file_directory": { "fg": "gray9", "bg": "gray4" },
 		"file_name": { "fg": "white", "bg": "gray4", "attr": ["bold"] },
 		"file_name_no_file": { "fg": "gray9", "bg": "gray4", "attr": ["bold"] },
@@ -126,7 +129,9 @@
 				"gradient6": "mediumcyan"
 			},
 			"groups": {
-				"mode": { "fg": "darkestcyan", "bg": "white", "attr": ["bold"] }
+				"mode": { "fg": "darkestcyan", "bg": "white", "attr": ["bold"] },
+				"background:divider": { "fg": "darkcyan", "bg": "darkestblue" },
+				"branch:divider": { "fg": "darkcyan", "bg": "darkblue" }
 			}
 		},
 		"v": {
