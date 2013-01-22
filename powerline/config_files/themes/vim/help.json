@@ -7,7 +7,7 @@
 			},
 			{
 				"type": "filler",
-				"highlight": ["background"]
+				"highlight_group": ["background"]
 			}
 		],
 		"right": [
@@ -21,7 +21,7 @@
 			{
 				"type": "string",
 				"contents": "⭡ ",
-				"highlight": ["line_current_symbol", "line_current"]
+				"highlight_group": ["line_current_symbol", "line_current"]
 			},
 			{
 				"name": "line_current",

@@ -90,10 +90,10 @@ def file_name(display_no_file=False, no_file_text='[No file]'):
 	if not file_name and not display_no_file:
 		return None
 	if not file_name:
-		return {
+		return [{
 			'contents': no_file_text,
-			'highlight': ['file_name_no_file', 'file_name'],
-			}
+			'highlight_group': ['file_name_no_file', 'file_name'],
+			}]
 	return file_name.decode('utf-8')
 
 
@@ -128,10 +128,10 @@ def line_percent(gradient=False):
 	percentage = int(line_current * 100 // line_last)
 	if not gradient:
 		return percentage
-	return {
+	return [{
 		'contents': percentage,
-		'highlight': ['line_percent_gradient' + str(int(5 * percentage // 100) + 1), 'line_percent'],
-		}
+		'highlight_group': ['line_percent_gradient' + str(int(5 * percentage // 100) + 1), 'line_percent'],
+		}]
 
 
 def line_current():
@@ -166,8 +166,12 @@ def file_vcs_status():
 			if not status:
 				return None
 			status = status.strip()
-			return {
-				'contents': status,
-				'highlight': ['file_vcs_status_' + status, 'file_vcs_status'],
-				}
+			ret = []
+			for status in status:
+				ret.append({
+					'contents': status,
+					'highlight_group': ['file_vcs_status_' + status, 'file_vcs_status'],
+					})
+			ret[0]['before'] = ' '
+			return ret
 	return None

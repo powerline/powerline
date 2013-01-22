@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from collections import defaultdict
-import copy
+from copy import copy
 
 from .segment import Segment
 
@@ -38,24 +38,30 @@ class Theme(object):
 		and ljust/rjust properties applied.
 		'''
 		for side in [side] if side else ['left', 'right']:
+			parsed_segments = []
 			for segment in self.segments[side]:
 				if segment['type'] == 'function':
 					contents = segment['contents_func'](**segment['args'])
 					if contents is None:
 						continue
-					try:
-						segment['highlight'] = self.colorscheme.get_group_highlighting(contents['highlight'])
-						segment['contents'] = contents['contents']
-					except TypeError:
+					if isinstance(contents, list):
+						for subsegment in contents:
+							segment_copy = copy(segment)
+							segment_copy.update(subsegment)
+							parsed_segments.append(segment_copy)
+					else:
 						segment['contents'] = contents
+						parsed_segments.append(segment)
 				elif segment['type'] == 'filler' or (segment['type'] == 'string' and segment['contents'] is not None):
-					pass
+					parsed_segments.append(segment)
 				else:
 					continue
+			for segment in parsed_segments:
+				segment['highlight'] = self.colorscheme.get_group_highlighting(segment['highlight_group'])
 				segment['contents'] = (segment['before'] + unicode(segment['contents']) + segment['after'])\
 					.ljust(segment['ljust'])\
 					.rjust(segment['rjust'])
 				# We need to yield a copy of the segment, or else mode-dependent
 				# segment contents can't be cached correctly e.g. when caching
 				# non-current window contents for vim statuslines
-				yield copy.copy(segment)
+				yield copy(segment)

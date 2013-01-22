@@ -34,11 +34,12 @@ class Segment(object):
 		except AttributeError:
 			raise TypeError('Unknown segment type: {0}'.format(segment_type))
 		contents, contents_func, key = get_segment_info(segment)
-		highlighting_group = segment.get('highlight', segment.get('name'))
+		highlight_group = segment.get('highlight_group', segment.get('name'))
 		return {
 			'key': key,
 			'type': segment_type,
-			'highlight': self.colorscheme.get_group_highlighting(highlighting_group),
+			'highlight_group': highlight_group,
+			'highlight': self.colorscheme.get_group_highlighting(highlight_group),
 			'before': segment.get('before', ''),
 			'after': segment.get('after', ''),
 			'contents_func': contents_func,

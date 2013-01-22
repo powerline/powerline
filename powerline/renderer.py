@@ -89,7 +89,7 @@ class Renderer(object):
 			next_segment = segments[index + 1] if index < segments_len - 1 else theme.EMPTY_SEGMENT
 			compare_segment = next_segment if segment['side'] == 'left' else prev_segment
 			segment['rendered_raw'] = u''
-			outer_padding = ' ' if index == 0 or (index == segments_len - 1 and segment['side'] == 'right') else ''
+			outer_padding = ' ' if (index == 0 and segment['side'] == 'left') or (index == segments_len - 1 and segment['side'] == 'right') else ''
 			divider_type = 'soft' if compare_segment['highlight'][mode]['bg'] == segment['highlight'][mode]['bg'] else 'hard'
 			divider = theme.get_divider(segment['side'], divider_type)
 			divider_hl = ''

@@ -53,10 +53,10 @@ def hostname():
 def user():
 	user = os.environ.get('USER')
 	euid = os.geteuid()
-	return {
-		'contents': user,
-		'highlight': 'user' if euid != 0 else ['superuser', 'user'],
-		}
+	return [{
+			'contents': user,
+			'highlight_group': 'user' if euid != 0 else ['superuser', 'user'],
+		}]
 
 
 def branch():
@@ -140,20 +140,26 @@ def weather(unit='c', location_query=None):
 	return u'{0}  {1}°{2}'.format(icon, condition['temp'], unit.upper())
 
 
-def system_load(format='{avg[0]:.1f}, {avg[1]:.1f}, {avg[2]:.1f}', threshold_good=1, threshold_bad=2):
-	from multiprocessing import cpu_count
-	averages = os.getloadavg()
-	normalized = averages[1] / cpu_count()
-	if normalized < threshold_good:
-		gradient = 'system_load_good'
-	elif normalized < threshold_bad:
-		gradient = 'system_load_bad'
-	else:
-		gradient = 'system_load_ugly'
-	return {
-		'contents': format.format(avg=averages),
-		'highlight': [gradient, 'system_load']
-	}
+def system_load(format='{avg:.1f}', threshold_good=1, threshold_bad=2):
+	import multiprocessing
+	cpu_count = multiprocessing.cpu_count()
+	ret = []
+	for avg in os.getloadavg():
+		normalized = avg / cpu_count
+		if normalized < threshold_good:
+			hl = 'system_load_good'
+		elif normalized < threshold_bad:
+			hl = 'system_load_bad'
+		else:
+			hl = 'system_load_ugly'
+		ret.append({
+			'contents': format.format(avg=avg),
+			'highlight_group': [hl, 'system_load'],
+			'draw_divider': False,
+			})
+	ret[0]['contents'] += ' '
+	ret[1]['contents'] += ' '
+	return ret
 
 
 def cpu_load_percent(measure_interval=.5):

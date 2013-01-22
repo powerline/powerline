@@ -61,7 +61,7 @@ Common configuration is a subdictionary that is a value of ``common`` key in
     segments with the same background color.
 
 ``paths``
-    .. _config-common-paths
+    .. _config-common-paths:
 
     Defines additional paths which will be searched for modules when using 
     :ref:`module segment option <config-themes-seg-module>`. Paths defined here 
@@ -166,14 +166,14 @@ Themes
         ``string``
             A static string segment where the contents is defined in the 
             :ref:`contents option <config-themes-seg-contents>`, and the 
-            highlighting group is defined in the :ref:`highlight option 
-            <config-themes-seg-highlight>`.
+            highlighting group is defined in the :ref:`highlight_group 
+            option <config-themes-seg-highlight_group>`.
 
         ``filler``
             If the statusline is rendered with a specific width, remaining 
             whitespace is distributed among filler segments. The 
-            highlighting group is defined in the :ref:`highlight option 
-            <config-themes-seg-highlight>`.
+            highlighting group is defined in the :ref:`highlight_group 
+            option <config-themes-seg-highlight_group>`.
 
     ``module``
         .. _config-themes-seg-module:
@@ -187,8 +187,8 @@ Themes
 
         Function name, only required for function segments.
 
-    ``highlight``
-        .. _config-themes-seg-highlight:
+    ``highlight_group``
+        .. _config-themes-seg-highlight_group:
 
         Highlighting group for this segment. Consists of a prioritized list 
         of highlighting groups, where the first highlighting group that is 
@@ -259,6 +259,6 @@ A segment function must return one of the following values:
 
 * ``None``, which will remove the segment from the prompt/statusline.
 * A string, which will be the segment contents.
-* A dict consisting of a ``contents`` string, and a ``highlight`` list. This 
-  is useful for providing a particular highlighting group depending on the 
-  segment contents.
+* A list of dicts consisting of a ``contents`` string, and 
+  a ``highlight_group`` list. This is useful for providing a particular 
+  highlighting group depending on the segment contents.
