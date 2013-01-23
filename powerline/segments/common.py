@@ -152,7 +152,7 @@ def weather(unit='c', location_query=None):
 			'highlight_group': ['weather_condition_' + icon, 'weather_condition', 'weather'],
 			},
 			{
-			'contents': '{0}°{1}'.format(condition['temp'], unit.upper()),
+			'contents': u'{0}°{1}'.format(condition['temp'], unit.upper()),
 			'highlight_group': ['weather_temp_cold' if int(condition['temp']) < 0 else 'weather_temp_hot', 'weather_temp', 'weather'],
 			'draw_divider': False,
 			},
