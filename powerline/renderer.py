@@ -9,6 +9,8 @@ class Renderer(object):
 	ATTR_ITALIC = 2
 	ATTR_UNDERLINE = 4
 
+	TERM_24BIT = False
+
 	def __init__(self, theme_config, local_themes, theme_kwargs):
 		self.theme = Theme(theme_config=theme_config, **theme_kwargs)
 		self.local_themes = local_themes
@@ -137,6 +139,13 @@ class Renderer(object):
 		that the segments have been rendered using the render() method first.
 		'''
 		return len(''.join([segment['rendered_raw'] for segment in segments]))
+
+	@staticmethod
+	def _int_to_rgb(int):
+		r = (int >> 16) & 0xff
+		g = (int >> 8) & 0xff
+		b = int & 0xff
+		return r, g, b
 
 	def hl(self, fg=None, bg=None, attr=None):
 		raise NotImplementedError
