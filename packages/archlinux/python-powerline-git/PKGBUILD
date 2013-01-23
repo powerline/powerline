@@ -1,0 +1,61 @@
+# Maintainer: Kim Silkebækken <kim.silkebaekken+aur@gmail.com>
+
+pkgname=python-powerline-git
+pkgver=20130123
+pkgrel=1
+pkgdesc='The ultimate statusline/prompt utility.'
+url='https://github.com/Lokaltog/powerline'
+license=('CC BY-SA 3.0')
+arch=('any')
+depends=('python>=3.3')
+makedepends=('git' 'python-distribute')
+optdepends=('python-psutil: improved system information'
+	'python-pygit2: improved git support'
+	'zsh: better shell prompt')
+install='powerline.install'
+source=()
+
+_gitroot="https://github.com/Lokaltog/powerline.git"
+_gitname="powerline"
+_gitbranch="develop"
+
+build() {
+	cd ${srcdir}
+
+	msg "Connecting to GitHub..."
+
+	if [ -d ${srcdir}/${_gitname} ]; then
+		cd ${_gitname}
+		git pull origin ${_gitbranch}
+		msg "The local files are updated."
+	else
+		git clone ${_gitroot}
+		cd ${_gitname}
+		git checkout ${_gitbranch}
+	fi
+
+	msg "Git checkout done or server timeout."
+
+	python setup.py build || return 1
+	python setup.py install --root=${pkgdir} || return 1
+
+	msg2 "Installing fonts..."
+	install -dm755 "${pkgdir}/usr/share/fonts/TTF/"
+	install -dm755 "${pkgdir}/etc/fonts/conf.avail"
+	install -dm755 "${pkgdir}/etc/fonts/conf.d"
+	install -m644 "font/PowerlineSymbols.otf" "${pkgdir}/usr/share/fonts/TTF/PowerlineSymbols.otf"
+	install -m644 "font/10-powerline-symbols.conf" "${pkgdir}/etc/fonts/conf.avail/10-powerline-symbols.conf"
+	ln -s "../conf.avail/10-powerline-symbols.conf" "${pkgdir}/etc/fonts/conf.d/10-powerline-symbols.conf"
+
+	msg2 "Installing vim plugin..."
+	install -dm755 "${pkgdir}/usr/share/vim/vimfiles/plugin"
+	install -m644 "powerline/bindings/vim/powerline.vim" "${pkgdir}/usr/share/vim/vimfiles/plugin/powerline.vim"
+
+	msg2 "Installing zsh plugin..."
+	install -dm755 "${pkgdir}/usr/share/zsh/site-contrib"
+	install -m644 "powerline/bindings/zsh/powerline.zsh" "${pkgdir}/usr/share/zsh/site-contrib/powerline.zsh"
+
+	msg2 "Installing tmux configuration..."
+	install -dm755 "${pkgdir}/usr/share/tmux"
+	install -m644 "powerline/bindings/tmux/powerline.conf" "${pkgdir}/usr/share/tmux/powerline.conf"
+}

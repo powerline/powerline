@@ -1,7 +1,7 @@
 # Maintainer: Kim Silkebækken <kim.silkebaekken+aur@gmail.com>
 
-pkgname=powerline-git
-pkgver=20130122
+pkgname=python2-powerline-git
+pkgver=20130123
 pkgrel=1
 pkgdesc='The ultimate statusline/prompt utility.'
 url='https://github.com/Lokaltog/powerline'
