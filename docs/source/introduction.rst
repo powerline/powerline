@@ -1,5 +1,6 @@
+************
 Introduction
-============
+************
 
 This is the next version of Powerline, implemented in Python. It aims to 
 resolve some of the "unresolvable" problems of the vimscript implementation, 
@@ -10,7 +11,7 @@ The project is currently in beta, and most of the functionality in the old
 vimscript project is already implemented.
 
 Screenshots
------------
+===========
 
 **Mode-dependent highlighting**
 
@@ -37,7 +38,7 @@ The font in the screenshots is `Pragmata Pro`_ by Fabrizio Schiavi.
 .. _`Pragmata Pro`: http://www.fsd.it/fonts/pragmatapro.htm
 
 Feature highlights
-------------------
+==================
 
 * **Better performance.** Python performs quite a bit better than vimscript, 
   and by having most of the code in Python instead of vimscript it's also 

@@ -1,7 +1,8 @@
 .. _font-patching:
 
+*************
 Font patching
-=============
+*************
 
 Powerline provides a font patcher for custom glyphs like the segment 
 dividers (arrows), branch symbol, padlock symbol, etc. The font patcher 
@@ -24,7 +25,7 @@ patched versions of some popular programming fonts.
    configuration.
 
 Glyph table
------------
+===========
 
 Powerline stores all special glyphs in the Unicode *Private Use Area* 
 (``U+E000``-``U+F8FF``).
@@ -42,7 +43,7 @@ Code point  Glyph  Description
 ==========  =====  ===========
 
 Usage
------
+=====
 
 The font patcher is located at :file:`powerline/fontpatcher/fontpatcher.py`.  
 It requires Python 2.7 and FontForge compiled with Python bindings to work.
@@ -57,7 +58,7 @@ option to disable font renaming.
    the glyphs manually using a tool like ``gbdfed``.
 
 Linux
-^^^^^
+-----
 
 1. Install fontforge with Python bindings. For Ubuntu users the required 
    package is ``python-fontforge``, for Arch Linux users the required 
@@ -89,7 +90,7 @@ Linux
 6. Open vim and enjoy your new statusline!
 
 OS X
-^^^^
+----
 
 1. Check if you have a FontForge version with Python support by running 
    ``fontforge -version``. You should see something like this::

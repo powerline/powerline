@@ -1,8 +1,9 @@
+********
 Overview
-========
+********
 
 Requirements
-------------
+============
 
 Powerline requires Python 3.3 or Python 2.7 to work.
 
@@ -12,15 +13,15 @@ font or a patched font on your system. See `Font installation`_ for more
 details.
 
 Vim plugin requirements
-^^^^^^^^^^^^^^^^^^^^^^^
+-----------------------
 
 The vim plugin requires a vim version with Python support compiled in.  You 
 can check if your vim supports Python by running ``vim --version | grep 
 +python``.
 
 If your vim version doesn't have support for Python, you'll have to compile 
-it with the ``--enable-python3interp`` flag (``--enable-pythoninterp`` if 
-you want Python 2 support instead). Note that this also requires the related 
+it with the ``--enable-pythoninterp`` flag (``--enable-python3interp`` if 
+you want Python 3 support instead). Note that this also requires the related 
 Python headers to be installed on your system. Please consult your 
 distribution's documentation for details on how to compile and install 
 packages.
@@ -28,20 +29,20 @@ packages.
 Vim version 7.3.661 or newer is recommended for performance reasons.
 
 Optional dependencies
-^^^^^^^^^^^^^^^^^^^^^
+---------------------
 
 The following Python packages are not required by all segments, but 
-recommended for optimal performance:
+recommended for optimal performance and extra features:
 
 * ``pygit2``
 * ``mercurial``
 * ``psutil``
 
 Installation
-------------
+============
 
 Installing with ``pip``
-^^^^^^^^^^^^^^^^^^^^^^^
+-----------------------
 
 To install Powerline system-wide, run the following command as root::
 
@@ -54,7 +55,7 @@ system-wide, install with ``pip install --user`` instead.
    conflict with an unrelated project.
 
 Distribution-specific packages
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+------------------------------
 
 The following distribution-specific packages are officially supported, and 
 they provide an easy way of installing and upgrading Powerline:
@@ -65,10 +66,10 @@ they provide an easy way of installing and upgrading Powerline:
 .. _font-installation:
 
 Font installation
-^^^^^^^^^^^^^^^^^
+-----------------
 
 Linux
-*****
+^^^^^
 
 If you're running Linux, you may be able to avoid patching your coding font 
 to get the special glyphs required by Powerline. This works by utilizing 
@@ -94,13 +95,13 @@ font (see :ref:`font-patching` for details).
    an issue on GitHub.
 
 OS X and Windows
-****************
+^^^^^^^^^^^^^^^^
 
 You'll have to use a patched font to use the Powerline symbols. See 
 :ref:`font-patching` for details on font patching and pre-patched fonts.
 
 Usage
------
+=====
 
 .. note:: If Powerline is installed somewhere other than Python's 
    site-packages directories (e.g. by having the git repo in your dotfiles 
@@ -108,14 +109,14 @@ Usage
    examples below.
 
 Vim statusline
-^^^^^^^^^^^^^^
+--------------
 
 Regular installation
-********************
+^^^^^^^^^^^^^^^^^^^^
 
 **The recommended way of installing Powerline is as a Python package.**
 You can then enable the vim plugin by adding the following line to your 
-``vimrc``:
+:file:`vimrc`:
 
 .. code-block:: vim
 
@@ -129,40 +130,40 @@ If Powerline is installed somewhere other than Python's site-packages
 directories you'll either have to use a plugin manager like Vundle, or 
 source the vim plugin file with an absolute path to the plugin location.
 
-Add the following line to your ``vimrc``, where ``{path}`` is the path to 
-the main Powerline project directory:
+Add the following line to your :file:`vimrc`, where ``{path}`` is the path 
+to the main Powerline project directory:
 
 .. code-block:: vim
 
    source {path}/powerline/bindings/vim/plugin/source_plugin.vim
 
 Vundle installation
-*******************
+^^^^^^^^^^^^^^^^^^^
 
-If you're using Vundle you can add the following line to your ``vimrc``:
+If you're using Vundle you can add the following line to your :file:`vimrc`:
 
 .. code-block:: vim
 
    Bundle 'Lokaltog/powerline', {'rtp': 'powerline/bindings/vim/'}
 
 Shell prompts
-^^^^^^^^^^^^^
+-------------
 
 Bash prompt
-***********
+^^^^^^^^^^^
 
-Add the following line to your ``.bashrc``, where ``{path}`` is the absolute 
-path to your Powerline installation directory:
+Add the following line to your :file:`bashrc`, where ``{path}`` is the 
+absolute path to your Powerline installation directory:
 
 .. code-block:: bash
 
    . {path}/powerline/bindings/bash/powerline.sh
 
 Zsh prompt
-**********
+^^^^^^^^^^
 
-Add the following line to your ``.zshrc``, where ``{path}`` is the absolute 
-path to your Powerline installation directory:
+Add the following line to your :file:`zshrc`, where ``{path}`` is the 
+absolute path to your Powerline installation directory:
 
 .. code-block:: bash
 
@@ -171,7 +172,7 @@ path to your Powerline installation directory:
 Tmux statusline
 ^^^^^^^^^^^^^^^
 
-Add the following line to your ``.tmux.conf``, where ``{path}`` is the 
+Add the following line to your :file:`tmux.conf`, where ``{path}`` is the 
 absolute path to your Powerline installation directory::
 
    source '{path}/powerline/bindings/tmux/powerline.conf'

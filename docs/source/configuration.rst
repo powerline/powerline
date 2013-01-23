@@ -1,5 +1,6 @@
+*************
 Configuration
-=============
+*************
 
 Powerline is configured with one main configuration file, and with separate 
 configuration files for themes and colorschemes. All configuration files are 
@@ -37,7 +38,7 @@ file. Example:
    colorscheme/theme!
 
 Main configuration
-------------------
+==================
 
 :Location: :file:`powerline/config.json`
 
@@ -46,7 +47,7 @@ extensions, as well as some extension-specific options like themes and
 colorschemes.
 
 Common configuration
-^^^^^^^^^^^^^^^^^^^^
+--------------------
 
 Common configuration is a subdictionary that is a value of ``common`` key in 
 :file:`powerline/config.json` file.
@@ -68,7 +69,7 @@ Common configuration is a subdictionary that is a value of ``common`` key in
     have priority when searching for modules.
 
 Extension-specific configuration
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+--------------------------------
 
 Common configuration is a subdictionary that is a value of ``ext`` key in 
 :file:`powerline/config.json` file.
@@ -84,7 +85,7 @@ Common configuration is a subdictionary that is a value of ``ext`` key in
     buffer-specific statuslines in vim. Requires a custom matcher and theme.
 
 Colorschemes
-------------
+============
 
 :Location: :file:`powerline/colorschemes/{extension}/{name}.json`
 
@@ -139,7 +140,7 @@ Colorschemes
         :ref:`groups <config-colorscheme-groups>` option.
 
 Themes
-------
+======
 
 :Location: :file:`powerline/themes/{extension}/{name}.json`
 
@@ -243,7 +244,7 @@ Themes
         *not* included in any modes, *except* for the modes in this list.
 
 Segments
---------
+========
 
 Segments are written in Python, and the default segments provided with 
 Powerline are located in :file:`powerline/segments/{extension}.py`.  
