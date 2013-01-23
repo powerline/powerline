@@ -51,6 +51,10 @@ I'm using tmux and Powerline looks like crap, what's wrong?
     If you use iTerm2, make sure that you have enabled the setting 'Set 
     locale variables automatically' in Profiles > Terminal > Environment.
 
+I'm using PuTTY and I get huge gaps around the arrow glyphs!
+    Please uncheck :guilabel:`Treat CJK ambiguous characters as wide` in 
+    :menuselection:`Window --> Translation`.
+
 Vim-specific issues
 -------------------
 
