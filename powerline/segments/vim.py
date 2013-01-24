@@ -79,12 +79,12 @@ def readonly_indicator(text=u''):
 	return text if int(vim.eval('&readonly')) else None
 
 
-def file_directory():
+def file_directory(shorten_home=False):
 	'''Return file directory (head component of the file path).'''
 	file_directory = vim_funcs['expand']('%:~:.:h')
 	if file_directory is None:
 		return None
-	if file_directory.startswith('/home/'):
+	if shorten_home and file_directory.startswith('/home/'):
 		file_directory = '~' + file_directory[6:]
 	return file_directory.decode('utf-8') + os.sep if file_directory else None
 
