@@ -81,6 +81,9 @@ def readonly_indicator(text=u''):
 def file_directory():
 	'''Return file directory (head component of the file path).'''
 	file_directory = vim_funcs['expand']('%:~:.:h')
+	# Replace "/home/foo/" with "~foo" (foo's home, not current user's)
+	if file_directory.startswith('/home/'):
+		file_directory = '~' + file_directory[6:]
 	return file_directory.decode('utf-8') + os.sep if file_directory else None
 
 
