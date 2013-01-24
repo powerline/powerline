@@ -30,3 +30,4 @@ coverage.xml
 
 # SQLite databases
 *.db
+/.local.vimrc

@@ -26,6 +26,10 @@
 			"local_themes": {
 				"help": "help"
 			}
+		},
+		"ipython": {
+			"colorscheme": "default",
+			"theme": "default"
 		}
 	}
 }

@@ -176,3 +176,23 @@ Add the following line to your :file:`tmux.conf`, where ``{path}`` is the
 absolute path to your Powerline installation directory::
 
    source '{path}/powerline/bindings/tmux/powerline.conf'
+
+Ipython prompt
+^^^^^^^^^^^^^^
+
+Add the following lines to your :file:`.ipython/ipy_user_conf.py`::
+
+  # top
+  from powerline.bindings.ipython import setup as powerline_setup
+
+  # main() function (assuming you launched ipython without configuration to 
+  # create skeleton ipy_user_conf.py file):
+  powerline_setup()
+
+The following theoretically works, if you can figure out where to put it (I saw 
+a big bunch of wiki pages suggesting to put it somewhere, but have no idea where 
+actually)::
+
+  c.InteractiveShellApp.extensions = [
+    'powerline.bindings.ipython'
+  ]
