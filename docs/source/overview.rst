@@ -180,7 +180,8 @@ absolute path to your Powerline installation directory::
 Ipython prompt
 ^^^^^^^^^^^^^^
 
-Add the following lines to your :file:`.ipython/ipy_user_conf.py`::
+For ipython<0.11 add the following lines to your 
+:file:`.ipython/ipy_user_conf.py`::
 
   # top
   from powerline.bindings.ipython import setup as powerline_setup
@@ -189,9 +190,8 @@ Add the following lines to your :file:`.ipython/ipy_user_conf.py`::
   # create skeleton ipy_user_conf.py file):
   powerline_setup()
 
-The following theoretically works, if you can figure out where to put it (I saw 
-a big bunch of wiki pages suggesting to put it somewhere, but have no idea where 
-actually)::
+For ipython>=0.11 add the following line to your ipython_config.py file in the 
+profile you are using::
 
   c.InteractiveShellApp.extensions = [
     'powerline.bindings.ipython'
