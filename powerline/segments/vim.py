@@ -101,6 +101,28 @@ def file_name(display_no_file=False, no_file_text='[No file]'):
 	return file_name.decode('utf-8')
 
 
+def _to_human(size, precision=2):
+	SUFFIXES = ['B', 'KiB', 'MiB', 'GiB', 'TiB']
+	suffix = 0
+	while size >= 1024:
+		suffix += 1
+		size = size / 1024.0
+	if suffix == 0:
+		precision = 0
+	return u'%.*f %s' % (precision, size, SUFFIXES[suffix])
+
+
+def file_size():
+	'''Return file size.
+
+	Return None for unknown file size.
+	'''
+	if file_name() is None:
+		return None
+	file_size = vim_funcs['getfsize'](file_name())
+	return _to_human(file_size)
+
+
 def file_format():
 	'''Return file format (i.e. line ending type).
 
