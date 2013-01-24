@@ -64,6 +64,7 @@
 		"branch:divider": { "fg": "gray7", "bg": "gray4" },
 		"file_directory": { "fg": "gray9", "bg": "gray4" },
 		"file_name": { "fg": "white", "bg": "gray4", "attr": ["bold"] },
+		"file_size": { "fg": "gray8", "bg": "gray2" },
 		"file_name_no_file": { "fg": "gray9", "bg": "gray4", "attr": ["bold"] },
 		"file_name_empty": { "fg": "gray9", "bg": "gray4" },
 		"file_format": { "fg": "gray8", "bg": "gray2" },

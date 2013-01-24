@@ -6,7 +6,7 @@ import os
 import vim
 
 from powerline.bindings.vim import vim_get_func
-from powerline.lib import memoize
+from powerline.lib import memoize, humanize_bytes
 from powerline.lib.vcs import guess
 
 vim_funcs = {
@@ -15,6 +15,7 @@ vim_funcs = {
 	'expand': vim_get_func('expand'),
 	'line': vim_get_func('line', rettype=int),
 	'mode': vim_get_func('mode'),
+	'getfsize': vim_get_func('getfsize', rettype=int),
 }
 
 vim_modes = {
@@ -99,6 +100,20 @@ def file_name(display_no_file=False, no_file_text='[No file]'):
 			'highlight_group': ['file_name_no_file', 'file_name'],
 			}]
 	return file_name.decode('utf-8')
+
+
+@memoize(2)
+def file_size(suffix='B', binary_prefix=False):
+	'''Return file size.
+
+	Returns None if the file isn't saved, or if the size is too
+	big to fit in a number.
+	'''
+	file_name = vim_funcs['expand']('%')
+	file_size = vim_funcs['getfsize'](file_name)
+	if file_size < 0:
+		return None
+	return humanize_bytes(file_size, suffix, binary_prefix)
 
 
 def file_format():
