@@ -1,0 +1,25 @@
+{
+	"name": "Default color scheme for IPython prompt",
+	"colors": {
+		"black": 16,
+		"white": 231,
+
+		"darkcyan": 74,
+
+		"gray0": 233,
+		"gray1": 235,
+		"gray2": 236,
+		"gray3": 239,
+		"gray4": 240,
+		"gray5": 241,
+		"gray6": 244,
+		"gray7": 245,
+		"gray8": 247,
+		"gray9": 250,
+		"gray10": 252
+	},
+	"groups": {
+		"virtualenv": { "fg": "white", "bg": "darkcyan" },
+		"prompt": { "fg": "gray9", "bg": "gray4" }
+	}
+}
