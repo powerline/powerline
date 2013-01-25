@@ -180,7 +180,7 @@ Themes
         .. _config-themes-seg-module:
 
         Function module, only required for function segments. Defaults to 
-        ``powerline.ext.{extension}.segments``. Default is overriden by 
+        ``powerline.segments.{extension}``. Default is overriden by 
         :ref:`default_module theme option <config-themes-default_module>`.
 
     ``name``
