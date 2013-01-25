@@ -28,4 +28,4 @@ class IpythonRenderer(ShellRenderer):
 		if not self.color:
 			return ''
 		else:
-			return super(IpythonRenderer, self).hl(*args, **kwargs)
+			return '\x01'+super(IpythonRenderer, self).hl(*args, **kwargs)+'\x02'
