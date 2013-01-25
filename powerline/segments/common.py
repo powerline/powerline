@@ -140,8 +140,11 @@ def weather(unit='c', location_query=None):
 	}
 	url = 'http://query.yahooapis.com/v1/public/yql?' + _urllib_urlencode(query_data)
 	response = json.loads(_urllib_read(url))
-	condition = response['query']['results']['weather']['rss']['channel']['item']['condition']
-	condition_code = int(condition['code'])
+	try:
+		condition = response['query']['results']['weather']['rss']['channel']['item']['condition']
+		condition_code = int(condition['code'])
+	except KeyError:
+		return None
 	icon = u'〇'
 	for icon, codes in weather_conditions_codes.items():
 		if condition_code in codes:
