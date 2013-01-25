@@ -46,7 +46,8 @@ class Powerline(object):
 		renderer_module_import = 'powerline.renderers.{0}'.format(renderer_module_name)
 		renderer_class_name = '{0}Renderer'.format(underscore_to_camelcase(renderer_module_name))
 		Renderer = getattr(importlib.import_module(renderer_module_import), renderer_class_name)
-		self.renderer = Renderer(theme_config, local_themes, theme_kwargs)
+		self.renderer = Renderer(theme_config, local_themes, theme_kwargs,
+			term_24bit_colors=self.config.get('term_24bit_colors', False))
 
 	def add_local_theme(self, key, config):
 		'''Add local themes at runtime (e.g. during vim session).

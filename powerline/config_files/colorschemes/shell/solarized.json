@@ -1,0 +1,31 @@
+{
+	"name": "Solarized Dark",
+	"colors": {
+		"base03": [8, "002b36"],
+		"base02": [0, "073642"],
+		"base01": [10, "586e75"],
+		"base00": [11, "657b83"],
+		"base0": [12, "839496"],
+		"base1": [14, "93a1a1"],
+		"base2": [7, "eee8d5"],
+		"base3": [15, "fdf6e3"],
+		"yellow": [3, "b58900"],
+		"orange": [9, "cb4b16"],
+		"red": [1, "dc322f"],
+		"magenta": [5, "d33682"],
+		"violet": [13, "6c71c4"],
+		"blue": [4, "268bd2"],
+		"cyan": [6, "2aa198"],
+		"green": [2, "719e07"]
+	},
+	"groups": {
+		"user":               { "fg": "base3", "bg": "blue", "attr": ["bold"] },
+		"superuser":          { "fg": "base3", "bg": "red", "attr": ["bold"] },
+		"virtualenv":         { "fg": "base3", "bg": "green" },
+		"branch":             { "fg": "base1", "bg": "base02" },
+		"cwd":                { "fg": "base2", "bg": "base01" },
+		"cwd:current_folder": { "fg": "base3", "bg": "base01", "attr": ["bold"] },
+		"cwd:divider":        { "fg": "base1", "bg": "base01" },
+		"hostname":           { "fg": "base3", "bg": "base01" }
+	}
+}

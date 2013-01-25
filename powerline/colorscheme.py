@@ -12,7 +12,7 @@ class Colorscheme(object):
 		# Create a dict of color tuples with both a cterm and hex value
 		for color_name, color in colorscheme['colors'].items():
 			try:
-				self.colors[color_name] = (color[0], color[1])
+				self.colors[color_name] = (color[0], int(color[1], 16))
 			except TypeError:
 				self.colors[color_name] = (color, cterm_to_hex[color])
 

@@ -8,9 +8,8 @@ Powerline
 
    introduction
    overview
-   fontpatching
    configuration
-   troubleshooting
+   fontpatching
    license-credits
 
 Indices and tables

@@ -8,9 +8,6 @@ Powerline provides a font patcher for custom glyphs like the segment
 dividers (arrows), branch symbol, padlock symbol, etc. The font patcher 
 requires FontForge with Python bindings to work.
 
-You may be able to avoid patching your coding font to use the custom glyphs!  
-See :ref:`font-installation` for instructions.
-
 Check out the `powerline-fonts 
 <https://github.com/Lokaltog/powerline-fonts>`_ repository on GitHub for 
 patched versions of some popular programming fonts.

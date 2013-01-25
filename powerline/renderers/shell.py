@@ -17,7 +17,7 @@ class ShellRenderer(Renderer):
 			if fg is False or fg[0] is False:
 				ansi += [39]
 			else:
-				if self.TERM_24BIT:
+				if self.TERM_24BIT_COLORS:
 					ansi += [38, 2] + list(self._int_to_rgb(fg[1]))
 				else:
 					ansi += [38, 5, fg[0]]
@@ -25,7 +25,7 @@ class ShellRenderer(Renderer):
 			if bg is False or bg[0] is False:
 				ansi += [49]
 			else:
-				if self.TERM_24BIT:
+				if self.TERM_24BIT_COLORS:
 					ansi += [48, 2] + list(self._int_to_rgb(bg[1]))
 				else:
 					ansi += [48, 5, bg[0]]
