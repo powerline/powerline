@@ -148,9 +148,12 @@ For ipython<0.11 add the following lines to your
   # create skeleton ipy_user_conf.py file):
   powerline_setup()
 
-For ipython>=0.11 add the following line to your ipython_config.py file in the 
+For ipython>0.11 add the following line to your ipython_config.py file in the 
 profile you are using::
 
   c.InteractiveShellApp.extensions = [
     'powerline.bindings.ipython.post_0_11'
   ]
+
+Ipython=0.11* is not supported and does not work. Ipython<0.10 was not tested 
+(not installable by pip).
