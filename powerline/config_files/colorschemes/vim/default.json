@@ -46,12 +46,12 @@
 		"gray9": 250,
 		"gray10": 252,
 
-		"gradient1": 190,
-		"gradient2": 184,
-		"gradient3": 178,
-		"gradient4": 172,
-		"gradient5": 166,
-		"gradient6": 160
+		"gradient1": [190, "8ae71c"],
+		"gradient2": [184, "c2e821"],
+		"gradient3": [178, "e9d926"],
+		"gradient4": [172, "eaa72b"],
+		"gradient5": [166, "eb7830"],
+		"gradient6": [160, "ec4b35"]
 	},
 	"groups": {
 		"background": { "fg": "white", "bg": "gray2" },
