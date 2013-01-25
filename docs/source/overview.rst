@@ -142,7 +142,7 @@ For ipython<0.11 add the following lines to your
 :file:`.ipython/ipy_user_conf.py`::
 
   # top
-  from powerline.bindings.ipython import setup as powerline_setup
+  from powerline.bindings.ipython.pre_0_11 import setup as powerline_setup
 
   # main() function (assuming you launched ipython without configuration to 
   # create skeleton ipy_user_conf.py file):
@@ -152,5 +152,5 @@ For ipython>=0.11 add the following line to your ipython_config.py file in the
 profile you are using::
 
   c.InteractiveShellApp.extensions = [
-    'powerline.bindings.ipython'
+    'powerline.bindings.ipython.post_0_11'
   ]
