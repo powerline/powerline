@@ -23,6 +23,8 @@ _powerline_install_precmd() {
 		fi
 	done
 	precmd_functions+=(_powerline_precmd)
+	setopt promptpercent
+	setopt promptsubst
 	PS1='$(powerline-prompt --renderer_module=zsh_prompt --last_exit_code=$? --last_pipe_status="$pipestatus" left)'
 	RPS1='$(powerline-prompt --renderer_module=zsh_prompt --last_exit_code=$? --last_pipe_status="$pipestatus" right)'
 }
