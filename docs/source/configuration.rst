@@ -52,31 +52,12 @@ Common configuration
 Common configuration is a subdictionary that is a value of ``common`` key in 
 :file:`powerline/config.json` file.
 
+.. _config-term_24bit_colors:
+
 ``term_24bit_colors``
-    Defines whether to output a cterm index (8-bit) or RGB colors (24-bit) 
-    to the terminal emulator.
-
-    .. table:: 24-bit color support table
-       :name: term-rgb-color-support
-
-       ================== =====================
-       Terminal emulator  24-bit color support
-       ================== =====================
-       Gnome Terminal     |supp_no|
-       Gvim               |supp_no|
-       Konsole            |supp_yes|
-       lxterminal         |supp_no|
-       rxvt-unicode       |supp_no|
-       st                 |supp_no|
-       Xfce Terminal      |supp_no|
-       xterm              |supp_partial| [#]_
-       ================== =====================
-
-    .. |supp_yes| image:: _static/img/icons/tick.png
-    .. |supp_no| image:: _static/img/icons/cross.png
-    .. |supp_partial| image:: _static/img/icons/error.png
-
-    .. [#] Uses nearest color from 8-bit palette.
+    Defines whether to output cterm indices (8-bit) or RGB colors (24-bit) 
+    to the terminal emulator. See the :ref:`term-feature-support-matrix` for 
+    information on whether your terminal emulator supports 24-bit colors.
 
 ``dividers``
     Defines the dividers used in all Powerline extensions. This option 
@@ -87,12 +68,12 @@ Common configuration is a subdictionary that is a value of ``common`` key in
     background colors, while the ``soft`` dividers are used to divide 
     segments with the same background color.
 
-``paths``
-    .. _config-common-paths:
+.. _config-common-paths:
 
+``paths``
     Defines additional paths which will be searched for modules when using 
-    :ref:`module segment option <config-themes-seg-module>`. Paths defined here 
-    have priority when searching for modules.
+    :ref:`module segment option <config-themes-seg-module>`. Paths defined 
+    here have priority when searching for modules.
 
 Extension-specific configuration
 --------------------------------
@@ -118,9 +99,9 @@ Colorschemes
 ``name``
     Name of the colorscheme.
 
-``colors``
-    .. _config-colorscheme-colors:
+.. _config-colorscheme-colors:
 
+``colors``
     Color definitions, consisting of a dict where the key is the name of the 
     color, and the value is one of the following:
 
@@ -129,9 +110,9 @@ Colorschemes
       "aabbcc"]``). This is useful for colorschemes that use colors that 
       aren't available in color terminals.
 
-``groups``
-    .. _config-colorscheme-groups:
+.. _config-colorscheme-groups:
 
+``groups``
     Segment highlighting groups, consisting of a dict where the key is the 
     name of the highlighting group (usually the function name for function 
     segments), and the value is a dict that defines the foreground color, 
@@ -173,9 +154,9 @@ Themes
 ``name``
     Name of the theme.
 
-``default_module``
-    .. _config-themes-default_module:
+.. _config-themes-default_module:
 
+``default_module``
     Python module where segments will be looked by default.
 
 ``segments``

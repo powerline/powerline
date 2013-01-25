@@ -7,11 +7,6 @@ Requirements
 
 Powerline requires Python 3.3 or Python 2.7 to work.
 
-Powerline uses several special glyphs to get the arrow effect and some 
-custom symbols for developers. This requires that you either have the symbol 
-font or a patched font on your system (details in installation 
-instructions).
-
 Vim plugin requirements
 -----------------------
 
@@ -27,6 +22,44 @@ distribution's documentation for details on how to compile and install
 packages.
 
 Vim version 7.3.661 or newer is recommended for performance reasons.
+
+Terminal emulator requirements
+------------------------------
+
+Powerline uses several special glyphs to get the arrow effect and some 
+custom symbols for developers. This requires that you either have a symbol 
+font or a patched font on your system. Your terminal emulator must also 
+support either patched fonts or fontconfig for Powerline to work properly.
+
+You can also enable :ref:`24-bit color support <config-term_24bit_colors>` 
+if your terminal emulator supports it.
+
+.. table:: Application/terminal emulator feature support matrix
+   :name: term-feature-support-matrix
+
+   ===================== ======= ===================== ===================== =====================
+   Name                  OS      Patched font support  Fontconfig support    24-bit color support 
+   ===================== ======= ===================== ===================== =====================
+   Gnome Terminal        Linux   |i_yes|               |i_yes|               |i_no|
+   Gvim                  Linux   |i_yes|               |i_no|                |i_yes|
+   iTerm2                OS X    |i_yes|               |i_no|                |i_no|
+   Konsole               Linux   |i_yes|               |i_yes|               |i_yes|
+   lxterminal            Linux   |i_yes|               |i_yes|               |i_no|
+   MacVim                OS X    |i_yes|               |i_no|                |i_yes|
+   rxvt-unicode          Linux   |i_partial| [#]_      |i_no|                |i_no|
+   st                    Linux   |i_yes|               |i_yes|               |i_no|
+   Terminal.app          OS X    |i_yes|               |i_no|                |i_no|
+   Xfce Terminal         Linux   |i_yes|               |i_yes|               |i_no|
+   xterm                 Linux   |i_yes|               |i_no|                |i_partial| [#]_
+   ===================== ======= ===================== ===================== =====================
+
+.. |i_yes| image:: _static/img/icons/tick.png
+.. |i_no| image:: _static/img/icons/cross.png
+.. |i_partial| image:: _static/img/icons/error.png
+
+.. [#] Must be compiled with ``--enable-unicode3`` for the 
+   patched font to work.
+.. [#] Uses nearest color from 8-bit palette.
 
 Optional dependencies
 ---------------------

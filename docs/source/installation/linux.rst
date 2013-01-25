@@ -36,31 +36,10 @@ Plugin installation
 Font installation
 =================
 
-================== ============================= ======================
-Application/terminal emulator font support table
------------------------------------------------------------------------
-Name               Patched font support          Fontconfig support
-================== ============================= ======================
-Gnome Terminal     |supp_yes|                    |supp_yes|
-Gvim               |supp_yes|                    |supp_no|
-Konsole            |supp_yes|                    |supp_yes|
-lxterminal         |supp_yes|                    |supp_yes|
-rxvt-unicode       |supp_partial| [#]_           |supp_no|
-st                 |supp_yes|                    |supp_yes|
-Xfce Terminal      |supp_yes|                    |supp_yes|
-xterm              |supp_yes|                    |supp_no|
-================== ============================= ======================
-
-.. |supp_yes| image:: ../_static/img/icons/tick.png
-.. |supp_no| image:: ../_static/img/icons/cross.png
-.. |supp_partial| image:: ../_static/img/icons/error.png
-
-.. [#] Must be compiled with ``--enable-unicode3`` for the 
-   patched font to work.
-
 Powerline provides two ways of installing the required fonts on Linux. The 
 recommended method is using ``fontconfig`` if your terminal emulator 
-supports it (see the table above).
+supports it. See the :ref:`term-feature-support-matrix` for details about 
+what features your terminal emulator supports.
 
 Fontconfig
 ----------

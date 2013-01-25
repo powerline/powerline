@@ -41,22 +41,9 @@ command::
 Font installation
 =================
 
-================== =============================
-Application/terminal emulator font support table
-------------------------------------------------
-Name               Patched font support
-================== =============================
-iTerm2             |supp_yes|
-Terminal.app       |supp_yes|
-================== =============================
-
-.. |supp_yes| image:: ../_static/img/icons/tick.png
-.. |supp_no| image:: ../_static/img/icons/cross.png
-.. |supp_partial| image:: ../_static/img/icons/error.png
-
-.. note:: You need a patched font for Powerline to work on OS X. Check out 
-   the `powerline-fonts`_ repository on GitHub for patched versions of some 
-   popular programming fonts.
+You need a patched font for Powerline to work on OS X. Check out the 
+`powerline-fonts`_ repository on GitHub for patched versions of some popular 
+programming fonts.
 
 1. Download the font of your choice and install it by double-clicking the 
    font file in Finder and then click :guilabel:`Install this font` in the 
