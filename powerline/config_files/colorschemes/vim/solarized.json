@@ -1,0 +1,101 @@
+{
+	"name": "Solarized Dark",
+	"colors": {
+		"base03": [8, "002b36"],
+		"base02": [0, "073642"],
+		"base01": [10, "586e75"],
+		"base00": [11, "657b83"],
+		"base0": [12, "839496"],
+		"base1": [14, "93a1a1"],
+		"base2": [7, "eee8d5"],
+		"base3": [15, "fdf6e3"],
+		"yellow": [3, "b58900"],
+		"orange": [9, "cb4b16"],
+		"red": [1, "dc322f"],
+		"magenta": [5, "d33682"],
+		"violet": [13, "6c71c4"],
+		"blue": [4, "268bd2"],
+		"cyan": [6, "2aa198"],
+		"green": [2, "719e07"]
+	},
+	"groups": {
+		"background":             { "fg": "base3", "bg": "base02" },
+		"background:divider":     { "fg": "base00", "bg": "base02" },
+		"mode":                   { "fg": "base3", "bg": "green", "attr": ["bold"] },
+		"modified_indicator":     { "fg": "yellow", "bg": "base01", "attr": ["bold"] },
+		"paste_indicator":        { "fg": "base3", "bg": "orange", "attr": ["bold"] },
+		"readonly_indicator":     { "fg": "red", "bg": "base01" },
+		"branch":                 { "fg": "base2", "bg": "base01" },
+		"branch:divider":         { "fg": "base1", "bg": "base01" },
+		"file_directory":         { "fg": "base2", "bg": "base01" },
+		"file_name":              { "fg": "base3", "bg": "base01", "attr": ["bold"] },
+		"file_size":              { "fg": "base3", "bg": "base01" },
+		"file_name_no_file":      { "fg": "base3", "bg": "base01", "attr": ["bold"] },
+		"file_name_empty":        { "fg": "base3", "bg": "base01" },
+		"file_format":            { "fg": "base1", "bg": "base02" },
+		"file_encoding":          { "fg": "base1", "bg": "base02" },
+		"file_type":              { "fg": "base1", "bg": "base02" },
+		"file_vcs_status":        { "fg": "red", "bg": "base01" },
+		"file_vcs_status_M":      { "fg": "yellow", "bg": "base01" },
+		"file_vcs_status_A":      { "fg": "green", "bg": "base01" },
+		"line_percent":           { "fg": "base3", "bg": "base00" },
+		"line_current":           { "fg": "base03", "bg": "base2", "attr": ["bold"] },
+		"line_current_symbol":    { "fg": "base03", "bg": "base2" },
+		"col_current":            { "fg": "base0", "bg": "base2" }
+	},
+	"mode_translations": {
+		"nc": {
+			"colors": {
+				"base02": "base02",
+				"base01": "base02",
+				"base00": "base02",
+				"base0": "base01",
+				"base1": "base00",
+				"base2": "base0",
+				"base3": "base1"
+			}
+		},
+		"i": {
+			"groups": {
+				"background":             { "fg": "base3", "bg": "base01" },
+				"background:divider":     { "fg": "base2", "bg": "base01" },
+				"mode":                   { "fg": "base3", "bg": "blue", "attr": ["bold"] },
+				"modified_indicator":     { "fg": "yellow", "bg": "base2", "attr": ["bold"] },
+				"paste_indicator":        { "fg": "base3", "bg": "orange", "attr": ["bold"] },
+				"readonly_indicator":     { "fg": "red", "bg": "base2" },
+				"branch":                 { "fg": "base01", "bg": "base2" },
+				"branch:divider":         { "fg": "base00", "bg": "base2" },
+				"file_directory":         { "fg": "base01", "bg": "base2" },
+				"file_name":              { "fg": "base02", "bg": "base2", "attr": ["bold"] },
+				"file_size":              { "fg": "base02", "bg": "base2" },
+				"file_name_no_file":      { "fg": "base02", "bg": "base2", "attr": ["bold"] },
+				"file_name_empty":        { "fg": "base02", "bg": "base2" },
+				"file_format":            { "fg": "base2", "bg": "base01" },
+				"file_encoding":          { "fg": "base2", "bg": "base01" },
+				"file_type":              { "fg": "base2", "bg": "base01" },
+				"file_vcs_status":        { "fg": "red", "bg": "base2" },
+				"file_vcs_status_M":      { "fg": "yellow", "bg": "base2" },
+				"file_vcs_status_A":      { "fg": "green", "bg": "base2" },
+				"line_percent":           { "fg": "base3", "bg": "base1" },
+				"line_current":           { "fg": "base03", "bg": "base3", "attr": ["bold"] },
+				"line_current_symbol":    { "fg": "base03", "bg": "base3" },
+				"col_current":            { "fg": "base0", "bg": "base3" }
+			}
+		},
+		"v": {
+			"groups": {
+				"mode": { "fg": "base3", "bg": "orange", "attr": ["bold"] }
+			}
+		},
+		"V": {
+			"groups": {
+				"mode": { "fg": "base3", "bg": "orange", "attr": ["bold"] }
+			}
+		},
+		"R": {
+			"groups": {
+				"mode": { "fg": "base3", "bg": "red", "attr": ["bold"] }
+			}
+		}
+	}
+}
