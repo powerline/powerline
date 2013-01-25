@@ -15,4 +15,4 @@ class ZshPromptRenderer(ShellRenderer):
 
 	@staticmethod
 	def escape(string):
-		return string.replace('%', '%%')
+		return string.replace('%', '%%').replace('\\', '\\\\')

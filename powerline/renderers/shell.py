@@ -36,3 +36,7 @@ class ShellRenderer(Renderer):
 				if attr & Renderer.ATTR_BOLD:
 					ansi += [1]
 		return '[{0}m'.format(';'.join(str(attr) for attr in ansi))
+
+	@staticmethod
+	def escape(string):
+		return string.replace('\\', '\\\\')
