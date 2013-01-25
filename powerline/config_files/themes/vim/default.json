@@ -69,7 +69,7 @@
 				"name": "line_percent",
 				"args": { "gradient": true },
 				"priority": 30,
-				"after": "",
+				"after": "%",
 				"rjust": 4
 			},
 			{
