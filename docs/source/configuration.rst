@@ -99,9 +99,9 @@ Colorschemes
     color, and the value is one of the following:
 
     * A cterm color index.
-    * A list of two integers, where the first integer is a cterm color 
-      index, and the second is an RGB/hex color. This is useful for 
-      colorschemes that use colors that aren't available in color terminals.
+    * A list with a cterm color index and a hex color string (e.g. ``[123, 
+      "aabbcc"]``). This is useful for colorschemes that use colors that 
+      aren't available in color terminals.
 
 ``groups``
     .. _config-colorscheme-groups:
