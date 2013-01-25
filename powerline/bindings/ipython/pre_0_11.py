@@ -9,8 +9,7 @@ class PowerlinePrompt(BasePrompt):
 		super(PowerlinePrompt, self).__init__(*args, **kwargs)
 
 	def set_p_str(self):
-		self.p_str = self.powerline.renderer.render()
-		self.p_str_nocolor = self.powerline.renderer.render(color=False)
+		self.p_str, self.p_str_nocolor = self.powerline.renderer.render(output_raw=True)
 
 def setup(prompt='1'):
 	ip = get_ipython()

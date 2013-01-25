@@ -32,7 +32,14 @@ class Renderer(object):
 		else:
 			return self.theme
 
-	def render(self, mode=None, width=None, theme=None, segments=None, side=None):
+	@staticmethod
+	def _returned_value(rendered_highlighted, segments, output_raw):
+		if output_raw:
+			return rendered_highlighted, ''.join((segment['rendered_raw'] for segment in segments))
+		else:
+			return rendered_highlighted
+
+	def render(self, mode=None, width=None, theme=None, segments=None, side=None, output_raw=False):
 		'''Render all segments.
 
 		When a width is provided, low-priority segments are dropped one at
@@ -50,7 +57,7 @@ class Renderer(object):
 		rendered_highlighted = self._render_segments(mode, theme, segments)
 		if not width:
 			# No width specified, so we don't need to crop or pad anything
-			return rendered_highlighted
+			return self._returned_value(rendered_highlighted, segments, output_raw)
 
 		# Create an ordered list of segments that can be dropped
 		segments_priority = [segment for segment in sorted(segments, key=lambda segment: segment['priority'], reverse=True) if segment['priority'] > 0]
@@ -70,7 +77,8 @@ class Renderer(object):
 				segment['contents'] = segments_fillers_contents
 			# Add remainder whitespace to the first filler segment
 			segments_fillers[0]['contents'] += ' ' * segments_fillers_remainder
-		return self._render_segments(mode, theme, segments)
+
+		return self._returned_value(self._render_segments(mode, theme, segments), segments, output_raw)
 
 	def _render_segments(self, mode, theme, segments, render_highlighted=True):
 		'''Internal segment rendering method.
@@ -133,7 +141,8 @@ class Renderer(object):
 		rendered_highlighted += self.hl()
 		return rendered_highlighted
 
-	def _total_len(self, segments):
+	@staticmethod
+	def _total_len(segments):
 		'''Return total/rendered length of all segments.
 
 		This method uses the rendered_raw property of the segments and requires
