@@ -1,6 +1,4 @@
 _powerline_precmd() {
-	export PS1="$(powerline-prompt --renderer_module=zsh_prompt --last_exit_code=$? --last_pipe_status="$pipestatus" left)"
-	export RPS1="$(powerline-prompt --renderer_module=zsh_prompt --last_exit_code=$? --last_pipe_status="$pipestatus" right)"
 	_powerline_tmux_set_pwd
 }
 
@@ -25,6 +23,8 @@ _powerline_install_precmd() {
 		fi
 	done
 	precmd_functions+=(_powerline_precmd)
+	PS1='$(powerline-prompt --renderer_module=zsh_prompt --last_exit_code=$? --last_pipe_status="$pipestatus" left)'
+	RPS1='$(powerline-prompt --renderer_module=zsh_prompt --last_exit_code=$? --last_pipe_status="$pipestatus" right)'
 }
 
 trap "_powerline_tmux_set_columns" SIGWINCH
