@@ -52,6 +52,32 @@ Common configuration
 Common configuration is a subdictionary that is a value of ``common`` key in 
 :file:`powerline/config.json` file.
 
+``term_24bit_colors``
+    Defines whether to output a cterm index (8-bit) or RGB colors (24-bit) 
+    to the terminal emulator.
+
+    .. table:: 24-bit color support table
+       :name: term-rgb-color-support
+
+       ================== =====================
+       Terminal emulator  24-bit color support
+       ================== =====================
+       Gnome Terminal     |supp_no|
+       Gvim               |supp_no|
+       Konsole            |supp_yes|
+       lxterminal         |supp_no|
+       rxvt-unicode       |supp_no|
+       st                 |supp_no|
+       Xfce Terminal      |supp_no|
+       xterm              |supp_partial| [#]_
+       ================== =====================
+
+    .. |supp_yes| image:: _static/img/icons/tick.png
+    .. |supp_no| image:: _static/img/icons/cross.png
+    .. |supp_partial| image:: _static/img/icons/error.png
+
+    .. [#] Uses nearest color from 8-bit palette.
+
 ``dividers``
     Defines the dividers used in all Powerline extensions. This option 
     should usually only be changed if you don't have a patched font, or if 

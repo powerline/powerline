@@ -9,12 +9,13 @@ class Renderer(object):
 	ATTR_ITALIC = 2
 	ATTR_UNDERLINE = 4
 
-	TERM_24BIT = False
+	TERM_24BIT_COLORS = False
 
-	def __init__(self, theme_config, local_themes, theme_kwargs):
+	def __init__(self, theme_config, local_themes, theme_kwargs, term_24bit_colors=False):
 		self.theme = Theme(theme_config=theme_config, **theme_kwargs)
 		self.local_themes = local_themes
 		self.theme_kwargs = theme_kwargs
+		self.TERM_24BIT_COLORS = term_24bit_colors
 
 	def add_local_theme(self, matcher, theme):
 		if matcher in self.local_themes:
