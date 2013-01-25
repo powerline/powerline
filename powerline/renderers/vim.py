@@ -15,7 +15,6 @@ vim_setwinvar = vim_get_func('setwinvar')
 
 class VimRenderer(Renderer):
 	'''Powerline vim segment renderer.'''
-	_PERCENT_PLACEHOLDER = u''
 
 	def __init__(self, *args, **kwargs):
 		super(VimRenderer, self).__init__(*args, **kwargs)
@@ -34,17 +33,17 @@ class VimRenderer(Renderer):
 		if current:
 			mode = vim_mode()
 			theme = self.get_theme()
-			segments = []
-			for segment in theme.get_segments():
-				segment['contents'] = segment['contents'].replace('%', self._PERCENT_PLACEHOLDER)
-				segments.append(segment)
+			segments = [segment for segment in theme.get_segments()]
 			self.window_cache[window_id] = (theme, segments)
 		else:
 			mode = 'nc'
 			theme, segments = self.window_cache.get(window_id, (None, None))
 		statusline = super(VimRenderer, self).render(mode, winwidth, theme, segments)
-		statusline = statusline.replace(self._PERCENT_PLACEHOLDER, '%%')
 		return statusline
+
+	@staticmethod
+	def escape(string):
+		return string.replace('%', '%%')
 
 	def hl(self, fg=None, bg=None, attr=None):
 		'''Highlight a segment.

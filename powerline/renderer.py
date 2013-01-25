@@ -117,25 +117,25 @@ class Renderer(object):
 				segment_hl = self.hl(**segment['highlight'][mode])
 
 			if segment['type'] == 'filler':
-				rendered_highlighted += segment['contents'] or ''
+				rendered_highlighted += self.escape(segment['contents'] or '')
 			elif segment['draw_divider'] or divider_type == 'hard':
 				# Draw divider if specified, or if it's a hard divider
 				# Note: Hard dividers are always drawn, regardless of
 				# the draw_divider option
 				if segment['side'] == 'left':
 					segment['rendered_raw'] += outer_padding + segment['contents'] + ' ' + divider + ' '
-					rendered_highlighted += segment_hl + outer_padding + segment['contents'] + ' ' + divider_hl + divider + ' '
+					rendered_highlighted += segment_hl + self.escape(outer_padding + segment['contents'] + ' ') + divider_hl + self.escape(divider + ' ')
 				else:
 					segment['rendered_raw'] += ' ' + divider + ' ' + segment['contents'] + outer_padding
-					rendered_highlighted += ' ' + divider_hl + divider + segment_hl + ' ' + segment['contents'] + outer_padding
+					rendered_highlighted += self.escape(' ') + divider_hl + self.escape(divider) + segment_hl + self.escape(' ' + segment['contents'] + outer_padding)
 			elif segment['contents']:
 				# Segments without divider
 				if segment['side'] == 'left':
 					segment['rendered_raw'] += outer_padding + segment['contents']
-					rendered_highlighted += segment_hl + outer_padding + segment['contents']
+					rendered_highlighted += segment_hl + self.escape(outer_padding + segment['contents'])
 				else:
 					segment['rendered_raw'] += segment['contents'] + outer_padding
-					rendered_highlighted += segment_hl + segment['contents'] + outer_padding
+					rendered_highlighted += segment_hl + self.escape(segment['contents'] + outer_padding)
 			else:
 				raise ValueError('Unknown segment type')
 		rendered_highlighted += self.hl()
@@ -149,6 +149,10 @@ class Renderer(object):
 		that the segments have been rendered using the render() method first.
 		'''
 		return len(''.join([segment['rendered_raw'] for segment in segments]))
+
+	@staticmethod
+	def escape(string):
+		return string
 
 	@staticmethod
 	def _int_to_rgb(int):
