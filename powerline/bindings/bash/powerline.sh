@@ -16,4 +16,4 @@ trap "_powerline_tmux_set_columns" SIGWINCH
 kill -SIGWINCH "$$"
 
 export PROMPT_COMMAND="_powerline_tmux_set_pwd"
-PS1='$(powerline-prompt --last_exit_code=$? left)'
+export PS1='$(powerline-prompt --last_exit_code=$? left)'
