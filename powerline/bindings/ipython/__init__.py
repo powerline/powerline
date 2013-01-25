@@ -102,6 +102,5 @@ def setup(ip=None, prompt_type='in', level=1):
 	set_prompt(ip, prompt, key)
 	if hasattr(ip, 'prompt_manager'):
 		ip.prompt_manager = PowerlinePromptManager(shell=ip.prompt_manager.shell, config=ip.prompt_manager.config)
-	ip.user_ns.update({'ip': ip})
 
 load_ipython_extension = setup
