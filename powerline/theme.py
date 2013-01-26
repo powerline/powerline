@@ -12,7 +12,7 @@ except NameError:
 
 
 class Theme(object):
-	def __init__(self, ext, colorscheme, theme_config, common_config):
+	def __init__(self, ext, colorscheme, theme_config, common_config, segment_info=None):
 		self.colorscheme = colorscheme
 		self.dividers = theme_config.get('dividers', common_config['dividers'])
 		self.segments = {
@@ -23,6 +23,7 @@ class Theme(object):
 			'contents': None,
 			'highlight': defaultdict(lambda: {'fg': False, 'bg': False, 'attr': 0})
 			}
+		self.segment_info = segment_info
 		get_segment = Segment(ext, common_config['paths'], colorscheme, theme_config.get('default_module')).get
 		for side in ['left', 'right']:
 			self.segments[side].extend((get_segment(segment, side) for segment in theme_config['segments'].get(side, [])))
@@ -41,7 +42,11 @@ class Theme(object):
 			parsed_segments = []
 			for segment in self.segments[side]:
 				if segment['type'] == 'function':
-					contents = segment['contents_func'](**segment['args'])
+					if (hasattr(segment['contents_func'], 'requires_powerline_segment_info')
+							and segment['contents_func'].requires_powerline_segment_info):
+						contents = segment['contents_func'](segment_info=self.segment_info, **segment['args'])
+					else:
+						contents = segment['contents_func'](**segment['args'])
 					if contents is None:
 						continue
 					if isinstance(contents, list):

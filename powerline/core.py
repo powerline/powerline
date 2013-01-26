@@ -11,7 +11,7 @@ from powerline.lib import underscore_to_camelcase
 
 
 class Powerline(object):
-	def __init__(self, ext, renderer_module=None):
+	def __init__(self, ext, renderer_module=None, segment_info=None):
 		config_home = os.environ.get('XDG_CONFIG_HOME', os.path.expanduser('~/.config'))
 		config_path = os.path.join(config_home, 'powerline')
 		plugin_path = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'config_files')
@@ -35,6 +35,7 @@ class Powerline(object):
 			'ext': ext,
 			'colorscheme': colorscheme,
 			'common_config': self.config,
+			'segment_info': segment_info,
 			}
 		local_themes = {}
 		for key, local_theme_name in self.config_ext.get('local_themes', {}).items():

@@ -23,6 +23,11 @@
 					"dir_limit_depth": 3
 				},
 				"divider_highlight_group": "cwd:divider"
+			},
+			{
+				"name": "last_status",
+				"highlight_group": ["exit_fail"],
+				"module": "powerline.segments.shell"
 			}
 		]
 	}

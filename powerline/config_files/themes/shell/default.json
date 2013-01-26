@@ -26,6 +26,11 @@
 		],
 		"right": [
 			{
+				"module": "powerline.segments.shell",
+				"name": "last_pipe_status",
+				"highlight_group": "exit_fail"
+			},
+			{
 				"name": "branch",
 				"before": " "
 			}

@@ -61,6 +61,8 @@
 		"cwd": { "fg": "gray9", "bg": "gray4" },
 		"cwd:current_folder": { "fg": "gray10", "bg": "gray4", "attr": ["bold"] },
 		"cwd:divider": { "fg": "gray7", "bg": "gray4" },
-		"hostname": { "fg": "brightyellow", "bg": "mediumorange" }
+		"hostname": { "fg": "brightyellow", "bg": "mediumorange" },
+		"exit_fail": { "fg": "white", "bg": "darkestred" },
+		"exit_success": { "fg": "white", "bg": "darkestgreen" }
 	}
 }
