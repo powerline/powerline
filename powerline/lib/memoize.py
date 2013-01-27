@@ -29,8 +29,8 @@ class memoize(object):
 				try:
 					with open(self.persistent_file, 'rb') as fileobj:
 						self._cache = pickle.load(fileobj)
-				except (IOError, EOFError):
-					pass
+				except (IOError, EOFError, ValueError):
+					self._cache = {}
 			cached = self._cache.get(key, None)
 			if cached is None or time.time() - cached['time'] > self.timeout:
 				cached = self._cache[key] = {
