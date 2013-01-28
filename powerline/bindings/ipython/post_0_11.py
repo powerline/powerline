@@ -10,10 +10,13 @@ class PowerlinePromptManager(PromptManager):
 		self.powerline = powerline
 		super(PowerlinePromptManager, self).__init__(**kwargs)
 
-	def _render(self, name, color=True, *args, **kwargs):
+	def render(self, name, color=True, *args, **kwargs):
 		if name != 'in':
-			return super(PowerlinePromptManager, self)._render(name, color, *args, **kwargs)
-		return self.powerline.renderer.render(color=color)
+			return super(PowerlinePromptManager, self).render(name, color, *args, **kwargs)
+		res, res_nocolor = self.powerline.renderer.render(output_raw=True)
+		self.txtwidth = len(res_nocolor)
+		self.width = self.txtwidth
+		return res if color else res_nocolor
 
 
 def load_ipython_extension(ip):
