@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-'''Powerline prompt script.'''
+'''Powerline prompt and statusline script.'''
 import argparse
 import sys
 
@@ -12,15 +12,15 @@ except ImportError:
 	from powerline.core import Powerline  # NOQA
 
 parser = argparse.ArgumentParser(description=__doc__)
-parser.add_argument('side', nargs='?', default=None, choices=('left', 'right'))
-parser.add_argument('--renderer_module', default='shell', choices=('shell', 'zsh_prompt'))
-parser.add_argument('--ext', default='shell')
-parser.add_argument('--last_exit_code', default=None, type=int)
-parser.add_argument('--last_pipe_status', default=None)
+parser.add_argument('ext', nargs=1)
+parser.add_argument('side', nargs='?', choices=('left', 'right'))
+parser.add_argument('-r', '--renderer_module', choices=('shell', 'zsh_prompt', 'tmux'))
+parser.add_argument('--last_exit_code', type=int, metavar='int')
+parser.add_argument('--last_pipe_status', metavar='list')
 
 if __name__ == '__main__':
 	args = parser.parse_args()
-	powerline = Powerline(ext=args.ext, renderer_module=args.renderer_module, segment_info=args)
+	powerline = Powerline(ext=args.ext[0], renderer_module=args.renderer_module, segment_info=args)
 	rendered = powerline.renderer.render(side=args.side)
 	try:
 		sys.stdout.write(rendered)

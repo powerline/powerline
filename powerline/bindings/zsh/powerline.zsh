@@ -25,8 +25,8 @@ _powerline_install_precmd() {
 	precmd_functions+=(_powerline_precmd)
 	setopt promptpercent
 	setopt promptsubst
-	PS1='$(powerline-prompt --renderer_module=zsh_prompt --last_exit_code=$? --last_pipe_status="$pipestatus" left)'
-	RPS1='$(powerline-prompt --renderer_module=zsh_prompt --last_exit_code=$? --last_pipe_status="$pipestatus" right)'
+	PS1='$(powerline shell left -r zsh_prompt --last_exit_code=$? --last_pipe_status="$pipestatus")'
+	RPS1='$(powerline shell right -r zsh_prompt --last_exit_code=$? --last_pipe_status="$pipestatus")'
 }
 
 trap "_powerline_tmux_set_columns" SIGWINCH
