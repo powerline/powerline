@@ -229,3 +229,23 @@ def network_load(interface='eth0', measure_interval=1, suffix='B/s', binary_pref
 
 def virtualenv():
 	return os.path.basename(os.environ.get('VIRTUAL_ENV', '')) or None
+
+
+@memoize(60, persistent=True)
+def email_imap_alert(username, password, server='imap.gmail.com', port=993, folder='INBOX'):
+	import imaplib
+	import re
+
+	try:
+		mail = imaplib.IMAP4_SSL(server, port)
+		mail.login(username, password)
+		rc, message = mail.status(folder, "(UNSEEN)")
+		unread_count = re.search("UNSEEN (\d+)", message[0]).group(1)
+	except (imaplib.error, AttributeError):
+		return None
+	if not unread_count:
+		return None
+	return [{
+		'highlight_group': 'email_alert',
+		'contents': unread_count,
+		}]

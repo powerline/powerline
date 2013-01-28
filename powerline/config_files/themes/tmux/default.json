@@ -40,6 +40,15 @@
 				"divider_highlight_group": "time:divider"
 			},
 			{
+				"name": "email_imap_alert",
+				"before": "✉ ",
+				"priority": 10,
+				"args": {
+					"username": "",
+					"password": ""
+				}
+			},
+			{
 				"name": "hostname"
 			}
 		]

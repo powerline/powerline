@@ -4,6 +4,8 @@
 		"black": 16,
 		"white": 231,
 
+		"brightred": 160,
+
 		"darkestblue": 24,
 		"darkblue": 31,
 		"mediumblue": 38,
@@ -37,6 +39,7 @@
 		"date": { "fg": "gray8", "bg": "gray2" },
 		"time": { "fg": "gray10", "bg": "gray2", "attr": ["bold"] },
 		"time:divider": { "fg": "gray5", "bg": "gray2" },
+		"email_alert": { "fg": "white", "bg": "brightred", "attr": ["bold"] },
 		"hostname": { "fg": "black", "bg": "gray10", "attr": ["bold"] },
 		"weather": { "fg": "gray8", "bg": "gray0" },
 		"weather_temp_cold": { "fg": "weather_temp_cold", "bg": "gray0" },
