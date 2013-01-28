@@ -15,13 +15,14 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('ext', nargs=1)
 parser.add_argument('side', nargs='?', choices=('left', 'right'))
 parser.add_argument('-r', '--renderer_module', choices=('shell', 'zsh_prompt', 'tmux'))
-parser.add_argument('--last_exit_code', type=int, metavar='int')
-parser.add_argument('--last_pipe_status', metavar='list')
+parser.add_argument('-w', '--width', type=int)
+parser.add_argument('--last_exit_code', type=int, metavar='INT')
+parser.add_argument('--last_pipe_status', metavar='LIST')
 
 if __name__ == '__main__':
 	args = parser.parse_args()
 	powerline = Powerline(ext=args.ext[0], renderer_module=args.renderer_module, segment_info=args)
-	rendered = powerline.renderer.render(side=args.side)
+	rendered = powerline.renderer.render(width=args.width, side=args.side)
 	try:
 		sys.stdout.write(rendered)
 	except UnicodeEncodeError:
