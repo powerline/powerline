@@ -13,6 +13,14 @@
 		}
 	},
 	"ext": {
+		"awesome": {
+			"colorscheme": "default",
+			"theme": "default"
+		},
+		"ipython": {
+			"colorscheme": "default",
+			"theme": "default"
+		},
 		"shell": {
 			"colorscheme": "default",
 			"theme": "default"
@@ -27,10 +35,6 @@
 			"local_themes": {
 				"help": "help"
 			}
-		},
-		"ipython": {
-			"colorscheme": "default",
-			"theme": "default"
 		}
 	}
 }

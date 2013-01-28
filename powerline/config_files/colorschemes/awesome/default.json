@@ -1,0 +1,55 @@
+{
+	"name": "Default color scheme for Awesome WM",
+	"colors": {
+		"black": 16,
+		"white": 231,
+
+		"darkestblue": 24,
+		"darkblue": 31,
+		"mediumblue": 38,
+		"brightblue": 117,
+		"brightestblue": 153,
+
+		"gray0": 234,
+		"gray1": 235,
+		"gray2": 236,
+		"gray3": 239,
+		"gray4": 240,
+		"gray5": 241,
+		"gray6": 244,
+		"gray7": 245,
+		"gray8": 247,
+		"gray9": 250,
+		"gray10": 254,
+
+		"system_load_good": 106,
+		"system_load_bad": 178,
+		"system_load_ugly": 202,
+
+		"weather_temp_cold": 67,
+		"weather_temp_hot": 166,
+		"weather_condition_cold": 117,
+		"weather_condition_hot": 228
+	},
+	"groups": {
+		"background:divider": { "fg": "gray5", "bg": "gray0" },
+		"session": { "fg": "black", "bg": "gray10", "attr": ["bold"] },
+		"date": { "fg": "gray8", "bg": "gray2" },
+		"time": { "fg": "gray10", "bg": "gray2", "attr": ["bold"] },
+		"time:divider": { "fg": "gray5", "bg": "gray2" },
+		"hostname": { "fg": "black", "bg": "gray10", "attr": ["bold"] },
+		"weather": { "fg": "gray8", "bg": "gray0" },
+		"weather_temp_cold": { "fg": "weather_temp_cold", "bg": "gray0" },
+		"weather_temp_hot": { "fg": "weather_temp_hot", "bg": "gray0" },
+		"weather_condition_☼": { "fg": "weather_condition_hot", "bg": "gray0" },
+		"weather_condition_❅": { "fg": "weather_condition_cold", "bg": "gray0" },
+		"weather_condition_☔": { "fg": "weather_condition_cold", "bg": "gray0" },
+		"uptime": { "fg": "gray8", "bg": "gray0" },
+		"external_ip": { "fg": "gray8", "bg": "gray0" },
+		"network_load": { "fg": "gray8", "bg": "gray0" },
+		"system_load": { "fg": "gray8", "bg": "gray0" },
+		"system_load_good": { "fg": "system_load_good", "bg": "gray0" },
+		"system_load_bad": { "fg": "system_load_bad", "bg": "gray0" },
+		"system_load_ugly": { "fg": "system_load_ugly", "bg": "gray0" }
+	}
+}

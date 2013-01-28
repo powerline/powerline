@@ -157,3 +157,25 @@ file in the profile you are using::
 
 IPython=0.11* is not supported and does not work. IPython<0.10 was not 
 tested (not installable by pip).
+
+Awesome widget
+--------------
+
+.. note:: Powerline currently only supports awesome 3.5.
+
+.. note:: The Powerline widget will spawn a shell script that runs in the 
+   background and updates the statusline with ``awesome-client``.
+
+Add the following to your :file:`rc.lua`, where ``{path}`` is the absolute 
+path to your Powerline installation directory:
+
+.. code-block:: lua
+
+   package.path = package.path .. ';{path}/powerline/bindings/awesome/?.lua'
+   require('powerline')
+
+Then add the ``powerline_widget`` to your ``wibox``:
+
+.. code-block:: lua
+
+   right_layout:add(powerline_widget)
