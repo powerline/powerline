@@ -236,6 +236,8 @@ def email_imap_alert(username, password, server='imap.gmail.com', port=993, fold
 	import imaplib
 	import re
 
+	if not username or not password:
+		return None
 	try:
 		mail = imaplib.IMAP4_SSL(server, port)
 		mail.login(username, password)
