@@ -5,10 +5,9 @@ import sys
 
 
 class Segment(object):
-	def __init__(self, ext, path, colorscheme, default_module=None):
+	def __init__(self, ext, path, default_module=None):
 		self.default_module = default_module or 'powerline.segments.{0}'.format(ext)
 		self.path = path
-		self.colorscheme = colorscheme
 
 	def get_function(self, segment):
 		oldpath = sys.path
@@ -40,9 +39,7 @@ class Segment(object):
 			'key': key,
 			'type': segment_type,
 			'highlight_group': highlight_group,
-			'highlight': self.colorscheme.get_group_highlighting(highlight_group),
 			'divider_highlight_group': divider_highlight_group,
-			'divider_highlight': self.colorscheme.get_group_highlighting(divider_highlight_group) if divider_highlight_group else None,
 			'before': segment.get('before', ''),
 			'after': segment.get('after', ''),
 			'contents_func': contents_func,
