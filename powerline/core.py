@@ -46,7 +46,11 @@ class Powerline(object):
 		renderer_module_name = renderer_module or ext
 		renderer_module_import = 'powerline.renderers.{0}'.format(renderer_module_name)
 		renderer_class_name = '{0}Renderer'.format(underscore_to_camelcase(renderer_module_name))
-		Renderer = getattr(importlib.import_module(renderer_module_import), renderer_class_name)
+		try:
+			Renderer = getattr(importlib.import_module(renderer_module_import), renderer_class_name)
+		except ImportError as e:
+			sys.stderr.write('Error while importing renderer module: {0}\n'.format(e))
+			sys.exit(1)
 		self.renderer = Renderer(theme_config, local_themes, theme_kwargs,
 			term_24bit_colors=self.config.get('term_24bit_colors', False))
 
