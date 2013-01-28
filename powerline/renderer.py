@@ -105,39 +105,59 @@ class Renderer(object):
 			segment['rendered_raw'] = u''
 			outer_padding = ' ' if (index == 0 and segment['side'] == 'left') or (index == segments_len - 1 and segment['side'] == 'right') else ''
 			divider_type = 'soft' if compare_segment['highlight'][mode]['bg'] == segment['highlight'][mode]['bg'] else 'hard'
-			divider = theme.get_divider(segment['side'], divider_type)
-			divider_hl = ''
-			segment_hl = ''
 
+			divider_raw = theme.get_divider(segment['side'], divider_type)
+			divider_highlighted = ''
+			contents_raw = segment['contents']
+			contents_highlighted = ''
+
+			# Pad segments first
+			if segment['type'] == 'filler':
+				pass
+			elif segment['draw_divider'] or divider_type == 'hard':
+				if segment['side'] == 'left':
+					contents_raw = outer_padding + contents_raw + ' '
+					divider_raw = divider_raw + ' '
+				else:
+					contents_raw = ' ' + contents_raw + outer_padding
+					divider_raw = ' ' + divider_raw
+			elif contents_raw:
+				if segment['side'] == 'left':
+					contents_raw = outer_padding + contents_raw
+				else:
+					contents_raw = contents_raw + outer_padding
+			else:
+				raise ValueError('Unknown segment type')
+
+			# Apply highlighting to padded dividers and contents
 			if render_highlighted:
 				if divider_type == 'soft' and segment['divider_highlight_group'] is not None:
-					divider_hl = self.hl(segment['divider_highlight'][mode]['fg'], segment['divider_highlight'][mode]['bg'], False)
+					divider_highlighted = self.hl(divider_raw, segment['divider_highlight'][mode]['fg'], segment['divider_highlight'][mode]['bg'], False)
 				elif divider_type == 'hard':
-					divider_hl = self.hl(segment['highlight'][mode]['bg'], compare_segment['highlight'][mode]['bg'], False)
-				segment_hl = self.hl(**segment['highlight'][mode])
+					divider_highlighted = self.hl(divider_raw, segment['highlight'][mode]['bg'], compare_segment['highlight'][mode]['bg'], False)
+				contents_highlighted = self.hl(self.escape(contents_raw), **segment['highlight'][mode])
 
+			# Append padded raw and highlighted segments to the rendered segment variables
 			if segment['type'] == 'filler':
-				rendered_highlighted += self.escape(segment['contents'] or '')
+				rendered_highlighted += contents_highlighted if contents_raw else ''
 			elif segment['draw_divider'] or divider_type == 'hard':
 				# Draw divider if specified, or if it's a hard divider
 				# Note: Hard dividers are always drawn, regardless of
 				# the draw_divider option
 				if segment['side'] == 'left':
-					segment['rendered_raw'] += outer_padding + segment['contents'] + ' ' + divider + ' '
-					rendered_highlighted += segment_hl + self.escape(outer_padding + segment['contents'] + ' ') + divider_hl + self.escape(divider + ' ')
+					segment['rendered_raw'] += contents_raw + divider_raw
+					rendered_highlighted += contents_highlighted + divider_highlighted
 				else:
-					segment['rendered_raw'] += ' ' + divider + ' ' + segment['contents'] + outer_padding
-					rendered_highlighted += self.escape(' ') + divider_hl + self.escape(divider) + segment_hl + self.escape(' ' + segment['contents'] + outer_padding)
-			elif segment['contents']:
+					segment['rendered_raw'] += divider_raw + contents_raw
+					rendered_highlighted += divider_highlighted + contents_highlighted
+			elif contents_raw:
 				# Segments without divider
 				if segment['side'] == 'left':
-					segment['rendered_raw'] += outer_padding + segment['contents']
-					rendered_highlighted += segment_hl + self.escape(outer_padding + segment['contents'])
+					segment['rendered_raw'] += contents_raw
+					rendered_highlighted += contents_highlighted
 				else:
-					segment['rendered_raw'] += segment['contents'] + outer_padding
-					rendered_highlighted += segment_hl + self.escape(segment['contents'] + outer_padding)
-			else:
-				raise ValueError('Unknown segment type')
+					segment['rendered_raw'] += contents_raw
+					rendered_highlighted += contents_highlighted
 		rendered_highlighted += self.hl()
 		return rendered_highlighted
 
@@ -161,5 +181,5 @@ class Renderer(object):
 		b = int & 0xff
 		return r, g, b
 
-	def hl(self, fg=None, bg=None, attr=None):
+	def hl(self, contents=None, fg=None, bg=None, attr=None):
 		raise NotImplementedError

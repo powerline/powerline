@@ -45,7 +45,7 @@ class VimRenderer(Renderer):
 	def escape(string):
 		return string.replace('%', '%%')
 
-	def hl(self, fg=None, bg=None, attr=None):
+	def hl(self, contents=None, fg=None, bg=None, attr=None):
 		'''Highlight a segment.
 
 		If an argument is None, the argument is ignored. If an argument is
@@ -94,4 +94,4 @@ class VimRenderer(Renderer):
 					guibg='#{0:06x}'.format(hl_group['guibg']) if hl_group['guibg'] != 'NONE' else 'NONE',
 					attr=','.join(hl_group['attr']),
 				))
-		return '%#' + self.hl_groups[(fg, bg, attr)]['name'] + '#'
+		return '%#' + self.hl_groups[(fg, bg, attr)]['name'] + '#' + (contents or u'')
