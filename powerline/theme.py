@@ -24,13 +24,21 @@ class Theme(object):
 			'highlight': defaultdict(lambda: {'fg': False, 'bg': False, 'attr': 0})
 			}
 		self.segment_info = segment_info
-		get_segment = Segment(ext, common_config['paths'], colorscheme, theme_config.get('default_module')).get
+		get_segment = Segment(ext, common_config['paths'], theme_config.get('default_module')).get
 		for side in ['left', 'right']:
 			self.segments[side].extend((get_segment(segment, side) for segment in theme_config['segments'].get(side, [])))
 
 	def get_divider(self, side='left', type='soft'):
 		'''Return segment divider.'''
 		return self.dividers[side][type]
+
+	def add_highlight(self, segment):
+		segment['highlight'] = self.colorscheme.get_group_highlighting(segment['highlight_group'])
+		if segment['divider_highlight_group']:
+			segment['divider_highlight'] = self.colorscheme.get_group_highlighting(segment['divider_highlight_group'])
+		else:
+			segment['divider_highlight'] = None
+		return segment
 
 	def get_segments(self, side=None):
 		'''Return all segments.
@@ -62,7 +70,7 @@ class Theme(object):
 				else:
 					continue
 			for segment in parsed_segments:
-				segment['highlight'] = self.colorscheme.get_group_highlighting(segment['highlight_group'])
+				segment = self.add_highlight(segment)
 				segment['contents'] = (segment['before'] + unicode(segment['contents']) + segment['after'])\
 					.ljust(segment['ljust'])\
 					.rjust(segment['rjust'])
