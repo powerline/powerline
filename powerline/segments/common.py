@@ -241,7 +241,7 @@ def email_imap_alert(username, password, server='imap.gmail.com', port=993, fold
 		mail.login(username, password)
 		rc, message = mail.status(folder, "(UNSEEN)")
 		unread_count = re.search("UNSEEN (\d+)", message[0]).group(1)
-	except (imaplib.error, AttributeError):
+	except (imaplib.IMAP4.error, AttributeError):
 		return None
 	if not unread_count:
 		return None
