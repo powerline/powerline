@@ -9,9 +9,7 @@ class Args(object):
 
 	@property
 	def last_pipe_status(self):
-		# FIXME Use arrays when they will be supported
-		zsh.eval('POWERLINE_PIPE_STATUS="$pipestatus"')
-		return [int(code) for code in zsh.getvalue('POWERLINE_PIPE_STATUS').split()]
+		return zsh.pipestatus()
 
 def setup():
 	render = Powerline(ext='shell', renderer_module='zsh_prompt', segment_info=Args()).renderer.render
