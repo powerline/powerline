@@ -13,10 +13,6 @@
 		}
 	},
 	"ext": {
-		"awesome": {
-			"colorscheme": "default",
-			"theme": "default"
-		},
 		"ipython": {
 			"colorscheme": "default",
 			"theme": "default"
@@ -36,6 +32,10 @@
 				"cmdwin": "cmdwin",
 				"help": "help"
 			}
+		},
+		"wm": {
+			"colorscheme": "default",
+			"theme": "default"
 		}
 	}
 }
