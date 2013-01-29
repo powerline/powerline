@@ -109,7 +109,7 @@ def uptime(format='{days:02d}d {hours:02d}h {minutes:02d}m'):
 	try:
 		import psutil
 		from datetime import datetime
-		seconds = (datetime.now() - datetime.fromtimestamp(psutil.BOOT_TIME)).seconds
+		seconds = int((datetime.now() - datetime.fromtimestamp(psutil.BOOT_TIME)).total_seconds())
 	except ImportError:
 		try:
 			with open('/proc/uptime', 'r') as f:
