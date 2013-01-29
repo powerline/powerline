@@ -2,6 +2,10 @@
 	"default_module": "powerline.segments.common",
 	"segments": {
 		"right": [
+            {
+                "name": "rhythmbox",
+                "before": "♫ "
+            },
 			{
 				"name": "uptime",
 				"before": "⇑  ",

@@ -251,3 +251,14 @@ def email_imap_alert(username, password, server='imap.gmail.com', port=993, fold
 		'highlight_group': 'email_alert',
 		'contents': unread_count,
 		}]
+
+def rhythmbox(formatting='%tt - %at'):
+    import subprocess
+    try:
+        now_playing = subprocess.check_output(['rhythmbox-client', '--no-start', '--no-present', '--print-playing-format', '"%s"' % formatting])
+        now_playing = now_playing.rstrip().strip('"')
+        if not now_playing or now_playing == ' - ':
+            return None
+        return now_playing
+    except subprocess.CalledProcessError:
+        return None
