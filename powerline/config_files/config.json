@@ -33,6 +33,7 @@
 			"colorscheme": "default",
 			"theme": "default",
 			"local_themes": {
+				"cmdwin": "cmdwin",
 				"help": "help"
 			}
 		}

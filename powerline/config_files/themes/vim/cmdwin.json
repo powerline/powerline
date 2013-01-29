@@ -1,0 +1,15 @@
+{
+	"segments": {
+		"left": [
+			{
+				"type": "string",
+				"contents": "Command Line",
+				"highlight_group": ["file_name"]
+			},
+			{
+				"type": "filler",
+				"highlight_group": ["background"]
+			}
+		]
+	}
+}
