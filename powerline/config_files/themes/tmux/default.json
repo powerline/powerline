@@ -3,6 +3,10 @@
 	"segments": {
 		"right": [
 			{
+				"name": "rhythmbox",
+				"before": "♫ "
+			},
+			{
 				"name": "uptime",
 				"before": "⇑  ",
 				"priority": 50,
