@@ -10,4 +10,4 @@ def help():
 
 
 def cmdwin():
-	return bool(int(vim.eval('bufname("%") == "[Command Line]"')))
+	return bool(int(vim.eval('bufname("%") is# "[Command Line]"')))
