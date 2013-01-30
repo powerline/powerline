@@ -3,8 +3,8 @@
 from powerline.renderer import Renderer
 
 
-class AwesomeRenderer(Renderer):
-	'''Powerline Awesome WM segment renderer.'''
+class PangoMarkupRenderer(Renderer):
+	'''Powerline Pango markup segment renderer.'''
 
 	def hl(self, contents=None, fg=None, bg=None, attr=None):
 		'''Highlight a segment.'''

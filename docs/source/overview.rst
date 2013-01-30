@@ -179,3 +179,23 @@ Then add the ``powerline_widget`` to your ``wibox``:
 .. code-block:: lua
 
    right_layout:add(powerline_widget)
+
+Qtile widget
+------------
+
+Add the following to your :file:`~/.config/qtile/config.py`:
+
+.. code-block:: python
+
+   from powerline.bindings.qtile.widget import Powerline
+
+   screens = [
+       Screen(
+           top=bar.Bar([
+                   # ...
+                   Powerline(timeout=2),
+                   # ...
+               ],
+           ),
+       ),
+   ]
