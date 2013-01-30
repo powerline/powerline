@@ -11,6 +11,8 @@ class Renderer(object):
 
 	TERM_24BIT_COLORS = False
 
+	PADDING_CHAR = u'\u00a0'  # No-break space
+
 	def __init__(self, theme_config, local_themes, theme_kwargs, term_24bit_colors=False):
 		self.theme = Theme(theme_config=theme_config, **theme_kwargs)
 		self.local_themes = local_themes
@@ -72,11 +74,11 @@ class Renderer(object):
 		segments_fillers = [segment for segment in segments if segment['type'] == 'filler']
 		if segments_fillers:
 			segments_fillers_len, segments_fillers_remainder = divmod((width - self._total_len(segments)), len(segments_fillers))
-			segments_fillers_contents = ' ' * segments_fillers_len
+			segments_fillers_contents = self.PADDING_CHAR * segments_fillers_len
 			for segment in segments_fillers:
 				segment['contents'] = segments_fillers_contents
 			# Add remainder whitespace to the first filler segment
-			segments_fillers[0]['contents'] += ' ' * segments_fillers_remainder
+			segments_fillers[0]['contents'] += self.PADDING_CHAR * segments_fillers_remainder
 
 		return self._returned_value(self._render_segments(mode, theme, segments), segments, output_raw)
 
@@ -103,7 +105,7 @@ class Renderer(object):
 			next_segment = segments[index + 1] if index < segments_len - 1 else theme.EMPTY_SEGMENT
 			compare_segment = next_segment if segment['side'] == 'left' else prev_segment
 			segment['rendered_raw'] = u''
-			outer_padding = ' ' if (index == 0 and segment['side'] == 'left') or (index == segments_len - 1 and segment['side'] == 'right') else ''
+			outer_padding = self.PADDING_CHAR if (index == 0 and segment['side'] == 'left') or (index == segments_len - 1 and segment['side'] == 'right') else ''
 			divider_type = 'soft' if compare_segment['highlight'][mode]['bg'] == segment['highlight'][mode]['bg'] else 'hard'
 
 			divider_raw = theme.get_divider(segment['side'], divider_type)
@@ -116,11 +118,11 @@ class Renderer(object):
 				pass
 			elif segment['draw_divider'] or divider_type == 'hard':
 				if segment['side'] == 'left':
-					contents_raw = outer_padding + contents_raw + ' '
-					divider_raw = divider_raw + ' '
+					contents_raw = outer_padding + contents_raw + self.PADDING_CHAR
+					divider_raw = divider_raw + self.PADDING_CHAR
 				else:
-					contents_raw = ' ' + contents_raw + outer_padding
-					divider_raw = ' ' + divider_raw
+					contents_raw = self.PADDING_CHAR + contents_raw + outer_padding
+					divider_raw = self.PADDING_CHAR + divider_raw
 			elif contents_raw:
 				if segment['side'] == 'left':
 					contents_raw = outer_padding + contents_raw
