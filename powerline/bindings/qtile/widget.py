@@ -13,8 +13,11 @@ class Powerline(base._TextBox):
 		self.powerline = PowerlineCore(ext='wm', renderer_module='pango_markup')
 
 	def update(self):
+		if not self.configured:
+			return True
 		self.text = self.powerline.renderer.render(side='right')
 		self.bar.draw()
+		return True
 
 	def cmd_update(self, text):
 		self.update(text)
