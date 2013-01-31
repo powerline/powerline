@@ -35,5 +35,5 @@ endfunction
 
 augroup Powerline
 	autocmd!
-	autocmd BufEnter,BufWinEnter,WinEnter * call s:UpdateWindows()
+	autocmd BufEnter,BufWinEnter,WinEnter,CmdwinEnter * call s:UpdateWindows()
 augroup END
