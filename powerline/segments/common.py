@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 
 from powerline.lib import memoize
 
@@ -251,3 +252,100 @@ def email_imap_alert(username, password, server='imap.gmail.com', port=993, fold
 		'highlight_group': 'email_alert',
 		'contents': unread_count,
 		}]
+
+
+class NowPlayingSegment(object):
+	STATE_SYMBOLS = {
+		'fallback': u'♫',
+		'play': u'▶',
+		'pause': u'▮▮',
+		'stop': u'■',
+		}
+
+	def __call__(self, player='mpd', format=u'{state_symbol} {artist} - {title} ({total})', *args, **kwargs):
+		update_func = getattr(self, 'player_{0}'.format(player))
+		self.now_playing = {
+			'state': None,
+			'state_symbol': self.STATE_SYMBOLS['fallback'],
+			'album': None,
+			'artist': None,
+			'title': None,
+			'elapsed': None,
+			'total': None,
+			}
+		updated = update_func(*args, **kwargs)
+		if not updated:
+			return None
+		return format.format(**self.now_playing)
+
+	@staticmethod
+	def _run_cmd(cmd):
+		from subprocess import Popen, PIPE
+		try:
+			p = Popen(cmd, stdout=PIPE)
+			stdout, err = p.communicate()
+		except OSError as e:
+			sys.stderr.write('Could not execute command ({0}): {1}\n'.format(e, cmd))
+			return None
+		return stdout.strip()
+
+	def player_mpd(self, host='localhost', port=6600):
+		try:
+			import mpd
+			client = mpd.MPDClient()
+			client.connect(host, port)
+			now_playing = client.currentsong()
+			if not now_playing:
+				return
+			status = client.status()
+			client.close()
+			client.disconnect()
+			self.now_playing.update({
+				'state': status.get('state'),
+				'state_symbol': self.STATE_SYMBOLS.get(status.get('state')),
+				'album': now_playing.get('album'),
+				'artist': now_playing.get('artist'),
+				'title': now_playing.get('title'),
+				'elapsed': '{0:.0f}:{1:02.0f}'.format(*divmod(float(status.get('elapsed', 0)), 60)),
+				'total': '{0:.0f}:{1:02.0f}'.format(*divmod(float(now_playing['time']), 60)),
+				})
+		except ImportError:
+			now_playing = self._run_cmd(['mpc', 'current', '-f', '%album%\n%artist%\n%title%\n%time%', '-h', str(host), '-p', str(port)])
+			if not now_playing:
+				return
+			now_playing = now_playing.split('\n')
+			self.now_playing.update({
+				'album': now_playing[0],
+				'artist': now_playing[1],
+				'title': now_playing[2],
+				'total': now_playing[3],
+				})
+		return True
+
+	def player_spotify(self):
+		try:
+			import dbus
+		except ImportError:
+			sys.stderr.write('Could not add Spotify segment: Requires python-dbus.\n')
+			return
+		bus = dbus.SessionBus()
+		DBUS_IFACE_PROPERTIES = 'org.freedesktop.DBus.Properties'
+		DBUS_IFACE_PLAYER = 'org.freedesktop.MediaPlayer2'
+		try:
+			player = bus.get_object('com.spotify.qt', '/')
+			iface = dbus.Interface(player, DBUS_IFACE_PROPERTIES)
+			info = iface.Get(DBUS_IFACE_PLAYER, 'Metadata')
+			state = iface.Get(DBUS_IFACE_PLAYER, 'PlaybackStatus')
+		except dbus.exceptions.DBusException:
+			return
+		state = {'Playing': 'play', 'Paused': 'pause'}.get(state, None)
+		self.now_playing.update({
+			'state': state,
+			'state_symbol': self.STATE_SYMBOLS.get(state),
+			'album': str(info['xesam:album']),
+			'artist': str(info['xesam:artist'][0]),
+			'title': str(info['xesam:title']),
+			'total': '{0:.0f}:{1:02.0f}'.format(*divmod(float(info['mpris:length'] / 1e6), 60)),
+			})
+		return True
+now_playing = NowPlayingSegment()
