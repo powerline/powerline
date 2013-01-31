@@ -253,7 +253,6 @@ def email_imap_alert(username, password, server='imap.gmail.com', port=993, fold
 		'contents': unread_count,
 		}]
 
-
 class NowPlayingSegment(object):
 	STATE_SYMBOLS = {
 		'fallback': u'♫',
@@ -346,5 +345,18 @@ class NowPlayingSegment(object):
 			'artist': str(info['xesam:artist'][0]),
 			'title': str(info['xesam:title']),
 			'total': '{0:.0f}:{1:02.0f}'.format(*divmod(float(info['mpris:length'] / 1e6), 60)),
+			}
+
+	def player_rhythmbox(self, format_='%at\n%aa\n%tt\n%te\n%td'):
+		now_playing = self._run_cmd(['rhythmbox-client', '--no-start', '--no-present', '--print-playing-format', '"%s"' % format_])
+		if not now_playing:
+			return
+		now_playing = now_playing.rstrip().strip('"').split('\n')
+		return {
+			'album': now_playing[0],
+			'artist': now_playing[1],
+			'title': now_playing[2],
+			'elapsed': now_playing[3],
+			'total': now_playing[4],
 			}
 now_playing = NowPlayingSegment()
