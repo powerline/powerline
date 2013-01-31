@@ -133,10 +133,14 @@ class Renderer(object):
 
 			# Apply highlighting to padded dividers and contents
 			if render_highlighted:
-				if divider_type == 'soft' and segment['divider_highlight_group'] is not None:
-					divider_highlighted = self.hl(divider_raw, segment['divider_highlight'][mode]['fg'], segment['divider_highlight'][mode]['bg'], False)
-				elif divider_type == 'hard':
-					divider_highlighted = self.hl(divider_raw, segment['highlight'][mode]['bg'], compare_segment['highlight'][mode]['bg'], False)
+				if divider_type == 'soft':
+					divider_highlight_group_key = 'highlight' if segment['divider_highlight_group'] is None else 'divider_highlight'
+					divider_fg = segment[divider_highlight_group_key][mode]['fg']
+					divider_bg = segment[divider_highlight_group_key][mode]['bg']
+				else:
+					divider_fg = segment['highlight'][mode]['bg']
+					divider_bg = compare_segment['highlight'][mode]['bg']
+				divider_highlighted = self.hl(divider_raw, divider_fg, divider_bg, False)
 				contents_highlighted = self.hl(self.escape(contents_raw), **segment['highlight'][mode])
 
 			# Append padded raw and highlighted segments to the rendered segment variables
