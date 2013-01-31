@@ -347,4 +347,17 @@ class NowPlayingSegment(object):
 			'title': str(info['xesam:title']),
 			'total': '{0:.0f}:{1:02.0f}'.format(*divmod(float(info['mpris:length'] / 1e6), 60)),
 			}
+
+	def player_rhythmbox(self):
+		now_playing = self._run_cmd(['rhythmbox-client', '--no-start', '--no-present', '--print-playing-format', '%at\n%aa\n%tt\n%te\n%td'])
+		if not now_playing:
+			return
+		now_playing = now_playing.split('\n')
+		return {
+			'album': now_playing[0],
+			'artist': now_playing[1],
+			'title': now_playing[2],
+			'elapsed': now_playing[3],
+			'total': now_playing[4],
+			}
 now_playing = NowPlayingSegment()
