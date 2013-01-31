@@ -1,7 +1,8 @@
 # Maintainer: Kim Silkebækken <kim.silkebaekken+aur@gmail.com>
 
+pkgbase=python-powerline
 pkgname=python-powerline-git
-pkgver=20130124
+pkgver=20130131
 pkgrel=1
 pkgdesc='The ultimate statusline/prompt utility.'
 url='https://github.com/Lokaltog/powerline'
@@ -21,24 +22,26 @@ _gitname="powerline"
 _gitbranch="develop"
 
 build() {
-	cd ${srcdir}
+	cd "${srcdir}"
 
 	msg "Connecting to GitHub..."
 
-	if [ -d ${srcdir}/${_gitname} ]; then
-		cd ${_gitname}
-		git pull origin ${_gitbranch}
+	if [ -d "${srcdir}/${_gitname}" ]; then
+		cd "${_gitname}"
+		git pull origin "${_gitbranch}"
 		msg "The local files are updated."
 	else
-		git clone ${_gitroot}
-		cd ${_gitname}
-		git checkout ${_gitbranch}
+		git clone "${_gitroot}"
+		cd "${_gitname}"
+		git checkout "${_gitbranch}"
 	fi
 
 	msg "Git checkout done or server timeout."
+}
 
-	python setup.py build || return 1
-	python setup.py install --root=${pkgdir} || return 1
+package() {
+	cd "${srcdir}/${_gitname}"
+	python setup.py install --root="${pkgdir}" --optimize=1 || return 1
 
 	msg2 "Installing fonts..."
 	install -dm755 "${pkgdir}/usr/share/fonts/TTF/"
