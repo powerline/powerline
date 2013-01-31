@@ -37,7 +37,6 @@
 		"background:divider": { "fg": "gray5", "bg": "gray0" },
 		"session": { "fg": "black", "bg": "gray10", "attr": ["bold"] },
 		"date": { "fg": "gray8", "bg": "gray2" },
-		"rhythmbox": { "fg": "gray8", "bg": "gray2" },
 		"time": { "fg": "gray10", "bg": "gray2", "attr": ["bold"] },
 		"time:divider": { "fg": "gray5", "bg": "gray2" },
 		"email_alert": { "fg": "white", "bg": "brightred", "attr": ["bold"] },
