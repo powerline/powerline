@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 
 from powerline.lib import memoize
 
@@ -241,8 +242,8 @@ def email_imap_alert(username, password, server='imap.gmail.com', port=993, fold
 	try:
 		mail = imaplib.IMAP4_SSL(server, port)
 		mail.login(username, password)
-		rc, message = mail.status(folder, "(UNSEEN)")
-		unread_count = int(re.search("UNSEEN (\d+)", message[0]).group(1))
+		rc, message = mail.status(folder, '(UNSEEN)')
+		unread_count = int(re.search('UNSEEN (\d+)', message[0]).group(1))
 	except (imaplib.IMAP4.error, AttributeError):
 		return None
 	if not unread_count:
@@ -252,13 +253,97 @@ def email_imap_alert(username, password, server='imap.gmail.com', port=993, fold
 		'contents': unread_count,
 		}]
 
-def rhythmbox(formatting='%tt - %at'):
-    import subprocess
-    try:
-        now_playing = subprocess.check_output(['rhythmbox-client', '--no-start', '--no-present', '--print-playing-format', '"%s"' % formatting])
-        now_playing = now_playing.rstrip().strip('"')
-        if not now_playing or now_playing == ' - ':
-            return None
-        return now_playing
-    except subprocess.CalledProcessError:
-        return None
+class NowPlayingSegment(object):
+	STATE_SYMBOLS = {
+		'fallback': u'♫',
+		'play': u'▶',
+		'pause': u'▮▮',
+		'stop': u'■',
+		}
+
+	def __call__(self, player='mpd', format=u'{state_symbol} {artist} - {title} ({total})', *args, **kwargs):
+		player_func = getattr(self, 'player_{0}'.format(player))
+		stats = {
+			'state': None,
+			'state_symbol': self.STATE_SYMBOLS['fallback'],
+			'album': None,
+			'artist': None,
+			'title': None,
+			'elapsed': None,
+			'total': None,
+			}
+		func_stats = player_func(*args, **kwargs)
+		if not func_stats:
+			return None
+		stats.update(func_stats)
+		return format.format(**stats)
+
+	@staticmethod
+	def _run_cmd(cmd):
+		from subprocess import Popen, PIPE
+		try:
+			p = Popen(cmd, stdout=PIPE)
+			stdout, err = p.communicate()
+		except OSError as e:
+			sys.stderr.write('Could not execute command ({0}): {1}\n'.format(e, cmd))
+			return None
+		return stdout.strip()
+
+	def player_mpd(self, host='localhost', port=6600):
+		try:
+			import mpd
+			client = mpd.MPDClient()
+			client.connect(host, port)
+			now_playing = client.currentsong()
+			if not now_playing:
+				return
+			status = client.status()
+			client.close()
+			client.disconnect()
+			return {
+				'state': status.get('state'),
+				'state_symbol': self.STATE_SYMBOLS.get(status.get('state')),
+				'album': now_playing.get('album'),
+				'artist': now_playing.get('artist'),
+				'title': now_playing.get('title'),
+				'elapsed': '{0:.0f}:{1:02.0f}'.format(*divmod(float(status.get('elapsed', 0)), 60)),
+				'total': '{0:.0f}:{1:02.0f}'.format(*divmod(float(now_playing['time']), 60)),
+				}
+		except ImportError:
+			now_playing = self._run_cmd(['mpc', 'current', '-f', '%album%\n%artist%\n%title%\n%time%', '-h', str(host), '-p', str(port)])
+			if not now_playing:
+				return
+			now_playing = now_playing.split('\n')
+			return {
+				'album': now_playing[0],
+				'artist': now_playing[1],
+				'title': now_playing[2],
+				'total': now_playing[3],
+				}
+
+	def player_spotify(self):
+		try:
+			import dbus
+		except ImportError:
+			sys.stderr.write('Could not add Spotify segment: Requires python-dbus.\n')
+			return
+		bus = dbus.SessionBus()
+		DBUS_IFACE_PROPERTIES = 'org.freedesktop.DBus.Properties'
+		DBUS_IFACE_PLAYER = 'org.freedesktop.MediaPlayer2'
+		try:
+			player = bus.get_object('com.spotify.qt', '/')
+			iface = dbus.Interface(player, DBUS_IFACE_PROPERTIES)
+			info = iface.Get(DBUS_IFACE_PLAYER, 'Metadata')
+			state = iface.Get(DBUS_IFACE_PLAYER, 'PlaybackStatus')
+		except dbus.exceptions.DBusException:
+			return
+		state = {'Playing': 'play', 'Paused': 'pause'}.get(state, None)
+		return {
+			'state': state,
+			'state_symbol': self.STATE_SYMBOLS.get(state),
+			'album': str(info['xesam:album']),
+			'artist': str(info['xesam:artist'][0]),
+			'title': str(info['xesam:title']),
+			'total': '{0:.0f}:{1:02.0f}'.format(*divmod(float(info['mpris:length'] / 1e6), 60)),
+			}
+now_playing = NowPlayingSegment()
