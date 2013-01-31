@@ -263,8 +263,8 @@ class NowPlayingSegment(object):
 		}
 
 	def __call__(self, player='mpd', format=u'{state_symbol} {artist} - {title} ({total})', *args, **kwargs):
-		update_func = getattr(self, 'player_{0}'.format(player))
-		self.now_playing = {
+		player_func = getattr(self, 'player_{0}'.format(player))
+		stats = {
 			'state': None,
 			'state_symbol': self.STATE_SYMBOLS['fallback'],
 			'album': None,
@@ -273,10 +273,11 @@ class NowPlayingSegment(object):
 			'elapsed': None,
 			'total': None,
 			}
-		updated = update_func(*args, **kwargs)
-		if not updated:
+		func_stats = player_func(*args, **kwargs)
+		if not func_stats:
 			return None
-		return format.format(**self.now_playing)
+		stats.update(func_stats)
+		return format.format(**stats)
 
 	@staticmethod
 	def _run_cmd(cmd):
@@ -300,7 +301,7 @@ class NowPlayingSegment(object):
 			status = client.status()
 			client.close()
 			client.disconnect()
-			self.now_playing.update({
+			return {
 				'state': status.get('state'),
 				'state_symbol': self.STATE_SYMBOLS.get(status.get('state')),
 				'album': now_playing.get('album'),
@@ -308,19 +309,18 @@ class NowPlayingSegment(object):
 				'title': now_playing.get('title'),
 				'elapsed': '{0:.0f}:{1:02.0f}'.format(*divmod(float(status.get('elapsed', 0)), 60)),
 				'total': '{0:.0f}:{1:02.0f}'.format(*divmod(float(now_playing['time']), 60)),
-				})
+				}
 		except ImportError:
 			now_playing = self._run_cmd(['mpc', 'current', '-f', '%album%\n%artist%\n%title%\n%time%', '-h', str(host), '-p', str(port)])
 			if not now_playing:
 				return
 			now_playing = now_playing.split('\n')
-			self.now_playing.update({
+			return {
 				'album': now_playing[0],
 				'artist': now_playing[1],
 				'title': now_playing[2],
 				'total': now_playing[3],
-				})
-		return True
+				}
 
 	def player_spotify(self):
 		try:
@@ -339,13 +339,12 @@ class NowPlayingSegment(object):
 		except dbus.exceptions.DBusException:
 			return
 		state = {'Playing': 'play', 'Paused': 'pause'}.get(state, None)
-		self.now_playing.update({
+		return {
 			'state': state,
 			'state_symbol': self.STATE_SYMBOLS.get(state),
 			'album': str(info['xesam:album']),
 			'artist': str(info['xesam:artist'][0]),
 			'title': str(info['xesam:title']),
 			'total': '{0:.0f}:{1:02.0f}'.format(*divmod(float(info['mpris:length'] / 1e6), 60)),
-			})
-		return True
+			}
 now_playing = NowPlayingSegment()
