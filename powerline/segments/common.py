@@ -290,6 +290,20 @@ class NowPlayingSegment(object):
 			return None
 		return stdout.strip()
 
+	@staticmethod
+	def _convert_state(state):
+		state = state.lower()
+		if 'play' in state:
+			return 'play'
+		if 'pause' in state:
+			return 'pause'
+		if 'stop' in state:
+			return 'stop'
+
+	@staticmethod
+	def _convert_seconds(seconds):
+		return u'{0:.0f}:{1:02.0f}'.format(*divmod(float(seconds), 60))
+
 	def player_mpd(self, host='localhost', port=6600):
 		try:
 			import mpd
