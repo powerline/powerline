@@ -304,6 +304,44 @@ class NowPlayingSegment(object):
 	def _convert_seconds(seconds):
 		return u'{0:.0f}:{1:02.0f}'.format(*divmod(float(seconds), 60))
 
+	def player_cmus(self):
+		'''Return cmus player information.
+
+		cmus-remote -Q returns data with multi-level information i.e.
+			status playing
+			file <file_name>
+			tag artist <artist_name>
+			tag title <track_title>
+			tag ..
+			tag n
+			set continue <true|false>
+			set repeat <true|false>
+			set ..
+			set n
+
+		For the information we are looking for we don't really care if we're on
+		the tag level or the set level. The dictionary comprehension in this
+		method takes anything in ignore_levels and brings the key inside that
+		to the first level of the dictionary.
+		'''
+		now_playing_str = self._run_cmd(['cmus-remote', '-Q'])
+		if not now_playing_str:
+			return
+		ignore_levels = ('tag', 'set',)
+		now_playing = {token[0] if token[0] not in ignore_levels else token[1]:
+			' '.join(token[1:]) if token[0] not in ignore_levels else
+			' '.join(token[2:]) for token in [line.split(' ') for line in now_playing_str.split('\n')[:-1]]}
+		state = self._convert_state(now_playing.get('status'))
+		return {
+			'state': state,
+			'state_symbol': self.STATE_SYMBOLS.get(state),
+			'album': now_playing.get('album'),
+			'artist': now_playing.get('artist'),
+			'title': now_playing.get('title'),
+			'elapsed': self._convert_seconds(now_playing.get('position', 0)),
+			'total': self._convert_seconds(now_playing.get('duration', 0)),
+			}
+
 	def player_mpd(self, host='localhost', port=6600):
 		try:
 			import mpd
