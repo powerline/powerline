@@ -242,7 +242,7 @@ def email_imap_alert(username, password, server='imap.gmail.com', port=993, fold
 	try:
 		mail = imaplib.IMAP4_SSL(server, port)
 		mail.login(username, password)
-		rc, message = mail.status(folder, '(UNSEEN)')
+		rc, message = mail.status(folder, '(UNSEEN)').decode('utf-8')
 		unread_count = int(re.search('UNSEEN (\d+)', message[0]).group(1))
 	except (imaplib.IMAP4.error, AttributeError):
 		return None
