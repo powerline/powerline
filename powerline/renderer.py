@@ -125,6 +125,10 @@ class Renderer(object):
 				else:
 					contents_raw = (segment['_space_left'] * ' ') + contents_raw + (segment['_space_right'] * ' ') + outer_padding
 
+			# Replace spaces with no-break spaces
+			contents_raw = contents_raw.replace(' ', u'\u00a0')
+			divider_raw = divider_raw.replace(' ', u'\u00a0')
+
 			# Apply highlighting to padded dividers and contents
 			if render_highlighted:
 				if divider_type == 'soft':
@@ -153,8 +157,6 @@ class Renderer(object):
 					segment['_rendered_raw'] += contents_raw
 					segment['_rendered_hl'] += contents_highlighted
 			segment['_len'] = len(segment['_rendered_raw'])
-			# Replace rendered spaces with no-break spaces
-			segment['_rendered_hl'] = segment['_rendered_hl'].replace(' ', u'\u00a0')
 			yield segment
 
 	@staticmethod
