@@ -321,8 +321,8 @@ class NowPlayingSegment(object):
 				'album': now_playing.get('album'),
 				'artist': now_playing.get('artist'),
 				'title': now_playing.get('title'),
-				'elapsed': '{0:.0f}:{1:02.0f}'.format(*divmod(float(status.get('elapsed', 0)), 60)),
-				'total': '{0:.0f}:{1:02.0f}'.format(*divmod(float(now_playing['time']), 60)),
+				'elapsed': self._convert_seconds(now_playing.get('elapsed', 0)),
+				'total': self._convert_seconds(now_playing.get('time', 0)),
 				}
 		except ImportError:
 			now_playing = self._run_cmd(['mpc', 'current', '-f', '%album%\n%artist%\n%title%\n%time%', '-h', str(host), '-p', str(port)])
@@ -349,17 +349,17 @@ class NowPlayingSegment(object):
 			player = bus.get_object('com.spotify.qt', '/')
 			iface = dbus.Interface(player, DBUS_IFACE_PROPERTIES)
 			info = iface.Get(DBUS_IFACE_PLAYER, 'Metadata')
-			state = iface.Get(DBUS_IFACE_PLAYER, 'PlaybackStatus')
+			status = iface.Get(DBUS_IFACE_PLAYER, 'PlaybackStatus')
 		except dbus.exceptions.DBusException:
 			return
-		state = {'Playing': 'play', 'Paused': 'pause'}.get(state, None)
+		state = self._convert_state(status)
 		return {
 			'state': state,
 			'state_symbol': self.STATE_SYMBOLS.get(state),
-			'album': str(info['xesam:album']),
-			'artist': str(info['xesam:artist'][0]),
-			'title': str(info['xesam:title']),
-			'total': '{0:.0f}:{1:02.0f}'.format(*divmod(float(info['mpris:length'] / 1e6), 60)),
+			'album': info['xesam:album'],
+			'artist': info['xesam:artist'][0],
+			'title': info['xesam:title'],
+			'total': self._convert_seconds(info['mpris:length'] / 1e6),
 			}
 
 	def player_rhythmbox(self):
