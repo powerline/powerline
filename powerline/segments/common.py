@@ -101,7 +101,7 @@ def date(format='%Y-%m-%d'):
 	return datetime.now().strftime(format)
 
 
-@memoize(600, persistent=True)
+@memoize(600)
 def external_ip(query_url='http://ipv4.icanhazip.com/'):
 	return _urllib_read(query_url).strip()
 
@@ -123,7 +123,7 @@ def uptime(format='{days:02d}d {hours:02d}h {minutes:02d}m'):
 	return format.format(days=int(days), hours=hours, minutes=minutes)
 
 
-@memoize(1800, persistent=True)
+@memoize(1800)
 def weather(unit='c', location_query=None):
 	import json
 
@@ -232,7 +232,7 @@ def virtualenv():
 	return os.path.basename(os.environ.get('VIRTUAL_ENV', '')) or None
 
 
-@memoize(60, persistent=True)
+@memoize(60)
 def email_imap_alert(username, password, server='imap.gmail.com', port=993, folder='INBOX'):
 	import imaplib
 	import re
