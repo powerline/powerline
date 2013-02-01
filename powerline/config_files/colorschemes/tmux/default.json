@@ -50,6 +50,7 @@
 		"uptime": { "fg": "gray8", "bg": "gray0" },
 		"external_ip": { "fg": "gray8", "bg": "gray0" },
 		"network_load": { "fg": "gray8", "bg": "gray0" },
+		"now_playing": { "fg": "gray8", "bg": "gray0" },
 		"system_load": { "fg": "gray8", "bg": "gray0" },
 		"system_load_good": { "fg": "system_load_good", "bg": "gray0" },
 		"system_load_bad": { "fg": "system_load_bad", "bg": "gray0" },
