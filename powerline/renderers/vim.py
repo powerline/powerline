@@ -38,6 +38,9 @@ class VimRenderer(Renderer):
 		else:
 			mode = 'nc'
 			theme, segments = self.window_cache.get(window_id, (None, None))
+			for segment in segments:
+				segment['_space_left'] = 0
+				segment['_space_right'] = 0
 		statusline = super(VimRenderer, self).render(mode, winwidth, theme, segments)
 		return statusline
 
