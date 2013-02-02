@@ -101,7 +101,7 @@ def date(format='%Y-%m-%d'):
 	return datetime.now().strftime(format)
 
 
-@memoize(600, persistent=True)
+@memoize(600)
 def external_ip(query_url='http://ipv4.icanhazip.com/'):
 	return _urllib_read(query_url).strip()
 
@@ -123,7 +123,7 @@ def uptime(format='{days:02d}d {hours:02d}h {minutes:02d}m'):
 	return format.format(days=int(days), hours=hours, minutes=minutes)
 
 
-@memoize(1800, persistent=True)
+@memoize(1800)
 def weather(unit='c', location_query=None):
 	import json
 
@@ -232,7 +232,7 @@ def virtualenv():
 	return os.path.basename(os.environ.get('VIRTUAL_ENV', '')) or None
 
 
-@memoize(60, persistent=True)
+@memoize(60)
 def email_imap_alert(username, password, server='imap.gmail.com', port=993, folder='INBOX'):
 	import imaplib
 	import re
@@ -242,7 +242,7 @@ def email_imap_alert(username, password, server='imap.gmail.com', port=993, fold
 	try:
 		mail = imaplib.IMAP4_SSL(server, port)
 		mail.login(username, password)
-		rc, message = mail.status(folder, '(UNSEEN)')
+		rc, message = mail.status(folder, '(UNSEEN)').decode('utf-8')
 		unread_count = int(re.search('UNSEEN (\d+)', message[0]).group(1))
 	except (imaplib.IMAP4.error, AttributeError):
 		return None
@@ -290,6 +290,58 @@ class NowPlayingSegment(object):
 			return None
 		return stdout.strip()
 
+	@staticmethod
+	def _convert_state(state):
+		state = state.lower()
+		if 'play' in state:
+			return 'play'
+		if 'pause' in state:
+			return 'pause'
+		if 'stop' in state:
+			return 'stop'
+
+	@staticmethod
+	def _convert_seconds(seconds):
+		return u'{0:.0f}:{1:02.0f}'.format(*divmod(float(seconds), 60))
+
+	def player_cmus(self):
+		'''Return cmus player information.
+
+		cmus-remote -Q returns data with multi-level information i.e.
+			status playing
+			file <file_name>
+			tag artist <artist_name>
+			tag title <track_title>
+			tag ..
+			tag n
+			set continue <true|false>
+			set repeat <true|false>
+			set ..
+			set n
+
+		For the information we are looking for we don't really care if we're on
+		the tag level or the set level. The dictionary comprehension in this
+		method takes anything in ignore_levels and brings the key inside that
+		to the first level of the dictionary.
+		'''
+		now_playing_str = self._run_cmd(['cmus-remote', '-Q'])
+		if not now_playing_str:
+			return
+		ignore_levels = ('tag', 'set',)
+		now_playing = {token[0] if token[0] not in ignore_levels else token[1]:
+			' '.join(token[1:]) if token[0] not in ignore_levels else
+			' '.join(token[2:]) for token in [line.split(' ') for line in now_playing_str.split('\n')[:-1]]}
+		state = self._convert_state(now_playing.get('status'))
+		return {
+			'state': state,
+			'state_symbol': self.STATE_SYMBOLS.get(state),
+			'album': now_playing.get('album'),
+			'artist': now_playing.get('artist'),
+			'title': now_playing.get('title'),
+			'elapsed': self._convert_seconds(now_playing.get('position', 0)),
+			'total': self._convert_seconds(now_playing.get('duration', 0)),
+			}
+
 	def player_mpd(self, host='localhost', port=6600):
 		try:
 			import mpd
@@ -307,8 +359,8 @@ class NowPlayingSegment(object):
 				'album': now_playing.get('album'),
 				'artist': now_playing.get('artist'),
 				'title': now_playing.get('title'),
-				'elapsed': '{0:.0f}:{1:02.0f}'.format(*divmod(float(status.get('elapsed', 0)), 60)),
-				'total': '{0:.0f}:{1:02.0f}'.format(*divmod(float(now_playing['time']), 60)),
+				'elapsed': self._convert_seconds(now_playing.get('elapsed', 0)),
+				'total': self._convert_seconds(now_playing.get('time', 0)),
 				}
 		except ImportError:
 			now_playing = self._run_cmd(['mpc', 'current', '-f', '%album%\n%artist%\n%title%\n%time%', '-h', str(host), '-p', str(port)])
@@ -335,17 +387,17 @@ class NowPlayingSegment(object):
 			player = bus.get_object('com.spotify.qt', '/')
 			iface = dbus.Interface(player, DBUS_IFACE_PROPERTIES)
 			info = iface.Get(DBUS_IFACE_PLAYER, 'Metadata')
-			state = iface.Get(DBUS_IFACE_PLAYER, 'PlaybackStatus')
+			status = iface.Get(DBUS_IFACE_PLAYER, 'PlaybackStatus')
 		except dbus.exceptions.DBusException:
 			return
-		state = {'Playing': 'play', 'Paused': 'pause'}.get(state, None)
+		state = self._convert_state(status)
 		return {
 			'state': state,
 			'state_symbol': self.STATE_SYMBOLS.get(state),
-			'album': str(info['xesam:album']),
-			'artist': str(info['xesam:artist'][0]),
-			'title': str(info['xesam:title']),
-			'total': '{0:.0f}:{1:02.0f}'.format(*divmod(float(info['mpris:length'] / 1e6), 60)),
+			'album': info['xesam:album'],
+			'artist': info['xesam:artist'][0],
+			'title': info['xesam:title'],
+			'total': self._convert_seconds(info['mpris:length'] / 1e6),
 			}
 
 	def player_rhythmbox(self):

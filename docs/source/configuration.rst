@@ -237,12 +237,6 @@ Themes
             highlighting group is defined in the :ref:`highlight_group 
             option <config-themes-seg-highlight_group>`.
 
-        ``filler``
-            If the statusline is rendered with a specific width, remaining 
-            whitespace is distributed among filler segments. The 
-            highlighting group is defined in the :ref:`highlight_group 
-            option <config-themes-seg-highlight_group>`.
-
     ``module``
         .. _config-themes-seg-module:
 
@@ -276,13 +270,18 @@ Themes
     ``args``
         A dict of arguments to be passed to a ``function`` segment.
 
-    ``ljust``
-        If set, the segment will be left justified to the width specified by 
-        this option.
+    ``align``
+        Aligns the segments contents to the left (``l``), center (``c``) or 
+        right (``r``).
 
-    ``rjust``
-        If set, the segment will be right justified to the width specified 
-        by this option.
+    ``width``
+        Enforces a specific width for this segment.
+
+        This segment will work as a spacer if the width is set to ``auto``.
+        Several spacers may be used, and the space will be distributed 
+        equally among all the spacer segments. Spacers may have contents, 
+        either returned by a function or a static string, and the contents 
+        can be aligned with the ``align`` property.
 
     ``priority``
         Optional segment priority. Segments with priority ``-1`` (the 

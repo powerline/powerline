@@ -65,15 +65,21 @@ class Theme(object):
 					else:
 						segment['contents'] = contents
 						parsed_segments.append(segment)
-				elif segment['type'] == 'filler' or (segment['type'] == 'string' and segment['contents'] is not None):
+				elif segment['width'] == 'auto' or (segment['type'] == 'string' and segment['contents'] is not None):
 					parsed_segments.append(segment)
 				else:
 					continue
 			for segment in parsed_segments:
 				segment = self.add_highlight(segment)
-				segment['contents'] = (segment['before'] + unicode(segment['contents']) + segment['after'])\
-					.ljust(segment['ljust'])\
-					.rjust(segment['rjust'])
+				segment['contents'] = segment['before'] + unicode(segment['contents'] if segment['contents'] is not None else '') + segment['after']
+				# Align segment contents
+				if segment['width'] and segment['width'] != 'auto':
+					if segment['align'] == 'l':
+						segment['contents'] = segment['contents'].ljust(segment['width'])
+					elif segment['align'] == 'r':
+						segment['contents'] = segment['contents'].rjust(segment['width'])
+					elif segment['align'] == 'c':
+						segment['contents'] = segment['contents'].center(segment['width'])
 				# We need to yield a copy of the segment, or else mode-dependent
 				# segment contents can't be cached correctly e.g. when caching
 				# non-current window contents for vim statuslines
