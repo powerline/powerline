@@ -11,11 +11,19 @@ class Args(object):
 	def last_pipe_status(self):
 		return zsh.pipestatus()
 
+class Prompt(object):
+	__slots__ = ('render', 'side')
+	def __init__(self, powerline, side):
+		self.render = powerline.renderer.render
+		self.side = side
+
+	def __str__(self):
+		return self.render(width=zsh.columns(), side=self.side).encode('utf-8')
+
 def setup():
-	render = Powerline(ext='shell', renderer_module='zsh_prompt', segment_info=Args()).renderer.render
+	powerline = Powerline(ext='shell', renderer_module='zsh_prompt', segment_info=Args())
 
-	def powerline_setprompt():
-		zsh.setvalue('PS1', render(width=zsh.columns(), side='left').encode('utf-8'))
-		zsh.setvalue('RPS1', render(width=zsh.columns(), side='right').encode('utf-8'))
-
-	return powerline_setprompt
+	zsh.define_magic_string('ZPYTHON_PS1', Prompt(powerline, 'left'))
+	zsh.define_magic_string('ZPYTHON_RPS1', Prompt(powerline, 'right'))
+	zsh.setvalue('PS1',  '${ZPYTHON_PS1}')
+	zsh.setvalue('RPS1', '${ZPYTHON_RPS1}')

@@ -12,10 +12,6 @@ _powerline_tmux_set_columns() {
 	_powerline_tmux_setenv COLUMNS "$COLUMNS"
 }
 
-_powerline_zpython_precmd() {
-	zpython 'powerline_setprompt()'
-}
-
 _powerline_install_precmd() {
 	for f in "${precmd_functions[@]}"; do
 		if [[ "$f" = "_powerline_precmd" ]]; then
@@ -26,8 +22,8 @@ _powerline_install_precmd() {
 	setopt promptpercent
 	if zmodload zsh/zpython &>/dev/null ; then
 		zpython 'from powerline.bindings.zsh import setup as powerline_setup'
-		zpython 'powerline_setprompt = powerline_setup()'
-		precmd_functions+=(_powerline_zpython_precmd)
+		zpython 'powerline_setup()'
+		zpython 'del powerline_setup'
 	else
 		setopt promptsubst
 		PS1='$(powerline shell left -r zsh_prompt --last_exit_code=$? --last_pipe_status="$pipestatus")'
