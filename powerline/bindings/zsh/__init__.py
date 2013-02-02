@@ -23,7 +23,7 @@ class Prompt(object):
 def setup():
 	powerline = Powerline(ext='shell', renderer_module='zsh_prompt', segment_info=Args())
 
-	zsh.define_magic_string('ZPYTHON_PS1', Prompt(powerline, 'left'))
-	zsh.define_magic_string('ZPYTHON_RPS1', Prompt(powerline, 'right'))
+	zsh.set_special_string('ZPYTHON_PS1', Prompt(powerline, 'left'))
+	zsh.set_special_string('ZPYTHON_RPS1', Prompt(powerline, 'right'))
 	zsh.setvalue('PS1',  '${ZPYTHON_PS1}')
 	zsh.setvalue('RPS1', '${ZPYTHON_RPS1}')
