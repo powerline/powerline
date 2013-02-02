@@ -20,12 +20,12 @@ _powerline_install_precmd() {
 	done
 	precmd_functions+=(_powerline_tmux_set_pwd)
 	setopt promptpercent
+	setopt promptsubst
 	if zmodload zsh/zpython &>/dev/null ; then
 		zpython 'from powerline.bindings.zsh import setup as powerline_setup'
 		zpython 'powerline_setup()'
 		zpython 'del powerline_setup'
 	else
-		setopt promptsubst
 		PS1='$(powerline shell left -r zsh_prompt --last_exit_code=$? --last_pipe_status="$pipestatus")'
 		RPS1='$(powerline shell right -r zsh_prompt --last_exit_code=$? --last_pipe_status="$pipestatus")'
 	fi
