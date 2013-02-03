@@ -37,7 +37,7 @@ class VimRenderer(Renderer):
 			self.window_cache[window_id] = (theme, segments)
 		else:
 			mode = 'nc'
-			theme, segments = self.window_cache.get(window_id, (None, None))
+			theme, segments = self.window_cache.get(window_id, (None, []))
 			for segment in segments:
 				segment['_space_left'] = 0
 				segment['_space_right'] = 0
