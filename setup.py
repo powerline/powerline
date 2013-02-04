@@ -33,5 +33,4 @@ setup(name='Powerline',
 			'Sphinx',
 			],
 		},
-	namespace_packages=['powerline'],
 	)
