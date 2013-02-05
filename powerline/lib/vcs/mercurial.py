@@ -42,7 +42,8 @@ class Repository(object):
 		else:
 			resulting_status = 0
 			for status, paths in zip(self.repo_statuses, repo.status(unknown=True)):
-				resulting_status |= status
+				if paths:
+					resulting_status |= status
 			return self.repo_statuses_str[resulting_status]
 
 	def branch(self):
