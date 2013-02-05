@@ -26,6 +26,8 @@
 		"cwd":                { "fg": "base2", "bg": "base01" },
 		"cwd:current_folder": { "fg": "base3", "bg": "base01", "attr": ["bold"] },
 		"cwd:divider":        { "fg": "base1", "bg": "base01" },
-		"hostname":           { "fg": "base3", "bg": "base01" }
+		"hostname":           { "fg": "base3", "bg": "base01" },
+		"exit_fail":          { "fg": "base3", "bg": "red" },
+		"exit_success":       { "fg": "base3", "bg": "green" }
 	}
 }
