@@ -59,7 +59,7 @@ try:
 				wt_column = ' '
 				index_column = ' '
 				untracked_column = ' '
-				for status in self._repo().status():
+				for status in self._repo().status().values():
 					if status & (git.GIT_STATUS_WT_DELETED
 							| git.GIT_STATUS_WT_MODIFIED):
 						wt_column = 'D'
