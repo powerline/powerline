@@ -136,7 +136,7 @@ def weather(unit='c', location_query=None):
 	query_data = {
 		'q':
 			'use "http://github.com/yql/yql-tables/raw/master/weather/weather.bylocation.xml" as we;'
-			'select * from we where location="{0}" and unit="{1}"'.format(location_query, unit),
+			'select * from we where location="{0}" and unit="{1}"'.format(location_query.encode('utf-8'), unit),
 		'format': 'json'
 	}
 	try:
