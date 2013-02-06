@@ -24,13 +24,13 @@ def _urllib_read(url):
 		import urllib.error
 		import urllib.request
 		try:
-			return urllib.request.urlopen(url).read().decode('utf-8')
-		except urllib.error.HTTPError:
+			return urllib.request.urlopen(url, timeout=5).read().decode('utf-8')
+		except:
 			return
 	except ImportError:
 		import urllib2
 		try:
-			return urllib2.urlopen(url).read()
+			return urllib2.urlopen(url, timeout=5).read()
 		except urllib2.HTTPError:
 			return
 
@@ -131,7 +131,7 @@ def weather(unit='c', location_query=None):
 		try:
 			location = json.loads(_urllib_read('http://freegeoip.net/json/' + external_ip()))
 			location_query = ','.join([location['city'], location['region_name'], location['country_name']])
-		except ValueError:
+		except (TypeError, ValueError):
 			return None
 	query_data = {
 		'q':
