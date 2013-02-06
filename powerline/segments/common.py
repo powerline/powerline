@@ -242,17 +242,13 @@ def email_imap_alert(username, password, server='imap.gmail.com', port=993, fold
 	try:
 		mail = imaplib.IMAP4_SSL(server, port)
 		mail.login(username, password)
-		rc, message = mail.status(folder, '(UNSEEN)').decode('utf-8')
-		unread_count = int(re.search('UNSEEN (\d+)', message[0]).group(1))
+		message = mail.status(folder, '(UNSEEN)')
+		unread_count = int(re.search('UNSEEN (\d+)', message[1][0]).group(1))
 	except (imaplib.IMAP4.error, AttributeError):
 		return None
 	if not unread_count:
 		return None
-	return [{
-		'highlight_group': 'email_alert',
-		'contents': unread_count,
-		}]
-
+	return unread_count
 
 class NowPlayingSegment(object):
 	STATE_SYMBOLS = {
