@@ -194,3 +194,11 @@ def file_vcs_status():
 			ret[0]['before'] = ' '
 			return ret
 	return None
+
+
+@memoize(2)
+def repository_status():
+	repo = guess(os.path.abspath(vim.current.buffer.name or os.getcwd()))
+	if repo:
+		return repo.status()
+	return None
