@@ -12,3 +12,7 @@ class BashPromptRenderer(ShellRenderer):
 		around it (required in bash prompts).
 		'''
 		return '\[' + super(BashPromptRenderer, self).hl(None, fg, bg, attr) + '\]' + (contents or u'')
+
+	@staticmethod
+	def escape(string):
+		return string.replace('\\', '\\\\').replace('$', '\\$').replace('`', '\\`')
