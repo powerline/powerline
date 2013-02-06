@@ -144,7 +144,7 @@ def weather(unit='c', location_query=None):
 		response = json.loads(_urllib_read(url))
 		condition = response['query']['results']['weather']['rss']['channel']['item']['condition']
 		condition_code = int(condition['code'])
-	except (KeyError, ValueError):
+	except (KeyError, TypeError, ValueError):
 		return None
 	icon = u'〇'
 	for icon, codes in weather_conditions_codes.items():
