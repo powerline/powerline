@@ -12,7 +12,7 @@ def humanize_bytes(num, suffix='B', binary_prefix=False):
 	if num == 0:
 		return '0 ' + suffix
 	div = 1000 if binary_prefix else 1024
-	exponent = min(int(log(num, div)), len(unit_list) - 1)
+	exponent = min(int(log(num, div)) if num else 0, len(unit_list) - 1)
 	quotient = float(num) / div ** exponent
 	unit, decimals = unit_list[exponent]
 	if unit and binary_prefix:
