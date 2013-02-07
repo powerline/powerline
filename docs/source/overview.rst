@@ -83,26 +83,17 @@ Usage
 Vim statusline
 --------------
 
-Add the following line to your :file:`vimrc`:
+Add the following line to your :file:`vimrc`, where ``{path}`` is the 
+absolute path to your Powerline installation directory:
 
 .. code-block:: vim
 
-   python from powerline.bindings.vim import source_plugin; source_plugin()
+   set rtp+={path}/powerline/bindings/vim
 
-If you want to enable Python 3 support, substitute the ``python`` command 
-above with ``python3``. Note that this is somewhat experimental as some 
-segments don't have support for Python 3 yet.
-
-If Powerline is installed somewhere other than Python's site-packages 
-directories you'll either have to use a plugin manager like Vundle, or 
-source the vim plugin file with an absolute path to the plugin location.
-
-Add the following line to your :file:`vimrc`, where ``{path}`` is the path 
-to the main Powerline project directory:
-
-.. code-block:: vim
-
-   source {path}/powerline/bindings/vim/plugin/source_plugin.vim
+If you're using Vundle or Pathogen and don't want Powerline functionality in 
+any other applications, simply add Powerline as a bundle and point the path 
+above to the Powerline bundle directory, e.g.  
+``~/.vim/bundle/powerline/powerline/bindings/vim``.
 
 Shell prompts
 -------------
@@ -128,7 +119,7 @@ absolute path to your Powerline installation directory:
    . {path}/powerline/bindings/zsh/powerline.zsh
 
 Tmux statusline
-^^^^^^^^^^^^^^^
+---------------
 
 Add the following line to your :file:`tmux.conf`, where ``{path}`` is the 
 absolute path to your Powerline installation directory::
@@ -136,7 +127,7 @@ absolute path to your Powerline installation directory::
    source '{path}/powerline/bindings/tmux/powerline.conf'
 
 IPython prompt
-^^^^^^^^^^^^^^
+--------------
 
 For IPython<0.11 add the following lines to your 
 :file:`.ipython/ipy_user_conf.py`::
