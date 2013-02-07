@@ -9,6 +9,7 @@ Powerline
    introduction
    overview
    configuration
+   tipstricks
    fontpatching
    license-credits
 
