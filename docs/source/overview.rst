@@ -118,6 +118,9 @@ absolute path to your Powerline installation directory:
 
    . {path}/powerline/bindings/zsh/powerline.zsh
 
+If you are not satisfied with powerline speed in this case, compile zpython 
+branch from https://bitbucket.org/ZyX_I/zsh.
+
 Tmux statusline
 ---------------
 
