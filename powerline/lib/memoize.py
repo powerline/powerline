@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from functools import wraps
 import time
 
 
@@ -12,6 +13,7 @@ class memoize(object):
 		self.additional_key = additional_key
 
 	def __call__(self, func):
+		@wraps(func)
 		def decorated_function(*args, **kwargs):
 			if self.additional_key:
 				key = (func.__name__, args, tuple(kwargs.items()), self.additional_key())
