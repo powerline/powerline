@@ -2,7 +2,7 @@
 
 pkgbase=python-powerline
 pkgname=python-powerline-git
-pkgver=20130131
+pkgver=20130208
 pkgrel=1
 pkgdesc='The ultimate statusline/prompt utility.'
 url='https://github.com/Lokaltog/powerline'
@@ -53,7 +53,7 @@ package() {
 
 	msg2 "Installing vim plugin..."
 	install -dm755 "${pkgdir}/usr/share/vim/vimfiles/plugin"
-	install -m644 "powerline/bindings/vim/powerline.vim" "${pkgdir}/usr/share/vim/vimfiles/plugin/powerline.vim"
+	install -m644 "powerline/bindings/vim/plugin/powerline.vim" "${pkgdir}/usr/share/vim/vimfiles/plugin/powerline.vim"
 
 	msg2 "Installing zsh plugin..."
 	install -dm755 "${pkgdir}/usr/share/zsh/site-contrib"
