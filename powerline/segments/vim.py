@@ -167,6 +167,15 @@ def col_current(virtcol=True):
 	return vim_funcs['virtcol' if virtcol else 'col']('.')
 
 
+def modified_buffers(text=u'+'):
+	'''Return a comma-separated list of modified buffers.'''
+	buffer_len = int(vim.eval('bufnr("$")'))
+	buffer_mod = [str(bufnr) for bufnr in range(1, buffer_len + 1) if vim.eval('getbufvar({0}, "&mod")'.format(bufnr)) == '1']
+	if buffer_mod:
+		return u'{0} {1}'.format(text, ','.join(buffer_mod))
+	return None
+
+
 @memoize(2)
 def branch():
 	repo = guess(os.path.abspath(vim.current.buffer.name or os.getcwd()))
