@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import sys, os
+import os
+import sys
 
-sys.path.insert(0, os.path.abspath('../powerline'))
+sys.path.insert(0, os.path.abspath('../..'))
 
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.todo', 'sphinx.ext.coverage', 'sphinx.ext.viewcode']
 source_suffix = '.rst'
@@ -13,5 +14,5 @@ version = 'beta'
 release = 'beta'
 exclude_patterns = ['_build']
 pygments_style = 'sphinx'
-html_theme = 'nature'
+html_theme = 'default'
 html_static_path = ['_static']
