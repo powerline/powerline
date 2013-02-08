@@ -45,6 +45,11 @@ def _urllib_urlencode(string):
 
 
 def hostname(only_if_ssh=False):
+	'''Return the current hostname.
+
+	:param bool only_if_ssh:
+		only return the hostname if currently in an SSH session
+	'''
 	import socket
 	if only_if_ssh and not os.environ.get('SSH_CLIENT'):
 		return None
@@ -52,6 +57,10 @@ def hostname(only_if_ssh=False):
 
 
 def user():
+	'''Return the current user.
+
+	Highlights the user with the ``superuser`` if the effective user ID is 0.
+	'''
 	user = os.environ.get('USER')
 	euid = os.geteuid()
 	return [{
@@ -61,6 +70,7 @@ def user():
 
 
 def branch():
+	'''Return the current VCS branch.'''
 	from powerline.lib.vcs import guess
 	repo = guess(os.path.abspath(os.getcwd()))
 	if repo:
@@ -69,6 +79,15 @@ def branch():
 
 
 def cwd(dir_shorten_len=None, dir_limit_depth=None):
+	'''Return the current working directory.
+
+	Returns a segment list to create a breadcrumb-like effect.
+
+	:param int dir_shorten_len:
+		shorten parent directory names to this length (e.g. :file:`/long/path/to/powerline` → :file:`/l/p/t/powerline`)
+	:param int dir_limit_depth:
+		limit directory depth to this number (e.g. :file:`/long/path/to/powerline` → :file:`⋯/to/powerline`)
+	'''
 	import re
 	try:
 		cwd = os.getcwdu()
@@ -97,16 +116,40 @@ def cwd(dir_shorten_len=None, dir_limit_depth=None):
 
 
 def date(format='%Y-%m-%d'):
+	'''Return the current date.
+
+	:param str format:
+		strftime-style date format string
+	'''
 	from datetime import datetime
 	return datetime.now().strftime(format)
 
 
 @memoize(600)
 def external_ip(query_url='http://ipv4.icanhazip.com/'):
+	'''Return external IP address.
+
+	Suggested URIs:
+
+	* http://ipv4.icanhazip.com/
+	* http://ipv6.icanhazip.com/
+	* http://icanhazip.com/ (returns IPv6 address if available, else IPv4)
+
+	:param str query_url:
+		URI to query for IP address, should return only the IP address as a text string
+	'''
 	return _urllib_read(query_url).strip()
 
 
 def uptime(format='{days:02d}d {hours:02d}h {minutes:02d}m'):
+	'''Return system uptime.
+
+	Uses the ``psutil`` module if available for multi-platform compatibility,
+	falls back to reading :file:`/proc/uptime`.
+
+	:param str format:
+		format string, will be passed ``days``, ``hours`` and ``minutes`` as arguments
+	'''
 	try:
 		import psutil
 		from datetime import datetime
@@ -125,6 +168,20 @@ def uptime(format='{days:02d}d {hours:02d}h {minutes:02d}m'):
 
 @memoize(1800)
 def weather(unit='c', location_query=None):
+	'''Return weather from Yahoo! Weather.
+
+	Uses GeoIP lookup from http://freegeoip.net/ to automatically determine
+	your current location. This should be changed if you're in a VPN or if your
+	IP address is registered at another location.
+
+	Returns a list of colorized icon and temperature segments depending on
+	weather conditions.
+
+	:param str unit:
+		temperature unit, can be one of ``F``, ``C`` or ``K``
+	:param str location_query:
+		location query for your current location, e.g. ``oslo, norway``
+	'''
 	import json
 
 	if not location_query:
@@ -164,6 +221,19 @@ def weather(unit='c', location_query=None):
 
 
 def system_load(format='{avg:.1f}', threshold_good=1, threshold_bad=2):
+	'''Return normalized system load average.
+
+	Highlights using ``system_load_good``, ``system_load_bad`` and
+	``system_load_ugly`` highlighting groups, depending on the thresholds
+	passed to the function.
+
+	:param str format:
+		format string, receives ``avg`` as an argument
+	:param float threshold_good:
+		threshold for "good load" highlighting
+	:param float threshold_bad:
+		threshold for "bad load" highlighting
+	'''
 	import multiprocessing
 	cpu_count = multiprocessing.cpu_count()
 	ret = []
@@ -187,6 +257,13 @@ def system_load(format='{avg:.1f}', threshold_good=1, threshold_bad=2):
 
 
 def cpu_load_percent(measure_interval=.5):
+	'''Return the average CPU load as a percentage.
+
+	Requires the ``psutil`` module.
+
+	:param float measure_interval:
+		interval used to measure CPU load (in seconds)
+	'''
 	try:
 		import psutil
 	except ImportError:
@@ -196,6 +273,21 @@ def cpu_load_percent(measure_interval=.5):
 
 
 def network_load(interface='eth0', measure_interval=1, suffix='B/s', binary_prefix=False):
+	'''Return the network load.
+
+	Uses the ``psutil`` module if available for multi-platform compatibility,
+	falls back to reading
+	:file:`/sys/class/net/{interface}/statistics/{rx,tx}_bytes`.
+
+	:param str interface:
+		network interface to measure
+	:param float measure_interval:
+		interval used to measure the network load (in seconds)
+	:param str suffix:
+		string appended to each load string
+	:param bool binary_prefix:
+		use binary prefix, e.g. MiB instead of MB
+	'''
 	import time
 	from powerline.lib import humanize_bytes
 
@@ -229,11 +321,25 @@ def network_load(interface='eth0', measure_interval=1, suffix='B/s', binary_pref
 
 
 def virtualenv():
+	'''Return the name of the current Python virtualenv.'''
 	return os.path.basename(os.environ.get('VIRTUAL_ENV', '')) or None
 
 
 @memoize(60)
 def email_imap_alert(username, password, server='imap.gmail.com', port=993, folder='INBOX'):
+	'''Return unread e-mail count for IMAP servers.
+
+	:param str username:
+		login username
+	:param str password:
+		login password
+	:param str server:
+		e-mail server
+	:param int port:
+		e-mail server port
+	:param str folder:
+		folder to check for e-mails
+	'''
 	import imaplib
 	import re
 

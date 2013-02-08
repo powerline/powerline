@@ -13,6 +13,14 @@ Powerline
    fontpatching
    license-credits
 
+Segments
+========
+
+.. toctree::
+   segments/common
+   segments/shell
+   segments/vim
+
 Indices and tables
 ==================
 
