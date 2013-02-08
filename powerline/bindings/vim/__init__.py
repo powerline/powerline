@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import vim
+try:
+	import vim
+except ImportError:
+	vim = {}
 
 try:
 	_vim_globals = vim.bindeval('g:')

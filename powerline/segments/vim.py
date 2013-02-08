@@ -3,7 +3,10 @@
 from __future__ import absolute_import
 
 import os
-import vim
+try:
+	import vim
+except ImportError:
+	vim = {}
 
 from powerline.bindings.vim import vim_get_func
 from powerline.lib import memoize, humanize_bytes
