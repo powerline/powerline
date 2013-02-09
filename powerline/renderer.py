@@ -52,7 +52,7 @@ class Renderer(object):
 
 		if not width:
 			# No width specified, so we don't need to crop or pad anything
-			return self._returned_value(u''.join([segment['_rendered_hl'] for segment in segments]) + self.hl(), segments, output_raw)
+			return self._returned_value(u''.join([segment['_rendered_hl'] for segment in segments]) + self.hlstyle(), segments, output_raw)
 
 		# Create an ordered list of segments that can be dropped
 		segments_priority = [segment for segment in sorted(segments, key=lambda segment: segment['priority'], reverse=True) if segment['priority'] > 0]
@@ -75,7 +75,7 @@ class Renderer(object):
 					segment['_space_right'] += space_side
 			segments_spacers[0]['_space_right'] += distribute_len_remainder
 
-		rendered_highlighted = u''.join([segment['_rendered_hl'] for segment in self._render_segments(mode, theme, segments)]) + self.hl()
+		rendered_highlighted = u''.join([segment['_rendered_hl'] for segment in self._render_segments(mode, theme, segments)]) + self.hlstyle()
 
 		return self._returned_value(rendered_highlighted, segments, output_raw)
 
@@ -177,5 +177,8 @@ class Renderer(object):
 		b = int & 0xff
 		return r, g, b
 
-	def hl(self, contents=None, fg=None, bg=None, attr=None):
+	def hlstyle(fg=None, bg=None, attr=None):
 		raise NotImplementedError
+
+	def hl(self, contents, fg=None, bg=None, attr=None):
+		return self.hlstyle(fg, bg, attr) + (contents or u'')
