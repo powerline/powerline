@@ -5,7 +5,7 @@ from powerline.renderer import Renderer
 
 class TmuxRenderer(Renderer):
 	'''Powerline tmux segment renderer.'''
-	def hl(self, contents=None, fg=None, bg=None, attr=None):
+	def hlstyle(self, fg=None, bg=None, attr=None):
 		'''Highlight a segment.'''
 		# We don't need to explicitly reset attributes, so skip those calls
 		if not attr and not bg and not fg:
@@ -37,4 +37,4 @@ class TmuxRenderer(Renderer):
 					tmux_attr += ['underscore']
 				else:
 					tmux_attr += ['nounderscore']
-		return '#[' + ','.join(tmux_attr) + ']' + (contents or u'')
+		return '#[' + ','.join(tmux_attr) + ']'
