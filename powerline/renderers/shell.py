@@ -5,6 +5,9 @@ from powerline.renderer import Renderer
 
 class ShellRenderer(Renderer):
 	'''Powerline shell segment renderer.'''
+	escape_hl_start = ''
+	escape_hl_end = ''
+
 	def hlstyle(self, fg=None, bg=None, attr=None):
 		'''Highlight a segment.
 
@@ -35,7 +38,7 @@ class ShellRenderer(Renderer):
 			else:
 				if attr & Renderer.ATTR_BOLD:
 					ansi += [1]
-		return '[{0}m'.format(';'.join(str(attr) for attr in ansi))
+		return self.escape_hl_start + '[{0}m'.format(';'.join(str(attr) for attr in ansi)) + self.escape_hl_end
 
 	@staticmethod
 	def escape(string):

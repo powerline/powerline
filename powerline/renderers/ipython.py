@@ -5,5 +5,5 @@ from powerline.renderers.shell import ShellRenderer
 
 class IpythonRenderer(ShellRenderer):
 	'''Powerline ipython segment renderer.'''
-	def hlstyle(self, *args, **kwargs):
-		return '\x01' + super(IpythonRenderer, self).hlstyle(*args, **kwargs) + '\x02'
+	escape_hl_start = '\x01'
+	escape_hl_end = '\x02'
