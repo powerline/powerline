@@ -10,6 +10,12 @@ class PowerlinePrompt(BasePrompt):
 
 	def set_p_str(self):
 		self.p_str, self.p_str_nocolor = self.powerline.renderer.render(output_raw=True)
+		self.nrspaces = len(self.rspace.search(self.p_str_nocolor).group())
+		self.prompt_text_len = len(self.p_str_nocolor) - self.nrspaces - 1
+
+	def auto_rewrite(self):
+		# TODO color this
+		return '%s>%s' % ('-'*self.prompt_text_len, ' '*self.nrspaces)
 
 
 def setup(prompt='1'):
