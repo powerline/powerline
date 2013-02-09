@@ -6,11 +6,13 @@ from powerline.renderer import Renderer
 class PangoMarkupRenderer(Renderer):
 	'''Powerline Pango markup segment renderer.'''
 
-	def hl(self, contents=None, fg=None, bg=None, attr=None):
-		'''Highlight a segment.'''
+	@staticmethod
+	def hlstyle(*args, **kwargs):
 		# We don't need to explicitly reset attributes, so skip those calls
-		if not contents or (not attr and not bg and not fg):
-			return ''
+		return ''
+
+	def hl(self, contents, fg=None, bg=None, attr=None):
+		'''Highlight a segment.'''
 		awesome_attr = []
 		if fg is not None:
 			if fg is not False and fg[1] is not False:
