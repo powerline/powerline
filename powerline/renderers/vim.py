@@ -44,6 +44,9 @@ class VimRenderer(Renderer):
 		statusline = super(VimRenderer, self).render(mode, winwidth, theme, segments)
 		return statusline
 
+	def reset_highlight(self):
+		self.hl_groups.clear()
+
 	@staticmethod
 	def escape(string):
 		return string.replace('%', '%%')
