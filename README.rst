@@ -8,8 +8,9 @@ Powerline
 This is the upcoming version of Powerline, implemented in Python. The 
 project is currently in a stable beta and almost ready for release.
 
-* Consult the `documentation <http://lokaltog.github.com/powerline/>`_ for 
-  more information and installation instructions.
+* Consult the `documentation 
+  <https://powerline.readthedocs.org/en/latest/>`_ for more information and 
+  installation instructions.
 * Check out `powerline-fonts <https://github.com/Lokaltog/powerline-fonts>`_ 
   for pre-patched versions of popular coding fonts.
 

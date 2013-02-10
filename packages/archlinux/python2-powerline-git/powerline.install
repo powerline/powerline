@@ -14,7 +14,7 @@ If Powerline doesn't work out of the box on your system, please submit an issue
 on GitHub: https://github.com/Lokaltog/powerline/issues
 
 Consult the documentation for detailed installation instructions and 
-troubleshooting information: http://lokaltog.github.com/powerline/
+troubleshooting information: https://powerline.readthedocs.org/en/latest/
 
 Vim installation
 ----------------
