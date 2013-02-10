@@ -72,4 +72,5 @@ augroup Powerline
 	autocmd!
 	autocmd BufEnter,BufWinEnter,WinEnter,CmdwinEnter * call s:UpdateWindows(0) | redrawstatus
 	autocmd CmdwinLeave * call s:UpdateWindows(1)
+	autocmd ColorScheme * exec s:powerline_pycmd 'powerline.renderer.reset_highlight()'
 augroup END
