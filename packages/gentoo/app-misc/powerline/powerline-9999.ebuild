@@ -18,7 +18,7 @@ SRC_URI=""
 
 LICENSE="CC-Attribution-ShareAlike-3.0"
 SLOT="0"
-KEYWORDS="~alpha ~amd64 arm ~hppa ~ia64 ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc ~x86 ~ppc-aix ~amd64-fbsd ~sparc-fbsd ~x86-fbsd ~x64-freebsd ~x86-freebsd ~hppa-hpux ~ia64-hpux ~x86-interix ~amd64-linux ~ia64-linux ~x86-linux ~ppc-macos ~x64-macos ~x86-macos ~m68k-mint ~sparc-solaris ~sparc64-solaris ~x64-solaris ~x86-solaris"
+KEYWORDS="~alpha ~amd64 ~arm ~hppa ~ia64 ~mips ~ppc ~ppc64 ~s390 ~sh ~sparc ~x86 ~ppc-aix ~amd64-fbsd ~sparc-fbsd ~x86-fbsd ~x64-freebsd ~x86-freebsd ~hppa-hpux ~ia64-hpux ~x86-interix ~amd64-linux ~ia64-linux ~x86-linux ~ppc-macos ~x64-macos ~x86-macos ~m68k-mint ~sparc-solaris ~sparc64-solaris ~x64-solaris ~x86-solaris"
 IUSE="vim zsh doc"
 
 #if LIVE
@@ -51,9 +51,11 @@ src_install() {
 	font_src_install
 	if use vim ; then
 		insinto /usr/share/vim/vimfiles/plugin
-		doins powerline/bindings/vim/powerline.vim
+		# Don't do sys.path.append, it points to wrong location
+		sed -i -e '/sys\.path\.append/d' powerline/bindings/vim/plugin/powerline.vim
+		doins powerline/bindings/vim/plugin/powerline.vim
 	fi
-	# rm powerline/bindings/vim/powerline.vim
+	rm powerline/bindings/vim/plugin/powerline.vim
 	if use zsh ; then
 		insinto /usr/share/zsh/site-contrib
 		doins powerline/bindings/zsh/powerline.zsh
