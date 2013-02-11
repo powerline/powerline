@@ -10,6 +10,7 @@ class ShellRenderer(Renderer):
 	escape_hl_end = ''
 	term_truecolor = False
 	tmux_escape = False
+	screen_escape = False
 
 	def hlstyle(self, fg=None, bg=None, attr=None):
 		'''Highlight a segment.
@@ -50,6 +51,8 @@ class ShellRenderer(Renderer):
 		r = '\033[{0}m'.format(';'.join(str(attr) for attr in ansi))
 		if self.tmux_escape:
 			r = '\033Ptmux;' + r.replace('\033', '\033\033') + '\033\\'
+		elif self.screen_escape:
+			r = '\033P' + r.replace('\033', '\033\033') + '\033\\'
 		return self.escape_hl_start + r + self.escape_hl_end
 
 	@staticmethod
