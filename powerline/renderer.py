@@ -16,9 +16,9 @@ class Renderer(object):
 			raise KeyError('There is already a local theme with given matcher')
 		self.local_themes[matcher] = theme
 
-	def get_theme(self):
+	def get_theme(self, matcher_info):
 		for matcher in self.local_themes.keys():
-			if matcher():
+			if matcher(matcher_info):
 				match = self.local_themes[matcher]
 				if 'config' in match:
 					match['theme'] = Theme(theme_config=match.pop('config'), **self.theme_kwargs)
@@ -26,7 +26,7 @@ class Renderer(object):
 		else:
 			return self.theme
 
-	def render(self, mode=None, width=None, theme=None, segments=None, side=None, output_raw=False):
+	def render(self, mode=None, width=None, side=None, output_raw=False, segment_info=None, matcher_info=None):
 		'''Render all segments.
 
 		When a width is provided, low-priority segments are dropped one at
@@ -35,8 +35,11 @@ class Renderer(object):
 		provided they will fill the remaining space until the desired width is
 		reached.
 		'''
-		theme = theme or self.get_theme()
-		segments = segments or theme.get_segments(side)
+		theme = self.get_theme(matcher_info)
+		segments = theme.get_segments(side)
+
+		if segment_info:
+			theme.segment_info.update(segment_info)
 
 		# Handle excluded/included segments for the current mode
 		segments = [segment for segment in segments\
