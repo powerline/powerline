@@ -3,32 +3,7 @@
 import os
 import sys
 
-from powerline.lib import memoize
-
-
-def _urllib_read(url):
-	try:
-		import urllib.error
-		import urllib.request
-		try:
-			return urllib.request.urlopen(url, timeout=5).read().decode('utf-8')
-		except:
-			return
-	except ImportError:
-		import urllib2
-		try:
-			return urllib2.urlopen(url, timeout=5).read()
-		except urllib2.HTTPError:
-			return
-
-
-def _urllib_urlencode(string):
-	try:
-		import urllib.parse
-		return urllib.parse.urlencode(string)
-	except ImportError:
-		import urllib
-		return urllib.urlencode(string)
+from powerline.lib import memoize, urllib_read, urllib_urlencode
 
 
 def hostname(only_if_ssh=False):
@@ -125,7 +100,7 @@ def external_ip(query_url='http://ipv4.icanhazip.com/'):
 	:param str query_url:
 		URI to query for IP address, should return only the IP address as a text string
 	'''
-	return _urllib_read(query_url).strip()
+	return urllib_read(query_url).strip()
 
 
 def uptime(format='{days:02d}d {hours:02d}h {minutes:02d}m'):
@@ -186,7 +161,7 @@ def weather(unit='c', location_query=None):
 
 	if not location_query:
 		try:
-			location = json.loads(_urllib_read('http://freegeoip.net/json/' + external_ip()))
+			location = json.loads(urllib_read('http://freegeoip.net/json/' + external_ip()))
 			location_query = ','.join([location['city'], location['region_name'], location['country_name']])
 		except (TypeError, ValueError):
 			return None
@@ -197,8 +172,8 @@ def weather(unit='c', location_query=None):
 		'format': 'json'
 	}
 	try:
-		url = 'http://query.yahooapis.com/v1/public/yql?' + _urllib_urlencode(query_data)
-		response = json.loads(_urllib_read(url))
+		url = 'http://query.yahooapis.com/v1/public/yql?' + urllib_urlencode(query_data)
+		response = json.loads(urllib_read(url))
 		condition = response['query']['results']['weather']['rss']['channel']['item']['condition']
 		condition_code = int(condition['code'])
 	except (KeyError, TypeError, ValueError):
