@@ -39,6 +39,12 @@ class ShellRenderer(Renderer):
 			else:
 				if attr & ATTR_BOLD:
 					ansi += [1]
+				elif attr & ATTR_ITALIC:
+					# Note: is likely not to work or even be inverse in place of 
+					# italic. Omit using this in colorschemes.
+					ansi += [3]
+				elif attr & ATTR_UNDERLINE:
+					ansi += [4]
 		return self.escape_hl_start + '[{0}m'.format(';'.join(str(attr) for attr in ansi)) + self.escape_hl_end
 
 	@staticmethod
