@@ -11,6 +11,11 @@ except NameError:
 	unicode = str
 
 
+def requires_segment_info(func):
+	func.requires_powerline_segment_info = True
+	return func
+
+
 class Theme(object):
 	def __init__(self, ext, colorscheme, theme_config, common_config, segment_info=None):
 		self.colorscheme = colorscheme

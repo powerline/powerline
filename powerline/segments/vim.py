@@ -8,17 +8,16 @@ try:
 except ImportError:
 	vim = {}
 
-from powerline.bindings.vim import vim_get_func
+from powerline.bindings.vim import vim_get_func, getbufvar
+from powerline.theme import requires_segment_info
 from powerline.lib import memoize, humanize_bytes
 from powerline.lib.vcs import guess
 
 vim_funcs = {
-	'col': vim_get_func('col', rettype=int),
 	'virtcol': vim_get_func('virtcol', rettype=int),
-	'expand': vim_get_func('expand'),
-	'line': vim_get_func('line', rettype=int),
-	'mode': vim_get_func('mode'),
+	'fnamemodify': vim_get_func('fnamemodify'),
 	'getfsize': vim_get_func('getfsize', rettype=int),
+	'bufnr': vim_get_func('bufnr', rettype=int),
 }
 
 vim_modes = {
@@ -48,13 +47,37 @@ mode_translations = {
 }
 
 
-def mode(override=None):
+def bufnr(segment_info, *args, **kwargs):
+	'''Used for cache key, returns current buffer number'''
+	return segment_info['bufnr']
+
+
+# TODO Remove cache when needed
+def window_cached(func):
+	cache = {}
+	def ret(segment_info, *args, **kwargs):
+		window_id = segment_info['window_id']
+		if segment_info['mode'] == 'nc':
+			return cache.get(window_id)
+		else:
+			r = func(*args, **kwargs)
+			cache[window_id] = r
+			return r
+	ret = requires_segment_info(ret)
+	ret.__name__ = func.__name__
+	return ret
+
+
+@requires_segment_info
+def mode(segment_info, override=None):
 	'''Return the current vim mode.
 
 	:param dict override:
 		dict for overriding default mode strings, e.g. ``{ 'n': 'NORM' }``
 	'''
-	mode = vim_funcs['mode']().decode('utf-8')
+	mode = segment_info['mode']
+	if mode == 'nc':
+		return None
 	mode = mode_translations.get(mode, mode)
 	if not override:
 		return vim_modes[mode]
@@ -64,48 +87,53 @@ def mode(override=None):
 		return vim_modes[mode]
 
 
-def modified_indicator(text=u'+'):
+@requires_segment_info
+def modified_indicator(segment_info, text=u'+'):
 	'''Return a file modified indicator.
 
 	:param string text:
 		text to display if the current buffer is modified
 	'''
-	return text if int(vim.eval('&modified')) else None
+	return text if int(getbufvar(segment_info['bufnr'], '&modified')) else None
 
 
-def paste_indicator(text='PASTE'):
+@requires_segment_info
+def paste_indicator(segment_info, text='PASTE'):
 	'''Return a paste mode indicator.
 
 	:param string text:
 		text to display if paste mode is enabled
 	'''
-	return text if int(vim.eval('&paste')) else None
+	return text if int(getbufvar(segment_info['bufnr'], '&paste')) else None
 
 
-def readonly_indicator(text=u''):
+@requires_segment_info
+def readonly_indicator(segment_info, text=u''):
 	'''Return a read-only indicator.
 
 	:param string text:
 		text to display if the current buffer is read-only
 	'''
-	return text if int(vim.eval('&readonly')) else None
+	return text if int(getbufvar(segment_info['bufnr'], '&readonly')) else None
 
-
-def file_directory(shorten_home=False):
+@requires_segment_info
+def file_directory(segment_info, shorten_home=False):
 	'''Return file directory (head component of the file path).
 
 	:param bool shorten_home:
 		shorten all directories in :file:`/home/` to :file:`~user/` instead of :file:`/home/user/`.
 	'''
-	file_directory = vim_funcs['expand']('%:~:.:h')
-	if file_directory is None:
+	name = segment_info['buffer'].name
+	if not name:
 		return None
+	file_directory = vim_funcs['fnamemodify'](name, ':~:.:h')
 	if shorten_home and file_directory.startswith('/home/'):
 		file_directory = '~' + file_directory[6:]
 	return file_directory.decode('utf-8') + os.sep if file_directory else None
 
 
-def file_name(display_no_file=False, no_file_text='[No file]'):
+@requires_segment_info
+def file_name(segment_info, display_no_file=False, no_file_text='[No file]'):
 	'''Return file name (tail component of the file path).
 
 	:param bool display_no_file:
@@ -113,19 +141,22 @@ def file_name(display_no_file=False, no_file_text='[No file]'):
 	:param str no_file_text:
 		the string to display if the buffer is missing a file name
 	'''
-	file_name = vim_funcs['expand']('%:~:.:t')
-	if not file_name and not display_no_file:
-		return None
-	if not file_name:
-		return [{
-			'contents': no_file_text,
-			'highlight_group': ['file_name_no_file', 'file_name'],
-			}]
+	name = segment_info['buffer'].name
+	if not name:
+		if display_no_file:
+			return [{
+				'contents': no_file_text,
+				'highlight_group': ['file_name_no_file', 'file_name'],
+				}]
+		else:
+			return None
+	file_name = vim_funcs['fnamemodify'](name, ':~:.:t')
 	return file_name.decode('utf-8')
 
 
-@memoize(2)
-def file_size(suffix='B', binary_prefix=False):
+@requires_segment_info
+@memoize(2, additional_key=bufnr)
+def file_size(segment_info, suffix='B', binary_prefix=False):
 	'''Return file size.
 
 	:param str suffix:
@@ -134,45 +165,49 @@ def file_size(suffix='B', binary_prefix=False):
 		use binary prefix, e.g. MiB instead of MB
 	:return: file size or None if the file isn't saved or if the size is too big to fit in a number
 	'''
-	file_name = vim_funcs['expand']('%')
+	file_name = segment_info['buffer'].name
 	file_size = vim_funcs['getfsize'](file_name)
 	if file_size < 0:
 		return None
 	return humanize_bytes(file_size, suffix, binary_prefix)
 
 
-def file_format():
+@requires_segment_info
+def file_format(segment_info):
 	'''Return file format (i.e. line ending type).
 
 	:return: file format or None if unknown or missing file format
 	'''
-	return vim.eval('&fileformat') or None
+	return getbufvar(segment_info['bufnr'], '&fileformat') or None
 
 
-def file_encoding():
+@requires_segment_info
+def file_encoding(segment_info):
 	'''Return file encoding/character set.
 
 	:return: file encoding/character set or None if unknown or missing file encoding
 	'''
-	return vim.eval('&fileencoding') or None
+	return getbufvar(segment_info['bufnr'], '&fileencoding') or None
 
 
-def file_type():
+@requires_segment_info
+def file_type(segment_info):
 	'''Return file type.
 
 	:return: file type or None if unknown file type
 	'''
-	return vim.eval('&filetype') or None
+	return getbufvar(segment_info['bufnr'], '&filetype') or None
 
 
-def line_percent(gradient=False):
+@requires_segment_info
+def line_percent(segment_info, gradient=False):
 	'''Return the cursor position in the file as a percentage.
 
 	:param bool gradient:
 		highlight the percentage with a color gradient (by default a green to red gradient)
 	'''
-	line_current = vim_funcs['line']('.')
-	line_last = vim_funcs['line']('$')
+	line_current = segment_info['window'].cursor[0]
+	line_last = len(segment_info['buffer'])
 	percentage = int(line_current * 100 // line_last)
 	if not gradient:
 		return percentage
@@ -182,18 +217,23 @@ def line_percent(gradient=False):
 		}]
 
 
-def line_current():
+@requires_segment_info
+def line_current(segment_info):
 	'''Return the current cursor line.'''
-	return vim_funcs['line']('.')
+	return segment_info['window'].cursor[0]
 
 
-def col_current(virtcol=True):
+@requires_segment_info
+def col_current(segment_info):
 	'''Return the current cursor column.
-
-	:param bool virtcol:
-		return visual column with concealed characters ingored
 	'''
-	return vim_funcs['virtcol' if virtcol else 'col']('.')
+	return segment_info['window'].cursor[1] + 1
+
+
+@window_cached
+def virtcol_current():
+	'''Return current visual column with concealed characters ingored'''
+	return vim_funcs['virtcol']('.')
 
 
 def modified_buffers(text=u'+', join_str=','):
@@ -204,30 +244,33 @@ def modified_buffers(text=u'+', join_str=','):
 	:param str join_str:
 		string to use for joining the modified buffer list
 	'''
-	buffer_len = int(vim.eval('bufnr("$")'))
-	buffer_mod = [str(bufnr) for bufnr in range(1, buffer_len + 1) if vim.eval('getbufvar({0}, "&mod")'.format(bufnr)) == '1']
+	buffer_len = vim_funcs['bufnr']('$')
+	buffer_mod = [str(bufnr) for bufnr in range(1, buffer_len + 1) if int(getbufvar(bufnr, '&modified'))]
 	if buffer_mod:
 		return u'{0} {1}'.format(text, join_str.join(buffer_mod))
 	return None
 
 
+@requires_segment_info
 @memoize(2)
-def branch():
+def branch(segment_info):
 	'''Return the current working branch.'''
-	repo = guess(os.path.abspath(vim.current.buffer.name or os.getcwd()))
+	repo = guess(os.path.abspath(segment_info['buffer'].name or os.getcwd()))
 	if repo:
 		return repo.branch()
 	return None
 
 
 # TODO Drop cache on BufWrite event
-@memoize(2, additional_key=lambda: vim.current.buffer.number)
-def file_vcs_status():
+@requires_segment_info
+@memoize(2, additional_key=bufnr)
+def file_vcs_status(segment_info):
 	'''Return the VCS status for this buffer.'''
-	if vim.current.buffer.name and not vim.eval('&buftype'):
-		repo = guess(os.path.abspath(vim.current.buffer.name))
+	name = segment_info['buffer'].name 
+	if name and not getbufvar(segment_info['bufnr'], '&buftype'):
+		repo = guess(os.path.abspath(name))
 		if repo:
-			status = repo.status(os.path.relpath(vim.current.buffer.name, repo.directory))
+			status = repo.status(os.path.relpath(name, repo.directory))
 			if not status:
 				return None
 			status = status.strip()
@@ -242,10 +285,11 @@ def file_vcs_status():
 	return None
 
 
+@requires_segment_info
 @memoize(2)
-def repository_status():
+def repository_status(segment_info):
 	'''Return the status for the current repo.'''
-	repo = guess(os.path.abspath(vim.current.buffer.name or os.getcwd()))
+	repo = guess(os.path.abspath(segment_info['buffer'].name or os.getcwd()))
 	if repo:
 		return repo.status()
 	return None

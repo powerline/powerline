@@ -16,7 +16,7 @@ class memoize(object):
 		@wraps(func)
 		def decorated_function(*args, **kwargs):
 			if self.additional_key:
-				key = (func.__name__, args, tuple(kwargs.items()), self.additional_key())
+				key = (func.__name__, args, tuple(kwargs.items()), self.additional_key(*args, **kwargs))
 			else:
 				key = (func.__name__, args, tuple(kwargs.items()))
 			cached = self._cache.get(key, None)

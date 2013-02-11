@@ -9,7 +9,6 @@ from powerline.colorscheme import ATTR_BOLD, ATTR_ITALIC, ATTR_UNDERLINE
 import vim
 
 vim_mode = vim_get_func('mode')
-vim_winwidth = vim_get_func('winwidth', rettype=int)
 vim_getwinvar = vim_get_func('getwinvar')
 vim_setwinvar = vim_get_func('setwinvar')
 
@@ -20,7 +19,6 @@ class VimRenderer(Renderer):
 	def __init__(self, *args, **kwargs):
 		super(VimRenderer, self).__init__(*args, **kwargs)
 		self.hl_groups = {}
-		self.window_cache = {}
 
 	def render(self, winnr, current):
 		'''Render all segments.
@@ -30,19 +28,20 @@ class VimRenderer(Renderer):
 		used in non-current windows.
 		'''
 		window_id = vim_getwinvar(winnr, 'window_id')
-		winwidth = vim_winwidth(winnr)
 		if current:
 			mode = vim_mode()
-			theme = self.get_theme()
-			segments = [segment for segment in theme.get_segments()]
-			self.window_cache[window_id] = (theme, segments)
 		else:
 			mode = 'nc'
-			theme, segments = self.window_cache.get(window_id, (None, []))
-			for segment in segments:
-				segment['_space_left'] = 0
-				segment['_space_right'] = 0
-		statusline = super(VimRenderer, self).render(mode, winwidth, theme, segments)
+		segment_info = {
+			'window': vim.windows[winnr-1],
+			'winnr': winnr,
+			'mode': mode,
+			'window_id': window_id,
+		}
+		segment_info['buffer'] = segment_info['window'].buffer
+		segment_info['bufnr'] = segment_info['buffer'].number
+		winwidth = segment_info['window'].width
+		statusline = super(VimRenderer, self).render(mode, winwidth, segment_info=segment_info, matcher_info=segment_info)
 		return statusline
 
 	def reset_highlight(self):
