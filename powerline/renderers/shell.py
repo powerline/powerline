@@ -8,6 +8,8 @@ class ShellRenderer(Renderer):
 	'''Powerline shell segment renderer.'''
 	escape_hl_start = ''
 	escape_hl_end = ''
+	term_truecolor = False
+	tmux_escape = False
 
 	def hlstyle(self, fg=None, bg=None, attr=None):
 		'''Highlight a segment.
@@ -45,7 +47,10 @@ class ShellRenderer(Renderer):
 					ansi += [3]
 				elif attr & ATTR_UNDERLINE:
 					ansi += [4]
-		return self.escape_hl_start + '[{0}m'.format(';'.join(str(attr) for attr in ansi)) + self.escape_hl_end
+		r = '\033[{0}m'.format(';'.join(str(attr) for attr in ansi))
+		if self.tmux_escape:
+			r = '\033Ptmux;' + r.replace('\033', '\033\033') + '\033\\'
+		return self.escape_hl_start + r + self.escape_hl_end
 
 	@staticmethod
 	def escape(string):
