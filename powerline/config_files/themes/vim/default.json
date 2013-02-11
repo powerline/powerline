@@ -87,11 +87,12 @@
 				"align": "r"
 			},
 			{
-				"name": "col_current",
+				"name": "virtcol_current",
 				"draw_divider": false,
 				"priority": 30,
 				"before": ":",
 				"width": 3,
+				"highlight_group": ["col_current"],
 				"align": "l"
 			}
 		]

@@ -36,7 +36,7 @@ catch
 		finish
 	endtry
 endtry
-exec s:powerline_pycmd 'powerline = Powerline("vim")'
+exec s:powerline_pycmd 'powerline = Powerline("vim", segment_info={})'
 
 if exists('*'. s:powerline_pyeval)
 	let s:pyeval = function(s:powerline_pyeval)

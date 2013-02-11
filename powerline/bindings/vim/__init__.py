@@ -46,3 +46,5 @@ except AttributeError:
 			return r
 
 	vim_get_func = VimFunc
+
+getbufvar = vim_get_func('getbufvar')
