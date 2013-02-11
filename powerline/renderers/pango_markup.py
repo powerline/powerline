@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from powerline.renderer import Renderer
+from powerline.colorscheme import ATTR_BOLD, ATTR_ITALIC, ATTR_UNDERLINE
 
 
 class PangoMarkupRenderer(Renderer):
@@ -21,10 +22,10 @@ class PangoMarkupRenderer(Renderer):
 			if bg is not False and bg[1] is not False:
 				awesome_attr += ['background="#{0:06x}"'.format(bg[1])]
 		if attr is not None and attr is not False:
-			if attr & Renderer.ATTR_BOLD:
+			if attr & ATTR_BOLD:
 				awesome_attr += ['font_weight="bold"']
-			if attr & Renderer.ATTR_ITALIC:
+			if attr & ATTR_ITALIC:
 				awesome_attr += ['font_style="italic"']
-			if attr & Renderer.ATTR_UNDERLINE:
+			if attr & ATTR_UNDERLINE:
 				awesome_attr += ['underline="single"']
 		return '<span ' + ' '.join(awesome_attr) + '>' + contents + '</span>'

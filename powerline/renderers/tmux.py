@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from powerline.renderer import Renderer
+from powerline.colorscheme import ATTR_BOLD, ATTR_ITALIC, ATTR_UNDERLINE
 
 
 class TmuxRenderer(Renderer):
@@ -25,15 +26,15 @@ class TmuxRenderer(Renderer):
 			if attr is False:
 				tmux_attr += ['nobold', 'noitalics', 'nounderscore']
 			else:
-				if attr & Renderer.ATTR_BOLD:
+				if attr & ATTR_BOLD:
 					tmux_attr += ['bold']
 				else:
 					tmux_attr += ['nobold']
-				if attr & Renderer.ATTR_ITALIC:
+				if attr & ATTR_ITALIC:
 					tmux_attr += ['italics']
 				else:
 					tmux_attr += ['noitalics']
-				if attr & Renderer.ATTR_UNDERLINE:
+				if attr & ATTR_UNDERLINE:
 					tmux_attr += ['underscore']
 				else:
 					tmux_attr += ['nounderscore']

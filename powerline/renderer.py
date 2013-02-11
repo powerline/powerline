@@ -1,21 +1,15 @@
 # -*- coding: utf-8 -*-
 
-from powerline.colorscheme import Colorscheme
+from powerline.colorscheme import DEFAULT_MODE_KEY
 from powerline.theme import Theme
 
 
 class Renderer(object):
-	ATTR_BOLD = 1
-	ATTR_ITALIC = 2
-	ATTR_UNDERLINE = 4
-
-	TERM_24BIT_COLORS = False
-
-	def __init__(self, theme_config, local_themes, theme_kwargs, term_24bit_colors=False):
+	def __init__(self, theme_config, local_themes, theme_kwargs, **options):
+		self.__dict__.update(options)
 		self.theme = Theme(theme_config=theme_config, **theme_kwargs)
 		self.local_themes = local_themes
 		self.theme_kwargs = theme_kwargs
-		self.TERM_24BIT_COLORS = term_24bit_colors
 
 	def add_local_theme(self, matcher, theme):
 		if matcher in self.local_themes:
@@ -92,7 +86,7 @@ class Renderer(object):
 		'''
 		segments_len = len(segments)
 		try:
-			mode = mode if mode in segments[0]['highlight'] else Colorscheme.DEFAULT_MODE_KEY
+			mode = mode if mode in segments[0]['highlight'] else DEFAULT_MODE_KEY
 		except IndexError:
 			pass
 

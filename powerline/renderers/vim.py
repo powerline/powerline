@@ -4,6 +4,7 @@ from __future__ import absolute_import
 
 from powerline.bindings.vim import vim_get_func
 from powerline.renderer import Renderer
+from powerline.colorscheme import ATTR_BOLD, ATTR_ITALIC, ATTR_UNDERLINE
 
 import vim
 
@@ -79,11 +80,11 @@ class VimRenderer(Renderer):
 				hl_group['guibg'] = bg[1]
 			if attr:
 				hl_group['attr'] = []
-				if attr & self.ATTR_BOLD:
+				if attr & ATTR_BOLD:
 					hl_group['attr'].append('bold')
-				if attr & self.ATTR_ITALIC:
+				if attr & ATTR_ITALIC:
 					hl_group['attr'].append('italic')
-				if attr & self.ATTR_UNDERLINE:
+				if attr & ATTR_UNDERLINE:
 					hl_group['attr'].append('underline')
 			hl_group['name'] = 'Pl_' + \
 				str(hl_group['ctermfg']) + '_' + \

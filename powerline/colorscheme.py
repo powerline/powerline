@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 
+DEFAULT_MODE_KEY = None
+ATTR_BOLD = 1
+ATTR_ITALIC = 2
+ATTR_UNDERLINE = 4
 
 class Colorscheme(object):
-	DEFAULT_MODE_KEY = '__default__'
 
 	def __init__(self, colorscheme):
 		'''Initialize a colorscheme.'''
 		self.colors = {}
-		self.modes_groups = {self.DEFAULT_MODE_KEY: {}}
+		self.modes_groups = {DEFAULT_MODE_KEY: {}}
 
 		# Create a dict of color tuples with both a cterm and hex value
 		for color_name, color in colorscheme['colors'].items():
@@ -19,7 +22,7 @@ class Colorscheme(object):
 		# Create highlighting groups for all modes
 		for group_name, group_props in colorscheme['groups'].items():
 			group_attr_flag = self._get_attr_flag(group_props.get('attr', []))
-			self.modes_groups[self.DEFAULT_MODE_KEY][group_name] = {
+			self.modes_groups[DEFAULT_MODE_KEY][group_name] = {
 				'fg': self.colors[group_props['fg']],
 				'bg': self.colors[group_props['bg']],
 				'attr': group_attr_flag,
@@ -67,7 +70,7 @@ class Colorscheme(object):
 		the default mode is returned.
 		'''
 		if not mode or mode not in self.modes_groups:
-			mode = self.DEFAULT_MODE_KEY
+			mode = DEFAULT_MODE_KEY
 		try:
 			return self.modes_groups[mode][group]
 		except TypeError:
@@ -79,14 +82,13 @@ class Colorscheme(object):
 
 	def _get_attr_flag(self, attributes):
 		'''Convert an attribute array to a renderer flag.'''
-		from powerline.renderer import Renderer
 		attr_flag = 0
 		if 'bold' in attributes:
-			attr_flag |= Renderer.ATTR_BOLD
+			attr_flag |= ATTR_BOLD
 		if 'italic' in attributes:
-			attr_flag |= Renderer.ATTR_ITALIC
+			attr_flag |= ATTR_ITALIC
 		if 'underline' in attributes:
-			attr_flag |= Renderer.ATTR_UNDERLINE
+			attr_flag |= ATTR_UNDERLINE
 		return attr_flag
 
 cterm_to_hex = {
