@@ -5,19 +5,6 @@ import sys
 
 from powerline.lib import memoize
 
-# Weather condition code descriptions available at http://developer.yahoo.com/weather/#codes
-weather_conditions_codes = {
-	u'〇': [25, 34],
-	u'⚑': [24],
-	u'☔': [5, 6, 8, 9, 10, 11, 12, 35, 40, 45, 47],
-	u'☁': [26, 27, 28, 29, 30, 44],
-	u'❅': [7, 13, 14, 15, 16, 17, 18, 41, 42, 43, 46],
-	u'☈': [0, 1, 2, 3, 4, 37, 38, 39],
-	u'〰': [19, 20, 21, 22, 23],
-	u'☼': [32, 36],
-	u'☾': [31, 33],
-}
-
 
 def _urllib_read(url):
 	try:
@@ -183,6 +170,19 @@ def weather(unit='c', location_query=None):
 		location query for your current location, e.g. ``oslo, norway``
 	'''
 	import json
+
+	# Weather condition code descriptions available at http://developer.yahoo.com/weather/#codes
+	weather_conditions_codes = {
+		u'〇': [25, 34],
+		u'⚑': [24],
+		u'☔': [5, 6, 8, 9, 10, 11, 12, 35, 40, 45, 47],
+		u'☁': [26, 27, 28, 29, 30, 44],
+		u'❅': [7, 13, 14, 15, 16, 17, 18, 41, 42, 43, 46],
+		u'☈': [0, 1, 2, 3, 4, 37, 38, 39],
+		u'〰': [19, 20, 21, 22, 23],
+		u'☼': [32, 36],
+		u'☾': [31, 33],
+	}
 
 	if not location_query:
 		try:
