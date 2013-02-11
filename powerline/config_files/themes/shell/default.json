@@ -32,8 +32,15 @@
 			},
 			{
 				"module": "powerline.segments.shell",
-				"name": "branch_with_status",
-				"before": " "
+				"name": "branch_status",
+				"before": " ",
+				"args": {
+				  "with_branch_name": false
+ 				}
+			},
+			{
+				"name": "branch",
+				"draw_divider": false
 			}
 		]
 	}
