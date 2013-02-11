@@ -11,7 +11,7 @@ from powerline.lib import underscore_to_camelcase
 
 
 class Powerline(object):
-	def __init__(self, ext, renderer_module=None, segment_info=None):
+	def __init__(self, ext, renderer_module=None, segment_info=None, renderer_options={}):
 		config_home = os.environ.get('XDG_CONFIG_HOME', os.path.expanduser('~/.config'))
 		config_path = os.path.join(config_home, 'powerline')
 		plugin_path = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'config_files')
@@ -51,8 +51,9 @@ class Powerline(object):
 		except ImportError as e:
 			sys.stderr.write('Error while importing renderer module: {0}\n'.format(e))
 			sys.exit(1)
-		self.renderer = Renderer(theme_config, local_themes, theme_kwargs,
-			term_24bit_colors=self.config.get('term_24bit_colors', False))
+		options = {'term_truecolor': self.config.get('term_24bit_colors', False)}
+		options.update(renderer_options)
+		self.renderer = Renderer(theme_config, local_themes, theme_kwargs, **options)
 
 	def add_local_theme(self, key, config):
 		'''Add local themes at runtime (e.g. during vim session).

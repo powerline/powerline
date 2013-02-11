@@ -5,14 +5,11 @@ from powerline.theme import Theme
 
 
 class Renderer(object):
-
-	term_truecolor = False
-
-	def __init__(self, theme_config, local_themes, theme_kwargs, term_24bit_colors=False):
+	def __init__(self, theme_config, local_themes, theme_kwargs, **options):
+		self.__dict__.update(options)
 		self.theme = Theme(theme_config=theme_config, **theme_kwargs)
 		self.local_themes = local_themes
 		self.theme_kwargs = theme_kwargs
-		self.term_truecolor = term_24bit_colors
 
 	def add_local_theme(self, matcher, theme):
 		if matcher in self.local_themes:
