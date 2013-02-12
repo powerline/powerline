@@ -31,8 +31,16 @@
 				"highlight_group": "exit_fail"
 			},
 			{
+				"module": "powerline.segments.shell",
+				"name": "branch_status",
+				"before": " ",
+				"args": {
+				  "with_branch_name": false
+ 				}
+			},
+			{
 				"name": "branch",
-				"before": " "
+				"draw_divider": false
 			}
 		]
 	}
