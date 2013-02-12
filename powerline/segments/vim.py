@@ -47,7 +47,7 @@ mode_translations = {
 }
 
 
-def bufnr(segment_info, *args, **kwargs):
+def bufnr(segment_info, **kwargs):
 	'''Used for cache key, returns current buffer number'''
 	return segment_info['bufnr']
 
@@ -157,7 +157,7 @@ def file_name(segment_info, display_no_file=False, no_file_text='[No file]'):
 
 
 @requires_segment_info
-@memoize(2, additional_key=bufnr)
+@memoize(2, cache_key=bufnr)
 def file_size(segment_info, suffix='B', binary_prefix=False):
 	'''Return file size.
 
@@ -254,10 +254,10 @@ def modified_buffers(text=u'+', join_str=','):
 
 
 @requires_segment_info
-@memoize(2)
+@memoize(2, cache_key=bufnr)
 def branch(segment_info):
 	'''Return the current working branch.'''
-	repo = guess(os.path.abspath(segment_info['buffer'].name or os.getcwd()))
+	repo = guess(path=os.path.abspath(segment_info['buffer'].name or os.getcwd()))
 	if repo:
 		return repo.branch()
 	return None
@@ -265,12 +265,12 @@ def branch(segment_info):
 
 # TODO Drop cache on BufWrite event
 @requires_segment_info
-@memoize(2, additional_key=bufnr)
+@memoize(2, cache_key=bufnr)
 def file_vcs_status(segment_info):
 	'''Return the VCS status for this buffer.'''
 	name = segment_info['buffer'].name
 	if name and not getbufvar(segment_info['bufnr'], '&buftype'):
-		repo = guess(os.path.abspath(name))
+		repo = guess(path=os.path.abspath(name))
 		if repo:
 			status = repo.status(os.path.relpath(name, repo.directory))
 			if not status:
@@ -288,10 +288,10 @@ def file_vcs_status(segment_info):
 
 
 @requires_segment_info
-@memoize(2)
+@memoize(2, cache_key=bufnr)
 def repository_status(segment_info):
 	'''Return the status for the current repo.'''
-	repo = guess(os.path.abspath(segment_info['buffer'].name or os.getcwd()))
+	repo = guess(path=os.path.abspath(segment_info['buffer'].name or os.getcwd()))
 	if repo:
 		return repo.status()
 	return None
