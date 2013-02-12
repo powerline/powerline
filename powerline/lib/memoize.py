@@ -16,10 +16,13 @@ class memoize(object):
 		@wraps(func)
 		def decorated_function(*args, **kwargs):
 			if self.additional_key:
-				key = (func.__name__, args, tuple(kwargs.items()), self.additional_key(*args, **kwargs))
+				key = (func.__name__, args, self.additional_key(*args, **kwargs))
 			else:
-				key = (func.__name__, args, tuple(kwargs.items()))
-			cached = self._cache.get(key, None)
+				key = (func.__name__, args)
+			try:
+				cached = self._cache.get(key, None)
+			except TypeError:
+				return func(*args, **kwargs)
 			if cached is None or time.time() - cached['time'] > self.timeout:
 				cached = self._cache[key] = {
 					'result': func(*args, **kwargs),
