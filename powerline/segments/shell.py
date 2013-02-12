@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 
+from powerline.theme import requires_segment_info
 
+
+@requires_segment_info
 def last_status(segment_info):
 	'''Return last exit code.'''
 	return str(segment_info.last_exit_code) if segment_info.last_exit_code else None
-last_status.requires_powerline_segment_info = True
 
 
+@requires_segment_info
 def last_pipe_status(segment_info):
 	'''Return last pipe status.'''
 	if any(segment_info.last_pipe_status):
@@ -14,4 +17,3 @@ def last_pipe_status(segment_info):
 			for status in segment_info.last_pipe_status]
 	else:
 		return None
-last_pipe_status.requires_powerline_segment_info = True
