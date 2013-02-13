@@ -257,7 +257,7 @@ def modified_buffers(text=u'+', join_str=','):
 @memoize(2, cache_key=bufnr)
 def branch(segment_info):
 	'''Return the current working branch.'''
-	repo = guess(os.path.abspath(segment_info['buffer'].name or os.getcwd()))
+	repo = guess(path=os.path.abspath(segment_info['buffer'].name or os.getcwd()))
 	if repo:
 		return repo.branch()
 	return None
@@ -270,7 +270,7 @@ def file_vcs_status(segment_info):
 	'''Return the VCS status for this buffer.'''
 	name = segment_info['buffer'].name
 	if name and not getbufvar(segment_info['bufnr'], '&buftype'):
-		repo = guess(os.path.abspath(name))
+		repo = guess(path=os.path.abspath(name))
 		if repo:
 			status = repo.status(os.path.relpath(name, repo.directory))
 			if not status:
@@ -291,7 +291,7 @@ def file_vcs_status(segment_info):
 @memoize(2, cache_key=bufnr)
 def repository_status(segment_info):
 	'''Return the status for the current repo.'''
-	repo = guess(os.path.abspath(segment_info['buffer'].name or os.getcwd()))
+	repo = guess(path=os.path.abspath(segment_info['buffer'].name or os.getcwd()))
 	if repo:
 		return repo.status()
 	return None
