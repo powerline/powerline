@@ -19,7 +19,7 @@ class memoize(object):
 	def __call__(self, func):
 		@wraps(func)
 		def decorated_function(**kwargs):
-			key = self.cache_key(**kwargs)
+			key = (func, self.cache_key(**kwargs))
 			try:
 				cached = self._cache.get(key, None)
 			except TypeError:
