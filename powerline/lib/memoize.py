@@ -10,16 +10,16 @@ def default_cache_key(**kwargs):
 
 class memoize(object):
 	'''Memoization decorator with timeout.'''
-	_cache = {}
-
 	def __init__(self, timeout, cache_key=default_cache_key):
 		self.timeout = timeout
 		self.cache_key = cache_key
+		self._cache = {}
+
 
 	def __call__(self, func):
 		@wraps(func)
 		def decorated_function(**kwargs):
-			key = (func, self.cache_key(**kwargs))
+			key = self.cache_key(**kwargs)
 			try:
 				cached = self._cache.get(key, None)
 			except TypeError:
