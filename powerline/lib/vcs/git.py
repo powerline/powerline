@@ -34,9 +34,9 @@ try:
 					return None
 				else:
 					if status & git.GIT_STATUS_WT_NEW:
-						return '??'
+						return '?'
 					if status & git.GIT_STATUS_IGNORED:
-						return '!!'
+						return '!'
 
 					if status & git.GIT_STATUS_INDEX_NEW:
 						index_status = 'A'

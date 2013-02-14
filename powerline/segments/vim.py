@@ -266,8 +266,14 @@ def branch(segment_info):
 # TODO Drop cache on BufWrite event
 @requires_segment_info
 @memoize(2, additional_key=bufnr)
-def file_vcs_status(segment_info):
-	'''Return the VCS status for this buffer.'''
+def file_vcs_status(segment_info, symbols={}):
+	'''Return the VCS status for this buffer.
+
+	:param dict symbols:
+		symbol replacements for the various statuses
+	:param str before:
+		string to prepend to the status group
+	'''
 	name = segment_info['buffer'].name
 	if name and not getbufvar(segment_info['bufnr'], '&buftype'):
 		repo = guess(os.path.abspath(name))
@@ -278,11 +284,11 @@ def file_vcs_status(segment_info):
 			status = status.strip()
 			ret = []
 			for status in status:
-				ret.append({
-					'contents': status,
-					'highlight_group': ['file_vcs_status_' + status, 'file_vcs_status'],
-					})
-			ret[0]['before'] = ' '
+				if symbols.get(status) != False:
+					ret.append({
+						'contents': symbols.get(status, status),
+						'highlight_group': ['file_vcs_status_' + status, 'file_vcs_status'],
+						})
 			return ret
 	return None
 

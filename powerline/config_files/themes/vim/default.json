@@ -33,7 +33,14 @@
 			},
 			{
 				"name": "file_vcs_status",
-				"draw_divider": false
+				"before": " ",
+				"draw_divider": false,
+				"args": {
+					"symbols": {
+						"?": "??",
+						"!": "!!"
+					}
+				}
 			},
 			{
 				"name": "modified_indicator",
