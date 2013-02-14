@@ -12,10 +12,12 @@ from powerline.bindings.vim import vim_get_func, getbufvar
 from powerline.theme import requires_segment_info
 from powerline.lib import memoize, humanize_bytes
 from powerline.lib.vcs import guess
+from collections import defaultdict
 
 vim_funcs = {
 	'virtcol': vim_get_func('virtcol', rettype=int),
 	'fnamemodify': vim_get_func('fnamemodify'),
+	'expand': vim_get_func('expand'),
 	'getfsize': vim_get_func('getfsize', rettype=int),
 	'bufnr': vim_get_func('bufnr', rettype=int),
 }
@@ -45,6 +47,35 @@ mode_translations = {
 	chr(ord('V') - 0x40): '^V',
 	chr(ord('S') - 0x40): '^S',
 }
+
+
+eventcaches = defaultdict(lambda : [])
+bufeventcaches = defaultdict(lambda : [])
+def purgeonevents_reg(events, eventcaches=bufeventcaches):
+	def cache_reg_func(cache):
+		for event in events:
+			if event not in eventcaches:
+				vim.eval('PowerlineRegisterCachePurgerEvent("' + event + '")')
+			eventcaches[event].append(cache)
+
+	return cache_reg_func
+
+purgeall_on_shell = purgeonevents_reg(('ShellCmdPost', 'ShellFilterPost', 'FocusGained'), eventcaches=eventcaches)
+purgebuf_on_shell_and_write = purgeonevents_reg(('BufWritePost', 'ShellCmdPost', 'ShellFilterPost', 'FocusGained'))
+
+
+def launchevent(event):
+	global eventcaches
+	global bufeventcaches
+	for cache in eventcaches[event]:
+		cache.clear()
+	if bufeventcaches[event]:
+		buf = int(vim_funcs['expand']('<abuf>'))
+		for cache in bufeventcaches[event]:
+			try:
+				cache.pop(buf)
+			except KeyError:
+				pass
 
 
 def bufnr(segment_info, **kwargs):
@@ -157,7 +188,7 @@ def file_name(segment_info, display_no_file=False, no_file_text='[No file]'):
 
 
 @requires_segment_info
-@memoize(2, cache_key=bufnr)
+@memoize(2, cache_key=bufnr, cache_reg_func=purgebuf_on_shell_and_write)
 def file_size(segment_info, suffix='B', binary_prefix=False):
 	'''Return file size.
 
@@ -254,7 +285,7 @@ def modified_buffers(text=u'+', join_str=','):
 
 
 @requires_segment_info
-@memoize(2, cache_key=bufnr)
+@memoize(2, cache_key=bufnr, cache_reg_func=purgeall_on_shell)
 def branch(segment_info):
 	'''Return the current working branch.'''
 	repo = guess(path=os.path.abspath(segment_info['buffer'].name or os.getcwd()))
@@ -263,9 +294,8 @@ def branch(segment_info):
 	return None
 
 
-# TODO Drop cache on BufWrite event
 @requires_segment_info
-@memoize(2, cache_key=bufnr)
+@memoize(2, cache_key=bufnr, cache_reg_func=purgebuf_on_shell_and_write)
 def file_vcs_status(segment_info):
 	'''Return the VCS status for this buffer.'''
 	name = segment_info['buffer'].name
@@ -287,7 +317,7 @@ def file_vcs_status(segment_info):
 
 
 @requires_segment_info
-@memoize(2, cache_key=bufnr)
+@memoize(2, cache_key=bufnr, cache_reg_func=purgeall_on_shell)
 def repository_status(segment_info):
 	'''Return the status for the current repo.'''
 	repo = guess(path=os.path.abspath(segment_info['buffer'].name or os.getcwd()))
