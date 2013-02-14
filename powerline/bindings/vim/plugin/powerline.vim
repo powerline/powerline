@@ -67,6 +67,13 @@ function! s:UpdateWindows(use_last_current_window_id)
 	endfor
 endfunction
 
+function! PowerlineRegisterCachePurgerEvent(event)
+	exec s:powerline_pycmd 'from powerline.segments.vim import launchevent as powerline_launchevent'
+	augroup Powerline
+		exec 'autocmd!' a:event '*' s:powerline_pycmd.' powerline_launchevent("'.a:event.'")'
+	augroup END
+endfunction
+
 let s:last_current_window_id = ''
 augroup Powerline
 	autocmd!
