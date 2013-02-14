@@ -34,7 +34,7 @@ def user():
 def branch():
 	'''Return the current VCS branch.'''
 	from powerline.lib.vcs import guess
-	repo = guess(os.path.abspath(os.getcwd()))
+	repo = guess(path=os.path.abspath(os.getcwd()))
 	if repo:
 		return repo.branch()
 	return None

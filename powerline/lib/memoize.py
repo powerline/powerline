@@ -4,28 +4,29 @@ from functools import wraps
 import time
 
 
+def default_cache_key(**kwargs):
+	return frozenset(kwargs.items())
+
+
 class memoize(object):
 	'''Memoization decorator with timeout.'''
-	_cache = {}
-
-	def __init__(self, timeout, additional_key=None):
+	def __init__(self, timeout, cache_key=default_cache_key):
 		self.timeout = timeout
-		self.additional_key = additional_key
+		self.cache_key = cache_key
+		self._cache = {}
+
 
 	def __call__(self, func):
 		@wraps(func)
-		def decorated_function(*args, **kwargs):
-			if self.additional_key:
-				key = (func.__name__, args, self.additional_key(*args, **kwargs))
-			else:
-				key = (func.__name__, args)
+		def decorated_function(**kwargs):
+			key = self.cache_key(**kwargs)
 			try:
 				cached = self._cache.get(key, None)
 			except TypeError:
-				return func(*args, **kwargs)
+				return func(**kwargs)
 			if cached is None or time.time() - cached['time'] > self.timeout:
 				cached = self._cache[key] = {
-					'result': func(*args, **kwargs),
+					'result': func(**kwargs),
 					'time': time.time(),
 					}
 			return cached['result']
