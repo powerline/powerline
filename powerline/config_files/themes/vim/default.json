@@ -33,6 +33,7 @@
 			},
 			{
 				"name": "file_vcs_status",
+				"before": " ",
 				"draw_divider": false
 			},
 			{

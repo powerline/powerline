@@ -63,8 +63,17 @@ class Theme(object):
 					if contents is None:
 						continue
 					if isinstance(contents, list):
+						segment_base = copy(segment)
+						if contents:
+							for key in ('before', 'after'):
+								try:
+									contents[0][key] = segment_base.pop(key)
+									segment_base[key] = ''
+								except KeyError:
+									pass
+
 						for subsegment in contents:
-							segment_copy = copy(segment)
+							segment_copy = copy(segment_base)
 							segment_copy.update(subsegment)
 							parsed_segments.append(segment_copy)
 					else:
