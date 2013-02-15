@@ -282,7 +282,6 @@ def file_vcs_status(segment_info):
 					'contents': status,
 					'highlight_group': ['file_vcs_status_' + status, 'file_vcs_status'],
 					})
-			ret[0]['before'] = ' '
 			return ret
 	return None
 
