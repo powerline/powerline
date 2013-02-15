@@ -251,7 +251,8 @@ weather_conditions_icons = {
 	'sunny':         u'☼',
 	'night':         u'☾',
 	'windy':         u'☴',
-	'not_available': u'⚠',
+	'not_available': u'�',
+	'unknown':       u'⚠',
 }
 
 
@@ -294,13 +295,12 @@ def weather(unit='c', location_query=None, icons=None):
 		condition_code = int(condition['code'])
 	except (KeyError, TypeError, ValueError):
 		return None
+
 	try:
 		icon_names = weather_conditions_codes[condition_code]
 	except IndexError:
-		if condition_code == 3200:
-			icon_names = ('not_available',)
-		else:
-			icon_names = ('unknown')
+		icon_names = (('not_available' if condition_code == 3200 else 'unknown'),)
+
 	for icon_name in icon_names:
 		if icons:
 			if icon_name in icons:
@@ -308,6 +308,7 @@ def weather(unit='c', location_query=None, icons=None):
 				break
 	else:
 		icon = weather_conditions_icons[icon_names[-1]]
+
 	groups = ['weather_condition_' + icon_name for icon_name in icon_names] + ['weather_conditions', 'weather']
 	return [
 			{
