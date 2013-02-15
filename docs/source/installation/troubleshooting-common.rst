@@ -30,3 +30,17 @@ My vim statusline is hidden/only appears in split windows!
 ----------------------------------------------------------
 
 * Make sure that you have ``set laststatus=2`` in your :file:`vimrc`.
+
+I get E858/E860 error in vim (Eval did not return a valid python object)
+--------------------------------------------------------------------------
+
+* You need to make ``pyeval()`` display python stack trace. There is currently 
+  a patch for this, but it was not merged into main vim tree, thus you will have 
+  to use different approach: reproduce the error with
+
+    .. code-block:: sh
+
+       vim --cmd "let g:powerline_debugging_pyeval=1" ...
+
+  and then use the stack trace to search for existing issues or to create a new 
+  one.
