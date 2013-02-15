@@ -64,11 +64,16 @@ if your terminal emulator supports it.
 Optional dependencies
 ---------------------
 
-The following Python packages are not required by all segments, but 
-recommended for optimal performance and extra features:
+The following software is not required by all segments, but recommended for 
+optimal performance and extra features:
+
+Python packages:
 
 * ``pygit2``
 * ``mercurial``
+
+Programs:
+
 * ``psutil``
 * ``git`` version 1.7.2 and later. Not needed if you have ``pygit2``.
 
