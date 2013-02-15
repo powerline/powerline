@@ -20,6 +20,7 @@ class Theme(object):
 	def __init__(self, ext, colorscheme, theme_config, common_config, segment_info=None):
 		self.colorscheme = colorscheme
 		self.dividers = theme_config.get('dividers', common_config['dividers'])
+		self.spaces = theme_config.get('spaces', common_config['spaces'])
 		self.segments = {
 			'left': [],
 			'right': [],
@@ -36,6 +37,9 @@ class Theme(object):
 	def get_divider(self, side='left', type='soft'):
 		'''Return segment divider.'''
 		return self.dividers[side][type]
+
+	def get_spaces(self):
+		return self.spaces
 
 	def add_highlight(self, segment):
 		segment['highlight'] = self.colorscheme.get_group_highlighting(segment['highlight_group'])

@@ -104,6 +104,7 @@ class Renderer(object):
 			divider_type = 'soft' if compare_segment['highlight'][mode]['bg'] == segment['highlight'][mode]['bg'] else 'hard'
 
 			divider_raw = theme.get_divider(segment['side'], divider_type)
+			divider_spaces = theme.get_spaces()
 			divider_highlighted = ''
 			contents_raw = segment['contents']
 			contents_highlighted = ''
@@ -111,11 +112,9 @@ class Renderer(object):
 			# Pad segments first
 			if segment['draw_divider'] or (divider_type == 'hard' and segment['width'] != 'auto'):
 				if segment['side'] == 'left':
-					contents_raw = outer_padding + (segment['_space_left'] * ' ') + contents_raw + (segment['_space_right'] * ' ') + ' '
-					divider_raw = divider_raw + ' '
+					contents_raw = outer_padding + (segment['_space_left'] * ' ') + contents_raw + ((divider_spaces + segment['_space_right']) * ' ')
 				else:
-					contents_raw = ' ' + (segment['_space_left'] * ' ') + contents_raw + (segment['_space_right'] * ' ') + outer_padding
-					divider_raw = ' ' + divider_raw
+					contents_raw = ((divider_spaces + segment['_space_left']) * ' ') + contents_raw + (segment['_space_right'] * ' ') + outer_padding
 			else:
 				if segment['side'] == 'left':
 					contents_raw = outer_padding + (segment['_space_left'] * ' ') + contents_raw + (segment['_space_right'] * ' ')
