@@ -38,13 +38,13 @@ catch
 endtry
 exec s:powerline_pycmd 'powerline = Powerline("vim", segment_info={})'
 
-if exists('*'. s:powerline_pyeval)
+if !get(g:, 'powerline_debugging_pyeval') && exists('*'. s:powerline_pyeval)
 	let s:pyeval = function(s:powerline_pyeval)
 else
 	exec s:powerline_pycmd 'import json, vim'
-	function! s:pyeval(e)
-		exec s:powerline_pycmd 'vim.command("return " + json.dumps(eval(vim.eval("a:e"))))'
-	endfunction
+	exec "function! s:pyeval(e)\n".
+		\	s:powerline_pycmd." vim.command('return ' + json.dumps(eval(vim.eval('a:e'))))\n".
+		\"endfunction"
 endif
 
 function! Powerline(winnr, current)
