@@ -599,14 +599,16 @@ class NowPlayingSegment(object):
 			status = iface.Get(DBUS_IFACE_PLAYER, 'PlaybackStatus')
 		except dbus.exceptions.DBusException:
 			return
+		if not info:
+			return
 		state = self._convert_state(status)
 		return {
 			'state': state,
 			'state_symbol': self.STATE_SYMBOLS.get(state),
-			'album': info['xesam:album'],
-			'artist': info['xesam:artist'][0],
-			'title': info['xesam:title'],
-			'total': self._convert_seconds(info['mpris:length'] / 1e6),
+			'album': info.get('xesam:album'),
+			'artist': info.get('xesam:artist')[0],
+			'title': info.get('xesam:title'),
+			'total': self._convert_seconds(info.get('mpris:length') / 1e6),
 			}
 
 	def player_rhythmbox(self):
