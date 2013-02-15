@@ -107,13 +107,9 @@ except ImportError:
 		def status(self, path=None):
 			if path:
 				try:
-					return next(self._gitcmd('status', '--porcelain', '--', path))[:2]
+					return next(self._gitcmd('status', '--porcelain', '--ignored', '--', path))[:2]
 				except StopIteration:
-					try:
-						next(self._gitcmd('ls-files', '--ignored', '--exclude-standard', '--others', '--', path))
-						return '!!'
-					except StopIteration:
-						return None
+					return None
 			else:
 				wt_column = ' '
 				index_column = ' '

@@ -70,6 +70,7 @@ recommended for optimal performance and extra features:
 * ``pygit2``
 * ``mercurial``
 * ``psutil``
+* ``git`` version 1.7.2 and later. Not needed if you have ``pygit2``.
 
 Installation
 ============
