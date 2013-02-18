@@ -1,4 +1,19 @@
 {
+	"segment_data": {
+		"branch": {
+			"before": " "
+		},
+		"modified_indicator": {
+			"args": { "text": "+" }
+		},
+		"line_percent": {
+			"args": { "gradient": true },
+			"after": "%"
+		},
+		"line_current_symbol": {
+			"contents": " "
+		}
+	},
 	"segments": {
 		"left": [
 			{
@@ -14,7 +29,6 @@
 				"name": "branch",
 				"exclude_modes": ["nc"],
 				"priority": 60,
-				"before": " ",
 				"divider_highlight_group": "branch:divider"
 			},
 			{
@@ -38,7 +52,6 @@
 			},
 			{
 				"name": "modified_indicator",
-				"args": { "text": "+" },
 				"before": " "
 			},
 			{
@@ -70,15 +83,13 @@
 			},
 			{
 				"name": "line_percent",
-				"args": { "gradient": true },
 				"priority": 30,
-				"after": "%",
 				"width": 4,
 				"align": "r"
 			},
 			{
 				"type": "string",
-				"contents": " ",
+				"name": "line_current_symbol",
 				"highlight_group": ["line_current_symbol", "line_current"]
 			},
 			{
