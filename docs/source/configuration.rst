@@ -236,7 +236,8 @@ Themes
     using :ref:`local themes <config-ext-local_themes>` values of these keys are 
     first searched in the segment description, then in ``segment_data`` key of 
     a local theme, then in ``segment_data`` key of a :ref:`default theme 
-    <config-ext-theme>`.
+    <config-ext-theme>`. For the :ref:`default theme <config-ext-theme>` itself 
+    step 2 is obviously avoided.
 
 ``segments``
     A dict with a ``left`` and a ``right`` list, consisting of segment 
@@ -354,3 +355,34 @@ A segment function must return one of the following values:
 * A list of dicts consisting of a ``contents`` string, and 
   a ``highlight_group`` list. This is useful for providing a particular 
   highlighting group depending on the segment contents.
+
+Local configuration
+===================
+
+Depending on the application used it is possible to override configuration. Here 
+is the list:
+
+Vim overrides
+-------------
+
+Global configuration options can be overridden by defining dictionary 
+``g:powerline_config_overrides``. This dictionary is recursively merged with 
+dictionary in :file:`powerline/config.json`. Theme configuration options can be 
+overridden by defining dictionary ``g:powerline_theme_overrides__{theme_name}`` 
+(obviously ``theme_name`` is restricted to alphanumeric characters and 
+underscores). This dictionary is recursively merged with dictionary in 
+:file:`powerline/themes/vim/{theme_name}.json`. Note that this way you can only 
+redefine the whole segments list from some side, lists are not merged.
+
+Powerline script overrides
+--------------------------
+
+Global configuration options can be overridden by providing additional 
+command-line key(s) ``-c key.nested_key=value`` (value is some JSON object). 
+Theme configuration overrides are similar: ``-t 
+theme_name.key.nested_key=value``. If you are using zsh+zpython first must be 
+defined in associative array parameter ``POWERLINE_CONFIG``, second in 
+``POWERLINE_THEME_CONFIG`` where keys should look like ``key.nested_key`` 
+(``theme_name.key.nested_key``) and values are just ``value`` from above. 
+Similarly to vim, you cannot override something in ``theme_name.segments.side`` 
+list, but you can override the whole list.

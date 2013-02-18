@@ -3,7 +3,7 @@
 from libqtile import bar
 from libqtile.widget import base
 
-from powerline.core import Powerline as PowerlineCore
+from powerline import Powerline as PowerlineCore
 
 
 class Powerline(base._TextBox):

@@ -1,8 +1,18 @@
 import zsh
-from powerline.core import Powerline
+from powerline.shell import ShellPowerline
+
+
+def get_var_config(var):
+	try:
+		return dict((k, json.loads(v) for k, v in zsh.getvalue(var).items()))
+	except:
+		return None
 
 
 class Args(object):
+	ext = ['shell']
+	renderer_module = 'zsh_prompt'
+
 	@property
 	def last_exit_code(self):
 		return zsh.last_exit_code()
@@ -10,6 +20,14 @@ class Args(object):
 	@property
 	def last_pipe_status(self):
 		return zsh.pipestatus()
+
+	@property
+	def config(self):
+		return get_var_config('POWERLINE_CONFIG')
+
+	@property
+	def theme_option(self):
+		return get_var_config('POWERLINE_THEME_CONFIG')
 
 
 class Prompt(object):
@@ -38,6 +56,6 @@ def set_prompt(powerline, psvar, side):
 
 
 def setup():
-	powerline = Powerline(ext='shell', renderer_module='zsh_prompt', segment_info=Args())
+	powerline = ShellPowerline(Args())
 	set_prompt(powerline, 'PS1', 'left')
 	set_prompt(powerline, 'RPS1', 'right')

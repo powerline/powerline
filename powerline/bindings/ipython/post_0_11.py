@@ -1,4 +1,4 @@
-from powerline.core import Powerline
+from powerline import Powerline
 
 from IPython.core.prompts import PromptManager
 
