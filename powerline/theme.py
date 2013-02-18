@@ -3,7 +3,7 @@
 from collections import defaultdict
 from copy import copy
 
-from .segment import Segment
+from .segment import gen_segment_getter
 
 try:
 	unicode()
@@ -17,7 +17,7 @@ def requires_segment_info(func):
 
 
 class Theme(object):
-	def __init__(self, ext, colorscheme, theme_config, common_config, segment_info=None):
+	def __init__(self, ext, colorscheme, theme_config, common_config, top_theme_config=None, segment_info=None):
 		self.colorscheme = colorscheme
 		self.dividers = theme_config.get('dividers', common_config['dividers'])
 		self.spaces = theme_config.get('spaces', common_config['spaces'])
@@ -30,7 +30,10 @@ class Theme(object):
 			'highlight': defaultdict(lambda: {'fg': False, 'bg': False, 'attr': 0})
 			}
 		self.segment_info = segment_info
-		get_segment = Segment(ext, common_config['paths'], theme_config.get('default_module')).get
+		theme_configs = [theme_config]
+		if top_theme_config:
+			theme_configs.append(top_theme_config)
+		get_segment = gen_segment_getter(ext, common_config['paths'], theme_configs, theme_config.get('default_module'))
 		for side in ['left', 'right']:
 			self.segments[side].extend((get_segment(segment, side) for segment in theme_config['segments'].get(side, [])))
 

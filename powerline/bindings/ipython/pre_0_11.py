@@ -1,4 +1,4 @@
-from powerline.core import Powerline
+from powerline import Powerline
 from IPython.Prompts import BasePrompt
 from IPython.ipapi import get as get_ipython
 
