@@ -18,15 +18,16 @@ endif
 let s:powerline_pycmd = substitute(get(g:, 'powerline_pycmd', 'py'), '\v^(py)%[thon](3?)$', '\1\2', '')
 let s:powerline_pyeval = get(g:, 'powerline_pyeval', s:powerline_pycmd.'eval')
 
+let s:import_cmd = 'from powerline.vim import VimPowerline'
 try
-	exec s:powerline_pycmd 'from powerline.core import Powerline'
+	exec s:powerline_pycmd s:import_cmd
 catch
 	" An error occured while importing the module, it could be installed
 	" outside of Python's module search paths. Update sys.path and try again.
 	exec s:powerline_pycmd 'import sys, vim'
 	exec s:powerline_pycmd 'sys.path.append(vim.eval(''expand("<sfile>:h:h:h:h:h")''))'
 	try
-		exec s:powerline_pycmd 'from powerline.core import Powerline'
+		exec s:powerline_pycmd s:import_cmd
 	catch
 		call s:CriticalError('An error occured while importing the Powerline package.
 			\ This could be caused by an invalid sys.path setting, or by an incompatible
@@ -35,7 +36,8 @@ catch
 		finish
 	endtry
 endtry
-exec s:powerline_pycmd 'powerline = Powerline("vim", segment_info={})'
+exec s:powerline_pycmd 'powerline = VimPowerline()'
+exec s:powerline_pycmd 'del VimPowerline'
 
 if !get(g:, 'powerline_debugging_pyeval') && exists('*'. s:powerline_pyeval)
 	let s:pyeval = function(s:powerline_pyeval)

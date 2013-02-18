@@ -1,20 +1,29 @@
 {
 	"default_module": "powerline.segments.common",
+	"segment_data": {
+		"hostname": {
+			"before": " ",
+			"args": {
+				"only_if_ssh": true
+			}
+		},
+		"virtualenv": {
+			"before": "ⓔ  "
+		},
+		"branch": {
+			"before": " "
+		}
+	},
 	"segments": {
 		"left": [
 			{
-				"name": "hostname",
-				"before": " ",
-				"args": {
-					"only_if_ssh": true
-				}
+				"name": "hostname"
 			},
 			{
 				"name": "user"
 			},
 			{
-				"name": "virtualenv",
-				"before": "ⓔ  "
+				"name": "virtualenv"
 			},
 			{
 				"name": "cwd",
@@ -31,8 +40,7 @@
 				"highlight_group": "exit_fail"
 			},
 			{
-				"name": "branch",
-				"before": " "
+				"name": "branch"
 			}
 		]
 	}

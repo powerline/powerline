@@ -132,8 +132,8 @@ Common configuration is a subdictionary that is a value of ``common`` key in
 
 ``paths``
     Defines additional paths which will be searched for modules when using 
-    :ref:`module segment option <config-themes-seg-module>`. Paths defined 
-    here have priority when searching for modules.
+    :ref:`module segment option <config-themes-seg-module>`. Paths defined here 
+    have priority when searching for modules.
 
 Extension-specific configuration
 --------------------------------
@@ -236,7 +236,8 @@ Themes
     using :ref:`local themes <config-ext-local_themes>` values of these keys are 
     first searched in the segment description, then in ``segment_data`` key of 
     a local theme, then in ``segment_data`` key of a :ref:`default theme 
-    <config-ext-theme>`.
+    <config-ext-theme>`. For the :ref:`default theme <config-ext-theme>` itself 
+    step 2 is obviously avoided.
 
 ``segments``
     A dict with a ``left`` and a ``right`` list, consisting of segment 
@@ -354,3 +355,74 @@ A segment function must return one of the following values:
 * A list of dicts consisting of a ``contents`` string, and 
   a ``highlight_group`` list. This is useful for providing a particular 
   highlighting group depending on the segment contents.
+
+Local configuration
+===================
+
+Depending on the application used it is possible to override configuration. Here 
+is the list:
+
+Vim overrides
+-------------
+
+Vim configuration can be overridden using the following options:
+
+``g:powerline_config_overrides``
+    Dictionary, recursively merged with contents of 
+    :file:`powerline/config.json`.
+
+``g:powerline_theme_overrides__{theme_name}``
+    Dictionary, recursively merged with contents of 
+    :file:`powerline/themes/vim/{theme_name}.json`. Note that this way you can’t 
+    redefine some value (e.g. segment) in list, only the whole list itself: only 
+    dictionaries are merged recursively.
+
+``g:powerline_config_path``
+    Path (must be expanded, ``~`` shortcut is not supported). Points to the 
+    directory which will be searched for configuration. When this option is 
+    present, none of the other locations are searched.
+
+Powerline script overrides
+--------------------------
+
+Powerline script has a number of options controlling powerline behavior. Here 
+``VALUE`` always means “some JSON object”.
+
+``-c KEY.NESTED_KEY=VALUE`` or ``--config=KEY.NESTED_KEY=VALUE``
+    Overrides options from :file:`powerline/config.json`. 
+    ``KEY.KEY2.KEY3=VALUE`` is a shortcut for ``KEY={"KEY2": {"KEY3": VALUE}}``. 
+    Multiple options (i.e. ``-c K1=V1 -c K2=V2``) are allowed, result (in the 
+    example: ``{"K1": V1, "K2": V2}``) is recursively merged with the contents 
+    of the file.
+
+``-t THEME_NAME.KEY.NESTED_KEY=VALUE`` or ``--theme_option=THEME_NAME.KEY.NESTED_KEY=VALUE``
+    Overrides options from :file:`powerline/themes/{ext}/{THEME_NAME}.json`. 
+    ``KEY.NESTED_KEY=VALUE`` is processed like described above, ``{ext}`` is the 
+    first argument to powerline script. May be passed multiple times.
+
+``-p PATH`` or ``--config_path=PATH``
+    Sets directory where configuration should be read from. If present, no 
+    default locations are searched for configuration. No expansions are 
+    performed by powerline script itself, but ``-p ~/.powerline`` will likely be 
+    expanded by the shell to something like ``-p /home/user/.powerline``.
+
+Ipython overrides
+-----------------
+
+Ipython overrides depend on ipython version. Before ipython-0.11 you should pass 
+additional keyword arguments to setup() function. After ipython-0.11 you should 
+use ``c.Powerline.KEY``. Supported ``KEY`` strings or keyword argument names:
+
+``config_overrides``
+    Overrides options from :file:`powerline/config.json`. Should be a dictionary 
+    that will be recursively merged with the contents of the file.
+
+``theme_overrides``
+    Overrides options from :file:`powerline/themes/ipython/*.json`. Should be 
+    a dictionary where keys are theme names and values are dictionaries which 
+    will be recursively merged with the contents of the given theme.
+
+``path``
+    Sets directory where configuration should be read from. If present, no 
+    default locations are searched for configuration. No expansions are 
+    performed thus you cannot use paths starting with ``~/``.
