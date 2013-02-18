@@ -145,9 +145,13 @@ Common configuration is a subdictionary that is a value of ``ext`` key in
     Defines the colorscheme used for this extension.
 
 ``theme``
+    .. _config-ext-theme:
+
     Defines the theme used for this extension.
 
 ``local_themes``
+    .. _config-ext-local_themes:
+
     Defines themes used when certain conditions are met, e.g. for 
     buffer-specific statuslines in vim. Requires a custom matcher and theme.
 
@@ -219,6 +223,21 @@ Themes
 ``default_module``
     Python module where segments will be looked by default.
 
+.. _config-themes-segment_data:
+
+``segment_data``
+    A dict where keys are segment names or strings ``{module}.{name}``. Used to 
+    specify default values for various keys:
+    :ref:`after <config-theme-seg-after>`,
+    :ref:`before <config-theme-seg-before>`,
+    :ref:`contents <config-theme-seg-contents>` (only for string segments
+    if :ref:`name <config-themes-seg-name>` is defined),
+    :ref:`args <config-themes-seg-args>` (only for function segments). When 
+    using :ref:`local themes <config-ext-local_themes>` values of these keys are 
+    first searched in the segment description, then in ``segment_data`` key of 
+    a local theme, then in ``segment_data`` key of a :ref:`default theme 
+    <config-ext-theme>`.
+
 ``segments``
     A dict with a ``left`` and a ``right`` list, consisting of segment 
     dicts. Each segment has the following options:
@@ -257,9 +276,13 @@ Themes
         available in the colorscheme is used.
 
     ``before``
+        .. _config-themes-seg-before:
+
         A string which will be prepended to the segment contents.
 
     ``after``
+        .. _config-themes-seg-after:
+
         A string which will be appended to the segment contents.
 
     ``contents``
@@ -268,6 +291,8 @@ Themes
         Segment contents, only required for ``string`` segments.
 
     ``args``
+        .. _config-themes-seg-args:
+
         A dict of arguments to be passed to a ``function`` segment.
 
     ``align``

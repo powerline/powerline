@@ -7,6 +7,7 @@ from powerline.theme import Theme
 class Renderer(object):
 	def __init__(self, theme_config, local_themes, theme_kwargs, **options):
 		self.__dict__.update(options)
+		self.theme_config = theme_config
 		self.theme = Theme(theme_config=theme_config, **theme_kwargs)
 		self.local_themes = local_themes
 		self.theme_kwargs = theme_kwargs
@@ -21,7 +22,7 @@ class Renderer(object):
 			if matcher(matcher_info):
 				match = self.local_themes[matcher]
 				if 'config' in match:
-					match['theme'] = Theme(theme_config=match.pop('config'), **self.theme_kwargs)
+					match['theme'] = Theme(theme_config=match.pop('config'), top_theme_config=self.theme_config, **self.theme_kwargs)
 				return match['theme']
 		else:
 			return self.theme
