@@ -6,11 +6,11 @@ import sys
 import json
 
 try:
-	from powerline.core import Powerline
+	from powerline.shell import ShellPowerline
 except ImportError:
 	import os
 	sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-	from powerline.core import Powerline  # NOQA
+	from powerline.shell import ShellPowerline  # NOQA
 
 def oval(s):
 	if '=' not in s:
@@ -22,6 +22,20 @@ def oval(s):
 	val = json.loads(s[idx+1:])
 	return (o, val)
 
+def odotval(s):
+	o, val = oval(s)
+	keys = o.split('.')
+	if len(keys) > 1:
+		r = (keys[0], {})
+		rcur = r[1]
+		for key in keys[1:-1]:
+			rcur[key] = {}
+			rcur = rcur[key]
+		rcur[keys[-1]] = val
+		return r
+	else:
+		return (o, val)
+
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('ext', nargs=1)
 parser.add_argument('side', nargs='?', choices=('left', 'right'))
@@ -29,11 +43,13 @@ parser.add_argument('-r', '--renderer_module', metavar='MODULE', type=str)
 parser.add_argument('-w', '--width', type=int)
 parser.add_argument('--last_exit_code', metavar='INT', type=int)
 parser.add_argument('--last_pipe_status', metavar='LIST', default='', type=lambda s: [int(status) for status in s.split()])
-parser.add_argument('-o', '--renderer_option', nargs='*', metavar='OPTION=VALUE', type=oval)
+parser.add_argument('-c', '--config', metavar='KEY.KEY=VALUE', type=odotval, action='append')
+parser.add_argument('-t', '--theme_option', metavar='THEME.KEY.KEY=VALUE', type=odotval, action='append')
+parser.add_argument('-p', '--config_path', metavar='PATH')
 
 if __name__ == '__main__':
 	args = parser.parse_args()
-	powerline = Powerline(ext=args.ext[0], renderer_module=args.renderer_module, segment_info=args, renderer_options=dict(args.renderer_option or {}))
+	powerline = ShellPowerline(args)
 	rendered = powerline.renderer.render(width=args.width, side=args.side)
 	try:
 		sys.stdout.write(rendered)

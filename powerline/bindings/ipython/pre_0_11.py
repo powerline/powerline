@@ -1,4 +1,4 @@
-from powerline.core import Powerline
+from powerline.ipython import IpythonPowerline
 from IPython.Prompts import BasePrompt
 from IPython.ipapi import get as get_ipython
 
@@ -18,10 +18,18 @@ class PowerlinePrompt(BasePrompt):
 		return '%s>%s' % ('-' * self.prompt_text_len, ' ' * self.nrspaces)
 
 
-def setup(prompt='1'):
+class ConfigurableIpythonPowerline(IpythonPowerline):
+	def __init__(self, config_overrides=None, theme_overrides={}, path=None):
+		self.config_overrides = config_overrides
+		self.theme_overrides = theme_overrides
+		self.path = path
+		super(ConfigurableIpythonPowerline, self).__init__()
+
+
+def setup(prompt='1', **kwargs):
 	ip = get_ipython()
 
-	powerline = Powerline('ipython')
+	powerline = ConfigurableIpythonPowerline(**kwargs)
 
 	attr = 'prompt' + prompt
 
