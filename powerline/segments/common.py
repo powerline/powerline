@@ -52,9 +52,17 @@ def cwd(dir_shorten_len=None, dir_limit_depth=None):
 	'''
 	import re
 	try:
-		cwd = os.getcwdu()
-	except AttributeError:
-		cwd = os.getcwd()
+		try:
+			cwd = os.getcwdu()
+		except AttributeError:
+			cwd = os.getcwd()
+	except OSError as e:
+		if e.errno == 2:
+			# user most probably deleted the directory
+			# this happens when removing files from Mercurial repos for example
+			cwd = "[not found]"
+		else:
+			raise
 	home = os.environ.get('HOME')
 	if home:
 		cwd = re.sub('^' + re.escape(home), '~', cwd, 1)
