@@ -18,7 +18,6 @@ vim_funcs = {
 	'virtcol': vim_get_func('virtcol', rettype=int),
 	'fnamemodify': vim_get_func('fnamemodify'),
 	'expand': vim_get_func('expand'),
-	'getfsize': vim_get_func('getfsize', rettype=int),
 	'bufnr': vim_get_func('bufnr', rettype=int),
 }
 
@@ -194,8 +193,9 @@ def file_size(segment_info, suffix='B', binary_prefix=False):
 	:return: file size or None if the file isn't saved or if the size is too big to fit in a number
 	'''
 	file_name = segment_info['buffer'].name
-	file_size = vim_funcs['getfsize'](file_name)
-	if file_size < 0:
+	try:
+		file_size = os.stat(file_name).st_size
+	except:
 		return None
 	return humanize_bytes(file_size, suffix, binary_prefix)
 
