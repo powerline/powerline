@@ -47,25 +47,27 @@ else
 		\"endfunction"
 endif
 
-function! Powerline(winnr, current)
-	return s:pyeval('powerline.renderer.render('. a:winnr .', '. a:current .')')
+function! s:GetWinID(winnr)
+	let r = getwinvar(a:winnr, 'window_id')
+	if empty(r)
+		let r = s:pyeval('str(uuid.uuid4())')
+		call setwinvar(a:winnr, 'window_id', r)
+		call setwinvar(a:winnr, '&statusline', '%!Powerline("'.r.'")')
+	endif
+	return r
 endfunction
 
-function! s:UpdateWindows(use_last_current_window_id)
-	if ! exists('w:window_id')
-		let w:window_id = s:pyeval('str(uuid.uuid4())')
-	endif
-	for winnr in range(1, winnr('$'))
-		let current = 0
-		if w:window_id == getwinvar(winnr, 'window_id') || (a:use_last_current_window_id && getwinvar(winnr, 'window_id') == s:last_current_window_id)
-			let current = 1
-			if bufname(winbufnr(winnr)) isnot# '[Command Line]'
-				let s:last_current_window_id = getwinvar(winnr, 'window_id')
-			endif
-		endif
-		call setwinvar(winnr, '&statusline', '%!Powerline('. winnr .', '. current .')')
-	endfor
+function! Powerline(window_id)
+	let winidx = index(map(range(1, winnr('$')), 's:GetWinID(v:val)'), a:window_id)
+	let current = w:window_id is# a:window_id
+	return s:pyeval('powerline.renderer.render("'. a:window_id .'", '. winidx .', '. current .')')
 endfunction
+
+function! PowerlineNew()
+	return Powerline(s:GetWinID(winnr()))
+endfunction
+
+set statusline=%!PowerlineNew()
 
 function! PowerlineRegisterCachePurgerEvent(event)
 	exec s:powerline_pycmd 'from powerline.segments.vim import launchevent as powerline_launchevent'
@@ -74,10 +76,7 @@ function! PowerlineRegisterCachePurgerEvent(event)
 	augroup END
 endfunction
 
-let s:last_current_window_id = ''
 augroup Powerline
 	autocmd!
-	autocmd BufEnter,BufWinEnter,WinEnter,CmdwinEnter * call s:UpdateWindows(0) | redrawstatus
-	autocmd CmdwinLeave * call s:UpdateWindows(1)
 	autocmd ColorScheme * exec s:powerline_pycmd 'powerline.renderer.reset_highlight()'
 augroup END

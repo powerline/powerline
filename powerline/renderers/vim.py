@@ -20,21 +20,19 @@ class VimRenderer(Renderer):
 		super(VimRenderer, self).__init__(*args, **kwargs)
 		self.hl_groups = {}
 
-	def render(self, winnr, current):
+	def render(self, window_id, winidx, current):
 		'''Render all segments.
 
 		This method handles replacing of the percent placeholder for vim
 		statuslines, and it caches segment contents which are retrieved and
 		used in non-current windows.
 		'''
-		window_id = vim_getwinvar(winnr, 'window_id')
 		if current:
 			mode = vim_mode()
 		else:
 			mode = 'nc'
 		segment_info = {
-			'window': vim.windows[winnr - 1],
-			'winnr': winnr,
+			'window': vim.windows[winidx],
 			'mode': mode,
 			'window_id': window_id,
 			}
