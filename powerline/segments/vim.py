@@ -6,7 +6,7 @@ import os
 try:
 	import vim
 except ImportError:
-	vim = {}
+	vim = {}  # NOQA
 
 from powerline.bindings.vim import vim_get_func, getbufvar
 from powerline.theme import requires_segment_info
@@ -49,15 +49,16 @@ mode_translations = {
 }
 
 
-eventcaches = defaultdict(lambda : [])
-bufeventcaches = defaultdict(lambda : [])
+eventcaches = defaultdict(lambda: [])
+bufeventcaches = defaultdict(lambda: [])
+
+
 def purgeonevents_reg(events, eventcaches=bufeventcaches):
 	def cache_reg_func(cache):
 		for event in events:
 			if event not in eventcaches:
 				vim.eval('PowerlineRegisterCachePurgerEvent("' + event + '")')
 			eventcaches[event].append(cache)
-
 	return cache_reg_func
 
 purgeall_on_shell = purgeonevents_reg(('ShellCmdPost', 'ShellFilterPost', 'FocusGained'), eventcaches=eventcaches)

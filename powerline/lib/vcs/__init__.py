@@ -3,6 +3,10 @@ import os
 from powerline.lib.memoize import memoize
 
 
+vcs_props = (('git', '.git', os.path.exists),
+	('mercurial', '.hg', os.path.isdir))
+
+
 def generate_directories(path):
 	yield path
 	while True:
@@ -12,9 +16,6 @@ def generate_directories(path):
 			break
 		yield path
 
-
-vcs_props = (('git', '.git', os.path.exists),
-			 ('mercurial', '.hg', os.path.isdir))
 
 @memoize(100)
 def guess(path):

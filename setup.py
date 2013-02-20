@@ -11,7 +11,8 @@ try:
 except IOError:
 	README = ''
 
-setup(name='Powerline',
+setup(
+	name='Powerline',
 	version='beta',
 	description='The ultimate statusline/prompt utility.',
 	long_description=README,

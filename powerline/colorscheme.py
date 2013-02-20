@@ -5,8 +5,8 @@ ATTR_BOLD = 1
 ATTR_ITALIC = 2
 ATTR_UNDERLINE = 4
 
-class Colorscheme(object):
 
+class Colorscheme(object):
 	def __init__(self, colorscheme):
 		'''Initialize a colorscheme.'''
 		self.colors = {}

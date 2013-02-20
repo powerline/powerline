@@ -42,7 +42,7 @@ class Renderer(object):
 			theme.segment_info.update(segment_info)
 
 		# Handle excluded/included segments for the current mode
-		segments = [segment for segment in segments\
+		segments = [segment for segment in segments
 			if mode not in segment['exclude_modes'] or (segment['include_modes'] and segment in segment['include_modes'])]
 
 		segments = [segment for segment in self._render_segments(mode, theme, segments)]

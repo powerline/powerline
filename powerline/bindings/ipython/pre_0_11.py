@@ -15,7 +15,7 @@ class PowerlinePrompt(BasePrompt):
 
 	def auto_rewrite(self):
 		# TODO color this
-		return '%s>%s' % ('-'*self.prompt_text_len, ' '*self.nrspaces)
+		return '%s>%s' % ('-' * self.prompt_text_len, ' ' * self.nrspaces)
 
 
 def setup(prompt='1'):

@@ -5,8 +5,9 @@ from copy import copy
 
 from .segment import Segment
 
+
 try:
-	unicode()
+	unicode()  # NOQA
 except NameError:
 	unicode = str
 

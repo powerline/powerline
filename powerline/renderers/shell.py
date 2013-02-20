@@ -43,7 +43,7 @@ class ShellRenderer(Renderer):
 				if attr & ATTR_BOLD:
 					ansi += [1]
 				elif attr & ATTR_ITALIC:
-					# Note: is likely not to work or even be inverse in place of 
+					# Note: is likely not to work or even be inverse in place of
 					# italic. Omit using this in colorschemes.
 					ansi += [3]
 				elif attr & ATTR_UNDERLINE:

@@ -191,54 +191,54 @@ def uptime(format='{days:02d}d {hours:02d}h {minutes:02d}m'):
 # Weather condition code descriptions available at
 # http://developer.yahoo.com/weather/#codes
 weather_conditions_codes = (
-	('tornado',                 'stormy'), #  0
-	('tropical_storm',          'stormy'), #  1
-	('hurricane',               'stormy'), #  2
-	('severe_thunderstorms',    'stormy'), #  3
-	('thunderstorms',           'stormy'), #  4
-	('mixed_rain_and_snow',     'rainy' ), #  5
-	('mixed_rain_and_sleet',    'rainy' ), #  6
-	('mixed_snow_and_sleet',    'snowy' ), #  7
-	('freezing_drizzle',        'rainy' ), #  8
-	('drizzle',                 'rainy' ), #  9
-	('freezing_rain',           'rainy' ), # 10
-	('showers',                 'rainy' ), # 11
-	('showers',                 'rainy' ), # 12
-	('snow_flurries',           'snowy' ), # 13
-	('light_snow_showers',      'snowy' ), # 14
-	('blowing_snow',            'snowy' ), # 15
-	('snow',                    'snowy' ), # 16
-	('hail',                    'snowy' ), # 17
-	('sleet',                   'snowy' ), # 18
-	('dust',                    'foggy' ), # 19
-	('fog',                     'foggy' ), # 20
-	('haze',                    'foggy' ), # 21
-	('smoky',                   'foggy' ), # 22
-	('blustery',                'foggy' ), # 23
-	('windy',                           ), # 24
-	('cold',                    'day'   ), # 25
-	('clouds',                  'cloudy'), # 26
-	('mostly_cloudy_night',     'cloudy'), # 27
-	('mostly_cloudy_day',       'cloudy'), # 28
-	('partly_cloudy_night',     'cloudy'), # 29
-	('partly_cloudy_day',       'cloudy'), # 30
-	('clear_night',             'night' ), # 31
-	('sun',                     'sunny' ), # 32
-	('fair_night',              'night' ), # 33
-	('fair_day',                'day'   ), # 34
-	('mixed_rain_and_hail',     'rainy' ), # 35
-	('hot',                     'sunny' ), # 36
-	('isolated_thunderstorms',  'stormy'), # 37
-	('scattered_thunderstorms', 'stormy'), # 38
-	('scattered_thunderstorms', 'stormy'), # 39
-	('scattered_showers',       'rainy' ), # 40
-	('heavy_snow',              'snowy' ), # 41
-	('scattered_snow_showers',  'snowy' ), # 42
-	('heavy_snow',              'snowy' ), # 43
-	('partly_cloudy',           'cloudy'), # 44
-	('thundershowers',          'rainy' ), # 45
-	('snow_showers',            'snowy' ), # 46
-	('isolated_thundershowers', 'rainy' ), # 47
+	('tornado',                 'stormy'),  # 0
+	('tropical_storm',          'stormy'),  # 1
+	('hurricane',               'stormy'),  # 2
+	('severe_thunderstorms',    'stormy'),  # 3
+	('thunderstorms',           'stormy'),  # 4
+	('mixed_rain_and_snow',     'rainy' ),  # 5
+	('mixed_rain_and_sleet',    'rainy' ),  # 6
+	('mixed_snow_and_sleet',    'snowy' ),  # 7
+	('freezing_drizzle',        'rainy' ),  # 8
+	('drizzle',                 'rainy' ),  # 9
+	('freezing_rain',           'rainy' ),  # 10
+	('showers',                 'rainy' ),  # 11
+	('showers',                 'rainy' ),  # 12
+	('snow_flurries',           'snowy' ),  # 13
+	('light_snow_showers',      'snowy' ),  # 14
+	('blowing_snow',            'snowy' ),  # 15
+	('snow',                    'snowy' ),  # 16
+	('hail',                    'snowy' ),  # 17
+	('sleet',                   'snowy' ),  # 18
+	('dust',                    'foggy' ),  # 19
+	('fog',                     'foggy' ),  # 20
+	('haze',                    'foggy' ),  # 21
+	('smoky',                   'foggy' ),  # 22
+	('blustery',                'foggy' ),  # 23
+	('windy',                           ),  # 24
+	('cold',                    'day'   ),  # 25
+	('clouds',                  'cloudy'),  # 26
+	('mostly_cloudy_night',     'cloudy'),  # 27
+	('mostly_cloudy_day',       'cloudy'),  # 28
+	('partly_cloudy_night',     'cloudy'),  # 29
+	('partly_cloudy_day',       'cloudy'),  # 30
+	('clear_night',             'night' ),  # 31
+	('sun',                     'sunny' ),  # 32
+	('fair_night',              'night' ),  # 33
+	('fair_day',                'day'   ),  # 34
+	('mixed_rain_and_hail',     'rainy' ),  # 35
+	('hot',                     'sunny' ),  # 36
+	('isolated_thunderstorms',  'stormy'),  # 37
+	('scattered_thunderstorms', 'stormy'),  # 38
+	('scattered_thunderstorms', 'stormy'),  # 39
+	('scattered_showers',       'rainy' ),  # 40
+	('heavy_snow',              'snowy' ),  # 41
+	('scattered_snow_showers',  'snowy' ),  # 42
+	('heavy_snow',              'snowy' ),  # 43
+	('partly_cloudy',           'cloudy'),  # 44
+	('thundershowers',          'rainy' ),  # 45
+	('snow_showers',            'snowy' ),  # 46
+	('isolated_thundershowers', 'rainy' ),  # 47
 )
 # ('day',    (25, 34)),
 # ('rainy',  (5, 6, 8, 9, 10, 11, 12, 35, 40, 45, 47)),
