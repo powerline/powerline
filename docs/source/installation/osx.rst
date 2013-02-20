@@ -26,9 +26,6 @@ Python package
    project is currently unavailable on the PyPI due to a naming conflict 
    with an unrelated project.
 
-.. warning:: Installing Powerline with a vim plugin manager like Vundle is 
-   not recommended and not officially supported.
-
 Vim installation
 ----------------
 
