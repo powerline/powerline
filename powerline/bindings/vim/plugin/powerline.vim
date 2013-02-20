@@ -52,6 +52,9 @@ function! s:GetWinID(winnr)
 	if empty(r)
 		let r = s:pyeval('str(uuid.uuid4())')
 		call setwinvar(a:winnr, 'window_id', r)
+	endif
+	" Without this condition it triggers unneeded statusline redraw
+	if getwinvar(a:winnr, '&statusline') isnot# '%!Powerline("'.r.'")'
 		call setwinvar(a:winnr, '&statusline', '%!Powerline("'.r.'")')
 	endif
 	return r
@@ -64,9 +67,11 @@ function! Powerline(window_id)
 endfunction
 
 function! PowerlineNew()
-	return Powerline(s:GetWinID(winnr()))
+	call map(range(1, winnr('$')), 's:GetWinID(v:val)')
 endfunction
 
+" Is immediately changed when Powerline() function is run. Good for global 
+" value.
 set statusline=%!PowerlineNew()
 
 function! PowerlineRegisterCachePurgerEvent(event)
