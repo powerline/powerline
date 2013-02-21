@@ -68,6 +68,7 @@ endfunction
 
 function! PowerlineNew()
 	call map(range(1, winnr('$')), 's:GetWinID(v:val)')
+	redrawstatus!
 endfunction
 
 " Is immediately changed when Powerline() function is run. Good for global 
