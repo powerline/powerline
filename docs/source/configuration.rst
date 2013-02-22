@@ -155,15 +155,12 @@ Common configuration is a subdictionary that is a value of ``ext`` key in
     Defines themes used when certain conditions are met, e.g. for 
     buffer-specific statuslines in vim. Requires a custom matcher and theme.
 
-Colorschemes
-============
+Color definitions
+=================
 
-:Location: :file:`powerline/colorschemes/{extension}/{name}.json`
+:Location: :file:`powerline/colors.json`
 
-``name``
-    Name of the colorscheme.
-
-.. _config-colorscheme-colors:
+.. _config-colors-colors:
 
 ``colors``
     Color definitions, consisting of a dict where the key is the name of the 
@@ -173,6 +170,22 @@ Colorschemes
     * A list with a cterm color index and a hex color string (e.g. ``[123, 
       "aabbcc"]``). This is useful for colorschemes that use colors that 
       aren't available in color terminals.
+
+``gradients``
+    Gradient definitions, consisting of a dict where the key is the name of the 
+    gradient, and the value is a list containing one or two items, second item 
+    is optional:
+
+    * A list of cterm color indicies.
+    * A list of hex color strings.
+
+Colorschemes
+============
+
+:Location: :file:`powerline/colorschemes/{extension}/{name}.json`
+
+``name``
+    Name of the colorscheme.
 
 .. _config-colorscheme-groups:
 
@@ -184,11 +197,11 @@ Colorschemes
 
     ``fg``
         Foreground color. Must be defined in :ref:`colors 
-        <config-colorscheme-colors>`.
+        <config-colors-colors>`.
 
     ``bg``
         Background color. Must be defined in :ref:`colors 
-        <config-colorscheme-colors>`.
+        <config-colors-colors>`.
 
     ``attr``
         Optional list of attributes. Valid values are one or more of 
@@ -203,8 +216,8 @@ Colorschemes
 
     ``colors``
         A dict where the key is the color to be translated in this mode, and 
-        the value is the new color. Both the key and the value must be 
-        defined in :ref:`colors <config-colorscheme-colors>`.
+        the value is the new color. Both the key and the value must be defined 
+        in :ref:`colors <config-colors-colors>`.
 
     ``groups``
         Segment highlighting groups for this mode. Same syntax as the main 

@@ -1,0 +1,82 @@
+{
+	"colors": {
+		"black": 16,
+		"white": 231,
+
+		"green": [2, "719e07"],
+		"darkestgreen": 22,
+		"darkgreen": 28,
+		"mediumgreen": 70,
+		"brightgreen": 148,
+
+		"cyan": [6, "2aa198"],
+		"darkestcyan": 23,
+		"darkcyan": 74,
+		"mediumcyan": 117,
+		"brightcyan": 159,
+
+		"blue": [4, "268bd2"],
+		"darkestblue": 24,
+		"darkblue": 31,
+
+		"red": [1, "dc322f"],
+		"darkestred": 52,
+		"darkred": 88,
+		"mediumred": 124,
+		"brightred": 160,
+		"brightestred": 196,
+
+		"magenta": [5, "d33682"],
+
+		"darkestpurple": 55,
+		"mediumpurple": 98,
+		"brightpurple": 189,
+
+		"violet": [13, "6c71c4"],
+
+		"orange": [9, "cb4b16"],
+		"darkorange": 94,
+		"mediumorange": 166,
+		"brightorange": 208,
+		"brightestorange": 214,
+
+		"yellow": [3, "b58900"],
+		"brightyellow": 220,
+
+		"gray0": 233,
+		"gray1": 235,
+		"gray2": 236,
+		"gray3": 239,
+		"gray4": 240,
+		"gray5": 241,
+		"gray6": 244,
+		"gray7": 245,
+		"gray8": 247,
+		"gray9": 250,
+		"gray10": 252,
+
+		"base03": [8, "002b36"],
+		"base02": [0, "073642"],
+		"base01": [10, "586e75"],
+		"base00": [11, "657b83"],
+		"base0": [12, "839496"],
+		"base1": [14, "93a1a1"],
+		"base2": [7, "eee8d5"],
+		"base3": [15, "fdf6e3"],
+
+		"system_load_good": 106,
+		"system_load_bad": 178,
+		"system_load_ugly": 202,
+
+		"weather_temp_cold": 67,
+		"weather_temp_hot": 166,
+		"weather_condition_cold": 117,
+		"weather_condition_hot": 228
+	},
+	"gradients": {
+		"green_yellow_red": [
+			[190, 184, 178, 172, 166, 160],
+			["8ae71c", "c2e821", "e9d926", "eaa72b", "eb7830", "ec4b35"]
+		]
+	}
+}

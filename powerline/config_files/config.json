@@ -11,7 +11,8 @@
 				"soft": " "
 			}
 		},
-		"spaces": 1
+		"spaces": 1,
+		"colors": "default"
 	},
 	"ext": {
 		"ipython": {

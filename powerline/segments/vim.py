@@ -241,7 +241,8 @@ def line_percent(segment_info, gradient=False):
 		return percentage
 	return [{
 		'contents': percentage,
-		'highlight_group': ['line_percent_gradient' + str(int(5 * percentage // 100) + 1), 'line_percent'],
+		'highlight_group': ['line_percent_gradient', 'line_percent'],
+		'gradient_level': percentage,
 		}]
 
 
