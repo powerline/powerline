@@ -11,6 +11,7 @@ import vim
 
 vim_exists = vim_get_func('exists', rettype=int)
 
+
 def _override_from(config, override_varname):
 	if vim_exists(override_varname):
 		# FIXME vim.eval has problem with numeric types, vim.bindeval may be 
@@ -51,7 +52,8 @@ class VimPowerline(Powerline):
 		# Note: themes with non-[a-zA-Z0-9_] names are impossible to override 
 		# (though as far as I know exists() won’t throw). Won’t fix, use proper 
 		# theme names.
-		return _override_from(super(VimPowerline, self).load_theme_config(name), 'g:powerline_theme_overrides__'+name)
+		return _override_from(super(VimPowerline, self).load_theme_config(name),
+						'g:powerline_theme_overrides__' + name)
 
 	def get_local_themes(self, local_themes):
 		self.get_matcher = gen_matcher_getter(self.ext, self.import_paths)

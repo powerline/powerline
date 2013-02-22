@@ -7,7 +7,6 @@ from powerline.lib import mergedicts
 def mergeargs(argvalue):
 	if not argvalue:
 		return None
-	l = argvalue
 	r = dict([argvalue[0]])
 	for subval in argvalue[1:]:
 		mergedicts(r, dict([subval]))

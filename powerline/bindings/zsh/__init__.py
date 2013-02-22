@@ -1,4 +1,5 @@
 import zsh
+import json
 from powerline.shell import ShellPowerline
 
 

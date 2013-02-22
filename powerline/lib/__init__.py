@@ -7,6 +7,7 @@ def underscore_to_camelcase(string):
 	'''Return a underscore_separated_string as CamelCase.'''
 	return ''.join(word.capitalize() or '_' for word in string.split('_'))
 
+
 def mergedicts(d1, d2):
 	'''Recursively merge two dictionaries. First dictionary is modified in-place.
 	'''
