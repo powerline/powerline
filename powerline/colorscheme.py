@@ -7,20 +7,20 @@ ATTR_UNDERLINE = 4
 
 
 class Colorscheme(object):
-	def __init__(self, colorscheme):
+	def __init__(self, colorscheme_config):
 		'''Initialize a colorscheme.'''
 		self.colors = {}
 		self.modes_groups = {DEFAULT_MODE_KEY: {}}
 
 		# Create a dict of color tuples with both a cterm and hex value
-		for color_name, color in colorscheme['colors'].items():
+		for color_name, color in colorscheme_config['colors'].items():
 			try:
 				self.colors[color_name] = (color[0], int(color[1], 16))
 			except TypeError:
 				self.colors[color_name] = (color, cterm_to_hex[color])
 
 		# Create highlighting groups for all modes
-		for group_name, group_props in colorscheme['groups'].items():
+		for group_name, group_props in colorscheme_config['groups'].items():
 			group_attr_flag = self._get_attr_flag(group_props.get('attr', []))
 			self.modes_groups[DEFAULT_MODE_KEY][group_name] = {
 				'fg': self.colors[group_props['fg']],
@@ -29,7 +29,7 @@ class Colorscheme(object):
 				}
 
 			# Create mode-specific highlighting for this group
-			for mode, translations in colorscheme.get('mode_translations', {}).items():
+			for mode, translations in colorscheme_config.get('mode_translations', {}).items():
 				if not mode in self.modes_groups:
 					self.modes_groups[mode] = {}
 				if group_name in translations.get('groups', {}):
