@@ -18,8 +18,7 @@ def requires_segment_info(func):
 
 
 class Theme(object):
-	def __init__(self, ext, colorscheme, theme_config, common_config, top_theme_config=None, segment_info=None):
-		self.colorscheme = colorscheme
+	def __init__(self, ext, theme_config, common_config, top_theme_config=None, segment_info=None):
 		self.dividers = theme_config.get('dividers', common_config['dividers'])
 		self.spaces = theme_config.get('spaces', common_config['spaces'])
 		self.segments = {
@@ -28,7 +27,7 @@ class Theme(object):
 			}
 		self.EMPTY_SEGMENT = {
 			'contents': None,
-			'highlight': defaultdict(lambda: {'fg': False, 'bg': False, 'attr': 0})
+			'highlight': {'fg': False, 'bg': False, 'attr': 0}
 			}
 		self.segment_info = segment_info
 		theme_configs = [theme_config]
@@ -44,14 +43,6 @@ class Theme(object):
 
 	def get_spaces(self):
 		return self.spaces
-
-	def add_highlight(self, segment):
-		segment['highlight'] = self.colorscheme.get_group_highlighting(segment['highlight_group'])
-		if segment['divider_highlight_group']:
-			segment['divider_highlight'] = self.colorscheme.get_group_highlighting(segment['divider_highlight_group'])
-		else:
-			segment['divider_highlight'] = None
-		return segment
 
 	def get_segments(self, side=None):
 		'''Return all segments.
@@ -92,7 +83,6 @@ class Theme(object):
 				else:
 					continue
 			for segment in parsed_segments:
-				segment = self.add_highlight(segment)
 				segment['contents'] = segment['before'] + unicode(segment['contents'] if segment['contents'] is not None else '') + segment['after']
 				# Align segment contents
 				if segment['width'] and segment['width'] != 'auto':

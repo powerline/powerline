@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from powerline.colorscheme import DEFAULT_MODE_KEY
 from powerline.theme import Theme
 
 
 class Renderer(object):
-	def __init__(self, theme_config, local_themes, theme_kwargs, **options):
+	def __init__(self, theme_config, local_themes, theme_kwargs, colorscheme, **options):
 		self.__dict__.update(options)
 		self.theme_config = theme_config
 		self.theme = Theme(theme_config=theme_config, **theme_kwargs)
 		self.local_themes = local_themes
 		self.theme_kwargs = theme_kwargs
+		self.colorscheme = colorscheme
 
 	def add_local_theme(self, matcher, theme):
 		if matcher in self.local_themes:
@@ -26,6 +26,14 @@ class Renderer(object):
 				return match['theme']
 		else:
 			return self.theme
+
+	def get_highlighting(self, segment, mode):
+		segment['highlight'] = self.colorscheme.get_highlighting(segment['highlight_group'], mode, segment.get('gradient_level'))
+		if segment['divider_highlight_group']:
+			segment['divider_highlight'] = self.colorscheme.get_highlighting(segment['divider_highlight_group'], mode)
+		else:
+			segment['divider_highlight'] = None
+		return segment
 
 	def render(self, mode=None, width=None, side=None, output_raw=False, segment_info=None, matcher_info=None):
 		'''Render all segments.
@@ -43,10 +51,10 @@ class Renderer(object):
 			theme.segment_info.update(segment_info)
 
 		# Handle excluded/included segments for the current mode
-		segments = [segment for segment in segments
+		segments = [self.get_highlighting(segment, mode) for segment in segments
 			if mode not in segment['exclude_modes'] or (segment['include_modes'] and segment in segment['include_modes'])]
 
-		segments = [segment for segment in self._render_segments(mode, theme, segments)]
+		segments = [segment for segment in self._render_segments(theme, segments)]
 
 		if not width:
 			# No width specified, so we don't need to crop or pad anything
@@ -73,11 +81,11 @@ class Renderer(object):
 					segment['_space_right'] += space_side
 			segments_spacers[0]['_space_right'] += distribute_len_remainder
 
-		rendered_highlighted = u''.join([segment['_rendered_hl'] for segment in self._render_segments(mode, theme, segments)]) + self.hlstyle()
+		rendered_highlighted = u''.join([segment['_rendered_hl'] for segment in self._render_segments(theme, segments)]) + self.hlstyle()
 
 		return self._returned_value(rendered_highlighted, segments, output_raw)
 
-	def _render_segments(self, mode, theme, segments, render_highlighted=True):
+	def _render_segments(self, theme, segments, render_highlighted=True):
 		'''Internal segment rendering method.
 
 		This method loops through the segment array and compares the
@@ -89,10 +97,6 @@ class Renderer(object):
 		statusline if render_highlighted is True.
 		'''
 		segments_len = len(segments)
-		try:
-			mode = mode if mode in segments[0]['highlight'] else DEFAULT_MODE_KEY
-		except IndexError:
-			pass
 
 		for index, segment in enumerate(segments):
 			segment['_rendered_raw'] = u''
@@ -102,7 +106,7 @@ class Renderer(object):
 			next_segment = segments[index + 1] if index < segments_len - 1 else theme.EMPTY_SEGMENT
 			compare_segment = next_segment if segment['side'] == 'left' else prev_segment
 			outer_padding = ' ' if (index == 0 and segment['side'] == 'left') or (index == segments_len - 1 and segment['side'] == 'right') else ''
-			divider_type = 'soft' if compare_segment['highlight'][mode]['bg'] == segment['highlight'][mode]['bg'] else 'hard'
+			divider_type = 'soft' if compare_segment['highlight']['bg'] == segment['highlight']['bg'] else 'hard'
 
 			divider_raw = theme.get_divider(segment['side'], divider_type)
 			divider_spaces = theme.get_spaces()
@@ -130,13 +134,13 @@ class Renderer(object):
 			if render_highlighted:
 				if divider_type == 'soft':
 					divider_highlight_group_key = 'highlight' if segment['divider_highlight_group'] is None else 'divider_highlight'
-					divider_fg = segment[divider_highlight_group_key][mode]['fg']
-					divider_bg = segment[divider_highlight_group_key][mode]['bg']
+					divider_fg = segment[divider_highlight_group_key]['fg']
+					divider_bg = segment[divider_highlight_group_key]['bg']
 				else:
-					divider_fg = segment['highlight'][mode]['bg']
-					divider_bg = compare_segment['highlight'][mode]['bg']
+					divider_fg = segment['highlight']['bg']
+					divider_bg = compare_segment['highlight']['bg']
 				divider_highlighted = self.hl(divider_raw, divider_fg, divider_bg, False)
-				contents_highlighted = self.hl(self.escape(contents_raw), **segment['highlight'][mode])
+				contents_highlighted = self.hl(self.escape(contents_raw), **segment['highlight'])
 
 			# Append padded raw and highlighted segments to the rendered segment variables
 			if segment['draw_divider'] or (divider_type == 'hard' and segment['width'] != 'auto'):

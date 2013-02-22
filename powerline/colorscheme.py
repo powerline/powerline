@@ -1,95 +1,108 @@
 # -*- coding: utf-8 -*-
 
+from copy import copy
+
+
 DEFAULT_MODE_KEY = None
 ATTR_BOLD = 1
 ATTR_ITALIC = 2
 ATTR_UNDERLINE = 4
 
 
+def get_attr_flag(attributes):
+	'''Convert an attribute array to a renderer flag.'''
+	attr_flag = 0
+	if 'bold' in attributes:
+		attr_flag |= ATTR_BOLD
+	if 'italic' in attributes:
+		attr_flag |= ATTR_ITALIC
+	if 'underline' in attributes:
+		attr_flag |= ATTR_UNDERLINE
+	return attr_flag
+
+
+def pick_gradient_value(grad_list, gradient_level):
+	'''Given a list of colors and gradient percent, return a color that should be used.
+
+	Note: gradient level is not checked for being inside [0, 100] interval.
+	'''
+	return grad_list[int(round(gradient_level * (len(grad_list) - 1) / 100))]
+
+
 class Colorscheme(object):
-	def __init__(self, colorscheme_config):
+	def __init__(self, colorscheme_config, colors_config):
 		'''Initialize a colorscheme.'''
 		self.colors = {}
-		self.modes_groups = {DEFAULT_MODE_KEY: {}}
+		self.gradients = {}
+
+		self.groups = colorscheme_config['groups']
+		self.translations = colorscheme_config.get('mode_translations', {})
 
 		# Create a dict of color tuples with both a cterm and hex value
-		for color_name, color in colorscheme_config['colors'].items():
+		for color_name, color in colors_config['colors'].items():
 			try:
 				self.colors[color_name] = (color[0], int(color[1], 16))
 			except TypeError:
 				self.colors[color_name] = (color, cterm_to_hex[color])
 
-		# Create highlighting groups for all modes
-		for group_name, group_props in colorscheme_config['groups'].items():
-			group_attr_flag = self._get_attr_flag(group_props.get('attr', []))
-			self.modes_groups[DEFAULT_MODE_KEY][group_name] = {
-				'fg': self.colors[group_props['fg']],
-				'bg': self.colors[group_props['bg']],
-				'attr': group_attr_flag,
-				}
+		# Create a dict of gradient names with two lists: for cterm and hex 
+		# values. Two lists in place of one list of pairs were chosen because 
+		# true colors allow more precise gradients.
+		for gradient_name, gradient in colors_config['gradients'].items():
+			if len(gradient) == 2:
+				self.gradients[gradient_name] = (
+					(gradient[0], [int(color, 16) for color in gradient[1]]))
+			else:
+				self.gradients[gradient_name] = (
+					(gradient[0], [cterm_to_hex[color] for color in gradient[0]]))
 
-			# Create mode-specific highlighting for this group
-			for mode, translations in colorscheme_config.get('mode_translations', {}).items():
-				if not mode in self.modes_groups:
-					self.modes_groups[mode] = {}
-				if group_name in translations.get('groups', {}):
-					# Override entire group if present in the translations group dict
-					self.modes_groups[mode][group_name] = {
-						'fg': self.colors[translations['groups'][group_name]['fg']],
-						'bg': self.colors[translations['groups'][group_name]['bg']],
-						'attr': self._get_attr_flag(translations['groups'][group_name].get('attr', [])),
-						}
-				else:
-					# Fallback to color translations from the translations colors dict
-					self.modes_groups[mode][group_name] = {
-						'fg': self.colors[translations.get('colors', {}).get(group_props['fg'], group_props['fg'])],
-						'bg': self.colors[translations.get('colors', {}).get(group_props['bg'], group_props['bg'])],
-						'attr': group_attr_flag,
-						}
+	def get_gradient(self, gradient, gradient_level):
+		if gradient in self.gradients:
+			return tuple((pick_gradient_value(grad_list, gradient_level) for grad_list in self.gradients[gradient]))
+		else:
+			return self.colors[gradient]
 
-	def get_group_highlighting(self, group):
-		'''Return highlighting information for all modes of a highlighting group.'''
-		group_highlighting = {}
-		for mode, mode_group in self.modes_groups.items():
-			try:
-				group_highlighting[mode] = mode_group[group]
-			except TypeError:
-				for try_group in group:
-					if try_group in self.modes_groups[mode]:
-						group_highlighting[mode] = mode_group[try_group]
-						break
-			finally:
-				if mode not in group_highlighting:
-					raise KeyError('Highlighting groups not found in colorscheme: {0}'.format(group))
-		return group_highlighting
+	def get_highlighting(self, groups, mode, gradient_level=None):
+		trans = self.translations.get(mode, {})
+		for group in groups:
+			if 'groups' in trans and group in trans['groups']:
+				try:
+					group_props = trans['groups'][group]
+				except KeyError:
+					continue
+				break
 
-	def get_highlighting(self, group, mode=None):
-		'''Return highlighting information for a highlighting group and mode.
+			else:
+				try:
+					group_props = copy(self.groups[group])
+				except KeyError:
+					continue
 
-		If no mode is specified, or the mode doesn't exist, highlighting for
-		the default mode is returned.
-		'''
-		if not mode or mode not in self.modes_groups:
-			mode = DEFAULT_MODE_KEY
-		try:
-			return self.modes_groups[mode][group]
-		except TypeError:
-			for try_group in group:
-				if try_group in self.modes_groups[mode]:
-					return self.modes_groups[mode][try_group]
-			raise KeyError('Highlighting groups not found in colorscheme: {0}'.format(group))
-		return self.modes_groups[mode][group]
+				try:
+					ctrans = trans['colors']
+					for key in ('fg', 'bg'):
+						try:
+							group_props[key] = ctrans[group_props[key]]
+						except KeyError:
+							pass
+				except KeyError:
+					pass
 
-	def _get_attr_flag(self, attributes):
-		'''Convert an attribute array to a renderer flag.'''
-		attr_flag = 0
-		if 'bold' in attributes:
-			attr_flag |= ATTR_BOLD
-		if 'italic' in attributes:
-			attr_flag |= ATTR_ITALIC
-		if 'underline' in attributes:
-			attr_flag |= ATTR_UNDERLINE
-		return attr_flag
+				break
+		else:
+			raise KeyError('Highlighting groups not found in colorscheme: ' + ', '.join(groups))
+
+		if gradient_level is None:
+			pick_color = self.colors.__getitem__
+		else:
+			pick_color = lambda gradient : self.get_gradient(gradient, gradient_level)
+
+		return {
+			'fg': pick_color(group_props['fg']),
+			'bg': pick_color(group_props['bg']),
+			'attr': get_attr_flag(group_props.get('attr', [])),
+			}
+
 
 cterm_to_hex = {
 	16: 0x000000, 17: 0x00005f, 18: 0x000087, 19: 0x0000af, 20: 0x0000d7, 21: 0x0000ff,

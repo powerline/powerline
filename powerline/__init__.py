@@ -31,7 +31,8 @@ class Powerline(object):
 
 		# Load and initialize colorscheme
 		colorscheme_config = self.load_colorscheme_config(ext_config['colorscheme'])
-		colorscheme = Colorscheme(colorscheme_config)
+		colors_config = self.load_colors_config()
+		colorscheme = Colorscheme(colorscheme_config, colors_config)
 
 		# Load and initialize extension theme
 		theme_config = self.load_theme_config(ext_config.get('theme', 'default'))
@@ -39,7 +40,6 @@ class Powerline(object):
 		self.import_paths = common_config['paths']
 		theme_kwargs = {
 			'ext': ext,
-			'colorscheme': colorscheme,
 			'common_config': common_config,
 			'segment_info': self.get_segment_info(),
 			}
@@ -55,7 +55,7 @@ class Powerline(object):
 			sys.stderr.write('Error while importing renderer module: {0}\n'.format(e))
 			sys.exit(1)
 		options = {'term_truecolor': common_config.get('term_24bit_colors', False)}
-		self.renderer = Renderer(theme_config, local_themes, theme_kwargs, **options)
+		self.renderer = Renderer(theme_config, local_themes, theme_kwargs, colorscheme, **options)
 
 	def get_config_paths(self):
 		config_home = os.environ.get('XDG_CONFIG_HOME', os.path.join(os.path.expanduser('~'), '.config'))
@@ -71,6 +71,9 @@ class Powerline(object):
 
 	def load_colorscheme_config(self, name):
 		return load_json_config(self.config_paths, os.path.join('colorschemes', self.ext, name))
+
+	def load_colors_config(self):
+		return load_json_config(self.config_paths, 'colors')
 
 	@staticmethod
 	def get_local_themes(local_themes):
