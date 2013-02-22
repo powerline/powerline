@@ -68,9 +68,9 @@ class VimRenderer(Renderer):
 		if not (fg, bg, attr) in self.hl_groups:
 			hl_group = {
 				'ctermfg': 'NONE',
-				'guifg': 'NONE',
+				'guifg': None,
 				'ctermbg': 'NONE',
-				'guibg': 'NONE',
+				'guibg': None,
 				'attr': ['NONE'],
 				'name': '',
 				}
@@ -98,9 +98,9 @@ class VimRenderer(Renderer):
 			vim.command('hi {group} ctermfg={ctermfg} guifg={guifg} guibg={guibg} ctermbg={ctermbg} cterm={attr} gui={attr}'.format(
 					group=hl_group['name'],
 					ctermfg=hl_group['ctermfg'],
-					guifg='#{0:06x}'.format(hl_group['guifg']) if hl_group['guifg'] != 'NONE' else 'NONE',
+					guifg='#{0:06x}'.format(hl_group['guifg']) if hl_group['guifg'] is not None else 'NONE',
 					ctermbg=hl_group['ctermbg'],
-					guibg='#{0:06x}'.format(hl_group['guibg']) if hl_group['guibg'] != 'NONE' else 'NONE',
+					guibg='#{0:06x}'.format(hl_group['guibg']) if hl_group['guibg'] is not None else 'NONE',
 					attr=','.join(hl_group['attr']),
 				))
 		return '%#' + self.hl_groups[(fg, bg, attr)]['name'] + '#'
