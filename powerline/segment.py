@@ -12,7 +12,7 @@ def get_segment_key(segment, theme_configs, key, module=None, default=None):
 			name = segment['name']
 			for theme_config in theme_configs:
 				if 'segment_data' in theme_config:
-					for segment_key in ((module+'.'+name, name) if module else (name,)):
+					for segment_key in ((module + '.' + name, name) if module else (name,)):
 						try:
 							return theme_config['segment_data'][segment_key][key]
 						except KeyError:
@@ -47,9 +47,10 @@ segment_getters = {
 
 def gen_segment_getter(ext, path, theme_configs, default_module=None):
 	data = {
-			'default_module': default_module or 'powerline.segments.'+ext,
+			'default_module': default_module or 'powerline.segments.' + ext,
 			'path': path,
 			}
+
 	def get_key(segment, module, key, default=None):
 		return get_segment_key(segment, theme_configs, key, module, default)
 	data['get_key'] = get_key
@@ -68,7 +69,7 @@ def gen_segment_getter(ext, path, theme_configs, default_module=None):
 			'highlight_group': highlight_group,
 			'divider_highlight_group': divider_highlight_group,
 			'before': get_key(segment, module, 'before', ''),
-			'after':  get_key(segment, module, 'after', ''),
+			'after': get_key(segment, module, 'after', ''),
 			'contents_func': contents_func,
 			'contents': contents,
 			'args': get_key(segment, module, 'args', {}) if segment_type == 'function' else {},
