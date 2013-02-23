@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from collections import defaultdict
 from copy import copy
 
 from .segment import gen_segment_getter
