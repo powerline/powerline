@@ -28,8 +28,7 @@
 			{
 				"name": "branch",
 				"exclude_modes": ["nc"],
-				"priority": 60,
-				"divider_highlight_group": "branch:divider"
+				"priority": 60
 			},
 			{
 				"name": "readonly_indicator",
@@ -66,20 +65,17 @@
 				"name": "file_format",
 				"draw_divider": false,
 				"exclude_modes": ["nc"],
-				"priority": 50,
-				"divider_highlight_group": "background:divider"
+				"priority": 50
 			},
 			{
 				"name": "file_encoding",
 				"exclude_modes": ["nc"],
-				"priority": 50,
-				"divider_highlight_group": "background:divider"
+				"priority": 50
 			},
 			{
 				"name": "file_type",
 				"exclude_modes": ["nc"],
-				"priority": 50,
-				"divider_highlight_group": "background:divider"
+				"priority": 50
 			},
 			{
 				"name": "line_percent",

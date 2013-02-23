@@ -90,7 +90,6 @@ segments that you may want to customize right away:
        {
            "name": "weather",
            "priority": 50,
-           "divider_highlight_group": "background:divider"
            "args": {
                "unit": "f",
                "location_query": "oslo, norway"
@@ -288,6 +287,8 @@ Themes
         Highlighting group for this segment. Consists of a prioritized list 
         of highlighting groups, where the first highlighting group that is 
         available in the colorscheme is used.
+
+        Ignored for segments that have ``function`` type.
 
     ``before``
         .. _config-themes-seg-before:

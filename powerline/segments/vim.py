@@ -10,7 +10,7 @@ except ImportError:
 
 from powerline.bindings.vim import vim_get_func, getbufvar
 from powerline.theme import requires_segment_info
-from powerline.lib import memoize, humanize_bytes
+from powerline.lib import memoize, humanize_bytes, add_divider_highlight_group
 from powerline.lib.vcs import guess
 from collections import defaultdict
 
@@ -201,6 +201,7 @@ def file_size(segment_info, suffix='B', binary_prefix=False):
 
 
 @requires_segment_info
+@add_divider_highlight_group('background:divider')
 def file_format(segment_info):
 	'''Return file format (i.e. line ending type).
 
@@ -210,6 +211,7 @@ def file_format(segment_info):
 
 
 @requires_segment_info
+@add_divider_highlight_group('background:divider')
 def file_encoding(segment_info):
 	'''Return file encoding/character set.
 
@@ -219,6 +221,7 @@ def file_encoding(segment_info):
 
 
 @requires_segment_info
+@add_divider_highlight_group('background:divider')
 def file_type(segment_info):
 	'''Return file type.
 
@@ -262,7 +265,9 @@ def col_current(segment_info):
 @window_cached
 def virtcol_current():
 	'''Return current visual column with concealed characters ingored'''
-	return vim_funcs['virtcol']('.')
+	return [{'contents': vim_funcs['virtcol']('.'),
+			'highlight_group': ['virtcol_current', 'col_current'],
+			}]
 
 
 def modified_buffers(text=u'+', join_str=','):
@@ -286,7 +291,10 @@ def branch(segment_info):
 	'''Return the current working branch.'''
 	repo = guess(path=os.path.abspath(segment_info['buffer'].name or os.getcwd()))
 	if repo:
-		return repo.branch()
+		return [{
+			'contents': repo.branch(),
+			'divider_highlight_group': 'branch:divider',
+		}]
 	return None
 
 
