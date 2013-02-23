@@ -9,17 +9,17 @@
 		"email_alert": { "fg": "white", "bg": "brightred", "attr": ["bold"] },
 		"hostname": { "fg": "black", "bg": "gray10", "attr": ["bold"] },
 		"weather": { "fg": "gray8", "bg": "gray0" },
-		"weather_temp_cold": { "fg": "weather_temp_cold", "bg": "gray0" },
-		"weather_temp_hot": { "fg": "weather_temp_hot", "bg": "gray0" },
-		"weather_condition_hot": { "fg": "weather_condition_hot", "bg": "gray0" },
-		"weather_condition_snowy": { "fg": "weather_condition_cold", "bg": "gray0" },
-		"weather_condition_rainy": { "fg": "weather_condition_cold", "bg": "gray0" },
+		"weather_temp_cold": { "fg": "steelblue", "bg": "gray0" },
+		"weather_temp_hot": { "fg": "darkorange3", "bg": "gray0" },
+		"weather_condition_hot": { "fg": "khaki1", "bg": "gray0" },
+		"weather_condition_snowy": { "fg": "skyblue1", "bg": "gray0" },
+		"weather_condition_rainy": { "fg": "skyblue1", "bg": "gray0" },
 		"uptime": { "fg": "gray8", "bg": "gray0" },
 		"external_ip": { "fg": "gray8", "bg": "gray0" },
 		"network_load": { "fg": "gray8", "bg": "gray0" },
 		"system_load": { "fg": "gray8", "bg": "gray0" },
-		"system_load_good": { "fg": "system_load_good", "bg": "gray0" },
-		"system_load_bad": { "fg": "system_load_bad", "bg": "gray0" },
-		"system_load_ugly": { "fg": "system_load_ugly", "bg": "gray0" }
+		"system_load_good": { "fg": "lightyellowgreen", "bg": "gray0" },
+		"system_load_bad": { "fg": "gold3", "bg": "gray0" },
+		"system_load_ugly": { "fg": "orangered", "bg": "gray0" }
 	}
 }

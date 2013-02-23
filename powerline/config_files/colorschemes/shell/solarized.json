@@ -1,15 +1,15 @@
 {
 	"name": "Solarized Dark",
 	"groups": {
-		"user":               { "fg": "base3", "bg": "blue", "attr": ["bold"] },
-		"superuser":          { "fg": "base3", "bg": "red", "attr": ["bold"] },
-		"virtualenv":         { "fg": "base3", "bg": "green" },
-		"branch":             { "fg": "base1", "bg": "base02" },
-		"cwd":                { "fg": "base2", "bg": "base01" },
-		"cwd:current_folder": { "fg": "base3", "bg": "base01", "attr": ["bold"] },
-		"cwd:divider":        { "fg": "base1", "bg": "base01" },
-		"hostname":           { "fg": "base3", "bg": "base01" },
-		"exit_fail":          { "fg": "base3", "bg": "red" },
-		"exit_success":       { "fg": "base3", "bg": "green" }
+		"user":               { "fg": "oldlace", "bg": "blue", "attr": ["bold"] },
+		"superuser":          { "fg": "oldlace", "bg": "red", "attr": ["bold"] },
+		"virtualenv":         { "fg": "oldlace", "bg": "green" },
+		"branch":             { "fg": "gray61", "bg": "royalblue5" },
+		"cwd":                { "fg": "lightyellow", "bg": "darkgreencopper" },
+		"cwd:current_folder": { "fg": "oldlace", "bg": "darkgreencopper", "attr": ["bold"] },
+		"cwd:divider":        { "fg": "gray61", "bg": "darkgreencopper" },
+		"hostname":           { "fg": "oldlace", "bg": "darkgreencopper" },
+		"exit_fail":          { "fg": "oldlace", "bg": "red" },
+		"exit_success":       { "fg": "oldlace", "bg": "green" }
 	}
 }
