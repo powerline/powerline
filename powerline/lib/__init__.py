@@ -1,3 +1,5 @@
+from functools import wraps
+
 from powerline.lib.memoize import memoize  # NOQA
 from powerline.lib.humanize_bytes import humanize_bytes  # NOQA
 from powerline.lib.url import urllib_read, urllib_urlencode  # NOQA
@@ -16,3 +18,19 @@ def mergedicts(d1, d2):
 			mergedicts(d1[k], d2[k])
 		else:
 			d1[k] = d2[k]
+
+
+def add_divider_highlight_group(highlight_group):
+	def dec(func):
+		@wraps(func)
+		def f(**kwargs):
+			r = func(**kwargs)
+			if r:
+				return [{
+					'contents': r,
+					'divider_highlight_group': highlight_group,
+				}]
+			else:
+				return None
+		return f
+	return dec

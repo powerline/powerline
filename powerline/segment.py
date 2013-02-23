@@ -66,12 +66,11 @@ def gen_segment_getter(ext, path, theme_configs, default_module=None):
 		except KeyError:
 			raise TypeError('Unknown segment type: {0}'.format(segment_type))
 		contents, contents_func, module = get_segment_info(data, segment)
-		highlight_group = segment.get('highlight_group', segment.get('name'))
-		divider_highlight_group = segment.get('divider_highlight_group')
+		highlight_group = segment_type != 'function' and segment.get('highlight_group') or segment.get('name')
 		return {
 			'type': segment_type,
 			'highlight_group': scalar_to_list(highlight_group),
-			'divider_highlight_group': scalar_to_list(divider_highlight_group) if divider_highlight_group else None,
+			'divider_highlight_group': None,
 			'before': get_key(segment, module, 'before', ''),
 			'after': get_key(segment, module, 'after', ''),
 			'contents_func': contents_func,

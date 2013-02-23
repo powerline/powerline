@@ -4,18 +4,18 @@
 		"right": [
 			{
 				"name": "weather",
-				"priority": 50,
-				"divider_highlight_group": "background:divider"
+				"priority": 50
 			},
 			{
 				"name": "date"
 			},
 			{
 				"name": "date",
-				"args": {"format": "%H:%M"},
-				"before": "⌚ ",
-				"highlight_group": ["time", "date"],
-				"divider_highlight_group": "time:divider"
+				"args": {
+					"format": "%H:%M",
+					"istime": true
+				},
+				"before": "⌚ "
 			},
 			{
 				"name": "email_imap_alert",

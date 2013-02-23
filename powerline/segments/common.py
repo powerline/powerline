@@ -3,7 +3,8 @@
 import os
 import sys
 
-from powerline.lib import memoize, urllib_read, urllib_urlencode
+from powerline.lib import memoize, urllib_read, urllib_urlencode, add_divider_highlight_group
+from functools import wraps
 
 
 def hostname(only_if_ssh=False):
@@ -80,19 +81,24 @@ def cwd(dir_shorten_len=None, dir_limit_depth=None):
 			continue
 		ret.append({
 			'contents': part,
+			'divider_highlight_group': 'cwd:divider',
 			})
 	ret[-1]['highlight_group'] = ['cwd:current_folder', 'cwd']
 	return ret
 
 
-def date(format='%Y-%m-%d'):
+def date(format='%Y-%m-%d', istime=False):
 	'''Return the current date.
 
 	:param str format:
 		strftime-style date format string
 	'''
 	from datetime import datetime
-	return datetime.now().strftime(format)
+	return [{
+		'contents': datetime.now().strftime(format),
+		'highlight_group': (['time'] if istime else []) + ['date'],
+		'divider_highlight_group': 'time:divider' if istime else None,
+	}]
 
 
 def fuzzy_time():
@@ -148,6 +154,7 @@ def fuzzy_time():
 
 
 @memoize(600)
+@add_divider_highlight_group('background:divider')
 def external_ip(query_url='http://ipv4.icanhazip.com/'):
 	'''Return external IP address.
 
@@ -163,6 +170,7 @@ def external_ip(query_url='http://ipv4.icanhazip.com/'):
 	return urllib_read(query_url).strip()
 
 
+@add_divider_highlight_group('background:divider')
 def uptime(format='{days:02d}d {hours:02d}h {minutes:02d}m'):
 	'''Return system uptime.
 
@@ -265,6 +273,7 @@ weather_conditions_icons = {
 
 
 @memoize(1800)
+@add_divider_highlight_group('background:divider')
 def weather(unit='c', location_query=None, icons=None):
 	'''Return weather from Yahoo! Weather.
 
@@ -360,6 +369,7 @@ def system_load(format='{avg:.1f}', threshold_good=1, threshold_bad=2):
 			'contents': format.format(avg=avg),
 			'highlight_group': [hl, 'system_load'],
 			'draw_divider': False,
+			'divider_highlight_group': 'background:divider',
 			})
 	ret[0]['draw_divider'] = True
 	ret[0]['contents'] += ' '
@@ -383,6 +393,7 @@ def cpu_load_percent(measure_interval=.5):
 	return u'{0}%'.format(cpu_percent)
 
 
+@add_divider_highlight_group('background:divider')
 def network_load(interface='eth0', measure_interval=1, suffix='B/s', binary_prefix=False):
 	'''Return the network load.
 

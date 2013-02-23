@@ -29,8 +29,7 @@
 				"name": "cwd",
 				"args": {
 					"dir_limit_depth": 3
-				},
-				"divider_highlight_group": "cwd:divider"
+				}
 			}
 		],
 		"right": [
