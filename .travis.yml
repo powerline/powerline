@@ -1,0 +1,12 @@
+language: python
+python:
+    - "2.7"
+    - "3.2"
+    - "3.3"
+install: "pip install ."
+script: python setup.py test
+branches:
+    only:
+        - tests
+
+# vim: et
