@@ -28,6 +28,9 @@ class ConfigurableIpythonPowerline(IpythonPowerline):
 		super(ConfigurableIpythonPowerline, self).__init__()
 
 
+old_prompt_manager = None
+
+
 def load_ipython_extension(ip):
 	global old_prompt_manager
 
@@ -36,6 +39,7 @@ def load_ipython_extension(ip):
 
 	ip.prompt_manager = PowerlinePromptManager(powerline=powerline,
 		shell=ip.prompt_manager.shell, config=ip.prompt_manager.config)
+
 
 def unload_ipython_extension(ip):
 	ip.prompt_manager = old_prompt_manager

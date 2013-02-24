@@ -4,7 +4,6 @@ import os
 import sys
 
 from powerline.lib import memoize, urllib_read, urllib_urlencode, add_divider_highlight_group
-from functools import wraps
 
 
 def hostname(only_if_ssh=False):

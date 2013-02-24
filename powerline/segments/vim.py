@@ -266,8 +266,7 @@ def col_current(segment_info):
 def virtcol_current():
 	'''Return current visual column with concealed characters ingored'''
 	return [{'contents': vim_funcs['virtcol']('.'),
-			'highlight_group': ['virtcol_current', 'col_current'],
-			}]
+			'highlight_group': ['virtcol_current', 'col_current']}]
 
 
 def modified_buffers(text=u'+', join_str=','):
