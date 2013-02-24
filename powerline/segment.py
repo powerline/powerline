@@ -45,10 +45,6 @@ segment_getters = {
 		}
 
 
-def scalar_to_list(value):
-	return value if type(value) is list else [value]
-
-
 def gen_segment_getter(ext, path, theme_configs, default_module=None):
 	data = {
 			'default_module': default_module or 'powerline.segments.' + ext,
@@ -69,7 +65,7 @@ def gen_segment_getter(ext, path, theme_configs, default_module=None):
 		highlight_group = segment_type != 'function' and segment.get('highlight_group') or segment.get('name')
 		return {
 			'type': segment_type,
-			'highlight_group': scalar_to_list(highlight_group),
+			'highlight_group': highlight_group,
 			'divider_highlight_group': None,
 			'before': get_key(segment, module, 'before', ''),
 			'after': get_key(segment, module, 'after', ''),

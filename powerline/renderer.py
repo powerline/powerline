@@ -30,7 +30,7 @@ class Renderer(object):
 	def get_highlighting(self, segment, mode):
 		segment['highlight'] = self.colorscheme.get_highlighting(segment['highlight_group'], mode, segment.get('gradient_level'))
 		if segment['divider_highlight_group']:
-			segment['divider_highlight'] = self.colorscheme.get_highlighting([segment['divider_highlight_group']], mode)
+			segment['divider_highlight'] = self.colorscheme.get_highlighting(segment['divider_highlight_group'], mode)
 		else:
 			segment['divider_highlight'] = None
 		return segment

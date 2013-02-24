@@ -29,6 +29,14 @@ def pick_gradient_value(grad_list, gradient_level):
 	return grad_list[int(round(gradient_level * (len(grad_list) - 1) / 100))]
 
 
+def hl_iter(value):
+	if type(value) is list:
+		for v in value:
+			yield v
+	else:
+		yield value
+
+
 class Colorscheme(object):
 	def __init__(self, colorscheme_config, colors_config):
 		'''Initialize a colorscheme.'''
@@ -64,7 +72,7 @@ class Colorscheme(object):
 
 	def get_highlighting(self, groups, mode, gradient_level=None):
 		trans = self.translations.get(mode, {})
-		for group in groups:
+		for group in hl_iter(groups):
 			if 'groups' in trans and group in trans['groups']:
 				try:
 					group_props = trans['groups'][group]
