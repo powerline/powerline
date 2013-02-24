@@ -43,11 +43,6 @@ vim_modes = {
 	'!': u'SHELL',
 }
 
-mode_translations = {
-	chr(ord('V') - 0x40): '^V',
-	chr(ord('S') - 0x40): '^S',
-}
-
 
 eventcaches = defaultdict(lambda: [])
 bufeventcaches = defaultdict(lambda: [])
@@ -111,7 +106,6 @@ def mode(segment_info, override=None):
 	mode = segment_info['mode']
 	if mode == 'nc':
 		return None
-	mode = mode_translations.get(mode, mode)
 	if not override:
 		return vim_modes[mode]
 	try:
