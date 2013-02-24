@@ -24,14 +24,14 @@ setup(
 		'scripts/powerline',
 		],
 	keywords='',
-	packages=find_packages(),
+	packages=find_packages(exclude=('tests',)),
 	include_package_data=True,
 	zip_safe=False,
-	test_suite='powerline',
 	install_requires=[],
 	extras_require={
 		'docs': [
 			'Sphinx',
 			],
 		},
+	test_suite='tests',
 	)
