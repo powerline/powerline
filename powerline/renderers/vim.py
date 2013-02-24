@@ -11,6 +11,10 @@ import vim
 vim_mode = vim_get_func('mode')
 vim_getwinvar = vim_get_func('getwinvar')
 vim_setwinvar = vim_get_func('setwinvar')
+mode_translations = {
+	chr(ord('V') - 0x40): '^V',
+	chr(ord('S') - 0x40): '^S',
+}
 
 
 class VimRenderer(Renderer):
@@ -29,6 +33,7 @@ class VimRenderer(Renderer):
 		'''
 		if current:
 			mode = vim_mode()
+			mode = mode_translations.get(mode, mode)
 		else:
 			mode = 'nc'
 		segment_info = {
