@@ -78,6 +78,11 @@ def bufnr(segment_info, **kwargs):
 	return segment_info['bufnr']
 
 
+def bufname(segment_info, **kwargs):
+	'''Used for cache key, returns current buffer name'''
+	return segment_info['buffer'].name
+
+
 # TODO Remove cache when needed
 def window_cached(func):
 	cache = {}
@@ -130,7 +135,7 @@ def paste_indicator(segment_info, text='PASTE'):
 	:param string text:
 		text to display if paste mode is enabled
 	'''
-	return text if int(getbufvar(segment_info['bufnr'], '&paste')) else None
+	return text if int(vim.eval('&paste')) else None
 
 
 @requires_segment_info
@@ -156,7 +161,7 @@ def file_directory(segment_info, shorten_home=False):
 	file_directory = vim_funcs['fnamemodify'](name, ':~:.:h')
 	if shorten_home and file_directory.startswith('/home/'):
 		file_directory = '~' + file_directory[6:]
-	return file_directory.decode('utf-8') + os.sep if file_directory else None
+	return file_directory + os.sep if file_directory else None
 
 
 @requires_segment_info
@@ -178,18 +183,18 @@ def file_name(segment_info, display_no_file=False, no_file_text='[No file]'):
 		else:
 			return None
 	file_name = vim_funcs['fnamemodify'](name, ':~:.:t')
-	return file_name.decode('utf-8')
+	return file_name
 
 
 @requires_segment_info
-@memoize(2, cache_key=bufnr, cache_reg_func=purgebuf_on_shell_and_write)
-def file_size(segment_info, suffix='B', binary_prefix=False):
+@memoize(2, cache_key=bufname, cache_reg_func=purgebuf_on_shell_and_write)
+def file_size(segment_info, suffix='B', si_prefix=False):
 	'''Return file size.
 
 	:param str suffix:
 		string appended to the file size
-	:param bool binary_prefix:
-		use binary prefix, e.g. MiB instead of MB
+	:param bool si_prefix:
+		use SI prefix, e.g. MB instead of MiB
 	:return: file size or None if the file isn't saved or if the size is too big to fit in a number
 	'''
 	file_name = segment_info['buffer'].name
@@ -197,7 +202,7 @@ def file_size(segment_info, suffix='B', binary_prefix=False):
 		file_size = os.stat(file_name).st_size
 	except:
 		return None
-	return humanize_bytes(file_size, suffix, binary_prefix)
+	return humanize_bytes(file_size, suffix, si_prefix)
 
 
 @requires_segment_info
@@ -241,9 +246,9 @@ def line_percent(segment_info, gradient=False):
 	line_last = len(segment_info['buffer'])
 	percentage = int(line_current * 100 // line_last)
 	if not gradient:
-		return percentage
+		return str(percentage)
 	return [{
-		'contents': percentage,
+		'contents': str(percentage),
 		'highlight_group': ['line_percent_gradient', 'line_percent'],
 		'gradient_level': percentage,
 		}]
@@ -252,24 +257,24 @@ def line_percent(segment_info, gradient=False):
 @requires_segment_info
 def line_current(segment_info):
 	'''Return the current cursor line.'''
-	return segment_info['window'].cursor[0]
+	return str(segment_info['window'].cursor[0])
 
 
 @requires_segment_info
 def col_current(segment_info):
 	'''Return the current cursor column.
 	'''
-	return segment_info['window'].cursor[1] + 1
+	return str(segment_info['window'].cursor[1] + 1)
 
 
 @window_cached
 def virtcol_current():
 	'''Return current visual column with concealed characters ingored'''
-	return [{'contents': vim_funcs['virtcol']('.'),
+	return [{'contents': str(vim_funcs['virtcol']('.')),
 			'highlight_group': ['virtcol_current', 'col_current']}]
 
 
-def modified_buffers(text=u'+', join_str=','):
+def modified_buffers(text=u'+ ', join_str=u','):
 	'''Return a comma-separated list of modified buffers.
 
 	:param str text:
@@ -278,9 +283,9 @@ def modified_buffers(text=u'+', join_str=','):
 		string to use for joining the modified buffer list
 	'''
 	buffer_len = vim_funcs['bufnr']('$')
-	buffer_mod = [str(bufnr) for bufnr in range(1, buffer_len + 1) if int(getbufvar(bufnr, '&modified'))]
+	buffer_mod = [str(bufnr) for bufnr in range(1, buffer_len + 1) if int(getbufvar(bufnr, '&modified') or 0)]
 	if buffer_mod:
-		return u'{0} {1}'.format(text, join_str.join(buffer_mod))
+		return text + join_str.join(buffer_mod)
 	return None
 
 

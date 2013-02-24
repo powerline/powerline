@@ -60,15 +60,18 @@ try:
 				index_column = ' '
 				untracked_column = ' '
 				for status in self._repo().status().values():
+					if status & git.GIT_STATUS_WT_NEW:
+						untracked_column = 'U'
+						continue
+
 					if status & (git.GIT_STATUS_WT_DELETED
 							| git.GIT_STATUS_WT_MODIFIED):
 						wt_column = 'D'
-					elif status & (git.GIT_STATUS_INDEX_NEW
+
+					if status & (git.GIT_STATUS_INDEX_NEW
 							| git.GIT_STATUS_INDEX_MODIFIED
 							| git.GIT_STATUS_INDEX_DELETED):
 						index_column = 'I'
-					elif status & git.GIT_STATUS_WT_NEW:
-						untracked_column = 'U'
 				return wt_column + index_column + untracked_column
 
 		def branch(self):
@@ -117,14 +120,18 @@ except ImportError:
 				for line in self._gitcmd('status', '--porcelain'):
 					if line[0] == '?':
 						untracked_column = 'U'
+						continue
 					elif line[0] == '!':
-						pass
-					elif line[0] != ' ':
+						continue
+
+					if line[0] != ' ':
 						index_column = 'I'
-					elif line[1] != ' ':
+
+					if line[1] != ' ':
 						wt_column = 'D'
+
 				r = wt_column + index_column + untracked_column
-				return None if r == '   ' else r
+				return r
 
 		def branch(self):
 			for line in self._gitcmd('branch', '-l'):

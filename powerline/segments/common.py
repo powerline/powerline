@@ -24,7 +24,11 @@ def user():
 	Highlights the user with the ``superuser`` if the effective user ID is 0.
 	'''
 	user = os.environ.get('USER')
-	euid = os.geteuid()
+	try:
+		euid = os.geteuid()
+	except AttributeError:
+		# os.geteuid is not available on windows
+		euid = 1
 	return [{
 			'contents': user,
 			'highlight_group': 'user' if euid != 0 else ['superuser', 'user'],
@@ -68,7 +72,7 @@ def cwd(dir_shorten_len=None, dir_limit_depth=None):
 		cwd = re.sub('^' + re.escape(home), '~', cwd, 1)
 	cwd_split = cwd.split(os.sep)
 	cwd_split_len = len(cwd_split)
-	if cwd_split_len > dir_limit_depth + 1:
+	if dir_limit_depth and cwd_split_len > dir_limit_depth + 1:
 		del(cwd_split[0:-dir_limit_depth])
 		cwd_split.insert(0, u'⋯')
 	cwd = [i[0:dir_shorten_len] if dir_shorten_len and i else i for i in cwd_split[:-1]] + [cwd_split[-1]]
@@ -393,7 +397,7 @@ def cpu_load_percent(measure_interval=.5):
 
 
 @add_divider_highlight_group('background:divider')
-def network_load(interface='eth0', measure_interval=1, suffix='B/s', binary_prefix=False):
+def network_load(interface='eth0', measure_interval=1, suffix='B/s', si_prefix=False):
 	'''Return the network load.
 
 	Uses the ``psutil`` module if available for multi-platform compatibility,
@@ -406,8 +410,8 @@ def network_load(interface='eth0', measure_interval=1, suffix='B/s', binary_pref
 		interval used to measure the network load (in seconds)
 	:param str suffix:
 		string appended to each load string
-	:param bool binary_prefix:
-		use binary prefix, e.g. MiB instead of MB
+	:param bool si_prefix:
+		use SI prefix, e.g. MB instead of MiB
 	'''
 	import time
 	from powerline.lib import humanize_bytes
@@ -436,8 +440,8 @@ def network_load(interface='eth0', measure_interval=1, suffix='B/s', binary_pref
 	time.sleep(measure_interval)
 	b2 = get_bytes()
 	return u'⬇ {rx_diff} ⬆ {tx_diff}'.format(
-		rx_diff=humanize_bytes((b2[0] - b1[0]) / measure_interval, suffix, binary_prefix).rjust(8),
-		tx_diff=humanize_bytes((b2[1] - b1[1]) / measure_interval, suffix, binary_prefix).rjust(8),
+		rx_diff=humanize_bytes((b2[0] - b1[0]) / measure_interval, suffix, si_prefix).rjust(8),
+		tx_diff=humanize_bytes((b2[1] - b1[1]) / measure_interval, suffix, si_prefix).rjust(8),
 		)
 
 
