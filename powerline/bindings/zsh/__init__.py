@@ -1,11 +1,11 @@
 import zsh
-import json
 from powerline.shell import ShellPowerline
+from powerline.lib import parsedotval
 
 
 def get_var_config(var):
 	try:
-		return dict(((k, json.loads(v)) for k, v in zsh.getvalue(var).items()))
+		return [parsedotval(i) for i in zsh.getvalue(var).items()]
 	except:
 		return None
 
@@ -24,11 +24,24 @@ class Args(object):
 
 	@property
 	def config(self):
-		return get_var_config('POWERLINE_CONFIG')
+		try:
+			return get_var_config('POWERLINE_CONFIG')
+		except IndexError:
+			return None
 
 	@property
 	def theme_option(self):
-		return get_var_config('POWERLINE_THEME_CONFIG')
+		try:
+			return get_var_config('POWERLINE_THEME_CONFIG')
+		except IndexError:
+			return None
+
+	@property
+	def config_path(self):
+		try:
+			return zsh.getvalue('POWERLINE_CONFIG_PATH')
+		except IndexError:
+			return None
 
 
 class Prompt(object):

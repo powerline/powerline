@@ -4,6 +4,7 @@
 import argparse
 import sys
 import json
+from powerline.lib import parsedotval
 
 try:
 	from powerline.shell import ShellPowerline
@@ -12,30 +13,6 @@ except ImportError:
 	sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 	from powerline.shell import ShellPowerline  # NOQA
 
-def oval(s):
-	if '=' not in s:
-		raise TypeError('Option must look like option=json_value')
-	if s[0] == '_':
-		raise ValueError('Option names must not start with `_\'')
-	idx = s.index('=')
-	o = s[:idx]
-	val = json.loads(s[idx+1:])
-	return (o, val)
-
-def odotval(s):
-	o, val = oval(s)
-	keys = o.split('.')
-	if len(keys) > 1:
-		r = (keys[0], {})
-		rcur = r[1]
-		for key in keys[1:-1]:
-			rcur[key] = {}
-			rcur = rcur[key]
-		rcur[keys[-1]] = val
-		return r
-	else:
-		return (o, val)
-
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('ext', nargs=1)
 parser.add_argument('side', nargs='?', choices=('left', 'right'))
@@ -43,8 +20,8 @@ parser.add_argument('-r', '--renderer_module', metavar='MODULE', type=str)
 parser.add_argument('-w', '--width', type=int)
 parser.add_argument('--last_exit_code', metavar='INT', type=int)
 parser.add_argument('--last_pipe_status', metavar='LIST', default='', type=lambda s: [int(status) for status in s.split()])
-parser.add_argument('-c', '--config', metavar='KEY.KEY=VALUE', type=odotval, action='append')
-parser.add_argument('-t', '--theme_option', metavar='THEME.KEY.KEY=VALUE', type=odotval, action='append')
+parser.add_argument('-c', '--config', metavar='KEY.KEY=VALUE', type=parsedotval, action='append')
+parser.add_argument('-t', '--theme_option', metavar='THEME.KEY.KEY=VALUE', type=parsedotval, action='append')
 parser.add_argument('-p', '--config_path', metavar='PATH')
 
 if __name__ == '__main__':

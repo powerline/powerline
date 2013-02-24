@@ -420,6 +420,33 @@ Powerline script has a number of options controlling powerline behavior. Here
     performed by powerline script itself, but ``-p ~/.powerline`` will likely be 
     expanded by the shell to something like ``-p /home/user/.powerline``.
 
+Zsh/zpython overrides
+---------------------
+
+Here overrides are controlled by similarly to the powerline script, but values 
+are taken from zsh variables.
+
+``POWERLINE_CONFIG``
+    Overrides options from :file:`powerline/config.json`. Should be a zsh 
+    associative array with keys equal to ``KEY.NESTED_KEY`` and values being 
+    JSON strings. Pair ``KEY.KEY1 VALUE`` is equivalent to ``{"KEY": {"KEY1": 
+    VALUE}}``. All pairs are then recursively merged into one dictionary and 
+    this dictionary is recursively merged with the contents of the file.
+
+``POWERLINE_THEME_CONFIG``
+    Overrides options from :file:`powerline/themes/shell/*.json`. Should be 
+    a zsh associative array with keys equal to ``THEME_NAME.KEY.NESTED_KEY`` and 
+    values being JSON strings. Is processed like the above ``POWERLINE_CONFIG``, 
+    but only subdictionaries for ``THEME_NAME`` key are merged with theme 
+    configuration when theme with given name is requested.
+
+``POWERLINE_CONFIG_PATH``
+    Sets directory where configuration should be read from. If present, no 
+    default locations are searched for configuration. No expansions are 
+    performed by powerline script itself, but zsh usually performs them on its 
+    own if you set variable without quotes: ``POWERLINE_CONFIG_PATH=~/example``. 
+    Expansion depends on zsh configuration.
+
 Ipython overrides
 -----------------
 
