@@ -52,7 +52,7 @@
 			},
 			{
 				"name": "email_imap_alert",
-				"priority": 10,
+				"priority": 10
 			},
 			{
 				"name": "hostname"
