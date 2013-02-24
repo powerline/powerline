@@ -146,6 +146,11 @@
 				"mode": { "fg": "darkorange", "bg": "brightestorange", "attr": ["bold"] }
 			}
 		},
+		"^V": {
+			"groups": {
+				"mode": { "fg": "darkorange", "bg": "brightestorange", "attr": ["bold"] }
+			}
+		},
 		"R": {
 			"groups": {
 				"mode": { "fg": "white", "bg": "brightred", "attr": ["bold"] }
