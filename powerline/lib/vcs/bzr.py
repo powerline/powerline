@@ -1,6 +1,6 @@
 from __future__ import absolute_import, unicode_literals, division, print_function
 
-import sys
+import sys, os
 from io import StringIO
 
 from bzrlib import (branch, workingtree, status, library_state, trace, ui)
@@ -36,6 +36,8 @@ class Repository(object):
         '''
         buf = CoerceIO()
         w = workingtree.WorkingTree.open(self.directory)
+        if path and not os.path.exists(path):
+            return None
         status.show_tree_status(w, specific_files=[path] if path else None,
                                 to_file=buf, short=True)
         raw = buf.getvalue()
@@ -56,7 +58,6 @@ class Repository(object):
         return b.nick or None
 
 if __name__ == '__main__':
-    import os
     r = Repository(os.getcwdu())
     print ('Branch:', r.branch())
     print ('Repo Status:', r.status())
