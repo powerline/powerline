@@ -65,17 +65,17 @@
 		},
 		"v": {
 			"groups": {
-				"mode": { "fg": "beige", "bg": "orange", "attr": ["bold"] }
+				"mode": { "fg": "oldlace", "bg": "orange", "attr": ["bold"] }
 			}
 		},
 		"V": {
 			"groups": {
-				"mode": { "fg": "beige", "bg": "orange", "attr": ["bold"] }
+				"mode": { "fg": "oldlace", "bg": "orange", "attr": ["bold"] }
 			}
 		},
 		"R": {
 			"groups": {
-				"mode": { "fg": "beige", "bg": "red", "attr": ["bold"] }
+				"mode": { "fg": "oldlace", "bg": "red", "attr": ["bold"] }
 			}
 		}
 	}
