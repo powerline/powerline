@@ -276,7 +276,6 @@ weather_conditions_icons = {
 
 
 @memoize(1800)
-@add_divider_highlight_group('background:divider')
 def weather(unit='c', location_query=None, icons=None):
 	'''Return weather from Yahoo! Weather.
 
@@ -334,11 +333,13 @@ def weather(unit='c', location_query=None, icons=None):
 			{
 			'contents': icon + ' ',
 			'highlight_group': groups,
+			'divider_highlight_group': 'background:divider',
 			},
 			{
 			'contents': u'{0}°{1}'.format(condition['temp'], unit.upper()),
 			'highlight_group': ['weather_temp_cold' if int(condition['temp']) < 0 else 'weather_temp_hot', 'weather_temp', 'weather'],
 			'draw_divider': False,
+			'divider_highlight_group': 'background:divider',
 			},
 		]
 
