@@ -36,7 +36,6 @@
 			},
 			{
 				"name": "last_status",
-				"highlight_group": ["exit_fail"],
 				"module": "powerline.segments.shell"
 			}
 		]
