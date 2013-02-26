@@ -44,3 +44,9 @@ I get E858/E860 error in vim (Eval did not return a valid python object)
 
   and then use the stack trace to search for existing issues or to create a new 
   one.
+
+My vim statusline is not displayed completely and has too much spaces
+---------------------------------------------------------------------
+
+* Be sure you have ``ambiwidth`` option set to ``single``.
+* Alternative: remove fancy dividers and other fancy symbols from configuration.
