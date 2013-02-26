@@ -86,6 +86,12 @@ The colors look weird in iTerm2!
   contrast" slider in the color tab of  your OS X settings.
 * Please disable background transparency to resolve this issue.
 
+Statusline is getting wrapped to the next line in iTerm2
+--------------------------------------------------------
+
+* Turn off “Treat ambigious-width characters as double width” in `Preferences 
+  --> Text`.
+
 I receive a ``NameError`` when trying to use Powerline with MacVim!
 -------------------------------------------------------------------
 
