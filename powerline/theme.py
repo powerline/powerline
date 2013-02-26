@@ -6,9 +6,16 @@ from .segment import gen_segment_getter
 
 
 try:
-	unicode()  # NOQA
-except NameError:
+	from __builtin__ import unicode
+except ImportError:
 	unicode = str
+
+
+def u(s):
+	if type(s) is unicode:
+		return s
+	else:
+		return unicode(s, 'utf-8')
 
 
 def requires_segment_info(func):
@@ -82,7 +89,7 @@ class Theme(object):
 				else:
 					continue
 			for segment in parsed_segments:
-				segment['contents'] = segment['before'] + unicode(segment['contents'] if segment['contents'] is not None else '') + segment['after']
+				segment['contents'] = segment['before'] + u(segment['contents'] if segment['contents'] is not None else '') + segment['after']
 				# Align segment contents
 				if segment['width'] and segment['width'] != 'auto':
 					if segment['align'] == 'l':
