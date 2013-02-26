@@ -49,3 +49,4 @@ My vim statusline is not displayed completely and has too much spaces
 ---------------------------------------------------------------------
 
 * Be sure you have ``ambiwidth`` option set to ``single``.
+* Alternative: remove fancy dividers and other fancy symbols from configuration.

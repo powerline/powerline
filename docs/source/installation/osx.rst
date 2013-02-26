@@ -91,6 +91,7 @@ Statusline is getting wrapped to the next line in iTerm2
 
 * Turn off “Treat ambigious-width characters as double width” in `Preferences 
   --> Text`.
+* Alternative: remove fancy dividers and other fancy symbols from configuration.
 
 I receive a ``NameError`` when trying to use Powerline with MacVim!
 -------------------------------------------------------------------
