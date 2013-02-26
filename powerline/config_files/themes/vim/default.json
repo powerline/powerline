@@ -100,7 +100,6 @@
 				"priority": 30,
 				"before": ":",
 				"width": 3,
-				"highlight_group": ["col_current"],
 				"align": "l"
 			}
 		]
