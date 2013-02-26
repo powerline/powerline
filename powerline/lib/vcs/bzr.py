@@ -34,6 +34,12 @@ class Repository(object):
         With file argument: returns status of this file: The status codes are
         those returned by bzr status -S
         '''
+        try:
+            return self._status(path)
+        except:
+            pass
+
+    def _status(self, path):
         buf = CoerceIO()
         w = workingtree.WorkingTree.open(self.directory)
         if path and not os.path.exists(path):
@@ -54,8 +60,11 @@ class Repository(object):
         return dirtied + untracked
 
     def branch(self):
-        b = branch.Branch.open(self.directory)
-        return b.nick or None
+        try:
+            b = branch.Branch.open(self.directory)
+            return b.nick or None
+        except:
+            pass
 
 if __name__ == '__main__':
     r = Repository(os.getcwdu())
