@@ -32,7 +32,7 @@ class VimRenderer(Renderer):
 		used in non-current windows.
 		'''
 		if current:
-			mode = vim_mode()
+			mode = vim_mode(1)
 			mode = mode_translations.get(mode, mode)
 		else:
 			mode = 'nc'
