@@ -30,12 +30,21 @@ class VimPowerline(Powerline):
 	def add_local_theme(self, key, config):
 		'''Add local themes at runtime (during vim session).
 
-		Accepts key as first argument (same as keys in config.json:
-		ext/*/local_themes) and configuration dictionary as the second (has
-		format identical to themes/*/*.json)
+		:param str key:
+			Matcher name (in format ``{matcher_module}.{module_attribute}`` or 
+			``{module_attribute}`` if ``{matcher_module}`` is 
+			``powerline.matchers.vim``). Function pointed by 
+			``{module_attribute}`` should be hashable and accept a dictionary 
+			with information about current buffer and return boolean value 
+			indicating whether current window matched conditions. See also 
+			:ref:`local_themes key description <config-ext-local_themes>`.
 
-		Returns True if theme was added successfully and False if theme with
-		the same matcher already exists
+		:param dict config:
+			:ref:`Theme <config-themes>` dictionary.
+
+		:return:
+			``True`` if theme was added successfully and ``False`` if theme with 
+			the same matcher already exists.
 		'''
 		key = self.get_matcher(key)
 		try:
