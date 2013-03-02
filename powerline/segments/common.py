@@ -3,7 +3,12 @@
 import os
 import sys
 
+from datetime import datetime
+import socket
+from multiprocessing import cpu_count
+
 from powerline.lib import memoize, urllib_read, urllib_urlencode, add_divider_highlight_group
+from powerline.lib.vcs import guess
 
 
 def hostname(only_if_ssh=False):
@@ -12,7 +17,6 @@ def hostname(only_if_ssh=False):
 	:param bool only_if_ssh:
 		only return the hostname if currently in an SSH session
 	'''
-	import socket
 	if only_if_ssh and not os.environ.get('SSH_CLIENT'):
 		return None
 	return socket.gethostname()
@@ -37,7 +41,6 @@ def user():
 
 def branch():
 	'''Return the current VCS branch.'''
-	from powerline.lib.vcs import guess
 	repo = guess(path=os.path.abspath(os.getcwd()))
 	if repo:
 		return repo.branch()
@@ -96,7 +99,6 @@ def date(format='%Y-%m-%d', istime=False):
 	:param str format:
 		strftime-style date format string
 	'''
-	from datetime import datetime
 	return [{
 		'contents': datetime.now().strftime(format),
 		'highlight_group': (['time'] if istime else []) + ['date'],
@@ -106,8 +108,6 @@ def date(format='%Y-%m-%d', istime=False):
 
 def fuzzy_time():
 	'''Display the current time as fuzzy time, e.g. "quarter past six".'''
-	from datetime import datetime
-
 	hour_str = ['twelve', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven']
 	minute_str = {
 		5: 'five past',
@@ -188,7 +188,6 @@ def uptime(format='{days:02d}d {hours:02d}h {minutes:02d}m'):
 	'''
 	try:
 		import psutil
-		from datetime import datetime
 		seconds = int((datetime.now() - datetime.fromtimestamp(psutil.BOOT_TIME)).total_seconds())
 	except ImportError:
 		try:
@@ -361,11 +360,10 @@ def system_load(format='{avg:.1f}', threshold_good=1, threshold_bad=2):
 	:param float threshold_bad:
 		threshold for "bad load" highlighting
 	'''
-	import multiprocessing
-	cpu_count = multiprocessing.cpu_count()
+	cpu_num = cpu_count()
 	ret = []
 	for avg in os.getloadavg():
-		normalized = avg / cpu_count
+		normalized = avg / cpu_num
 		if normalized < threshold_good:
 			hl = 'system_load_good'
 		elif normalized < threshold_bad:

@@ -29,7 +29,7 @@ class TestShell(TestCase):
 class TestCommon(TestCase):
 	def test_hostname(self):
 		with replace_env('SSH_CLIENT', '192.168.0.12 40921 22'):
-			with replace_module('socket', gethostname=lambda: 'abc'):
+			with replace_module_module(common, 'socket', gethostname=lambda: 'abc'):
 				self.assertEqual(common.hostname(), 'abc')
 				self.assertEqual(common.hostname(only_if_ssh=True), 'abc')
 				os.environ.pop('SSH_CLIENT')
@@ -46,10 +46,9 @@ class TestCommon(TestCase):
 			self.assertEqual(common.user(), [{'contents': 'def', 'highlight_group': ['superuser', 'user']}])
 
 	def test_branch(self):
-		vcslib = new_module('powerline.lib.vcs', guess=lambda path: Args(branch=lambda: os.path.basename(path)))
-		with replace_module('powerline.lib.vcs', vcslib):
+		with replace_module_attr(common, 'guess', lambda path: Args(branch=lambda: os.path.basename(path))):
 			self.assertEqual(common.branch(), 'tests')
-			vcslib.guess = lambda path: None
+		with replace_module_attr(common, 'guess', lambda path: None):
 			self.assertEqual(common.branch(), None)
 
 	def test_cwd(self):
@@ -104,13 +103,13 @@ class TestCommon(TestCase):
 				common.cwd(dir_limit_depth=2, dir_shorten_len=2),
 
 	def test_date(self):
-		with replace_module('datetime', datetime=Args(now=lambda: Args(strftime=lambda fmt: fmt))):
+		with replace_module_attr(common, 'datetime', Args(now=lambda: Args(strftime=lambda fmt: fmt))):
 			self.assertEqual(common.date(), [{'contents': '%Y-%m-%d', 'highlight_group': ['date'], 'divider_highlight_group': None}])
 			self.assertEqual(common.date(format='%H:%M', istime=True), [{'contents': '%H:%M', 'highlight_group': ['time', 'date'], 'divider_highlight_group': 'time:divider'}])
 
 	def test_fuzzy_time(self):
 		time = Args(hour=0, minute=45)
-		with replace_module('datetime', datetime=Args(now=lambda: time)):
+		with replace_module_attr(common, 'datetime', Args(now=lambda: time)):
 			self.assertEqual(common.fuzzy_time(), 'quarter to one')
 			time.hour = 23
 			time.minute = 59
@@ -134,7 +133,7 @@ class TestCommon(TestCase):
 
 	def test_system_load(self):
 		with replace_module_module(common, 'os', getloadavg=lambda: (7.5, 3.5, 1.5)):
-			with replace_module('multiprocessing', cpu_count=lambda: 2):
+			with replace_module_attr(common, 'cpu_count', lambda: 2):
 				self.assertEqual(common.system_load(),
 						[{'contents': '7.5 ', 'highlight_group': ['system_load_ugly', 'system_load'], 'draw_divider': True, 'divider_highlight_group': 'background:divider'},
 						{'contents': '3.5 ', 'highlight_group': ['system_load_bad', 'system_load'], 'draw_divider': False, 'divider_highlight_group': 'background:divider'},
@@ -311,14 +310,14 @@ old_cwd = None
 
 def setUpModule():
 	global old_cwd
+	sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'path')))
 	old_cwd = os.getcwd()
 	os.chdir(os.path.dirname(__file__))
-	sys.modules['vim'] = vim_module._get_module()
 	from powerline.segments import vim
 	globals()['vim'] = vim
 
 
 def tearDownModule():
 	global old_cwd
-	sys.modules.pop('vim')
 	os.chdir(old_cwd)
+	sys.path.pop(0)
