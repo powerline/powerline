@@ -8,6 +8,8 @@ import tests.vim as vim_module
 import sys
 import os
 import json
+from .lib import Args, urllib_read
+import tests.lib as lib
 
 
 VBLOCK = chr(ord('V') - 0x40)
@@ -55,20 +57,32 @@ class TestConfig(TestCase):
 		finally:
 			vim_module._g.pop('powerline_config_path')
 
+	def test_tmux(self):
+		import powerline.segments.common
+		from imp import reload
+		reload(powerline.segments.common)
+		old_urllib_read = powerline.segments.common.urllib_read 
+		powerline.segments.common.urllib_read = urllib_read
+		from powerline.shell import ShellPowerline
+		try:
+			ShellPowerline(Args(ext=['tmux'])).renderer.render()
+		finally:
+			powerline.segments.common.urllib_read = old_urllib_read
+
 
 old_cwd = None
 
 
 def setUpModule():
 	global old_cwd
+	sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'path')))
 	old_cwd = os.getcwd()
-	sys.modules['vim'] = vim_module._get_module()
 	from powerline.segments import vim
 	globals()['vim'] = vim
 
 
 def tearDownModule():
 	global old_cwd
-	sys.modules.pop('vim')
 	os.chdir(old_cwd)
 	old_cwd = None
+	sys.path.pop(0)

@@ -234,22 +234,22 @@ class _Buffer(object):
 			_buf_scopes.pop(bufnr)
 
 
-_module = None
+_dict = None
 
 
-def _get_module():
-	global _module
+def _init():
+	global _dict
 
-	if _module:
-		return _module
+	if _dict:
+		return _dict
 
 	import imp
-	_module = imp.new_module('vim')
+	_dict = {}
 	for varname, value in globals().items():
 		if varname[0] != '_':
-			setattr(_module, varname, value)
+			_dict[varname] = value
 	_new()
-	return _module
+	return _dict
 
 
 def _get_segment_info():
