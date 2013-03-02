@@ -3,6 +3,12 @@
 from powerline.theme import Theme
 
 
+try:
+	NBSP = unicode(' ', 'utf-8')
+except NameError:
+	NBSP = ' '
+
+
 class Renderer(object):
 	def __init__(self, theme_config, local_themes, theme_kwargs, colorscheme, **options):
 		self.__dict__.update(options)
@@ -58,7 +64,7 @@ class Renderer(object):
 
 		if not width:
 			# No width specified, so we don't need to crop or pad anything
-			return self._returned_value(u''.join([segment['_rendered_hl'] for segment in segments]) + self.hlstyle(), segments, output_raw)
+			return self._returned_value(''.join([segment['_rendered_hl'] for segment in segments]) + self.hlstyle(), segments, output_raw)
 
 		# Create an ordered list of segments that can be dropped
 		segments_priority = [segment for segment in sorted(segments, key=lambda segment: segment['priority'], reverse=True) if segment['priority'] > 0]
@@ -81,7 +87,7 @@ class Renderer(object):
 					segment['_space_right'] += space_side
 			segments_spacers[0]['_space_right'] += distribute_len_remainder
 
-		rendered_highlighted = u''.join([segment['_rendered_hl'] for segment in self._render_segments(theme, segments)]) + self.hlstyle()
+		rendered_highlighted = ''.join([segment['_rendered_hl'] for segment in self._render_segments(theme, segments)]) + self.hlstyle()
 
 		return self._returned_value(rendered_highlighted, segments, output_raw)
 
@@ -99,8 +105,8 @@ class Renderer(object):
 		segments_len = len(segments)
 
 		for index, segment in enumerate(segments):
-			segment['_rendered_raw'] = u''
-			segment['_rendered_hl'] = u''
+			segment['_rendered_raw'] = ''
+			segment['_rendered_hl'] = ''
 
 			prev_segment = segments[index - 1] if index > 0 else theme.EMPTY_SEGMENT
 			next_segment = segments[index + 1] if index < segments_len - 1 else theme.EMPTY_SEGMENT
@@ -127,8 +133,8 @@ class Renderer(object):
 					contents_raw = (segment['_space_left'] * ' ') + contents_raw + (segment['_space_right'] * ' ') + outer_padding
 
 			# Replace spaces with no-break spaces
-			contents_raw = contents_raw.replace(' ', u'\u00a0')
-			divider_raw = divider_raw.replace(' ', u'\u00a0')
+			contents_raw = contents_raw.replace(' ', NBSP)
+			divider_raw = divider_raw.replace(' ', NBSP)
 
 			# Apply highlighting to padded dividers and contents
 			if render_highlighted:
@@ -182,4 +188,4 @@ class Renderer(object):
 		raise NotImplementedError
 
 	def hl(self, contents, fg=None, bg=None, attr=None):
-		return self.hlstyle(fg, bg, attr) + (contents or u'')
+		return self.hlstyle(fg, bg, attr) + (contents or '')
