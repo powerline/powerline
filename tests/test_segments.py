@@ -5,18 +5,7 @@ from powerline.segments import shell, common
 import tests.vim as vim_module
 import sys
 import os
-import imp
-
-
-class Args(object):
-	theme_option = None
-	config = None
-	config_path = None
-	ext = ['shell']
-	renderer_module = None
-
-	def __init__(self, **kwargs):
-		self.__dict__.update(kwargs)
+from .lib import Args, urllib_read, replace_module, replace_module_attr, new_module, replace_module_module, replace_env
 
 
 vim = None
@@ -39,51 +28,34 @@ class TestShell(TestCase):
 
 class TestCommon(TestCase):
 	def test_hostname(self):
-		os.environ['SSH_CLIENT'] = '192.168.0.12 40921 22'
-		socket = imp.new_module('socket')
-		socket.gethostname = lambda: 'abc'
-		sys.modules['socket'] = socket
-		try:
-			self.assertEqual(common.hostname(), 'abc')
-			self.assertEqual(common.hostname(only_if_ssh=True), 'abc')
-			os.environ.pop('SSH_CLIENT')
-			self.assertEqual(common.hostname(), 'abc')
-			self.assertEqual(common.hostname(only_if_ssh=True), None)
-		finally:
-			sys.modules.pop('socket')
+		with replace_env('SSH_CLIENT', '192.168.0.12 40921 22'):
+			with replace_module('socket', gethostname=lambda: 'abc'):
+				self.assertEqual(common.hostname(), 'abc')
+				self.assertEqual(common.hostname(only_if_ssh=True), 'abc')
+				os.environ.pop('SSH_CLIENT')
+				self.assertEqual(common.hostname(), 'abc')
+				self.assertEqual(common.hostname(only_if_ssh=True), None)
 
 	def test_user(self):
-		new_os = imp.new_module('os')
-		new_os.environ = {'USER': 'def'}
-		common.os = new_os
-		try:
+		new_os = new_module('os', environ={'USER': 'def'})
+		with replace_module_attr(common, 'os', new_os):
 			self.assertEqual(common.user(), [{'contents': 'def', 'highlight_group': 'user'}])
 			new_os.geteuid = lambda: 1
 			self.assertEqual(common.user(), [{'contents': 'def', 'highlight_group': 'user'}])
 			new_os.geteuid = lambda: 0
 			self.assertEqual(common.user(), [{'contents': 'def', 'highlight_group': ['superuser', 'user']}])
-		finally:
-			common.os = os
 
 	def test_branch(self):
-		vcslib = imp.new_module('powerline.lib.vcs')
-		vcslib.guess = lambda path: Args(branch=lambda: os.path.basename(path))
-		sys.modules['powerline.lib.vcs'] = vcslib
-		try:
+		vcslib = new_module('powerline.lib.vcs', guess=lambda path: Args(branch=lambda: os.path.basename(path)))
+		with replace_module('powerline.lib.vcs', vcslib):
 			self.assertEqual(common.branch(), 'tests')
 			vcslib.guess = lambda path: None
 			self.assertEqual(common.branch(), None)
-		finally:
-			sys.modules.pop('powerline.lib.vcs')
 
 	def test_cwd(self):
-		new_os = imp.new_module('os')
-		new_os.path = os.path
-		new_os.environ = {}
-		new_os.sep = '/'
+		new_os = new_module('os', path=os.path, environ={}, sep='/')
 		new_os.getcwd = lambda: '/abc/def/ghi/foo/bar'
-		common.os = new_os
-		try:
+		with replace_module_attr(common, 'os', new_os):
 			self.assertEqual(common.cwd(),
 					[{'contents': '/', 'divider_highlight_group': 'cwd:divider'},
 					{'contents': 'abc', 'divider_highlight_group': 'cwd:divider'},
@@ -130,25 +102,15 @@ class TestCommon(TestCase):
 			new_os.getcwdu = lambda: raises(ValueError())
 			with self.assertRaises(ValueError):
 				common.cwd(dir_limit_depth=2, dir_shorten_len=2),
-		finally:
-			common.os = os
 
 	def test_date(self):
-		datetime = imp.new_module('datetime')
-		datetime.datetime = Args(now=lambda: Args(strftime=lambda fmt: fmt))
-		sys.modules['datetime'] = datetime
-		try:
+		with replace_module('datetime', datetime=Args(now=lambda: Args(strftime=lambda fmt: fmt))):
 			self.assertEqual(common.date(), [{'contents': '%Y-%m-%d', 'highlight_group': ['date'], 'divider_highlight_group': None}])
 			self.assertEqual(common.date(format='%H:%M', istime=True), [{'contents': '%H:%M', 'highlight_group': ['time', 'date'], 'divider_highlight_group': 'time:divider'}])
-		finally:
-			sys.modules.pop('datetime')
 
 	def test_fuzzy_time(self):
-		datetime = imp.new_module('datetime')
 		time = Args(hour=0, minute=45)
-		datetime.datetime = Args(now=lambda: time)
-		sys.modules['datetime'] = datetime
-		try:
+		with replace_module('datetime', datetime=Args(now=lambda: time)):
 			self.assertEqual(common.fuzzy_time(), 'quarter to one')
 			time.hour = 23
 			time.minute = 59
@@ -157,16 +119,10 @@ class TestCommon(TestCase):
 			self.assertEqual(common.fuzzy_time(), 'twenty-five to twelve')
 			time.minute = 60
 			self.assertEqual(common.fuzzy_time(), 'twelve o\'clock')
-		finally:
-			sys.modules.pop('datetime')
 
 	def test_external_ip(self):
-		old_urllib_read = common.urllib_read
-		common.urllib_read = lambda url: '127.0.0.1'
-		try:
+		with replace_module_attr(common, 'urllib_read', urllib_read):
 			self.assertEqual(common.external_ip(), [{'contents': '127.0.0.1', 'divider_highlight_group': 'background:divider'}])
-		finally:
-			common.urllib_read = old_urllib_read
 
 	def test_uptime(self):
 		# TODO
@@ -177,43 +133,30 @@ class TestCommon(TestCase):
 		pass
 
 	def test_system_load(self):
-		new_os = imp.new_module('os')
-		new_os.getloadavg = lambda: (7.5, 3.5, 1.5)
-		multiprocessing = imp.new_module('multiprocessing')
-		multiprocessing.cpu_count = lambda: 2
-		common.os = new_os
-		sys.modules['multiprocessing'] = multiprocessing
-		try:
-			self.assertEqual(common.system_load(),
-					[{'contents': '7.5 ', 'highlight_group': ['system_load_ugly', 'system_load'], 'draw_divider': True, 'divider_highlight_group': 'background:divider'},
-					{'contents': '3.5 ', 'highlight_group': ['system_load_bad', 'system_load'], 'draw_divider': False, 'divider_highlight_group': 'background:divider'},
-					{'contents': '1.5', 'highlight_group': ['system_load_good', 'system_load'], 'draw_divider': False, 'divider_highlight_group': 'background:divider'}])
-			self.assertEqual(common.system_load(format='{avg:.0f}', threshold_good=0, threshold_bad=1),
-					[{'contents': '8 ', 'highlight_group': ['system_load_ugly', 'system_load'], 'draw_divider': True, 'divider_highlight_group': 'background:divider'},
-					{'contents': '4 ', 'highlight_group': ['system_load_ugly', 'system_load'], 'draw_divider': False, 'divider_highlight_group': 'background:divider'},
-					{'contents': '2', 'highlight_group': ['system_load_bad', 'system_load'], 'draw_divider': False, 'divider_highlight_group': 'background:divider'}])
-		finally:
-			common.os = os
-			sys.modules.pop('multiprocessing')
+		with replace_module_module(common, 'os', getloadavg=lambda: (7.5, 3.5, 1.5)):
+			with replace_module('multiprocessing', cpu_count=lambda: 2):
+				self.assertEqual(common.system_load(),
+						[{'contents': '7.5 ', 'highlight_group': ['system_load_ugly', 'system_load'], 'draw_divider': True, 'divider_highlight_group': 'background:divider'},
+						{'contents': '3.5 ', 'highlight_group': ['system_load_bad', 'system_load'], 'draw_divider': False, 'divider_highlight_group': 'background:divider'},
+						{'contents': '1.5', 'highlight_group': ['system_load_good', 'system_load'], 'draw_divider': False, 'divider_highlight_group': 'background:divider'}])
+				self.assertEqual(common.system_load(format='{avg:.0f}', threshold_good=0, threshold_bad=1),
+						[{'contents': '8 ', 'highlight_group': ['system_load_ugly', 'system_load'], 'draw_divider': True, 'divider_highlight_group': 'background:divider'},
+						{'contents': '4 ', 'highlight_group': ['system_load_ugly', 'system_load'], 'draw_divider': False, 'divider_highlight_group': 'background:divider'},
+						{'contents': '2', 'highlight_group': ['system_load_bad', 'system_load'], 'draw_divider': False, 'divider_highlight_group': 'background:divider'}])
 
 	def test_cpu_load_percent(self):
-		psutil = imp.new_module('psutil')
-		psutil.cpu_percent = lambda **kwargs: 52.3
-		sys.modules['psutil'] = psutil
-		try:
+		with replace_module('psutil', cpu_percent=lambda **kwargs: 52.3):
 			self.assertEqual(common.cpu_load_percent(), '52%')
-		finally:
-			sys.modules.pop('psutil')
 
 	def test_network_load(self):
 		# TODO
 		pass
 
 	def test_virtualenv(self):
-		os.environ['VIRTUAL_ENV'] = '/abc/def/ghi'
-		self.assertEqual(common.virtualenv(), 'ghi')
-		os.environ.pop('VIRTUAL_ENV')
-		self.assertEqual(common.virtualenv(), None)
+		with replace_env('VIRTUAL_ENV', '/abc/def/ghi'):
+			self.assertEqual(common.virtualenv(), 'ghi')
+			os.environ.pop('VIRTUAL_ENV')
+			self.assertEqual(common.virtualenv(), None)
 
 	def test_email_imap_alert(self):
 		# TODO
@@ -274,15 +217,15 @@ class TestVim(TestCase):
 	def test_file_directory(self):
 		segment_info = vim_module._get_segment_info()
 		self.assertEqual(vim.file_directory(segment_info=segment_info), None)
-		os.environ['HOME'] = '/home/foo'
-		vim_module._edit('/tmp/abc')
-		segment_info = vim_module._get_segment_info()
-		try:
-			self.assertEqual(vim.file_directory(segment_info=segment_info), '/tmp/')
-			os.environ['HOME'] = '/tmp'
-			self.assertEqual(vim.file_directory(segment_info=segment_info), '~/')
-		finally:
-			vim_module._bw(segment_info['bufnr'])
+		with replace_env('HOME', '/home/foo'):
+			vim_module._edit('/tmp/abc')
+			segment_info = vim_module._get_segment_info()
+			try:
+				self.assertEqual(vim.file_directory(segment_info=segment_info), '/tmp/')
+				os.environ['HOME'] = '/tmp'
+				self.assertEqual(vim.file_directory(segment_info=segment_info), '~/')
+			finally:
+				vim_module._bw(segment_info['bufnr'])
 
 	def test_file_name(self):
 		segment_info = vim_module._get_segment_info()
