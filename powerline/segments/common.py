@@ -157,7 +157,10 @@ def fuzzy_time():
 
 
 @memoize(600)
-@add_divider_highlight_group('background:divider')
+def _external_ip(query_url='http://ipv4.icanhazip.com/'):
+	return urllib_read(query_url).strip()
+
+
 def external_ip(query_url='http://ipv4.icanhazip.com/'):
 	'''Return external IP address.
 
@@ -170,7 +173,7 @@ def external_ip(query_url='http://ipv4.icanhazip.com/'):
 	:param str query_url:
 		URI to query for IP address, should return only the IP address as a text string
 	'''
-	return urllib_read(query_url).strip()
+	return [{'contents': _external_ip(query_url=query_url), 'divider_highlight_group': 'background:divider'}]
 
 
 @add_divider_highlight_group('background:divider')
@@ -297,7 +300,7 @@ def weather(unit='c', location_query=None, icons=None):
 
 	if not location_query:
 		try:
-			location = json.loads(urllib_read('http://freegeoip.net/json/' + external_ip()))
+			location = json.loads(urllib_read('http://freegeoip.net/json/' + _external_ip()))
 			location_query = ','.join([location['city'], location['region_name'], location['country_name']])
 		except (TypeError, ValueError):
 			return None
