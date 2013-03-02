@@ -346,11 +346,6 @@ def _b(bufnr):
 	windows[_window - 1].buffer = buffers[bufnr]
 
 
-def _set_filetype(ft):
-	_buf_options[_buffer()]['filetype'] = ft
-	_launch_event('FileType')
-
-
 def _set_cursor(line, col):
 	windows[_window - 1].cursor = (line, col)
 	if _mode == 'n':
@@ -365,3 +360,86 @@ def _get_buffer():
 
 def _set_bufoption(option, value, bufnr=None):
 	_buf_options[bufnr or _buffer()][option] = value
+	if option == 'filetype':
+		_launch_event('FileType')
+
+
+class _WithNewBuffer(object):
+	def __init__(self, func, *args, **kwargs):
+		self.call = lambda: func(*args, **kwargs)
+
+	def __enter__(self):
+		self.call()
+		self.bufnr = _buffer()
+		return _get_segment_info()
+
+	def __exit__(self, *args):
+		_bw(self.bufnr)
+
+
+def _set_dict(d, new, setfunc=None):
+	if not setfunc:
+		def setfunc(k, v):
+			d[k] = v
+
+	old = {}
+	na = []
+	for k, v in new.items():
+		try:
+			old[k] = d[k]
+		except KeyError:
+			na.append(k)
+		setfunc(k, v)
+	return old, na
+
+
+class _WithBufOption(object):
+	def __init__(self, **new):
+		self.new = new
+
+	def __enter__(self):
+		self.bufnr = _buffer()
+		self.old = _set_dict(_buf_options[self.bufnr], self.new, _set_bufoption)[0]
+
+	def __exit__(self, *args):
+		_buf_options[self.bufnr].update(self.old)
+
+
+class _WithMode(object):
+	def __init__(self, new):
+		self.new = new
+
+	def __enter__(self):
+		self.old = _mode
+		_start_mode(self.new)
+		return _get_segment_info()
+
+	def __exit__(self, *args):
+		_start_mode(self.old)
+
+
+class _WithDict(object):
+	def __init__(self, d, **new):
+		self.new = new
+		self.d = d
+
+	def __enter__(self):
+		self.old, self.na = _set_dict(self.d, self.new)
+
+	def __exit__(self, *args):
+		self.d.update(self.old)
+		for k in self.na:
+			self.d.pop(k)
+
+
+def _with(key, *args, **kwargs):
+	if key == 'buffer':
+		return _WithNewBuffer(_edit, *args, **kwargs)
+	elif key == 'mode':
+		return _WithMode(*args, **kwargs)
+	elif key == 'bufoptions':
+		return _WithBufOption(**kwargs)
+	elif key == 'options':
+		return _WithDict(_options, **kwargs)
+	elif key == 'globals':
+		return _WithDict(_g, **kwargs)

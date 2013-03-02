@@ -172,16 +172,11 @@ class TestVim(TestCase):
 		self.assertEqual(vim.mode(segment_info=segment_info), 'NORMAL')
 		self.assertEqual(vim.mode(segment_info=segment_info, override={'i': 'INS'}), 'NORMAL')
 		self.assertEqual(vim.mode(segment_info=segment_info, override={'n': 'NORM'}), 'NORM')
-		try:
-			vim_module._start_mode('i')
-			segment_info = vim_module._get_segment_info()
+		with vim_module._with('mode', 'i') as segment_info:
 			self.assertEqual(vim.mode(segment_info=segment_info), 'INSERT')
-			vim_module._start_mode(chr(ord('V') - 0x40))
-			segment_info = vim_module._get_segment_info()
+		with vim_module._with('mode', chr(ord('V') - 0x40)) as segment_info:
 			self.assertEqual(vim.mode(segment_info=segment_info), 'V·BLCK')
 			self.assertEqual(vim.mode(segment_info=segment_info, override={'^V': 'VBLK'}), 'VBLK')
-		finally:
-			vim_module._start_mode('n')
 
 	def test_modified_indicator(self):
 		segment_info = vim_module._get_segment_info()
@@ -191,40 +186,30 @@ class TestVim(TestCase):
 			self.assertEqual(vim.modified_indicator(segment_info=segment_info), '+')
 			self.assertEqual(vim.modified_indicator(segment_info=segment_info, text='-'), '-')
 		finally:
-			vim_module._undo()
+			vim_module._bw(segment_info['bufnr'])
 
 	def test_paste_indicator(self):
 		segment_info = vim_module._get_segment_info()
 		self.assertEqual(vim.paste_indicator(segment_info=segment_info), None)
-		vim_module._options['paste'] = 1
-		try:
+		with vim_module._with('options', paste=1):
 			self.assertEqual(vim.paste_indicator(segment_info=segment_info), 'PASTE')
 			self.assertEqual(vim.paste_indicator(segment_info=segment_info, text='P'), 'P')
-		finally:
-			vim_module._options['paste'] = 0
 
 	def test_readonly_indicator(self):
 		segment_info = vim_module._get_segment_info()
 		self.assertEqual(vim.readonly_indicator(segment_info=segment_info), None)
-		vim_module._buf_options[vim_module._buffer()]['readonly'] = 1
-		try:
+		with vim_module._with('bufoptions', readonly=1):
 			self.assertEqual(vim.readonly_indicator(segment_info=segment_info), '')
 			self.assertEqual(vim.readonly_indicator(segment_info=segment_info, text='L'), 'L')
-		finally:
-			vim_module._buf_options[vim_module._buffer()]['readonly'] = 0
 
 	def test_file_directory(self):
 		segment_info = vim_module._get_segment_info()
 		self.assertEqual(vim.file_directory(segment_info=segment_info), None)
 		with replace_env('HOME', '/home/foo'):
-			vim_module._edit('/tmp/abc')
-			segment_info = vim_module._get_segment_info()
-			try:
+			with vim_module._with('buffer', '/tmp/abc') as segment_info:
 				self.assertEqual(vim.file_directory(segment_info=segment_info), '/tmp/')
 				os.environ['HOME'] = '/tmp'
 				self.assertEqual(vim.file_directory(segment_info=segment_info), '~/')
-			finally:
-				vim_module._bw(segment_info['bufnr'])
 
 	def test_file_name(self):
 		segment_info = vim_module._get_segment_info()
@@ -233,28 +218,16 @@ class TestVim(TestCase):
 				[{'contents': '[No file]', 'highlight_group': ['file_name_no_file', 'file_name']}])
 		self.assertEqual(vim.file_name(segment_info=segment_info, display_no_file=True, no_file_text='X'),
 				[{'contents': 'X', 'highlight_group': ['file_name_no_file', 'file_name']}])
-		vim_module._edit('/tmp/abc')
-		segment_info = vim_module._get_segment_info()
-		try:
+		with vim_module._with('buffer', '/tmp/abc') as segment_info:
 			self.assertEqual(vim.file_name(segment_info=segment_info), 'abc')
-		finally:
-			vim_module._bw(segment_info['bufnr'])
-		vim_module._edit('/tmp/’’')
-		segment_info = vim_module._get_segment_info()
-		try:
+		with vim_module._with('buffer', '/tmp/’’') as segment_info:
 			self.assertEqual(vim.file_name(segment_info=segment_info), '’’')
-		finally:
-			vim_module._bw(segment_info['bufnr'])
 
 	def test_file_size(self):
 		segment_info = vim_module._get_segment_info()
 		self.assertEqual(vim.file_size(segment_info=segment_info), None)
-		vim_module._edit(os.path.join(os.path.dirname(__file__), 'empty'))
-		segment_info = vim_module._get_segment_info()
-		try:
+		with vim_module._with('buffer', os.path.join(os.path.dirname(__file__), 'empty')) as segment_info:
 			self.assertEqual(vim.file_size(segment_info=segment_info), '0 B')
-		finally:
-			vim_module._bw(segment_info['bufnr'])
 
 	def test_file_opts(self):
 		segment_info = vim_module._get_segment_info()
@@ -263,12 +236,9 @@ class TestVim(TestCase):
 		self.assertEqual(vim.file_encoding(segment_info=segment_info),
 				[{'divider_highlight_group': 'background:divider', 'contents': 'utf-8'}])
 		self.assertEqual(vim.file_type(segment_info=segment_info), None)
-		vim_module._set_filetype('python')
-		try:
+		with vim_module._with('bufoptions', filetype='python'):
 			self.assertEqual(vim.file_type(segment_info=segment_info),
 					[{'divider_highlight_group': 'background:divider', 'contents': 'python'}])
-		finally:
-			vim_module._set_filetype('')
 
 	def test_line_percent(self):
 		segment_info = vim_module._get_segment_info()

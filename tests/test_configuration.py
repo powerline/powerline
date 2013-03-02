@@ -8,8 +8,7 @@ import tests.vim as vim_module
 import sys
 import os
 import json
-from .lib import Args, urllib_read
-import tests.lib as lib
+from .lib import Args, urllib_read, replace_module_attr
 
 
 VBLOCK = chr(ord('V') - 0x40)
@@ -20,9 +19,7 @@ class TestConfig(TestCase):
 	def test_vim(self):
 		from powerline.vim import VimPowerline
 		cfg_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'powerline', 'config_files')
-		vim_module._g['powerline_config_path'] = cfg_path
-		buffers = ((lambda: vim_module._set_bufoption('buftype', 'help'), lambda: vim_module._set_bufoption('buftype', '')),
-			 (lambda: vim_module._edit('[Command Line]'), lambda: vim_module._bw()))
+		buffers = ((('bufoptions',), {'buftype': 'help'}), (('buffer', '[Command Line]'), {}))
 		with open(os.path.join(cfg_path, 'config.json'), 'r') as f:
 			self.assertEqual(len(buffers), len(json.load(f)['ext']['vim']['local_themes']))
 		outputs = {}
@@ -36,38 +33,30 @@ class TestConfig(TestCase):
 				self.fail('Duplicate in set #{0} for mode {1!r} (previously defined in set #{2} for mode {3!r})'.format(i, mode, *outputs[out]))
 			outputs[out] = (i, mode)
 
-		try:
-			exclude = set(('no', 'v', 'V', VBLOCK, 's', 'S', SBLOCK, 'R', 'Rv', 'c', 'cv', 'ce', 'r', 'rm', 'r?', '!'))
-			try:
-				for mode in ['n', 'nc', 'no', 'v', 'V', VBLOCK, 's', 'S', SBLOCK, 'i', 'R', 'Rv', 'c', 'cv', 'ce', 'r', 'rm', 'r?', '!']:
-					if mode != 'nc':
-						vim_module._start_mode(mode)
-					check_output(1, 0)
-					for setup, teardown in buffers:
-						i += 1
-						if mode in exclude:
-							continue
-						setup()
-						try:
-							check_output(1, 0)
-						finally:
-							teardown()
-			finally:
-				vim_module._start_mode('n')
-		finally:
-			vim_module._g.pop('powerline_config_path')
+		with vim_module._with('buffer', 'foo.txt'):
+			with vim_module._with('globals', powerline_config_path=cfg_path):
+				exclude = set(('no', 'v', 'V', VBLOCK, 's', 'S', SBLOCK, 'R', 'Rv', 'c', 'cv', 'ce', 'r', 'rm', 'r?', '!'))
+				try:
+					for mode in ['n', 'nc', 'no', 'v', 'V', VBLOCK, 's', 'S', SBLOCK, 'i', 'R', 'Rv', 'c', 'cv', 'ce', 'r', 'rm', 'r?', '!']:
+						if mode != 'nc':
+							vim_module._start_mode(mode)
+						check_output(1, 0)
+						for args, kwargs in buffers:
+							i += 1
+							if mode in exclude:
+								continue
+							with vim_module._with(*args, **kwargs):
+								check_output(1, 0)
+				finally:
+					vim_module._start_mode('n')
 
 	def test_tmux(self):
-		import powerline.segments.common
+		from powerline.segments import common
 		from imp import reload
-		reload(powerline.segments.common)
-		old_urllib_read = powerline.segments.common.urllib_read 
-		powerline.segments.common.urllib_read = urllib_read
+		reload(common)
 		from powerline.shell import ShellPowerline
-		try:
+		with replace_module_attr(common, 'urllib_read', urllib_read):
 			ShellPowerline(Args(ext=['tmux'])).renderer.render()
-		finally:
-			powerline.segments.common.urllib_read = old_urllib_read
 
 
 old_cwd = None
