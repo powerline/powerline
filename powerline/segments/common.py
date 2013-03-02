@@ -74,7 +74,7 @@ def cwd(dir_shorten_len=None, dir_limit_depth=None):
 	cwd_split_len = len(cwd_split)
 	if dir_limit_depth and cwd_split_len > dir_limit_depth + 1:
 		del(cwd_split[0:-dir_limit_depth])
-		cwd_split.insert(0, u'⋯')
+		cwd_split.insert(0, '⋯')
 	cwd = [i[0:dir_shorten_len] if dir_shorten_len and i else i for i in cwd_split[:-1]] + [cwd_split[-1]]
 	ret = []
 	if not cwd[0]:
@@ -263,18 +263,18 @@ weather_conditions_codes = (
 # ('sunny',  (32, 36)),
 # ('night',  (31, 33))):
 weather_conditions_icons = {
-	'day':           u'〇',
-	'blustery':      u'⚑',
-	'rainy':         u'☔',
-	'cloudy':        u'☁',
-	'snowy':         u'❅',
-	'stormy':        u'☈',
-	'foggy':         u'〰',
-	'sunny':         u'☼',
-	'night':         u'☾',
-	'windy':         u'☴',
-	'not_available': u'�',
-	'unknown':       u'⚠',
+	'day':           '〇',
+	'blustery':      '⚑',
+	'rainy':         '☔',
+	'cloudy':        '☁',
+	'snowy':         '❅',
+	'stormy':        '☈',
+	'foggy':         '〰',
+	'sunny':         '☼',
+	'night':         '☾',
+	'windy':         '☴',
+	'not_available': '�',
+	'unknown':       '⚠',
 }
 
 
@@ -306,8 +306,8 @@ def weather(unit='c', location_query=None, icons=None):
 			return None
 	query_data = {
 		'q':
-			u'use "http://github.com/yql/yql-tables/raw/master/weather/weather.bylocation.xml" as we;'
-			u'select * from we where location="{0}" and unit="{1}"'.format(location_query, unit).encode('utf-8'),
+			'use "http://github.com/yql/yql-tables/raw/master/weather/weather.bylocation.xml" as we;'
+			'select * from we where location="{0}" and unit="{1}"'.format(location_query, unit).encode('utf-8'),
 		'format': 'json'
 	}
 	try:
@@ -339,7 +339,7 @@ def weather(unit='c', location_query=None, icons=None):
 			'divider_highlight_group': 'background:divider',
 			},
 			{
-			'contents': u'{0}°{1}'.format(condition['temp'], unit.upper()),
+			'contents': '{0}°{1}'.format(condition['temp'], unit.upper()),
 			'highlight_group': ['weather_temp_cold' if int(condition['temp']) < 0 else 'weather_temp_hot', 'weather_temp', 'weather'],
 			'draw_divider': False,
 			'divider_highlight_group': 'background:divider',
@@ -397,7 +397,7 @@ def cpu_load_percent(measure_interval=.5):
 	except ImportError:
 		return None
 	cpu_percent = int(psutil.cpu_percent(interval=measure_interval))
-	return u'{0}%'.format(cpu_percent)
+	return '{0}%'.format(cpu_percent)
 
 
 @add_divider_highlight_group('background:divider')
@@ -443,7 +443,7 @@ def network_load(interface='eth0', measure_interval=1, suffix='B/s', si_prefix=F
 		return None
 	time.sleep(measure_interval)
 	b2 = get_bytes()
-	return u'⬇ {rx_diff} ⬆ {tx_diff}'.format(
+	return '⬇ {rx_diff} ⬆ {tx_diff}'.format(
 		rx_diff=humanize_bytes((b2[0] - b1[0]) / measure_interval, suffix, si_prefix).rjust(8),
 		tx_diff=humanize_bytes((b2[1] - b1[1]) / measure_interval, suffix, si_prefix).rjust(8),
 		)
@@ -492,13 +492,13 @@ def email_imap_alert(username, password, server='imap.gmail.com', port=993, fold
 
 class NowPlayingSegment(object):
 	STATE_SYMBOLS = {
-		'fallback': u'♫',
-		'play': u'▶',
-		'pause': u'▮▮',
-		'stop': u'■',
+		'fallback': '♫',
+		'play': '▶',
+		'pause': '▮▮',
+		'stop': '■',
 		}
 
-	def __call__(self, player='mpd', format=u'{state_symbol} {artist} - {title} ({total})', *args, **kwargs):
+	def __call__(self, player='mpd', format='{state_symbol} {artist} - {title} ({total})', *args, **kwargs):
 		player_func = getattr(self, 'player_{0}'.format(player))
 		stats = {
 			'state': None,
@@ -538,7 +538,7 @@ class NowPlayingSegment(object):
 
 	@staticmethod
 	def _convert_seconds(seconds):
-		return u'{0:.0f}:{1:02.0f}'.format(*divmod(float(seconds), 60))
+		return '{0:.0f}:{1:02.0f}'.format(*divmod(float(seconds), 60))
 
 	def player_cmus(self):
 		'''Return cmus player information.

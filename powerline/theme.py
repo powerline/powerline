@@ -8,7 +8,7 @@ from .segment import gen_segment_getter
 try:
 	from __builtin__ import unicode
 except ImportError:
-	unicode = str
+	unicode = str  # NOQA
 
 
 def u(s):
