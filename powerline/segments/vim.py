@@ -198,6 +198,8 @@ def file_size(segment_info, suffix='B', si_prefix=False):
 	:return: file size or None if the file isn't saved or if the size is too big to fit in a number
 	'''
 	file_name = segment_info['buffer'].name
+	if not file_name:
+		return None
 	try:
 		file_size = os.stat(file_name).st_size
 	except:

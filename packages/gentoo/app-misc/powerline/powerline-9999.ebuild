@@ -3,7 +3,7 @@
 # $Header: /var/cvsroot/gentoo-x86/dev-python/setuptools/setuptools-9999.ebuild,v 1.1 2013/01/11 09:59:31 mgorny Exp $
 
 EAPI="5"
-PYTHON_COMPAT=( python{2_7,3_3} )
+PYTHON_COMPAT=( python{2_6,2_7,3_2,3_3} )
 
 #if LIVE
 EGIT_REPO_URI="https://github.com/Lokaltog/${PN}"

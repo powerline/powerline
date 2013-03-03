@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from importlib import import_module
+from __future__ import absolute_import
 import sys
 
 
@@ -25,7 +25,7 @@ def get_function(data, segment):
 	sys.path = data['path'] + sys.path
 	segment_module = str(segment.get('module', data['default_module']))
 	try:
-		return None, getattr(import_module(segment_module), segment['name']), segment_module
+		return None, getattr(__import__(segment_module, fromlist=[segment['name']]), segment['name']), segment_module
 	finally:
 		sys.path = oldpath
 
