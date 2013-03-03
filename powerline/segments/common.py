@@ -484,7 +484,7 @@ def email_imap_alert(username, password, server='imap.gmail.com', port=993, fold
 		return None
 	return [{
 		'highlight_group': 'email_alert',
-		'contents': unread_count,
+		'contents': str(unread_count),
 		}]
 
 
