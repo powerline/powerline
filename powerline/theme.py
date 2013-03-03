@@ -15,7 +15,7 @@ def u(s):
 	if type(s) is unicode:
 		return s
 	else:
-		return unicode(s, 'utf-8')
+		return unicode(str(s), 'utf-8')
 
 
 def requires_segment_info(func):
