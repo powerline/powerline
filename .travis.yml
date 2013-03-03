@@ -6,8 +6,5 @@ python:
     - "3.3"
 install: tests/install.sh
 script: tests/test.sh
-branches:
-    only:
-        - tests
 
 # vim: et
