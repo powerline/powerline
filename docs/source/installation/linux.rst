@@ -21,7 +21,7 @@ follow the installation guide below:
 Plugin installation
 ===================
 
-1. Install Python 3.2+ or Python 2.7.
+1. Install Python 3.2+ or Python 2.6+.
 2. Install Powerline using the following command::
 
        pip install --user git+git://github.com/Lokaltog/powerline

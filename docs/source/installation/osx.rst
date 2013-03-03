@@ -29,9 +29,8 @@ Python package
 Vim installation
 ----------------
 
-Any terminal vim version with Python 3.3 or Python 2.7 support should work, 
-but if you're using MacVim you need to install it using the following 
-command::
+Any terminal vim version with Python 3.2+ or Python 2.6+ support should work, 
+but if you're using MacVim you need to install it using the following command::
 
     brew install macvim --env-std --override-system-vim
 

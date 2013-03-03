@@ -564,9 +564,9 @@ class NowPlayingSegment(object):
 		if not now_playing_str:
 			return
 		ignore_levels = ('tag', 'set',)
-		now_playing = {token[0] if token[0] not in ignore_levels else token[1]:
-			' '.join(token[1:]) if token[0] not in ignore_levels else
-			' '.join(token[2:]) for token in [line.split(' ') for line in now_playing_str.split('\n')[:-1]]}
+		now_playing = dict(((token[0] if token[0] not in ignore_levels else token[1],
+			(' '.join(token[1:]) if token[0] not in ignore_levels else
+			' '.join(token[2:]))) for token in [line.split(' ') for line in now_playing_str.split('\n')[:-1]]))
 		state = self._convert_state(now_playing.get('status'))
 		return {
 			'state': state,

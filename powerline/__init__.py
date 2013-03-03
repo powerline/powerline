@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import importlib
+from __future__ import absolute_import
 import json
 import os
 import sys
@@ -63,7 +63,7 @@ class Powerline(object):
 		renderer_module_import = 'powerline.renderers.{0}'.format(renderer_module_name)
 		renderer_class_name = '{0}Renderer'.format(underscore_to_camelcase(renderer_module_name))
 		try:
-			Renderer = getattr(importlib.import_module(renderer_module_import), renderer_class_name)
+			Renderer = getattr(__import__(renderer_module_import, fromlist=[renderer_class_name]), renderer_class_name)
 		except ImportError as e:
 			sys.stderr.write('Error while importing renderer module: {0}\n'.format(e))
 			sys.exit(1)
