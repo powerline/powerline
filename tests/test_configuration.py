@@ -3,12 +3,12 @@
 '''Dynamic configuration files tests.'''
 
 
-from unittest import TestCase
 import tests.vim as vim_module
 import sys
 import os
 import json
-from .lib import Args, urllib_read, replace_module_attr
+from tests.lib import Args, urllib_read, replace_module_attr
+from tests import TestCase
 
 
 VBLOCK = chr(ord('V') - 0x40)
@@ -75,3 +75,8 @@ def tearDownModule():
 	os.chdir(old_cwd)
 	old_cwd = None
 	sys.path.pop(0)
+
+
+if __name__ == '__main__':
+	from tests import main
+	main()

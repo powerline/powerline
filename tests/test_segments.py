@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from unittest import TestCase
 from powerline.segments import shell, common
 import tests.vim as vim_module
 import sys
 import os
-from .lib import Args, urllib_read, replace_module, replace_module_attr, new_module, replace_module_module, replace_env
+from tests.lib import Args, urllib_read, replace_module, replace_module_attr, new_module, replace_module_module, replace_env
+from tests import TestCase
 
 
 vim = None
@@ -96,11 +96,9 @@ class TestCommon(TestCase):
 			self.assertEqual(common.cwd(dir_limit_depth=2, dir_shorten_len=2),
 					[{'contents': '[not found]', 'divider_highlight_group': 'cwd:divider', 'highlight_group': ['cwd:current_folder', 'cwd']}])
 			new_os.getcwdu = lambda: raises(OSError())
-			with self.assertRaises(OSError):
-				common.cwd(dir_limit_depth=2, dir_shorten_len=2),
+			self.assertRaises(OSError, common.cwd, tuple(), {'dir_limit_depth': 2, 'dir_shorten_len': 2})
 			new_os.getcwdu = lambda: raises(ValueError())
-			with self.assertRaises(ValueError):
-				common.cwd(dir_limit_depth=2, dir_shorten_len=2),
+			self.assertRaises(ValueError, common.cwd, tuple(), {'dir_limit_depth': 2, 'dir_shorten_len': 2})
 
 	def test_date(self):
 		with replace_module_attr(common, 'datetime', Args(now=lambda: Args(strftime=lambda fmt: fmt))):
@@ -280,8 +278,10 @@ old_cwd = None
 
 def setUpModule():
 	global old_cwd
+	global __file__
 	sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'path')))
 	old_cwd = os.getcwd()
+	__file__ = os.path.abspath(__file__)
 	os.chdir(os.path.dirname(__file__))
 	from powerline.segments import vim
 	globals()['vim'] = vim
@@ -291,3 +291,8 @@ def tearDownModule():
 	global old_cwd
 	os.chdir(old_cwd)
 	sys.path.pop(0)
+
+
+if __name__ == '__main__':
+	from tests import main
+	main()
