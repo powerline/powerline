@@ -22,11 +22,17 @@ def _logged(func):
 	from functools import wraps
 
 	@wraps(func)
-	def f(*args):
+	def f(*args, **kwargs):
 		_log.append((func.__name__, args))
-		return func(*args)
+		return func(*args, **kwargs)
 
 	return f
+
+
+def _log_print():
+	import sys
+	for entry in _log:
+		sys.stdout.write(repr(entry) + '\n')
 
 
 @_logged
@@ -237,13 +243,13 @@ class _Buffer(object):
 _dict = None
 
 
+@_logged
 def _init():
 	global _dict
 
 	if _dict:
 		return _dict
 
-	import imp
 	_dict = {}
 	for varname, value in globals().items():
 		if varname[0] != '_':
@@ -252,6 +258,7 @@ def _init():
 	return _dict
 
 
+@_logged
 def _get_segment_info():
 	mode_translations = {
 			chr(ord('V') - 0x40): '^V',
@@ -268,10 +275,12 @@ def _get_segment_info():
 	}
 
 
+@_logged
 def _launch_event(event):
 	pass
 
 
+@_logged
 def _start_mode(mode):
 	global _mode
 	if mode == 'i':
@@ -281,6 +290,7 @@ def _start_mode(mode):
 	_mode = mode
 
 
+@_logged
 def _undo():
 	if len(_undostate[_buffer()]) == 1:
 		return
@@ -290,6 +300,7 @@ def _undo():
 		_buf_options[_buffer()]['modified'] = 0
 
 
+@_logged
 def _edit(name=None):
 	global _last_bufnr
 	if _buffer() and buffers[_buffer()].name is None:
@@ -300,12 +311,14 @@ def _edit(name=None):
 		windows[_window - 1].buffer = buf
 
 
+@_logged
 def _new(name=None):
 	global _window
 	_Window(buffer={'name': name})
 	_window = len(windows)
 
 
+@_logged
 def _del_window(winnr):
 	win = windows.pop(winnr - 1)
 	_win_scopes.pop(winnr)
@@ -314,6 +327,7 @@ def _del_window(winnr):
 	return win
 
 
+@_logged
 def _close(winnr, wipe=True):
 	global _window
 	win = _del_window(winnr)
@@ -329,6 +343,7 @@ def _close(winnr, wipe=True):
 		_Window()
 
 
+@_logged
 def _bw(bufnr=None):
 	bufnr = bufnr or _buffer()
 	winnr = 1
@@ -342,10 +357,12 @@ def _bw(bufnr=None):
 	_b(max(buffers.keys()))
 
 
+@_logged
 def _b(bufnr):
 	windows[_window - 1].buffer = buffers[bufnr]
 
 
+@_logged
 def _set_cursor(line, col):
 	windows[_window - 1].cursor = (line, col)
 	if _mode == 'n':
@@ -354,10 +371,12 @@ def _set_cursor(line, col):
 		_launch_event('CursorMovedI')
 
 
+@_logged
 def _get_buffer():
 	return buffers[_buffer()]
 
 
+@_logged
 def _set_bufoption(option, value, bufnr=None):
 	_buf_options[bufnr or _buffer()][option] = value
 	if option == 'filetype':
@@ -377,6 +396,7 @@ class _WithNewBuffer(object):
 		_bw(self.bufnr)
 
 
+@_logged
 def _set_dict(d, new, setfunc=None):
 	if not setfunc:
 		def setfunc(k, v):
@@ -432,6 +452,7 @@ class _WithDict(object):
 			self.d.pop(k)
 
 
+@_logged
 def _with(key, *args, **kwargs):
 	if key == 'buffer':
 		return _WithNewBuffer(_edit, *args, **kwargs)

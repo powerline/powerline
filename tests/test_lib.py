@@ -1,9 +1,9 @@
 from powerline.lib import mergedicts, underscore_to_camelcase, add_divider_highlight_group, humanize_bytes
 from powerline.lib.vcs import guess
-from unittest import TestCase
 from subprocess import call, PIPE
 import os
 import sys
+from tests import TestCase
 
 
 class TestLib(TestCase):
@@ -79,8 +79,13 @@ class TestVCS(TestCase):
 			os.remove(os.path.join('hg_repo', 'file'))
 
 
+old_HGRCPATH = None
+old_cwd = None
+
+
 def setUpModule():
 	global old_cwd
+	global old_HGRCPATH
 	old_cwd = os.getcwd()
 	os.chdir(os.path.dirname(__file__))
 	call(['git', 'init', '--quiet', 'git_repo'])
@@ -88,6 +93,8 @@ def setUpModule():
 	call(['git', 'config', '--local', 'user.email', 'bar@example.org'], cwd='git_repo')
 	call(['git', 'commit', '--allow-empty', '--message', 'Initial commit', '--quiet'], cwd='git_repo')
 	if use_mercurial:
+		old_HGRCPATH = os.environ.get('HGRCPATH')
+		os.environ['HGRCPATH'] = ''
 		call(['hg', 'init', 'hg_repo'])
 		with open(os.path.join('hg_repo', '.hg', 'hgrc'), 'w') as hgrc:
 			hgrc.write('[ui]\n')
@@ -96,6 +103,7 @@ def setUpModule():
 
 def tearDownModule():
 	global old_cwd
+	global old_HGRCPATH
 	for repo_dir in ['git_repo'] + (['hg_repo'] if use_mercurial else []):
 		for root, dirs, files in list(os.walk(repo_dir, topdown=False)):
 			for file in files:
@@ -103,4 +111,14 @@ def tearDownModule():
 			for dir in dirs:
 				os.rmdir(os.path.join(root, dir))
 		os.rmdir(repo_dir)
-	os.chdir(old_cwd)  # NOQA
+	if use_mercurial:
+		if old_HGRCPATH is None:
+			os.environ.pop('HGRCPATH')
+		else:
+			os.environ['HGRCPATH'] = old_HGRCPATH
+	os.chdir(old_cwd)
+
+
+if __name__ == '__main__':
+	from tests import main
+	main()

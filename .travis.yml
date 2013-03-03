@@ -1,10 +1,11 @@
 language: python
 python:
+    - "2.6"
     - "2.7"
     - "3.2"
     - "3.3"
-install: "pip install ."
-script: python setup.py test
+install: tests/install.sh
+script: tests/test.sh
 branches:
     only:
         - tests
