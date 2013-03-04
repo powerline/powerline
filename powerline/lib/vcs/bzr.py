@@ -42,8 +42,6 @@ class Repository(object):
     def _status(self, path):
         buf = CoerceIO()
         w = workingtree.WorkingTree.open(self.directory)
-        if path and not os.path.exists(path):
-            return None
         status.show_tree_status(w, specific_files=[path] if path else None,
                                 to_file=buf, short=True)
         raw = buf.getvalue()
@@ -53,7 +51,7 @@ class Repository(object):
             return raw[:2]
         dirtied = untracked = ' '
         for line in raw.splitlines():
-            if len(line) > 1 and line[1] in 'ACDMRI':
+            if len(line) > 1 and line[1] in 'ACDMRIN':
                 dirtied = 'D'
             elif line and line[0] == '?':
                 untracked = 'U'
