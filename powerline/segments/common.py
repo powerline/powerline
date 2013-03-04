@@ -3,7 +3,12 @@
 import os
 import sys
 
+from datetime import datetime
+import socket
+from multiprocessing import cpu_count
+
 from powerline.lib import memoize, urllib_read, urllib_urlencode, add_divider_highlight_group
+from powerline.lib.vcs import guess
 
 
 def hostname(only_if_ssh=False):
@@ -12,7 +17,6 @@ def hostname(only_if_ssh=False):
 	:param bool only_if_ssh:
 		only return the hostname if currently in an SSH session
 	'''
-	import socket
 	if only_if_ssh and not os.environ.get('SSH_CLIENT'):
 		return None
 	return socket.gethostname()
@@ -37,7 +41,6 @@ def user():
 
 def branch():
 	'''Return the current VCS branch.'''
-	from powerline.lib.vcs import guess
 	repo = guess(path=os.path.abspath(os.getcwd()))
 	if repo:
 		return repo.branch()
@@ -74,7 +77,7 @@ def cwd(dir_shorten_len=None, dir_limit_depth=None):
 	cwd_split_len = len(cwd_split)
 	if dir_limit_depth and cwd_split_len > dir_limit_depth + 1:
 		del(cwd_split[0:-dir_limit_depth])
-		cwd_split.insert(0, u'⋯')
+		cwd_split.insert(0, '⋯')
 	cwd = [i[0:dir_shorten_len] if dir_shorten_len and i else i for i in cwd_split[:-1]] + [cwd_split[-1]]
 	ret = []
 	if not cwd[0]:
@@ -96,7 +99,6 @@ def date(format='%Y-%m-%d', istime=False):
 	:param str format:
 		strftime-style date format string
 	'''
-	from datetime import datetime
 	return [{
 		'contents': datetime.now().strftime(format),
 		'highlight_group': (['time'] if istime else []) + ['date'],
@@ -106,8 +108,6 @@ def date(format='%Y-%m-%d', istime=False):
 
 def fuzzy_time():
 	'''Display the current time as fuzzy time, e.g. "quarter past six".'''
-	from datetime import datetime
-
 	hour_str = ['twelve', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven']
 	minute_str = {
 		5: 'five past',
@@ -157,7 +157,10 @@ def fuzzy_time():
 
 
 @memoize(600)
-@add_divider_highlight_group('background:divider')
+def _external_ip(query_url='http://ipv4.icanhazip.com/'):
+	return urllib_read(query_url).strip()
+
+
 def external_ip(query_url='http://ipv4.icanhazip.com/'):
 	'''Return external IP address.
 
@@ -170,7 +173,7 @@ def external_ip(query_url='http://ipv4.icanhazip.com/'):
 	:param str query_url:
 		URI to query for IP address, should return only the IP address as a text string
 	'''
-	return urllib_read(query_url).strip()
+	return [{'contents': _external_ip(query_url=query_url), 'divider_highlight_group': 'background:divider'}]
 
 
 @add_divider_highlight_group('background:divider')
@@ -185,7 +188,6 @@ def uptime(format='{days:02d}d {hours:02d}h {minutes:02d}m'):
 	'''
 	try:
 		import psutil
-		from datetime import datetime
 		seconds = int((datetime.now() - datetime.fromtimestamp(psutil.BOOT_TIME)).total_seconds())
 	except ImportError:
 		try:
@@ -260,18 +262,18 @@ weather_conditions_codes = (
 # ('sunny',  (32, 36)),
 # ('night',  (31, 33))):
 weather_conditions_icons = {
-	'day':           u'〇',
-	'blustery':      u'⚑',
-	'rainy':         u'☔',
-	'cloudy':        u'☁',
-	'snowy':         u'❅',
-	'stormy':        u'☈',
-	'foggy':         u'〰',
-	'sunny':         u'☼',
-	'night':         u'☾',
-	'windy':         u'☴',
-	'not_available': u'�',
-	'unknown':       u'⚠',
+	'day':           '〇',
+	'blustery':      '⚑',
+	'rainy':         '☔',
+	'cloudy':        '☁',
+	'snowy':         '❅',
+	'stormy':        '☈',
+	'foggy':         '〰',
+	'sunny':         '☼',
+	'night':         '☾',
+	'windy':         '☴',
+	'not_available': '�',
+	'unknown':       '⚠',
 }
 
 
@@ -297,14 +299,14 @@ def weather(unit='c', location_query=None, icons=None):
 
 	if not location_query:
 		try:
-			location = json.loads(urllib_read('http://freegeoip.net/json/' + external_ip()))
+			location = json.loads(urllib_read('http://freegeoip.net/json/' + _external_ip()))
 			location_query = ','.join([location['city'], location['region_name'], location['country_name']])
 		except (TypeError, ValueError):
 			return None
 	query_data = {
 		'q':
-			u'use "http://github.com/yql/yql-tables/raw/master/weather/weather.bylocation.xml" as we;'
-			u'select * from we where location="{0}" and unit="{1}"'.format(location_query, unit).encode('utf-8'),
+			'use "http://github.com/yql/yql-tables/raw/master/weather/weather.bylocation.xml" as we;'
+			'select * from we where location="{0}" and unit="{1}"'.format(location_query, unit).encode('utf-8'),
 		'format': 'json'
 	}
 	try:
@@ -336,7 +338,7 @@ def weather(unit='c', location_query=None, icons=None):
 			'divider_highlight_group': 'background:divider',
 			},
 			{
-			'contents': u'{0}°{1}'.format(condition['temp'], unit.upper()),
+			'contents': '{0}°{1}'.format(condition['temp'], unit.upper()),
 			'highlight_group': ['weather_temp_cold' if int(condition['temp']) < 0 else 'weather_temp_hot', 'weather_temp', 'weather'],
 			'draw_divider': False,
 			'divider_highlight_group': 'background:divider',
@@ -358,11 +360,10 @@ def system_load(format='{avg:.1f}', threshold_good=1, threshold_bad=2):
 	:param float threshold_bad:
 		threshold for "bad load" highlighting
 	'''
-	import multiprocessing
-	cpu_count = multiprocessing.cpu_count()
+	cpu_num = cpu_count()
 	ret = []
 	for avg in os.getloadavg():
-		normalized = avg / cpu_count
+		normalized = avg / cpu_num
 		if normalized < threshold_good:
 			hl = 'system_load_good'
 		elif normalized < threshold_bad:
@@ -394,7 +395,7 @@ def cpu_load_percent(measure_interval=.5):
 	except ImportError:
 		return None
 	cpu_percent = int(psutil.cpu_percent(interval=measure_interval))
-	return u'{0}%'.format(cpu_percent)
+	return '{0}%'.format(cpu_percent)
 
 
 @add_divider_highlight_group('background:divider')
@@ -440,7 +441,7 @@ def network_load(interface='eth0', measure_interval=1, suffix='B/s', si_prefix=F
 		return None
 	time.sleep(measure_interval)
 	b2 = get_bytes()
-	return u'⬇ {rx_diff} ⬆ {tx_diff}'.format(
+	return '⬇ {rx_diff} ⬆ {tx_diff}'.format(
 		rx_diff=humanize_bytes((b2[0] - b1[0]) / measure_interval, suffix, si_prefix).rjust(8),
 		tx_diff=humanize_bytes((b2[1] - b1[1]) / measure_interval, suffix, si_prefix).rjust(8),
 		)
@@ -483,19 +484,19 @@ def email_imap_alert(username, password, server='imap.gmail.com', port=993, fold
 		return None
 	return [{
 		'highlight_group': 'email_alert',
-		'contents': unread_count,
+		'contents': str(unread_count),
 		}]
 
 
 class NowPlayingSegment(object):
 	STATE_SYMBOLS = {
-		'fallback': u'♫',
-		'play': u'▶',
-		'pause': u'▮▮',
-		'stop': u'■',
+		'fallback': '♫',
+		'play': '▶',
+		'pause': '▮▮',
+		'stop': '■',
 		}
 
-	def __call__(self, player='mpd', format=u'{state_symbol} {artist} - {title} ({total})', *args, **kwargs):
+	def __call__(self, player='mpd', format='{state_symbol} {artist} - {title} ({total})', *args, **kwargs):
 		player_func = getattr(self, 'player_{0}'.format(player))
 		stats = {
 			'state': None,
@@ -535,7 +536,7 @@ class NowPlayingSegment(object):
 
 	@staticmethod
 	def _convert_seconds(seconds):
-		return u'{0:.0f}:{1:02.0f}'.format(*divmod(float(seconds), 60))
+		return '{0:.0f}:{1:02.0f}'.format(*divmod(float(seconds), 60))
 
 	def player_cmus(self):
 		'''Return cmus player information.
@@ -561,9 +562,9 @@ class NowPlayingSegment(object):
 		if not now_playing_str:
 			return
 		ignore_levels = ('tag', 'set',)
-		now_playing = {token[0] if token[0] not in ignore_levels else token[1]:
-			' '.join(token[1:]) if token[0] not in ignore_levels else
-			' '.join(token[2:]) for token in [line.split(' ') for line in now_playing_str.split('\n')[:-1]]}
+		now_playing = dict(((token[0] if token[0] not in ignore_levels else token[1],
+			(' '.join(token[1:]) if token[0] not in ignore_levels else
+			' '.join(token[2:]))) for token in [line.split(' ') for line in now_playing_str.split('\n')[:-1]]))
 		state = self._convert_state(now_playing.get('status'))
 		return {
 			'state': state,

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from importlib import import_module
+from __future__ import absolute_import
 import sys
 
 
@@ -25,7 +25,7 @@ def get_function(data, segment):
 	sys.path = data['path'] + sys.path
 	segment_module = str(segment.get('module', data['default_module']))
 	try:
-		return None, getattr(import_module(segment_module), segment['name']), segment_module
+		return None, getattr(__import__(segment_module, fromlist=[segment['name']]), segment['name']), segment_module
 	finally:
 		sys.path = oldpath
 
@@ -79,8 +79,8 @@ def gen_segment_getter(ext, path, theme_configs, default_module=None):
 			'include_modes': segment.get('include_modes', []),
 			'width': segment.get('width'),
 			'align': segment.get('align', 'l'),
-			'_rendered_raw': u'',
-			'_rendered_hl': u'',
+			'_rendered_raw': '',
+			'_rendered_hl': '',
 			'_len': 0,
 			'_space_left': 0,
 			'_space_right': 0,

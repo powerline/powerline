@@ -1,4 +1,4 @@
-import importlib
+from __future__ import absolute_import
 import os
 from powerline.lib.memoize import memoize
 
@@ -27,7 +27,7 @@ def guess(path):
 			if check(os.path.join(directory, vcs_dir)):
 				try:
 					if vcs not in globals():
-						globals()[vcs] = importlib.import_module('powerline.lib.vcs.' + vcs)
+						globals()[vcs] = getattr(__import__('powerline.lib.vcs', fromlist=[vcs]), vcs)
 					return globals()[vcs].Repository(directory)
 				except:
 					pass

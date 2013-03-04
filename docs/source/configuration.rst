@@ -96,6 +96,8 @@ segments that you may want to customize right away:
            }
        },
 
+.. _config-main:
+
 Main configuration
 ==================
 
@@ -111,7 +113,7 @@ Common configuration
 Common configuration is a subdictionary that is a value of ``common`` key in 
 :file:`powerline/config.json` file.
 
-.. _config-term_24bit_colors:
+.. _config-common-term_24bit_colors:
 
 ``term_24bit_colors``
     Defines whether to output cterm indices (8-bit) or RGB colors (24-bit) 
@@ -152,7 +154,14 @@ Common configuration is a subdictionary that is a value of ``ext`` key in
     .. _config-ext-local_themes:
 
     Defines themes used when certain conditions are met, e.g. for 
-    buffer-specific statuslines in vim. Requires a custom matcher and theme.
+    buffer-specific statuslines in vim. Value depends on extension used. For vim 
+    it is a dictionary ``{matcher_name : theme_name}``, where ``matcher_name`` 
+    is either ``matcher_module.module_attribute`` or ``module_attribute`` 
+    (``matcher_module`` defaults to ``powerline.matchers.vim``) and 
+    ``module_attribute`` should point to a function that returns boolean value 
+    indicating that current buffer has (not) matched conditions.
+
+.. _config-colors:
 
 Color definitions
 =================
@@ -178,6 +187,8 @@ Color definitions
     * A list of cterm color indicies.
     * A list of hex color strings.
 
+.. _config-colorschemes:
+
 Colorschemes
 ============
 
@@ -186,7 +197,7 @@ Colorschemes
 ``name``
     Name of the colorscheme.
 
-.. _config-colorscheme-groups:
+.. _config-colorschemes-groups:
 
 ``groups``
     Segment highlighting groups, consisting of a dict where the key is the 
@@ -220,7 +231,9 @@ Colorschemes
 
     ``groups``
         Segment highlighting groups for this mode. Same syntax as the main 
-        :ref:`groups <config-colorscheme-groups>` option.
+        :ref:`groups <config-colorschemes-groups>` option.
+
+.. _config-themes:
 
 Themes
 ======

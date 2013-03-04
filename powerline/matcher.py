@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from importlib import import_module
+from __future__ import absolute_import
 import sys
 
 
@@ -13,7 +13,7 @@ def gen_matcher_getter(ext, import_paths):
 		oldpath = sys.path
 		sys.path = import_paths + sys.path
 		try:
-			return getattr(import_module(match_module), match_function)
+			return getattr(__import__(match_module, fromlist=[match_function]), match_function)
 		finally:
 			sys.path = oldpath
 	return get

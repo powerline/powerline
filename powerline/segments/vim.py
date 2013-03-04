@@ -22,24 +22,24 @@ vim_funcs = {
 }
 
 vim_modes = {
-	'n': u'NORMAL',
-	'no': u'N·OPER',
-	'v': u'VISUAL',
-	'V': u'V·LINE',
-	'^V': u'V·BLCK',
-	's': u'SELECT',
-	'S': u'S·LINE',
-	'^S': u'S·BLCK',
-	'i': u'INSERT',
-	'R': u'REPLACE',
-	'Rv': u'V·RPLCE',
-	'c': u'COMMND',
-	'cv': u'VIM EX',
-	'ce': u'EX',
-	'r': u'PROMPT',
-	'rm': u'MORE',
-	'r?': u'CONFIRM',
-	'!': u'SHELL',
+	'n': 'NORMAL',
+	'no': 'N·OPER',
+	'v': 'VISUAL',
+	'V': 'V·LINE',
+	'^V': 'V·BLCK',
+	's': 'SELECT',
+	'S': 'S·LINE',
+	'^S': 'S·BLCK',
+	'i': 'INSERT',
+	'R': 'REPLACE',
+	'Rv': 'V·RPLCE',
+	'c': 'COMMND',
+	'cv': 'VIM EX',
+	'ce': 'EX',
+	'r': 'PROMPT',
+	'rm': 'MORE',
+	'r?': 'CONFIRM',
+	'!': 'SHELL',
 }
 
 
@@ -119,7 +119,7 @@ def mode(segment_info, override=None):
 
 
 @requires_segment_info
-def modified_indicator(segment_info, text=u'+'):
+def modified_indicator(segment_info, text='+'):
 	'''Return a file modified indicator.
 
 	:param string text:
@@ -139,7 +139,7 @@ def paste_indicator(segment_info, text='PASTE'):
 
 
 @requires_segment_info
-def readonly_indicator(segment_info, text=u''):
+def readonly_indicator(segment_info, text=''):
 	'''Return a read-only indicator.
 
 	:param string text:
@@ -198,6 +198,8 @@ def file_size(segment_info, suffix='B', si_prefix=False):
 	:return: file size or None if the file isn't saved or if the size is too big to fit in a number
 	'''
 	file_name = segment_info['buffer'].name
+	if not file_name:
+		return None
 	try:
 		file_size = os.stat(file_name).st_size
 	except:
@@ -274,7 +276,7 @@ def virtcol_current():
 			'highlight_group': ['virtcol_current', 'col_current']}]
 
 
-def modified_buffers(text=u'+ ', join_str=u','):
+def modified_buffers(text='+ ', join_str=','):
 	'''Return a comma-separated list of modified buffers.
 
 	:param str text:

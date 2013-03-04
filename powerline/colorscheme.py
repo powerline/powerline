@@ -98,7 +98,7 @@ class Colorscheme(object):
 
 				break
 		else:
-			raise KeyError('Highlighting groups not found in colorscheme: ' + ', '.join(groups))
+			raise KeyError('Highlighting groups not found in colorscheme: ' + ', '.join(hl_iter(groups)))
 
 		if gradient_level is None:
 			pick_color = self.colors.__getitem__

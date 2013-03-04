@@ -44,7 +44,7 @@ def keyvaluesplit(s):
 		raise ValueError('Option names must not start with `_\'')
 	idx = s.index('=')
 	o = s[:idx]
-	val = json.loads(s[idx+1:])
+	val = json.loads(s[idx + 1:])
 	return (o, val)
 
 

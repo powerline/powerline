@@ -29,9 +29,8 @@ Python package
 Vim installation
 ----------------
 
-Any terminal vim version with Python 3.3 or Python 2.7 support should work, 
-but if you're using MacVim you need to install it using the following 
-command::
+Any terminal vim version with Python 3.2+ or Python 2.6+ support should work, 
+but if you're using MacVim you need to install it using the following command::
 
     brew install macvim --env-std --override-system-vim
 
@@ -85,6 +84,13 @@ The colors look weird in iTerm2!
 * The arrows may have the wrong colors if you have changed the "minimum 
   contrast" slider in the color tab of  your OS X settings.
 * Please disable background transparency to resolve this issue.
+
+Statusline is getting wrapped to the next line in iTerm2
+--------------------------------------------------------
+
+* Turn off “Treat ambigious-width characters as double width” in `Preferences 
+  --> Text`.
+* Alternative: remove fancy dividers and other fancy symbols from configuration.
 
 I receive a ``NameError`` when trying to use Powerline with MacVim!
 -------------------------------------------------------------------
