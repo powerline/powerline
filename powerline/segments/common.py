@@ -478,6 +478,8 @@ def email_imap_alert(username, password, server='imap.gmail.com', port=993, fold
 		rc, message = mail.status(folder, '(UNSEEN)')
 		unread_str = message[0].decode('utf-8')
 		unread_count = int(re.search('UNSEEN (\d+)', unread_str).group(1))
+	except socket.gaierror:
+		return None
 	except imaplib.IMAP4.error as e:
 		unread_count = str(e)
 	if not unread_count:
