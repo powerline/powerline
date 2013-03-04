@@ -98,6 +98,7 @@ class TestVCS(TestCase):
 				f.write('def')
 			self.assertEqual(repo.status(), 'D ')
 			self.assertEqual(repo.status('file'), ' M')
+			self.assertEqual(repo.status('notexist'), None)
 			os.remove(os.path.join('bzr_repo', 'file'))
 
 old_HGRCPATH = None
