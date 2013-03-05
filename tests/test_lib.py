@@ -82,7 +82,7 @@ class TestVCS(TestCase):
 	if use_bzr:
 		def test_bzr(self):
 			repo = guess(path='bzr_repo')
-			self.assertNotEqual(repo, None)
+			self.assertNotEqual(repo, None, 'No bzr repo found. Do you have bzr installed?')
 			self.assertEqual(repo.branch(), 'test_powerline')
 			self.assertEqual(repo.status(), None)
 			with open(os.path.join('bzr_repo', 'file'), 'w') as f:
