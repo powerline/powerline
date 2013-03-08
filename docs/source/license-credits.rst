@@ -5,13 +5,8 @@ License and credits
 License
 =======
 
-.. image:: http://i.creativecommons.org/l/by-sa/3.0/88x31.png
-   :target: `Creative Commons Attribution-ShareAlike 3.0 Unported License`_
-
-Powerline is licensed under a `Creative Commons Attribution-ShareAlike 3.0 
-Unported License`_.
-
-.. _`Creative Commons Attribution-ShareAlike 3.0 Unported License`: http://creativecommons.org/licenses/by-sa/3.0/
+Powerline is licensed under the `MIT license 
+<https://raw.github.com/Lokaltog/powerline/develop/LICENSE>`_.
 
 Credits
 =======
