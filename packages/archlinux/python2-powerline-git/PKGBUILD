@@ -1,6 +1,5 @@
 # Maintainer: Kim Silkebækken <kim.silkebaekken+aur@gmail.com>
 
-pkgbase=python-powerline
 pkgname=python2-powerline-git
 pkgver=20130308
 pkgrel=1
@@ -8,13 +7,13 @@ pkgdesc='The ultimate statusline/prompt utility.'
 url='https://github.com/Lokaltog/powerline'
 license=('MIT')
 arch=('any')
-depends=('python2>=2.7')
+depends=('python2>=2.6')
 makedepends=('git' 'python2-distribute')
 optdepends=('python2-psutil: improved system information'
 	'python2-pygit2: improved git support'
 	'mercurial: improved mercurial support'
 	'zsh: better shell prompt')
-conflicts=('powerline-git')
+replaces=('powerline-git')
 install='powerline.install'
 source=()
 
