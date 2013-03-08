@@ -35,3 +35,15 @@ statusline:
    
    set laststatus=2 " Always display the statusline in all windows
    set noshowmode " Hide the default mode text (e.g. -- INSERT -- below the statusline)
+
+Empty or weird statusline on startup
+-----------------------------------
+
+If you encounter this problem (the statusline fixes itself on first cursor movement) 
+you probably have lazyredraw enabled. Either disable lazyredraw or set the following AutoCommand:
+
+.. code-block:: vim
+
+   au VimEnter * redrawstatusline
+
+This will not fix it entirely, but it will make the statusbar more sensible.
