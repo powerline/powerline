@@ -215,6 +215,8 @@ def file_format(segment_info):
 	'''Return file format (i.e. line ending type).
 
 	:return: file format or None if unknown or missing file format
+
+	Divider highlight group used: ``background:divider``.
 	'''
 	return getbufvar(segment_info['bufnr'], '&fileformat') or None
 
@@ -225,6 +227,8 @@ def file_encoding(segment_info):
 	'''Return file encoding/character set.
 
 	:return: file encoding/character set or None if unknown or missing file encoding
+
+	Divider highlight group used: ``background:divider``.
 	'''
 	return getbufvar(segment_info['bufnr'], '&fileencoding') or None
 
@@ -235,6 +239,8 @@ def file_type(segment_info):
 	'''Return file type.
 
 	:return: file type or None if unknown file type
+
+	Divider highlight group used: ``background:divider``.
 	'''
 	return getbufvar(segment_info['bufnr'], '&filetype') or None
 
@@ -245,6 +251,8 @@ def line_percent(segment_info, gradient=False):
 
 	:param bool gradient:
 		highlight the percentage with a color gradient (by default a green to red gradient)
+
+	Highlight groups used: ``line_percent_gradient`` (gradient), ``line_percent``.
 	'''
 	line_current = segment_info['window'].cursor[0]
 	line_last = len(segment_info['buffer'])
@@ -273,7 +281,10 @@ def col_current(segment_info):
 
 @window_cached
 def virtcol_current():
-	'''Return current visual column with concealed characters ingored'''
+	'''Return current visual column with concealed characters ingored
+
+	Highlight groups used: ``virtcol_current`` or ``col_current``.
+	'''
 	return [{'contents': str(vim_funcs['virtcol']('.')),
 			'highlight_group': ['virtcol_current', 'col_current']}]
 
@@ -296,7 +307,10 @@ def modified_buffers(text='+ ', join_str=','):
 @requires_segment_info
 @memoize(2, cache_key=bufnr, cache_reg_func=purgeall_on_shell)
 def branch(segment_info):
-	'''Return the current working branch.'''
+	'''Return the current working branch.
+
+	Divider highlight group used: ``branch:divider``.
+	'''
 	repo = guess(path=os.path.abspath(segment_info['buffer'].name or os.getcwd()))
 	if repo:
 		return [{
@@ -309,7 +323,10 @@ def branch(segment_info):
 @requires_segment_info
 @memoize(2, cache_key=bufnr, cache_reg_func=purgebuf_on_shell_and_write)
 def file_vcs_status(segment_info):
-	'''Return the VCS status for this buffer.'''
+	'''Return the VCS status for this buffer.
+
+	Highlight groups used: ``file_vcs_status``.
+	'''
 	name = segment_info['buffer'].name
 	if name and not getbufvar(segment_info['bufnr'], '&buftype'):
 		repo = guess(path=os.path.abspath(name))
