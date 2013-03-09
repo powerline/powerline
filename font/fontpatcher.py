@@ -3,6 +3,7 @@
 
 import argparse
 import sys
+import os.path
 
 try:
 	import fontforge
@@ -100,7 +101,11 @@ class FontPatcher(object):
 			target_font.em = target_font_em_original
 
 			# Generate patched font
-			target_font.generate('{0}.otf'.format(target_font.fullname))
+			extension = os.path.splitext(target_font.path)[1]
+			if extension.lower() not in ['.ttf', '.otf']:
+				# Default to OpenType if input is not TrueType/OpenType
+				extension = '.otf'
+			target_font.generate('{0}{1}'.format(target_font.fullname, extension))
 
 fp = FontPatcher(args.source_font, args.target_fonts, args.rename_font)
 fp.patch()
