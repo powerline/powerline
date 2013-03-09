@@ -76,10 +76,6 @@ function! PowerlineNew()
 	call map(range(1, winnr('$')), 's:GetWinID(v:val)')
 endfunction
 
-" Is immediately changed when PowerlineNew() function is run. Good for global 
-" value.
-set statusline=%!PowerlineNew()
-
 function! PowerlineRegisterCachePurgerEvent(event)
 	exec s:powerline_pycmd 'from powerline.segments.vim import launchevent as powerline_launchevent'
 	augroup Powerline
@@ -87,7 +83,13 @@ function! PowerlineRegisterCachePurgerEvent(event)
 	augroup END
 endfunction
 
+" Is immediately changed when PowerlineNew() function is run. Good for global 
+" value.
+set statusline=%!PowerlineNew()
+call PowerlineNew()
+
 augroup Powerline
 	autocmd!
-	autocmd ColorScheme * exec s:powerline_pycmd 'powerline.renderer.reset_highlight()'
+	autocmd ColorScheme * :exec s:powerline_pycmd 'powerline.renderer.reset_highlight()'
+	autocmd VimEnter    * :redrawstatus!
 augroup END
