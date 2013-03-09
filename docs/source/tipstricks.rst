@@ -44,6 +44,6 @@ you probably have lazyredraw enabled. Either disable lazyredraw or set the follo
 
 .. code-block:: vim
 
-   au VimEnter * redrawstatusline
+   au VimEnter * redrawstatus
 
 This will not fix it entirely, but it will make the statusbar more sensible.
