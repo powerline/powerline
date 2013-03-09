@@ -56,7 +56,7 @@ class Powerline(object):
 			'common_config': common_config,
 			'segment_info': self.get_segment_info(),
 			}
-		local_themes = self.get_local_themes(ext_config.get('local_themes', {}))
+		local_themes = self.get_local_themes(ext_config.get('local_themes'))
 
 		# Load and initialize extension renderer
 		renderer_module_name = renderer_module or ext
@@ -125,14 +125,15 @@ class Powerline(object):
 		required.
 
 		:param dict local_themes:
-			Usually accepts ``{matcher_name : theme_name}``.
+			Usually accepts ``{matcher_name : theme_name}``. May also receive 
+			None in case there is no local_themes configuration.
 
 		:return:
 			anything accepted by ``self.renderer.get_theme`` and processable by 
 			``self.renderer.add_local_theme``. Renderer module is determined by 
 			``__init__`` arguments, refer to its documentation.
 		'''
-		return {}
+		return None
 
 	@staticmethod
 	def get_segment_info():
