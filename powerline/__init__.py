@@ -9,13 +9,17 @@ from powerline.colorscheme import Colorscheme
 from powerline.lib import underscore_to_camelcase
 
 
-def load_json_config(search_paths, config_file):
+def open_file(path):
+	return open(path, 'r')
+
+
+def load_json_config(search_paths, config_file, load=json.load, open=open_file):
 	config_file += '.json'
 	for path in search_paths:
 		config_file_path = os.path.join(path, config_file)
 		if os.path.isfile(config_file_path):
-			with open(config_file_path, 'r') as config_file_fp:
-				return json.load(config_file_fp)
+			with open(config_file_path) as config_file_fp:
+				return load(config_file_fp)
 	raise IOError('Config file not found in search path: {0}'.format(config_file))
 
 
@@ -70,7 +74,8 @@ class Powerline(object):
 		options = {'term_truecolor': common_config.get('term_truecolor', False)}
 		self.renderer = Renderer(theme_config, local_themes, theme_kwargs, colorscheme, **options)
 
-	def get_config_paths(self):
+	@staticmethod
+	def get_config_paths():
 		'''Get configuration paths.
 
 		:return: list of paths
