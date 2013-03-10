@@ -48,10 +48,10 @@ class Mark:
                 % (self.name, self.line+1, self.column+1)
         if snippet is not None:
             where += ":\n" + snippet
-        try:
-            return where.encode('utf-8')
-        except AttributeError:
+        if type(where) is str:
             return where
+        else:
+            return where.encode('utf-8')
 
 class YAMLError(Exception):
     pass
