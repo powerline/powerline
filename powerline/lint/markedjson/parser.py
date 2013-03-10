@@ -1,6 +1,6 @@
 __all__ = ['Parser', 'ParserError']
 
-from .error import MarkedYAMLError, echoerr
+from .error import MarkedYAMLError
 from .tokens import *
 from .events import *
 from .scanner import *
@@ -99,10 +99,11 @@ class Parser:
         if not self.check_token(StreamEndToken):
             token = self.peek_token()
             start_mark = token.start_mark
-            raise ParserError(None, None,
+            self.echoerr(None, None,
                     "expected '<stream end>', but found %r"
                     % self.peek_token().id,
                     self.peek_token().start_mark)
+            return StreamEndEvent(token.start_mark, token.end_mark)
         else:
             # Parse the end of the stream.
             token = self.get_token()
@@ -173,7 +174,7 @@ class Parser:
                     self.get_token()
                     if self.check_token(FlowSequenceEndToken):
                         token = self.peek_token()
-                        echoerr("While parsing a flow sequence", self.marks[-1],
+                        self.echoerr("While parsing a flow sequence", self.marks[-1],
                             "expected sequence value, but got %r" % token.id, token.start_mark)
                 else:
                     token = self.peek_token()
@@ -206,7 +207,7 @@ class Parser:
                     self.get_token()
                     if self.check_token(FlowMappingEndToken):
                         token = self.peek_token()
-                        echoerr("While parsing a flow mapping", self.marks[-1],
+                        self.echoerr("While parsing a flow mapping", self.marks[-1],
                             "expected mapping key, but got %r" % token.id, token.start_mark)
                 else:
                     token = self.peek_token()

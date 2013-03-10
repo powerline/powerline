@@ -560,8 +560,8 @@ def check_full_segment_data(segment, data, context, echoerr):
 
 	ext = data['ext']
 	theme_segment_data = context[0][1].get('segment_data', {})
-	top_theme_name = data['main_config'].get('ext', {}).get(ext, {}).get('theme', {})
-	if data['theme'] == top_theme_name:
+	top_theme_name = data['main_config'].get('ext', {}).get(ext, {}).get('theme', None)
+	if not top_theme_name or data['theme'] == top_theme_name:
 		top_segment_data = {}
 	else:
 		top_segment_data = data['ext_theme_configs'].get(top_theme_name, {}).get('segment_data', {})
@@ -860,13 +860,23 @@ def check(path=None):
 				'themes' if ext in configs['themes'] else 'colorschemes',
 				))
 
-	main_config = load_json_config(search_paths, 'config', load=load, open=open_file)
+	lhadproblem = [False]
+	def load_config(stream):
+		r, hadproblem = load(stream)
+		if hadproblem:
+			lhadproblem[0] = True
+		return r
+
+	main_config = load_json_config(search_paths, 'config', load=load_config, open=open_file)
 	hadproblem = main_spec.match(main_config, data={'configs': configs}, context=(('', main_config),))[1]
 
 	import_paths = [os.path.expanduser(path) for path in main_config.get('common', {}).get('paths', [])]
 
-	colors_config = load_json_config(search_paths, 'colors', load=load, open=open_file)
+	colors_config = load_json_config(search_paths, 'colors', load=load_config, open=open_file)
 	if colors_spec.match(colors_config, context=(('', colors_config),))[1]:
+		hadproblem = True
+
+	if lhadproblem[0]:
 		hadproblem = True
 
 	colorscheme_configs = defaultdict(lambda: {})
@@ -874,7 +884,9 @@ def check(path=None):
 		data = {'ext': ext, 'colors_config': colors_config}
 		for colorscheme, cfile in configs['colorschemes'][ext].items():
 			with open_file(cfile) as config_file_fp:
-				config = load(config_file_fp)
+				config, lhadproblem = load(config_file_fp)
+			if lhadproblem:
+				hadproblem = True
 			colorscheme_configs[ext][colorscheme] = config
 			if ext == 'vim':
 				spec = vim_colorscheme_spec
@@ -887,7 +899,9 @@ def check(path=None):
 	for ext in configs['themes']:
 		for theme, sfile in configs['themes'][ext].items():
 			with open_file(sfile) as config_file_fp:
-				config = load(config_file_fp)
+				config, lhadproblem = load(config_file_fp)
+			if lhadproblem:
+				hadproblem = True
 			theme_configs[ext][theme] = config
 	for ext, configs in theme_configs.items():
 		data = {'ext': ext, 'colorscheme_configs': colorscheme_configs, 'import_paths': import_paths,

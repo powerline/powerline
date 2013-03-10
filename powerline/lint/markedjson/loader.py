@@ -7,6 +7,7 @@ from .parser import *
 from .composer import *
 from .constructor import *
 from .resolver import *
+from .error import echoerr
 
 class Loader(Reader, Scanner, Parser, Composer, Constructor, Resolver):
 
@@ -17,4 +18,9 @@ class Loader(Reader, Scanner, Parser, Composer, Constructor, Resolver):
         Composer.__init__(self)
         Constructor.__init__(self)
         Resolver.__init__(self)
+        self.haserrors = False
+
+    def echoerr(self, *args, **kwargs):
+        echoerr(*args, **kwargs)
+        self.haserrors = True
 

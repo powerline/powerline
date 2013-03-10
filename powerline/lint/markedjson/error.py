@@ -83,5 +83,5 @@ class MarkedYAMLError(YAMLError):
 
     def __init__(self, context=None, context_mark=None,
             problem=None, problem_mark=None, note=None):
-        YAMLError.__init__(format_error(context, context_mark, problem,
+        YAMLError.__init__(self, format_error(context, context_mark, problem,
                                         problem_mark, note))

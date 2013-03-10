@@ -351,9 +351,9 @@ class Scanner:
 
     def fetch_plain(self):
 
-        # No simple keys after plain scalars. But note that `scan_plain` will
-        # change this flag if the scan is finished at the beginning of the
-        # line.
+        self.save_possible_simple_key()
+
+        # No simple keys after plain scalars.
         self.allow_simple_key = False
 
         # Scan and add SCALAR. May change `allow_simple_key`.
