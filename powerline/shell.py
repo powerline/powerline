@@ -1,7 +1,8 @@
-# -*- coding: utf-8 -*-
+# vim:fileencoding=UTF-8:ts=4:sw=4:sta:noet:sts=4:fdm=marker:ai
+import argparse
 
 from powerline import Powerline
-from powerline.lib import mergedicts
+from powerline.lib import mergedicts, parsedotval
 
 
 def mergeargs(argvalue):
@@ -11,6 +12,21 @@ def mergeargs(argvalue):
 	for subval in argvalue[1:]:
 		mergedicts(r, dict([subval]))
 	return r
+
+
+def get_argparser(description, parser=argparse.ArgumentParser):
+	p = parser(description=description)
+	a = p.add_argument
+	a('ext', nargs=1)
+	a('side', nargs='?', choices=('left', 'right'))
+	a('-r', '--renderer_module', metavar='MODULE', type=str)
+	a('-w', '--width', type=int)
+	a('--last_exit_code', metavar='INT', type=int)
+	a('--last_pipe_status', metavar='LIST', default='', type=lambda s: [int(status) for status in s.split()])
+	a('-c', '--config', metavar='KEY.KEY=VALUE', type=parsedotval, action='append')
+	a('-t', '--theme_option', metavar='THEME.KEY.KEY=VALUE', type=parsedotval, action='append')
+	a('-p', '--config_path', metavar='PATH')
+	return p
 
 
 class ShellPowerline(Powerline):

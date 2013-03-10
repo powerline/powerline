@@ -1,19 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 '''Powerline prompt and statusline script.'''
-import argparse
 import sys
-import json
 from powerline.lib import parsedotval
 
 try:
-	from powerline.shell import ShellPowerline
+	from powerline.shell import ShellPowerline, get_argparser
 except ImportError:
 	import os
 	sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-	from powerline.shell import ShellPowerline  # NOQA
+	from powerline.shell import ShellPowerline, get_argparser # NOQA
 
-parser = argparse.ArgumentParser(description=__doc__)
+parser = get_argparser(__doc__)
 parser.add_argument('ext', nargs=1)
 parser.add_argument('side', nargs='?', choices=('left', 'right'))
 parser.add_argument('-r', '--renderer_module', metavar='MODULE', type=str)
