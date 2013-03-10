@@ -28,12 +28,17 @@ KEYWORDS=
 
 S="${WORKDIR}/${PN}"
 
+COMMON_DEPEND="
+	virtual/python-argparse
+"
 RDEPEND="
+	${COMMON_DEPEND}
 	vim? ( || ( app-editors/vim[python] app-editors/gvim[python] ) )
 	awesome? ( >=x11-wm/awesome-3.5 )
 	git? ( || ( >=dev-vcs/git-1.7.2 >=dev-python/pygit2-0.17 ) )
 "
 DEPEND="
+	${COMMON_DEPEND}
 	doc? ( dev-python/sphinx dev-python/docutils )
 	test? (
 		python_targets_python2_6? ( virtual/python-unittest2 )
