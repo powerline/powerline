@@ -10,6 +10,15 @@ I'm using tmux and Powerline looks like crap, what's wrong?
   :guilabel:`Set locale variables automatically` in :menuselection:`Profiles 
   --> Terminal --> Environment`.
 
+I’m using tmux/screen and Powerline is colorless
+------------------------------------------------
+
+* If the above advices do not help, then you need to disable 
+  :ref:`term_truecolor <config-common-term_truecolor>`.
+* Alternative: set :ref:`additional_escapes <config-common-additional_escapes>` 
+  to ``"tmux"`` or ``"screen"``. Note that it is known to work perfectly in 
+  screen, but in tmux it may produce ugly spaces.
+
 My vim statusline has strange characters like ``^B`` in it!
 -----------------------------------------------------------
 
@@ -49,4 +58,5 @@ My vim statusline is not displayed completely and has too much spaces
 ---------------------------------------------------------------------
 
 * Be sure you have ``ambiwidth`` option set to ``single``.
-* Alternative: remove fancy dividers and other fancy symbols from configuration.
+* Alternative: set :ref:`ambiwidth <config-common-ambiwidth>` to 2, remove fancy 
+  dividers (they suck when ``ambiwidth`` is set to double).

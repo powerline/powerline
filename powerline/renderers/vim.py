@@ -22,6 +22,11 @@ class VimRenderer(Renderer):
 	'''Powerline vim segment renderer.'''
 
 	def __init__(self, *args, **kwargs):
+		if not hasattr(vim, 'strwidth'):
+			# Hope nobody want to change this at runtime
+			if vim.eval('&ambiwidth') == 'double':
+				kwargs = dict(**kwargs)
+				kwargs['ambigious'] = 2
 		super(VimRenderer, self).__init__(*args, **kwargs)
 		self.hl_groups = {}
 
@@ -39,6 +44,13 @@ class VimRenderer(Renderer):
 				return match['theme']
 		else:
 			return self.theme
+
+	if hasattr(vim, 'strwidth'):
+		@staticmethod
+		def strwidth(string):
+			# Does not work with tabs, but neither is strwidth from default 
+			# renderer
+			return vim.strwidth(string.encode('utf-8'))
 
 	def render(self, window_id, winidx, current):
 		'''Render all segments.

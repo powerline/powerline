@@ -1,6 +1,7 @@
 # vim:fileencoding=utf-8:noet
 
-from powerline.theme import Theme
+from powerline.theme import Theme, u
+from unicodedata import east_asian_width, combining
 
 
 try:
@@ -17,6 +18,17 @@ class Renderer(object):
 		self.local_themes = local_themes
 		self.theme_kwargs = theme_kwargs
 		self.colorscheme = colorscheme
+		self.width_data = {
+				'N':  1,                              # Neutral
+				'Na': 1,                              # Narrow
+				'A':  getattr(self, 'ambiwidth', 1),  # Ambigious
+				'H':  1,                              # Half-width
+				'W':  2,                              # Wide
+				'F':  2,                              # Fullwidth
+				}
+
+	def strwidth(self, string):
+		return sum((0 if combining(symbol) else self.width_data[east_asian_width(symbol)] for symbol in string))
 
 	def get_theme(self, matcher_info):
 		return self.theme
@@ -151,7 +163,7 @@ class Renderer(object):
 				else:
 					segment['_rendered_raw'] += contents_raw
 					segment['_rendered_hl'] += contents_highlighted
-			segment['_len'] = len(segment['_rendered_raw'])
+			segment['_len'] = self.strwidth(segment['_rendered_raw'])
 			yield segment
 
 	@staticmethod
