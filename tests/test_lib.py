@@ -45,64 +45,69 @@ use_mercurial = use_bzr = sys.version_info < (3, 0)
 
 class TestVCS(TestCase):
 	def test_git(self):
-		repo = guess(path='git_repo')
+		repo = guess(path=GIT_REPO)
 		self.assertNotEqual(repo, None)
 		self.assertEqual(repo.branch(), 'master')
 		self.assertEqual(repo.status(), '   ')
 		self.assertEqual(repo.status('file'), None)
-		with open(os.path.join('git_repo', 'file'), 'w') as f:
+		with open(os.path.join(GIT_REPO, 'file'), 'w') as f:
 			f.write('abc')
 			f.flush()
 			self.assertEqual(repo.status(), '  U')
 			self.assertEqual(repo.status('file'), '??')
-			call(['git', 'add', '.'], cwd='git_repo')
+			call(['git', 'add', '.'], cwd=GIT_REPO)
 			self.assertEqual(repo.status(), ' I ')
 			self.assertEqual(repo.status('file'), 'A ')
 			f.write('def')
 			f.flush()
 			self.assertEqual(repo.status(), 'DI ')
 			self.assertEqual(repo.status('file'), 'AM')
-		os.remove(os.path.join('git_repo', 'file'))
+		os.remove(os.path.join(GIT_REPO, 'file'))
 
 	if use_mercurial:
 		def test_mercurial(self):
-			repo = guess(path='hg_repo')
+			repo = guess(path=HG_REPO)
 			self.assertNotEqual(repo, None)
 			self.assertEqual(repo.branch(), 'default')
-			with open(os.path.join('hg_repo', 'file'), 'w') as f:
+			with open(os.path.join(HG_REPO, 'file'), 'w') as f:
 				f.write('abc')
 				f.flush()
 				self.assertEqual(repo.status(), ' U')
 				self.assertEqual(repo.status('file'), 'U')
-				call(['hg', 'add', '.'], cwd='hg_repo', stdout=PIPE)
+				call(['hg', 'add', '.'], cwd=HG_REPO, stdout=PIPE)
 				self.assertEqual(repo.status(), 'D ')
 				self.assertEqual(repo.status('file'), 'A')
-			os.remove(os.path.join('hg_repo', 'file'))
+			os.remove(os.path.join(HG_REPO, 'file'))
 
 	if use_bzr:
 		def test_bzr(self):
-			repo = guess(path='bzr_repo')
+			repo = guess(path=BZR_REPO)
 			self.assertNotEqual(repo, None, 'No bzr repo found. Do you have bzr installed?')
 			self.assertEqual(repo.branch(), 'test_powerline')
 			self.assertEqual(repo.status(), None)
-			with open(os.path.join('bzr_repo', 'file'), 'w') as f:
+			with open(os.path.join(BZR_REPO, 'file'), 'w') as f:
 				f.write('abc')
 			self.assertEqual(repo.status(), ' U')
 			self.assertEqual(repo.status('file'), '? ')
-			call(['bzr', 'add', '.'], cwd='bzr_repo', stdout=PIPE)
+			call(['bzr', 'add', '.'], cwd=BZR_REPO, stdout=PIPE)
 			self.assertEqual(repo.status(), 'D ')
 			self.assertEqual(repo.status('file'), '+N')
-			call(['bzr', 'commit', '-m', 'initial commit'], cwd='bzr_repo', stdout=PIPE, stderr=PIPE)
+			call(['bzr', 'commit', '-m', 'initial commit'], cwd=BZR_REPO, stdout=PIPE, stderr=PIPE)
 			self.assertEqual(repo.status(), None)
-			with open(os.path.join('bzr_repo', 'file'), 'w') as f:
+			with open(os.path.join(BZR_REPO, 'file'), 'w') as f:
 				f.write('def')
 			self.assertEqual(repo.status(), 'D ')
 			self.assertEqual(repo.status('file'), ' M')
 			self.assertEqual(repo.status('notexist'), None)
-			os.remove(os.path.join('bzr_repo', 'file'))
+			os.remove(os.path.join(BZR_REPO, 'file'))
 
 old_HGRCPATH = None
 old_cwd = None
+
+
+GIT_REPO = 'git_repo' + os.environ.get('PYTHON', '')
+HG_REPO = 'hg_repo' + os.environ.get('PYTHON', '')
+BZR_REPO = 'bzr_repo' + os.environ.get('PYTHON', '')
 
 
 def setUpModule():
@@ -110,28 +115,29 @@ def setUpModule():
 	global old_HGRCPATH
 	old_cwd = os.getcwd()
 	os.chdir(os.path.dirname(__file__))
-	call(['git', 'init', '--quiet', 'git_repo'])
-	call(['git', 'config', '--local', 'user.name', 'Foo'], cwd='git_repo')
-	call(['git', 'config', '--local', 'user.email', 'bar@example.org'], cwd='git_repo')
-	call(['git', 'commit', '--allow-empty', '--message', 'Initial commit', '--quiet'], cwd='git_repo')
+	call(['git', 'init', '--quiet', GIT_REPO])
+	assert os.path.isdir(GIT_REPO)
+	call(['git', 'config', '--local', 'user.name', 'Foo'], cwd=GIT_REPO)
+	call(['git', 'config', '--local', 'user.email', 'bar@example.org'], cwd=GIT_REPO)
+	call(['git', 'commit', '--allow-empty', '--message', 'Initial commit', '--quiet'], cwd=GIT_REPO)
 	if use_mercurial:
 		old_HGRCPATH = os.environ.get('HGRCPATH')
 		os.environ['HGRCPATH'] = ''
-		call(['hg', 'init', 'hg_repo'])
-		with open(os.path.join('hg_repo', '.hg', 'hgrc'), 'w') as hgrc:
+		call(['hg', 'init', HG_REPO])
+		with open(os.path.join(HG_REPO, '.hg', 'hgrc'), 'w') as hgrc:
 			hgrc.write('[ui]\n')
 			hgrc.write('username = Foo <bar@example.org>\n')
 	if use_bzr:
-		call(['bzr', 'init', '--quiet', 'bzr_repo'])
-		call(['bzr', 'config', 'email=Foo <bar@example.org>'], cwd='bzr_repo')
-		call(['bzr', 'config', 'nickname=test_powerline'], cwd='bzr_repo')
-		call(['bzr', 'config', 'create_signatures=0'], cwd='bzr_repo')
+		call(['bzr', 'init', '--quiet', BZR_REPO])
+		call(['bzr', 'config', 'email=Foo <bar@example.org>'], cwd=BZR_REPO)
+		call(['bzr', 'config', 'nickname=test_powerline'], cwd=BZR_REPO)
+		call(['bzr', 'config', 'create_signatures=0'], cwd=BZR_REPO)
 
 
 def tearDownModule():
 	global old_cwd
 	global old_HGRCPATH
-	for repo_dir in (['git_repo'] + (['hg_repo'] if use_mercurial else []) + (['bzr_repo'] if use_bzr else [])):
+	for repo_dir in [GIT_REPO] + ([HG_REPO] if use_mercurial else []) + ([BZR_REPO] if use_bzr else []):
 		for root, dirs, files in list(os.walk(repo_dir, topdown=False)):
 			for file in files:
 				os.remove(os.path.join(root, file))
