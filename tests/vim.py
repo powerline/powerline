@@ -5,8 +5,9 @@ _window = 0
 _mode = 'n'
 _buf_purge_events = set()
 _options = {
-		'paste': 0,
-		}
+	'paste': 0,
+	'ambiwidth': 'single',
+}
 _last_bufnr = 0
 _highlights = {}
 
