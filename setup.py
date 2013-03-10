@@ -27,7 +27,7 @@ setup(
 		'scripts/powerline',
 		],
 	keywords='',
-	packages=find_packages(exclude=('tests',)),
+	packages=find_packages(exclude=('tests', 'tests.*')),
 	include_package_data=True,
 	zip_safe=False,
 	install_requires=[],
