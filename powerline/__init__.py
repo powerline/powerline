@@ -1,35 +1,51 @@
-# -*- coding: utf-8 -*-
+# vim:fileencoding=UTF-8:ts=4:sw=4:sta:noet:sts=4:fdm=marker:ai
 
 from __future__ import absolute_import
 import json
 import os
 import sys
+import copy
 
 from powerline.colorscheme import Colorscheme
 from powerline.lib import underscore_to_camelcase
 
+class ConfigCache(object):
 
-def load_json_config(search_paths, config_file):
-	config_file += '.json'
-	for path in search_paths:
-		config_file_path = os.path.join(path, config_file)
-		if os.path.isfile(config_file_path):
-			with open(config_file_path, 'r') as config_file_fp:
-				return json.load(config_file_fp)
-	raise IOError('Config file not found in search path: {0}'.format(config_file))
+	def __init__(self):
+		self.cache = {}
 
+	def __call__(self, search_paths, config_file):
+		config_file += '.json'
+		for path in search_paths:
+			config_file_path = os.path.join(path, config_file)
+			try:
+				st = os.stat(config_file_path)
+			except EnvironmentError:
+				continue
+			mtime, parsed = self.cache.get(config_file_path, (None, None))
+			if mtime is None or mtime < st.st_mtime:
+				with open(config_file_path, 'rb') as f:
+					parsed = json.loads(f.read())
+				self.cache[config_file_path] = (st.st_mtime, parsed)
+			# We return a copy because other code might modify the returned
+			# object.
+			return copy.deepcopy(parsed)
+
+		raise IOError('Config file not found in search path: {0}'.format(config_file))
+
+load_json_config = ConfigCache()
 
 class Powerline(object):
-	'''Main powerline class, entrance point for all powerline uses. Sets 
+	'''Main powerline class, entrance point for all powerline uses. Sets
 	powerline up and loads the configuration.
 
 	:param str ext:
-		extension used. Determines where configuration files will 
-		searched and what renderer module will be used. Affected: used ``ext`` 
-		dictionary from :file:`powerline/config.json`, location of themes and 
+		extension used. Determines where configuration files will
+		searched and what renderer module will be used. Affected: used ``ext``
+		dictionary from :file:`powerline/config.json`, location of themes and
 		colorschemes, render module (``powerline.renders.{ext}``).
 	:param str renderer_module:
-		Overrides renderer module (defaults to ``ext``). Should be the name of 
+		Overrides renderer module (defaults to ``ext``). Should be the name of
 		the package imported like this: ``powerline.renders.{render_module}``.
 	'''
 
@@ -116,26 +132,26 @@ class Powerline(object):
 
 	@staticmethod
 	def get_local_themes(local_themes):
-		'''Get local themes. No-op here, to be overridden in subclasses if 
+		'''Get local themes. No-op here, to be overridden in subclasses if
 		required.
 
 		:param dict local_themes:
 			Usually accepts ``{matcher_name : theme_name}``.
 
 		:return:
-			anything accepted by ``self.renderer.get_theme`` and processable by 
-			``self.renderer.add_local_theme``. Renderer module is determined by 
+			anything accepted by ``self.renderer.get_theme`` and processable by
+			``self.renderer.add_local_theme``. Renderer module is determined by
 			``__init__`` arguments, refer to its documentation.
 		'''
 		return {}
 
 	@staticmethod
 	def get_segment_info():
-		'''Get information for segments that require ``segment_info`` argument. 
+		'''Get information for segments that require ``segment_info`` argument.
 		To be overridden in subclasses.
 
 		:return:
-			anything accepted by segments as ``segment_info`` argument. Depends 
+			anything accepted by segments as ``segment_info`` argument. Depends
 			on the segments used, refer to Powerline subclass documentation.
 		'''
 		return None
