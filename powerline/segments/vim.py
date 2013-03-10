@@ -12,6 +12,7 @@ from powerline.bindings.vim import vim_get_func, getbufvar
 from powerline.theme import requires_segment_info
 from powerline.lib import memoize, humanize_bytes, add_divider_highlight_group
 from powerline.lib.vcs import guess
+from functools import wraps
 from collections import defaultdict
 
 vim_funcs = {
@@ -87,6 +88,8 @@ def bufname(segment_info, **kwargs):
 def window_cached(func):
 	cache = {}
 
+	@requires_segment_info
+	@wraps(func)
 	def ret(segment_info, *args, **kwargs):
 		window_id = segment_info['window_id']
 		if segment_info['mode'] == 'nc':
@@ -95,8 +98,7 @@ def window_cached(func):
 			r = func(*args, **kwargs)
 			cache[window_id] = r
 			return r
-	ret = requires_segment_info(ret)
-	ret.__name__ = func.__name__
+
 	return ret
 
 
