@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# vim:fileencoding=UTF-8:ts=4:sw=4:sta:noet:sts=4:fdm=marker:ai
 
 import os
 import sys
@@ -6,6 +6,7 @@ import sys
 from datetime import datetime
 import socket
 from multiprocessing import cpu_count
+from threading import Thread
 
 from powerline.lib import memoize, urllib_read, urllib_urlencode, add_divider_highlight_group
 from powerline.lib.vcs import guess
@@ -397,6 +398,54 @@ def cpu_load_percent(measure_interval=.5):
 	cpu_percent = int(psutil.cpu_percent(interval=measure_interval))
 	return '{0}%'.format(cpu_percent)
 
+class NetworkLoadWatcher(Thread):
+
+	def __init__(self):
+		Thread.__init__(self)
+		self.daemon = True
+		self.interval = 1.0
+		self.delta_rx, self.delta_tx = 0, 0
+		self.psutil = None
+		self.keep_going = True
+		try:
+			import psutil
+		except ImportError:
+			pass
+		else:
+			self.psutil = psutil
+		self.interface = 'eth0'
+		self.last_data = (self.interface, None, None)
+
+	def get_bytes(self):
+		interface = self.interface
+		if self.psutil is None:
+			try:
+				with open('/sys/class/net/{0}/statistics/rx_bytes'.format(interface), 'rb') as file_obj:
+					rx = int(file_obj.read())
+				with open('/sys/class/net/{0}/statistics/tx_bytes'.format(interface), 'rb') as file_obj:
+					tx = int(file_obj.read())
+				return (rx, tx)
+			except (IOError, ValueError):
+				return (None, None)
+		else:
+			io_counters = self.psutil.network_io_counters(pernic=True)
+			if_io = io_counters.get(interface)
+			if not if_io:
+				return (None, None)
+			return (if_io.bytes_recv, if_io.bytes_sent)
+
+	def run(self):
+		import time
+		while self.keep_going:
+			rx, tx = self.get_bytes()
+			if rx is not None and tx is not None:
+				if self.last_data[0] == self.interface and self.last_data[1] is not None:
+					self.delta_rx, self.delta_tx = (rx - self.last_data[1], tx -
+										self.last_data[2])
+				self.last_data = (self.interface, rx, tx)
+			time.sleep(self.interval)
+
+network_load_watcher = None
 
 @add_divider_highlight_group('background:divider')
 def network_load(interface='eth0', measure_interval=1, suffix='B/s', si_prefix=False):
@@ -415,37 +464,20 @@ def network_load(interface='eth0', measure_interval=1, suffix='B/s', si_prefix=F
 	:param bool si_prefix:
 		use SI prefix, e.g. MB instead of MiB
 	'''
-	import time
+	global network_load_watcher
 	from powerline.lib import humanize_bytes
+	if network_load_watcher is None:
+		network_load_watcher = NetworkLoadWatcher()
+		network_load_watcher.start()
+	network_load_watcher.interface, network_load_watcher.interval = (
+		interface, measure_interval)
 
-	def get_bytes():
-		try:
-			import psutil
-			io_counters = psutil.network_io_counters(pernic=True)
-			if_io = io_counters.get(interface)
-			if not if_io:
-				return None
-			return (if_io.bytes_recv, if_io.bytes_sent)
-		except ImportError:
-			try:
-				with open('/sys/class/net/{interface}/statistics/rx_bytes'.format(interface=interface), 'rb') as file_obj:
-					rx = int(file_obj.read())
-				with open('/sys/class/net/{interface}/statistics/tx_bytes'.format(interface=interface), 'rb') as file_obj:
-					tx = int(file_obj.read())
-				return (rx, tx)
-			except IOError:
-				return None
-
-	b1 = get_bytes()
-	if b1 is None:
-		return None
-	time.sleep(measure_interval)
-	b2 = get_bytes()
+	rx_diff = network_load_watcher.delta_rx / measure_interval
+	tx_diff = network_load_watcher.delta_tx / measure_interval
 	return '⬇ {rx_diff} ⬆ {tx_diff}'.format(
-		rx_diff=humanize_bytes((b2[0] - b1[0]) / measure_interval, suffix, si_prefix).rjust(8),
-		tx_diff=humanize_bytes((b2[1] - b1[1]) / measure_interval, suffix, si_prefix).rjust(8),
+		rx_diff=humanize_bytes(rx_diff, suffix, si_prefix).rjust(8),
+		tx_diff=humanize_bytes(tx_diff, suffix, si_prefix).rjust(8),
 		)
-
 
 def virtualenv():
 	'''Return the name of the current Python virtualenv.'''
