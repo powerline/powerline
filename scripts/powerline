@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 '''Powerline prompt and statusline script.'''
 import sys
-from powerline.lib import parsedotval
 
 try:
 	from powerline.shell import ShellPowerline, get_argparser
@@ -12,15 +11,6 @@ except ImportError:
 	from powerline.shell import ShellPowerline, get_argparser # NOQA
 
 parser = get_argparser(__doc__)
-parser.add_argument('ext', nargs=1)
-parser.add_argument('side', nargs='?', choices=('left', 'right'))
-parser.add_argument('-r', '--renderer_module', metavar='MODULE', type=str)
-parser.add_argument('-w', '--width', type=int)
-parser.add_argument('--last_exit_code', metavar='INT', type=int)
-parser.add_argument('--last_pipe_status', metavar='LIST', default='', type=lambda s: [int(status) for status in s.split()])
-parser.add_argument('-c', '--config', metavar='KEY.KEY=VALUE', type=parsedotval, action='append')
-parser.add_argument('-t', '--theme_option', metavar='THEME.KEY.KEY=VALUE', type=parsedotval, action='append')
-parser.add_argument('-p', '--config_path', metavar='PATH')
 
 if __name__ == '__main__':
 	args = parser.parse_args()

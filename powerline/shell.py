@@ -1,5 +1,4 @@
 # vim:fileencoding=UTF-8:ts=4:sw=4:sta:noet:sts=4:fdm=marker:ai
-import argparse
 
 from powerline import Powerline
 from powerline.lib import mergedicts, parsedotval
@@ -14,7 +13,10 @@ def mergeargs(argvalue):
 	return r
 
 
-def get_argparser(description, parser=argparse.ArgumentParser):
+def get_argparser(description, parser=None):
+	if parser is None:
+		import argparse
+		parser = argparse.ArgumentParser
 	p = parser(description=description)
 	a = p.add_argument
 	a('ext', nargs=1)
