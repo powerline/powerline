@@ -1,57 +1,65 @@
-
 class Token(object):
-    def __init__(self, start_mark, end_mark):
-        self.start_mark = start_mark
-        self.end_mark = end_mark
-    def __repr__(self):
-        attributes = [key for key in self.__dict__
-                if not key.endswith('_mark')]
-        attributes.sort()
-        arguments = ', '.join(['%s=%r' % (key, getattr(self, key))
-                for key in attributes])
-        return '%s(%s)' % (self.__class__.__name__, arguments)
+	def __init__(self, start_mark, end_mark):
+		self.start_mark = start_mark
+		self.end_mark = end_mark
 
-#class BOMToken(Token):
-#    id = '<byte order mark>'
+	def __repr__(self):
+		attributes = [key for key in self.__dict__
+				if not key.endswith('_mark')]
+		attributes.sort()
+		arguments = ', '.join(['%s=%r' % (key, getattr(self, key))
+				for key in attributes])
+		return '%s(%s)' % (self.__class__.__name__, arguments)
+
 
 class StreamStartToken(Token):
-    id = '<stream start>'
-    def __init__(self, start_mark=None, end_mark=None,
-            encoding=None):
-        self.start_mark = start_mark
-        self.end_mark = end_mark
-        self.encoding = encoding
+	id = '<stream start>'
+
+	def __init__(self, start_mark=None, end_mark=None,
+			encoding=None):
+		self.start_mark = start_mark
+		self.end_mark = end_mark
+		self.encoding = encoding
+
 
 class StreamEndToken(Token):
-    id = '<stream end>'
+	id = '<stream end>'
+
 
 class FlowSequenceStartToken(Token):
-    id = '['
+	id = '['
+
 
 class FlowMappingStartToken(Token):
-    id = '{'
+	id = '{'
+
 
 class FlowSequenceEndToken(Token):
-    id = ']'
+	id = ']'
+
 
 class FlowMappingEndToken(Token):
-    id = '}'
+	id = '}'
+
 
 class KeyToken(Token):
-    id = '?'
+	id = '?'
+
 
 class ValueToken(Token):
-    id = ':'
+	id = ':'
+
 
 class FlowEntryToken(Token):
-    id = ','
+	id = ','
+
 
 class ScalarToken(Token):
-    id = '<scalar>'
-    def __init__(self, value, plain, start_mark, end_mark, style=None):
-        self.value = value
-        self.plain = plain
-        self.start_mark = start_mark
-        self.end_mark = end_mark
-        self.style = style
+	id = '<scalar>'
 
+	def __init__(self, value, plain, start_mark, end_mark, style=None):
+		self.value = value
+		self.plain = plain
+		self.start_mark = start_mark
+		self.end_mark = end_mark
+		self.style = style

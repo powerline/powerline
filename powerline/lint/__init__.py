@@ -108,7 +108,7 @@ class Spec(object):
 			else:
 				proceed, echo, fhadproblem = item_func(item, data, context, echoerr)
 				if echo and fhadproblem:
-					echoerr(context=self.cmsg.format(key=context_key(context)+'/list item '+unicode(i)),
+					echoerr(context=self.cmsg.format(key=context_key(context) + '/list item ' + unicode(i)),
 							context_mark=value.mark,
 							problem=msg_func(item),
 							problem_mark=item.mark)
@@ -141,7 +141,7 @@ class Spec(object):
 	def check_tuple(self, value, context_mark, data, context, echoerr, start, end):
 		hadproblem = False
 		for (i, item, spec) in zip(itertools.count(), value, self.specs[start:end]):
-			proceed, ihadproblem = spec.match(item, value.mark, data, context + (('tuple item '+unicode(i), item),), echoerr)
+			proceed, ihadproblem = spec.match(item, value.mark, data, context + (('tuple item ' + unicode(i), item),), echoerr)
 			if ihadproblem:
 				hadproblem = True
 			if not proceed:
@@ -154,9 +154,9 @@ class Spec(object):
 
 	cmp_funcs = {
 		'le': lambda x, y: x <= y,
-		'lt': lambda x, y: x <  y,
+		'lt': lambda x, y: x < y,
 		'ge': lambda x, y: x >= y,
-		'gt': lambda x, y: x >  y,
+		'gt': lambda x, y: x > y,
 		'eq': lambda x, y: x == y,
 	}
 
@@ -424,8 +424,8 @@ main_spec = (Spec(
 	.context_message('Error while loading extensions configuration (key {key})'),
 ).context_message('Error while loading main configuration'))
 
-term_color_spec=Spec().unsigned().cmp('le', 255).copy
-true_color_spec=Spec().re('^[0-9a-fA-F]{6}$',
+term_color_spec = Spec().unsigned().cmp('le', 255).copy
+true_color_spec = Spec().re('^[0-9a-fA-F]{6}$',
 						lambda value: '"{0}" is not a six-digit hexadecimal unsigned integer written as a string'.format(value)).copy
 colors_spec = (Spec(
 	colors=Spec().unknown_spec(
@@ -568,7 +568,7 @@ def check_full_segment_data(segment, data, context, echoerr):
 
 	names = [segment['name']]
 	if segment.get('type', 'function') == 'function':
-		module = segment.get('module', context[0][1].get('default_module', 'powerline.segments.'+ext))
+		module = segment.get('module', context[0][1].get('default_module', 'powerline.segments.' + ext))
 		names.insert(0, unicode(module) + '.' + unicode(names[0]))
 
 	segment_copy = segment.copy()
@@ -592,7 +592,7 @@ def check_full_segment_data(segment, data, context, echoerr):
 def check_segment_name(name, data, context, echoerr):
 	ext = data['ext']
 	if context[-2][1].get('type', 'function') == 'function':
-		module = context[-2][1].get('module', context[0][1].get('default_module', 'powerline.segments.'+ext))
+		module = context[-2][1].get('module', context[0][1].get('default_module', 'powerline.segments.' + ext))
 		with WithPath(data['import_paths']):
 			try:
 				func = getattr(__import__(unicode(module), fromlist=[unicode(name)]), unicode(name))
@@ -616,9 +616,9 @@ def check_segment_name(name, data, context, echoerr):
 			D_H_G_USED_STR = 'Divider highlight group used: '
 			for line in func.__doc__.split('\n'):
 				if H_G_USED_STR in line:
-					hl_groups.append(line[line.index(H_G_USED_STR)+len(H_G_USED_STR):])
+					hl_groups.append(line[line.index(H_G_USED_STR) + len(H_G_USED_STR):])
 				elif D_H_G_USED_STR in line:
-					divider_hl_group = line[line.index(D_H_G_USED_STR)+len(D_H_G_USED_STR)+2:-3]
+					divider_hl_group = line[line.index(D_H_G_USED_STR) + len(D_H_G_USED_STR) + 2:-3]
 
 		hadproblem = False
 
@@ -756,7 +756,7 @@ def check_segment_data_key(key, data, context, echoerr):
 				if 'name' in segment:
 					if key == segment['name']:
 						found = True
-					module = segment.get('module', theme.get('default_module', 'powerline.segments.'+ext))
+					module = segment.get('module', theme.get('default_module', 'powerline.segments.' + ext))
 					if key == unicode(module) + '.' + unicode(segment['name']):
 						found = True
 			if found:
@@ -861,6 +861,7 @@ def check(path=None):
 				))
 
 	lhadproblem = [False]
+
 	def load_config(stream):
 		r, hadproblem = load(stream)
 		if hadproblem:
