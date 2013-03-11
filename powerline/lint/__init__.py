@@ -604,7 +604,7 @@ def check_segment_name(name, data, context, echoerr):
 			except AttributeError:
 				echoerr(context='Error while loading segment function (key {key})'.format(key=context_key(context)),
 						problem='failed to load function {0} from module {1}'.format(name, module),
-						problem_mark=match_name.mark)
+						problem_mark=name.mark)
 				return True, False, True
 
 		if not callable(func):
