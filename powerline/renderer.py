@@ -18,20 +18,8 @@ class Renderer(object):
 		self.theme_kwargs = theme_kwargs
 		self.colorscheme = colorscheme
 
-	def add_local_theme(self, matcher, theme):
-		if matcher in self.local_themes:
-			raise KeyError('There is already a local theme with given matcher')
-		self.local_themes[matcher] = theme
-
 	def get_theme(self, matcher_info):
-		for matcher in self.local_themes.keys():
-			if matcher(matcher_info):
-				match = self.local_themes[matcher]
-				if 'config' in match:
-					match['theme'] = Theme(theme_config=match.pop('config'), top_theme_config=self.theme_config, **self.theme_kwargs)
-				return match['theme']
-		else:
-			return self.theme
+		return self.theme
 
 	def get_highlighting(self, segment, mode):
 		segment['highlight'] = self.colorscheme.get_highlighting(segment['highlight_group'], mode, segment.get('gradient_level'))

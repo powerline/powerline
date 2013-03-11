@@ -5,6 +5,7 @@ from __future__ import absolute_import
 from powerline.bindings.vim import vim_get_func
 from powerline.renderer import Renderer
 from powerline.colorscheme import ATTR_BOLD, ATTR_ITALIC, ATTR_UNDERLINE
+from powerline.theme import Theme
 
 import vim
 
@@ -23,6 +24,21 @@ class VimRenderer(Renderer):
 	def __init__(self, *args, **kwargs):
 		super(VimRenderer, self).__init__(*args, **kwargs)
 		self.hl_groups = {}
+
+	def add_local_theme(self, matcher, theme):
+		if matcher in self.local_themes:
+			raise KeyError('There is already a local theme with given matcher')
+		self.local_themes[matcher] = theme
+
+	def get_theme(self, matcher_info):
+		for matcher in self.local_themes.keys():
+			if matcher(matcher_info):
+				match = self.local_themes[matcher]
+				if 'config' in match:
+					match['theme'] = Theme(theme_config=match.pop('config'), top_theme_config=self.theme_config, **self.theme_kwargs)
+				return match['theme']
+		else:
+			return self.theme
 
 	def render(self, window_id, winidx, current):
 		'''Render all segments.
