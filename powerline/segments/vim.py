@@ -12,6 +12,7 @@ from powerline.bindings.vim import vim_get_func, getbufvar
 from powerline.theme import requires_segment_info
 from powerline.lib import memoize, humanize_bytes, add_divider_highlight_group
 from powerline.lib.vcs import guess
+from functools import wraps
 from collections import defaultdict
 
 vim_funcs = {
@@ -87,6 +88,8 @@ def bufname(segment_info, **kwargs):
 def window_cached(func):
 	cache = {}
 
+	@requires_segment_info
+	@wraps(func)
 	def ret(segment_info, *args, **kwargs):
 		window_id = segment_info['window_id']
 		if segment_info['mode'] == 'nc':
@@ -95,8 +98,7 @@ def window_cached(func):
 			r = func(*args, **kwargs)
 			cache[window_id] = r
 			return r
-	ret = requires_segment_info(ret)
-	ret.__name__ = func.__name__
+
 	return ret
 
 
@@ -213,6 +215,8 @@ def file_format(segment_info):
 	'''Return file format (i.e. line ending type).
 
 	:return: file format or None if unknown or missing file format
+
+	Divider highlight group used: ``background:divider``.
 	'''
 	return getbufvar(segment_info['bufnr'], '&fileformat') or None
 
@@ -223,6 +227,8 @@ def file_encoding(segment_info):
 	'''Return file encoding/character set.
 
 	:return: file encoding/character set or None if unknown or missing file encoding
+
+	Divider highlight group used: ``background:divider``.
 	'''
 	return getbufvar(segment_info['bufnr'], '&fileencoding') or None
 
@@ -233,6 +239,8 @@ def file_type(segment_info):
 	'''Return file type.
 
 	:return: file type or None if unknown file type
+
+	Divider highlight group used: ``background:divider``.
 	'''
 	return getbufvar(segment_info['bufnr'], '&filetype') or None
 
@@ -243,6 +251,8 @@ def line_percent(segment_info, gradient=False):
 
 	:param bool gradient:
 		highlight the percentage with a color gradient (by default a green to red gradient)
+
+	Highlight groups used: ``line_percent_gradient`` (gradient) or ``line_percent``.
 	'''
 	line_current = segment_info['window'].cursor[0]
 	line_last = len(segment_info['buffer'])
@@ -271,7 +281,10 @@ def col_current(segment_info):
 
 @window_cached
 def virtcol_current():
-	'''Return current visual column with concealed characters ingored'''
+	'''Return current visual column with concealed characters ingored
+
+	Highlight groups used: ``virtcol_current`` or ``col_current``.
+	'''
 	return [{'contents': str(vim_funcs['virtcol']('.')),
 			'highlight_group': ['virtcol_current', 'col_current']}]
 
@@ -294,7 +307,10 @@ def modified_buffers(text='+ ', join_str=','):
 @requires_segment_info
 @memoize(2, cache_key=bufnr, cache_reg_func=purgeall_on_shell)
 def branch(segment_info):
-	'''Return the current working branch.'''
+	'''Return the current working branch.
+
+	Divider highlight group used: ``branch:divider``.
+	'''
 	repo = guess(path=os.path.abspath(segment_info['buffer'].name or os.getcwd()))
 	if repo:
 		return [{
@@ -307,7 +323,10 @@ def branch(segment_info):
 @requires_segment_info
 @memoize(2, cache_key=bufnr, cache_reg_func=purgebuf_on_shell_and_write)
 def file_vcs_status(segment_info):
-	'''Return the VCS status for this buffer.'''
+	'''Return the VCS status for this buffer.
+
+	Highlight groups used: ``file_vcs_status``.
+	'''
 	name = segment_info['buffer'].name
 	if name and not getbufvar(segment_info['bufnr'], '&buftype'):
 		repo = guess(path=os.path.abspath(name))

@@ -26,6 +26,8 @@ def user():
 	'''Return the current user.
 
 	Highlights the user with the ``superuser`` if the effective user ID is 0.
+
+	Highlight groups used: ``superuser`` or ``user``. It is recommended to define all highlight groups.
 	'''
 	user = os.environ.get('USER')
 	try:
@@ -56,6 +58,11 @@ def cwd(dir_shorten_len=None, dir_limit_depth=None):
 		shorten parent directory names to this length (e.g. :file:`/long/path/to/powerline` → :file:`/l/p/t/powerline`)
 	:param int dir_limit_depth:
 		limit directory depth to this number (e.g. :file:`/long/path/to/powerline` → :file:`⋯/to/powerline`)
+
+
+	Divider highlight group used: ``cwd:divider``.
+
+	Highlight groups used: ``cwd:current_folder`` or ``cwd``. It is recommended to define all highlight groups.
 	'''
 	import re
 	try:
@@ -98,6 +105,10 @@ def date(format='%Y-%m-%d', istime=False):
 
 	:param str format:
 		strftime-style date format string
+
+	Divider highlight group used: ``time:divider``.
+
+	Highlight groups used: ``time`` or ``date``.
 	'''
 	return [{
 		'contents': datetime.now().strftime(format),
@@ -172,6 +183,8 @@ def external_ip(query_url='http://ipv4.icanhazip.com/'):
 
 	:param str query_url:
 		URI to query for IP address, should return only the IP address as a text string
+
+	Divider highlight group used: ``background:divider``.
 	'''
 	return [{'contents': _external_ip(query_url=query_url), 'divider_highlight_group': 'background:divider'}]
 
@@ -185,6 +198,8 @@ def uptime(format='{days:02d}d {hours:02d}h {minutes:02d}m'):
 
 	:param str format:
 		format string, will be passed ``days``, ``hours`` and ``minutes`` as arguments
+
+	Divider highlight group used: ``background:divider``.
 	'''
 	try:
 		import psutil
@@ -294,6 +309,11 @@ def weather(unit='c', location_query=None, icons=None):
 		location query for your current location, e.g. ``oslo, norway``
 	:param dict icons:
 		dict for overriding default icons, e.g. ``{'heavy_snow' : u'❆'}``
+
+	Divider highlight group used: ``background:divider``.
+
+	Highlight groups used: ``weather_conditions`` or ``weather``, ``weather_temp_cold`` or ``weather_temp_hot`` or ``weather_temp`` or ``weather``.
+	Also uses ``weather_conditions_{condition}`` for all weather conditions supported by Yahoo.
 	'''
 	import json
 
@@ -359,6 +379,10 @@ def system_load(format='{avg:.1f}', threshold_good=1, threshold_bad=2):
 		threshold for "good load" highlighting
 	:param float threshold_bad:
 		threshold for "bad load" highlighting
+
+	Divider highlight group used: ``background:divider``.
+
+	Highlight groups used: ``system_load_good`` or ``system_load``, ``system_load_bad`` or ``system_load``, ``system_load_ugly`` or ``system_load``. It is recommended to define all highlight groups.
 	'''
 	cpu_num = cpu_count()
 	ret = []
@@ -466,6 +490,8 @@ def email_imap_alert(username, password, server='imap.gmail.com', port=993, fold
 		e-mail server port
 	:param str folder:
 		folder to check for e-mails
+
+	Highlight groups used: ``email_alert``.
 	'''
 	import imaplib
 	import re

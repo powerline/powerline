@@ -113,9 +113,9 @@ Common configuration
 Common configuration is a subdictionary that is a value of ``common`` key in 
 :file:`powerline/config.json` file.
 
-.. _config-common-term_24bit_colors:
+.. _config-common-term_truecolor:
 
-``term_24bit_colors``
+``term_truecolor``
     Defines whether to output cterm indices (8-bit) or RGB colors (24-bit) 
     to the terminal emulator. See the :ref:`term-feature-support-matrix` for 
     information on whether your terminal emulator supports 24-bit colors.
