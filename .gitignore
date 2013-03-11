@@ -1,6 +1,7 @@
 *.py[co]
 __pycache__
 env
+tags
 
 # Packages
 *.egg

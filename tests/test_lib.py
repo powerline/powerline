@@ -1,3 +1,4 @@
+# vim:fileencoding=UTF-8:ts=4:sw=4:sta:noet:sts=4:fdm=marker:ai
 from powerline.lib import mergedicts, underscore_to_camelcase, add_divider_highlight_group, humanize_bytes
 from powerline.lib.vcs import guess
 from subprocess import call, PIPE
@@ -39,7 +40,7 @@ class TestLib(TestCase):
 		self.assertEqual(humanize_bytes(1000000000, si_prefix=False), '953.7 MiB')
 
 
-use_mercurial = sys.version_info < (3, 0)
+use_mercurial = use_bzr = sys.version_info < (3, 0)
 
 
 class TestVCS(TestCase):
@@ -78,6 +79,27 @@ class TestVCS(TestCase):
 				self.assertEqual(repo.status('file'), 'A')
 			os.remove(os.path.join('hg_repo', 'file'))
 
+	if use_bzr:
+		def test_bzr(self):
+			repo = guess(path='bzr_repo')
+			self.assertNotEqual(repo, None, 'No bzr repo found. Do you have bzr installed?')
+			self.assertEqual(repo.branch(), 'test_powerline')
+			self.assertEqual(repo.status(), None)
+			with open(os.path.join('bzr_repo', 'file'), 'w') as f:
+				f.write('abc')
+			self.assertEqual(repo.status(), ' U')
+			self.assertEqual(repo.status('file'), '? ')
+			call(['bzr', 'add', '.'], cwd='bzr_repo', stdout=PIPE)
+			self.assertEqual(repo.status(), 'D ')
+			self.assertEqual(repo.status('file'), '+N')
+			call(['bzr', 'commit', '-m', 'initial commit'], cwd='bzr_repo', stdout=PIPE, stderr=PIPE)
+			self.assertEqual(repo.status(), None)
+			with open(os.path.join('bzr_repo', 'file'), 'w') as f:
+				f.write('def')
+			self.assertEqual(repo.status(), 'D ')
+			self.assertEqual(repo.status('file'), ' M')
+			self.assertEqual(repo.status('notexist'), None)
+			os.remove(os.path.join('bzr_repo', 'file'))
 
 old_HGRCPATH = None
 old_cwd = None
@@ -99,12 +121,17 @@ def setUpModule():
 		with open(os.path.join('hg_repo', '.hg', 'hgrc'), 'w') as hgrc:
 			hgrc.write('[ui]\n')
 			hgrc.write('username = Foo <bar@example.org>\n')
+	if use_bzr:
+		call(['bzr', 'init', '--quiet', 'bzr_repo'])
+		call(['bzr', 'config', 'email=Foo <bar@example.org>'], cwd='bzr_repo')
+		call(['bzr', 'config', 'nickname=test_powerline'], cwd='bzr_repo')
+		call(['bzr', 'config', 'create_signatures=0'], cwd='bzr_repo')
 
 
 def tearDownModule():
 	global old_cwd
 	global old_HGRCPATH
-	for repo_dir in ['git_repo'] + (['hg_repo'] if use_mercurial else []):
+	for repo_dir in (['git_repo'] + (['hg_repo'] if use_mercurial else []) + (['bzr_repo'] if use_bzr else [])):
 		for root, dirs, files in list(os.walk(repo_dir, topdown=False)):
 			for file in files:
 				os.remove(os.path.join(root, file))
