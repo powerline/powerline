@@ -1,6 +1,6 @@
 # vim:fileencoding=utf-8:noet
 
-from powerline.theme import Theme, u
+from powerline.theme import Theme
 from unicodedata import east_asian_width, combining
 
 
