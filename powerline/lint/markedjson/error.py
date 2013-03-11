@@ -1,17 +1,24 @@
-__all__ = ['Mark', 'JSONError', 'MarkedError', 'echoerr']
+__all__ = ['Mark', 'MarkedError', 'echoerr', 'NON_PRINTABLE']
 
 
 import sys
+import re
+
+
+NON_PRINTABLE = re.compile('[^\t\n\x20-\x7E' + unichr(0x85) + (unichr(0xA0) + '-' + unichr(0xD7FF)) + (unichr(0xE000) + '-' + unichr(0xFFFD)) + ']')
+
+
+def repl(s):
+	return '<x%04x>' % ord(s.group())
 
 
 def strtrans(s):
-	return s.replace('\t', '>---')
+	return NON_PRINTABLE.sub(repl, s.replace('\t', '>---'))
 
 
 class Mark:
-	def __init__(self, name, index, line, column, buffer, pointer):
+	def __init__(self, name, line, column, buffer, pointer):
 		self.name = name
-		self.index = index
 		self.line = line
 		self.column = column
 		self.buffer = buffer
@@ -53,10 +60,6 @@ class Mark:
 			return where.encode('utf-8')
 
 
-class JSONError(Exception):
-	pass
-
-
 def echoerr(*args, **kwargs):
 	sys.stderr.write('\n')
 	sys.stderr.write(format_error(*args, **kwargs) + '\n')
@@ -81,8 +84,8 @@ def format_error(context=None, context_mark=None, problem=None, problem_mark=Non
 	return '\n'.join(lines)
 
 
-class MarkedError(JSONError):
+class MarkedError(Exception):
 	def __init__(self, context=None, context_mark=None,
 			problem=None, problem_mark=None, note=None):
-		JSONError.__init__(self, format_error(context, context_mark, problem,
+		Exception.__init__(self, format_error(context, context_mark, problem,
 										problem_mark, note))
