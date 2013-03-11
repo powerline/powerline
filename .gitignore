@@ -1,32 +1,9 @@
+tags
+
 *.py[co]
 __pycache__
-env
 
-# Packages
 *.egg
 *.egg-info
 dist
 build
-eggs
-parts
-bin
-var
-sdist
-develop-eggs
-.installed.cfg
-
-# Installer logs
-pip-log.txt
-
-# Unit test / coverage reports
-.tox
-junit-*.xml
-.coverage
-coverage.xml
-
-# Translations
-*.mo
-*.pot
-
-# SQLite databases
-*.db
