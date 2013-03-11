@@ -1,6 +1,6 @@
 {
 	"common": {
-		"term_24bit_colors": false,
+		"term_truecolor": false,
 		"dividers": {
 			"left": {
 				"hard": " ",

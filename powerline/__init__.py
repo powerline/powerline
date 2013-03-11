@@ -67,7 +67,7 @@ class Powerline(object):
 		except ImportError as e:
 			sys.stderr.write('Error while importing renderer module: {0}\n'.format(e))
 			sys.exit(1)
-		options = {'term_truecolor': common_config.get('term_24bit_colors', False)}
+		options = {'term_truecolor': common_config.get('term_truecolor', False)}
 		self.renderer = Renderer(theme_config, local_themes, theme_kwargs, colorscheme, **options)
 
 	def get_config_paths(self):

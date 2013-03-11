@@ -31,8 +31,8 @@ custom symbols for developers. This requires that you either have a symbol
 font or a patched font on your system. Your terminal emulator must also 
 support either patched fonts or fontconfig for Powerline to work properly.
 
-You can also enable :ref:`24-bit color support 
-<config-common-term_24bit_colors>` if your terminal emulator supports it.
+You can also enable :ref:`24-bit color support <config-common-term_truecolor>` 
+if your terminal emulator supports it.
 
 .. table:: Application/terminal emulator feature support matrix
    :name: term-feature-support-matrix
