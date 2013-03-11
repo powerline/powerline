@@ -598,8 +598,13 @@ def check_segment_name(name, data, context, echoerr):
 				func = getattr(__import__(unicode(module), fromlist=[unicode(name)]), unicode(name))
 			except ImportError:
 				echoerr(context='Error while checking segments (key {key})'.format(key=context_key(context)),
-						problem='failed to import function {0} from module {1}'.format(name, module),
+						problem='failed to import module {0}'.format(module),
 						problem_mark=module.mark)
+				return True, False, True
+			except AttributeError:
+				echoerr(context='Error while loading segment function (key {key})'.format(key=context_key(context)),
+						problem='failed to load function {0} from module {1}'.format(name, module),
+						problem_mark=match_name.mark)
 				return True, False, True
 
 		if not callable(func):

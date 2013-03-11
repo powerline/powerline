@@ -8,10 +8,9 @@ from .error import MarkedError, Mark, NON_PRINTABLE
 import codecs
 
 try:
-	from __builtin__ import unicode, unichr
+	from __builtin__ import unicode
 except ImportError:
 	unicode = str  # NOQA
-	unichr = chr  # NOQA
 
 
 class ReaderError(MarkedError):
