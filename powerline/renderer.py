@@ -9,6 +9,13 @@ except NameError:
 	NBSP = ' '
 
 
+def construct_returned_value(rendered_highlighted, segments, output_raw):
+	if output_raw:
+		return rendered_highlighted, ''.join((segment['_rendered_raw'] for segment in segments))
+	else:
+		return rendered_highlighted
+
+
 class Renderer(object):
 	def __init__(self, theme_config, local_themes, theme_kwargs, colorscheme, **options):
 		self.__dict__.update(options)
@@ -52,7 +59,7 @@ class Renderer(object):
 
 		if not width:
 			# No width specified, so we don't need to crop or pad anything
-			return self._returned_value(''.join([segment['_rendered_hl'] for segment in segments]) + self.hlstyle(), segments, output_raw)
+			return construct_returned_value(''.join([segment['_rendered_hl'] for segment in segments]) + self.hlstyle(), segments, output_raw)
 
 		# Create an ordered list of segments that can be dropped
 		segments_priority = [segment for segment in sorted(segments, key=lambda segment: segment['priority'], reverse=True) if segment['priority'] > 0]
@@ -77,7 +84,7 @@ class Renderer(object):
 
 		rendered_highlighted = ''.join([segment['_rendered_hl'] for segment in self._render_segments(theme, segments)]) + self.hlstyle()
 
-		return self._returned_value(rendered_highlighted, segments, output_raw)
+		return construct_returned_value(rendered_highlighted, segments, output_raw)
 
 	def _render_segments(self, theme, segments, render_highlighted=True):
 		'''Internal segment rendering method.
@@ -155,22 +162,8 @@ class Renderer(object):
 			yield segment
 
 	@staticmethod
-	def _returned_value(rendered_highlighted, segments, output_raw):
-		if output_raw:
-			return rendered_highlighted, ''.join((segment['_rendered_raw'] for segment in segments))
-		else:
-			return rendered_highlighted
-
-	@staticmethod
 	def escape(string):
 		return string
-
-	@staticmethod
-	def _int_to_rgb(int):
-		r = (int >> 16) & 0xff
-		g = (int >> 8) & 0xff
-		b = int & 0xff
-		return r, g, b
 
 	def hlstyle(fg=None, bg=None, attr=None):
 		raise NotImplementedError
