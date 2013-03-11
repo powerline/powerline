@@ -1,6 +1,6 @@
 from powerline.lint.markedjson import load
 from powerline import load_json_config, Powerline
-from powerline.lint.markedjson.error import echoerr
+from powerline.lint.markedjson.error import echoerr, MarkedError
 from powerline.segments.vim import vim_modes
 import itertools
 import sys
@@ -659,7 +659,7 @@ def check_segment_name(name, data, context, echoerr):
 		return True, False, hadproblem
 	else:
 		if name not in context[0][1].get('segment_data', {}):
-			top_theme_name = data['main_config'].get('ext', {}).get(ext, {}).get('theme', {})
+			top_theme_name = data['main_config'].get('ext', {}).get(ext, {}).get('theme', None)
 			if data['theme'] == top_theme_name:
 				top_theme = {}
 			else:
@@ -742,7 +742,7 @@ def check_highlight_groups(hl_groups, data, context, echoerr):
 
 def check_segment_data_key(key, data, context, echoerr):
 	ext = data['ext']
-	top_theme_name = data['main_config'].get('ext', {}).get(ext, {}).get('theme', {})
+	top_theme_name = data['main_config'].get('ext', {}).get(ext, {}).get('theme', None)
 	is_top_theme = (data['theme'] == top_theme_name)
 	if is_top_theme:
 		themes = data['ext_theme_configs'].values()
@@ -868,14 +868,36 @@ def check(path=None):
 			lhadproblem[0] = True
 		return r
 
-	main_config = load_json_config(search_paths, 'config', load=load_config, open=open_file)
-	hadproblem = main_spec.match(main_config, data={'configs': configs}, context=(('', main_config),))[1]
+	hadproblem = False
+	try:
+		main_config = load_json_config(search_paths, 'config', load=load_config, open=open_file)
+	except IOError:
+		main_config = {}
+		sys.stderr.write('\nConfiguration file not found: config.json\n')
+		hadproblem = True
+	except MarkedError as e:
+		main_config = {}
+		sys.stderr.write(str(e) + '\n')
+		hadproblem = True
+	else:
+		if main_spec.match(main_config, data={'configs': configs}, context=(('', main_config),))[1]:
+			hadproblem = True
 
 	import_paths = [os.path.expanduser(path) for path in main_config.get('common', {}).get('paths', [])]
 
-	colors_config = load_json_config(search_paths, 'colors', load=load_config, open=open_file)
-	if colors_spec.match(colors_config, context=(('', colors_config),))[1]:
+	try:
+		colors_config = load_json_config(search_paths, 'colors', load=load_config, open=open_file)
+	except IOError:
+		colors_config = {}
+		sys.stderr.write('\nConfiguration file not found: colors.json\n')
 		hadproblem = True
+	except MarkedError as e:
+		colors_config = {}
+		sys.stderr.write(str(e) + '\n')
+		hadproblem = True
+	else:
+		if colors_spec.match(colors_config, context=(('', colors_config),))[1]:
+			hadproblem = True
 
 	if lhadproblem[0]:
 		hadproblem = True
@@ -885,7 +907,12 @@ def check(path=None):
 		data = {'ext': ext, 'colors_config': colors_config}
 		for colorscheme, cfile in configs['colorschemes'][ext].items():
 			with open_file(cfile) as config_file_fp:
-				config, lhadproblem = load(config_file_fp)
+				try:
+					config, lhadproblem = load(config_file_fp)
+				except MarkedError as e:
+					sys.stderr.write(str(e) + '\n')
+					hadproblem = True
+					continue
 			if lhadproblem:
 				hadproblem = True
 			colorscheme_configs[ext][colorscheme] = config
@@ -900,7 +927,12 @@ def check(path=None):
 	for ext in configs['themes']:
 		for theme, sfile in configs['themes'][ext].items():
 			with open_file(sfile) as config_file_fp:
-				config, lhadproblem = load(config_file_fp)
+				try:
+					config, lhadproblem = load(config_file_fp)
+				except MarkedError as e:
+					sys.stderr.write(str(e) + '\n')
+					hadproblem = True
+					continue
 			if lhadproblem:
 				hadproblem = True
 			theme_configs[ext][theme] = config
