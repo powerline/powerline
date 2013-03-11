@@ -1,8 +1,11 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
+# vim:fenc=utf-8:noet
 
 import argparse
 import sys
+import re
+import os.path
 
 try:
 	import fontforge
@@ -40,7 +43,10 @@ class FontPatcher(object):
 			if self.rename_font:
 				target_font.familyname += ' for Powerline'
 				target_font.fullname += ' for Powerline'
-				target_font.fontname += 'ForPowerline'
+				fontname, style = re.match("^([^-]*)(?:(-.*))?$", target_font.fontname).groups()
+				target_font.fontname = fontname + 'ForPowerline'
+				if style is not None:
+					target_font.fontname += style
 				target_font.appendSFNTName('English (US)', 'Preferred Family', target_font.familyname)
 				target_font.appendSFNTName('English (US)', 'Compatible Full', target_font.fullname)
 
@@ -100,7 +106,11 @@ class FontPatcher(object):
 			target_font.em = target_font_em_original
 
 			# Generate patched font
-			target_font.generate('{0}.otf'.format(target_font.fullname))
+			extension = os.path.splitext(target_font.path)[1]
+			if extension.lower() not in ['.ttf', '.otf']:
+				# Default to OpenType if input is not TrueType/OpenType
+				extension = '.otf'
+			target_font.generate('{0}{1}'.format(target_font.fullname, extension))
 
 fp = FontPatcher(args.source_font, args.target_fonts, args.rename_font)
 fp.patch()

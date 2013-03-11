@@ -1,3 +1,4 @@
+# vim:fenc=utf-8:noet
 from __future__ import absolute_import
 from mercurial import hg, ui, match
 

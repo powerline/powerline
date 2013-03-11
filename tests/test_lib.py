@@ -1,4 +1,4 @@
-# vim:fileencoding=UTF-8:ts=4:sw=4:sta:noet:sts=4:fdm=marker:ai
+# vim:fenc=utf-8:noet
 from powerline.lib import mergedicts, underscore_to_camelcase, add_divider_highlight_group, humanize_bytes
 from powerline.lib.vcs import guess
 from subprocess import call, PIPE

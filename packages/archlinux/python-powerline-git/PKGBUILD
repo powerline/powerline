@@ -1,14 +1,13 @@
 # Maintainer: Kim Silkebækken <kim.silkebaekken+aur@gmail.com>
 
-pkgbase=python-powerline
 pkgname=python-powerline-git
-pkgver=20130208
+pkgver=20130308
 pkgrel=1
 pkgdesc='The ultimate statusline/prompt utility.'
 url='https://github.com/Lokaltog/powerline'
-license=('CC BY-SA 3.0')
+license=('MIT')
 arch=('any')
-depends=('python>=3.3')
+depends=('python>=3.2')
 makedepends=('git' 'python-distribute')
 optdepends=('python-psutil: improved system information'
 	'python-pygit2: improved git support'
@@ -62,4 +61,8 @@ package() {
 	msg2 "Installing tmux configuration..."
 	install -dm755 "${pkgdir}/usr/share/tmux"
 	install -m644 "powerline/bindings/tmux/powerline.conf" "${pkgdir}/usr/share/tmux/powerline.conf"
+
+	msg2 "Installing license..."
+	install -dm755 "${pkgdir}/usr/share/licenses/${pkgname}"
+	install -m644 "LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
 }

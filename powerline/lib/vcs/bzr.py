@@ -1,27 +1,25 @@
-# vim:fileencoding=UTF-8:ts=4:sw=4:sta:noet:sts=4:fdm=marker:ai
+# vim:fenc=utf-8:noet
 from __future__ import absolute_import, unicode_literals, division, print_function
 
-import sys, os
+import sys
 from io import StringIO
 
 from bzrlib import (branch, workingtree, status, library_state, trace, ui)
 
-class CoerceIO(StringIO):
 
+class CoerceIO(StringIO):
 	def write(self, arg):
 		if isinstance(arg, bytes):
 			arg = arg.decode('utf-8', 'replace')
 		return super(CoerceIO, self).write(arg)
 
-class Repository(object):
 
+class Repository(object):
 	def __init__(self, directory):
 		if isinstance(directory, bytes):
-			directory = directory.decode(sys.getfilesystemencoding() or
-										sys.getdefaultencoding() or 'utf-8')
+			directory = directory.decode(sys.getfilesystemencoding() or sys.getdefaultencoding() or 'utf-8')
 		self.directory = directory
-		self.state = library_state.BzrLibraryState(ui=ui.SilentUIFactory,
-												trace=trace.DefaultConfig())
+		self.state = library_state.BzrLibraryState(ui=ui.SilentUIFactory, trace=trace.DefaultConfig())
 
 	def status(self, path=None):
 		'''Return status of repository or file.
@@ -43,8 +41,7 @@ class Repository(object):
 	def _status(self, path):
 		buf = CoerceIO()
 		w = workingtree.WorkingTree.open(self.directory)
-		status.show_tree_status(w, specific_files=[path] if path else None,
-								to_file=buf, short=True)
+		status.show_tree_status(w, specific_files=[path] if path else None, to_file=buf, short=True)
 		raw = buf.getvalue()
 		if not raw.strip():
 			return
@@ -64,10 +61,3 @@ class Repository(object):
 			return b.nick or None
 		except:
 			pass
-
-if __name__ == '__main__':
-	r = Repository(os.getcwdu())
-	print ('Branch:', r.branch())
-	print ('Repo Status:', r.status())
-	if len(sys.argv) > 1:
-		print ('File status:', r.status(sys.argv[-1]))

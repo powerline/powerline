@@ -1,12 +1,13 @@
+# vim:fenc=utf-8:noet
 from __future__ import absolute_import
 import os
 from powerline.lib.memoize import memoize
 
 
 vcs_props = (
-    ('git', '.git', os.path.exists),
+	('git', '.git', os.path.exists),
 	('mercurial', '.hg', os.path.isdir),
-    ('bzr', '.bzr', os.path.isdir),
+	('bzr', '.bzr', os.path.isdir),
 )
 
 

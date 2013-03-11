@@ -1,3 +1,4 @@
+# vim:fenc=utf-8:noet
 import zsh
 from powerline.shell import ShellPowerline
 from powerline.lib import parsedotval

@@ -16,6 +16,11 @@ on GitHub: https://github.com/Lokaltog/powerline/issues
 Consult the documentation for detailed installation instructions and 
 troubleshooting information: https://powerline.readthedocs.org/en/latest/
 
+You may need to update your PYTHONPATH environment variable by adding the 
+following line to your /etc/profile, .zshrc, etc.:
+
+    export PYTHONPATH=/usr/lib/python3.3/site-packages
+
 Vim installation
 ----------------
 
