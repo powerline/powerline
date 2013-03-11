@@ -1,3 +1,4 @@
+# vim:fenc=utf-8:noet
 from functools import wraps
 import json
 

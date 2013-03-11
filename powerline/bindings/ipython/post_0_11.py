@@ -1,3 +1,4 @@
+# vim:fenc=utf-8:noet
 from powerline.ipython import IpythonPowerline
 
 from IPython.core.prompts import PromptManager

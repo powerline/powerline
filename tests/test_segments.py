@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# vim:fenc=utf-8:noet
 
 from powerline.segments import shell, common
 import tests.vim as vim_module
