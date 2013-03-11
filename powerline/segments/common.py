@@ -415,14 +415,14 @@ class NetworkLoadWatcher(Thread):
 			self.psutil = psutil
 		self.interface = 'detect'
 		self.last_data = (self.interface, None, None)
+		import re
+		self.replace_num_pat = re.compile(r'[a-zA-Z]+')
 
 	def choose_interface(self, interface_data):
 		ans = (0, 0)
 		for name, rx, tx in interface_data:
-			if (name == 'lo' or name.startswith('vmnet') or
-					name.startswith('sit')):
-				continue
-			if rx is None or tx is None:
+			base = self.replace_num_pat.match(name)
+			if None in (base, rx, tx) or base.group() in ('lo', 'vmnet', 'sit'):
 				continue
 			if rx + tx > sum(ans):
 				ans = (rx, tx)
@@ -460,10 +460,24 @@ class NetworkLoadWatcher(Thread):
 				return (None, None)
 			return (if_io.bytes_recv, if_io.bytes_sent)
 
+	def read_proc(self):
+		try:
+			with open('/proc/net/route', 'rb') as f:
+				for line in f.readlines():
+					parts = line.split()
+					if len(parts) > 1:
+						interface, destination = parts[:2]
+						if not destination.replace(b'0', b''):
+							return interface.decode('utf-8')
+		except EnvironmentError:
+			return None
+
 	def get_bytes(self):
 		interface = self.interface
 		if interface == 'detect':
-			return self.choose_interface(self.get_interfaces())
+			interface = self.read_proc()
+			if not interface:
+				return self.choose_interface(self.get_interfaces())
 		return self.get_interface_data(interface)
 
 	def run(self):
