@@ -1,4 +1,4 @@
-# vim:fenc=utf-8:noet
+# vim:fileencoding=utf-8:noet
 import imp
 import sys
 import os

@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# vim:fenc=utf-8:noet
+# vim:fileencoding=utf-8:noet
 
 from libqtile import bar
 from libqtile.widget import base

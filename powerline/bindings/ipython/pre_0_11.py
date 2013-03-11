@@ -1,4 +1,4 @@
-# vim:fenc=utf-8:noet
+# vim:fileencoding=utf-8:noet
 from powerline.ipython import IpythonPowerline
 from IPython.Prompts import BasePrompt
 from IPython.ipapi import get as get_ipython

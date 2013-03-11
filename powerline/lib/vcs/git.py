@@ -1,4 +1,4 @@
-# vim:fenc=utf-8:noet
+# vim:fileencoding=utf-8:noet
 try:
 	import pygit2 as git
 

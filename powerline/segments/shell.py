@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# vim:fenc=utf-8:noet
+# vim:fileencoding=utf-8:noet
 
 from powerline.theme import requires_segment_info
 
