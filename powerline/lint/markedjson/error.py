@@ -4,6 +4,11 @@ __all__ = ['Mark', 'MarkedError', 'echoerr', 'NON_PRINTABLE']
 import sys
 import re
 
+try:
+	from __builtin__ import unichr
+except ImportError:
+	unichr = chr  # NOQA
+
 
 NON_PRINTABLE = re.compile('[^\t\n\x20-\x7E' + unichr(0x85) + (unichr(0xA0) + '-' + unichr(0xD7FF)) + (unichr(0xE000) + '-' + unichr(0xFFFD)) + ']')
 
