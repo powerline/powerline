@@ -1,12 +1,12 @@
 __all__ = ['BaseResolver', 'Resolver']
 
-from .error import MarkedYAMLError
+from .error import MarkedError
 from .nodes import *  # NOQA
 
 import re
 
 
-class ResolverError(MarkedYAMLError):
+class ResolverError(MarkedError):
 	pass
 
 

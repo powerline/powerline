@@ -1,4 +1,4 @@
-__all__ = ['Mark', 'YAMLError', 'MarkedYAMLError', 'echoerr']
+__all__ = ['Mark', 'JSONError', 'MarkedError', 'echoerr']
 
 
 import sys
@@ -53,7 +53,7 @@ class Mark:
 			return where.encode('utf-8')
 
 
-class YAMLError(Exception):
+class JSONError(Exception):
 	pass
 
 
@@ -81,8 +81,8 @@ def format_error(context=None, context_mark=None, problem=None, problem_mark=Non
 	return '\n'.join(lines)
 
 
-class MarkedYAMLError(YAMLError):
+class MarkedError(JSONError):
 	def __init__(self, context=None, context_mark=None,
 			problem=None, problem_mark=None, note=None):
-		YAMLError.__init__(self, format_error(context, context_mark, problem,
+		JSONError.__init__(self, format_error(context, context_mark, problem,
 										problem_mark, note))

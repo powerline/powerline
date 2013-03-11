@@ -16,11 +16,11 @@
 
 __all__ = ['Scanner', 'ScannerError']
 
-from .error import MarkedYAMLError
+from .error import MarkedError
 from .tokens import *  # NOQA
 
 
-class ScannerError(MarkedYAMLError):
+class ScannerError(MarkedError):
 	pass
 
 

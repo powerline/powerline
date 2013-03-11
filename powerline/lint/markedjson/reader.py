@@ -3,7 +3,7 @@
 
 __all__ = ['Reader', 'ReaderError']
 
-from .error import YAMLError, Mark
+from .error import JSONError, Mark
 
 import codecs
 import re
@@ -15,7 +15,7 @@ except ImportError:
 	unichr = chr  # NOQA
 
 
-class ReaderError(YAMLError):
+class ReaderError(JSONError):
 	def __init__(self, name, position, character, encoding, reason):
 		self.name = name
 		self.character = character

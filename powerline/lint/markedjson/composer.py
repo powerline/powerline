@@ -1,11 +1,11 @@
 __all__ = ['Composer', 'ComposerError']
 
-from .error import MarkedYAMLError
+from .error import MarkedError
 from .events import *  # NOQA
 from .nodes import *  # NOQA
 
 
-class ComposerError(MarkedYAMLError):
+class ComposerError(MarkedError):
 	pass
 
 

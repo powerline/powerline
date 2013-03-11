@@ -1,11 +1,11 @@
 __all__ = ['Parser', 'ParserError']
 
-from .error import MarkedYAMLError
+from .error import MarkedError
 from .tokens import *  # NOQA
 from .events import *  # NOQA
 
 
-class ParserError(MarkedYAMLError):
+class ParserError(MarkedError):
 	pass
 
 

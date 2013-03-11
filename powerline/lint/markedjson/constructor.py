@@ -1,6 +1,6 @@
 __all__ = ['BaseConstructor', 'Constructor', 'ConstructorError']
 
-from .error import MarkedYAMLError
+from .error import MarkedError
 from .nodes import *  # NOQA
 from .markedvalue import gen_marked_value
 
@@ -23,7 +23,7 @@ def marked(func):
 	return f
 
 
-class ConstructorError(MarkedYAMLError):
+class ConstructorError(MarkedError):
 	pass
 
 
