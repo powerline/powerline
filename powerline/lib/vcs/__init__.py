@@ -1,4 +1,4 @@
-# vim:fenc=utf-8:noet
+# vim:fileencoding=utf-8:noet
 from __future__ import absolute_import
 import os
 from powerline.lib.memoize import memoize

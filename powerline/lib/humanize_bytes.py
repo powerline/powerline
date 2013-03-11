@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# vim:fenc=utf-8:noet
+# vim:fileencoding=utf-8:noet
 
 from math import log
 unit_list = tuple(zip(['', 'k', 'M', 'G', 'T', 'P'], [0, 0, 1, 2, 2, 2]))

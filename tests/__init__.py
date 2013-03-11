@@ -1,4 +1,4 @@
-# vim:fenc=utf-8:noet
+# vim:fileencoding=utf-8:noet
 import sys
 if sys.version_info < (2, 7):
 	from unittest2 import TestCase, main  # NOQA

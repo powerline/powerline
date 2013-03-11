@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# vim:fenc=utf-8:noet
+# vim:fileencoding=utf-8:noet
 
 from powerline.renderer import Renderer
 from powerline.colorscheme import ATTR_BOLD, ATTR_ITALIC, ATTR_UNDERLINE
