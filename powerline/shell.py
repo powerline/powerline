@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from powerline import Powerline
-from powerline.lib import mergedicts
+from powerline.lib import mergedicts, parsedotval
 
 
 def mergeargs(argvalue):
@@ -39,3 +39,20 @@ class ShellPowerline(Powerline):
 			return [self.args.config_path]
 		else:
 			return super(ShellPowerline, self).get_config_paths()
+
+
+def get_argparser(parser=None, *args, **kwargs):
+	if not parser:
+		import argparse
+		parser = argparse.ArgumentParser
+	p = parser(*args, **kwargs)
+	p.add_argument('ext', nargs=1)
+	p.add_argument('side', nargs='?', choices=('left', 'right'))
+	p.add_argument('-r', '--renderer_module', metavar='MODULE', type=str)
+	p.add_argument('-w', '--width', type=int)
+	p.add_argument('--last_exit_code', metavar='INT', type=int)
+	p.add_argument('--last_pipe_status', metavar='LIST', default='', type=lambda s: [int(status) for status in s.split()])
+	p.add_argument('-c', '--config', metavar='KEY.KEY=VALUE', type=parsedotval, action='append')
+	p.add_argument('-t', '--theme_option', metavar='THEME.KEY.KEY=VALUE', type=parsedotval, action='append')
+	p.add_argument('-p', '--config_path', metavar='PATH')
+	return p
