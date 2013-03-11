@@ -65,3 +65,6 @@ class ShellRenderer(Renderer):
 	@staticmethod
 	def escape(string):
 		return string.replace('\\', '\\\\')
+
+
+renderer = ShellRenderer

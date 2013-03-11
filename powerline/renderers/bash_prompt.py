@@ -11,3 +11,6 @@ class BashPromptRenderer(ShellRenderer):
 	@staticmethod
 	def escape(string):
 		return string.replace('\\', '\\\\').replace('$', '\\$').replace('`', '\\`')
+
+
+renderer = BashPromptRenderer

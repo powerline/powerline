@@ -9,6 +9,7 @@ from powerline.theme import Theme
 
 import vim
 
+
 vim_mode = vim_get_func('mode')
 vim_getwinvar = vim_get_func('getwinvar')
 vim_setwinvar = vim_get_func('setwinvar')
@@ -120,3 +121,6 @@ class VimRenderer(Renderer):
 					attr=','.join(hl_group['attr']),
 				))
 		return '%#' + self.hl_groups[(fg, bg, attr)]['name'] + '#'
+
+
+renderer = VimRenderer

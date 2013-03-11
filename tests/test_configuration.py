@@ -81,9 +81,8 @@ class TestConfig(TestCase):
 		from powerline.segments import common
 		from imp import reload
 		reload(common)
-		from powerline.shell import ShellPowerline
+		from powerline import Powerline
 		with replace_module_attr(common, 'urllib_read', urllib_read):
-			from powerline import Powerline
 			Powerline(ext='wm', renderer_module='pango_markup').renderer.render()
 		reload(common)
 
