@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# vim:fileencoding=UTF-8:ts=4:sw=4:sta:noet:sts=4:fdm=marker:ai
 
 from powerline.segments import shell, common
 import tests.vim as vim_module
@@ -122,8 +122,14 @@ class TestCommon(TestCase):
 			self.assertEqual(common.external_ip(), [{'contents': '127.0.0.1', 'divider_highlight_group': 'background:divider'}])
 
 	def test_uptime(self):
-		# TODO
-		pass
+		import time, datetime
+		n = time.time()
+		dt = datetime.datetime.fromtimestamp(n)
+		with replace_module_module(common, 'datetime', now=lambda:dt, fromtimestamp=datetime.datetime.fromtimestamp):
+			for delta, s, d in [(100, '0d 00h 01m', '01m 40s'), (3600*23, '0d 23h 00m', '23h 00m'), (3600*25, '1d 01h 00m', '1d 01h')]:
+				with replace_module('psutil', BOOT_TIME=n-delta):
+					self.assertEqual(common.uptime(mode='static')[0]['contents'], s)
+					self.assertEqual(common.uptime(mode='dynamic')[0]['contents'], d)
 
 	def test_weather(self):
 		# TODO

@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# vim:fileencoding=UTF-8:ts=4:sw=4:sta:noet:sts=4:fdm=marker:ai
 
 import os
 import sys
@@ -177,7 +177,7 @@ def external_ip(query_url='http://ipv4.icanhazip.com/'):
 
 
 @add_divider_highlight_group('background:divider')
-def uptime(format='{days:02d}d {hours:02d}h {minutes:02d}m', mode='static'):
+def uptime(format='{days:d}d {hours:02d}h {minutes:02d}m', mode='static'):
 	'''Return system uptime.
 
 	Uses the ``psutil`` module if available for multi-platform compatibility,
@@ -201,10 +201,10 @@ def uptime(format='{days:02d}d {hours:02d}h {minutes:02d}m', mode='static'):
 	if mode == 'static':
 		return format.format(days=int(days), hours=hours, minutes=minutes)
 	if days > 0:
-		return '{0}d {1}h'.format(days, hours)
+		return '{0}d {1:02d}h'.format(days, hours)
 	if hours > 0:
-		return '{0}h {1}m'.format(hours, minutes)
-	return '{0}m {1}s'.format(minutes, seconds)
+		return '{0:02d}h {1:02d}m'.format(hours, minutes)
+	return '{0:02d}m {1:02d}s'.format(minutes, seconds)
 
 
 # Weather condition code descriptions available at
