@@ -413,11 +413,37 @@ class NetworkLoadWatcher(Thread):
 			pass
 		else:
 			self.psutil = psutil
-		self.interface = 'eth0'
+		self.interface = 'detect'
 		self.last_data = (self.interface, None, None)
 
-	def get_bytes(self):
-		interface = self.interface
+	def choose_interface(self, interface_data):
+		ans = (0, 0)
+		for name, rx, tx in interface_data:
+			if (name == 'lo' or name.startswith('vmnet') or
+					name.startswith('sit')):
+				continue
+			if rx is None or tx is None:
+				continue
+			if rx + tx > sum(ans):
+				ans = (rx, tx)
+		if ans == (0, 0):
+			return (None, None)
+		return ans
+
+	def get_interfaces(self):
+		if self.psutil is None:
+			import glob
+			for interface in glob.glob('/sys/class/net/*'):
+				rx, tx = self.get_interface_data(os.path.basename(interface))
+				if rx is not None and tx is not None:
+					yield interface, rx, tx
+		else:
+			io_counters = self.psutil.network_io_counters(pernic=True)
+			for interface, data in io_counters.items():
+				if data:
+					yield interface, data.bytes_recv, data.bytes_sent
+
+	def get_interface_data(self, interface):
 		if self.psutil is None:
 			try:
 				with open('/sys/class/net/{0}/statistics/rx_bytes'.format(interface), 'rb') as file_obj:
@@ -429,10 +455,16 @@ class NetworkLoadWatcher(Thread):
 				return (None, None)
 		else:
 			io_counters = self.psutil.network_io_counters(pernic=True)
-			if_io = io_counters.get(interface)
+			if_io = io_counters.get(interface, None)
 			if not if_io:
 				return (None, None)
 			return (if_io.bytes_recv, if_io.bytes_sent)
+
+	def get_bytes(self):
+		interface = self.interface
+		if interface == 'detect':
+			return self.choose_interface(self.get_interfaces())
+		return self.get_interface_data(interface)
 
 	def run(self):
 		import time
@@ -448,7 +480,7 @@ class NetworkLoadWatcher(Thread):
 network_load_watcher = None
 
 @add_divider_highlight_group('background:divider')
-def network_load(interface='eth0', measure_interval=1, suffix='B/s', si_prefix=False):
+def network_load(interface='detect', measure_interval=1, suffix='B/s', si_prefix=False):
 	'''Return the network load.
 
 	Uses the ``psutil`` module if available for multi-platform compatibility,
