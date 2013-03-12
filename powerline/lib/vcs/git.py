@@ -135,7 +135,7 @@ except ImportError:
 				return r
 
 		def branch(self):
-			for line in self._gitcmd('branch', '-l'):
+			for line in self._gitcmd('branch', '-l', '--no-color'):
 				if line[0] == '*':
 					return line[2:]
 			return None
