@@ -11,6 +11,6 @@ except ImportError:
 
 def urllib_read(url):
 	try:
-		return urlopen(url, timeout=100).read().decode('utf-8')
+		return urlopen(url, timeout=10).read().decode('utf-8')
 	except HTTPError:
 		return

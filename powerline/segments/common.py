@@ -8,9 +8,12 @@ import socket
 from multiprocessing import cpu_count
 
 from powerline.lib import add_divider_highlight_group
-from powerline.lib.memoize import memoize
 from powerline.lib.url import urllib_read, urllib_urlencode
 from powerline.lib.vcs import guess
+from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment
+from powerline.lib.time import monotonic
+from powerline.lib.humanize_bytes import humanize_bytes
+from collections import namedtuple, defaultdict
 
 
 def hostname(only_if_ssh=False):
@@ -163,12 +166,11 @@ def fuzzy_time():
 		return ' '.join([minute, hour])
 
 
-@memoize(600)
 def _external_ip(query_url='http://ipv4.icanhazip.com/'):
 	return urllib_read(query_url).strip()
 
 
-def external_ip(query_url='http://ipv4.icanhazip.com/'):
+class ExternalIpSegment(ThreadedSegment):
 	'''Return external IP address.
 
 	Suggested URIs:
@@ -182,7 +184,21 @@ def external_ip(query_url='http://ipv4.icanhazip.com/'):
 
 	Divider highlight group used: ``background:divider``.
 	'''
-	return [{'contents': _external_ip(query_url=query_url), 'divider_highlight_group': 'background:divider'}]
+
+	def set_state(self, query_url='http://ipv4.icanhazip.com/', **kwargs):
+		super(ExternalIpSegment, self).set_state(**kwargs)
+		self.query_url = query_url
+
+	def update(self):
+		ip = _external_ip(query_url=self.query_url)
+		with self.write_lock:
+			self.ip = ip
+
+	def render(self):
+		return [{'contents': self.ip, 'divider_highlight_group': 'background:divider'}]
+
+
+external_ip = ExternalIpSegment()
 
 
 # Weather condition code descriptions available at
@@ -261,8 +277,7 @@ weather_conditions_icons = {
 }
 
 
-@memoize(1800)
-def weather(unit='c', location_query=None, icons=None):
+class WeatherSegment(ThreadedSegment):
 	'''Return weather from Yahoo! Weather.
 
 	Uses GeoIP lookup from http://freegeoip.net/ to automatically determine
@@ -284,55 +299,87 @@ def weather(unit='c', location_query=None, icons=None):
 	Highlight groups used: ``weather_conditions`` or ``weather``, ``weather_temp_cold`` or ``weather_temp_hot`` or ``weather_temp`` or ``weather``.
 	Also uses ``weather_conditions_{condition}`` for all weather conditions supported by Yahoo.
 	'''
-	import json
 
-	if not location_query:
+	interval = 600
+
+	def set_state(self, location_query=None, unit='c', **kwargs):
+		super(WeatherSegment, self).set_state(**kwargs)
+		self.location = location_query
+		self.url = None
+		self.condition = {}
+		self.unit = unit
+
+	def update(self):
+		import json
+
+		if not self.url:
+			# Do not lock attribute assignments in this branch: they are used 
+			# only in .update()
+			if not self.location:
+				try:
+					location_data = json.loads(urllib_read('http://freegeoip.net/json/' + _external_ip()))
+					self.location = ','.join([location_data['city'],
+												location_data['region_name'],
+												location_data['country_name']])
+				except (TypeError, ValueError):
+					return
+			query_data = {
+					'q':
+						'use "http://github.com/yql/yql-tables/raw/master/weather/weather.bylocation.xml" as we;'
+						'select * from we where location="{0}" and unit="{1}"'.format(self.location, self.unit).encode('utf-8'),
+					'format': 'json',
+					}
+			self.url = 'http://query.yahooapis.com/v1/public/yql?' + urllib_urlencode(query_data)
+
 		try:
-			location = json.loads(urllib_read('http://freegeoip.net/json/' + _external_ip()))
-			location_query = ','.join([location['city'], location['region_name'], location['country_name']])
-		except (TypeError, ValueError):
+			raw_response = urllib_read(self.url)
+			response = json.loads(raw_response)
+			condition = response['query']['results']['weather']['rss']['channel']['item']['condition']
+			condition_code = int(condition['code'])
+			contents = '{0}°{1}'.format(condition['temp'], self.unit.upper())
+			temp = int(condition['temp'])
+		except (KeyError, TypeError, ValueError):
+			return
+
+		try:
+			icon_names = weather_conditions_codes[condition_code]
+		except IndexError:
+			icon_names = (('not_available' if condition_code == 3200 else 'unknown'),)
+
+		with self.write_lock:
+			self.contents = contents
+			self.temp = temp
+			self.icon_names = icon_names
+
+	def render(self, icons=None, **kwargs):
+		if not hasattr(self, 'icon_names'):
 			return None
-	query_data = {
-		'q':
-			'use "http://github.com/yql/yql-tables/raw/master/weather/weather.bylocation.xml" as we;'
-			'select * from we where location="{0}" and unit="{1}"'.format(location_query, unit).encode('utf-8'),
-		'format': 'json'
-	}
-	try:
-		url = 'http://query.yahooapis.com/v1/public/yql?' + urllib_urlencode(query_data)
-		response = json.loads(urllib_read(url))
-		condition = response['query']['results']['weather']['rss']['channel']['item']['condition']
-		condition_code = int(condition['code'])
-	except (KeyError, TypeError, ValueError):
-		return None
 
-	try:
-		icon_names = weather_conditions_codes[condition_code]
-	except IndexError:
-		icon_names = (('not_available' if condition_code == 3200 else 'unknown'),)
+		for icon_name in self.icon_names:
+			if icons:
+				if icon_name in icons:
+					icon = icons[icon_name]
+					break
+		else:
+			icon = weather_conditions_icons[self.icon_names[-1]]
 
-	for icon_name in icon_names:
-		if icons:
-			if icon_name in icons:
-				icon = icons[icon_name]
-				break
-	else:
-		icon = weather_conditions_icons[icon_names[-1]]
+		groups = ['weather_condition_' + icon_name for icon_name in self.icon_names] + ['weather_conditions', 'weather']
+		return [
+				{
+				'contents': icon + ' ',
+				'highlight_group': groups,
+				'divider_highlight_group': 'background:divider',
+				},
+				{
+				'contents': self.contents,
+				'highlight_group': ['weather_temp_cold' if int(self.temp) < 0 else 'weather_temp_hot', 'weather_temp', 'weather'],
+				'draw_divider': False,
+				'divider_highlight_group': 'background:divider',
+				},
+			]
 
-	groups = ['weather_condition_' + icon_name for icon_name in icon_names] + ['weather_conditions', 'weather']
-	return [
-			{
-			'contents': icon + ' ',
-			'highlight_group': groups,
-			'divider_highlight_group': 'background:divider',
-			},
-			{
-			'contents': '{0}°{1}'.format(condition['temp'], unit.upper()),
-			'highlight_group': ['weather_temp_cold' if int(condition['temp']) < 0 else 'weather_temp_hot', 'weather_temp', 'weather'],
-			'draw_divider': False,
-			'divider_highlight_group': 'background:divider',
-			},
-		]
+
+weather = WeatherSegment()
 
 
 def system_load(format='{avg:.1f}', threshold_good=1, threshold_bad=2):
@@ -487,8 +534,29 @@ def uptime(format='{days:02d}d {hours:02d}h {minutes:02d}m'):
 	return format.format(days=int(days), hours=hours, minutes=minutes)
 
 
-@add_divider_highlight_group('background:divider')
-def network_load(interface='eth0', measure_interval=1, suffix='B/s', si_prefix=False):
+try:
+	import psutil
+
+
+	def get_bytes(interface):
+		io_counters = psutil.network_io_counters(pernic=True)
+		if_io = io_counters.get(interface)
+		if not if_io:
+			return None
+		return if_io.bytes_recv, if_io.bytes_sent
+except ImportError:
+	def get_bytes(interface):
+		try:
+			with open('/sys/class/net/{interface}/statistics/rx_bytes'.format(interface=interface), 'rb') as file_obj:
+				rx = int(file_obj.read())
+			with open('/sys/class/net/{interface}/statistics/tx_bytes'.format(interface=interface), 'rb') as file_obj:
+				tx = int(file_obj.read())
+			return (rx, tx)
+		except IOError:
+			return None
+
+
+class _NetworkLoadSegment(KwThreadedSegment):
 	'''Return the network load.
 
 	Uses the ``psutil`` module if available for multi-platform compatibility,
@@ -497,15 +565,11 @@ def network_load(interface='eth0', measure_interval=1, suffix='B/s', si_prefix=F
 
 	:param str interface:
 		network interface to measure
-	:param float measure_interval:
-		interval used to measure the network load (in seconds)
 	:param str suffix:
 		string appended to each load string
 	:param bool si_prefix:
 		use SI prefix, e.g. MB instead of MiB
 	'''
-	import time
-	from powerline.lib import humanize_bytes
 
 	interfaces = {}
 
@@ -516,7 +580,10 @@ def network_load(interface='eth0', measure_interval=1, suffix='B/s', si_prefix=F
 	def compute_state(self, interface):
 		if interface in self.interfaces:
 			idata = self.interfaces[interface]
-			idata['prev'] = idata['last']
+			try:
+				idata['prev'] = idata['last']
+			except KeyError:
+				pass
 		else:
 			idata = {}
 			if self.run_once:
@@ -527,8 +594,8 @@ def network_load(interface='eth0', measure_interval=1, suffix='B/s', si_prefix=F
 		idata['last'] = (monotonic(), _get_bytes(interface))
 		return idata
 
-	def render_one(self, idata, suffix='B/s', si_prefix=False, **kwargs):
-		if 'prev' not in idata:
+	def render_one(self, idata, format='⬇ {recv:>8} ⬆ {sent:>8}', suffix='B/s', si_prefix=False, **kwargs):
+		if not idata or 'prev' not in idata:
 			return None
 
 		t1, b1 = idata['prev']
@@ -547,7 +614,7 @@ def network_load(interface='eth0', measure_interval=1, suffix='B/s', si_prefix=F
 				}]
 
 
-network_load = NetworkLoadSegment()
+network_load = _NetworkLoadSegment()
 
 
 def virtualenv():
@@ -555,8 +622,10 @@ def virtualenv():
 	return os.path.basename(os.environ.get('VIRTUAL_ENV', '')) or None
 
 
-@memoize(60)
-def email_imap_alert(username, password, server='imap.gmail.com', port=993, folder='INBOX'):
+IMAPKey = namedtuple('Key', 'username password server port folder')
+
+
+class EmailIMAPSegment(KwThreadedSegment):
 	'''Return unread e-mail count for IMAP servers.
 
 	:param str username:
@@ -572,27 +641,38 @@ def email_imap_alert(username, password, server='imap.gmail.com', port=993, fold
 
 	Highlight groups used: ``email_alert``.
 	'''
-	import imaplib
-	import re
 
-	if not username or not password:
-		return None
-	try:
-		mail = imaplib.IMAP4_SSL(server, port)
-		mail.login(username, password)
-		rc, message = mail.status(folder, '(UNSEEN)')
-		unread_str = message[0].decode('utf-8')
-		unread_count = int(re.search('UNSEEN (\d+)', unread_str).group(1))
-	except socket.gaierror:
-		return None
-	except imaplib.IMAP4.error as e:
-		unread_count = str(e)
-	if not unread_count:
-		return None
-	return [{
-		'highlight_group': 'email_alert',
-		'contents': str(unread_count),
-		}]
+	interval = 60
+
+	@staticmethod
+	def key(username, password, server='imap.gmail.com', port=993, folder='INBOX'):
+		return IMAPKey(username, password, server, port, folder)
+
+	@staticmethod
+	def compute_state(key):
+		if not key.username or not key.password:
+			return None
+		try:
+			import imaplib
+			import re
+			mail = imaplib.IMAP4_SSL(key.server, key.port)
+			mail.login(key.username, key.password)
+			rc, message = mail.status(key.folder, '(UNSEEN)')
+			unread_str = message[0].decode('utf-8')
+			unread_count = int(re.search('UNSEEN (\d+)', unread_str).group(1))
+		except socket.gaierror:
+			return None
+		except imaplib.IMAP4.error as e:
+			unread_count = str(e)
+		if not unread_count:
+			return None
+		return [{
+			'highlight_group': 'email_alert',
+			'contents': str(unread_count),
+			}]
+
+
+email_imap_alert = EmailIMAPSegment()
 
 
 class NowPlayingSegment(object):

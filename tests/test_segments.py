@@ -39,12 +39,13 @@ class TestCommon(TestCase):
 	def test_user(self):
 		new_os = new_module('os', environ={'USER': 'def'}, getpid=lambda: 1)
 		new_psutil = new_module('psutil', Process=lambda pid: Args(username='def'))
-		with replace_module_attr(common, 'os', new_os), replace_module_attr(common, 'psutil', new_psutil):
-			self.assertEqual(common.user(), [{'contents': 'def', 'highlight_group': 'user'}])
-			new_os.geteuid = lambda: 1
-			self.assertEqual(common.user(), [{'contents': 'def', 'highlight_group': 'user'}])
-			new_os.geteuid = lambda: 0
-			self.assertEqual(common.user(), [{'contents': 'def', 'highlight_group': ['superuser', 'user']}])
+		with replace_module_attr(common, 'os', new_os):
+			with replace_module_attr(common, 'psutil', new_psutil):
+				self.assertEqual(common.user(), [{'contents': 'def', 'highlight_group': 'user'}])
+				new_os.geteuid = lambda: 1
+				self.assertEqual(common.user(), [{'contents': 'def', 'highlight_group': 'user'}])
+				new_os.geteuid = lambda: 0
+				self.assertEqual(common.user(), [{'contents': 'def', 'highlight_group': ['superuser', 'user']}])
 
 	def test_branch(self):
 		with replace_module_attr(common, 'guess', lambda path: Args(branch=lambda: os.path.basename(path), status=lambda: None)):
@@ -149,7 +150,7 @@ class TestCommon(TestCase):
 						{'contents': '2', 'highlight_group': ['system_load_bad', 'system_load'], 'draw_divider': False, 'divider_highlight_group': 'background:divider'}])
 
 	def test_cpu_load_percent(self):
-		with replace_module('psutil', cpu_percent=lambda **kwargs: 52.3):
+		with replace_module_module(common, 'psutil', cpu_percent=lambda **kwargs: 52.3):
 			self.assertEqual(common.cpu_load_percent(), '52%')
 
 	def test_network_load(self):

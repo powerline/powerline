@@ -1,7 +1,6 @@
 # vim:fileencoding=utf-8:noet
 from __future__ import absolute_import
 import os
-from powerline.lib.memoize import memoize
 
 
 vcs_props = (
@@ -21,7 +20,6 @@ def generate_directories(path):
 		yield path
 
 
-@memoize(100)
 def guess(path):
 	for directory in generate_directories(path):
 		for vcs, vcs_dir, check in vcs_props:

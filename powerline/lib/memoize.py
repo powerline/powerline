@@ -1,12 +1,7 @@
 # vim:fileencoding=utf-8:noet
 
 from functools import wraps
-try:
-	# Python>=3.3, the only valid clock source for this job
-	from time import monotonic as time
-except ImportError:
-	# System time, is affected by clock updates.
-	from time import time
+from powerline.lib.time import monotonic
 
 
 def default_cache_key(**kwargs):
@@ -36,10 +31,10 @@ class memoize(object):
 			# Handle case when time() appears to be less then cached['time'] due 
 			# to clock updates. Not applicable for monotonic clock, but this 
 			# case is currently rare.
-			if cached is None or not (cached['time'] < time() < cached['time'] + self.timeout):
+			if cached is None or not (cached['time'] < monotonic() < cached['time'] + self.timeout):
 				cached = self.cache[key] = {
 					'result': func(**kwargs),
-					'time': time(),
+					'time': monotonic(),
 					}
 			return cached['result']
 		return decorated_function
