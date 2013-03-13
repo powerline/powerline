@@ -41,11 +41,24 @@ def user():
 		}]
 
 
-def branch():
-	'''Return the current VCS branch.'''
+def branch(status_colors=True):
+	'''Return the current VCS branch.@
+
+	:param bool status_colors:
+		determines whether repository status will be used to determine highlighting. Default: True.
+
+	Highlight groups used: ``branch_clean``, ``branch_dirty``, ``branch``.
+	'''
 	repo = guess(path=os.path.abspath(os.getcwd()))
 	if repo:
-		return repo.branch()
+		branch = repo.branch()
+		if status_colors:
+			return [{
+				'contents': branch,
+				'highlight_group': ['branch_dirty' if repo.status().strip() else 'branch_clean', 'branch'],
+				}]
+		else:
+			return branch
 	return None
 
 
