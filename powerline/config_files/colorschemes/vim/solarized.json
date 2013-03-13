@@ -23,6 +23,7 @@
 		"file_vcs_status_M":      { "fg": "yellow", "bg": "darkgreencopper" },
 		"file_vcs_status_A":      { "fg": "green", "bg": "darkgreencopper" },
 		"line_percent":           { "fg": "oldlace", "bg": "lightskyblue4" },
+		"line_percent_gradient":  { "fg": "green_yellow_orange_red", "bg": "lightskyblue4" },
 		"line_current":           { "fg": "gray13", "bg": "lightyellow", "attr": ["bold"] },
 		"line_current_symbol":    { "fg": "gray13", "bg": "lightyellow" },
 		"col_current":            { "fg": "azure4", "bg": "lightyellow" }

@@ -247,7 +247,7 @@ def line_percent(segment_info, gradient=False):
 	:param bool gradient:
 		highlight the percentage with a color gradient (by default a green to red gradient)
 
-	Highlight groups used: ``line_percent_gradient`` (gradient) or ``line_percent``.
+	Highlight groups used: ``line_percent_gradient`` (gradient), ``line_percent``.
 	'''
 	line_current = segment_info['window'].cursor[0]
 	line_last = len(segment_info['buffer'])
