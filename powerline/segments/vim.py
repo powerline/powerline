@@ -20,6 +20,7 @@ vim_funcs = {
 	'fnamemodify': vim_get_func('fnamemodify'),
 	'expand': vim_get_func('expand'),
 	'bufnr': vim_get_func('bufnr', rettype=int),
+	'line2byte': vim_get_func('line2byte', rettype=int),
 }
 
 vim_modes = {
@@ -195,10 +196,9 @@ def file_name(segment_info, display_no_file=False, no_file_text='[No file]'):
 	return file_name
 
 
-@requires_segment_info
-@memoize(2, cache_key=bufname, cache_reg_func=purgebuf_on_shell_and_write)
-def file_size(segment_info, suffix='B', si_prefix=False):
-	'''Return file size.
+@window_cached
+def file_size(suffix='B', si_prefix=False):
+	'''Return file size in &encoding.
 
 	:param str suffix:
 		string appended to the file size
@@ -206,13 +206,9 @@ def file_size(segment_info, suffix='B', si_prefix=False):
 		use SI prefix, e.g. MB instead of MiB
 	:return: file size or None if the file isn't saved or if the size is too big to fit in a number
 	'''
-	file_name = segment_info['buffer'].name
-	if not file_name:
-		return None
-	try:
-		file_size = os.stat(file_name).st_size
-	except:
-		return None
+	# Note: returns file size in &encoding, not in &fileencoding. But returned 
+	# size is updated immediately; and it is valid for any buffer
+	file_size = vim_funcs['line2byte'](len(vim.current.buffer) + 1) - 1
 	return humanize_bytes(file_size, suffix, si_prefix)
 
 

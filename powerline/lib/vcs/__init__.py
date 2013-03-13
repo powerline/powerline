@@ -16,7 +16,7 @@ def generate_directories(path):
 	while True:
 		old_path = path
 		path = os.path.dirname(path)
-		if path == old_path:
+		if path == old_path or not path:
 			break
 		yield path
 

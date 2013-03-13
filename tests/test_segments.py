@@ -229,7 +229,7 @@ class TestVim(TestCase):
 
 	def test_file_size(self):
 		segment_info = vim_module._get_segment_info()
-		self.assertEqual(vim.file_size(segment_info=segment_info), None)
+		self.assertEqual(vim.file_size(segment_info=segment_info), '0 B')
 		with vim_module._with('buffer', os.path.join(os.path.dirname(__file__), 'empty')) as segment_info:
 			self.assertEqual(vim.file_size(segment_info=segment_info), '0 B')
 
