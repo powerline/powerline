@@ -8,6 +8,8 @@
 		"paste_indicator": { "fg": "white", "bg": "mediumorange", "attr": ["bold"] },
 		"readonly_indicator": { "fg": "brightestred", "bg": "gray4" },
 		"branch": { "fg": "gray9", "bg": "gray4" },
+		"branch_dirty": { "fg": "brightyellow", "bg": "gray4" },
+		"branch_clean": { "fg": "gray9", "bg": "gray4" },
 		"branch:divider": { "fg": "gray7", "bg": "gray4" },
 		"file_directory": { "fg": "gray9", "bg": "gray4" },
 		"file_name": { "fg": "white", "bg": "gray4", "attr": ["bold"] },
