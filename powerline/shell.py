@@ -17,7 +17,7 @@ class ShellPowerline(Powerline):
 	def __init__(self, args):
 		self.args = args
 		self.theme_option = mergeargs(args.theme_option) or {}
-		super(ShellPowerline, self).__init__(args.ext[0], args.renderer_module)
+		super(ShellPowerline, self).__init__(args.ext[0], args.renderer_module, run_once=True)
 
 	def get_segment_info(self):
 		return self.args

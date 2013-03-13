@@ -79,6 +79,8 @@ def gen_segment_getter(ext, path, theme_configs, default_module=None):
 			'include_modes': segment.get('include_modes', []),
 			'width': segment.get('width'),
 			'align': segment.get('align', 'l'),
+			'shutdown': getattr(contents_func, 'shutdown', None),
+			'startup': getattr(contents_func, 'startup', None),
 			'_rendered_raw': '',
 			'_rendered_hl': '',
 			'_len': 0,
