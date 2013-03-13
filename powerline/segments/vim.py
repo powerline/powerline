@@ -306,8 +306,13 @@ def modified_buffers(text='+ ', join_str=','):
 
 @requires_segment_info
 @memoize(2, cache_key=bufnr, cache_reg_func=purgeall_on_shell)
-def branch(segment_info):
+def branch(segment_info, status_colors=True):
 	'''Return the current working branch.
+
+	:param bool status_colors:
+		determines whether repository status will be used to determine highlighting. Default: True.
+
+	Highlight groups used: ``branch_clean``, ``branch_dirty``, ``branch``.
 
 	Divider highlight group used: ``branch:divider``.
 	'''
@@ -315,6 +320,7 @@ def branch(segment_info):
 	if repo:
 		return [{
 			'contents': repo.branch(),
+			'highlight_group': (['branch_dirty' if repo.status().strip() else 'branch_clean'] if status_colors else []) + ['branch'],
 			'divider_highlight_group': 'branch:divider',
 		}]
 	return None
@@ -351,5 +357,5 @@ def repository_status(segment_info):
 	'''Return the status for the current repo.'''
 	repo = guess(path=os.path.abspath(segment_info['buffer'].name or os.getcwd()))
 	if repo:
-		return repo.status()
+		return repo.status().strip() or None
 	return None

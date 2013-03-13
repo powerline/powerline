@@ -46,8 +46,14 @@ class TestCommon(TestCase):
 			self.assertEqual(common.user(), [{'contents': 'def', 'highlight_group': ['superuser', 'user']}])
 
 	def test_branch(self):
-		with replace_module_attr(common, 'guess', lambda path: Args(branch=lambda: os.path.basename(path))):
-			self.assertEqual(common.branch(), 'tests')
+		with replace_module_attr(common, 'guess', lambda path: Args(branch=lambda: os.path.basename(path), status=lambda: '   ')):
+			self.assertEqual(common.branch(status_colors=False), 'tests')
+			self.assertEqual(common.branch(status_colors=True),
+					[{'contents': 'tests', 'highlight_group': ['branch_clean', 'branch']}])
+		with replace_module_attr(common, 'guess', lambda path: Args(branch=lambda: os.path.basename(path), status=lambda: 'D  ')):
+			self.assertEqual(common.branch(status_colors=False), 'tests')
+			self.assertEqual(common.branch(),
+					[{'contents': 'tests', 'highlight_group': ['branch_dirty', 'branch']}])
 		with replace_module_attr(common, 'guess', lambda path: None):
 			self.assertEqual(common.branch(), None)
 
