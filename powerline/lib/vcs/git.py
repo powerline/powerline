@@ -73,7 +73,8 @@ try:
 							| git.GIT_STATUS_INDEX_MODIFIED
 							| git.GIT_STATUS_INDEX_DELETED):
 						index_column = 'I'
-				return wt_column + index_column + untracked_column
+				r = wt_column + index_column + untracked_column
+				return r if r != '   ' else None
 
 		def branch(self):
 			try:
@@ -132,7 +133,7 @@ except ImportError:
 						wt_column = 'D'
 
 				r = wt_column + index_column + untracked_column
-				return r
+				return r if r != '   ' else None
 
 		def branch(self):
 			for line in self._gitcmd('branch', '-l'):
