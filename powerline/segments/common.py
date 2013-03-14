@@ -13,7 +13,7 @@ from powerline.lib.vcs import guess
 from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment
 from powerline.lib.time import monotonic
 from powerline.lib.humanize_bytes import humanize_bytes
-from collections import namedtuple, defaultdict
+from collections import namedtuple
 
 
 def hostname(only_if_ssh=False):
@@ -460,7 +460,7 @@ except ImportError:
 		except IOError:
 			return None
 
-	def _get_user():
+	def _get_user():  # NOQA
 		return os.environ.get('USER', None)
 
 	def cpu_load_percent(**kwargs):  # NOQA
@@ -506,12 +506,12 @@ if os.path.exists('/proc/uptime'):
 			return int(float(f.readline().split()[0]))
 elif 'psutil' in globals():
 	from time import time
-	def _get_uptime():
+	def _get_uptime():  # NOQA
 		# psutil.BOOT_TIME is not subject to clock adjustments, but time() is. 
 		# Thus it is a fallback to /proc/uptime reading and not the reverse.
 		return int(time() - psutil.BOOT_TIME)
 else:
-	def _get_uptime():
+	def _get_uptime():  # NOQA
 		raise NotImplementedError
 
 
@@ -534,29 +534,7 @@ def uptime(format='{days:02d}d {hours:02d}h {minutes:02d}m'):
 	return format.format(days=int(days), hours=hours, minutes=minutes)
 
 
-try:
-	import psutil
-
-
-	def get_bytes(interface):
-		io_counters = psutil.network_io_counters(pernic=True)
-		if_io = io_counters.get(interface)
-		if not if_io:
-			return None
-		return if_io.bytes_recv, if_io.bytes_sent
-except ImportError:
-	def get_bytes(interface):
-		try:
-			with open('/sys/class/net/{interface}/statistics/rx_bytes'.format(interface=interface), 'rb') as file_obj:
-				rx = int(file_obj.read())
-			with open('/sys/class/net/{interface}/statistics/tx_bytes'.format(interface=interface), 'rb') as file_obj:
-				tx = int(file_obj.read())
-			return (rx, tx)
-		except IOError:
-			return None
-
-
-class _NetworkLoadSegment(KwThreadedSegment):
+class NetworkLoadSegment(KwThreadedSegment):
 	'''Return the network load.
 
 	Uses the ``psutil`` module if available for multi-platform compatibility,
@@ -614,7 +592,7 @@ class _NetworkLoadSegment(KwThreadedSegment):
 				}]
 
 
-network_load = _NetworkLoadSegment()
+network_load = NetworkLoadSegment()
 
 
 def virtualenv():

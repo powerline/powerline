@@ -4,7 +4,7 @@ from powerline.segments import shell, common
 import tests.vim as vim_module
 import sys
 import os
-from tests.lib import Args, urllib_read, replace_module, replace_module_attr, new_module, replace_module_module, replace_env
+from tests.lib import Args, urllib_read, replace_module_attr, new_module, replace_module_module, replace_env
 from tests import TestCase
 
 

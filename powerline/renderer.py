@@ -26,12 +26,12 @@ class Renderer(object):
 		self.theme_kwargs = theme_kwargs
 		self.colorscheme = colorscheme
 		self.width_data = {
-				'N':  1,                              # Neutral
-				'Na': 1,                              # Narrow
-				'A':  getattr(self, 'ambiwidth', 1),  # Ambigious
-				'H':  1,                              # Half-width
-				'W':  2,                              # Wide
-				'F':  2,                              # Fullwidth
+				'N': 1,                              # Neutral
+				'Na': 1,                             # Narrow
+				'A': getattr(self, 'ambiwidth', 1),  # Ambigious
+				'H': 1,                              # Half-width
+				'W': 2,                              # Wide
+				'F': 2,                              # Fullwidth
 				}
 
 	def strwidth(self, string):

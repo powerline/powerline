@@ -13,7 +13,7 @@ from powerline.theme import requires_segment_info
 from powerline.lib import add_divider_highlight_group
 from powerline.lib.vcs import guess
 from powerline.lib.humanize_bytes import humanize_bytes
-from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment
+from powerline.lib.threaded import KwThreadedSegment
 from functools import wraps
 from collections import defaultdict
 

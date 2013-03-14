@@ -149,6 +149,7 @@ def _emul_exists(varname):
 		return varname[2:] in _g
 	raise NotImplementedError
 
+
 @_logged
 def _emul_line2byte(line):
 	buflines = _buf_lines[_buffer()]

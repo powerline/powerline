@@ -5,7 +5,7 @@ try:
 	from urllib.request import urlopen
 	from urllib.parse import urlencode as urllib_urlencode  # NOQA
 except ImportError:
-	from urllib2 import urlopen, HTTPError
+	from urllib2 import urlopen, HTTPError  # NOQA
 	from urllib import urlencode as urllib_urlencode  # NOQA
 
 
