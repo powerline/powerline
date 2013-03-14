@@ -58,6 +58,6 @@ class Repository(object):
 	def branch(self):
 		try:
 			b = branch.Branch.open(self.directory)
-			return b.nick or None
+			return b._get_nick(local=True) or None
 		except:
 			pass
