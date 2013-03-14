@@ -1,6 +1,7 @@
 # vim:fileencoding=utf-8:noet
 
 from powerline.theme import Theme
+from unicodedata import east_asian_width, combining
 
 
 try:
@@ -17,21 +18,20 @@ class Renderer(object):
 		self.local_themes = local_themes
 		self.theme_kwargs = theme_kwargs
 		self.colorscheme = colorscheme
+		self.width_data = {
+				'N':  1,                              # Neutral
+				'Na': 1,                              # Narrow
+				'A':  getattr(self, 'ambiwidth', 1),  # Ambigious
+				'H':  1,                              # Half-width
+				'W':  2,                              # Wide
+				'F':  2,                              # Fullwidth
+				}
 
-	def add_local_theme(self, matcher, theme):
-		if matcher in self.local_themes:
-			raise KeyError('There is already a local theme with given matcher')
-		self.local_themes[matcher] = theme
+	def strwidth(self, string):
+		return sum((0 if combining(symbol) else self.width_data[east_asian_width(symbol)] for symbol in string))
 
 	def get_theme(self, matcher_info):
-		for matcher in self.local_themes.keys():
-			if matcher(matcher_info):
-				match = self.local_themes[matcher]
-				if 'config' in match:
-					match['theme'] = Theme(theme_config=match.pop('config'), top_theme_config=self.theme_config, **self.theme_kwargs)
-				return match['theme']
-		else:
-			return self.theme
+		return self.theme
 
 	def get_highlighting(self, segment, mode):
 		segment['highlight'] = self.colorscheme.get_highlighting(segment['highlight_group'], mode, segment.get('gradient_level'))
@@ -163,7 +163,7 @@ class Renderer(object):
 				else:
 					segment['_rendered_raw'] += contents_raw
 					segment['_rendered_hl'] += contents_highlighted
-			segment['_len'] = len(segment['_rendered_raw'])
+			segment['_len'] = self.strwidth(segment['_rendered_raw'])
 			yield segment
 
 	@staticmethod

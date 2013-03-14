@@ -25,9 +25,10 @@ setup(
 	url='https://github.com/Lokaltog/powerline',
 	scripts=[
 		'scripts/powerline',
+		'scripts/powerline-lint',
 		],
 	keywords='',
-	packages=find_packages(exclude=('tests',)),
+	packages=find_packages(exclude=('tests', 'tests.*')),
 	include_package_data=True,
 	zip_safe=False,
 	install_requires=[],

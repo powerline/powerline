@@ -8,6 +8,8 @@
 		"paste_indicator":        { "fg": "oldlace", "bg": "orange", "attr": ["bold"] },
 		"readonly_indicator":     { "fg": "red", "bg": "darkgreencopper" },
 		"branch":                 { "fg": "lightyellow", "bg": "darkgreencopper" },
+		"branch_dirty":           { "fg": "yellow", "bg": "darkgreencopper" },
+		"branch_clean":           { "fg": "lightyellow", "bg": "darkgreencopper" },
 		"branch:divider":         { "fg": "gray61", "bg": "darkgreencopper" },
 		"file_directory":         { "fg": "lightyellow", "bg": "darkgreencopper" },
 		"file_name":              { "fg": "oldlace", "bg": "darkgreencopper", "attr": ["bold"] },

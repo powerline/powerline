@@ -113,12 +113,31 @@ Common configuration
 Common configuration is a subdictionary that is a value of ``common`` key in 
 :file:`powerline/config.json` file.
 
-.. _config-common-term_24bit_colors:
+.. _config-common-term_truecolor:
 
-``term_24bit_colors``
+``term_truecolor``
     Defines whether to output cterm indices (8-bit) or RGB colors (24-bit) 
     to the terminal emulator. See the :ref:`term-feature-support-matrix` for 
     information on whether your terminal emulator supports 24-bit colors.
+
+.. _config-common-ambiwidth:
+
+``ambiwidth``
+    Tells powerline what to do with characters with East Asian Width Class 
+    Ambigious (such as Euro, Registered Sign, Copyright Sign, Greek
+    letters, Cyrillic letters). Valid values: any positive integer; it is 
+    suggested that you only set it to 1 (default) or 2.
+
+.. _config-common-additional_escapes:
+
+``additional_escapes``
+    Valid for shell extensions, makes sense only if :ref:`term_truecolor 
+    <config-common-term_truecolor>` is enabled. Is to be set from command-line 
+    (unless you are sure you always need it). Controls additional escaping that 
+    is needed for tmux/screen to work with terminal true color escape codes: 
+    normally tmux/screen prevent terminal emulator from receiving these control 
+    codes thus rendering powerline prompt colorless. Valid values: ``"tmux"``, 
+    ``"screen"``, ``null`` (default).
 
 ``dividers``
     Defines the dividers used in all Powerline extensions. This option 

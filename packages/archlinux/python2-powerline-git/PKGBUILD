@@ -1,7 +1,7 @@
 # Maintainer: Kim Silkebækken <kim.silkebaekken+aur@gmail.com>
 
 pkgname=python2-powerline-git
-pkgver=20130308
+pkgver=20130313
 pkgrel=1
 pkgdesc='The ultimate statusline/prompt utility.'
 url='https://github.com/Lokaltog/powerline'
@@ -44,10 +44,10 @@ package() {
 	python2 setup.py install --root="${pkgdir}" --optimize=1 || return 1
 
 	msg2 "Installing fonts..."
-	install -dm755 "${pkgdir}/usr/share/fonts/TTF/"
+	install -dm755 "${pkgdir}/usr/share/fonts/OTF/"
 	install -dm755 "${pkgdir}/etc/fonts/conf.avail"
 	install -dm755 "${pkgdir}/etc/fonts/conf.d"
-	install -m644 "font/PowerlineSymbols.otf" "${pkgdir}/usr/share/fonts/TTF/PowerlineSymbols.otf"
+	install -m644 "font/PowerlineSymbols.otf" "${pkgdir}/usr/share/fonts/OTF/PowerlineSymbols.otf"
 	install -m644 "font/10-powerline-symbols.conf" "${pkgdir}/etc/fonts/conf.avail/10-powerline-symbols.conf"
 	ln -s "../conf.avail/10-powerline-symbols.conf" "${pkgdir}/etc/fonts/conf.d/10-powerline-symbols.conf"
 

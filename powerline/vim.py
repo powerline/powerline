@@ -65,12 +65,12 @@ class VimPowerline(Powerline):
 						'g:powerline_theme_overrides__' + name)
 
 	def get_local_themes(self, local_themes):
+		if not local_themes:
+			return {}
+
 		self.get_matcher = gen_matcher_getter(self.ext, self.import_paths)
-		r = {}
-		for key, local_theme_name in local_themes.items():
-			key = self.get_matcher(key)
-			r[key] = {'config': self.load_theme_config(local_theme_name)}
-		return r
+		return dict(((self.get_matcher(key), {'config': self.load_theme_config(val)})
+					for key, val in local_themes.items()))
 
 	def get_config_paths(self):
 		if vim_exists('g:powerline_config_path'):
