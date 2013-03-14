@@ -604,7 +604,7 @@ def check_segment_name(name, data, context, echoerr):
 			except AttributeError:
 				echoerr(context='Error while loading segment function (key {key})'.format(key=context_key(context)),
 						problem='failed to load function {0} from module {1}'.format(name, module),
-						problem_mark=match_name.mark)
+						problem_mark=name.mark)
 				return True, False, True
 
 		if not callable(func):
@@ -875,7 +875,7 @@ def check(path=None):
 
 	hadproblem = False
 	try:
-		main_config = load_json_config(search_paths, 'config', load=load_config, open=open_file)
+		main_config = load_json_config(search_paths, 'config', load=load_config, open_file=open_file)
 	except IOError:
 		main_config = {}
 		sys.stderr.write('\nConfiguration file not found: config.json\n')
@@ -891,7 +891,7 @@ def check(path=None):
 	import_paths = [os.path.expanduser(path) for path in main_config.get('common', {}).get('paths', [])]
 
 	try:
-		colors_config = load_json_config(search_paths, 'colors', load=load_config, open=open_file)
+		colors_config = load_json_config(search_paths, 'colors', load=load_config, open_file=open_file)
 	except IOError:
 		colors_config = {}
 		sys.stderr.write('\nConfiguration file not found: colors.json\n')

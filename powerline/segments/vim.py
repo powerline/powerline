@@ -151,8 +151,14 @@ def readonly_indicator(segment_info, text=''):
 
 
 @requires_segment_info
-def file_directory(segment_info, shorten_home=False):
+def file_directory(segment_info, shorten_user=True, shorten_cwd=True, shorten_home=False):
 	'''Return file directory (head component of the file path).
+
+	:param bool shorten_user:
+		shorten ``$HOME`` directory to :file:`~/`
+
+	:param bool shorten_cwd:
+		shorten current directory to :file:`./`
 
 	:param bool shorten_home:
 		shorten all directories in :file:`/home/` to :file:`~user/` instead of :file:`/home/user/`.
@@ -160,7 +166,8 @@ def file_directory(segment_info, shorten_home=False):
 	name = segment_info['buffer'].name
 	if not name:
 		return None
-	file_directory = vim_funcs['fnamemodify'](name, ':~:.:h')
+	file_directory = vim_funcs['fnamemodify'](name, (':~' if shorten_user else '')
+												+ (':.' if shorten_home else '') + ':h')
 	if shorten_home and file_directory.startswith('/home/'):
 		file_directory = '~' + file_directory[6:]
 	return file_directory + os.sep if file_directory else None

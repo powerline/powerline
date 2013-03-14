@@ -4,6 +4,13 @@ from powerline.renderer import Renderer
 from powerline.colorscheme import ATTR_BOLD, ATTR_ITALIC, ATTR_UNDERLINE
 
 
+def int_to_rgb(num):
+	r = (num >> 16) & 0xff
+	g = (num >> 8) & 0xff
+	b = num & 0xff
+	return r, g, b
+
+
 class ShellRenderer(Renderer):
 	'''Powerline shell segment renderer.'''
 	escape_hl_start = ''
@@ -25,7 +32,7 @@ class ShellRenderer(Renderer):
 				ansi += [39]
 			else:
 				if self.term_truecolor:
-					ansi += [38, 2] + list(self._int_to_rgb(fg[1]))
+					ansi += [38, 2] + list(int_to_rgb(fg[1]))
 				else:
 					ansi += [38, 5, fg[0]]
 		if bg is not None:
@@ -33,7 +40,7 @@ class ShellRenderer(Renderer):
 				ansi += [49]
 			else:
 				if self.term_truecolor:
-					ansi += [48, 2] + list(self._int_to_rgb(bg[1]))
+					ansi += [48, 2] + list(int_to_rgb(bg[1]))
 				else:
 					ansi += [48, 5, bg[0]]
 		if attr is not None:
@@ -58,3 +65,6 @@ class ShellRenderer(Renderer):
 	@staticmethod
 	def escape(string):
 		return string.replace('\\', '\\\\')
+
+
+renderer = ShellRenderer

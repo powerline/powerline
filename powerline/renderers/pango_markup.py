@@ -29,3 +29,6 @@ class PangoMarkupRenderer(Renderer):
 			if attr & ATTR_UNDERLINE:
 				awesome_attr += ['underline="single"']
 		return '<span ' + ' '.join(awesome_attr) + '>' + contents + '</span>'
+
+
+renderer = PangoMarkupRenderer
