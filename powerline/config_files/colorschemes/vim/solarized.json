@@ -75,6 +75,11 @@
 				"mode": { "fg": "oldlace", "bg": "orange", "attr": ["bold"] }
 			}
 		},
+		"^V": {
+			"groups": {
+				"mode": { "fg": "oldlace", "bg": "orange", "attr": ["bold"] }
+			}
+		},
 		"R": {
 			"groups": {
 				"mode": { "fg": "oldlace", "bg": "red", "attr": ["bold"] }
