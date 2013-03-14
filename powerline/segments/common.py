@@ -202,33 +202,6 @@ def external_ip(query_url='http://ipv4.icanhazip.com/'):
 	return [{'contents': _external_ip(query_url=query_url), 'divider_highlight_group': 'background:divider'}]
 
 
-@add_divider_highlight_group('background:divider')
-def uptime(format='{days:02d}d {hours:02d}h {minutes:02d}m'):
-	'''Return system uptime.
-
-	Uses the ``psutil`` module if available for multi-platform compatibility,
-	falls back to reading :file:`/proc/uptime`.
-
-	:param str format:
-		format string, will be passed ``days``, ``hours`` and ``minutes`` as arguments
-
-	Divider highlight group used: ``background:divider``.
-	'''
-	try:
-		import psutil
-		seconds = int((datetime.now() - datetime.fromtimestamp(psutil.BOOT_TIME)).total_seconds())
-	except ImportError:
-		try:
-			with open('/proc/uptime', 'r') as f:
-				seconds = int(float(f.readline().split()[0]))
-		except IOError:
-			return None
-	minutes, seconds = divmod(seconds, 60)
-	hours, minutes = divmod(minutes, 60)
-	days, hours = divmod(hours, 24)
-	return format.format(days=int(days), hours=hours, minutes=minutes)
-
-
 # Weather condition code descriptions available at
 # http://developer.yahoo.com/weather/#codes
 weather_conditions_codes = (
@@ -397,7 +370,11 @@ def system_load(format='{avg:.1f}', threshold_good=1, threshold_bad=2):
 
 	Highlight groups used: ``system_load_good`` or ``system_load``, ``system_load_bad`` or ``system_load``, ``system_load_ugly`` or ``system_load``. It is recommended to define all highlight groups.
 	'''
-	cpu_num = cpu_count()
+	global cpu_count
+	try:
+		cpu_num = cpu_count()
+	except NotImplementedError:
+		return None
 	ret = []
 	for avg in os.getloadavg():
 		normalized = avg / cpu_num
@@ -433,6 +410,40 @@ def cpu_load_percent(measure_interval=.5):
 		return None
 	cpu_percent = int(psutil.cpu_percent(interval=measure_interval))
 	return '{0}%'.format(cpu_percent)
+
+
+if os.path.exists('/proc/uptime'):
+	def _get_uptime():
+		with open('/proc/uptime', 'r') as f:
+			return int(float(f.readline().split()[0]))
+elif 'psutil' in globals():
+	from time import time
+	def _get_uptime():
+		# psutil.BOOT_TIME is not subject to clock adjustments, but time() is. 
+		# Thus it is a fallback to /proc/uptime reading and not the reverse.
+		return int(time() - psutil.BOOT_TIME)
+else:
+	def _get_uptime():
+		raise NotImplementedError
+
+
+@add_divider_highlight_group('background:divider')
+def uptime(format='{days:02d}d {hours:02d}h {minutes:02d}m'):
+	'''Return system uptime.
+
+	:param str format:
+		format string, will be passed ``days``, ``hours`` and ``minutes`` as arguments
+
+	Divider highlight group used: ``background:divider``.
+	'''
+	try:
+		seconds = _get_uptime()
+	except IOError, NotImplementedError:
+		return None
+	minutes, seconds = divmod(seconds, 60)
+	hours, minutes = divmod(minutes, 60)
+	days, hours = divmod(hours, 24)
+	return format.format(days=int(days), hours=hours, minutes=minutes)
 
 
 @add_divider_highlight_group('background:divider')
