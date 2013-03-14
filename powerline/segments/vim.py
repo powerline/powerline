@@ -320,7 +320,7 @@ def branch(segment_info, status_colors=True):
 	if repo:
 		return [{
 			'contents': repo.branch(),
-			'highlight_group': (['branch_dirty' if repo.status().strip() else 'branch_clean'] if status_colors else []) + ['branch'],
+			'highlight_group': (['branch_dirty' if repo.status() else 'branch_clean'] if status_colors else []) + ['branch'],
 			'divider_highlight_group': 'branch:divider',
 		}]
 	return None
