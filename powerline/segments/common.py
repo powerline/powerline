@@ -55,7 +55,7 @@ def branch(status_colors=True):
 		if status_colors:
 			return [{
 				'contents': branch,
-				'highlight_group': ['branch_dirty' if repo.status().strip() else 'branch_clean', 'branch'],
+				'highlight_group': ['branch_dirty' if repo.status() else 'branch_clean', 'branch'],
 				}]
 		else:
 			return branch

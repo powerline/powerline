@@ -44,7 +44,7 @@ class TestVCS(TestCase):
 		repo = guess(path=GIT_REPO)
 		self.assertNotEqual(repo, None)
 		self.assertEqual(repo.branch(), 'master')
-		self.assertEqual(repo.status(), '   ')
+		self.assertEqual(repo.status(), None)
 		self.assertEqual(repo.status('file'), None)
 		with open(os.path.join(GIT_REPO, 'file'), 'w') as f:
 			f.write('abc')
@@ -65,6 +65,7 @@ class TestVCS(TestCase):
 			repo = guess(path=HG_REPO)
 			self.assertNotEqual(repo, None)
 			self.assertEqual(repo.branch(), 'default')
+			self.assertEqual(repo.status(), None)
 			with open(os.path.join(HG_REPO, 'file'), 'w') as f:
 				f.write('abc')
 				f.flush()
