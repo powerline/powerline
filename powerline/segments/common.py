@@ -78,7 +78,7 @@ def cwd(dir_shorten_len=None, dir_limit_depth=None):
 	Highlight groups used: ``cwd:current_folder`` or ``cwd``. It is recommended to define all highlight groups.
 	'''
 	import re
-	cwd = os.getenv('PWD')
+	cwd = os.environ.get('PWD')
 	if cwd is None:
 		try:
 			try:
