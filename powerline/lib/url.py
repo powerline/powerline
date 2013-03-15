@@ -13,7 +13,7 @@ def urllib_read(url):
 		import urllib2
 		try:
 			return urllib2.urlopen(url, timeout=5).read()
-		except urllib2.HTTPError:
+		except:
 			return
 
 
