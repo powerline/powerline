@@ -88,7 +88,6 @@ class Reader(object):
 	def check_printable(self, data):
 		match = NON_PRINTABLE.search(data)
 		if match:
-			character = match.group()
 			self.update_pointer(match.start())
 			raise ReaderError('while reading from stream', None,
 					'found special characters which are not allowed',

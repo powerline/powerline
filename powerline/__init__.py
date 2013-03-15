@@ -6,19 +6,18 @@ import os
 import sys
 
 from powerline.colorscheme import Colorscheme
-from powerline.lib import underscore_to_camelcase
 
 
 def open_file(path):
 	return open(path, 'r')
 
 
-def load_json_config(search_paths, config_file, load=json.load, open=open_file):
+def load_json_config(search_paths, config_file, load=json.load, open_file=open_file):
 	config_file += '.json'
 	for path in search_paths:
 		config_file_path = os.path.join(path, config_file)
 		if os.path.isfile(config_file_path):
-			with open(config_file_path) as config_file_fp:
+			with open_file(config_file_path) as config_file_fp:
 				return load(config_file_fp)
 	raise IOError('Config file not found in search path: {0}'.format(config_file))
 
@@ -65,9 +64,8 @@ class Powerline(object):
 		# Load and initialize extension renderer
 		renderer_module_name = renderer_module or ext
 		renderer_module_import = 'powerline.renderers.{0}'.format(renderer_module_name)
-		renderer_class_name = '{0}Renderer'.format(underscore_to_camelcase(renderer_module_name))
 		try:
-			Renderer = getattr(__import__(renderer_module_import, fromlist=[renderer_class_name]), renderer_class_name)
+			Renderer = __import__(renderer_module_import, fromlist=['renderer']).renderer
 		except ImportError as e:
 			sys.stderr.write('Error while importing renderer module: {0}\n'.format(e))
 			sys.exit(1)

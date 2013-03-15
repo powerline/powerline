@@ -39,3 +39,6 @@ class TmuxRenderer(Renderer):
 				else:
 					tmux_attr += ['nounderscore']
 		return '#[' + ','.join(tmux_attr) + ']'
+
+
+renderer = TmuxRenderer
