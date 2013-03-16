@@ -53,7 +53,8 @@ class Repository(object):
 				dirtied = 'D'
 			elif line and line[0] == '?':
 				untracked = 'U'
-		return dirtied + untracked
+		ans = dirtied + untracked
+		return ans if ans.strip() else None
 
 	def branch(self):
 		try:
