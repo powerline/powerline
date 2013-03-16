@@ -25,7 +25,7 @@ class ConfigCache(object):
 			mtime, parsed = self.cache.get(config_file_path, (None, None))
 			if mtime is None or mtime < st.st_mtime:
 				with open(config_file_path, 'rb') as f:
-					parsed = json.loads(f.read())
+					parsed = json.loads(f.read().decode('utf-8'))
 				self.cache[config_file_path] = (st.st_mtime, parsed)
 			# We return a copy because other code might modify the returned
 			# object.
