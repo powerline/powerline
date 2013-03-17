@@ -170,7 +170,7 @@ def file_directory(segment_info, shorten_user=True, shorten_cwd=True, shorten_ho
 	if not name:
 		return None
 	file_directory = vim_funcs['fnamemodify'](name, (':~' if shorten_user else '')
-												+ (':.' if shorten_home else '') + ':h')
+												+ (':.' if shorten_cwd else '') + ':h')
 	if shorten_home and file_directory.startswith('/home/'):
 		file_directory = '~' + file_directory[6:]
 	return file_directory + os.sep if file_directory else None
