@@ -550,6 +550,8 @@ class NetworkLoadSegment(KwThreadedSegment):
 		string appended to each load string
 	:param bool si_prefix:
 		use SI prefix, e.g. MB instead of MiB
+	:param str format:
+		format string, receives ``recv`` and ``sent`` as arguments
 	'''
 
 	interfaces = {}
@@ -587,9 +589,9 @@ class NetworkLoadSegment(KwThreadedSegment):
 			return None
 
 		return [{
-				'contents': '⬇ {rx_diff} ⬆ {tx_diff}'.format(
-					rx_diff=humanize_bytes((b2[0] - b1[0]) / measure_interval, suffix, si_prefix).rjust(8),
-					tx_diff=humanize_bytes((b2[1] - b1[1]) / measure_interval, suffix, si_prefix).rjust(8),
+				'contents': format.format(
+					recv=humanize_bytes((b2[0] - b1[0]) / measure_interval, suffix, si_prefix),
+					sent=humanize_bytes((b2[1] - b1[1]) / measure_interval, suffix, si_prefix),
 					),
 				'divider_highlight_group': 'background:divider',
 				}]
