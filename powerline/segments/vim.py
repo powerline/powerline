@@ -10,8 +10,10 @@ except ImportError:
 
 from powerline.bindings.vim import vim_get_func, getbufvar
 from powerline.theme import requires_segment_info
-from powerline.lib import memoize, humanize_bytes, add_divider_highlight_group
+from powerline.lib import add_divider_highlight_group
+from powerline.lib.memoize import memoize
 from powerline.lib.vcs import guess
+from powerline.lib.humanize_bytes import humanize_bytes
 from functools import wraps
 from collections import defaultdict
 

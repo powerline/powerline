@@ -7,7 +7,9 @@ from datetime import datetime
 import socket
 from multiprocessing import cpu_count
 
-from powerline.lib import memoize, urllib_read, urllib_urlencode, add_divider_highlight_group
+from powerline.lib import add_divider_highlight_group
+from powerline.lib.memoize import memoize
+from powerline.lib.url import urllib_read, urllib_urlencode
 from powerline.lib.vcs import guess
 
 

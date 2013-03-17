@@ -2,10 +2,6 @@
 from functools import wraps
 import json
 
-from powerline.lib.memoize import memoize  # NOQA
-from powerline.lib.humanize_bytes import humanize_bytes  # NOQA
-from powerline.lib.url import urllib_read, urllib_urlencode  # NOQA
-
 
 def mergedicts(d1, d2):
 	'''Recursively merge two dictionaries. First dictionary is modified in-place.
