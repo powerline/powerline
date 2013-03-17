@@ -19,7 +19,7 @@ def u(s):
 
 
 def requires_segment_info(func):
-	func.requires_powerline_segment_info = True
+	func.powerline_requires_segment_info = True
 	return func
 
 
@@ -72,8 +72,8 @@ class Theme(object):
 			parsed_segments = []
 			for segment in self.segments[side]:
 				if segment['type'] == 'function':
-					if (hasattr(segment['contents_func'], 'requires_powerline_segment_info')
-							and segment['contents_func'].requires_powerline_segment_info):
+					if (hasattr(segment['contents_func'], 'powerline_requires_segment_info')
+							and segment['contents_func'].powerline_requires_segment_info):
 						contents = segment['contents_func'](segment_info=self.segment_info, **segment['args'])
 					else:
 						contents = segment['contents_func'](**segment['args'])

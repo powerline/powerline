@@ -3,6 +3,14 @@ from functools import wraps
 import json
 
 
+def wraps_saveargs(wrapped):
+	def dec(wrapper):
+		r = wraps(wrapped)(wrapper)
+		r.powerline_origin = getattr(wrapped, 'powerline_origin', wrapped)
+		return r
+	return dec
+
+
 def mergedicts(d1, d2):
 	'''Recursively merge two dictionaries. First dictionary is modified in-place.
 	'''
@@ -15,7 +23,7 @@ def mergedicts(d1, d2):
 
 def add_divider_highlight_group(highlight_group):
 	def dec(func):
-		@wraps(func)
+		@wraps_saveargs(func)
 		def f(**kwargs):
 			r = func(**kwargs)
 			if r:

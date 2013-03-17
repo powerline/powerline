@@ -14,7 +14,7 @@ from powerline.lib import add_divider_highlight_group
 from powerline.lib.vcs import guess
 from powerline.lib.humanize_bytes import humanize_bytes
 from powerline.lib.threaded import KwThreadedSegment, with_docstring
-from functools import wraps
+from powerline.lib import wraps_saveargs as wraps
 from collections import defaultdict
 
 vim_funcs = {

@@ -28,7 +28,7 @@ class ThreadedDocumenter(autodoc.FunctionDocumenter):
 					for i, arg in zip(count(-1, -1), reversed(argspec.args)):
 						if (arg == 'self' or
 								(arg == 'segment_info' and
-									getattr(self.object, 'requires_powerline_segment_info', None)) or
+									getattr(self.object, 'powerline_requires_segment_info', None)) or
 								(method == 'render_one' and -i == len(argspec.args))):
 							continue
 						if argspec.defaults and len(argspec.defaults) >= -i:
@@ -39,14 +39,24 @@ class ThreadedDocumenter(autodoc.FunctionDocumenter):
 							args.insert(0, arg)
 			argspec = ArgSpec(args=args, varargs=None, keywords=None, defaults=tuple(defaults))
 		else:
-			argspec = getargspec(self.object)
-			args = argspec.args
-			defaults = argspec.defaults
-			if args and args[0] == 'segment_info' and getattr(self.object, 'requires_powerline_segment_info', None):
-				args = args[1:]
-				if defaults and len(defaults) > len(args):
-					defaults = defaults[1:]
-			argspec = ArgSpec(args=args, varargs=argspec.varargs, keywords=argspec.keywords, defaults=defaults)
+			if hasattr(self.object, 'powerline_origin'):
+				obj = self.object.powerline_origin
+			else:
+				obj = self.object
+
+			argspec = getargspec(obj)
+			args = []
+			defaults = []
+			for i, arg in zip(count(-1, -1), reversed(argspec.args)):
+				if (arg == 'segment_info' and getattr(self.object, 'powerline_requires_segment_info', None)):
+					continue
+				if argspec.defaults and len(argspec.defaults) >= -i:
+					default = argspec.defaults[i]
+					defaults.append(default)
+					args.append(arg)
+				else:
+					args.insert(0, arg)
+			argspec = ArgSpec(args=args, varargs=argspec.varargs, keywords=argspec.keywords, defaults=tuple(defaults))
 
 		return formatargspec(*argspec).replace('\\', '\\\\')
 

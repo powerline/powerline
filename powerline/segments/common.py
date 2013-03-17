@@ -477,7 +477,7 @@ except ImportError:
 	def _get_user():  # NOQA
 		return os.environ.get('USER', None)
 
-	def cpu_load_percent(**kwargs):  # NOQA
+	def cpu_load_percent(measure_interval=.5):  # NOQA
 		'''Return the average CPU load as a percentage.
 
 		Requires the ``psutil`` module.
