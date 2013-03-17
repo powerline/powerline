@@ -4,6 +4,18 @@ from inspect import ArgSpec, getargspec, formatargspec
 from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment
 from itertools import count
 
+try:
+	from __builtin__ import unicode
+except ImportError:
+	unicode = lambda s, enc: s
+
+
+def formatvalue(val):
+	if type(val) is str:
+		return '="' + unicode(val, 'utf-8').replace('"', '\\"').replace('\\', '\\\\') + '"'
+	else:
+		return '=' + repr(val)
+
 
 class ThreadedDocumenter(autodoc.FunctionDocumenter):
 	'''Specialized documenter subclass for ThreadedSegment subclasses.'''
@@ -58,7 +70,7 @@ class ThreadedDocumenter(autodoc.FunctionDocumenter):
 					args.insert(0, arg)
 			argspec = ArgSpec(args=args, varargs=argspec.varargs, keywords=argspec.keywords, defaults=tuple(defaults))
 
-		return formatargspec(*argspec).replace('\\', '\\\\')
+		return formatargspec(*argspec, formatvalue=formatvalue).replace('\\', '\\\\')
 
 
 def setup(app):
