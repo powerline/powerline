@@ -278,6 +278,19 @@ weather_conditions_icons = {
 	'unknown':       '⚠',
 }
 
+temp_conversions = {
+		'C': lambda temp: temp,
+		'F': lambda temp: (temp * 9 / 5) + 32,
+		'K': lambda temp: temp + 273.15,
+		}
+
+# Note: there are also unicode characters for units: ℃, ℉ and  K
+temp_units = {
+		'C': '°C',
+		'F': '°F',
+		'K': 'K',
+		}
+
 
 class WeatherSegment(ThreadedSegment):
 	'''Return weather from Yahoo! Weather.
@@ -295,6 +308,8 @@ class WeatherSegment(ThreadedSegment):
 		location query for your current location, e.g. ``oslo, norway``
 	:param dict icons:
 		dict for overriding default icons, e.g. ``{'heavy_snow' : u'❆'}``
+	:param str temperature_format:
+		format string, receives ``temp`` as an argument. Should also hold unit.
 
 	Divider highlight group used: ``background:divider``.
 
@@ -304,12 +319,11 @@ class WeatherSegment(ThreadedSegment):
 
 	interval = 600
 
-	def set_state(self, location_query=None, unit='c', **kwargs):
+	def set_state(self, location_query=None, **kwargs):
 		super(WeatherSegment, self).set_state(**kwargs)
 		self.location = location_query
 		self.url = None
 		self.condition = {}
-		self.unit = unit
 
 	def update(self):
 		import json
@@ -328,7 +342,7 @@ class WeatherSegment(ThreadedSegment):
 			query_data = {
 					'q':
 						'use "http://github.com/yql/yql-tables/raw/master/weather/weather.bylocation.xml" as we;'
-						'select * from we where location="{0}" and unit="{1}"'.format(self.location, self.unit).encode('utf-8'),
+						'select * from we where location="{0}" and unit="c"'.format(self.location).encode('utf-8'),
 					'format': 'json',
 					}
 			self.url = 'http://query.yahooapis.com/v1/public/yql?' + urllib_urlencode(query_data)
@@ -338,8 +352,7 @@ class WeatherSegment(ThreadedSegment):
 			response = json.loads(raw_response)
 			condition = response['query']['results']['weather']['rss']['channel']['item']['condition']
 			condition_code = int(condition['code'])
-			contents = '{0}°{1}'.format(condition['temp'], self.unit.upper())
-			temp = int(condition['temp'])
+			temp = float(condition['temp'])
 		except (KeyError, TypeError, ValueError):
 			return
 
@@ -349,11 +362,10 @@ class WeatherSegment(ThreadedSegment):
 			icon_names = (('not_available' if condition_code == 3200 else 'unknown'),)
 
 		with self.write_lock:
-			self.contents = contents
 			self.temp = temp
 			self.icon_names = icon_names
 
-	def render(self, icons=None, **kwargs):
+	def render(self, icons=None, unit='C', temperature_format=None, **kwargs):
 		if not hasattr(self, 'icon_names'):
 			return None
 
@@ -365,6 +377,8 @@ class WeatherSegment(ThreadedSegment):
 		else:
 			icon = weather_conditions_icons[self.icon_names[-1]]
 
+		temperature_format = temperature_format or ('{temp:.0f}' + temp_units[unit])
+		temp = temp_conversions[unit](self.temp)
 		groups = ['weather_condition_' + icon_name for icon_name in self.icon_names] + ['weather_conditions', 'weather']
 		return [
 				{
@@ -373,7 +387,7 @@ class WeatherSegment(ThreadedSegment):
 				'divider_highlight_group': 'background:divider',
 				},
 				{
-				'contents': self.contents,
+				'contents': temperature_format.format(temp=temp),
 				'highlight_group': ['weather_temp_cold' if int(self.temp) < 0 else 'weather_temp_hot', 'weather_temp', 'weather'],
 				'draw_divider': False,
 				'divider_highlight_group': 'background:divider',
