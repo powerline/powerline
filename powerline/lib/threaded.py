@@ -123,3 +123,8 @@ class KwThreadedSegment(ThreadedSegment):
 	@staticmethod
 	def render_one(update_state, **kwargs):
 		return update_state
+
+
+def with_docstring(instance, doc):
+	instance.__doc__ = doc
+	return instance

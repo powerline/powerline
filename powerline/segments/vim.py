@@ -13,7 +13,7 @@ from powerline.theme import requires_segment_info
 from powerline.lib import add_divider_highlight_group
 from powerline.lib.vcs import guess
 from powerline.lib.humanize_bytes import humanize_bytes
-from powerline.lib.threaded import KwThreadedSegment
+from powerline.lib.threaded import KwThreadedSegment, with_docstring
 from functools import wraps
 from collections import defaultdict
 
@@ -77,28 +77,18 @@ def launchevent(event):
 				pass
 
 
-def bufnr(segment_info, **kwargs):
-	'''Used for cache key, returns current buffer number'''
-	return segment_info['bufnr']
-
-
-def bufname(segment_info, **kwargs):
-	'''Used for cache key, returns current buffer name'''
-	return segment_info['buffer'].name
-
-
 # TODO Remove cache when needed
 def window_cached(func):
 	cache = {}
 
 	@requires_segment_info
 	@wraps(func)
-	def ret(segment_info, *args, **kwargs):
+	def ret(segment_info, **kwargs):
 		window_id = segment_info['window_id']
 		if segment_info['mode'] == 'nc':
 			return cache.get(window_id)
 		else:
-			r = func(*args, **kwargs)
+			r = func(**kwargs)
 			cache[window_id] = r
 			return r
 
@@ -348,8 +338,6 @@ class RepositorySegment(KwWindowThreadedSegment):
 
 @requires_segment_info
 class RepositoryStatusSegment(RepositorySegment):
-	'''Return the status for the current repo.'''
-
 	interval = 2
 
 	@staticmethod
@@ -357,21 +345,12 @@ class RepositoryStatusSegment(RepositorySegment):
 		return repo.status()
 
 
-repository_status = RepositoryStatusSegment()
+repository_status = with_docstring(RepositoryStatusSegment(),
+'''Return the status for the current repo.''')
 
 
 @requires_segment_info
 class BranchSegment(RepositorySegment):
-	'''Return the current working branch.
-
-	:param bool status_colors:
-		determines whether repository status will be used to determine highlighting. Default: False.
-
-	Highlight groups used: ``branch_clean``, ``branch_dirty``, ``branch``.
-
-	Divider highlight group used: ``branch:divider``.
-	'''
-
 	interval = 0.2
 	started_repository_status = False
 
@@ -405,16 +384,20 @@ class BranchSegment(RepositorySegment):
 		super(BranchSegment, self).shutdown()
 
 
-branch = BranchSegment()
+branch = with_docstring(BranchSegment(),
+'''Return the current working branch.
+
+:param bool status_colors:
+	determines whether repository status will be used to determine highlighting. Default: False.
+
+Highlight groups used: ``branch_clean``, ``branch_dirty``, ``branch``.
+
+Divider highlight group used: ``branch:divider``.
+''')
 
 
 @requires_segment_info
 class FileVCSStatusSegment(KwWindowThreadedSegment):
-	'''Return the VCS status for this buffer.
-
-	Highlight groups used: ``file_vcs_status``.
-	'''
-
 	interval = 0.2
 
 	@staticmethod
@@ -443,4 +426,8 @@ class FileVCSStatusSegment(KwWindowThreadedSegment):
 		return None
 
 
-file_vcs_status = FileVCSStatusSegment()
+file_vcs_status = with_docstring(FileVCSStatusSegment(),
+'''Return the VCS status for this buffer.
+
+Highlight groups used: ``file_vcs_status``.
+''')

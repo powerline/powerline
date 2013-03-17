@@ -3,9 +3,10 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath('../..'))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(os.getcwd()))))
+sys.path.insert(0, os.path.abspath(os.getcwd()))
 
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.todo', 'sphinx.ext.coverage', 'sphinx.ext.viewcode']
+extensions = ['powerline_autodoc', 'sphinx.ext.todo', 'sphinx.ext.coverage', 'sphinx.ext.viewcode']
 source_suffix = '.rst'
 master_doc = 'index'
 project = u'Powerline'

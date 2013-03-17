@@ -12,7 +12,7 @@ from multiprocessing import cpu_count
 from powerline.lib import add_divider_highlight_group
 from powerline.lib.url import urllib_read, urllib_urlencode
 from powerline.lib.vcs import guess
-from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment
+from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment, with_docstring
 from powerline.lib.time import monotonic
 from powerline.lib.humanize_bytes import humanize_bytes
 from collections import namedtuple
@@ -173,20 +173,6 @@ def _external_ip(query_url='http://ipv4.icanhazip.com/'):
 
 
 class ExternalIpSegment(ThreadedSegment):
-	'''Return external IP address.
-
-	Suggested URIs:
-
-	* http://ipv4.icanhazip.com/
-	* http://ipv6.icanhazip.com/
-	* http://icanhazip.com/ (returns IPv6 address if available, else IPv4)
-
-	:param str query_url:
-		URI to query for IP address, should return only the IP address as a text string
-
-	Divider highlight group used: ``background:divider``.
-	'''
-
 	def set_state(self, query_url='http://ipv4.icanhazip.com/', **kwargs):
 		super(ExternalIpSegment, self).set_state(**kwargs)
 		self.query_url = query_url
@@ -200,7 +186,20 @@ class ExternalIpSegment(ThreadedSegment):
 		return [{'contents': self.ip, 'divider_highlight_group': 'background:divider'}]
 
 
-external_ip = ExternalIpSegment()
+external_ip = with_docstring(ExternalIpSegment(),
+'''Return external IP address.
+
+Suggested URIs:
+
+* http://ipv4.icanhazip.com/
+* http://ipv6.icanhazip.com/
+* http://icanhazip.com/ (returns IPv6 address if available, else IPv4)
+
+:param str query_url:
+	URI to query for IP address, should return only the IP address as a text string
+
+Divider highlight group used: ``background:divider``.
+''')
 
 
 # Weather condition code descriptions available at
@@ -293,30 +292,6 @@ temp_units = {
 
 
 class WeatherSegment(ThreadedSegment):
-	'''Return weather from Yahoo! Weather.
-
-	Uses GeoIP lookup from http://freegeoip.net/ to automatically determine
-	your current location. This should be changed if you're in a VPN or if your
-	IP address is registered at another location.
-
-	Returns a list of colorized icon and temperature segments depending on
-	weather conditions.
-
-	:param str unit:
-		temperature unit, can be one of ``F``, ``C`` or ``K``
-	:param str location_query:
-		location query for your current location, e.g. ``oslo, norway``
-	:param dict icons:
-		dict for overriding default icons, e.g. ``{'heavy_snow' : u'❆'}``
-	:param str temperature_format:
-		format string, receives ``temp`` as an argument. Should also hold unit.
-
-	Divider highlight group used: ``background:divider``.
-
-	Highlight groups used: ``weather_conditions`` or ``weather``, ``weather_temp_cold`` or ``weather_temp_hot`` or ``weather_temp`` or ``weather``.
-	Also uses ``weather_conditions_{condition}`` for all weather conditions supported by Yahoo.
-	'''
-
 	interval = 600
 
 	def set_state(self, location_query=None, **kwargs):
@@ -395,7 +370,30 @@ class WeatherSegment(ThreadedSegment):
 			]
 
 
-weather = WeatherSegment()
+weather = with_docstring(WeatherSegment(),
+'''Return weather from Yahoo! Weather.
+
+Uses GeoIP lookup from http://freegeoip.net/ to automatically determine
+your current location. This should be changed if you're in a VPN or if your
+IP address is registered at another location.
+
+Returns a list of colorized icon and temperature segments depending on
+weather conditions.
+
+:param str unit:
+	temperature unit, can be one of ``F``, ``C`` or ``K``
+:param str location_query:
+	location query for your current location, e.g. ``oslo, norway``
+:param dict icons:
+	dict for overriding default icons, e.g. ``{'heavy_snow' : u'❆'}``
+:param str temperature_format:
+	format string, receives ``temp`` as an argument. Should also hold unit.
+
+Divider highlight group used: ``background:divider``.
+
+Highlight groups used: ``weather_conditions`` or ``weather``, ``weather_temp_cold`` or ``weather_temp_hot`` or ``weather_temp`` or ``weather``.
+Also uses ``weather_conditions_{condition}`` for all weather conditions supported by Yahoo.
+''')
 
 
 def system_load(format='{avg:.1f}', threshold_good=1, threshold_bad=2):
@@ -552,22 +550,6 @@ def uptime(format='{days}d {hours:02d}h {minutes:02d}m'):
 
 
 class NetworkLoadSegment(KwThreadedSegment):
-	'''Return the network load.
-
-	Uses the ``psutil`` module if available for multi-platform compatibility,
-	falls back to reading
-	:file:`/sys/class/net/{interface}/statistics/{rx,tx}_bytes`.
-
-	:param str interface:
-		network interface to measure
-	:param str suffix:
-		string appended to each load string
-	:param bool si_prefix:
-		use SI prefix, e.g. MB instead of MiB
-	:param str format:
-		format string, receives ``recv`` and ``sent`` as arguments
-	'''
-
 	interfaces = {}
 
 	@staticmethod
@@ -611,7 +593,22 @@ class NetworkLoadSegment(KwThreadedSegment):
 				}]
 
 
-network_load = NetworkLoadSegment()
+network_load = with_docstring(NetworkLoadSegment(),
+'''Return the network load.
+
+Uses the ``psutil`` module if available for multi-platform compatibility,
+falls back to reading
+:file:`/sys/class/net/{interface}/statistics/{rx,tx}_bytes`.
+
+:param str interface:
+	network interface to measure
+:param str suffix:
+	string appended to each load string
+:param bool si_prefix:
+	use SI prefix, e.g. MB instead of MiB
+:param str format:
+	format string, receives ``recv`` and ``sent`` as arguments
+''')
 
 
 def virtualenv():
@@ -619,31 +616,15 @@ def virtualenv():
 	return os.path.basename(os.environ.get('VIRTUAL_ENV', '')) or None
 
 
-IMAPKey = namedtuple('Key', 'username password server port folder')
+_IMAPKey = namedtuple('Key', 'username password server port folder')
 
 
 class EmailIMAPSegment(KwThreadedSegment):
-	'''Return unread e-mail count for IMAP servers.
-
-	:param str username:
-		login username
-	:param str password:
-		login password
-	:param str server:
-		e-mail server
-	:param int port:
-		e-mail server port
-	:param str folder:
-		folder to check for e-mails
-
-	Highlight groups used: ``email_alert``.
-	'''
-
 	interval = 60
 
 	@staticmethod
 	def key(username, password, server='imap.gmail.com', port=993, folder='INBOX'):
-		return IMAPKey(username, password, server, port, folder)
+		return _IMAPKey(username, password, server, port, folder)
 
 	@staticmethod
 	def compute_state(key):
@@ -669,7 +650,22 @@ class EmailIMAPSegment(KwThreadedSegment):
 			}]
 
 
-email_imap_alert = EmailIMAPSegment()
+email_imap_alert = with_docstring(EmailIMAPSegment(),
+'''Return unread e-mail count for IMAP servers.
+
+:param str username:
+	login username
+:param str password:
+	login password
+:param str server:
+	e-mail server
+:param int port:
+	e-mail server port
+:param str folder:
+	folder to check for e-mails
+
+Highlight groups used: ``email_alert``.
+''')
 
 
 class NowPlayingSegment(object):
