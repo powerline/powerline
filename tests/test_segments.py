@@ -37,8 +37,9 @@ class TestCommon(TestCase):
 				self.assertEqual(common.hostname(only_if_ssh=True), None)
 
 	def test_user(self):
-		new_os = new_module('os', environ={'USER': 'def'})
-		with replace_module_attr(common, 'os', new_os):
+		new_os = new_module('os', environ={'USER': 'def'}, getpid=lambda: 1)
+		new_psutil = new_module('psutil', Process=lambda pid: Args(username='def'))
+		with replace_module_attr(common, 'os', new_os), replace_module_attr(common, 'psutil', new_psutil):
 			self.assertEqual(common.user(), [{'contents': 'def', 'highlight_group': 'user'}])
 			new_os.geteuid = lambda: 1
 			self.assertEqual(common.user(), [{'contents': 'def', 'highlight_group': 'user'}])
