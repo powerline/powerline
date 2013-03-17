@@ -30,7 +30,7 @@ def hostname(only_if_ssh=False):
 
 
 def branch(status_colors=True):
-	'''Return the current VCS branch.@
+	'''Return the current VCS branch.
 
 	:param bool status_colors:
 		determines whether repository status will be used to determine highlighting. Default: True.
