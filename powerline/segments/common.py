@@ -1,5 +1,7 @@
 # vim:fileencoding=utf-8:noet
 
+from __future__ import absolute_import
+
 import os
 import sys
 
@@ -516,11 +518,12 @@ else:
 
 
 @add_divider_highlight_group('background:divider')
-def uptime(format='{days:02d}d {hours:02d}h {minutes:02d}m'):
+def uptime(format='{days}d {hours:02d}h {minutes:02d}m'):
 	'''Return system uptime.
 
 	:param str format:
-		format string, will be passed ``days``, ``hours`` and ``minutes`` as arguments
+		format string, will be passed ``days``, ``hours``, ``minutes`` and 
+		seconds as arguments
 
 	Divider highlight group used: ``background:divider``.
 	'''
@@ -531,7 +534,7 @@ def uptime(format='{days:02d}d {hours:02d}h {minutes:02d}m'):
 	minutes, seconds = divmod(seconds, 60)
 	hours, minutes = divmod(minutes, 60)
 	days, hours = divmod(hours, 24)
-	return format.format(days=int(days), hours=hours, minutes=minutes)
+	return format.format(days=int(days), hours=hours, minutes=minutes, seconds=seconds)
 
 
 class NetworkLoadSegment(KwThreadedSegment):
