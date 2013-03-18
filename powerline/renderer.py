@@ -40,6 +40,9 @@ class Renderer(object):
 	def get_theme(self, matcher_info):
 		return self.theme
 
+	def shutdown(self):
+		self.theme.shutdown()
+
 	def get_highlighting(self, segment, mode):
 		segment['highlight'] = self.colorscheme.get_highlighting(segment['highlight_group'], mode, segment.get('gradient_level'))
 		if segment['divider_highlight_group']:

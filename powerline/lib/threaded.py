@@ -44,6 +44,7 @@ class ThreadedSegment(Thread):
 
 	def shutdown(self):
 		self.keep_going = False
+		self.update_lock.acquire()
 
 	def set_interval(self, interval=None, **kwargs):
 		# Allowing “interval” keyword in configuration.
