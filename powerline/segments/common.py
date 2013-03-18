@@ -183,7 +183,7 @@ class ExternalIpSegment(ThreadedSegment):
 			self.ip = ip
 
 	def render(self):
-		return [{'contents': self.ip, 'divider_highlight_group': 'background:divider'}]
+		return [{'contents': getattr(self, 'ip', None), 'divider_highlight_group': 'background:divider'}]
 
 
 external_ip = with_docstring(ExternalIpSegment(),
@@ -304,7 +304,7 @@ class WeatherSegment(ThreadedSegment):
 		import json
 
 		if not self.url:
-			# Do not lock attribute assignments in this branch: they are used 
+			# Do not lock attribute assignments in this branch: they are used
 			# only in .update()
 			if not self.location:
 				try:
@@ -521,7 +521,7 @@ if os.path.exists('/proc/uptime'):
 elif 'psutil' in globals():
 	from time import time
 	def _get_uptime():  # NOQA
-		# psutil.BOOT_TIME is not subject to clock adjustments, but time() is. 
+		# psutil.BOOT_TIME is not subject to clock adjustments, but time() is.
 		# Thus it is a fallback to /proc/uptime reading and not the reverse.
 		return int(time() - psutil.BOOT_TIME)
 else:
@@ -534,7 +534,7 @@ def uptime(format='{days}d {hours:02d}h {minutes:02d}m'):
 	'''Return system uptime.
 
 	:param str format:
-		format string, will be passed ``days``, ``hours``, ``minutes`` and 
+		format string, will be passed ``days``, ``hours``, ``minutes`` and
 		seconds as arguments
 
 	Divider highlight group used: ``background:divider``.
@@ -581,7 +581,7 @@ class NetworkLoadSegment(KwThreadedSegment):
 		t2, b2 = idata['last']
 		measure_interval = t2 - t1
 
-		if None in (b1, b2):
+		if None in (b1, b2) or measure_interval == 0:
 			return None
 
 		return [{
