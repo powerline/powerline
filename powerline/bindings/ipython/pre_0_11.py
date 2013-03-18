@@ -2,6 +2,7 @@
 from powerline.ipython import IpythonPowerline
 from IPython.Prompts import BasePrompt
 from IPython.ipapi import get as get_ipython
+from IPython.ipapi import TryNext
 
 
 class PowerlinePrompt(BasePrompt):
@@ -38,4 +39,11 @@ def setup(prompt='1', **kwargs):
 		old_prompt = getattr(ip.IP.outputcache, attr)
 		setattr(ip.IP.outputcache, attr, PowerlinePrompt(powerline,
 			old_prompt.cache, old_prompt.sep, '', old_prompt.pad_left))
+		raise TryNext()
+
+	def shutdown_hook():
+		powerline.renderer.shutdown()
+		raise TryNext()
+
 	ip.IP.hooks.late_startup_hook.add(late_startup_hook)
+	ip.IP.hooks.shutdown_hook.add(shutdown_hook)

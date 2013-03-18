@@ -2,6 +2,7 @@
 from powerline.ipython import IpythonPowerline
 
 from IPython.core.prompts import PromptManager
+from IPython.core.hooks import TryNext
 
 
 class PowerlinePromptManager(PromptManager):
@@ -40,6 +41,12 @@ def load_ipython_extension(ip):
 
 	ip.prompt_manager = PowerlinePromptManager(powerline=powerline,
 		shell=ip.prompt_manager.shell, config=ip.prompt_manager.config)
+
+	def shutdown_hook():
+		powerline.renderer.shutdown()
+		raise TryNext()
+
+	ip.hooks.shutdown_hook.add(shutdown_hook)
 
 
 def unload_ipython_extension(ip):
