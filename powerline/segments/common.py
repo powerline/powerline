@@ -174,8 +174,8 @@ def _external_ip(query_url='http://ipv4.icanhazip.com/'):
 
 class ExternalIpSegment(ThreadedSegment):
 	def set_state(self, query_url='http://ipv4.icanhazip.com/', **kwargs):
-		super(ExternalIpSegment, self).set_state(**kwargs)
 		self.query_url = query_url
+		super(ExternalIpSegment, self).set_state(**kwargs)
 
 	def update(self):
 		ip = _external_ip(query_url=self.query_url)
@@ -297,10 +297,10 @@ class WeatherSegment(ThreadedSegment):
 	interval = 600
 
 	def set_state(self, location_query=None, **kwargs):
-		super(WeatherSegment, self).set_state(**kwargs)
 		self.location = location_query
 		self.url = None
 		self.condition = {}
+		super(WeatherSegment, self).set_state(**kwargs)
 
 	def update(self):
 		import json
