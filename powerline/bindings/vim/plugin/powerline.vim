@@ -92,4 +92,5 @@ augroup Powerline
 	autocmd!
 	autocmd ColorScheme * :exec s:powerline_pycmd 'powerline.renderer.reset_highlight()'
 	autocmd VimEnter    * :redrawstatus!
+	autocmd VimLeave    * :exec s:powerline_pycmd 'powerline.renderer.shutdown()'
 augroup END

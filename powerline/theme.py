@@ -19,12 +19,12 @@ def u(s):
 
 
 def requires_segment_info(func):
-	func.requires_powerline_segment_info = True
+	func.powerline_requires_segment_info = True
 	return func
 
 
 class Theme(object):
-	def __init__(self, ext, theme_config, common_config, top_theme_config=None, segment_info=None):
+	def __init__(self, ext, theme_config, common_config, top_theme_config=None, segment_info=None, run_once=False):
 		self.dividers = theme_config.get('dividers', common_config['dividers'])
 		self.spaces = theme_config.get('spaces', common_config['spaces'])
 		self.segments = {
@@ -42,6 +42,18 @@ class Theme(object):
 		get_segment = gen_segment_getter(ext, common_config['paths'], theme_configs, theme_config.get('default_module'))
 		for side in ['left', 'right']:
 			self.segments[side].extend((get_segment(segment, side) for segment in theme_config['segments'].get(side, [])))
+			if not run_once:
+				for segment in self.segments[side]:
+					if segment['startup']:
+						segment['startup'](**segment['args'])
+
+	def shutdown(self):
+		for segments in self.segments.values():
+			for segment in segments:
+				try:
+					segment['shutdown']()
+				except TypeError:
+					pass
 
 	def get_divider(self, side='left', type='soft'):
 		'''Return segment divider.'''
@@ -60,8 +72,8 @@ class Theme(object):
 			parsed_segments = []
 			for segment in self.segments[side]:
 				if segment['type'] == 'function':
-					if (hasattr(segment['contents_func'], 'requires_powerline_segment_info')
-							and segment['contents_func'].requires_powerline_segment_info):
+					if (hasattr(segment['contents_func'], 'powerline_requires_segment_info')
+							and segment['contents_func'].powerline_requires_segment_info):
 						contents = segment['contents_func'](segment_info=self.segment_info, **segment['args'])
 					else:
 						contents = segment['contents_func'](**segment['args'])

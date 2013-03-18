@@ -26,12 +26,12 @@ class Renderer(object):
 		self.theme_kwargs = theme_kwargs
 		self.colorscheme = colorscheme
 		self.width_data = {
-				'N':  1,                              # Neutral
-				'Na': 1,                              # Narrow
-				'A':  getattr(self, 'ambiwidth', 1),  # Ambigious
-				'H':  1,                              # Half-width
-				'W':  2,                              # Wide
-				'F':  2,                              # Fullwidth
+				'N': 1,                              # Neutral
+				'Na': 1,                             # Narrow
+				'A': getattr(self, 'ambiwidth', 1),  # Ambigious
+				'H': 1,                              # Half-width
+				'W': 2,                              # Wide
+				'F': 2,                              # Fullwidth
 				}
 
 	def strwidth(self, string):
@@ -39,6 +39,9 @@ class Renderer(object):
 
 	def get_theme(self, matcher_info):
 		return self.theme
+
+	def shutdown(self):
+		self.theme.shutdown()
 
 	def get_highlighting(self, segment, mode):
 		segment['highlight'] = self.colorscheme.get_highlighting(segment['highlight_group'], mode, segment.get('gradient_level'))

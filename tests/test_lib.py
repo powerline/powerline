@@ -1,5 +1,6 @@
 # vim:fileencoding=utf-8:noet
-from powerline.lib import mergedicts, add_divider_highlight_group, humanize_bytes
+from powerline.lib import mergedicts, add_divider_highlight_group
+from powerline.lib.humanize_bytes import humanize_bytes
 from powerline.lib.vcs import guess
 from subprocess import call, PIPE
 import os

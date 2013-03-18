@@ -10,9 +10,11 @@ except ImportError:
 
 from powerline.bindings.vim import vim_get_func, getbufvar
 from powerline.theme import requires_segment_info
-from powerline.lib import memoize, humanize_bytes, add_divider_highlight_group
+from powerline.lib import add_divider_highlight_group
 from powerline.lib.vcs import guess
-from functools import wraps
+from powerline.lib.humanize_bytes import humanize_bytes
+from powerline.lib.threaded import KwThreadedSegment, with_docstring
+from powerline.lib import wraps_saveargs as wraps
 from collections import defaultdict
 
 vim_funcs = {
@@ -20,6 +22,7 @@ vim_funcs = {
 	'fnamemodify': vim_get_func('fnamemodify'),
 	'expand': vim_get_func('expand'),
 	'bufnr': vim_get_func('bufnr', rettype=int),
+	'line2byte': vim_get_func('line2byte', rettype=int),
 }
 
 vim_modes = {
@@ -74,28 +77,18 @@ def launchevent(event):
 				pass
 
 
-def bufnr(segment_info, **kwargs):
-	'''Used for cache key, returns current buffer number'''
-	return segment_info['bufnr']
-
-
-def bufname(segment_info, **kwargs):
-	'''Used for cache key, returns current buffer name'''
-	return segment_info['buffer'].name
-
-
 # TODO Remove cache when needed
 def window_cached(func):
 	cache = {}
 
 	@requires_segment_info
 	@wraps(func)
-	def ret(segment_info, *args, **kwargs):
+	def ret(segment_info, **kwargs):
 		window_id = segment_info['window_id']
 		if segment_info['mode'] == 'nc':
 			return cache.get(window_id)
 		else:
-			r = func(*args, **kwargs)
+			r = func(**kwargs)
 			cache[window_id] = r
 			return r
 
@@ -167,7 +160,7 @@ def file_directory(segment_info, shorten_user=True, shorten_cwd=True, shorten_ho
 	if not name:
 		return None
 	file_directory = vim_funcs['fnamemodify'](name, (':~' if shorten_user else '')
-												+ (':.' if shorten_home else '') + ':h')
+												+ (':.' if shorten_cwd else '') + ':h')
 	if shorten_home and file_directory.startswith('/home/'):
 		file_directory = '~' + file_directory[6:]
 	return file_directory + os.sep if file_directory else None
@@ -195,10 +188,9 @@ def file_name(segment_info, display_no_file=False, no_file_text='[No file]'):
 	return file_name
 
 
-@requires_segment_info
-@memoize(2, cache_key=bufname, cache_reg_func=purgebuf_on_shell_and_write)
-def file_size(segment_info, suffix='B', si_prefix=False):
-	'''Return file size.
+@window_cached
+def file_size(suffix='B', si_prefix=False):
+	'''Return file size in &encoding.
 
 	:param str suffix:
 		string appended to the file size
@@ -206,13 +198,9 @@ def file_size(segment_info, suffix='B', si_prefix=False):
 		use SI prefix, e.g. MB instead of MiB
 	:return: file size or None if the file isn't saved or if the size is too big to fit in a number
 	'''
-	file_name = segment_info['buffer'].name
-	if not file_name:
-		return None
-	try:
-		file_size = os.stat(file_name).st_size
-	except:
-		return None
+	# Note: returns file size in &encoding, not in &fileencoding. But returned 
+	# size is updated immediately; and it is valid for any buffer
+	file_size = vim_funcs['line2byte'](len(vim.current.buffer) + 1) - 1
 	return humanize_bytes(file_size, suffix, si_prefix)
 
 
@@ -311,58 +299,135 @@ def modified_buffers(text='+ ', join_str=','):
 	return None
 
 
-@requires_segment_info
-@memoize(2, cache_key=bufnr, cache_reg_func=purgeall_on_shell)
-def branch(segment_info, status_colors=True):
-	'''Return the current working branch.
-
-	:param bool status_colors:
-		determines whether repository status will be used to determine highlighting. Default: True.
-
-	Highlight groups used: ``branch_clean``, ``branch_dirty``, ``branch``.
-
-	Divider highlight group used: ``branch:divider``.
-	'''
-	repo = guess(path=os.path.abspath(segment_info['buffer'].name or os.getcwd()))
-	if repo:
-		return [{
-			'contents': repo.branch(),
-			'highlight_group': (['branch_dirty' if repo.status() else 'branch_clean'] if status_colors else []) + ['branch'],
-			'divider_highlight_group': 'branch:divider',
-		}]
-	return None
+class KwWindowThreadedSegment(KwThreadedSegment):
+	def set_state(self, **kwargs):
+		for window in vim.windows:
+			buffer = window.buffer
+			kwargs['segment_info'] = {'bufnr': buffer.number, 'buffer': buffer}
+			super(KwWindowThreadedSegment, self).set_state(**kwargs)
 
 
-@requires_segment_info
-@memoize(2, cache_key=bufnr, cache_reg_func=purgebuf_on_shell_and_write)
-def file_vcs_status(segment_info):
-	'''Return the VCS status for this buffer.
+class RepositorySegment(KwWindowThreadedSegment):
+	def __init__(self):
+		super(RepositorySegment, self).__init__()
+		self.directories = {}
 
-	Highlight groups used: ``file_vcs_status``.
-	'''
-	name = segment_info['buffer'].name
-	if name and not getbufvar(segment_info['bufnr'], '&buftype'):
-		repo = guess(path=os.path.abspath(name))
+	@staticmethod
+	def key(segment_info, **kwargs):
+		# FIXME os.getcwd() is not a proper variant for non-current buffers
+		return segment_info['buffer'].name or os.getcwd()
+
+	def update(self):
+		# .compute_state() is running only in this method, and only in one 
+		# thread, thus operations with .directories do not need write locks 
+		# (.render() method is not using .directories). If this is changed 
+		# .directories needs redesigning
+		self.directories.clear()
+		super(RepositorySegment, self).update()
+
+	def compute_state(self, path):
+		repo = guess(path=path)
 		if repo:
-			status = repo.status(os.path.relpath(name, repo.directory))
-			if not status:
-				return None
-			status = status.strip()
-			ret = []
-			for status in status:
-				ret.append({
-					'contents': status,
-					'highlight_group': ['file_vcs_status_' + status, 'file_vcs_status'],
-					})
-			return ret
-	return None
+			if repo.directory in self.directories:
+				return self.directories[repo.directory]
+			else:
+				r = self.process_repo(repo)
+				self.directories[repo.directory] = r
+				return r
 
 
 @requires_segment_info
-@memoize(2, cache_key=bufnr, cache_reg_func=purgeall_on_shell)
-def repository_status(segment_info):
-	'''Return the status for the current repo.'''
-	repo = guess(path=os.path.abspath(segment_info['buffer'].name or os.getcwd()))
-	if repo:
-		return repo.status().strip() or None
-	return None
+class RepositoryStatusSegment(RepositorySegment):
+	interval = 2
+
+	@staticmethod
+	def process_repo(repo):
+		return repo.status()
+
+
+repository_status = with_docstring(RepositoryStatusSegment(),
+'''Return the status for the current repo.''')
+
+
+@requires_segment_info
+class BranchSegment(RepositorySegment):
+	interval = 0.2
+	started_repository_status = False
+
+	@staticmethod
+	def process_repo(repo):
+		return repo.branch()
+
+	def render_one(self, update_state, segment_info, status_colors=False, **kwargs):
+		if not update_state:
+			return None
+
+		if status_colors:
+			self.started_repository_status = True
+
+		return [{
+			'contents': update_state,
+			'highlight_group': (['branch_dirty' if repository_status(segment_info=segment_info) else 'branch_clean']
+								if status_colors else []) + ['branch'],
+			'divider_highlight_group': 'branch:divider',
+			}]
+
+	def startup(self, **kwargs):
+		super(BranchSegment, self).startup()
+		if kwargs.get('status_colors', False):
+			self.started_repository_status = True
+			repository_status.startup()
+
+	def shutdown(self):
+		if self.started_repository_status:
+			repository_status.shutdown()
+		super(BranchSegment, self).shutdown()
+
+
+branch = with_docstring(BranchSegment(),
+'''Return the current working branch.
+
+:param bool status_colors:
+	determines whether repository status will be used to determine highlighting. Default: False.
+
+Highlight groups used: ``branch_clean``, ``branch_dirty``, ``branch``.
+
+Divider highlight group used: ``branch:divider``.
+''')
+
+
+@requires_segment_info
+class FileVCSStatusSegment(KwWindowThreadedSegment):
+	interval = 0.2
+
+	@staticmethod
+	def key(segment_info, **kwargs):
+		name = segment_info['buffer'].name
+		skip = not (name and (not getbufvar(segment_info['bufnr'], '&buftype')))
+		return name, skip
+
+	@staticmethod
+	def compute_state(key):
+		name, skip = key
+		if not skip:
+			repo = guess(path=name)
+			if repo:
+				status = repo.status(os.path.relpath(name, repo.directory))
+				if not status:
+					return None
+				status = status.strip()
+				ret = []
+				for status in status:
+					ret.append({
+						'contents': status,
+						'highlight_group': ['file_vcs_status_' + status, 'file_vcs_status'],
+						})
+				return ret
+		return None
+
+
+file_vcs_status = with_docstring(FileVCSStatusSegment(),
+'''Return the VCS status for this buffer.
+
+Highlight groups used: ``file_vcs_status``.
+''')

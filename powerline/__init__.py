@@ -36,7 +36,7 @@ class Powerline(object):
 		the package imported like this: ``powerline.renders.{render_module}``.
 	'''
 
-	def __init__(self, ext, renderer_module=None):
+	def __init__(self, ext, renderer_module=None, run_once=False):
 		self.config_paths = self.get_config_paths()
 
 		# Load main config file
@@ -58,6 +58,7 @@ class Powerline(object):
 			'ext': ext,
 			'common_config': common_config,
 			'segment_info': self.get_segment_info(),
+			'run_once': run_once,
 			}
 		local_themes = self.get_local_themes(ext_config.get('local_themes'))
 
@@ -69,11 +70,12 @@ class Powerline(object):
 		except ImportError as e:
 			sys.stderr.write('Error while importing renderer module: {0}\n'.format(e))
 			sys.exit(1)
-		options = {'term_truecolor': common_config.get('term_truecolor', False),
-				'ambiwidth': common_config.get('ambiwidth', 1),
-				'tmux_escape': common_config.get('additional_escapes') == 'tmux',
-				'screen_escape': common_config.get('additional_escapes') == 'screen',
-				}
+		options = {
+			'term_truecolor': common_config.get('term_truecolor', False),
+			'ambiwidth': common_config.get('ambiwidth', 1),
+			'tmux_escape': common_config.get('additional_escapes') == 'tmux',
+			'screen_escape': common_config.get('additional_escapes') == 'screen',
+		}
 		self.renderer = Renderer(theme_config, local_themes, theme_kwargs, colorscheme, **options)
 
 	@staticmethod
