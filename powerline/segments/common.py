@@ -183,6 +183,8 @@ class ExternalIpSegment(ThreadedSegment):
 			self.ip = ip
 
 	def render(self):
+		if not hasattr(self, 'ip'):
+			return None
 		return [{'contents': self.ip, 'divider_highlight_group': 'background:divider'}]
 
 
