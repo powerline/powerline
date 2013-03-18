@@ -581,7 +581,7 @@ class NetworkLoadSegment(KwThreadedSegment):
 		t2, b2 = idata['last']
 		measure_interval = t2 - t1
 
-		if None in (b1, b2):
+		if None in (b1, b2) or measure_interval == 0:
 			return None
 
 		return [{
