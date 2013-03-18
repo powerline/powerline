@@ -1,4 +1,5 @@
 _powerline_tmux_setenv() {
+	emulate -L zsh
 	if [[ -n "$TMUX" ]]; then
 		tmux setenv TMUX_"$1"_$(tmux display -p "#D" | tr -d %) "$2"
 	fi
@@ -13,12 +14,13 @@ _powerline_tmux_set_columns() {
 }
 
 _powerline_install_precmd() {
+	emulate -L zsh
 	for f in "${precmd_functions[@]}"; do
 		if [[ "$f" = "_powerline_precmd" ]]; then
 			return
 		fi
 	done
-	precmd_functions+=(_powerline_tmux_set_pwd)
+	chpwd_functions+=( _powerline_tmux_set_pwd )
 	setopt promptpercent
 	setopt promptsubst
 	if zmodload zsh/zpython &>/dev/null ; then
@@ -32,6 +34,6 @@ _powerline_install_precmd() {
 }
 
 trap "_powerline_tmux_set_columns" SIGWINCH
-kill -SIGWINCH $$
+_powerline_tmux_set_columns
 
 _powerline_install_precmd
