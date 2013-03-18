@@ -4,7 +4,7 @@ from powerline.segments import shell, common
 import tests.vim as vim_module
 import sys
 import os
-from tests.lib import Args, urllib_read, replace_module, replace_module_attr, new_module, replace_module_module, replace_env
+from tests.lib import Args, urllib_read, replace_module_attr, new_module, replace_module_module, replace_env
 from tests import TestCase
 
 
@@ -37,13 +37,15 @@ class TestCommon(TestCase):
 				self.assertEqual(common.hostname(only_if_ssh=True), None)
 
 	def test_user(self):
-		new_os = new_module('os', environ={'USER': 'def'})
+		new_os = new_module('os', environ={'USER': 'def'}, getpid=lambda: 1)
+		new_psutil = new_module('psutil', Process=lambda pid: Args(username='def'))
 		with replace_module_attr(common, 'os', new_os):
-			self.assertEqual(common.user(), [{'contents': 'def', 'highlight_group': 'user'}])
-			new_os.geteuid = lambda: 1
-			self.assertEqual(common.user(), [{'contents': 'def', 'highlight_group': 'user'}])
-			new_os.geteuid = lambda: 0
-			self.assertEqual(common.user(), [{'contents': 'def', 'highlight_group': ['superuser', 'user']}])
+			with replace_module_attr(common, 'psutil', new_psutil):
+				self.assertEqual(common.user(), [{'contents': 'def', 'highlight_group': 'user'}])
+				new_os.geteuid = lambda: 1
+				self.assertEqual(common.user(), [{'contents': 'def', 'highlight_group': 'user'}])
+				new_os.geteuid = lambda: 0
+				self.assertEqual(common.user(), [{'contents': 'def', 'highlight_group': ['superuser', 'user']}])
 
 	def test_branch(self):
 		with replace_module_attr(common, 'guess', lambda path: Args(branch=lambda: os.path.basename(path), status=lambda: None)):
@@ -128,12 +130,41 @@ class TestCommon(TestCase):
 			self.assertEqual(common.external_ip(), [{'contents': '127.0.0.1', 'divider_highlight_group': 'background:divider'}])
 
 	def test_uptime(self):
-		# TODO
-		pass
+		with replace_module_attr(common, '_get_uptime', lambda: 65536):
+			self.assertEqual(common.uptime(), [{'contents': '0d 18h 12m', 'divider_highlight_group': 'background:divider'}])
+
+		def _get_uptime():
+			raise NotImplementedError
+
+		with replace_module_attr(common, '_get_uptime', _get_uptime):
+			self.assertEqual(common.uptime(), None)
 
 	def test_weather(self):
-		# TODO
-		pass
+		with replace_module_attr(common, 'urllib_read', urllib_read):
+			self.assertEqual(common.weather(), [
+				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_condition_partly_cloudy_day', 'weather_condition_cloudy', 'weather_conditions', 'weather'], 'contents': '☁ '},
+				{'draw_divider': False, 'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_temp_cold', 'weather_temp', 'weather'], 'contents': '-11°C'}
+				])
+			self.assertEqual(common.weather(icons={'cloudy': 'o'}), [
+				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_condition_partly_cloudy_day', 'weather_condition_cloudy', 'weather_conditions', 'weather'], 'contents': 'o '},
+				{'draw_divider': False, 'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_temp_cold', 'weather_temp', 'weather'], 'contents': '-11°C'}
+				])
+			self.assertEqual(common.weather(icons={'partly_cloudy_day': 'x'}), [
+				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_condition_partly_cloudy_day', 'weather_condition_cloudy', 'weather_conditions', 'weather'], 'contents': 'x '},
+				{'draw_divider': False, 'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_temp_cold', 'weather_temp', 'weather'], 'contents': '-11°C'}
+				])
+			self.assertEqual(common.weather(unit='F'), [
+				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_condition_partly_cloudy_day', 'weather_condition_cloudy', 'weather_conditions', 'weather'], 'contents': '☁ '},
+				{'draw_divider': False, 'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_temp_cold', 'weather_temp', 'weather'], 'contents': '12°F'}
+				])
+			self.assertEqual(common.weather(unit='K'), [
+				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_condition_partly_cloudy_day', 'weather_condition_cloudy', 'weather_conditions', 'weather'], 'contents': '☁ '},
+				{'draw_divider': False, 'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_temp_cold', 'weather_temp', 'weather'], 'contents': '262K'}
+				])
+			self.assertEqual(common.weather(temperature_format='{temp:.1e}C'), [
+				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_condition_partly_cloudy_day', 'weather_condition_cloudy', 'weather_conditions', 'weather'], 'contents': '☁ '},
+				{'draw_divider': False, 'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_temp_cold', 'weather_temp', 'weather'], 'contents': '-1.1e+01C'}
+				])
 
 	def test_system_load(self):
 		with replace_module_module(common, 'os', getloadavg=lambda: (7.5, 3.5, 1.5)):
@@ -148,12 +179,39 @@ class TestCommon(TestCase):
 						{'contents': '2', 'highlight_group': ['system_load_bad', 'system_load'], 'draw_divider': False, 'divider_highlight_group': 'background:divider'}])
 
 	def test_cpu_load_percent(self):
-		with replace_module('psutil', cpu_percent=lambda **kwargs: 52.3):
+		with replace_module_module(common, 'psutil', cpu_percent=lambda **kwargs: 52.3):
 			self.assertEqual(common.cpu_load_percent(), '52%')
 
 	def test_network_load(self):
-		# TODO
-		pass
+		def _get_bytes(interface):
+			return None
+		with replace_module_attr(common, '_get_bytes', _get_bytes):
+			self.assertEqual(common.network_load(), None)
+		l = [0, 0]
+
+		def _get_bytes2(interface):
+			l[0] += 1200
+			l[1] += 2400
+			return tuple(l)
+
+		from imp import reload
+		reload(common)
+		with replace_module_attr(common, '_get_bytes', _get_bytes2):
+			common.network_load.startup()
+			common.network_load.sleep(0)
+			common.network_load.sleep(0)
+			self.assertEqual(common.network_load(), [
+				{'divider_highlight_group': 'background:divider', 'contents': '⬇  1 KiB/s ⬆  2 KiB/s'}
+				])
+			self.assertEqual(common.network_load(format='r {recv} s {sent}'), [
+				{'divider_highlight_group': 'background:divider', 'contents': 'r 1 KiB/s s 2 KiB/s'}
+				])
+			self.assertEqual(common.network_load(format='r {recv} s {sent}', suffix='bps'), [
+				{'divider_highlight_group': 'background:divider', 'contents': 'r 1 Kibps s 2 Kibps'}
+				])
+			self.assertEqual(common.network_load(format='r {recv} s {sent}', si_prefix=True), [
+				{'divider_highlight_group': 'background:divider', 'contents': 'r 1 kB/s s 2 kB/s'}
+				])
 
 	def test_virtualenv(self):
 		with replace_env('VIRTUAL_ENV', '/abc/def/ghi'):
@@ -229,7 +287,7 @@ class TestVim(TestCase):
 
 	def test_file_size(self):
 		segment_info = vim_module._get_segment_info()
-		self.assertEqual(vim.file_size(segment_info=segment_info), None)
+		self.assertEqual(vim.file_size(segment_info=segment_info), '0 B')
 		with vim_module._with('buffer', os.path.join(os.path.dirname(__file__), 'empty')) as segment_info:
 			self.assertEqual(vim.file_size(segment_info=segment_info), '0 B')
 
@@ -267,16 +325,36 @@ class TestVim(TestCase):
 		self.assertEqual(vim.modified_buffers(), None)
 
 	def test_branch(self):
-		# TODO
-		pass
+		with vim_module._with('buffer', '/foo') as segment_info:
+			with replace_module_attr(vim, 'guess', lambda path: Args(branch=lambda: os.path.basename(path), status=lambda: None, directory=path)):
+				self.assertEqual(vim.branch(segment_info=segment_info),
+						[{'divider_highlight_group': 'branch:divider', 'highlight_group': ['branch'], 'contents': 'foo'}])
+				self.assertEqual(vim.branch(segment_info=segment_info, status_colors=True),
+						[{'divider_highlight_group': 'branch:divider', 'highlight_group': ['branch_clean', 'branch'], 'contents': 'foo'}])
+			with replace_module_attr(vim, 'guess', lambda path: Args(branch=lambda: os.path.basename(path), status=lambda: 'DU', directory=path)):
+				self.assertEqual(vim.branch(segment_info=segment_info),
+						[{'divider_highlight_group': 'branch:divider', 'highlight_group': ['branch'], 'contents': 'foo'}])
+				self.assertEqual(vim.branch(segment_info=segment_info, status_colors=True),
+						[{'divider_highlight_group': 'branch:divider', 'highlight_group': ['branch_dirty', 'branch'], 'contents': 'foo'}])
 
 	def test_file_vcs_status(self):
-		# TODO
-		pass
+		with vim_module._with('buffer', '/foo') as segment_info:
+			with replace_module_attr(vim, 'guess', lambda path: Args(branch=lambda: os.path.basename(path), status=lambda file: 'M', directory=path)):
+				self.assertEqual(vim.file_vcs_status(segment_info=segment_info),
+						[{'highlight_group': ['file_vcs_status_M', 'file_vcs_status'], 'contents': 'M'}])
+			with replace_module_attr(vim, 'guess', lambda path: Args(branch=lambda: os.path.basename(path), status=lambda file: None, directory=path)):
+				self.assertEqual(vim.file_vcs_status(segment_info=segment_info), None)
+		with vim_module._with('buffer', '/bar') as segment_info:
+			with vim_module._with('bufoptions', buftype='nofile'):
+				with replace_module_attr(vim, 'guess', lambda path: Args(branch=lambda: os.path.basename(path), status=lambda file: 'M', directory=path)):
+					self.assertEqual(vim.file_vcs_status(segment_info=segment_info), None)
 
 	def test_repository_status(self):
-		# TODO
-		pass
+		segment_info = vim_module._get_segment_info()
+		with replace_module_attr(vim, 'guess', lambda path: Args(branch=lambda: os.path.basename(path), status=lambda: None, directory=path)):
+			self.assertEqual(vim.repository_status(segment_info=segment_info), None)
+		with replace_module_attr(vim, 'guess', lambda path: Args(branch=lambda: os.path.basename(path), status=lambda: 'DU', directory=path)):
+			self.assertEqual(vim.repository_status(segment_info=segment_info), 'DU')
 
 
 old_cwd = None

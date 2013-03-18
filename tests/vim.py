@@ -150,6 +150,13 @@ def _emul_exists(varname):
 	raise NotImplementedError
 
 
+@_logged
+def _emul_line2byte(line):
+	buflines = _buf_lines[_buffer()]
+	if line == len(buflines) + 1:
+		return sum((len(s) for s in buflines)) + 1
+	raise NotImplementedError
+
 _window_ids = [None]
 _window_id = 0
 _win_scopes = [None]
@@ -240,6 +247,15 @@ class _Buffer(object):
 			_undostate.pop(bufnr)
 			_undo_written.pop(bufnr)
 			_buf_scopes.pop(bufnr)
+
+
+class _Current(object):
+	@property
+	def buffer(self):
+		return buffers[_buffer()]
+
+
+current = _Current()
 
 
 _dict = None

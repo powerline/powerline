@@ -97,8 +97,9 @@ except ImportError:
 	def readlines(cmd, cwd):
 		p = Popen(cmd, shell=False, stdout=PIPE, stderr=PIPE, cwd=cwd)
 		p.stderr.close()
-		for line in p.stdout:
-			yield line[:-1].decode('utf-8')
+		with p.stdout:
+			for line in p.stdout:
+				yield line[:-1].decode('utf-8')
 
 	class Repository(object):
 		__slots__ = ('directory',)

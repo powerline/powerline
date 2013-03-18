@@ -49,6 +49,7 @@ class TestConfig(TestCase):
 								check_output(1, 0)
 				finally:
 					vim_module._start_mode('n')
+		powerline.renderer.shutdown()
 
 	def test_tmux(self):
 		from powerline.segments import common
@@ -56,16 +57,16 @@ class TestConfig(TestCase):
 		reload(common)
 		from powerline.shell import ShellPowerline
 		with replace_module_attr(common, 'urllib_read', urllib_read):
-			ShellPowerline(Args(ext=['tmux'])).renderer.render()
+			ShellPowerline(Args(ext=['tmux']), run_once=True).renderer.render()
 		reload(common)
 
 	def test_zsh(self):
 		from powerline.shell import ShellPowerline
-		ShellPowerline(Args(last_pipe_status=[1, 0], ext=['shell'], renderer_module='zsh_prompt')).renderer.render()
+		ShellPowerline(Args(last_pipe_status=[1, 0], ext=['shell'], renderer_module='zsh_prompt'), run_once=True).renderer.render()
 
 	def test_bash(self):
 		from powerline.shell import ShellPowerline
-		ShellPowerline(Args(last_exit_code=1, ext=['shell'], renderer_module='bash_prompt', config=[('ext', {'shell': {'theme': 'default_leftonly'}})])).renderer.render()
+		ShellPowerline(Args(last_exit_code=1, ext=['shell'], renderer_module='bash_prompt', config=[('ext', {'shell': {'theme': 'default_leftonly'}})]), run_once=True).renderer.render()
 
 	def test_ipython(self):
 		from powerline.ipython import IpythonPowerline
@@ -75,7 +76,9 @@ class TestConfig(TestCase):
 			config_overrides = None
 			theme_overrides = {}
 
-		IpyPowerline().renderer.render()
+		powerline = IpyPowerline()
+		powerline.renderer.render()
+		powerline.renderer.shutdown()
 
 	def test_wm(self):
 		from powerline.segments import common
@@ -83,7 +86,7 @@ class TestConfig(TestCase):
 		reload(common)
 		from powerline import Powerline
 		with replace_module_attr(common, 'urllib_read', urllib_read):
-			Powerline(ext='wm', renderer_module='pango_markup').renderer.render()
+			Powerline(ext='wm', renderer_module='pango_markup', run_once=True).renderer.render()
 		reload(common)
 
 

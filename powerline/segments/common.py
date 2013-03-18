@@ -1,5 +1,7 @@
 # vim:fileencoding=utf-8:noet
 
+from __future__ import absolute_import
+
 import os
 import sys
 
@@ -7,8 +9,13 @@ from datetime import datetime
 import socket
 from multiprocessing import cpu_count
 
-from powerline.lib import memoize, urllib_read, urllib_urlencode, add_divider_highlight_group
+from powerline.lib import add_divider_highlight_group
+from powerline.lib.url import urllib_read, urllib_urlencode
 from powerline.lib.vcs import guess
+from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment, with_docstring
+from powerline.lib.time import monotonic
+from powerline.lib.humanize_bytes import humanize_bytes
+from collections import namedtuple
 
 
 def hostname(only_if_ssh=False):
@@ -22,27 +29,8 @@ def hostname(only_if_ssh=False):
 	return socket.gethostname()
 
 
-def user():
-	'''Return the current user.
-
-	Highlights the user with the ``superuser`` if the effective user ID is 0.
-
-	Highlight groups used: ``superuser`` or ``user``. It is recommended to define all highlight groups.
-	'''
-	user = os.environ.get('USER')
-	try:
-		euid = os.geteuid()
-	except AttributeError:
-		# os.geteuid is not available on windows
-		euid = 1
-	return [{
-			'contents': user,
-			'highlight_group': 'user' if euid != 0 else ['superuser', 'user'],
-		}]
-
-
 def branch(status_colors=True):
-	'''Return the current VCS branch.@
+	'''Return the current VCS branch.
 
 	:param bool status_colors:
 		determines whether repository status will be used to determine highlighting. Default: True.
@@ -180,53 +168,38 @@ def fuzzy_time():
 		return ' '.join([minute, hour])
 
 
-@memoize(600)
 def _external_ip(query_url='http://ipv4.icanhazip.com/'):
 	return urllib_read(query_url).strip()
 
 
-def external_ip(query_url='http://ipv4.icanhazip.com/'):
-	'''Return external IP address.
+class ExternalIpSegment(ThreadedSegment):
+	def set_state(self, query_url='http://ipv4.icanhazip.com/', **kwargs):
+		super(ExternalIpSegment, self).set_state(**kwargs)
+		self.query_url = query_url
 
-	Suggested URIs:
+	def update(self):
+		ip = _external_ip(query_url=self.query_url)
+		with self.write_lock:
+			self.ip = ip
 
-	* http://ipv4.icanhazip.com/
-	* http://ipv6.icanhazip.com/
-	* http://icanhazip.com/ (returns IPv6 address if available, else IPv4)
-
-	:param str query_url:
-		URI to query for IP address, should return only the IP address as a text string
-
-	Divider highlight group used: ``background:divider``.
-	'''
-	return [{'contents': _external_ip(query_url=query_url), 'divider_highlight_group': 'background:divider'}]
+	def render(self):
+		return [{'contents': self.ip, 'divider_highlight_group': 'background:divider'}]
 
 
-@add_divider_highlight_group('background:divider')
-def uptime(format='{days:02d}d {hours:02d}h {minutes:02d}m'):
-	'''Return system uptime.
+external_ip = with_docstring(ExternalIpSegment(),
+'''Return external IP address.
 
-	Uses the ``psutil`` module if available for multi-platform compatibility,
-	falls back to reading :file:`/proc/uptime`.
+Suggested URIs:
 
-	:param str format:
-		format string, will be passed ``days``, ``hours`` and ``minutes`` as arguments
+* http://ipv4.icanhazip.com/
+* http://ipv6.icanhazip.com/
+* http://icanhazip.com/ (returns IPv6 address if available, else IPv4)
 
-	Divider highlight group used: ``background:divider``.
-	'''
-	try:
-		import psutil
-		seconds = int((datetime.now() - datetime.fromtimestamp(psutil.BOOT_TIME)).total_seconds())
-	except ImportError:
-		try:
-			with open('/proc/uptime', 'r') as f:
-				seconds = int(float(f.readline().split()[0]))
-		except IOError:
-			return None
-	minutes, seconds = divmod(seconds, 60)
-	hours, minutes = divmod(minutes, 60)
-	days, hours = divmod(hours, 24)
-	return format.format(days=int(days), hours=hours, minutes=minutes)
+:param str query_url:
+	URI to query for IP address, should return only the IP address as a text string
+
+Divider highlight group used: ``background:divider``.
+''')
 
 
 # Weather condition code descriptions available at
@@ -304,79 +277,123 @@ weather_conditions_icons = {
 	'unknown':       '⚠',
 }
 
+temp_conversions = {
+		'C': lambda temp: temp,
+		'F': lambda temp: (temp * 9 / 5) + 32,
+		'K': lambda temp: temp + 273.15,
+		}
 
-@memoize(1800)
-def weather(unit='c', location_query=None, icons=None):
-	'''Return weather from Yahoo! Weather.
+# Note: there are also unicode characters for units: ℃, ℉ and  K
+temp_units = {
+		'C': '°C',
+		'F': '°F',
+		'K': 'K',
+		}
 
-	Uses GeoIP lookup from http://freegeoip.net/ to automatically determine
-	your current location. This should be changed if you're in a VPN or if your
-	IP address is registered at another location.
 
-	Returns a list of colorized icon and temperature segments depending on
-	weather conditions.
+class WeatherSegment(ThreadedSegment):
+	interval = 600
 
-	:param str unit:
-		temperature unit, can be one of ``F``, ``C`` or ``K``
-	:param str location_query:
-		location query for your current location, e.g. ``oslo, norway``
-	:param dict icons:
-		dict for overriding default icons, e.g. ``{'heavy_snow' : u'❆'}``
+	def set_state(self, location_query=None, **kwargs):
+		super(WeatherSegment, self).set_state(**kwargs)
+		self.location = location_query
+		self.url = None
+		self.condition = {}
 
-	Divider highlight group used: ``background:divider``.
+	def update(self):
+		import json
 
-	Highlight groups used: ``weather_conditions`` or ``weather``, ``weather_temp_cold`` or ``weather_temp_hot`` or ``weather_temp`` or ``weather``.
-	Also uses ``weather_conditions_{condition}`` for all weather conditions supported by Yahoo.
-	'''
-	import json
+		if not self.url:
+			# Do not lock attribute assignments in this branch: they are used 
+			# only in .update()
+			if not self.location:
+				try:
+					location_data = json.loads(urllib_read('http://freegeoip.net/json/' + _external_ip()))
+					self.location = ','.join([location_data['city'],
+												location_data['region_name'],
+												location_data['country_name']])
+				except (TypeError, ValueError):
+					return
+			query_data = {
+					'q':
+						'use "http://github.com/yql/yql-tables/raw/master/weather/weather.bylocation.xml" as we;'
+						'select * from we where location="{0}" and unit="c"'.format(self.location).encode('utf-8'),
+					'format': 'json',
+					}
+			self.url = 'http://query.yahooapis.com/v1/public/yql?' + urllib_urlencode(query_data)
 
-	if not location_query:
 		try:
-			location = json.loads(urllib_read('http://freegeoip.net/json/' + _external_ip()))
-			location_query = ','.join([location['city'], location['region_name'], location['country_name']])
-		except (TypeError, ValueError):
+			raw_response = urllib_read(self.url)
+			response = json.loads(raw_response)
+			condition = response['query']['results']['weather']['rss']['channel']['item']['condition']
+			condition_code = int(condition['code'])
+			temp = float(condition['temp'])
+		except (KeyError, TypeError, ValueError):
+			return
+
+		try:
+			icon_names = weather_conditions_codes[condition_code]
+		except IndexError:
+			icon_names = (('not_available' if condition_code == 3200 else 'unknown'),)
+
+		with self.write_lock:
+			self.temp = temp
+			self.icon_names = icon_names
+
+	def render(self, icons=None, unit='C', temperature_format=None, **kwargs):
+		if not hasattr(self, 'icon_names'):
 			return None
-	query_data = {
-		'q':
-			'use "http://github.com/yql/yql-tables/raw/master/weather/weather.bylocation.xml" as we;'
-			'select * from we where location="{0}" and unit="{1}"'.format(location_query, unit).encode('utf-8'),
-		'format': 'json'
-	}
-	try:
-		url = 'http://query.yahooapis.com/v1/public/yql?' + urllib_urlencode(query_data)
-		response = json.loads(urllib_read(url))
-		condition = response['query']['results']['weather']['rss']['channel']['item']['condition']
-		condition_code = int(condition['code'])
-	except (KeyError, TypeError, ValueError):
-		return None
 
-	try:
-		icon_names = weather_conditions_codes[condition_code]
-	except IndexError:
-		icon_names = (('not_available' if condition_code == 3200 else 'unknown'),)
+		for icon_name in self.icon_names:
+			if icons:
+				if icon_name in icons:
+					icon = icons[icon_name]
+					break
+		else:
+			icon = weather_conditions_icons[self.icon_names[-1]]
 
-	for icon_name in icon_names:
-		if icons:
-			if icon_name in icons:
-				icon = icons[icon_name]
-				break
-	else:
-		icon = weather_conditions_icons[icon_names[-1]]
+		temperature_format = temperature_format or ('{temp:.0f}' + temp_units[unit])
+		temp = temp_conversions[unit](self.temp)
+		groups = ['weather_condition_' + icon_name for icon_name in self.icon_names] + ['weather_conditions', 'weather']
+		return [
+				{
+				'contents': icon + ' ',
+				'highlight_group': groups,
+				'divider_highlight_group': 'background:divider',
+				},
+				{
+				'contents': temperature_format.format(temp=temp),
+				'highlight_group': ['weather_temp_cold' if int(self.temp) < 0 else 'weather_temp_hot', 'weather_temp', 'weather'],
+				'draw_divider': False,
+				'divider_highlight_group': 'background:divider',
+				},
+			]
 
-	groups = ['weather_condition_' + icon_name for icon_name in icon_names] + ['weather_conditions', 'weather']
-	return [
-			{
-			'contents': icon + ' ',
-			'highlight_group': groups,
-			'divider_highlight_group': 'background:divider',
-			},
-			{
-			'contents': '{0}°{1}'.format(condition['temp'], unit.upper()),
-			'highlight_group': ['weather_temp_cold' if int(condition['temp']) < 0 else 'weather_temp_hot', 'weather_temp', 'weather'],
-			'draw_divider': False,
-			'divider_highlight_group': 'background:divider',
-			},
-		]
+
+weather = with_docstring(WeatherSegment(),
+'''Return weather from Yahoo! Weather.
+
+Uses GeoIP lookup from http://freegeoip.net/ to automatically determine
+your current location. This should be changed if you're in a VPN or if your
+IP address is registered at another location.
+
+Returns a list of colorized icon and temperature segments depending on
+weather conditions.
+
+:param str unit:
+	temperature unit, can be one of ``F``, ``C`` or ``K``
+:param str location_query:
+	location query for your current location, e.g. ``oslo, norway``
+:param dict icons:
+	dict for overriding default icons, e.g. ``{'heavy_snow' : u'❆'}``
+:param str temperature_format:
+	format string, receives ``temp`` as an argument. Should also hold unit.
+
+Divider highlight group used: ``background:divider``.
+
+Highlight groups used: ``weather_conditions`` or ``weather``, ``weather_temp_cold`` or ``weather_temp_hot`` or ``weather_temp`` or ``weather``.
+Also uses ``weather_conditions_{condition}`` for all weather conditions supported by Yahoo.
+''')
 
 
 def system_load(format='{avg:.1f}', threshold_good=1, threshold_bad=2):
@@ -397,7 +414,11 @@ def system_load(format='{avg:.1f}', threshold_good=1, threshold_bad=2):
 
 	Highlight groups used: ``system_load_good`` or ``system_load``, ``system_load_bad`` or ``system_load``, ``system_load_ugly`` or ``system_load``. It is recommended to define all highlight groups.
 	'''
-	cpu_num = cpu_count()
+	global cpu_count
+	try:
+		cpu_num = cpu_count()
+	except NotImplementedError:
+		return None
 	ret = []
 	for avg in os.getloadavg():
 		normalized = avg / cpu_num
@@ -419,69 +440,175 @@ def system_load(format='{avg:.1f}', threshold_good=1, threshold_bad=2):
 	return ret
 
 
-def cpu_load_percent(measure_interval=.5):
-	'''Return the average CPU load as a percentage.
+try:
+	import psutil
 
-	Requires the ``psutil`` module.
+	def _get_bytes(interface):
+		io_counters = psutil.network_io_counters(pernic=True)
+		if_io = io_counters.get(interface)
+		if not if_io:
+			return None
+		return if_io.bytes_recv, if_io.bytes_sent
 
-	:param float measure_interval:
-		interval used to measure CPU load (in seconds)
-	'''
-	try:
-		import psutil
-	except ImportError:
+	def _get_user():
+		return psutil.Process(os.getpid()).username
+
+	def cpu_load_percent(measure_interval=.5):
+		'''Return the average CPU load as a percentage.
+
+		Requires the ``psutil`` module.
+
+		:param float measure_interval:
+			interval used to measure CPU load (in seconds)
+		'''
+		cpu_percent = int(psutil.cpu_percent(interval=measure_interval))
+		return '{0}%'.format(cpu_percent)
+except ImportError:
+	def _get_bytes(interface):  # NOQA
+		try:
+			with open('/sys/class/net/{interface}/statistics/rx_bytes'.format(interface=interface), 'rb') as file_obj:
+				rx = int(file_obj.read())
+			with open('/sys/class/net/{interface}/statistics/tx_bytes'.format(interface=interface), 'rb') as file_obj:
+				tx = int(file_obj.read())
+			return (rx, tx)
+		except IOError:
+			return None
+
+	def _get_user():  # NOQA
+		return os.environ.get('USER', None)
+
+	def cpu_load_percent(measure_interval=.5):  # NOQA
+		'''Return the average CPU load as a percentage.
+
+		Requires the ``psutil`` module.
+
+		:param float measure_interval:
+			interval used to measure CPU load (in seconds)
+		'''
 		return None
-	cpu_percent = int(psutil.cpu_percent(interval=measure_interval))
-	return '{0}%'.format(cpu_percent)
+
+
+username = False
+
+
+def user():
+	'''Return the current user.
+
+	Highlights the user with the ``superuser`` if the effective user ID is 0.
+
+	Highlight groups used: ``superuser`` or ``user``. It is recommended to define all highlight groups.
+	'''
+	global username
+	if username is False:
+		username = _get_user()
+	if username is None:
+		return None
+	try:
+		euid = os.geteuid()
+	except AttributeError:
+		# os.geteuid is not available on windows
+		euid = 1
+	return [{
+			'contents': username,
+			'highlight_group': 'user' if euid != 0 else ['superuser', 'user'],
+		}]
+
+
+if os.path.exists('/proc/uptime'):
+	def _get_uptime():
+		with open('/proc/uptime', 'r') as f:
+			return int(float(f.readline().split()[0]))
+elif 'psutil' in globals():
+	from time import time
+	def _get_uptime():  # NOQA
+		# psutil.BOOT_TIME is not subject to clock adjustments, but time() is. 
+		# Thus it is a fallback to /proc/uptime reading and not the reverse.
+		return int(time() - psutil.BOOT_TIME)
+else:
+	def _get_uptime():  # NOQA
+		raise NotImplementedError
 
 
 @add_divider_highlight_group('background:divider')
-def network_load(interface='eth0', measure_interval=1, suffix='B/s', si_prefix=False):
-	'''Return the network load.
+def uptime(format='{days}d {hours:02d}h {minutes:02d}m'):
+	'''Return system uptime.
 
-	Uses the ``psutil`` module if available for multi-platform compatibility,
-	falls back to reading
-	:file:`/sys/class/net/{interface}/statistics/{rx,tx}_bytes`.
+	:param str format:
+		format string, will be passed ``days``, ``hours``, ``minutes`` and 
+		seconds as arguments
 
-	:param str interface:
-		network interface to measure
-	:param float measure_interval:
-		interval used to measure the network load (in seconds)
-	:param str suffix:
-		string appended to each load string
-	:param bool si_prefix:
-		use SI prefix, e.g. MB instead of MiB
+	Divider highlight group used: ``background:divider``.
 	'''
-	import time
-	from powerline.lib import humanize_bytes
-
-	def get_bytes():
-		try:
-			import psutil
-			io_counters = psutil.network_io_counters(pernic=True)
-			if_io = io_counters.get(interface)
-			if not if_io:
-				return None
-			return (if_io.bytes_recv, if_io.bytes_sent)
-		except ImportError:
-			try:
-				with open('/sys/class/net/{interface}/statistics/rx_bytes'.format(interface=interface), 'rb') as file_obj:
-					rx = int(file_obj.read())
-				with open('/sys/class/net/{interface}/statistics/tx_bytes'.format(interface=interface), 'rb') as file_obj:
-					tx = int(file_obj.read())
-				return (rx, tx)
-			except IOError:
-				return None
-
-	b1 = get_bytes()
-	if b1 is None:
+	try:
+		seconds = _get_uptime()
+	except (IOError, NotImplementedError):
 		return None
-	time.sleep(measure_interval)
-	b2 = get_bytes()
-	return '⬇ {rx_diff} ⬆ {tx_diff}'.format(
-		rx_diff=humanize_bytes((b2[0] - b1[0]) / measure_interval, suffix, si_prefix).rjust(8),
-		tx_diff=humanize_bytes((b2[1] - b1[1]) / measure_interval, suffix, si_prefix).rjust(8),
-		)
+	minutes, seconds = divmod(seconds, 60)
+	hours, minutes = divmod(minutes, 60)
+	days, hours = divmod(hours, 24)
+	return format.format(days=int(days), hours=hours, minutes=minutes, seconds=seconds)
+
+
+class NetworkLoadSegment(KwThreadedSegment):
+	interfaces = {}
+
+	@staticmethod
+	def key(interface='eth0', **kwargs):
+		return interface
+
+	def compute_state(self, interface):
+		if interface in self.interfaces:
+			idata = self.interfaces[interface]
+			try:
+				idata['prev'] = idata['last']
+			except KeyError:
+				pass
+		else:
+			idata = {}
+			if self.run_once:
+				idata['prev'] = (monotonic(), _get_bytes(interface))
+				self.sleep(0)
+			self.interfaces[interface] = idata
+
+		idata['last'] = (monotonic(), _get_bytes(interface))
+		return idata
+
+	def render_one(self, idata, format='⬇ {recv:>8} ⬆ {sent:>8}', suffix='B/s', si_prefix=False, **kwargs):
+		if not idata or 'prev' not in idata:
+			return None
+
+		t1, b1 = idata['prev']
+		t2, b2 = idata['last']
+		measure_interval = t2 - t1
+
+		if None in (b1, b2):
+			return None
+
+		return [{
+				'contents': format.format(
+					recv=humanize_bytes((b2[0] - b1[0]) / measure_interval, suffix, si_prefix),
+					sent=humanize_bytes((b2[1] - b1[1]) / measure_interval, suffix, si_prefix),
+					),
+				'divider_highlight_group': 'background:divider',
+				}]
+
+
+network_load = with_docstring(NetworkLoadSegment(),
+'''Return the network load.
+
+Uses the ``psutil`` module if available for multi-platform compatibility,
+falls back to reading
+:file:`/sys/class/net/{interface}/statistics/{rx,tx}_bytes`.
+
+:param str interface:
+	network interface to measure
+:param str suffix:
+	string appended to each load string
+:param bool si_prefix:
+	use SI prefix, e.g. MB instead of MiB
+:param str format:
+	format string, receives ``recv`` and ``sent`` as arguments
+''')
 
 
 def virtualenv():
@@ -489,44 +616,56 @@ def virtualenv():
 	return os.path.basename(os.environ.get('VIRTUAL_ENV', '')) or None
 
 
-@memoize(60)
-def email_imap_alert(username, password, server='imap.gmail.com', port=993, folder='INBOX'):
-	'''Return unread e-mail count for IMAP servers.
+_IMAPKey = namedtuple('Key', 'username password server port folder')
 
-	:param str username:
-		login username
-	:param str password:
-		login password
-	:param str server:
-		e-mail server
-	:param int port:
-		e-mail server port
-	:param str folder:
-		folder to check for e-mails
 
-	Highlight groups used: ``email_alert``.
-	'''
-	import imaplib
-	import re
+class EmailIMAPSegment(KwThreadedSegment):
+	interval = 60
 
-	if not username or not password:
-		return None
-	try:
-		mail = imaplib.IMAP4_SSL(server, port)
-		mail.login(username, password)
-		rc, message = mail.status(folder, '(UNSEEN)')
-		unread_str = message[0].decode('utf-8')
-		unread_count = int(re.search('UNSEEN (\d+)', unread_str).group(1))
-	except socket.gaierror:
-		return None
-	except imaplib.IMAP4.error as e:
-		unread_count = str(e)
-	if not unread_count:
-		return None
-	return [{
-		'highlight_group': 'email_alert',
-		'contents': str(unread_count),
-		}]
+	@staticmethod
+	def key(username, password, server='imap.gmail.com', port=993, folder='INBOX'):
+		return _IMAPKey(username, password, server, port, folder)
+
+	@staticmethod
+	def compute_state(key):
+		if not key.username or not key.password:
+			return None
+		try:
+			import imaplib
+			import re
+			mail = imaplib.IMAP4_SSL(key.server, key.port)
+			mail.login(key.username, key.password)
+			rc, message = mail.status(key.folder, '(UNSEEN)')
+			unread_str = message[0].decode('utf-8')
+			unread_count = int(re.search('UNSEEN (\d+)', unread_str).group(1))
+		except socket.gaierror:
+			return None
+		except imaplib.IMAP4.error as e:
+			unread_count = str(e)
+		if not unread_count:
+			return None
+		return [{
+			'highlight_group': 'email_alert',
+			'contents': str(unread_count),
+			}]
+
+
+email_imap_alert = with_docstring(EmailIMAPSegment(),
+'''Return unread e-mail count for IMAP servers.
+
+:param str username:
+	login username
+:param str password:
+	login password
+:param str server:
+	e-mail server
+:param int port:
+	e-mail server port
+:param str folder:
+	folder to check for e-mails
+
+Highlight groups used: ``email_alert``.
+''')
 
 
 class NowPlayingSegment(object):

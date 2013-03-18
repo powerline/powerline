@@ -12,7 +12,7 @@ except ImportError:
 
 if __name__ == '__main__':
 	args = get_argparser(description=__doc__).parse_args()
-	powerline = ShellPowerline(args)
+	powerline = ShellPowerline(args, run_once=True)
 	rendered = powerline.renderer.render(width=args.width, side=args.side)
 	try:
 		sys.stdout.write(rendered)
