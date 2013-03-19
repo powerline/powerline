@@ -3,6 +3,11 @@ import json
 from powerline.colorscheme import cterm_to_hex
 from itertools import groupby
 
+try:
+	from __builtin__ import unicode
+except ImportError:
+	unicode = str
+
 
 if len(sys.argv) == 1:
 	sys.stderr.write('''
@@ -77,7 +82,7 @@ def print_color(color):
 	if type(color) is int:
 		colstr = '5;' + str(color)
 	else:
-		colstr = '2;' + ';'.join((str(i) for i in color))
+		colstr = '2;' + ';'.join((str(int(round(i))) for i in color))
 	sys.stdout.write('\033[48;' + colstr + 'm ')
 
 
