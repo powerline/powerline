@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import sys
 import json
 from powerline.colorscheme import cterm_to_hex
