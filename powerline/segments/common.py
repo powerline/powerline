@@ -356,6 +356,12 @@ class WeatherSegment(ThreadedSegment):
 
 		temperature_format = temperature_format or ('{temp:.0f}' + temp_units[unit])
 		temp = temp_conversions[unit](self.temp)
+		if self.temp < -30:
+			gradient_level = 0
+		elif self.temp > 40:
+			gradient_level = 100
+		else:
+			gradient_level = int((self.temp + 30) * 100 // 70)
 		groups = ['weather_condition_' + icon_name for icon_name in self.icon_names] + ['weather_conditions', 'weather']
 		return [
 				{
@@ -365,9 +371,10 @@ class WeatherSegment(ThreadedSegment):
 				},
 				{
 				'contents': temperature_format.format(temp=temp),
-				'highlight_group': ['weather_temp_cold' if int(self.temp) < 0 else 'weather_temp_hot', 'weather_temp', 'weather'],
+				'highlight_group': ['weather_temp_gradient', 'weather_temp', 'weather'],
 				'draw_divider': False,
 				'divider_highlight_group': 'background:divider',
+				'gradient_level': gradient_level,
 				},
 			]
 
@@ -393,7 +400,7 @@ weather conditions.
 
 Divider highlight group used: ``background:divider``.
 
-Highlight groups used: ``weather_conditions`` or ``weather``, ``weather_temp_cold`` or ``weather_temp_hot`` or ``weather_temp`` or ``weather``.
+Highlight groups used: ``weather_conditions`` or ``weather``, ``weather_temp_gradient`` (gradient) or ``weather``.
 Also uses ``weather_conditions_{condition}`` for all weather conditions supported by Yahoo.
 ''')
 
