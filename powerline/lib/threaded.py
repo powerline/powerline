@@ -45,8 +45,9 @@ class ThreadedSegment(Thread):
 			self.sleep(monotonic() - start_time)
 
 	def shutdown(self):
-		self.keep_going = False
-		self.update_lock.acquire()
+		if self.keep_going:
+			self.keep_going = False
+			self.update_lock.acquire()
 
 	def set_interval(self, interval=None):
 		# Allowing “interval” keyword in configuration.
