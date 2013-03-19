@@ -8,7 +8,7 @@ from time import sleep
 from threading import Thread, Lock
 
 
-class ThreadedSegment(Thread):
+class ThreadedSegment(object):
 	daemon = True
 	min_sleep_time = 0.1
 	update_first = True
@@ -21,6 +21,7 @@ class ThreadedSegment(Thread):
 		self.keep_going = True
 		self.run_once = True
 		self.did_set_interval = False
+		self.thread = None
 
 	def __call__(self, **kwargs):
 		if self.run_once:
@@ -31,6 +32,14 @@ class ThreadedSegment(Thread):
 
 		with self.write_lock:
 			return self.render(**kwargs)
+
+	def is_alive(self):
+		return self.thread and self.thread.is_alive()
+
+	def start(self):
+		self.thread = Thread(target=self.run)
+		self.thread.daemon = self.daemon
+		self.thread.start()
 
 	def sleep(self, adjust_time):
 		sleep(max(self.interval - adjust_time, self.min_sleep_time))
