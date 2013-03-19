@@ -15,6 +15,17 @@ VBLOCK = chr(ord('V') - 0x40)
 SBLOCK = chr(ord('S') - 0x40)
 
 
+def shutdown(powerline):
+	from powerline.segments import common, vim
+	try:
+		powerline.renderer.shutdown()
+	finally:
+		# After shutdown threads are useless, it is needed to recreate them.
+		from imp import reload
+		reload(common)
+		reload(vim)
+
+
 class TestConfig(TestCase):
 	def test_vim(self):
 		from powerline.vim import VimPowerline
@@ -49,7 +60,7 @@ class TestConfig(TestCase):
 								check_output(1, 0)
 				finally:
 					vim_module._start_mode('n')
-		powerline.renderer.shutdown()
+		shutdown(powerline)
 
 	def test_tmux(self):
 		from powerline.segments import common
@@ -57,16 +68,27 @@ class TestConfig(TestCase):
 		reload(common)
 		from powerline.shell import ShellPowerline
 		with replace_module_attr(common, 'urllib_read', urllib_read):
-			ShellPowerline(Args(ext=['tmux']), run_once=True).renderer.render()
-		reload(common)
+			powerline = ShellPowerline(Args(ext=['tmux']), run_once=False)
+			powerline.renderer.render()
+			powerline = ShellPowerline(Args(ext=['tmux']), run_once=False)
+			powerline.renderer.render()
+			shutdown(powerline)
 
 	def test_zsh(self):
 		from powerline.shell import ShellPowerline
-		ShellPowerline(Args(last_pipe_status=[1, 0], ext=['shell'], renderer_module='zsh_prompt'), run_once=True).renderer.render()
+		powerline = ShellPowerline(Args(last_pipe_status=[1, 0], ext=['shell'], renderer_module='zsh_prompt'), run_once=False)
+		powerline.renderer.render()
+		powerline = ShellPowerline(Args(last_pipe_status=[1, 0], ext=['shell'], renderer_module='zsh_prompt'), run_once=False)
+		powerline.renderer.render()
+		shutdown(powerline)
 
 	def test_bash(self):
 		from powerline.shell import ShellPowerline
-		ShellPowerline(Args(last_exit_code=1, ext=['shell'], renderer_module='bash_prompt', config=[('ext', {'shell': {'theme': 'default_leftonly'}})]), run_once=True).renderer.render()
+		powerline = ShellPowerline(Args(last_exit_code=1, ext=['shell'], renderer_module='bash_prompt', config=[('ext', {'shell': {'theme': 'default_leftonly'}})]), run_once=False)
+		powerline.renderer.render()
+		powerline = ShellPowerline(Args(last_exit_code=1, ext=['shell'], renderer_module='bash_prompt', config=[('ext', {'shell': {'theme': 'default_leftonly'}})]), run_once=False)
+		powerline.renderer.render()
+		shutdown(powerline)
 
 	def test_ipython(self):
 		from powerline.ipython import IpythonPowerline
@@ -78,7 +100,8 @@ class TestConfig(TestCase):
 
 		powerline = IpyPowerline()
 		powerline.renderer.render()
-		powerline.renderer.shutdown()
+		powerline.renderer.render()
+		shutdown(powerline)
 
 	def test_wm(self):
 		from powerline.segments import common
