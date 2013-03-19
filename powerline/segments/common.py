@@ -306,7 +306,7 @@ class WeatherSegment(ThreadedSegment):
 		import json
 
 		if not self.url:
-			# Do not lock attribute assignments in this branch: they are used 
+			# Do not lock attribute assignments in this branch: they are used
 			# only in .update()
 			if not self.location:
 				try:
@@ -452,6 +452,12 @@ try:
 			return None
 		return if_io.bytes_recv, if_io.bytes_sent
 
+	def _get_interfaces():
+		io_counters = psutil.network_io_counters(pernic=True)
+		for interface, data in io_counters.items():
+			if data:
+				yield interface, data.bytes_recv, data.bytes_sent
+
 	def _get_user():
 		return psutil.Process(os.getpid()).username
 
@@ -466,6 +472,8 @@ try:
 		cpu_percent = int(psutil.cpu_percent(interval=measure_interval))
 		return '{0}%'.format(cpu_percent)
 except ImportError:
+	import glob
+
 	def _get_bytes(interface):  # NOQA
 		try:
 			with open('/sys/class/net/{interface}/statistics/rx_bytes'.format(interface=interface), 'rb') as file_obj:
@@ -475,6 +483,13 @@ except ImportError:
 			return (rx, tx)
 		except IOError:
 			return None
+
+	def _get_interfaces():
+		for p in glob.glob(u'/sys/class/net/*'):
+			interface = os.path.basename(p)
+			x = _get_bytes(interface)
+			if x is not None:
+				yield interface, x[0], x[1]
 
 	def _get_user():  # NOQA
 		return os.environ.get('USER', None)
@@ -523,7 +538,7 @@ if os.path.exists('/proc/uptime'):
 elif 'psutil' in globals():
 	from time import time
 	def _get_uptime():  # NOQA
-		# psutil.BOOT_TIME is not subject to clock adjustments, but time() is. 
+		# psutil.BOOT_TIME is not subject to clock adjustments, but time() is.
 		# Thus it is a fallback to /proc/uptime reading and not the reverse.
 		return int(time() - psutil.BOOT_TIME)
 else:
@@ -536,7 +551,7 @@ def uptime(format='{days}d {hours:02d}h {minutes:02d}m'):
 	'''Return system uptime.
 
 	:param str format:
-		format string, will be passed ``days``, ``hours``, ``minutes`` and 
+		format string, will be passed ``days``, ``hours``, ``minutes`` and
 		seconds as arguments
 
 	Divider highlight group used: ``background:divider``.
@@ -552,13 +567,42 @@ def uptime(format='{days}d {hours:02d}h {minutes:02d}m'):
 
 
 class NetworkLoadSegment(KwThreadedSegment):
+	import re
 	interfaces = {}
+	replace_num_pat = re.compile(r'[a-zA-Z]+')
 
 	@staticmethod
-	def key(interface='eth0', **kwargs):
+	def key(interface='detect', **kwargs):
 		return interface
 
 	def compute_state(self, interface):
+		if interface == 'detect':
+			proc_exists = getattr(self, 'proc_exists', None)
+			if proc_exists is None:
+				proc_exists = self.proc_exists = os.path.exists('/proc/net/route')
+			if proc_exists:
+				# Look for default interface in routing table
+				with open('/proc/net/route', 'rb') as f:
+					for line in f.readlines():
+						parts = line.split()
+						if len(parts) > 1:
+							iface, destination = parts[:2]
+							if not destination.replace(b'0', b''):
+								interface = iface.decode('utf-8')
+								break
+			if interface == 'detect':
+				# Choose interface with most total activity, excluding some
+				# well known interface names
+				interface, total = 'eth0', -1
+				for name, rx, tx in _get_interfaces():
+					base = self.replace_num_pat.match(name)
+					if None in (base, rx, tx) or base.group() in ('lo', 'vmnet', 'sit'):
+						continue
+					activity = rx + tx
+					if activity > total:
+						total = activity
+						interface = name
+
 		if interface in self.interfaces:
 			idata = self.interfaces[interface]
 			try:
@@ -603,7 +647,7 @@ falls back to reading
 :file:`/sys/class/net/{interface}/statistics/{rx,tx}_bytes`.
 
 :param str interface:
-	network interface to measure
+	network interface to measure (use the special value "detect" to have powerline try to auto-detect the network interface)
 :param str suffix:
 	string appended to each load string
 :param bool si_prefix:
