@@ -301,6 +301,7 @@ def modified_buffers(text='+ ', join_str=','):
 
 class KwWindowThreadedSegment(KwThreadedSegment):
 	def set_state(self, **kwargs):
+		kwargs = kwargs.copy()
 		for window in vim.windows:
 			buffer = window.buffer
 			kwargs['segment_info'] = {'bufnr': buffer.number, 'buffer': buffer}
@@ -372,9 +373,9 @@ class BranchSegment(RepositorySegment):
 			'divider_highlight_group': 'branch:divider',
 			}]
 
-	def startup(self, **kwargs):
+	def startup(self, status_colors=False, **kwargs):
 		super(BranchSegment, self).startup()
-		if kwargs.get('status_colors', False):
+		if status_colors:
 			self.started_repository_status = True
 			repository_status.startup()
 

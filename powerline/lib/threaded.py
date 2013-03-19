@@ -11,6 +11,8 @@ from threading import Thread, Lock
 class ThreadedSegment(Thread):
 	daemon = True
 	min_sleep_time = 0.1
+	update_first = True
+	interval = 1
 
 	def __init__(self):
 		super(ThreadedSegment, self).__init__()
@@ -46,29 +48,30 @@ class ThreadedSegment(Thread):
 		self.keep_going = False
 		self.update_lock.acquire()
 
-	def set_interval(self, interval=None, **kwargs):
+	def set_interval(self, interval=None):
 		# Allowing “interval” keyword in configuration.
-		# Note: Here **kwargs is needed to support foreign data, in subclasses
-		# it can be seen in a number of places in order to support
+		# Note: Here **kwargs is needed to support foreign data, in subclasses 
+		# it can be seen in a number of places in order to support 
 		# .set_interval().
-		interval = interval or getattr(self, 'interval', 1)
+		interval = interval or getattr(self, 'interval')
 		self.interval = interval
 		self.has_set_interval = True
 
-	def set_state(self, **kwargs):
-		if not self.did_set_interval:
-			self.set_interval(**kwargs)
+	def set_state(self, interval=None, **kwargs):
+		if not self.did_set_interval or interval:
+			self.set_interval(interval)
+		# Without this we will not have to wait long until receiving bug “I 
+		# opened vim, but branch information is only shown after I move cursor”.
+		if self.update_first:
+			self.update_first = False
+			self.update()
 
 	def startup(self, **kwargs):
-		# Normally .update() succeeds to run before value is requested, meaning
-		# that user is getting values he needs directly at vim startup. Without
-		# .startup() we will not have to wait long until receiving bug “I opened
-		# vim, but branch information is only shown after I move cursor”.
 		self.run_once = False
 
+		self.set_state(**kwargs)
 
 		if not self.is_alive():
-			self.set_state(**kwargs)
 			self.start()
 
 
@@ -81,11 +84,12 @@ def printed(func):
 
 class KwThreadedSegment(ThreadedSegment):
 	drop_interval = 10 * 60
+	update_missing = True
+	update_first = False
 
 	def __init__(self):
 		super(KwThreadedSegment, self).__init__()
 		self.queries = {}
-		self.update_missing = True
 
 	@staticmethod
 	def key(**kwargs):
@@ -96,6 +100,8 @@ class KwThreadedSegment(ThreadedSegment):
 		try:
 			update_state = self.queries[key][1]
 		except KeyError:
+			# self.update_missing has the same reasoning as self.update_first in 
+			# parent class
 			update_state = self.compute_state(key) if self.update_missing else None
 		# No locks: render method is already running with write_lock acquired.
 		self.queries[key] = (monotonic(), update_state)
@@ -114,12 +120,13 @@ class KwThreadedSegment(ThreadedSegment):
 			for key in removes:
 				self.queries.pop(key)
 
-	def set_state(self, **kwargs):
-		if not self.did_set_interval or ('interval' in kwargs and self.interval > kwargs['interval']):
-			self.set_interval(**kwargs)
+	def set_state(self, interval=None, **kwargs):
+		if not self.did_set_interval or (interval < self.interval):
+			self.set_interval(interval)
 
 		key = self.key(**kwargs)
-		self.queries[key] = (monotonic(), None)
+		if key not in self.queries:
+			self.queries[key] = (monotonic(), self.compute_state(key) if self.update_missing else None)
 
 	@staticmethod
 	def render_one(update_state, **kwargs):

@@ -174,8 +174,8 @@ def _external_ip(query_url='http://ipv4.icanhazip.com/'):
 
 class ExternalIpSegment(ThreadedSegment):
 	def set_state(self, query_url='http://ipv4.icanhazip.com/', **kwargs):
-		super(ExternalIpSegment, self).set_state(**kwargs)
 		self.query_url = query_url
+		super(ExternalIpSegment, self).set_state(**kwargs)
 
 	def update(self):
 		ip = _external_ip(query_url=self.query_url)
@@ -183,7 +183,9 @@ class ExternalIpSegment(ThreadedSegment):
 			self.ip = ip
 
 	def render(self):
-		return [{'contents': getattr(self, 'ip', None), 'divider_highlight_group': 'background:divider'}]
+		if not hasattr(self, 'ip'):
+			return None
+		return [{'contents': self.ip, 'divider_highlight_group': 'background:divider'}]
 
 
 external_ip = with_docstring(ExternalIpSegment(),
@@ -295,16 +297,16 @@ class WeatherSegment(ThreadedSegment):
 	interval = 600
 
 	def set_state(self, location_query=None, **kwargs):
-		super(WeatherSegment, self).set_state(**kwargs)
 		self.location = location_query
 		self.url = None
 		self.condition = {}
+		super(WeatherSegment, self).set_state(**kwargs)
 
 	def update(self):
 		import json
 
 		if not self.url:
-			# Do not lock attribute assignments in this branch: they are used
+			# Do not lock attribute assignments in this branch: they are used 
 			# only in .update()
 			if not self.location:
 				try:
@@ -521,7 +523,7 @@ if os.path.exists('/proc/uptime'):
 elif 'psutil' in globals():
 	from time import time
 	def _get_uptime():  # NOQA
-		# psutil.BOOT_TIME is not subject to clock adjustments, but time() is.
+		# psutil.BOOT_TIME is not subject to clock adjustments, but time() is. 
 		# Thus it is a fallback to /proc/uptime reading and not the reverse.
 		return int(time() - psutil.BOOT_TIME)
 else:
@@ -534,7 +536,7 @@ def uptime(format='{days}d {hours:02d}h {minutes:02d}m'):
 	'''Return system uptime.
 
 	:param str format:
-		format string, will be passed ``days``, ``hours``, ``minutes`` and
+		format string, will be passed ``days``, ``hours``, ``minutes`` and 
 		seconds as arguments
 
 	Divider highlight group used: ``background:divider``.
