@@ -472,7 +472,6 @@ try:
 		cpu_percent = int(psutil.cpu_percent(interval=measure_interval))
 		return '{0}%'.format(cpu_percent)
 except ImportError:
-	import glob
 
 	def _get_bytes(interface):  # NOQA
 		try:
@@ -485,8 +484,7 @@ except ImportError:
 			return None
 
 	def _get_interfaces():
-		for p in glob.glob(u'/sys/class/net/*'):
-			interface = os.path.basename(p)
+		for interface in os.listdir('/sys/class/net'):
 			x = _get_bytes(interface)
 			if x is not None:
 				yield interface, x[0], x[1]
