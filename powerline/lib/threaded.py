@@ -67,14 +67,14 @@ class ThreadedSegment(object):
 		self.interval = interval
 		self.has_set_interval = True
 
-	def set_state(self, interval=None, **kwargs):
+	def set_state(self, update_first=True, interval=None, **kwargs):
 		if not self.did_set_interval or interval:
 			self.set_interval(interval)
 		# Without this we will not have to wait long until receiving bug “I 
 		# opened vim, but branch information is only shown after I move cursor”.
 		#
 		# If running once .update() is called in __call__.
-		if self.update_first and not self.run_once:
+		if update_first and self.update_first and not self.run_once:
 			self.update_first = False
 			self.update()
 
@@ -99,7 +99,6 @@ def printed(func):
 
 class KwThreadedSegment(ThreadedSegment):
 	drop_interval = 10 * 60
-	update_missing = True
 	update_first = False
 
 	def __init__(self):
@@ -115,9 +114,7 @@ class KwThreadedSegment(ThreadedSegment):
 		try:
 			update_state = self.queries[key][1]
 		except KeyError:
-			# self.update_missing has the same reasoning as self.update_first in 
-			# parent class
-			update_state = self.compute_state(key) if self.update_missing or self.run_once else None
+			update_state = self.compute_state(key) if self.update_first or self.run_once else None
 		# No locks: render method is already running with write_lock acquired.
 		self.queries[key] = (monotonic(), update_state)
 		return self.render_one(update_state, **kwargs)
@@ -135,13 +132,18 @@ class KwThreadedSegment(ThreadedSegment):
 			for key in removes:
 				self.queries.pop(key)
 
-	def set_state(self, interval=None, **kwargs):
+	def set_state(self, update_first=True, interval=None, **kwargs):
 		if not self.did_set_interval or (interval < self.interval):
 			self.set_interval(interval)
 
+		# Allow only to forbid to compute missing values: in either user 
+		# configuration or in subclasses.
+		if self.update_first:
+			self.update_first = update_first
+
 		key = self.key(**kwargs)
 		if not self.run_once and key not in self.queries:
-			self.queries[key] = (monotonic(), self.compute_state(key) if self.update_missing else None)
+			self.queries[key] = (monotonic(), self.compute_state(key) if self.update_first else None)
 
 	@staticmethod
 	def render_one(update_state, **kwargs):
