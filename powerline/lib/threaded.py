@@ -67,11 +67,14 @@ class ThreadedSegment(Thread):
 			self.update()
 
 	def startup(self, **kwargs):
+		# Normally .update() succeeds to run before value is requested, meaning
+		# that user is getting values he needs directly at vim startup. Without
+		# .startup() we will not have to wait long until receiving bug “I opened
+		# vim, but branch information is only shown after I move cursor”.
 		self.run_once = False
 
-		self.set_state(**kwargs)
-
 		if not self.is_alive():
+			self.set_state(**kwargs)
 			self.start()
 
 
