@@ -21,6 +21,7 @@ _powerline_install_precmd() {
 		fi
 	done
 	chpwd_functions+=( _powerline_tmux_set_pwd )
+	setopt nolocaloptions
 	setopt promptpercent
 	setopt promptsubst
 	if zmodload zsh/zpython &>/dev/null ; then
