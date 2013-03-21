@@ -306,7 +306,7 @@ class WeatherSegment(ThreadedSegment):
 		import json
 
 		if not self.url:
-			# Do not lock attribute assignments in this branch: they are used 
+			# Do not lock attribute assignments in this branch: they are used
 			# only in .update()
 			if not self.location:
 				try:
@@ -472,6 +472,7 @@ try:
 		cpu_percent = int(psutil.cpu_percent(interval=measure_interval))
 		return '{0}%'.format(cpu_percent)
 except ImportError:
+
 	def _get_bytes(interface):  # NOQA
 		try:
 			with open('/sys/class/net/{interface}/statistics/rx_bytes'.format(interface=interface), 'rb') as file_obj:
@@ -535,7 +536,7 @@ if os.path.exists('/proc/uptime'):
 elif 'psutil' in globals():
 	from time import time
 	def _get_uptime():  # NOQA
-		# psutil.BOOT_TIME is not subject to clock adjustments, but time() is. 
+		# psutil.BOOT_TIME is not subject to clock adjustments, but time() is.
 		# Thus it is a fallback to /proc/uptime reading and not the reverse.
 		return int(time() - psutil.BOOT_TIME)
 else:
@@ -548,7 +549,7 @@ def uptime(format='{days}d {hours:02d}h {minutes:02d}m'):
 	'''Return system uptime.
 
 	:param str format:
-		format string, will be passed ``days``, ``hours``, ``minutes`` and 
+		format string, will be passed ``days``, ``hours``, ``minutes`` and
 		seconds as arguments
 
 	Divider highlight group used: ``background:divider``.
