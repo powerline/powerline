@@ -192,6 +192,8 @@ class INotifyWatch(object):
 def get_inotify(expire_time=10):
 	''' Initialize the inotify based file watcher '''
 	import ctypes
+	if not hasattr(ctypes, 'c_ssize_t'):
+		raise INotifyError('You need python >= 2.7 to use inotify')
 	from ctypes.util import find_library
 	name = find_library('c')
 	if not name:
