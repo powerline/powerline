@@ -41,6 +41,17 @@ use_mercurial = use_bzr = sys.version_info < (3, 0)
 
 
 class TestVCS(TestCase):
+	def do_branch_rename_test(self, repo, q):
+		import time
+		st = time.time()
+		while time.time() - st < 1:
+			# Give inotify time to deliver events
+			ans = repo.branch()
+			if ans == q:
+				break
+			time.sleep(0.1)
+		self.assertEqual(ans, q)
+
 	def test_git(self):
 		repo = guess(path=GIT_REPO)
 		self.assertNotEqual(repo, None)
@@ -64,16 +75,12 @@ class TestVCS(TestCase):
 		self.assertEqual(repo.branch(), 'master')
 		call(['git', 'branch', 'branch1'], cwd=GIT_REPO)
 		call(['git', 'checkout', '-q', 'branch1'], cwd=GIT_REPO)
-		import time
-		time.sleep(1) # Give inotify time to deliver notification
-		self.assertEqual(repo.branch(), 'branch1')
+		self.do_branch_rename_test(repo, 'branch1')
 		call(['git', 'branch', 'branch2'], cwd=GIT_REPO)
 		call(['git', 'checkout', '-q', 'branch2'], cwd=GIT_REPO)
-		time.sleep(1) # Give inotify time to deliver notification
-		self.assertEqual(repo.branch(), 'branch2')
+		self.do_branch_rename_test(repo, 'branch2')
 		call(['git', 'checkout', '-q', '--detach', 'branch1'], cwd=GIT_REPO)
-		time.sleep(1) # Give inotify time to deliver notification
-		self.assertEqual(repo.branch(), '[DETACHED HEAD]')
+		self.do_branch_rename_test(repo, '[DETACHED HEAD]')
 
 	if use_mercurial:
 		def test_mercurial(self):
@@ -114,9 +121,7 @@ class TestVCS(TestCase):
 			os.remove(os.path.join(BZR_REPO, 'file'))
 			# Test changing branch
 			call(['bzr', 'nick', 'branch1'], cwd=BZR_REPO, stdout=PIPE, stderr=PIPE)
-			import time
-			time.sleep(1) # Give inotify time to deliver notification
-			self.assertEqual(repo.branch(), 'branch1')
+			self.do_branch_rename_test(repo, 'branch1')
 
 old_HGRCPATH = None
 old_cwd = None
