@@ -1,4 +1,22 @@
 # vim:fileencoding=utf-8:noet
+
+import os
+import re
+
+_ref_pat = re.compile(br'ref:\s*refs/heads/(.+)')
+
+def get_branch_name(base_dir):
+	head = os.path.join(base_dir, '.git', 'HEAD')
+	try:
+		with open(head, 'rb') as f:
+			raw = f.read()
+	except EnvironmentError:
+		return os.path.basename(base_dir)
+	m = _ref_pat.match(raw)
+	if m is not None:
+		return m.group(1).decode('utf-8', 'replace')
+	return '[DETACHED HEAD]'
+
 try:
 	import pygit2 as git
 
@@ -77,20 +95,7 @@ try:
 				return r if r != '   ' else None
 
 		def branch(self):
-			try:
-				ref = self._repo().lookup_reference('HEAD')
-			except KeyError:
-				return None
-
-			try:
-				target = ref.target
-			except ValueError:
-				return '[DETACHED HEAD]'
-
-			if target.startswith('refs/heads/'):
-				return target[11:]
-			else:
-				return '[DETACHED HEAD]'
+			return get_branch_name(self.directory)
 except ImportError:
 	from subprocess import Popen, PIPE
 
@@ -137,7 +142,4 @@ except ImportError:
 				return r if r != '   ' else None
 
 		def branch(self):
-			for line in self._gitcmd('branch', '-l'):
-				if line[0] == '*':
-					return line[2:]
-			return None
+			return get_branch_name(self.directory)
