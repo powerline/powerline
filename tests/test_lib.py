@@ -42,6 +42,7 @@ class TestLib(TestCase):
 		while time.time() - st < 1:
 			if watcher(path):
 				return
+			time.sleep(0.1)
 		self.fail('The change to %s was not detected'%path)
 
 	def test_file_watcher(self):
