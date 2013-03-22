@@ -5,6 +5,15 @@ import os
 
 from mercurial import hg, ui, match
 
+from powerline.lib.vcs import get_branch_name
+
+def branch_name_from_config_file(directory, config_file):
+	try:
+		with open(config_file, 'rb') as f:
+			raw = f.read()
+		return raw.decode('utf-8', 'replace').strip()
+	except Exception:
+		return 'default'
 
 class Repository(object):
 	__slots__ = ('directory', 'ui')
@@ -51,9 +60,5 @@ class Repository(object):
 			return self.repo_statuses_str[resulting_status]
 
 	def branch(self):
-		try:
-			with open(os.path.join(self.directory, '.hg', 'branch'), 'rb') as f:
-				raw = f.read()
-			return raw.decode('utf-8', 'replace').strip()
-		except Exception:
-			return 'default'
+		config_file = os.path.join(self.directory, '.hg', 'branch')
+		return get_branch_name(self.directory, config_file, branch_name_from_config_file)

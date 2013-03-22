@@ -3,19 +3,24 @@
 import os
 import re
 
+from powerline.lib.vcs import get_branch_name as _get_branch_name
+
 _ref_pat = re.compile(br'ref:\s*refs/heads/(.+)')
 
-def get_branch_name(base_dir):
-	head = os.path.join(base_dir, '.git', 'HEAD')
+def branch_name_from_config_file(directory, config_file):
 	try:
-		with open(head, 'rb') as f:
+		with open(config_file, 'rb') as f:
 			raw = f.read()
 	except EnvironmentError:
-		return os.path.basename(base_dir)
+		return os.path.basename(directory)
 	m = _ref_pat.match(raw)
 	if m is not None:
 		return m.group(1).decode('utf-8', 'replace')
 	return '[DETACHED HEAD]'
+
+def get_branch_name(base_dir):
+	head = os.path.join(base_dir, '.git', 'HEAD')
+	return _get_branch_name(base_dir, head, branch_name_from_config_file)
 
 try:
 	import pygit2 as git

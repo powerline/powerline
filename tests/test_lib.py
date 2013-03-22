@@ -60,6 +60,20 @@ class TestVCS(TestCase):
 			self.assertEqual(repo.status(), 'DI ')
 			self.assertEqual(repo.status('file'), 'AM')
 		os.remove(os.path.join(GIT_REPO, 'file'))
+		# Test changing branch
+		self.assertEqual(repo.branch(), 'master')
+		call(['git', 'branch', 'branch1'], cwd=GIT_REPO)
+		call(['git', 'checkout', '-q', 'branch1'], cwd=GIT_REPO)
+		import time
+		time.sleep(0.1) # Give inotify time to deliver notification
+		self.assertEqual(repo.branch(), 'branch1')
+		call(['git', 'branch', 'branch2'], cwd=GIT_REPO)
+		call(['git', 'checkout', '-q', 'branch2'], cwd=GIT_REPO)
+		time.sleep(0.1) # Give inotify time to deliver notification
+		self.assertEqual(repo.branch(), 'branch2')
+		call(['git', 'checkout', '-q', '--detach', 'branch1'], cwd=GIT_REPO)
+		time.sleep(0.1) # Give inotify time to deliver notification
+		self.assertEqual(repo.branch(), '[DETACHED HEAD]')
 
 	if use_mercurial:
 		def test_mercurial(self):
@@ -98,6 +112,11 @@ class TestVCS(TestCase):
 			self.assertEqual(repo.status('file'), ' M')
 			self.assertEqual(repo.status('notexist'), None)
 			os.remove(os.path.join(BZR_REPO, 'file'))
+			# Test changing branch
+			call(['bzr', 'nick', 'branch1'], cwd=BZR_REPO, stdout=PIPE, stderr=PIPE)
+			import time
+			time.sleep(0.1) # Give inotify time to deliver notification
+			self.assertEqual(repo.branch(), 'branch1')
 
 old_HGRCPATH = None
 old_cwd = None

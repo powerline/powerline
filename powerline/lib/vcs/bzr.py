@@ -8,6 +8,7 @@ from io import StringIO
 
 from bzrlib import (workingtree, status, library_state, trace, ui)
 
+from powerline.lib.vcs import get_branch_name
 
 class CoerceIO(StringIO):
 	def write(self, arg):
@@ -17,7 +18,23 @@ class CoerceIO(StringIO):
 
 state = None
 
+nick_pat = re.compile(br'nickname\s*=\s*(.+)')
+
+def branch_name_from_config_file(directory, config_file):
+	ans = None
+	try:
+		with open(config_file, 'rb') as f:
+			for line in f:
+				m = nick_pat.match(line)
+				if m is not None:
+					ans = m.group(1).strip().decode('utf-8', 'replace')
+					break
+	except Exception:
+		pass
+	return ans or os.path.basename(directory)
+
 class Repository(object):
+
 	def __init__(self, directory):
 		if isinstance(directory, bytes):
 			directory = directory.decode(sys.getfilesystemencoding() or sys.getdefaultencoding() or 'utf-8')
@@ -62,16 +79,6 @@ class Repository(object):
 		return ans if ans.strip() else None
 
 	def branch(self):
-		ans = None
-		try:
-			pat = re.compile(br'nickname\s*=\s*(.+)')
-			with open(os.path.join(self.directory, '.bzr', 'branch', 'branch.conf'), 'rb') as f:
-				for line in f:
-					m = pat.match(line)
-					if m is not None:
-						ans = m.group(1).strip().decode('utf-8', 'replace')
-						break
-		except Exception:
-			pass
-		return ans or os.path.basename(self.directory)
+		config_file = os.path.join(self.directory, '.bzr', 'branch', 'branch.conf')
+		return get_branch_name(self.directory, config_file, branch_name_from_config_file)
 
