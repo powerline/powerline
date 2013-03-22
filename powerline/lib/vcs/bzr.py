@@ -69,7 +69,7 @@ class Repository(object):
 				for line in f:
 					m = pat.match(line)
 					if m is not None:
-						ans = m.group(1).strip()
+						ans = m.group(1).strip().decode('utf-8')
 						break
 		except Exception:
 			pass
