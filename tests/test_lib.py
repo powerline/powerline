@@ -46,8 +46,9 @@ class TestLib(TestCase):
 
 	def test_file_watcher(self):
 		f1, f2 = os.path.join(INOTIFY_DIR, 'file1'), os.path.join(INOTIFY_DIR, 'file2')
-		with open(f1, 'wb'), open(f2, 'wb'):
-			pass
+		with open(f1, 'wb'):
+			with open(f2, 'wb'):
+				pass
 		ne = os.path.join(INOTIFY_DIR, 'notexists')
 		from powerline.lib.file_watcher import create_file_watcher
 		w = create_file_watcher()
@@ -65,8 +66,9 @@ class TestLib(TestCase):
 		self.assertFalse(w(f1), 'Spurious change detected')
 		self.assertFalse(w(f2), 'Spurious change detected')
 		# Check that open the file with 'w' triggers a change
-		with open(f1, 'wb'), open(f2, 'wb'):
-			pass
+		with open(f1, 'wb'):
+			with open(f2, 'wb'):
+				pass
 		self.do_test_for_change(w, f1)
 		self.do_test_for_change(w, f2)
 		# Check that writing to a file with 'a' triggers a change
