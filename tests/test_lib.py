@@ -65,14 +65,14 @@ class TestVCS(TestCase):
 		call(['git', 'branch', 'branch1'], cwd=GIT_REPO)
 		call(['git', 'checkout', '-q', 'branch1'], cwd=GIT_REPO)
 		import time
-		time.sleep(0.1) # Give inotify time to deliver notification
+		time.sleep(1) # Give inotify time to deliver notification
 		self.assertEqual(repo.branch(), 'branch1')
 		call(['git', 'branch', 'branch2'], cwd=GIT_REPO)
 		call(['git', 'checkout', '-q', 'branch2'], cwd=GIT_REPO)
-		time.sleep(0.1) # Give inotify time to deliver notification
+		time.sleep(1) # Give inotify time to deliver notification
 		self.assertEqual(repo.branch(), 'branch2')
 		call(['git', 'checkout', '-q', '--detach', 'branch1'], cwd=GIT_REPO)
-		time.sleep(0.1) # Give inotify time to deliver notification
+		time.sleep(1) # Give inotify time to deliver notification
 		self.assertEqual(repo.branch(), '[DETACHED HEAD]')
 
 	if use_mercurial:
@@ -115,7 +115,7 @@ class TestVCS(TestCase):
 			# Test changing branch
 			call(['bzr', 'nick', 'branch1'], cwd=BZR_REPO, stdout=PIPE, stderr=PIPE)
 			import time
-			time.sleep(0.1) # Give inotify time to deliver notification
+			time.sleep(1) # Give inotify time to deliver notification
 			self.assertEqual(repo.branch(), 'branch1')
 
 old_HGRCPATH = None
