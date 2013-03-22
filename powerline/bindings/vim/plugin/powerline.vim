@@ -40,8 +40,6 @@ catch
 		endif
 	endtry
 endtry
-exec s:powerline_pycmd 'powerline = VimPowerline()'
-exec s:powerline_pycmd 'del VimPowerline'
 
 if !get(g:, 'powerline_debugging_pyeval') && exists('*'. s:powerline_pyeval)
 	let s:pyeval = function(s:powerline_pyeval)
@@ -80,18 +78,19 @@ endfunction
 function! PowerlineRegisterCachePurgerEvent(event)
 	exec s:powerline_pycmd 'from powerline.segments.vim import launchevent as powerline_launchevent'
 	augroup Powerline
-		exec 'autocmd!' a:event '*' s:powerline_pycmd.' powerline_launchevent("'.a:event.'")'
+		exec 'autocmd' a:event '*' s:powerline_pycmd.' powerline_launchevent("'.a:event.'")'
 	augroup END
 endfunction
 
+augroup Powerline
+	autocmd! ColorScheme * :exec s:powerline_pycmd 'powerline.renderer.reset_highlight()'
+	autocmd! VimEnter    * :redrawstatus!
+	autocmd! VimLeave    * :exec s:powerline_pycmd 'powerline.renderer.shutdown()'
+augroup END
+
+exec s:powerline_pycmd 'powerline = VimPowerline()'
+exec s:powerline_pycmd 'del VimPowerline'
 " Is immediately changed when PowerlineNew() function is run. Good for global 
 " value.
 set statusline=%!PowerlineNew()
 call PowerlineNew()
-
-augroup Powerline
-	autocmd!
-	autocmd ColorScheme * :exec s:powerline_pycmd 'powerline.renderer.reset_highlight()'
-	autocmd VimEnter    * :redrawstatus!
-	autocmd VimLeave    * :exec s:powerline_pycmd 'powerline.renderer.shutdown()'
-augroup END

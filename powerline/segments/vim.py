@@ -47,34 +47,32 @@ vim_modes = {
 }
 
 
-eventcaches = defaultdict(lambda: [])
-bufeventcaches = defaultdict(lambda: [])
+eventfuncs = defaultdict(lambda: [])
+bufeventfuncs = defaultdict(lambda: [])
+defined_events = set()
 
 
-def purgeonevents_reg(events, eventcaches=bufeventcaches):
-	def cache_reg_func(cache):
-		for event in events:
-			if event not in eventcaches:
-				vim.eval('PowerlineRegisterCachePurgerEvent("' + event + '")')
-			eventcaches[event].append(cache)
-	return cache_reg_func
-
-purgeall_on_shell = purgeonevents_reg(('ShellCmdPost', 'ShellFilterPost', 'FocusGained'), eventcaches=eventcaches)
-purgebuf_on_shell_and_write = purgeonevents_reg(('BufWritePost', 'ShellCmdPost', 'ShellFilterPost', 'FocusGained'))
+def purgeonevents_reg(func, events, is_buffer_event=False):
+	if is_buffer_event:
+		cureventfuncs = bufeventfuncs
+	else:
+		cureventfuncs = eventfuncs
+	for event in events:
+		if event not in defined_events:
+			vim.eval('PowerlineRegisterCachePurgerEvent("' + event + '")')
+			defined_events.add(event)
+		cureventfuncs[event].append(func)
 
 
 def launchevent(event):
-	global eventcaches
-	global bufeventcaches
-	for cache in eventcaches[event]:
-		cache.clear()
-	if bufeventcaches[event]:
-		buf = int(vim_funcs['expand']('<abuf>'))
-		for cache in bufeventcaches[event]:
-			try:
-				cache.pop(buf)
-			except KeyError:
-				pass
+	global eventfuncs
+	global bufeventfuncs
+	for func in eventfuncs[event]:
+		func()
+	if bufeventfuncs[event]:
+		buffer = vim.buffers[int(vim_funcs['expand']('<abuf>')) - 1]
+		for func in bufeventfuncs[event]:
+			func(buffer)
 
 
 # TODO Remove cache when needed
