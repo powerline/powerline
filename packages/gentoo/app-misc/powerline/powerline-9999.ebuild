@@ -130,6 +130,10 @@ src_install() {
 	fi
 	rm powerline/bindings/bash/powerline.sh
 	elog ""
+	insinto /etc/xdg/powerline
+	doins -r powerline/config_files/*
+	rm -r powerline/config_files
+	sed -i -e "/DEFAULT_SYSTEM_CONFIG_DIR/ s@None@'/etc/xdg'@" powerline/__init__.py
 	distutils-r1_src_install
 	use doc && dohtml -r docs_output/*
 }
