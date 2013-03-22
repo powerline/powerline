@@ -13,6 +13,8 @@ class INotifyError(Exception):
 
 class INotifyWatch(object):
 
+	is_stat_based = False
+
 	# See <sys/inotify.h> for the flags defined below
 
 	# Supported events suitable for MASK parameter of INOTIFY_ADD_WATCH.
@@ -228,6 +230,8 @@ def get_inotify(expire_time=10):
 	return INotifyWatch(inotify_fd, add_watch, rm_watch, read, expire_time=expire_time)
 
 class StatWatch(object):
+
+	is_stat_based = True
 
 	def __init__(self):
 		self.watches = {}

@@ -45,13 +45,17 @@ class TestLib(TestCase):
 		self.fail('The change to %s was not detected'%path)
 
 	def test_file_watcher(self):
+		from powerline.lib.file_watcher import create_file_watcher
+		w = create_file_watcher()
+		if w.is_stat_based:
+			# The granularity of mtime (1 second) means that we cannot use the
+			# same tests for inotify and StatWatch.
+			return
 		f1, f2 = os.path.join(INOTIFY_DIR, 'file1'), os.path.join(INOTIFY_DIR, 'file2')
 		with open(f1, 'wb'):
 			with open(f2, 'wb'):
 				pass
 		ne = os.path.join(INOTIFY_DIR, 'notexists')
-		from powerline.lib.file_watcher import create_file_watcher
-		w = create_file_watcher()
 		self.assertRaises(OSError, w, ne)
 		self.assertTrue(w(f1))
 		self.assertTrue(w(f2))

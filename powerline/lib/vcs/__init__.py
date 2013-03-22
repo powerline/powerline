@@ -1,7 +1,7 @@
 # vim:fileencoding=utf-8:noet
 from __future__ import absolute_import
 
-import os
+import os, errno
 from threading import Lock
 
 
@@ -38,7 +38,9 @@ def get_branch_name(directory, config_file, get_func):
 	with branch_lock:
 		try:
 			changed = file_watcher()(config_file)
-		except OSError:
+		except OSError as e:
+			if getattr(e, 'errno', None) != errno.ENOENT:
+				raise
 			# Config file does not exist (happens for mercurial)
 			if config_file not in branch_name_cache:
 				branch_name_cache[config_file] = get_func(directory, config_file)
