@@ -21,24 +21,23 @@ let s:powerline_pyeval = get(g:, 'powerline_pyeval', s:powerline_pycmd.'eval')
 
 let s:import_cmd = 'from powerline.vim import VimPowerline'
 try
-	exec s:powerline_pycmd s:import_cmd
-catch
-	" An error occurred while importing the module, it could be installed
-	" outside of Python's module search paths. Update sys.path and try again.
-	exec s:powerline_pycmd 'import sys, vim'
-	exec s:powerline_pycmd 'sys.path.append(vim.eval(''expand("<sfile>:h:h:h:h:h")''))'
-	try
-		exec s:powerline_pycmd s:import_cmd
-		let s:launched = 1
-	finally
-		if !exists('s:launched')
-			call s:CriticalError('An error occurred while importing the Powerline package.
-				\ This could be caused by an invalid sys.path setting, or by an incompatible
-				\ Python version (Powerline requires Python 2.6+ or 3.2+ to work). Please consult
-				\ the troubleshooting section in the documentation for possible solutions.')
-			finish
-		endif
-	endtry
+	exec s:powerline_pycmd "try:\n"
+				\         ."	".s:import_cmd."\n"
+				\         ."except ImportError:\n"
+				\         ."	import sys, vim\n"
+				\         ."	sys.path.append(vim.eval('expand(\"<sfile>:h:h:h:h:h\")'))\n"
+				\         ."	".s:import_cmd
+	let s:launched = 1
+finally
+	if !exists('s:launched')
+		call s:CriticalError('An error occurred while importing the Powerline package.
+			\ This could be caused by an invalid sys.path setting, or by an incompatible
+			\ Python version (Powerline requires Python 2.6+ or 3.2+ to work). Please consult
+			\ the troubleshooting section in the documentation for possible solutions.')
+		finish
+	else
+		unlet s:launched
+	endif
 endtry
 
 if !get(g:, 'powerline_debugging_pyeval') && exists('*'. s:powerline_pyeval)
