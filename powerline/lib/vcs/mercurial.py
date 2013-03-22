@@ -1,5 +1,8 @@
 # vim:fileencoding=utf-8:noet
 from __future__ import absolute_import
+
+import os
+
 from mercurial import hg, ui, match
 
 
@@ -48,4 +51,9 @@ class Repository(object):
 			return self.repo_statuses_str[resulting_status]
 
 	def branch(self):
-		return self._repo().dirstate.branch()
+		try:
+			with open(os.path.join(self.directory, '.hg', 'branch'), 'rb') as f:
+				raw = f.read()
+			return raw.decode('utf-8', 'replace').strip()
+		except Exception:
+			return 'default'
