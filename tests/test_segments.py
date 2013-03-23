@@ -209,16 +209,31 @@ class TestCommon(TestCase):
 			common.network_load.sleep(0)
 			common.network_load.sleep(0)
 			self.assertEqual(common.network_load(), [
-				{'divider_highlight_group': 'background:divider', 'contents': '⬇  1 KiB/s ⬆  2 KiB/s'}
+				{'divider_highlight_group': 'background:divider', 'contents': '⬇  1 KiB/s', 'highlight_group': ['network_load_recv', 'network_load']},
+				{'divider_highlight_group': 'background:divider', 'contents': '⬆  2 KiB/s', 'highlight_group': ['network_load_sent', 'network_load']},
 				])
-			self.assertEqual(common.network_load(format='r {recv} s {sent}'), [
-				{'divider_highlight_group': 'background:divider', 'contents': 'r 1 KiB/s s 2 KiB/s'}
+			self.assertEqual(common.network_load(recv_format='r {value}', sent_format='s {value}'), [
+				{'divider_highlight_group': 'background:divider', 'contents': 'r 1 KiB/s', 'highlight_group': ['network_load_recv', 'network_load']},
+				{'divider_highlight_group': 'background:divider', 'contents': 's 2 KiB/s', 'highlight_group': ['network_load_sent', 'network_load']},
 				])
-			self.assertEqual(common.network_load(format='r {recv} s {sent}', suffix='bps'), [
-				{'divider_highlight_group': 'background:divider', 'contents': 'r 1 Kibps s 2 Kibps'}
+			self.assertEqual(common.network_load(recv_format='r {value}', sent_format='s {value}', suffix='bps'), [
+				{'divider_highlight_group': 'background:divider', 'contents': 'r 1 Kibps', 'highlight_group': ['network_load_recv', 'network_load']},
+				{'divider_highlight_group': 'background:divider', 'contents': 's 2 Kibps', 'highlight_group': ['network_load_sent', 'network_load']},
 				])
-			self.assertEqual(common.network_load(format='r {recv} s {sent}', si_prefix=True), [
-				{'divider_highlight_group': 'background:divider', 'contents': 'r 1 kB/s s 2 kB/s'}
+			self.assertEqual(common.network_load(recv_format='r {value}', sent_format='s {value}', si_prefix=True), [
+				{'divider_highlight_group': 'background:divider', 'contents': 'r 1 kB/s', 'highlight_group': ['network_load_recv', 'network_load']},
+				{'divider_highlight_group': 'background:divider', 'contents': 's 2 kB/s', 'highlight_group': ['network_load_sent', 'network_load']},
+				])
+			self.assertEqual(common.network_load(recv_format='r {value}', sent_format='s {value}', recv_max=0), [
+				{'divider_highlight_group': 'background:divider', 'contents': 'r 1 KiB/s', 'highlight_group': ['network_load_recv_gradient', 'network_load_gradient', 'network_load_recv', 'network_load'], 'gradient_level': 100},
+				{'divider_highlight_group': 'background:divider', 'contents': 's 2 KiB/s', 'highlight_group': ['network_load_sent', 'network_load']},
+				])
+			class ApproxEqual(object):
+				def __eq__(self, i):
+					return abs(i - 50.0) < 1
+			self.assertEqual(common.network_load(recv_format='r {value}', sent_format='s {value}', sent_max=4800), [
+				{'divider_highlight_group': 'background:divider', 'contents': 'r 1 KiB/s', 'highlight_group': ['network_load_recv', 'network_load']},
+				{'divider_highlight_group': 'background:divider', 'contents': 's 2 KiB/s', 'highlight_group': ['network_load_sent_gradient', 'network_load_gradient', 'network_load_sent', 'network_load'], 'gradient_level': ApproxEqual()},
 				])
 
 	def test_virtualenv(self):

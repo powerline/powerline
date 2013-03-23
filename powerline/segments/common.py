@@ -597,7 +597,7 @@ class NetworkLoadSegment(KwThreadedSegment):
 		idata['last'] = (monotonic(), _get_bytes(interface))
 		return idata
 
-	def render_one(self, idata, format='⬇ {recv:>8} ⬆ {sent:>8}', suffix='B/s', si_prefix=False, **kwargs):
+	def render_one(self, idata, recv_format='⬇ {value:>8}', sent_format='⬆ {value:>8}', suffix='B/s', si_prefix=False, **kwargs):
 		if not idata or 'prev' not in idata:
 			return None
 
@@ -608,13 +608,28 @@ class NetworkLoadSegment(KwThreadedSegment):
 		if None in (b1, b2) or measure_interval == 0:
 			return None
 
-		return [{
-				'contents': format.format(
-					recv=humanize_bytes((b2[0] - b1[0]) / measure_interval, suffix, si_prefix),
-					sent=humanize_bytes((b2[1] - b1[1]) / measure_interval, suffix, si_prefix),
-					),
+		r = []
+		for i, key in zip((0, 1), ('recv', 'sent')):
+			format = locals()[key + '_format']
+			value = (b2[i] - b1[i]) / measure_interval
+			max_key = key + '_max'
+			is_gradient = max_key in kwargs
+			hl_groups = ['network_load_' + key, 'network_load']
+			if is_gradient:
+				hl_groups[:0] = (group + '_gradient' for group in hl_groups)
+			r.append({
+				'contents': format.format(value=humanize_bytes(value, suffix, si_prefix)),
 				'divider_highlight_group': 'background:divider',
-				}]
+				'highlight_group': hl_groups,
+				})
+			if is_gradient:
+				max = kwargs[max_key]
+				if value >= max:
+					r[-1]['gradient_level'] = 100
+				else:
+					r[-1]['gradient_level'] = value * 100.0 / max
+
+		return r
 
 
 network_load = with_docstring(NetworkLoadSegment(),
@@ -630,8 +645,20 @@ falls back to reading
 	string appended to each load string
 :param bool si_prefix:
 	use SI prefix, e.g. MB instead of MiB
-:param str format:
-	format string, receives ``recv`` and ``sent`` as arguments
+:param str recv_format:
+	format string, receives ``value`` as argument
+:param str sent_format:
+	format string, receives ``value`` as argument
+:param float recv_max:
+	maximum number of received bytes per second. Is only used to compute 
+	gradient level
+:param float sent_max:
+	maximum number of sent bytes per second. Is only used to compute gradient 
+	level
+
+Divider highlight group used: ``background:divider``.
+
+Highlight groups used: ``network_load_sent_gradient`` (gradient) or ``network_load_recv_gradient`` (gradient) or ``network_load_gradient`` (gradient), ``network_load_sent`` or ``network_load_recv`` or ``network_load``.
 ''')
 
 
