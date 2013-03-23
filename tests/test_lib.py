@@ -47,7 +47,7 @@ class TestLib(TestCase):
 
 	def test_file_watcher(self):
 		from powerline.lib.file_watcher import create_file_watcher
-		w = create_file_watcher()
+		w = create_file_watcher(use_stat=False)
 		if w.is_stat_based:
 			# The granularity of mtime (1 second) means that we cannot use the
 			# same tests for inotify and StatWatch.
@@ -168,7 +168,13 @@ class TestVCS(TestCase):
 			self.assertEqual(repo.status(), 'D ')
 			self.assertEqual(repo.status('file'), ' M')
 			self.assertEqual(repo.status('notexist'), None)
-			os.remove(os.path.join(BZR_REPO, 'file'))
+			with open(os.path.join(BZR_REPO, 'ignored'), 'w') as f:
+				f.write('abc')
+			self.assertEqual(repo.status('ignored'), '? ')
+			# Test changing the .bzrignore file should update status
+			with open(os.path.join(BZR_REPO, '.bzrignore'), 'w') as f:
+				f.write('ignored')
+			self.assertEqual(repo.status('ignored'), None)
 			# Test changing branch
 			call(['bzr', 'nick', 'branch1'], cwd=BZR_REPO, stdout=PIPE, stderr=PIPE)
 			self.do_branch_rename_test(repo, 'branch1')

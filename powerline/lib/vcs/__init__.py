@@ -31,7 +31,9 @@ def file_watcher():
 	return _file_watcher
 
 branch_name_cache = {}
+file_status_cache = {}
 branch_lock = Lock()
+file_status_lock = Lock()
 
 def get_branch_name(directory, config_file, get_func):
 	global branch_name_cache
@@ -49,6 +51,37 @@ def get_branch_name(directory, config_file, get_func):
 				# Config file has changed or was not tracked
 				branch_name_cache[config_file] = get_func(directory, config_file)
 		return branch_name_cache[config_file]
+
+def get_file_status(directory, dirstate_file, file_path, ignore_file_name, get_func):
+	global file_status_cache
+	keypath = file_path if os.path.isabs(file_path) else os.path.join(directory, file_path)
+	key = (dirstate_file, keypath)
+	with file_status_lock:
+		file_changed = file_watcher()
+		try:
+			changed = file_changed(dirstate_file) or file_changed(keypath)
+		except OSError as e:
+			if getattr(e, 'errno', None) != errno.ENOENT:
+				raise
+			if key not in file_status_cache:
+				file_status_cache[key] = get_func(directory, file_path)
+		else:
+			parent = os.path.dirname(keypath)
+			while not changed:
+				try:
+					changed ^= file_changed(os.path.join(parent, ignore_file_name))
+				except OSError as e:
+					if getattr(e, 'errno', None) != errno.ENOENT:
+						raise
+				if parent == directory:
+					break
+				nparent = os.path.dirname(parent)
+				if not nparent or nparent == parent:
+					break
+			if changed:
+				file_status_cache[key] = get_func(directory, file_path)
+		return file_status_cache[key]
+
 
 def guess(path):
 	for directory in generate_directories(path):

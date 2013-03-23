@@ -263,7 +263,7 @@ class StatWatch(object):
 		with self.lock:
 			self.watches = {}
 
-def create_file_watcher(expire_time=10):
+def create_file_watcher(use_stat=False, expire_time=10):
 	'''
 	Create an object that can watch for changes to specified files. To use:
 
@@ -276,6 +276,8 @@ def create_file_watcher(expire_time=10):
 	watch for that path to be automatically removed. This conserves kernel
 	resources.
 	'''
+	if use_stat:
+		return StatWatch()
 	try:
 		return get_inotify(expire_time=expire_time)
 	except INotifyError:

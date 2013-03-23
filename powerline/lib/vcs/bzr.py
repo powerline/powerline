@@ -8,7 +8,7 @@ from io import StringIO
 
 from bzrlib import (workingtree, status, library_state, trace, ui)
 
-from powerline.lib.vcs import get_branch_name
+from powerline.lib.vcs import get_branch_name, get_file_status
 
 class CoerceIO(StringIO):
 	def write(self, arg):
@@ -38,7 +38,7 @@ class Repository(object):
 	def __init__(self, directory):
 		if isinstance(directory, bytes):
 			directory = directory.decode(sys.getfilesystemencoding() or sys.getdefaultencoding() or 'utf-8')
-		self.directory = directory
+		self.directory = os.path.abspath(directory)
 
 	def status(self, path=None):
 		'''Return status of repository or file.
@@ -52,23 +52,32 @@ class Repository(object):
 		With file argument: returns status of this file: The status codes are
 		those returned by bzr status -S
 		'''
+		if path is not None:
+			return get_file_status(self.directory, os.path.join(self.directory, '.bzr', 'checkout', 'dirstate'),
+								path, '.bzrignore', self.do_status)
+		return self.do_status(self.directory, path)
+
+	def do_status(self, directory, path):
 		try:
-			return self._status(path)
-		except:
+			return self._status(self.directory, path)
+		except Exception:
 			pass
 
-	def _status(self, path):
+	def _status(self, directory, path):
 		global state
 		if state is None:
 			state = library_state.BzrLibraryState(ui=ui.SilentUIFactory, trace=trace.DefaultConfig())
 		buf = CoerceIO()
-		w = workingtree.WorkingTree.open(self.directory)
+		w = workingtree.WorkingTree.open(directory)
 		status.show_tree_status(w, specific_files=[path] if path else None, to_file=buf, short=True)
 		raw = buf.getvalue()
 		if not raw.strip():
 			return
 		if path:
-			return raw[:2]
+			ans = raw[:2]
+			if ans == 'I ': # Ignored
+				ans = None
+			return ans
 		dirtied = untracked = ' '
 		for line in raw.splitlines():
 			if len(line) > 1 and line[1] in 'ACDMRIN':
