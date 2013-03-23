@@ -10,7 +10,7 @@ except ImportError:
 	unicode = str
 
 
-if len(sys.argv) == 1:
+if len(sys.argv) == 1 or sys.argv[1] == '--help':
 	sys.stderr.write('''
 	Usage: generate_gradients.py colors itemnum[ "show" [ min max num]]
 
@@ -30,6 +30,7 @@ if len(sys.argv) == 1:
 				different scale (controlled by min and max) and, possibly, 
 				different length (controlled by num)).
 	''')
+	sys.exit(1)
 
 
 def linear_gradient(start_value, stop_value, start_offset, stop_offset, offset):

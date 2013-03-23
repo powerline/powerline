@@ -251,11 +251,11 @@ def line_percent(segment_info, gradient=False):
 	'''
 	line_current = segment_info['window'].cursor[0]
 	line_last = len(segment_info['buffer'])
-	percentage = int(line_current * 100 // line_last)
+	percentage = line_current * 100.0 / line_last
 	if not gradient:
-		return str(percentage)
+		return str(int(round(percentage)))
 	return [{
-		'contents': str(percentage),
+		'contents': str(int(round(percentage))),
 		'highlight_group': ['line_percent_gradient', 'line_percent'],
 		'gradient_level': percentage,
 		}]
