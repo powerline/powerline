@@ -18,7 +18,7 @@ class ConfigCache(object):
 		self.cache = {}
 		self.file_changed = create_file_watcher()
 
-	def __call__(self, search_paths, config_file):
+	def __call__(self, search_paths, config_file, load=None, open_file=open_file):
 		config_file += '.json'
 		for path in search_paths:
 			config_file_path = os.path.join(path, config_file)
@@ -26,6 +26,10 @@ class ConfigCache(object):
 				changed = self.file_changed(config_file_path)
 			except OSError:
 				continue
+
+			if load is not None:
+				with open_file(config_file_path) as f:
+					return load(f)
 
 			if changed:
 				with open(config_file_path, 'rb') as f:
