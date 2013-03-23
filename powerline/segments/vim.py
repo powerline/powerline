@@ -198,7 +198,7 @@ def file_size(suffix='B', si_prefix=False):
 		use SI prefix, e.g. MB instead of MiB
 	:return: file size or None if the file isn't saved or if the size is too big to fit in a number
 	'''
-	# Note: returns file size in &encoding, not in &fileencoding. But returned 
+	# Note: returns file size in &encoding, not in &fileencoding. But returned
 	# size is updated immediately; and it is valid for any buffer
 	file_size = vim_funcs['line2byte'](len(vim.current.buffer) + 1) - 1
 	return humanize_bytes(file_size, suffix, si_prefix)
@@ -319,9 +319,9 @@ class RepositorySegment(KwWindowThreadedSegment):
 		return segment_info['buffer'].name or os.getcwd()
 
 	def update(self):
-		# .compute_state() is running only in this method, and only in one 
-		# thread, thus operations with .directories do not need write locks 
-		# (.render() method is not using .directories). If this is changed 
+		# .compute_state() is running only in this method, and only in one
+		# thread, thus operations with .directories do not need write locks
+		# (.render() method is not using .directories). If this is changed
 		# .directories needs redesigning
 		self.directories.clear()
 		super(RepositorySegment, self).update()
@@ -398,37 +398,25 @@ Divider highlight group used: ``branch:divider``.
 
 
 @requires_segment_info
-class FileVCSStatusSegment(KwWindowThreadedSegment):
-	interval = 0.2
+def file_vcs_status(segment_info):
+	'''Return the VCS status for this buffer.
 
-	@staticmethod
-	def key(segment_info, **kwargs):
-		name = segment_info['buffer'].name
-		skip = not (name and (not getbufvar(segment_info['bufnr'], '&buftype')))
-		return name, skip
+	Highlight groups used: ``file_vcs_status``.
+	'''
+	name = segment_info['buffer'].name
+	skip = not (name and (not getbufvar(segment_info['bufnr'], '&buftype')))
+	if not skip:
+		repo = guess(path=name)
+		if repo is not None:
+			status = repo.status(os.path.relpath(name, repo.directory))
+			if not status:
+				return None
+			status = status.strip()
+			ret = []
+			for status in status:
+				ret.append({
+					'contents': status,
+					'highlight_group': ['file_vcs_status_' + status, 'file_vcs_status'],
+					})
+			return ret
 
-	@staticmethod
-	def compute_state(key):
-		name, skip = key
-		if not skip:
-			repo = guess(path=name)
-			if repo:
-				status = repo.status(os.path.relpath(name, repo.directory))
-				if not status:
-					return None
-				status = status.strip()
-				ret = []
-				for status in status:
-					ret.append({
-						'contents': status,
-						'highlight_group': ['file_vcs_status_' + status, 'file_vcs_status'],
-						})
-				return ret
-		return None
-
-
-file_vcs_status = with_docstring(FileVCSStatusSegment(),
-'''Return the VCS status for this buffer.
-
-Highlight groups used: ``file_vcs_status``.
-''')
