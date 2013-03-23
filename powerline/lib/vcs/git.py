@@ -24,7 +24,7 @@ def get_branch_name(base_dir):
 	try:
 		return _get_branch_name(base_dir, head, branch_name_from_config_file)
 	except OSError as e:
-		if getattr(e, 'errno', None) == errno.ENOTDIR:
+		if getattr(e, 'errno', None) == errno.ENOTDIR or getattr(e, 'winerror', None) == 3:
 			# We are in a submodule
 			return '(no branch)'
 		raise
