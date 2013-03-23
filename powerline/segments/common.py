@@ -487,10 +487,15 @@ except ImportError:
 			return None
 
 	def _get_interfaces():
-		for interface in os.listdir('/sys/class/net'):
-			x = _get_bytes(interface)
-			if x is not None:
-				yield interface, x[0], x[1]
+		try:
+			interfaces = os.listdir('/sys/class/net')
+		except EnvironmentError:
+			pass
+		else:
+			for interface in interfaces:
+				x = _get_bytes(interface)
+				if x is not None:
+					yield interface, x[0], x[1]
 
 	def _get_user():  # NOQA
 		return os.environ.get('USER', None)
