@@ -2,6 +2,7 @@
 
 import os
 import re
+import errno
 
 from powerline.lib.vcs import get_branch_name as _get_branch_name
 
@@ -20,7 +21,13 @@ def branch_name_from_config_file(directory, config_file):
 
 def get_branch_name(base_dir):
 	head = os.path.join(base_dir, '.git', 'HEAD')
-	return _get_branch_name(base_dir, head, branch_name_from_config_file)
+	try:
+		return _get_branch_name(base_dir, head, branch_name_from_config_file)
+	except OSError as e:
+		if getattr(e, 'errno', None) == errno.ENOTDIR:
+			# We are in a submodule
+			return '(no branch)'
+		raise
 
 try:
 	import pygit2 as git
