@@ -66,18 +66,20 @@ def cwd(dir_shorten_len=None, dir_limit_depth=None):
 	Highlight groups used: ``cwd:current_folder`` or ``cwd``. It is recommended to define all highlight groups.
 	'''
 	import re
-	try:
+	cwd = os.environ.get('PWD')
+	if cwd is None:
 		try:
-			cwd = os.getcwdu()
-		except AttributeError:
-			cwd = os.getcwd()
-	except OSError as e:
-		if e.errno == 2:
-			# user most probably deleted the directory
-			# this happens when removing files from Mercurial repos for example
-			cwd = "[not found]"
-		else:
-			raise
+			try:
+				cwd = os.getcwdu()
+			except AttributeError:
+				cwd = os.getcwd()
+		except OSError as e:
+			if e.errno == 2:
+				# user most probably deleted the directory
+				# this happens when removing files from Mercurial repos for example
+				cwd = "[not found]"
+			else:
+				raise
 	home = os.environ.get('HOME')
 	if home:
 		cwd = re.sub('^' + re.escape(home), '~', cwd, 1)
