@@ -58,14 +58,28 @@ def get_file_status(directory, dirstate_file, file_path, ignore_file_name, get_f
 	key = (dirstate_file, keypath)
 	with file_status_lock:
 		file_changed = file_watcher()
+		changed = False
+		# Check if dirstate has changed
 		try:
-			changed = file_changed(dirstate_file) or file_changed(keypath)
+			changed = file_changed(dirstate_file)
 		except OSError as e:
 			if getattr(e, 'errno', None) != errno.ENOENT:
 				raise
-			if key not in file_status_cache:
-				file_status_cache[key] = get_func(directory, file_path)
-		else:
+			# The .git index file does not exist for a new git repo
+			return get_func(directory, file_path)
+
+		if not changed:
+			# Check if the file has changed
+			try:
+				changed ^= file_changed(keypath)
+			except OSError as e:
+				if getattr(e, 'errno', None) != errno.ENOENT:
+					raise
+				if key not in file_status_cache:
+					file_status_cache[key] = get_func(directory, file_path)
+				return file_status_cache[key]
+
+		if not changed:
 			parent = os.path.dirname(keypath)
 			while not changed:
 				try:
@@ -78,10 +92,16 @@ def get_file_status(directory, dirstate_file, file_path, ignore_file_name, get_f
 				nparent = os.path.dirname(parent)
 				if not nparent or nparent == parent:
 					break
-			if changed:
-				file_status_cache[key] = get_func(directory, file_path)
-		return file_status_cache[key]
+				parent = nparent
 
+		if changed:
+			file_status_cache[key] = get_func(directory, file_path)
+		try:
+			return file_status_cache[key]
+		except KeyError:
+			file_status_cache[key] = get_func(directory, file_path)
+
+		return file_status_cache[key]
 
 def guess(path):
 	for directory in generate_directories(path):
