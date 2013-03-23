@@ -59,7 +59,6 @@ class INotifyWatch(object):
 
 	def __init__(self, inotify_fd, add_watch, rm_watch, read, expire_time=10):
 		import ctypes, struct
-		self._inotify_fd = inotify_fd
 		self._add_watch, self._rm_watch = add_watch, rm_watch
 		self._read = read
 		# We keep a reference to os to prevent it from being deleted
@@ -76,6 +75,7 @@ class INotifyWatch(object):
 			self.fenc = 'utf-8'
 		self.lock = RLock()
 		self.expire_time = expire_time * 60
+		self._inotify_fd = inotify_fd
 
 	def handle_error(self):
 		import ctypes
@@ -83,10 +83,13 @@ class INotifyWatch(object):
 		raise OSError(eno, self.os.strerror(eno))
 
 	def __del__(self):
+		# This method can be called during interpreter shutdown, which means we
+		# must do the absolute minimum here. Note that there could be running
+		# daemon threads that are trying to call other methods on this object.
 		try:
-			self.close()
+			self.os.close(self._inotify_fd)
 		except (AttributeError, TypeError):
-			pass # Happens during interpreter shutdown
+			pass
 
 	def read(self):
 		import ctypes
@@ -184,12 +187,12 @@ class INotifyWatch(object):
 					self.unwatch(path)
 				except OSError:
 					pass
-			if self._inotify_fd is not None:
+			if hasattr(self, '_inotify_fd'):
 				self.os.close(self._inotify_fd)
 				del self.os
 				del self._add_watch
 				del self._rm_watch
-				self._inotify_fd = None
+				del self._inotify_fd
 
 def get_inotify(expire_time=10):
 	''' Initialize the inotify based file watcher '''
