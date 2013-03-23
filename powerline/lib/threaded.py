@@ -23,15 +23,24 @@ class ThreadedSegment(object):
 		self.did_set_interval = False
 		self.thread = None
 
-	def __call__(self, **kwargs):
+	def __call__(self, update_first=True, **kwargs):
 		if self.run_once:
+			self.pl = kwargs['pl']
 			self.set_state(**kwargs)
 			self.update()
 		elif not self.is_alive():
-			self.startup(**kwargs)
+			# Without this we will not have to wait long until receiving bug “I 
+			# opened vim, but branch information is only shown after I move 
+			# cursor”.
+			#
+			# If running once .update() is called in __call__.
+			if update_first and self.update_first:
+				self.update_first = False
+				self.update()
+			self.start()
 
 		with self.write_lock:
-			return self.render(**kwargs)
+			return self.render(update_first=update_first, **kwargs)
 
 	def is_alive(self):
 		return self.thread and self.thread.is_alive()
@@ -49,7 +58,10 @@ class ThreadedSegment(object):
 			start_time = monotonic()
 
 			with self.update_lock:
-				self.update()
+				try:
+					self.update()
+				except Exception as e:
+					self.error('Exception while updating: {0}', str(e))
 
 			self.sleep(monotonic() - start_time)
 
@@ -67,27 +79,26 @@ class ThreadedSegment(object):
 		self.interval = interval
 		self.has_set_interval = True
 
-	def set_state(self, update_first=True, interval=None, **kwargs):
+	def set_state(self, interval=None, **kwargs):
 		if not self.did_set_interval or interval:
 			self.set_interval(interval)
-		# Without this we will not have to wait long until receiving bug “I 
-		# opened vim, but branch information is only shown after I move cursor”.
-		#
-		# If running once .update() is called in __call__.
-		if update_first and self.update_first and not self.run_once:
-			self.update_first = False
-			self.update()
 
-	def startup(self, **kwargs):
-		# Normally .update() succeeds to run before value is requested, meaning
-		# that user is getting values he needs directly at vim startup. Without
-		# .startup() we will not have to wait long until receiving bug “I opened
-		# vim, but branch information is only shown after I move cursor”.
+	def startup(self, pl, **kwargs):
 		self.run_once = False
+		self.pl = pl
 
 		if not self.is_alive():
 			self.set_state(**kwargs)
 			self.start()
+
+	def error(self, *args, **kwargs):
+		self.pl.error(prefix=self.__class__.__name__, *args, **kwargs)
+
+	def warn(self, *args, **kwargs):
+		self.pl.warn(prefix=self.__class__.__name__, *args, **kwargs)
+
+	def debug(self, *args, **kwargs):
+		self.pl.debug(prefix=self.__class__.__name__, *args, **kwargs)
 
 
 def printed(func):
@@ -109,12 +120,14 @@ class KwThreadedSegment(ThreadedSegment):
 	def key(**kwargs):
 		return frozenset(kwargs.items())
 
-	def render(self, **kwargs):
+	def render(self, update_first, **kwargs):
 		key = self.key(**kwargs)
 		try:
 			update_state = self.queries[key][1]
 		except KeyError:
-			update_state = self.compute_state(key) if self.update_first or self.run_once else None
+			# Allow only to forbid to compute missing values: in either user 
+			# configuration or in subclasses.
+			update_state = self.compute_state(key) if update_first and self.update_first or self.run_once else None
 		# No locks: render method is already running with write_lock acquired.
 		self.queries[key] = (monotonic(), update_state)
 		return self.render_one(update_state, **kwargs)
@@ -124,7 +137,10 @@ class KwThreadedSegment(ThreadedSegment):
 		removes = []
 		for key, (last_query_time, state) in list(self.queries.items()):
 			if last_query_time < monotonic() < last_query_time + self.drop_interval:
-				updates[key] = (last_query_time, self.compute_state(key))
+				try:
+					updates[key] = (last_query_time, self.compute_state(key))
+				except Exception as e:
+					self.error('Exception while computing state for {0}: {1}', repr(key), str(e))
 			else:
 				removes.append(key)
 		with self.write_lock:
@@ -132,18 +148,12 @@ class KwThreadedSegment(ThreadedSegment):
 			for key in removes:
 				self.queries.pop(key)
 
-	def set_state(self, update_first=True, interval=None, **kwargs):
+	def set_state(self, interval=None, **kwargs):
 		if not self.did_set_interval or (interval < self.interval):
 			self.set_interval(interval)
 
-		# Allow only to forbid to compute missing values: in either user 
-		# configuration or in subclasses.
 		if self.update_first:
 			self.update_first = update_first
-
-		key = self.key(**kwargs)
-		if not self.run_once and key not in self.queries:
-			self.queries[key] = (monotonic(), self.compute_state(key) if self.update_first else None)
 
 	@staticmethod
 	def render_one(update_state, **kwargs):

@@ -45,6 +45,22 @@ class Args(object):
 			return None
 
 
+class Environment(object):
+	@staticmethod
+	def __getitem__(key):
+		try:
+			return zsh.getvalue(key)
+		except IndexError as e:
+			raise KeyError(*e.args)
+
+	@staticmethod
+	def get(key, default=None):
+		try:
+			return zsh.getvalue(key)
+		except IndexError:
+			return default
+
+
 class Prompt(object):
 	__slots__ = ('render', 'side', 'savedpsvar', 'savedps')
 
@@ -53,9 +69,10 @@ class Prompt(object):
 		self.side = side
 		self.savedpsvar = savedpsvar
 		self.savedps = savedps
+		self.args = powerline.args
 
 	def __str__(self):
-		return self.render(width=zsh.columns(), side=self.side).encode('utf-8')
+		return self.render(width=zsh.columns(), side=self.side, segment_info=args).encode('utf-8')
 
 	def __del__(self):
 		if self.savedps:
@@ -71,6 +88,6 @@ def set_prompt(powerline, psvar, side):
 
 
 def setup():
-	powerline = ShellPowerline(Args())
+	powerline = ShellPowerline(Args(), environ=Environment(), getcwd=lambda: zsh.getvalue('PWD'))
 	set_prompt(powerline, 'PS1', 'left')
 	set_prompt(powerline, 'RPS1', 'right')

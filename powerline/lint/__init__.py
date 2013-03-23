@@ -8,6 +8,7 @@ import os
 import re
 from collections import defaultdict
 from copy import copy
+import logging
 
 
 try:
@@ -408,6 +409,11 @@ main_spec = (Spec(
 		# only for existence of the path, not for it being a directory
 		paths=Spec().list((lambda value, *args: (True, True, not os.path.exists(value.value))),
 					lambda value: 'path does not exist: {0}'.format(value)).optional(),
+		log_file=Spec().type(str).func(lambda value, *args: (True, True, not os.path.isdir(os.path.dirname(value))),
+						lambda value: 'directory does not exist: {0}'.format(os.path.dirname(value))).optional(),
+		log_level=Spec().re('^[A-Z]+$').func(lambda value, *args: (True, True, not hasattr(logging, value)),
+										lambda value: 'unknown debugging level {0}'.format(value)).optional(),
+		log_format=Spec().type(str).optional(),
 	).context_message('Error while loading common configuration (key {key})'),
 	ext=Spec(
 		vim=Spec(
@@ -786,6 +792,11 @@ def check_segment_data_key(key, data, context, echoerr):
 	return True, False, False
 
 
+# FIXME More checks, limit existing to ThreadedSegment instances only
+args_spec = Spec(
+	interval=Spec().either(Spec().type(float), Spec().type(int)).optional(),
+	update_first=Spec().type(bool).optional(),
+).unknown_spec(Spec(), Spec()).optional().copy
 highlight_group_spec = Spec().type(unicode).copy
 segment_module_spec = Spec().type(unicode).func(check_segment_module).optional().copy
 segments_spec = Spec().optional().list(
@@ -801,8 +812,7 @@ segments_spec = Spec().optional().list(
 		before=Spec().type(unicode).optional(),
 		width=Spec().either(Spec().unsigned(), Spec().cmp('eq', 'auto')).optional(),
 		align=Spec().oneof(set('lr')).optional(),
-		# FIXME Check args
-		args=Spec().type(dict).optional(),
+		args=args_spec(),
 		contents=Spec().type(unicode).optional(),
 		highlight_group=Spec().list(
 			highlight_group_spec().re('^(?:(?!:divider$).)+$',
@@ -819,8 +829,7 @@ theme_spec = (Spec(
 		Spec(
 			after=Spec().type(unicode).optional(),
 			before=Spec().type(unicode).optional(),
-			# FIXME Check args
-			args=Spec().type(dict).optional(),
+			args=args_spec(),
 			contents=Spec().type(unicode).optional(),
 		),
 	).optional().context_message('Error while loading segment data (key {key})'),

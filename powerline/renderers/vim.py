@@ -66,12 +66,7 @@ class VimRenderer(Renderer):
 				return vim.strwidth(string)
 
 	def render(self, window_id, winidx, current):
-		'''Render all segments.
-
-		This method handles replacing of the percent placeholder for vim
-		statuslines, and it caches segment contents which are retrieved and
-		used in non-current windows.
-		'''
+		'''Render all segments.'''
 		if current:
 			mode = vim_mode(1)
 			mode = mode_translations.get(mode, mode)

@@ -19,9 +19,6 @@ class ShellPowerline(Powerline):
 		self.theme_option = mergeargs(args.theme_option) or {}
 		super(ShellPowerline, self).__init__(args.ext[0], args.renderer_module, run_once=run_once)
 
-	def get_segment_info(self):
-		return self.args
-
 	def load_main_config(self):
 		r = super(ShellPowerline, self).load_main_config()
 		if self.args.config:

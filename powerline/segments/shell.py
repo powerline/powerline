@@ -4,7 +4,7 @@ from powerline.theme import requires_segment_info
 
 
 @requires_segment_info
-def last_status(segment_info):
+def last_status(pl, segment_info):
 	'''Return last exit code.
 
 	Highlight groups used: ``exit_fail``
@@ -15,7 +15,7 @@ def last_status(segment_info):
 
 
 @requires_segment_info
-def last_pipe_status(segment_info):
+def last_pipe_status(pl, segment_info):
 	'''Return last pipe status.
 
 	Highlight groups used: ``exit_fail``, ``exit_success``
