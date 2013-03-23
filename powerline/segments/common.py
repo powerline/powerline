@@ -29,7 +29,7 @@ def hostname(only_if_ssh=False):
 	return socket.gethostname()
 
 
-def branch(status_colors=True):
+def branch(status_colors=False):
 	'''Return the current VCS branch.
 
 	:param bool status_colors:

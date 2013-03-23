@@ -54,7 +54,7 @@ class TestCommon(TestCase):
 					[{'contents': 'tests', 'highlight_group': ['branch_clean', 'branch']}])
 		with replace_module_attr(common, 'guess', lambda path: Args(branch=lambda: os.path.basename(path), status=lambda: 'D  ')):
 			self.assertEqual(common.branch(status_colors=False), 'tests')
-			self.assertEqual(common.branch(),
+			self.assertEqual(common.branch(status_colors=True),
 					[{'contents': 'tests', 'highlight_group': ['branch_dirty', 'branch']}])
 		with replace_module_attr(common, 'guess', lambda path: None):
 			self.assertEqual(common.branch(), None)
