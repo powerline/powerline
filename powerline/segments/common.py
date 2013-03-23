@@ -342,7 +342,7 @@ class WeatherSegment(ThreadedSegment):
 			self.temp = temp
 			self.icon_names = icon_names
 
-	def render(self, icons=None, unit='C', temperature_format=None, **kwargs):
+	def render(self, icons=None, unit='C', temp_format=None, temp_coldest=-30, temp_hottest=40, **kwargs):
 		if not hasattr(self, 'icon_names'):
 			return None
 
@@ -354,8 +354,14 @@ class WeatherSegment(ThreadedSegment):
 		else:
 			icon = weather_conditions_icons[self.icon_names[-1]]
 
-		temperature_format = temperature_format or ('{temp:.0f}' + temp_units[unit])
+		temp_format = temp_format or ('{temp:.0f}' + temp_units[unit])
 		temp = temp_conversions[unit](self.temp)
+		if self.temp <= temp_coldest:
+			gradient_level = 0
+		elif self.temp >= temp_hottest:
+			gradient_level = 100
+		else:
+			gradient_level = (self.temp - temp_coldest) * 100.0 / (temp_hottest - temp_coldest)
 		groups = ['weather_condition_' + icon_name for icon_name in self.icon_names] + ['weather_conditions', 'weather']
 		return [
 				{
@@ -364,10 +370,11 @@ class WeatherSegment(ThreadedSegment):
 				'divider_highlight_group': 'background:divider',
 				},
 				{
-				'contents': temperature_format.format(temp=temp),
-				'highlight_group': ['weather_temp_cold' if int(self.temp) < 0 else 'weather_temp_hot', 'weather_temp', 'weather'],
+				'contents': temp_format.format(temp=temp),
+				'highlight_group': ['weather_temp_gradient', 'weather_temp', 'weather'],
 				'draw_divider': False,
 				'divider_highlight_group': 'background:divider',
+				'gradient_level': gradient_level,
 				},
 			]
 
@@ -388,18 +395,26 @@ weather conditions.
 	location query for your current location, e.g. ``oslo, norway``
 :param dict icons:
 	dict for overriding default icons, e.g. ``{'heavy_snow' : u'❆'}``
-:param str temperature_format:
+:param str temp_format:
 	format string, receives ``temp`` as an argument. Should also hold unit.
+:param float temp_coldest:
+	coldest temperature. Any temperature below it will have gradient level equal 
+	to zero.
+:param float temp_hottest:
+	hottest temperature. Any temperature above it will have gradient level equal 
+	to 100. Temperatures between ``temp_coldest`` and ``temp_hottest`` receive 
+	gradient level that indicates relative position in this interval 
+	(``100 * (cur-coldest) / (hottest-coldest)``).
 
 Divider highlight group used: ``background:divider``.
 
-Highlight groups used: ``weather_conditions`` or ``weather``, ``weather_temp_cold`` or ``weather_temp_hot`` or ``weather_temp`` or ``weather``.
+Highlight groups used: ``weather_conditions`` or ``weather``, ``weather_temp_gradient`` (gradient) or ``weather``.
 Also uses ``weather_conditions_{condition}`` for all weather conditions supported by Yahoo.
 ''')
 
 
 def system_load(format='{avg:.1f}', threshold_good=1, threshold_bad=2):
-	'''Return normalized system load average.
+	'''Return system load average.
 
 	Highlights using ``system_load_good``, ``system_load_bad`` and
 	``system_load_ugly`` highlighting groups, depending on the thresholds
@@ -408,13 +423,19 @@ def system_load(format='{avg:.1f}', threshold_good=1, threshold_bad=2):
 	:param str format:
 		format string, receives ``avg`` as an argument
 	:param float threshold_good:
-		threshold for "good load" highlighting
+		threshold for gradient level 0: any normalized load average below this 
+		value will have this gradient level.
 	:param float threshold_bad:
-		threshold for "bad load" highlighting
+		threshold for gradient level 100: any normalized load average above this 
+		value will have this gradient level. Load averages between 
+		``threshold_good`` and ``threshold_bad`` receive gradient level that 
+		indicates relative position in this interval:
+		(``100 * (cur-good) / (bad-good)``).
+		Note: both parameters are checked against normalized load averages.
 
 	Divider highlight group used: ``background:divider``.
 
-	Highlight groups used: ``system_load_good`` or ``system_load``, ``system_load_bad`` or ``system_load``, ``system_load_ugly`` or ``system_load``. It is recommended to define all highlight groups.
+	Highlight groups used: ``system_load_gradient`` (gradient) or ``system_load``.
 	'''
 	global cpu_count
 	try:
@@ -425,16 +446,17 @@ def system_load(format='{avg:.1f}', threshold_good=1, threshold_bad=2):
 	for avg in os.getloadavg():
 		normalized = avg / cpu_num
 		if normalized < threshold_good:
-			hl = 'system_load_good'
+			gradient_level = 0
 		elif normalized < threshold_bad:
-			hl = 'system_load_bad'
+			gradient_level = (normalized - threshold_good) * 100.0 / (threshold_bad - threshold_good)
 		else:
-			hl = 'system_load_ugly'
+			gradient_level = 100
 		ret.append({
 			'contents': format.format(avg=avg),
-			'highlight_group': [hl, 'system_load'],
+			'highlight_group': ['system_load_gradient', 'system_load'],
 			'draw_divider': False,
 			'divider_highlight_group': 'background:divider',
+			'gradient_level': gradient_level,
 			})
 	ret[0]['draw_divider'] = True
 	ret[0]['contents'] += ' '
@@ -616,7 +638,7 @@ class NetworkLoadSegment(KwThreadedSegment):
 		idata['last'] = (monotonic(), _get_bytes(interface))
 		return idata
 
-	def render_one(self, idata, format='⬇ {recv:>8} ⬆ {sent:>8}', suffix='B/s', si_prefix=False, **kwargs):
+	def render_one(self, idata, recv_format='⬇ {value:>8}', sent_format='⬆ {value:>8}', suffix='B/s', si_prefix=False, **kwargs):
 		if not idata or 'prev' not in idata:
 			return None
 
@@ -627,13 +649,28 @@ class NetworkLoadSegment(KwThreadedSegment):
 		if None in (b1, b2) or measure_interval == 0:
 			return None
 
-		return [{
-				'contents': format.format(
-					recv=humanize_bytes((b2[0] - b1[0]) / measure_interval, suffix, si_prefix),
-					sent=humanize_bytes((b2[1] - b1[1]) / measure_interval, suffix, si_prefix),
-					),
+		r = []
+		for i, key in zip((0, 1), ('recv', 'sent')):
+			format = locals()[key + '_format']
+			value = (b2[i] - b1[i]) / measure_interval
+			max_key = key + '_max'
+			is_gradient = max_key in kwargs
+			hl_groups = ['network_load_' + key, 'network_load']
+			if is_gradient:
+				hl_groups[:0] = (group + '_gradient' for group in hl_groups)
+			r.append({
+				'contents': format.format(value=humanize_bytes(value, suffix, si_prefix)),
 				'divider_highlight_group': 'background:divider',
-				}]
+				'highlight_group': hl_groups,
+				})
+			if is_gradient:
+				max = kwargs[max_key]
+				if value >= max:
+					r[-1]['gradient_level'] = 100
+				else:
+					r[-1]['gradient_level'] = value * 100.0 / max
+
+		return r
 
 
 network_load = with_docstring(NetworkLoadSegment(),
@@ -649,8 +686,20 @@ falls back to reading
 	string appended to each load string
 :param bool si_prefix:
 	use SI prefix, e.g. MB instead of MiB
-:param str format:
-	format string, receives ``recv`` and ``sent`` as arguments
+:param str recv_format:
+	format string, receives ``value`` as argument
+:param str sent_format:
+	format string, receives ``value`` as argument
+:param float recv_max:
+	maximum number of received bytes per second. Is only used to compute 
+	gradient level
+:param float sent_max:
+	maximum number of sent bytes per second. Is only used to compute gradient 
+	level
+
+Divider highlight group used: ``background:divider``.
+
+Highlight groups used: ``network_load_sent_gradient`` (gradient) or ``network_load_recv_gradient`` (gradient) or ``network_load_gradient`` (gradient), ``network_load_sent`` or ``network_load_recv`` or ``network_load``.
 ''')
 
 
@@ -685,12 +734,23 @@ class EmailIMAPSegment(KwThreadedSegment):
 			return None
 		except imaplib.IMAP4.error as e:
 			unread_count = str(e)
+		return unread_count
+
+	@staticmethod
+	def render_one(unread_count, max_msgs=None, **kwargs):
 		if not unread_count:
 			return None
-		return [{
-			'highlight_group': 'email_alert',
-			'contents': str(unread_count),
-			}]
+		elif type(unread_count) != int or not max_msgs:
+			return [{
+				'contents': str(unread_count),
+				'highlight_group': 'email_alert',
+				}]
+		else:
+			return [{
+				'contents': str(unread_count),
+				'highlight_group': ['email_alert_gradient', 'email_alert'],
+				'gradient_level': unread_count * 100.0 / max_msgs,
+				}]
 
 
 email_imap_alert = with_docstring(EmailIMAPSegment(),
@@ -706,8 +766,12 @@ email_imap_alert = with_docstring(EmailIMAPSegment(),
 	e-mail server port
 :param str folder:
 	folder to check for e-mails
+:param int max_msgs:
+	Maximum number of messages. If there are more messages then max_msgs then it 
+	will use gradient level equal to 100, otherwise gradient level is equal to 
+	``100 * msgs_num / max_msgs``. If not present gradient is not computed.
 
-Highlight groups used: ``email_alert``.
+Highlight groups used: ``email_alert_gradient`` (gradient), ``email_alert``.
 ''')
 
 

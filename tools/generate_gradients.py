@@ -1,12 +1,18 @@
+#!/usr/bin/env python
 import sys
 import json
 from powerline.colorscheme import cterm_to_hex
 from itertools import groupby
 
+try:
+	from __builtin__ import unicode
+except ImportError:
+	unicode = str
 
-if len(sys.argv) == 1:
+
+if len(sys.argv) == 1 or sys.argv[1] == '--help':
 	sys.stderr.write('''
-	Usage: generate_gradients.py colors itemnum[ "show"]
+	Usage: generate_gradients.py colors itemnum[ "show" [ min max num]]
 
 		colors: JSON list with either cterm ([200, 42, 6]) or RGB (["abcdef", 
 			"feffef"]) colors.
@@ -15,7 +21,16 @@ if len(sys.argv) == 1:
 
 		"show": static string, determines whether gradient sample should be 
 			printed to stdout as well.
+
+		min, max: floating point values.
+		num: integer
+
+				all of the above are used to generate sample gradient for given 
+				range (just like the above gradients shown with "show", but with 
+				different scale (controlled by min and max) and, possibly, 
+				different length (controlled by num)).
 	''')
+	sys.exit(1)
 
 
 def linear_gradient(start_value, stop_value, start_offset, stop_offset, offset):
@@ -69,13 +84,13 @@ def print_color(color):
 	if type(color) is int:
 		colstr = '5;' + str(color)
 	else:
-		colstr = '2;' + ';'.join((str(i) for i in color))
+		colstr = '2;' + ';'.join((str(int(round(i))) for i in color))
 	sys.stdout.write('\033[48;' + colstr + 'm ')
 
 
-def print_colors(colors):
-	for i in range(101):
-		color = colors[int(round(i * (len(colors) - 1) / 100))]
+def print_colors(colors, num=100):
+	for i in range(num + 1):
+		color = colors[int(round(i * (len(colors) - 1) / num))]
 		print_color(color)
 	sys.stdout.write('\033[0m\n')
 
@@ -90,9 +105,9 @@ gradient = [gr_func(y) for y in range(0, m - 1)]
 r = [get_rgb(*color) for color in gradient]
 r2 = [find_color(color, cterm_to_hex)[0] for color in gradient]
 r3 = [i[0] for i in groupby(r2)]
-print json.dumps(r)
-print json.dumps(r2)
-print json.dumps(r3)
+print(json.dumps(r))
+print(json.dumps(r2))
+print(json.dumps(r3))
 if len(sys.argv) > 3 and sys.argv[3] == 'show':
 	print_colors(gradient)
 	print_colors(r2)
@@ -103,3 +118,14 @@ if len(sys.argv) > 3 and sys.argv[3] == 'show':
 	nums = (''.join((str(i) for i in range(10))))
 	sys.stdout.write(''.join(((('\033[1m' if j % 2 else '\033[0m') + nums) for j in range(10))))
 	sys.stdout.write('\033[0m0\n')
+	if len(sys.argv) > 6:
+		vmin = float(sys.argv[4])
+		vmax = float(sys.argv[5])
+		num = int(sys.argv[6])
+		print_colors(gradient, num)
+		s = ''
+		while len(s) < num:
+			curpc = len(s) + 1 if s else 0
+			curval = vmin + curpc * (vmax - vmin) / 100.0
+			s += str(curval) + ' '
+		print(s)
