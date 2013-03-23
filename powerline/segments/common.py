@@ -693,12 +693,23 @@ class EmailIMAPSegment(KwThreadedSegment):
 			return None
 		except imaplib.IMAP4.error as e:
 			unread_count = str(e)
+		return unread_count
+
+	@staticmethod
+	def render_one(unread_count, max_msgs=None, **kwargs):
 		if not unread_count:
 			return None
-		return [{
-			'highlight_group': 'email_alert',
-			'contents': str(unread_count),
-			}]
+		elif type(unread_count) != int or not max_msgs:
+			return [{
+				'contents': str(unread_count),
+				'highlight_group': 'email_alert',
+				}]
+		else:
+			return [{
+				'contents': str(unread_count),
+				'highlight_group': ['email_alert_gradient', 'email_alert'],
+				'gradient_level': unread_count * 100.0 / max_msgs,
+				}]
 
 
 email_imap_alert = with_docstring(EmailIMAPSegment(),
@@ -714,8 +725,12 @@ email_imap_alert = with_docstring(EmailIMAPSegment(),
 	e-mail server port
 :param str folder:
 	folder to check for e-mails
+:param int max_msgs:
+	Maximum number of messages. If there are more messages then max_msgs then it 
+	will use gradient level equal to 100, otherwise gradient level is equal to 
+	``100 * msgs_num / max_msgs``. If not present gradient is not computed.
 
-Highlight groups used: ``email_alert``.
+Highlight groups used: ``email_alert_gradient`` (gradient), ``email_alert``.
 ''')
 
 
