@@ -45,24 +45,31 @@ class Args(object):
 			return None
 
 
+def string(s):
+	if type(s) is bytes:
+		return s.decode('utf-8', errors='replace')
+	else:
+		return str(s)
+
+
 class Environment(object):
 	@staticmethod
 	def __getitem__(key):
 		try:
-			return zsh.getvalue(key)
+			return string(zsh.getvalue(key))
 		except IndexError as e:
 			raise KeyError(*e.args)
 
 	@staticmethod
 	def get(key, default=None):
 		try:
-			return zsh.getvalue(key)
+			return string(zsh.getvalue(key))
 		except IndexError:
 			return default
 
 
 class Prompt(object):
-	__slots__ = ('render', 'side', 'savedpsvar', 'savedps')
+	__slots__ = ('render', 'side', 'savedpsvar', 'savedps', 'args')
 
 	def __init__(self, powerline, side, savedpsvar=None, savedps=None):
 		self.render = powerline.renderer.render
@@ -72,7 +79,13 @@ class Prompt(object):
 		self.args = powerline.args
 
 	def __str__(self):
-		return self.render(width=zsh.columns(), side=self.side, segment_info=args).encode('utf-8')
+		r = self.render(width=zsh.columns(), side=self.side, segment_info=self.args)
+		if type(r) is not str:
+			if type(r) is bytes:
+				return r.decode('utf-8')
+			else:
+				return r.encode('utf-8')
+		return r
 
 	def __del__(self):
 		if self.savedps:
@@ -88,6 +101,7 @@ def set_prompt(powerline, psvar, side):
 
 
 def setup():
-	powerline = ShellPowerline(Args(), environ=Environment(), getcwd=lambda: zsh.getvalue('PWD'))
+	environ = Environment()
+	powerline = ShellPowerline(Args(), environ=environ, getcwd=lambda: environ['PWD'])
 	set_prompt(powerline, 'PS1', 'left')
 	set_prompt(powerline, 'RPS1', 'right')

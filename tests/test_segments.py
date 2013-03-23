@@ -44,11 +44,10 @@ class TestCommon(TestCase):
 		with replace_env('USER', 'def') as pl:
 			with replace_attr(common, 'os', new_os):
 				with replace_attr(common, 'psutil', new_psutil):
-					self.assertEqual(common.user(pl=pl), [{'contents': 'def', 'highlight_group': 'user'}])
-					new_os.geteuid = lambda: 1
-					self.assertEqual(common.user(pl=pl), [{'contents': 'def', 'highlight_group': 'user'}])
-					new_os.geteuid = lambda: 0
-					self.assertEqual(common.user(pl=pl), [{'contents': 'def', 'highlight_group': ['superuser', 'user']}])
+					with replace_attr(common, '_geteuid', lambda: 5):
+						self.assertEqual(common.user(pl=pl), [{'contents': 'def', 'highlight_group': 'user'}])
+					with replace_attr(common, '_geteuid', lambda: 0):
+						self.assertEqual(common.user(pl=pl), [{'contents': 'def', 'highlight_group': ['superuser', 'user']}])
 
 	def test_branch(self):
 		pl = Pl()

@@ -140,7 +140,7 @@ class KwThreadedSegment(ThreadedSegment):
 				try:
 					updates[key] = (last_query_time, self.compute_state(key))
 				except Exception as e:
-					self.error('Exception while computing state for {0}: {1}', repr(key), str(e))
+					self.exception('Exception while computing state for {0}: {1}', repr(key), str(e))
 			else:
 				removes.append(key)
 		with self.write_lock:

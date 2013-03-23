@@ -366,14 +366,10 @@ class WeatherSegment(ThreadedSegment):
 			# Do not lock attribute assignments in this branch: they are used 
 			# only in .update()
 			if not self.location:
-				try:
-					location_data = json.loads(urllib_read('http://freegeoip.net/json/' + _external_ip()))
-					self.location = ','.join([location_data['city'],
-												location_data['region_name'],
-												location_data['country_name']])
-				except (TypeError, ValueError) as e:
-					self.error('Failed to get location: {0}', str(e))
-					return
+				location_data = json.loads(urllib_read('http://freegeoip.net/json/' + _external_ip()))
+				self.location = ','.join([location_data['city'],
+											location_data['region_name'],
+											location_data['country_name']])
 			query_data = {
 					'q':
 						'use "http://github.com/yql/yql-tables/raw/master/weather/weather.bylocation.xml" as we;'
@@ -382,15 +378,14 @@ class WeatherSegment(ThreadedSegment):
 					}
 			self.url = 'http://query.yahooapis.com/v1/public/yql?' + urllib_urlencode(query_data)
 
-		try:
-			raw_response = urllib_read(self.url)
-			response = json.loads(raw_response)
-			condition = response['query']['results']['weather']['rss']['channel']['item']['condition']
-			condition_code = int(condition['code'])
-			temp = float(condition['temp'])
-		except (KeyError, TypeError, ValueError) as e:
-			self.error('Failed to get weather conditions: {0}', str(e))
+		raw_response = urllib_read(self.url)
+		if not raw_response:
+			self.error('Failed to get response')
 			return
+		response = json.loads(raw_response)
+		condition = response['query']['results']['weather']['rss']['channel']['item']['condition']
+		condition_code = int(condition['code'])
+		temp = float(condition['temp'])
 
 		try:
 			icon_names = weather_conditions_codes[condition_code]
@@ -560,14 +555,11 @@ try:
 		return '{0}%'.format(cpu_percent)
 except ImportError:
 	def _get_bytes(interface):  # NOQA
-		try:
-			with open('/sys/class/net/{interface}/statistics/rx_bytes'.format(interface=interface), 'rb') as file_obj:
-				rx = int(file_obj.read())
-			with open('/sys/class/net/{interface}/statistics/tx_bytes'.format(interface=interface), 'rb') as file_obj:
-				tx = int(file_obj.read())
-			return (rx, tx)
-		except IOError:
-			return None
+		with open('/sys/class/net/{interface}/statistics/rx_bytes'.format(interface=interface), 'rb') as file_obj:
+			rx = int(file_obj.read())
+		with open('/sys/class/net/{interface}/statistics/tx_bytes'.format(interface=interface), 'rb') as file_obj:
+			tx = int(file_obj.read())
+		return (rx, tx)
 
 	def _get_interfaces():
 		for interface in os.listdir('/sys/class/net'):
@@ -591,6 +583,8 @@ except ImportError:
 
 
 username = False
+# os.geteuid is not available on windows
+_geteuid = getattr(os, 'geteuid', lambda: 1)
 
 
 def user(pl):
@@ -606,11 +600,7 @@ def user(pl):
 	if username is None:
 		pl.warn('Failed to get username')
 		return None
-	try:
-		euid = os.geteuid()
-	except AttributeError:
-		# os.geteuid is not available on windows
-		euid = 1
+	euid = _geteuid()
 	return [{
 			'contents': username,
 			'highlight_group': 'user' if euid != 0 else ['superuser', 'user'],
@@ -644,9 +634,6 @@ def uptime(pl, format='{days}d {hours:02d}h {minutes:02d}m'):
 	'''
 	try:
 		seconds = _get_uptime()
-	except IOError as e:
-		pl.error('Failed to get uptime: {0}', e)
-		return None
 	except NotImplementedError:
 		pl.warn('Unable to get uptime. You should install psutil package')
 		return None
