@@ -35,7 +35,6 @@ class ThreadedSegment(object):
 			#
 			# If running once .update() is called in __call__.
 			if update_first and self.update_first:
-				self.update_first = False
 				self.update()
 			self.start()
 
