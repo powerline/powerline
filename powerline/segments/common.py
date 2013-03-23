@@ -178,7 +178,10 @@ class ExternalIpSegment(ThreadedSegment):
 		super(ExternalIpSegment, self).set_state(**kwargs)
 
 	def update(self):
-		ip = _external_ip(query_url=self.query_url)
+		try:
+			ip = _external_ip(query_url=self.query_url)
+		except Exception:
+			ip = 'unknown'
 		with self.write_lock:
 			self.ip = ip
 
