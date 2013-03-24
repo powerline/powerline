@@ -5,18 +5,17 @@ from __future__ import absolute_import
 from powerline.lib.time import monotonic
 
 from time import sleep
-from threading import Thread, Lock
+from threading import Thread, Lock, Event
 
 
 class ThreadedSegment(object):
-	daemon = True
 	min_sleep_time = 0.1
 	update_first = True
 	interval = 1
 
 	def __init__(self):
 		super(ThreadedSegment, self).__init__()
-		self.update_lock = Lock()
+		self.shutdown_event = Event()
 		self.write_lock = Lock()
 		self.keep_going = True
 		self.run_once = True
@@ -50,39 +49,27 @@ class ThreadedSegment(object):
 
 	def start(self):
 		self.thread = Thread(target=self.run)
-		self.thread.daemon = self.daemon
 		self.thread.start()
 
 	def sleep(self, adjust_time):
-		sleep(max(self.interval - adjust_time, self.min_sleep_time))
+		self.shutdown_event.wait(max(self.interval - adjust_time, self.min_sleep_time))
+		if self.shutdown_event.is_set():
+			self.keep_going = False
 
 	def run(self):
 		while self.keep_going:
 			start_time = monotonic()
-
 			try:
-				if self.update_lock.acquire(False):
-					try:
-						self.update()
-					except Exception as e:
-						self.error('Exception while updating: {0}', str(e))
-						self.skip = True
-					else:
-						self.skip = False
-				else:
-					return
-			finally:
-				# Release lock in any case. If it is not locked in this thread, 
-				# it was done in main thread in .shutdown method, and the lock 
-				# will never be released.
-				self.update_lock.release()
-
+				self.update()
+			except Exception as e:
+				self.error('Exception while updating: {0}', str(e))
+				self.skip = True
+			else:
+				self.skip = False
 			self.sleep(monotonic() - start_time)
 
 	def shutdown(self):
-		if self.keep_going:
-			self.keep_going = False
-			self.update_lock.acquire()
+		self.shutdown_event.set()
 
 	def set_interval(self, interval=None):
 		# Allowing “interval” keyword in configuration.
