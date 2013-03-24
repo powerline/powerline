@@ -18,39 +18,98 @@ from powerline.lib.humanize_bytes import humanize_bytes
 from collections import namedtuple
 
 
-def hostname(only_if_ssh=False):
+def hostname(pl, only_if_ssh=False):
 	'''Return the current hostname.
 
 	:param bool only_if_ssh:
 		only return the hostname if currently in an SSH session
 	'''
-	if only_if_ssh and not os.environ.get('SSH_CLIENT'):
+	if only_if_ssh and not pl.environ.get('SSH_CLIENT'):
 		return None
 	return socket.gethostname()
 
 
-def branch(status_colors=True):
-	'''Return the current VCS branch.
+class RepositorySegment(KwThreadedSegment):
+	def __init__(self):
+		super(RepositorySegment, self).__init__()
+		self.directories = {}
 
-	:param bool status_colors:
-		determines whether repository status will be used to determine highlighting. Default: True.
+	@staticmethod
+	def key(pl, **kwargs):
+		return os.path.abspath(pl.getcwd())
 
-	Highlight groups used: ``branch_clean``, ``branch_dirty``, ``branch``.
-	'''
-	repo = guess(path=os.path.abspath(os.getcwd()))
-	if repo:
-		branch = repo.branch()
-		if status_colors:
+	def update(self):
+		# .compute_state() is running only in this method, and only in one 
+		# thread, thus operations with .directories do not need write locks 
+		# (.render() method is not using .directories). If this is changed 
+		# .directories needs redesigning
+		self.directories.clear()
+		super(RepositorySegment, self).update()
+
+	def compute_state(self, path):
+		repo = guess(path=path)
+		if repo:
+			if repo.directory in self.directories:
+				return self.directories[repo.directory]
+			else:
+				r = self.process_repo(repo)
+				self.directories[repo.directory] = r
+				return r
+
+
+class RepositoryStatusSegment(RepositorySegment):
+	interval = 2
+
+	@staticmethod
+	def process_repo(repo):
+		return repo.status()
+
+
+repository_status = with_docstring(RepositoryStatusSegment(),
+'''Return the status for the current VCS repository.''')
+
+
+class BranchSegment(RepositorySegment):
+	interval = 0.2
+	started_repository_status = False
+
+	@staticmethod
+	def process_repo(repo):
+		return repo.branch()
+
+	@staticmethod
+	def render_one(branch, status_colors=False, **kwargs):
+		if branch and status_colors:
 			return [{
 				'contents': branch,
-				'highlight_group': ['branch_dirty' if repo.status() else 'branch_clean', 'branch'],
+				'highlight_group': ['branch_dirty' if repository_status(**kwargs) else 'branch_clean', 'branch'],
 				}]
 		else:
 			return branch
-	return None
+
+	def startup(self, status_colors=False, **kwargs):
+		super(BranchSegment, self).startup(**kwargs)
+		if status_colors:
+			self.started_repository_status = True
+			repository_status.startup(**kwargs)
+
+	def shutdown(self):
+		if self.started_repository_status:
+			repository_status.shutdown()
+		super(BranchSegment, self).shutdown()
 
 
-def cwd(dir_shorten_len=None, dir_limit_depth=None):
+branch = with_docstring(BranchSegment(),
+'''Return the current VCS branch.
+
+:param bool status_colors:
+	determines whether repository status will be used to determine highlighting. Default: True.
+
+Highlight groups used: ``branch_clean``, ``branch_dirty``, ``branch``.
+''')
+
+
+def cwd(pl, dir_shorten_len=None, dir_limit_depth=None):
 	'''Return the current working directory.
 
 	Returns a segment list to create a breadcrumb-like effect.
@@ -67,18 +126,16 @@ def cwd(dir_shorten_len=None, dir_limit_depth=None):
 	'''
 	import re
 	try:
-		try:
-			cwd = os.getcwdu()
-		except AttributeError:
-			cwd = os.getcwd()
+		cwd = pl.getcwd()
 	except OSError as e:
 		if e.errno == 2:
 			# user most probably deleted the directory
 			# this happens when removing files from Mercurial repos for example
+			pl.warn('Current directory not found')
 			cwd = "[not found]"
 		else:
 			raise
-	home = os.environ.get('HOME')
+	home = pl.home
 	if home:
 		cwd = re.sub('^' + re.escape(home), '~', cwd, 1)
 	cwd_split = cwd.split(os.sep)
@@ -101,7 +158,7 @@ def cwd(dir_shorten_len=None, dir_limit_depth=None):
 	return ret
 
 
-def date(format='%Y-%m-%d', istime=False):
+def date(pl, format='%Y-%m-%d', istime=False):
 	'''Return the current date.
 
 	:param str format:
@@ -118,7 +175,7 @@ def date(format='%Y-%m-%d', istime=False):
 	}]
 
 
-def fuzzy_time():
+def fuzzy_time(pl):
 	'''Display the current time as fuzzy time, e.g. "quarter past six".'''
 	hour_str = ['twelve', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven']
 	minute_str = {
@@ -182,7 +239,7 @@ class ExternalIpSegment(ThreadedSegment):
 		with self.write_lock:
 			self.ip = ip
 
-	def render(self):
+	def render(self, **kwargs):
 		if not hasattr(self, 'ip'):
 			return None
 		return [{'contents': self.ip, 'divider_highlight_group': 'background:divider'}]
@@ -309,13 +366,10 @@ class WeatherSegment(ThreadedSegment):
 			# Do not lock attribute assignments in this branch: they are used 
 			# only in .update()
 			if not self.location:
-				try:
-					location_data = json.loads(urllib_read('http://freegeoip.net/json/' + _external_ip()))
-					self.location = ','.join([location_data['city'],
-												location_data['region_name'],
-												location_data['country_name']])
-				except (TypeError, ValueError):
-					return
+				location_data = json.loads(urllib_read('http://freegeoip.net/json/' + _external_ip()))
+				self.location = ','.join([location_data['city'],
+											location_data['region_name'],
+											location_data['country_name']])
 			query_data = {
 					'q':
 						'use "http://github.com/yql/yql-tables/raw/master/weather/weather.bylocation.xml" as we;'
@@ -324,19 +378,24 @@ class WeatherSegment(ThreadedSegment):
 					}
 			self.url = 'http://query.yahooapis.com/v1/public/yql?' + urllib_urlencode(query_data)
 
-		try:
-			raw_response = urllib_read(self.url)
-			response = json.loads(raw_response)
-			condition = response['query']['results']['weather']['rss']['channel']['item']['condition']
-			condition_code = int(condition['code'])
-			temp = float(condition['temp'])
-		except (KeyError, TypeError, ValueError):
+		raw_response = urllib_read(self.url)
+		if not raw_response:
+			self.error('Failed to get response')
 			return
+		response = json.loads(raw_response)
+		condition = response['query']['results']['weather']['rss']['channel']['item']['condition']
+		condition_code = int(condition['code'])
+		temp = float(condition['temp'])
 
 		try:
 			icon_names = weather_conditions_codes[condition_code]
-		except IndexError:
-			icon_names = (('not_available' if condition_code == 3200 else 'unknown'),)
+		except IndexError as e:
+			if condition_code == 3200:
+				icon_names = ('not_available',)
+				self.warn('Weather is not available for location {0}', self.location)
+			else:
+				icon_names = ('unknown',)
+				self.error('Unknown condition code: {0}', condition_code)
 
 		with self.write_lock:
 			self.temp = temp
@@ -413,7 +472,7 @@ Also uses ``weather_conditions_{condition}`` for all weather conditions supporte
 ''')
 
 
-def system_load(format='{avg:.1f}', threshold_good=1, threshold_bad=2):
+def system_load(pl, format='{avg:.1f}', threshold_good=1, threshold_bad=2):
 	'''Return system load average.
 
 	Highlights using ``system_load_good``, ``system_load_bad`` and
@@ -441,6 +500,7 @@ def system_load(format='{avg:.1f}', threshold_good=1, threshold_bad=2):
 	try:
 		cpu_num = cpu_count()
 	except NotImplementedError:
+		pl.warn('Unable to get CPU count: method is not implemented')
 		return None
 	ret = []
 	for avg in os.getloadavg():
@@ -480,10 +540,10 @@ try:
 			if data:
 				yield interface, data.bytes_recv, data.bytes_sent
 
-	def _get_user():
+	def _get_user(pl):
 		return psutil.Process(os.getpid()).username
 
-	def cpu_load_percent(measure_interval=.5):
+	def cpu_load_percent(pl, measure_interval=.5):
 		'''Return the average CPU load as a percentage.
 
 		Requires the ``psutil`` module.
@@ -495,14 +555,11 @@ try:
 		return '{0}%'.format(cpu_percent)
 except ImportError:
 	def _get_bytes(interface):  # NOQA
-		try:
-			with open('/sys/class/net/{interface}/statistics/rx_bytes'.format(interface=interface), 'rb') as file_obj:
-				rx = int(file_obj.read())
-			with open('/sys/class/net/{interface}/statistics/tx_bytes'.format(interface=interface), 'rb') as file_obj:
-				tx = int(file_obj.read())
-			return (rx, tx)
-		except IOError:
-			return None
+		with open('/sys/class/net/{interface}/statistics/rx_bytes'.format(interface=interface), 'rb') as file_obj:
+			rx = int(file_obj.read())
+		with open('/sys/class/net/{interface}/statistics/tx_bytes'.format(interface=interface), 'rb') as file_obj:
+			tx = int(file_obj.read())
+		return (rx, tx)
 
 	def _get_interfaces():
 		for interface in os.listdir('/sys/class/net'):
@@ -510,10 +567,10 @@ except ImportError:
 			if x is not None:
 				yield interface, x[0], x[1]
 
-	def _get_user():  # NOQA
-		return os.environ.get('USER', None)
+	def _get_user(pl):  # NOQA
+		return pl.environ.get('USER', None)
 
-	def cpu_load_percent(measure_interval=.5):  # NOQA
+	def cpu_load_percent(pl, measure_interval=.5):  # NOQA
 		'''Return the average CPU load as a percentage.
 
 		Requires the ``psutil`` module.
@@ -521,13 +578,16 @@ except ImportError:
 		:param float measure_interval:
 			interval used to measure CPU load (in seconds)
 		'''
+		pl.warn('psutil package is not installed, thus CPU load is not available')
 		return None
 
 
 username = False
+# os.geteuid is not available on windows
+_geteuid = getattr(os, 'geteuid', lambda: 1)
 
 
-def user():
+def user(pl):
 	'''Return the current user.
 
 	Highlights the user with the ``superuser`` if the effective user ID is 0.
@@ -536,14 +596,11 @@ def user():
 	'''
 	global username
 	if username is False:
-		username = _get_user()
+		username = _get_user(pl)
 	if username is None:
+		pl.warn('Failed to get username')
 		return None
-	try:
-		euid = os.geteuid()
-	except AttributeError:
-		# os.geteuid is not available on windows
-		euid = 1
+	euid = _geteuid()
 	return [{
 			'contents': username,
 			'highlight_group': 'user' if euid != 0 else ['superuser', 'user'],
@@ -566,7 +623,7 @@ else:
 
 
 @add_divider_highlight_group('background:divider')
-def uptime(format='{days}d {hours:02d}h {minutes:02d}m'):
+def uptime(pl, format='{days}d {hours:02d}h {minutes:02d}m'):
 	'''Return system uptime.
 
 	:param str format:
@@ -577,7 +634,8 @@ def uptime(format='{days}d {hours:02d}h {minutes:02d}m'):
 	'''
 	try:
 		seconds = _get_uptime()
-	except (IOError, NotImplementedError):
+	except NotImplementedError:
+		pl.warn('Unable to get uptime. You should install psutil package')
 		return None
 	minutes, seconds = divmod(seconds, 60)
 	hours, minutes = divmod(minutes, 60)
@@ -646,7 +704,10 @@ class NetworkLoadSegment(KwThreadedSegment):
 		t2, b2 = idata['last']
 		measure_interval = t2 - t1
 
-		if None in (b1, b2) or measure_interval == 0:
+		if None in (b1, b2):
+			return None
+		if measure_interval == 0:
+			self.error('Measure interval is zero. This should not happen')
 			return None
 
 		r = []
@@ -703,9 +764,9 @@ Highlight groups used: ``network_load_sent_gradient`` (gradient) or ``network_lo
 ''')
 
 
-def virtualenv():
+def virtualenv(pl):
 	'''Return the name of the current Python virtualenv.'''
-	return os.path.basename(os.environ.get('VIRTUAL_ENV', '')) or None
+	return os.path.basename(pl.environ.get('VIRTUAL_ENV', '')) or None
 
 
 _IMAPKey = namedtuple('Key', 'username password server port folder')
@@ -715,12 +776,12 @@ class EmailIMAPSegment(KwThreadedSegment):
 	interval = 60
 
 	@staticmethod
-	def key(username, password, server='imap.gmail.com', port=993, folder='INBOX'):
+	def key(username, password, server='imap.gmail.com', port=993, folder='INBOX', **kwargs):
 		return _IMAPKey(username, password, server, port, folder)
 
-	@staticmethod
-	def compute_state(key):
+	def compute_state(self, key):
 		if not key.username or not key.password:
+			self.warn('Username and password are not configured')
 			return None
 		try:
 			import imaplib
@@ -730,8 +791,6 @@ class EmailIMAPSegment(KwThreadedSegment):
 			rc, message = mail.status(key.folder, '(UNSEEN)')
 			unread_str = message[0].decode('utf-8')
 			unread_count = int(re.search('UNSEEN (\d+)', unread_str).group(1))
-		except socket.gaierror:
-			return None
 		except imaplib.IMAP4.error as e:
 			unread_count = str(e)
 		return unread_count
@@ -783,7 +842,7 @@ class NowPlayingSegment(object):
 		'stop': '■',
 		}
 
-	def __call__(self, player='mpd', format='{state_symbol} {artist} - {title} ({total})', *args, **kwargs):
+	def __call__(self, player='mpd', format='{state_symbol} {artist} - {title} ({total})', **kwargs):
 		player_func = getattr(self, 'player_{0}'.format(player))
 		stats = {
 			'state': None,
@@ -794,7 +853,7 @@ class NowPlayingSegment(object):
 			'elapsed': None,
 			'total': None,
 			}
-		func_stats = player_func(*args, **kwargs)
+		func_stats = player_func(**kwargs)
 		if not func_stats:
 			return None
 		stats.update(func_stats)
@@ -825,7 +884,7 @@ class NowPlayingSegment(object):
 	def _convert_seconds(seconds):
 		return '{0:.0f}:{1:02.0f}'.format(*divmod(float(seconds), 60))
 
-	def player_cmus(self):
+	def player_cmus(self, pl):
 		'''Return cmus player information.
 
 		cmus-remote -Q returns data with multi-level information i.e.
@@ -863,7 +922,7 @@ class NowPlayingSegment(object):
 			'total': self._convert_seconds(now_playing.get('duration', 0)),
 			}
 
-	def player_mpd(self, host='localhost', port=6600):
+	def player_mpd(self, pl, host='localhost', port=6600):
 		try:
 			import mpd
 			client = mpd.MPDClient()
@@ -895,7 +954,7 @@ class NowPlayingSegment(object):
 				'total': now_playing[3],
 				}
 
-	def player_spotify(self):
+	def player_spotify(self, pl):
 		try:
 			import dbus
 		except ImportError:
@@ -923,7 +982,7 @@ class NowPlayingSegment(object):
 			'total': self._convert_seconds(info.get('mpris:length') / 1e6),
 			}
 
-	def player_rhythmbox(self):
+	def player_rhythmbox(self, pl):
 		now_playing = self._run_cmd(['rhythmbox-client', '--no-start', '--no-present', '--print-playing-format', '%at\n%aa\n%tt\n%te\n%td'])
 		if not now_playing:
 			return

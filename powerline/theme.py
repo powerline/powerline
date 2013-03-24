@@ -24,7 +24,7 @@ def requires_segment_info(func):
 
 
 class Theme(object):
-	def __init__(self, ext, theme_config, common_config, top_theme_config=None, run_once=False):
+	def __init__(self, ext, theme_config, common_config, pl, top_theme_config=None, run_once=False):
 		self.dividers = theme_config.get('dividers', common_config['dividers'])
 		self.spaces = theme_config.get('spaces', common_config['spaces'])
 		self.segments = {
@@ -35,16 +35,22 @@ class Theme(object):
 			'contents': None,
 			'highlight': {'fg': False, 'bg': False, 'attr': 0}
 			}
+		self.pl = pl
 		theme_configs = [theme_config]
 		if top_theme_config:
 			theme_configs.append(top_theme_config)
 		get_segment = gen_segment_getter(ext, common_config['paths'], theme_configs, theme_config.get('default_module'))
 		for side in ['left', 'right']:
-			self.segments[side].extend((get_segment(segment, side) for segment in theme_config['segments'].get(side, [])))
-			if not run_once:
-				for segment in self.segments[side]:
+			for segment in theme_config['segments'].get(side, []):
+				segment = get_segment(segment, side)
+				if not run_once:
 					if segment['startup']:
-						segment['startup'](**segment['args'])
+						try:
+							segment['startup'](pl=pl, **segment['args'])
+						except Exception as e:
+							pl.error('Exception during {0} startup: {1}', segment['name'], str(e))
+							continue
+				self.segments[side].append(segment)
 
 	def shutdown(self):
 		for segments in self.segments.values():
@@ -71,11 +77,17 @@ class Theme(object):
 			parsed_segments = []
 			for segment in self.segments[side]:
 				if segment['type'] == 'function':
-					if (hasattr(segment['contents_func'], 'powerline_requires_segment_info')
-							and segment['contents_func'].powerline_requires_segment_info):
-						contents = segment['contents_func'](segment_info=segment_info, **segment['args'])
-					else:
-						contents = segment['contents_func'](**segment['args'])
+					self.pl.prefix = segment['name']
+					try:
+						if (hasattr(segment['contents_func'], 'powerline_requires_segment_info')
+								and segment['contents_func'].powerline_requires_segment_info):
+							contents = segment['contents_func'](pl=self.pl, segment_info=segment_info, **segment['args'])
+						else:
+							contents = segment['contents_func'](pl=self.pl, **segment['args'])
+					except Exception as e:
+						self.pl.exception('Exception while computing segment: {0}', str(e))
+						continue
+
 					if contents is None:
 						continue
 					if isinstance(contents, list):

@@ -4,6 +4,28 @@ import sys
 import os
 
 
+class Pl(object):
+	def __init__(self):
+		self.errors = []
+		self.warns = []
+		self.debugs = []
+		self._cwd = None
+		self.prefix = None
+		self.environ = {}
+		self.home = None
+
+	def getcwd(self):
+		if isinstance(self._cwd, Exception):
+			raise self._cwd
+		else:
+			return self._cwd
+
+	for meth in ('error', 'warn', 'debug'):
+		exec ('''def {0}(self, msg, *args, **kwargs):
+					self.{0}s.append((kwargs.get('prefix') or self.prefix, msg, args, kwargs))
+		''').format(meth)
+
+
 class Args(object):
 	theme_option = None
 	config = None
@@ -63,50 +85,58 @@ def new_module(name, **kwargs):
 	return module
 
 
-class ModuleAttrReplace(object):
-	def __init__(self, module, attr, new):
-		self.module = module
+class AttrReplace(object):
+	def __init__(self, obj, attr, new):
+		self.obj = obj
 		self.attr = attr
 		self.new = new
 
 	def __enter__(self):
 		try:
-			self.old = getattr(self.module, self.attr)
+			self.old = getattr(self.obj, self.attr)
 		except AttributeError:
 			pass
-		setattr(self.module, self.attr, self.new)
+		setattr(self.obj, self.attr, self.new)
 
 	def __exit__(self, *args):
 		try:
-			setattr(self.module, self.attr, self.old)
+			setattr(self.obj, self.attr, self.old)
 		except AttributeError:
-			delattr(self.module, self.attr)
+			delattr(self.obj, self.attr)
 
 
-replace_module_attr = ModuleAttrReplace
+replace_attr = AttrReplace
 
 
 def replace_module_module(module, name, **kwargs):
-	return replace_module_attr(module, name, new_module(name, **kwargs))
+	return replace_attr(module, name, new_module(name, **kwargs))
 
 
-class EnvReplace(object):
-	def __init__(self, name, new):
-		self.name = name
+class ItemReplace(object):
+	def __init__(self, d, key, new, r=None):
+		self.key = key
 		self.new = new
+		self.d = d
+		self.r = r
 
 	def __enter__(self):
-		self.old = os.environ.get(self.name)
-		os.environ[self.name] = self.new
+		self.old = self.d.get(self.key)
+		self.d[self.key] = self.new
+		return self.r
 
 	def __exit__(self, *args):
 		if self.old is None:
 			try:
-				os.environ.pop(self.name)
+				self.d.pop(self.key)
 			except KeyError:
 				pass
 		else:
-			os.environ[self.name] = self.old
+			self.d[self.key] = self.old
 
 
-replace_env = EnvReplace
+def replace_env(key, new, d=None):
+	r = None
+	if not d:
+		r = Pl()
+		d = r.environ
+	return ItemReplace(d, key, new, r)
