@@ -138,7 +138,7 @@ class Powerline(object):
 
 		# Create logger
 		if not logger:
-			log_format = common_config.get('format', '%(asctime)s:%(levelname)s:%(message)s')
+			log_format = common_config.get('log_format', '%(asctime)s:%(levelname)s:%(message)s')
 			formatter = logging.Formatter(log_format)
 
 			level = getattr(logging, common_config.get('log_level', 'WARNING'))
@@ -162,8 +162,9 @@ class Powerline(object):
 
 		:return: logging.Handler subclass.
 		'''
-		log_file = common_config.get('file', None)
+		log_file = common_config.get('log_file', None)
 		if log_file:
+			log_file = os.path.expanduser(log_file)
 			log_dir = os.path.dirname(log_file)
 			if not os.path.isdir(log_dir):
 				os.mkdir(log_dir)
