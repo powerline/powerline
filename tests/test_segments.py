@@ -193,6 +193,7 @@ class TestCommon(TestCase):
 
 	def test_network_load(self):
 		from time import sleep
+
 		def gb(interface):
 			return None
 

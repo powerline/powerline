@@ -4,7 +4,6 @@ from __future__ import absolute_import
 
 from powerline.lib.time import monotonic
 
-from time import sleep
 from threading import Thread, Lock, Event
 
 
