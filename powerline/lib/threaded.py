@@ -4,21 +4,18 @@ from __future__ import absolute_import
 
 from powerline.lib.time import monotonic
 
-from time import sleep
-from threading import Thread, Lock
+from threading import Thread, Lock, Event
 
 
 class ThreadedSegment(object):
-	daemon = True
 	min_sleep_time = 0.1
 	update_first = True
 	interval = 1
 
 	def __init__(self):
 		super(ThreadedSegment, self).__init__()
-		self.update_lock = Lock()
+		self.shutdown_event = Event()
 		self.write_lock = Lock()
-		self.keep_going = True
 		self.run_once = True
 		self.did_set_interval = False
 		self.thread = None
@@ -39,6 +36,8 @@ class ThreadedSegment(object):
 			if update_first and self.update_first:
 				self.update()
 			self.start()
+		elif not self.updated:
+			self.update()
 
 		if self.skip:
 			return self.crashed_value
@@ -49,40 +48,29 @@ class ThreadedSegment(object):
 		return self.thread and self.thread.is_alive()
 
 	def start(self):
+		self.keep_going = True
 		self.thread = Thread(target=self.run)
-		self.thread.daemon = self.daemon
 		self.thread.start()
 
 	def sleep(self, adjust_time):
-		sleep(max(self.interval - adjust_time, self.min_sleep_time))
+		self.shutdown_event.wait(max(self.interval - adjust_time, self.min_sleep_time))
+		if self.shutdown_event.is_set():
+			self.keep_going = False
 
 	def run(self):
 		while self.keep_going:
 			start_time = monotonic()
-
 			try:
-				if self.update_lock.acquire(False):
-					try:
-						self.update()
-					except Exception as e:
-						self.error('Exception while updating: {0}', str(e))
-						self.skip = True
-					else:
-						self.skip = False
-				else:
-					return
-			finally:
-				# Release lock in any case. If it is not locked in this thread, 
-				# it was done in main thread in .shutdown method, and the lock 
-				# will never be released.
-				self.update_lock.release()
-
+				self.update()
+			except Exception as e:
+				self.error('Exception while updating: {0}', str(e))
+				self.skip = True
+			else:
+				self.skip = False
 			self.sleep(monotonic() - start_time)
 
 	def shutdown(self):
-		if self.keep_going:
-			self.keep_going = False
-			self.update_lock.acquire()
+		self.shutdown_event.set()
 
 	def set_interval(self, interval=None):
 		# Allowing “interval” keyword in configuration.
@@ -93,9 +81,10 @@ class ThreadedSegment(object):
 		self.interval = interval
 		self.has_set_interval = True
 
-	def set_state(self, interval=None, **kwargs):
+	def set_state(self, interval=None, update_first=True, **kwargs):
 		if not self.did_set_interval or interval:
 			self.set_interval(interval)
+			self.updated = not (update_first and self.update_first)
 
 	def startup(self, pl, **kwargs):
 		self.run_once = False
@@ -124,12 +113,13 @@ def printed(func):
 
 class KwThreadedSegment(ThreadedSegment):
 	drop_interval = 10 * 60
-	update_first = False
+	update_first = True
 
 	def __init__(self):
 		super(KwThreadedSegment, self).__init__()
 		self.queries = {}
 		self.crashed = set()
+		self.updated = True
 
 	@staticmethod
 	def key(**kwargs):
@@ -170,7 +160,7 @@ class KwThreadedSegment(ThreadedSegment):
 			for key in removes:
 				self.queries.pop(key)
 
-	def set_state(self, interval=None, **kwargs):
+	def set_state(self, interval=None, update_first=True, **kwargs):
 		if not self.did_set_interval or (interval < self.interval):
 			self.set_interval(interval)
 
