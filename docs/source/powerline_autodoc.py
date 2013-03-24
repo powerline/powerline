@@ -1,13 +1,13 @@
 from sphinx.ext import autodoc
 from sphinx.util.inspect import getargspec
-from inspect import ArgSpec, getargspec, formatargspec
+from inspect import ArgSpec, formatargspec
 from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment
 from itertools import count
 
 try:
 	from __builtin__ import unicode
 except ImportError:
-	unicode = lambda s, enc: s
+	unicode = lambda s, enc: s  # NOQA
 
 
 def formatvalue(val):
@@ -28,6 +28,9 @@ class ThreadedDocumenter(autodoc.FunctionDocumenter):
 		if isinstance(self.object, ThreadedSegment):
 			args = ['interval']
 			defaults = [getattr(self.object, 'interval', 1)]
+			if self.object.update_first:
+				args.append('update_first')
+				defaults.append(True)
 			methods = ['render', 'set_state']
 			if isinstance(self.object, KwThreadedSegment):
 				methods += ['key', 'render_one']
@@ -41,7 +44,8 @@ class ThreadedDocumenter(autodoc.FunctionDocumenter):
 						if (arg == 'self' or
 								(arg == 'segment_info' and
 									getattr(self.object, 'powerline_requires_segment_info', None)) or
-								(method == 'render_one' and -i == len(argspec.args))):
+								(method == 'render_one' and -i == len(argspec.args)) or
+								arg in args):
 							continue
 						if argspec.defaults and len(argspec.defaults) >= -i:
 							default = argspec.defaults[i]

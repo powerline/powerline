@@ -7,7 +7,7 @@ import tests.vim as vim_module
 import sys
 import os
 import json
-from tests.lib import Args, urllib_read, replace_module_attr
+from tests.lib import Args, urllib_read, replace_attr
 from tests import TestCase
 
 
@@ -67,7 +67,7 @@ class TestConfig(TestCase):
 		from imp import reload
 		reload(common)
 		from powerline.shell import ShellPowerline
-		with replace_module_attr(common, 'urllib_read', urllib_read):
+		with replace_attr(common, 'urllib_read', urllib_read):
 			powerline = ShellPowerline(Args(ext=['tmux']), run_once=False)
 			powerline.renderer.render()
 			powerline = ShellPowerline(Args(ext=['tmux']), run_once=False)
@@ -112,7 +112,7 @@ class TestConfig(TestCase):
 		from imp import reload
 		reload(common)
 		from powerline import Powerline
-		with replace_module_attr(common, 'urllib_read', urllib_read):
+		with replace_attr(common, 'urllib_read', urllib_read):
 			Powerline(ext='wm', renderer_module='pango_markup', run_once=True).renderer.render()
 		reload(common)
 

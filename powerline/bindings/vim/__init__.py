@@ -56,6 +56,7 @@ if sys.version_info < (3,) or not hasattr(vim, 'bindeval'):
 	getbufvar = vim_get_func('getbufvar')
 else:
 	_getbufvar = vim_get_func('getbufvar')
+
 	def getbufvar(*args):
 		r = _getbufvar(*args)
 		if type(r) is bytes:

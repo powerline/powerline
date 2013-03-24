@@ -47,34 +47,32 @@ vim_modes = {
 }
 
 
-eventcaches = defaultdict(lambda: [])
-bufeventcaches = defaultdict(lambda: [])
+eventfuncs = defaultdict(lambda: [])
+bufeventfuncs = defaultdict(lambda: [])
+defined_events = set()
 
 
-def purgeonevents_reg(events, eventcaches=bufeventcaches):
-	def cache_reg_func(cache):
-		for event in events:
-			if event not in eventcaches:
-				vim.eval('PowerlineRegisterCachePurgerEvent("' + event + '")')
-			eventcaches[event].append(cache)
-	return cache_reg_func
-
-purgeall_on_shell = purgeonevents_reg(('ShellCmdPost', 'ShellFilterPost', 'FocusGained'), eventcaches=eventcaches)
-purgebuf_on_shell_and_write = purgeonevents_reg(('BufWritePost', 'ShellCmdPost', 'ShellFilterPost', 'FocusGained'))
+def purgeonevents_reg(func, events, is_buffer_event=False):
+	if is_buffer_event:
+		cureventfuncs = bufeventfuncs
+	else:
+		cureventfuncs = eventfuncs
+	for event in events:
+		if event not in defined_events:
+			vim.eval('PowerlineRegisterCachePurgerEvent("' + event + '")')
+			defined_events.add(event)
+		cureventfuncs[event].append(func)
 
 
 def launchevent(event):
-	global eventcaches
-	global bufeventcaches
-	for cache in eventcaches[event]:
-		cache.clear()
-	if bufeventcaches[event]:
-		buf = int(vim_funcs['expand']('<abuf>'))
-		for cache in bufeventcaches[event]:
-			try:
-				cache.pop(buf)
-			except KeyError:
-				pass
+	global eventfuncs
+	global bufeventfuncs
+	for func in eventfuncs[event]:
+		func()
+	if bufeventfuncs[event]:
+		buffer = vim.buffers[int(vim_funcs['expand']('<abuf>')) - 1]
+		for func in bufeventfuncs[event]:
+			func(buffer)
 
 
 # TODO Remove cache when needed
@@ -96,7 +94,7 @@ def window_cached(func):
 
 
 @requires_segment_info
-def mode(segment_info, override=None):
+def mode(pl, segment_info, override=None):
 	'''Return the current vim mode.
 
 	:param dict override:
@@ -114,7 +112,7 @@ def mode(segment_info, override=None):
 
 
 @requires_segment_info
-def modified_indicator(segment_info, text='+'):
+def modified_indicator(pl, segment_info, text='+'):
 	'''Return a file modified indicator.
 
 	:param string text:
@@ -124,7 +122,7 @@ def modified_indicator(segment_info, text='+'):
 
 
 @requires_segment_info
-def paste_indicator(segment_info, text='PASTE'):
+def paste_indicator(pl, segment_info, text='PASTE'):
 	'''Return a paste mode indicator.
 
 	:param string text:
@@ -134,7 +132,7 @@ def paste_indicator(segment_info, text='PASTE'):
 
 
 @requires_segment_info
-def readonly_indicator(segment_info, text=''):
+def readonly_indicator(pl, segment_info, text=''):
 	'''Return a read-only indicator.
 
 	:param string text:
@@ -144,7 +142,7 @@ def readonly_indicator(segment_info, text=''):
 
 
 @requires_segment_info
-def file_directory(segment_info, shorten_user=True, shorten_cwd=True, shorten_home=False):
+def file_directory(pl, segment_info, shorten_user=True, shorten_cwd=True, shorten_home=False):
 	'''Return file directory (head component of the file path).
 
 	:param bool shorten_user:
@@ -167,13 +165,15 @@ def file_directory(segment_info, shorten_user=True, shorten_cwd=True, shorten_ho
 
 
 @requires_segment_info
-def file_name(segment_info, display_no_file=False, no_file_text='[No file]'):
+def file_name(pl, segment_info, display_no_file=False, no_file_text='[No file]'):
 	'''Return file name (tail component of the file path).
 
 	:param bool display_no_file:
 		display a string if the buffer is missing a file name
 	:param str no_file_text:
 		the string to display if the buffer is missing a file name
+
+	Highlight groups used: ``file_name_no_file`` or ``file_name``, ``file_name``.
 	'''
 	name = segment_info['buffer'].name
 	if not name:
@@ -189,7 +189,7 @@ def file_name(segment_info, display_no_file=False, no_file_text='[No file]'):
 
 
 @window_cached
-def file_size(suffix='B', si_prefix=False):
+def file_size(pl, suffix='B', si_prefix=False):
 	'''Return file size in &encoding.
 
 	:param str suffix:
@@ -206,7 +206,7 @@ def file_size(suffix='B', si_prefix=False):
 
 @requires_segment_info
 @add_divider_highlight_group('background:divider')
-def file_format(segment_info):
+def file_format(pl, segment_info):
 	'''Return file format (i.e. line ending type).
 
 	:return: file format or None if unknown or missing file format
@@ -218,7 +218,7 @@ def file_format(segment_info):
 
 @requires_segment_info
 @add_divider_highlight_group('background:divider')
-def file_encoding(segment_info):
+def file_encoding(pl, segment_info):
 	'''Return file encoding/character set.
 
 	:return: file encoding/character set or None if unknown or missing file encoding
@@ -230,7 +230,7 @@ def file_encoding(segment_info):
 
 @requires_segment_info
 @add_divider_highlight_group('background:divider')
-def file_type(segment_info):
+def file_type(pl, segment_info):
 	'''Return file type.
 
 	:return: file type or None if unknown file type
@@ -241,7 +241,7 @@ def file_type(segment_info):
 
 
 @requires_segment_info
-def line_percent(segment_info, gradient=False):
+def line_percent(pl, segment_info, gradient=False):
 	'''Return the cursor position in the file as a percentage.
 
 	:param bool gradient:
@@ -262,20 +262,20 @@ def line_percent(segment_info, gradient=False):
 
 
 @requires_segment_info
-def line_current(segment_info):
+def line_current(pl, segment_info):
 	'''Return the current cursor line.'''
 	return str(segment_info['window'].cursor[0])
 
 
 @requires_segment_info
-def col_current(segment_info):
+def col_current(pl, segment_info):
 	'''Return the current cursor column.
 	'''
 	return str(segment_info['window'].cursor[1] + 1)
 
 
 @window_cached
-def virtcol_current():
+def virtcol_current(pl):
 	'''Return current visual column with concealed characters ingored
 
 	Highlight groups used: ``virtcol_current`` or ``col_current``.
@@ -284,7 +284,7 @@ def virtcol_current():
 			'highlight_group': ['virtcol_current', 'col_current']}]
 
 
-def modified_buffers(text='+ ', join_str=','):
+def modified_buffers(pl, text='+ ', join_str=','):
 	'''Return a comma-separated list of modified buffers.
 
 	:param str text:
@@ -368,16 +368,16 @@ class BranchSegment(RepositorySegment):
 
 		return [{
 			'contents': update_state,
-			'highlight_group': (['branch_dirty' if repository_status(segment_info=segment_info) else 'branch_clean']
+			'highlight_group': (['branch_dirty' if repository_status(segment_info=segment_info, **kwargs) else 'branch_clean']
 								if status_colors else []) + ['branch'],
 			'divider_highlight_group': 'branch:divider',
 			}]
 
 	def startup(self, status_colors=False, **kwargs):
-		super(BranchSegment, self).startup()
+		super(BranchSegment, self).startup(**kwargs)
 		if status_colors:
 			self.started_repository_status = True
-			repository_status.startup()
+			repository_status.startup(**kwargs)
 
 	def shutdown(self):
 		if self.started_repository_status:

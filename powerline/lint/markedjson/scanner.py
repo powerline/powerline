@@ -27,7 +27,7 @@ class ScannerError(MarkedError):
 try:
 	from __builtin__ import unicode
 except ImportError:
-	unicode = str
+	unicode = str  # NOQA
 
 
 class SimpleKey:
