@@ -84,7 +84,7 @@ class Spec(object):
 		if type(value.value) is not t:
 			echoerr(context=self.cmsg.format(key=context_key(context)),
 					context_mark=context_mark,
-					problem='must be a {0} instance'.format(t.__name__),
+					problem='{0!r} must be a {1} instance, not {2}'.format(value, t.__name__, type(value.value).__name__),
 					problem_mark=value.mark)
 			return False, True
 		return True, False
@@ -380,9 +380,9 @@ def check_config(d, theme, data, context, echoerr):
 	else:
 		# local_themes
 		ext = context[-3][0]
-	if ext not in data['configs']['themes'] or theme not in data['configs']['themes'][ext]:
+	if ext not in data['configs'][d] or theme not in data['configs'][d][ext]:
 		echoerr(context='Error while loading {0} from {1} extension configuration'.format(d[:-1], ext),
-				problem='failed to find configuration file themes/{0}/{1}.json'.format(ext, theme),
+				problem='failed to find configuration file {0}/{1}/{2}.json'.format(d, ext, theme),
 				problem_mark=theme.mark)
 		return True, False, True
 	return True, False, False
