@@ -687,7 +687,7 @@ def hl_exists(hl_group, data, context, echoerr, allow_gradients=False):
 	for colorscheme, cconfig in data['colorscheme_configs'][ext].items():
 		if hl_group not in cconfig.get('groups', {}):
 			r.append(colorscheme)
-		elif not allow_gradients:
+		elif not allow_gradients or allow_gradients == 'force':
 			group_config = cconfig['groups'][hl_group]
 			hadgradient = False
 			for ckey in ('fg', 'bg'):
@@ -704,14 +704,14 @@ def hl_exists(hl_group, data, context, echoerr, allow_gradients=False):
 					hadgradient = True
 				if allow_gradients is False and not hascolor and hasgradient:
 					echoerr(context='Error while checking highlight group in theme (key {key})'.format(key=context_key(context)),
-							context_mark=hl_group.mark,
+							context_mark=getattr(hl_group, 'mark', None),
 							problem='group {0} is using gradient {1} instead of a color'.format(hl_group, color),
 							problem_mark=color.mark)
 					r.append(colorscheme)
 					continue
 			if allow_gradients == 'force' and not hadgradient:
 					echoerr(context='Error while checking highlight group in theme (key {key})'.format(key=context_key(context)),
-							context_mark=hl_group.mark,
+							context_mark=getattr(hl_group, 'mark', None),
 							problem='group {0} should have at least one gradient color, but it has no'.format(hl_group),
 							problem_mark=group_config.mark)
 					r.append(colorscheme)
