@@ -76,18 +76,20 @@ class TestConfig(TestCase):
 
 	def test_zsh(self):
 		from powerline.shell import ShellPowerline
-		powerline = ShellPowerline(Args(last_pipe_status=[1, 0], ext=['shell'], renderer_module='zsh_prompt'), run_once=False)
-		powerline.renderer.render()
-		powerline = ShellPowerline(Args(last_pipe_status=[1, 0], ext=['shell'], renderer_module='zsh_prompt'), run_once=False)
-		powerline.renderer.render()
+		args = Args(last_pipe_status=[1, 0], ext=['shell'], renderer_module='zsh_prompt')
+		powerline = ShellPowerline(args, run_once=False)
+		powerline.renderer.render(segment_info=args)
+		powerline = ShellPowerline(args, run_once=False)
+		powerline.renderer.render(segment_info=args)
 		shutdown(powerline)
 
 	def test_bash(self):
 		from powerline.shell import ShellPowerline
-		powerline = ShellPowerline(Args(last_exit_code=1, ext=['shell'], renderer_module='bash_prompt', config=[('ext', {'shell': {'theme': 'default_leftonly'}})]), run_once=False)
-		powerline.renderer.render()
-		powerline = ShellPowerline(Args(last_exit_code=1, ext=['shell'], renderer_module='bash_prompt', config=[('ext', {'shell': {'theme': 'default_leftonly'}})]), run_once=False)
-		powerline.renderer.render()
+		args = Args(last_exit_code=1, ext=['shell'], renderer_module='bash_prompt', config=[('ext', {'shell': {'theme': 'default_leftonly'}})])
+		powerline = ShellPowerline(args, run_once=False)
+		powerline.renderer.render(segment_info=args)
+		powerline = ShellPowerline(args, run_once=False)
+		powerline.renderer.render(segment_info=args)
 		shutdown(powerline)
 
 	def test_ipython(self):
