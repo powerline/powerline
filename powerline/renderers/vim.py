@@ -46,9 +46,11 @@ class VimRenderer(Renderer):
 		for matcher in self.local_themes.keys():
 			if matcher(matcher_info):
 				match = self.local_themes[matcher]
-				if 'config' in match:
-					match['theme'] = Theme(theme_config=match.pop('config'), top_theme_config=self.theme_config, **self.theme_kwargs)
-				return match['theme']
+				try:
+					return match['theme']
+				except KeyError:
+					match['theme'] = Theme(theme_config=match['config'], top_theme_config=self.theme_config, **self.theme_kwargs)
+					return match['theme']
 		else:
 			return self.theme
 

@@ -101,8 +101,10 @@ class TestConfig(TestCase):
 			theme_overrides = {}
 
 		powerline = IpyPowerline()
-		powerline.renderer.render()
-		powerline.renderer.render()
+		segment_info = Args(prompt_count=1)
+		for prompt_type in ['in', 'in2', 'out', 'rewrite']:
+			powerline.renderer.render(matcher_info=prompt_type, segment_info=segment_info)
+			powerline.renderer.render(matcher_info=prompt_type, segment_info=segment_info)
 		shutdown(powerline)
 
 	def test_wm(self):

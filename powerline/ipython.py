@@ -14,6 +14,9 @@ class IpythonPowerline(Powerline):
 		else:
 			return super(IpythonPowerline, self).get_config_paths()
 
+	def get_local_themes(self, local_themes):
+		return dict(((type, {'config': self.load_theme_config(name)}) for type, name in local_themes.items()))
+
 	def load_main_config(self):
 		r = super(IpythonPowerline, self).load_main_config()
 		if self.config_overrides:
