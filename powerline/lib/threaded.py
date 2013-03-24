@@ -17,7 +17,6 @@ class ThreadedSegment(object):
 		super(ThreadedSegment, self).__init__()
 		self.shutdown_event = Event()
 		self.write_lock = Lock()
-		self.keep_going = True
 		self.run_once = True
 		self.did_set_interval = False
 		self.thread = None
@@ -48,6 +47,7 @@ class ThreadedSegment(object):
 		return self.thread and self.thread.is_alive()
 
 	def start(self):
+		self.keep_going = True
 		self.thread = Thread(target=self.run)
 		self.thread.start()
 
