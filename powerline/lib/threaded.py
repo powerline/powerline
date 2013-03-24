@@ -23,9 +23,9 @@ class ThreadedSegment(object):
 		self.did_set_interval = False
 		self.thread = None
 
-	def __call__(self, update_first=True, **kwargs):
+	def __call__(self, pl, update_first=True, **kwargs):
 		if self.run_once:
-			self.pl = kwargs['pl']
+			self.pl = pl
 			self.set_state(**kwargs)
 			self.update()
 		elif not self.is_alive():
@@ -39,7 +39,7 @@ class ThreadedSegment(object):
 			self.start()
 
 		with self.write_lock:
-			return self.render(update_first=update_first, **kwargs)
+			return self.render(update_first=update_first, pl=pl, **kwargs)
 
 	def is_alive(self):
 		return self.thread and self.thread.is_alive()
@@ -56,11 +56,19 @@ class ThreadedSegment(object):
 		while self.keep_going:
 			start_time = monotonic()
 
-			with self.update_lock:
-				try:
-					self.update()
-				except Exception as e:
-					self.error('Exception while updating: {0}', str(e))
+			try:
+				if self.update_lock.acquire(False):
+					try:
+						self.update()
+					except Exception as e:
+						self.error('Exception while updating: {0}', str(e))
+				else:
+					return
+			finally:
+				# Release lock in any case. If it is not locked in this thread, 
+				# it was done in main thread in .shutdown method, and the lock 
+				# will never be released.
+				self.update_lock.release()
 
 			self.sleep(monotonic() - start_time)
 
