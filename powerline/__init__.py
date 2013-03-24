@@ -9,6 +9,9 @@ import copy
 from powerline.colorscheme import Colorscheme
 from powerline.lib.file_watcher import create_file_watcher
 
+DEFAULT_SYSTEM_CONFIG_DIR = None
+
+
 def open_file(path):
 	return open(path, 'r')
 
@@ -107,7 +110,7 @@ class Powerline(object):
 		config_home = os.environ.get('XDG_CONFIG_HOME', os.path.join(os.path.expanduser('~'), '.config'))
 		config_path = os.path.join(config_home, 'powerline')
 		config_paths = [config_path]
-		config_dirs = os.environ.get('XDG_CONFIG_DIRS', None)
+		config_dirs = os.environ.get('XDG_CONFIG_DIRS', DEFAULT_SYSTEM_CONFIG_DIR)
 		if config_dirs is not None:
 			config_paths.extend([os.path.join(d, 'powerline') for d in config_dirs.split(':')])
 		plugin_path = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'config_files')
