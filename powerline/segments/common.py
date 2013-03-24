@@ -389,7 +389,7 @@ class WeatherSegment(ThreadedSegment):
 
 		try:
 			icon_names = weather_conditions_codes[condition_code]
-		except IndexError as e:
+		except IndexError:
 			if condition_code == 3200:
 				icon_names = ('not_available',)
 				self.warn('Weather is not available for location {0}', self.location)
@@ -561,7 +561,7 @@ except ImportError:
 			tx = int(file_obj.read())
 		return (rx, tx)
 
-	def _get_interfaces():
+	def _get_interfaces():  # NOQA
 		for interface in os.listdir('/sys/class/net'):
 			x = _get_bytes(interface)
 			if x is not None:
@@ -613,6 +613,7 @@ if os.path.exists('/proc/uptime'):
 			return int(float(f.readline().split()[0]))
 elif 'psutil' in globals():
 	from time import time
+
 	def _get_uptime():  # NOQA
 		# psutil.BOOT_TIME is not subject to clock adjustments, but time() is. 
 		# Thus it is a fallback to /proc/uptime reading and not the reverse.

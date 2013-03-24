@@ -1,13 +1,13 @@
 from sphinx.ext import autodoc
 from sphinx.util.inspect import getargspec
-from inspect import ArgSpec, getargspec, formatargspec
+from inspect import ArgSpec, formatargspec
 from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment
 from itertools import count
 
 try:
 	from __builtin__ import unicode
 except ImportError:
-	unicode = lambda s, enc: s
+	unicode = lambda s, enc: s  # NOQA
 
 
 def formatvalue(val):

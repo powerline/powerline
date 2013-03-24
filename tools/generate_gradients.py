@@ -7,7 +7,7 @@ from itertools import groupby
 try:
 	from __builtin__ import unicode
 except ImportError:
-	unicode = str
+	unicode = str  # NOQA
 
 
 if len(sys.argv) == 1 or sys.argv[1] == '--help':

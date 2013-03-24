@@ -45,6 +45,7 @@ def _construct_result(r):
 
 def _str_func(func):
 	from functools import wraps
+
 	@wraps(func)
 	def f(*args, **kwargs):
 		return _construct_result(func(*args, **kwargs))

@@ -1,6 +1,6 @@
 # vim:fileencoding=utf-8:noet
 from powerline.ipython import IpythonPowerline
-from IPython.Prompts import BasePrompt, Prompt1
+from IPython.Prompts import BasePrompt
 from IPython.ipapi import get as get_ipython
 from IPython.ipapi import TryNext
 
@@ -87,6 +87,7 @@ class PowerlinePrompt1(PowerlinePrompt):
 	def auto_rewrite(self):
 		return RewriteResult(self.powerline.renderer.render(matcher_info='rewrite', width=self.prompt_text_len, segment_info=self.powerline_segment_info)
 						+ (' ' * self.nrspaces))
+
 
 class PowerlinePromptOut(PowerlinePrompt):
 	powerline_prompt_type = 'out'

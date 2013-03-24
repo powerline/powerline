@@ -1,7 +1,6 @@
 # vim:fileencoding=utf-8:noet
 import imp
 import sys
-import os
 
 
 class Pl(object):
@@ -21,9 +20,8 @@ class Pl(object):
 			return self._cwd
 
 	for meth in ('error', 'warn', 'debug'):
-		exec ('''def {0}(self, msg, *args, **kwargs):
-					self.{0}s.append((kwargs.get('prefix') or self.prefix, msg, args, kwargs))
-		''').format(meth)
+		exec (('def {0}(self, msg, *args, **kwargs):\n'
+				'	self.{0}s.append((kwargs.get("prefix") or self.prefix, msg, args, kwargs))\n').format(meth))
 
 
 class Args(object):
