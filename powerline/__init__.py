@@ -57,7 +57,6 @@ class Powerline(object):
 		theme_kwargs = {
 			'ext': ext,
 			'common_config': common_config,
-			'segment_info': self.get_segment_info(),
 			'run_once': run_once,
 			}
 		local_themes = self.get_local_themes(ext_config.get('local_themes'))
@@ -141,16 +140,5 @@ class Powerline(object):
 			anything accepted by ``self.renderer.get_theme`` and processable by 
 			``self.renderer.add_local_theme``. Renderer module is determined by 
 			``__init__`` arguments, refer to its documentation.
-		'''
-		return None
-
-	@staticmethod
-	def get_segment_info():
-		'''Get information for segments that require ``segment_info`` argument. 
-		To be overridden in subclasses.
-
-		:return:
-			anything accepted by segments as ``segment_info`` argument. Depends 
-			on the segments used, refer to Powerline subclass documentation.
 		'''
 		return None

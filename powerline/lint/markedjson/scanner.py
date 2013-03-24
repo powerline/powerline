@@ -24,6 +24,12 @@ class ScannerError(MarkedError):
 	pass
 
 
+try:
+	from __builtin__ import unicode
+except ImportError:
+	unicode = str
+
+
 class SimpleKey:
 	# See below simple keys treatment.
 	def __init__(self, token_number, index, line, column, mark):
@@ -379,7 +385,7 @@ class Scanner:
 			chunks.extend(self.scan_flow_scalar_non_spaces(start_mark))
 		self.forward()
 		end_mark = self.get_mark()
-		return ScalarToken(''.join(chunks), False, start_mark, end_mark, '"')
+		return ScalarToken(unicode().join(chunks), False, start_mark, end_mark, '"')
 
 	ESCAPE_REPLACEMENTS = {
 		'b': '\x08',
