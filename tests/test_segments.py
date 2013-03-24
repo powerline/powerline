@@ -196,6 +196,7 @@ class TestCommon(TestCase):
 			return None
 
 		f = [gb]
+
 		def _get_bytes(interface):
 			return f[0](interface)
 
@@ -237,9 +238,11 @@ class TestCommon(TestCase):
 				{'divider_highlight_group': 'background:divider', 'contents': 'r 1 KiB/s', 'highlight_group': ['network_load_recv_gradient', 'network_load_gradient', 'network_load_recv', 'network_load'], 'gradient_level': 100},
 				{'divider_highlight_group': 'background:divider', 'contents': 's 2 KiB/s', 'highlight_group': ['network_load_sent', 'network_load']},
 				])
+
 			class ApproxEqual(object):
 				def __eq__(self, i):
 					return abs(i - 50.0) < 1
+
 			self.assertEqual(common.network_load(pl=pl, recv_format='r {value}', sent_format='s {value}', sent_max=4800), [
 				{'divider_highlight_group': 'background:divider', 'contents': 'r 1 KiB/s', 'highlight_group': ['network_load_recv', 'network_load']},
 				{'divider_highlight_group': 'background:divider', 'contents': 's 2 KiB/s', 'highlight_group': ['network_load_sent_gradient', 'network_load_gradient', 'network_load_sent', 'network_load'], 'gradient_level': ApproxEqual()},

@@ -1,7 +1,6 @@
 # vim:fileencoding=utf-8:noet
 import imp
 import sys
-import os
 
 
 class Pl(object):
