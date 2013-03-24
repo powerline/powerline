@@ -312,12 +312,15 @@ class WeatherSegment(ThreadedSegment):
 			# Do not lock attribute assignments in this branch: they are used
 			# only in .update()
 			if not self.location:
+				extip = _external_ip()
+				if not extip or extip == 'unknown':
+					return
 				try:
-					location_data = json.loads(urllib_read('http://freegeoip.net/json/' + _external_ip()))
+					location_data = json.loads(urllib_read('http://freegeoip.net/json/' + extip))
 					self.location = ','.join([location_data['city'],
 												location_data['region_name'],
 												location_data['country_name']])
-				except (TypeError, ValueError):
+				except Exception:
 					return
 			query_data = {
 					'q':
@@ -333,7 +336,7 @@ class WeatherSegment(ThreadedSegment):
 			condition = response['query']['results']['weather']['rss']['channel']['item']['condition']
 			condition_code = int(condition['code'])
 			temp = float(condition['temp'])
-		except (KeyError, TypeError, ValueError):
+		except Exception:
 			return
 
 		try:
