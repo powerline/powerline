@@ -22,6 +22,8 @@ class ThreadedSegment(object):
 		self.run_once = True
 		self.did_set_interval = False
 		self.thread = None
+		self.skip = False
+		self.crashed_value = None
 
 	def __call__(self, pl, update_first=True, **kwargs):
 		if self.run_once:
@@ -38,6 +40,8 @@ class ThreadedSegment(object):
 				self.update()
 			self.start()
 
+		if self.skip:
+			return self.crashed_value
 		with self.write_lock:
 			return self.render(update_first=update_first, pl=pl, **kwargs)
 
@@ -62,6 +66,9 @@ class ThreadedSegment(object):
 						self.update()
 					except Exception as e:
 						self.error('Exception while updating: {0}', str(e))
+						self.skip = True
+					else:
+						self.skip = False
 				else:
 					return
 			finally:
@@ -122,6 +129,7 @@ class KwThreadedSegment(ThreadedSegment):
 	def __init__(self):
 		super(KwThreadedSegment, self).__init__()
 		self.queries = {}
+		self.crashed = set()
 
 	@staticmethod
 	def key(**kwargs):
@@ -129,12 +137,16 @@ class KwThreadedSegment(ThreadedSegment):
 
 	def render(self, update_first, **kwargs):
 		key = self.key(**kwargs)
+		if key in self.crashed:
+			return self.crashed_value
+
 		try:
 			update_state = self.queries[key][1]
 		except KeyError:
 			# Allow only to forbid to compute missing values: in either user 
 			# configuration or in subclasses.
 			update_state = self.compute_state(key) if update_first and self.update_first or self.run_once else None
+
 		# No locks: render method is already running with write_lock acquired.
 		self.queries[key] = (monotonic(), update_state)
 		return self.render_one(update_state, **kwargs)
@@ -148,10 +160,13 @@ class KwThreadedSegment(ThreadedSegment):
 					updates[key] = (last_query_time, self.compute_state(key))
 				except Exception as e:
 					self.exception('Exception while computing state for {0}: {1}', repr(key), str(e))
+					with self.write_lock:
+						self.crashed.add(key)
 			else:
 				removes.append(key)
 		with self.write_lock:
 			self.queries.update(updates)
+			self.crashed -= set(updates)
 			for key in removes:
 				self.queries.pop(key)
 
