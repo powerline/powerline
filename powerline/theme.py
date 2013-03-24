@@ -24,7 +24,7 @@ def requires_segment_info(func):
 
 
 class Theme(object):
-	def __init__(self, ext, theme_config, common_config, top_theme_config=None, segment_info=None, run_once=False):
+	def __init__(self, ext, theme_config, common_config, top_theme_config=None, run_once=False):
 		self.dividers = theme_config.get('dividers', common_config['dividers'])
 		self.spaces = theme_config.get('spaces', common_config['spaces'])
 		self.segments = {
@@ -35,7 +35,6 @@ class Theme(object):
 			'contents': None,
 			'highlight': {'fg': False, 'bg': False, 'attr': 0}
 			}
-		self.segment_info = segment_info
 		theme_configs = [theme_config]
 		if top_theme_config:
 			theme_configs.append(top_theme_config)
@@ -62,7 +61,7 @@ class Theme(object):
 	def get_spaces(self):
 		return self.spaces
 
-	def get_segments(self, side=None):
+	def get_segments(self, side=None, segment_info=None):
 		'''Return all segments.
 
 		Function segments are called, and all segments get their before/after
@@ -74,7 +73,7 @@ class Theme(object):
 				if segment['type'] == 'function':
 					if (hasattr(segment['contents_func'], 'powerline_requires_segment_info')
 							and segment['contents_func'].powerline_requires_segment_info):
-						contents = segment['contents_func'](segment_info=self.segment_info, **segment['args'])
+						contents = segment['contents_func'](segment_info=segment_info, **segment['args'])
 					else:
 						contents = segment['contents_func'](**segment['args'])
 					if contents is None:

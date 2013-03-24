@@ -5,17 +5,26 @@ from IPython.core.prompts import PromptManager
 from IPython.core.hooks import TryNext
 
 
+class IpythonInfo(object):
+	def __init__(self, shell):
+		self._shell = shell
+
+	@property
+	def prompt_count(self):
+		return self._shell.execution_count
+
+
 class PowerlinePromptManager(PromptManager):
 	powerline = None
 
-	def __init__(self, powerline, **kwargs):
+	def __init__(self, powerline, shell):
 		self.powerline = powerline
-		super(PowerlinePromptManager, self).__init__(**kwargs)
+		self.powerline_segment_info = IpythonInfo(shell)
+		self.shell = shell
 
 	def render(self, name, color=True, *args, **kwargs):
-		if name != 'in':
-			return super(PowerlinePromptManager, self).render(name, color, *args, **kwargs)
-		res, res_nocolor = self.powerline.renderer.render(output_raw=True)
+		width = None if name == 'in' else self.width
+		res, res_nocolor = self.powerline.renderer.render(output_raw=True, width=width, matcher_info=name, segment_info=self.powerline_segment_info)
 		self.txtwidth = len(res_nocolor)
 		self.width = self.txtwidth
 		return res if color else res_nocolor
@@ -39,8 +48,7 @@ def load_ipython_extension(ip):
 	old_prompt_manager = ip.prompt_manager
 	powerline = ConfigurableIpythonPowerline(ip)
 
-	ip.prompt_manager = PowerlinePromptManager(powerline=powerline,
-		shell=ip.prompt_manager.shell, config=ip.prompt_manager.config)
+	ip.prompt_manager = PowerlinePromptManager(powerline=powerline, shell=ip.prompt_manager.shell)
 
 	def shutdown_hook():
 		powerline.renderer.shutdown()

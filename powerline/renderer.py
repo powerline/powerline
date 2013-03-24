@@ -61,10 +61,7 @@ class Renderer(object):
 		reached.
 		'''
 		theme = self.get_theme(matcher_info)
-		segments = theme.get_segments(side)
-
-		if segment_info:
-			theme.segment_info.update(segment_info)
+		segments = theme.get_segments(side, segment_info)
 
 		# Handle excluded/included segments for the current mode
 		segments = [self.get_highlighting(segment, mode) for segment in segments

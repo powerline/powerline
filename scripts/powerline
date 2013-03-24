@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 '''Powerline prompt and statusline script.'''
 import sys
+import os
 
 try:
 	from powerline.shell import ShellPowerline, get_argparser
@@ -13,7 +14,7 @@ except ImportError:
 if __name__ == '__main__':
 	args = get_argparser(description=__doc__).parse_args()
 	powerline = ShellPowerline(args, run_once=True)
-	rendered = powerline.renderer.render(width=args.width, side=args.side)
+	rendered = powerline.renderer.render(width=args.width, side=args.side, segment_info=args)
 	try:
 		sys.stdout.write(rendered)
 	except UnicodeEncodeError:
