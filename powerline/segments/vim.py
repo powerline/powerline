@@ -19,8 +19,8 @@ from collections import defaultdict
 
 vim_funcs = {
 	'virtcol': vim_get_func('virtcol', rettype=int),
-	'fnamemodify': vim_get_func('fnamemodify'),
-	'expand': vim_get_func('expand'),
+	'fnamemodify': vim_get_func('fnamemodify', rettype=str),
+	'expand': vim_get_func('expand', rettype=str),
 	'bufnr': vim_get_func('bufnr', rettype=int),
 	'line2byte': vim_get_func('line2byte', rettype=int),
 }

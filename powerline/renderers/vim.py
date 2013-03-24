@@ -10,9 +10,7 @@ from powerline.theme import Theme
 import vim
 
 
-vim_mode = vim_get_func('mode')
-vim_getwinvar = vim_get_func('getwinvar')
-vim_setwinvar = vim_get_func('setwinvar')
+vim_mode = vim_get_func('mode', rettype=str)
 mode_translations = {
 	chr(ord('V') - 0x40): '^V',
 	chr(ord('S') - 0x40): '^S',
