@@ -8,6 +8,7 @@ from powerline.colorscheme import ATTR_BOLD, ATTR_ITALIC, ATTR_UNDERLINE
 from powerline.theme import Theme
 
 import vim
+import sys
 
 
 vim_mode = vim_get_func('mode', rettype=str)
@@ -51,11 +52,16 @@ class VimRenderer(Renderer):
 			return self.theme
 
 	if hasattr(vim, 'strwidth'):
-		@staticmethod
-		def strwidth(string):
-			# Does not work with tabs, but neither is strwidth from default 
-			# renderer
-			return vim.strwidth(string.encode('utf-8'))
+		if sys.version_info < (3,):
+			@staticmethod
+			def strwidth(string):
+				# Does not work with tabs, but neither is strwidth from default 
+				# renderer
+				return vim.strwidth(string.encode('utf-8'))
+		else:
+			@staticmethod
+			def strwidth(string):
+				return vim.strwidth(string)
 
 	def render(self, window_id, winidx, current):
 		'''Render all segments.
