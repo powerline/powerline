@@ -15,7 +15,7 @@ class Powerline(base._TextBox):
 	def update(self):
 		if not self.configured:
 			return True
-		self.text = self.powerline.renderer.render(side='right')
+		self.text = self.powerline.render(side='right')
 		self.bar.draw()
 		return True
 

@@ -56,7 +56,7 @@ class PowerlinePrompt(BasePrompt):
 
 	def set_p_str(self, width=None):
 		self.p_str, self.p_str_nocolor = (
-			self.powerline.renderer.render(output_raw=True,
+			self.powerline.render(output_raw=True,
 								segment_info=self.powerline_segment_info,
 								matcher_info=self.powerline_prompt_type,
 								width=width)
@@ -85,7 +85,7 @@ class PowerlinePrompt1(PowerlinePrompt):
 		self.powerline_last_in['prompt_text_len'] = self.prompt_text_len
 
 	def auto_rewrite(self):
-		return RewriteResult(self.powerline.renderer.render(matcher_info='rewrite', width=self.prompt_text_len, segment_info=self.powerline_segment_info)
+		return RewriteResult(self.powerline.render(matcher_info='rewrite', width=self.prompt_text_len, segment_info=self.powerline_segment_info)
 						+ (' ' * self.nrspaces))
 
 
@@ -128,7 +128,7 @@ def setup(**kwargs):
 		raise TryNext()
 
 	def shutdown_hook():
-		powerline.renderer.shutdown()
+		powerline.shutdown()
 		raise TryNext()
 
 	ip.IP.hooks.late_startup_hook.add(late_startup_hook)

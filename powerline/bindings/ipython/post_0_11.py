@@ -24,7 +24,7 @@ class PowerlinePromptManager(PromptManager):
 
 	def render(self, name, color=True, *args, **kwargs):
 		width = None if name == 'in' else self.width
-		res, res_nocolor = self.powerline.renderer.render(output_raw=True, width=width, matcher_info=name, segment_info=self.powerline_segment_info)
+		res, res_nocolor = self.powerline.render(output_raw=True, width=width, matcher_info=name, segment_info=self.powerline_segment_info)
 		self.txtwidth = len(res_nocolor)
 		self.width = self.txtwidth
 		return res if color else res_nocolor
@@ -51,7 +51,7 @@ def load_ipython_extension(ip):
 	ip.prompt_manager = PowerlinePromptManager(powerline=powerline, shell=ip.prompt_manager.shell)
 
 	def shutdown_hook():
-		powerline.renderer.shutdown()
+		powerline.shutdown()
 		raise TryNext()
 
 	ip.hooks.shutdown_hook.add(shutdown_hook)

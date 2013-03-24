@@ -67,7 +67,7 @@ endfunction
 function! Powerline(window_id)
 	let winidx = index(map(range(1, winnr('$')), 's:GetWinID(v:val)'), a:window_id)
 	let current = w:window_id is# a:window_id
-	return s:pyeval('powerline.renderer.render('. a:window_id .', '. winidx .', '. current .')')
+	return s:pyeval('powerline.render('. a:window_id .', '. winidx .', '. current .')')
 endfunction
 
 function! PowerlineNew()
@@ -84,7 +84,7 @@ endfunction
 augroup Powerline
 	autocmd! ColorScheme * :exec s:powerline_pycmd 'powerline.renderer.reset_highlight()'
 	autocmd! VimEnter    * :redrawstatus!
-	autocmd! VimLeave    * :exec s:powerline_pycmd 'powerline.renderer.shutdown()'
+	autocmd! VimLeave    * :exec s:powerline_pycmd 'powerline.shutdown()'
 augroup END
 
 exec s:powerline_pycmd 'powerline = VimPowerline()'

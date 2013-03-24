@@ -17,7 +17,7 @@ if __name__ == '__main__':
 	if 'PWD' in os.environ:
 		kwargs['getcwd'] = lambda: os.environ['PWD']
 	powerline = ShellPowerline(args, run_once=True, **kwargs)
-	rendered = powerline.renderer.render(width=args.width, side=args.side, segment_info=args)
+	rendered = powerline.render(width=args.width, side=args.side, segment_info=args)
 	try:
 		sys.stdout.write(rendered)
 	except UnicodeEncodeError:

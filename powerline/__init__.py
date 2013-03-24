@@ -8,6 +8,8 @@ import logging
 
 from powerline.colorscheme import Colorscheme
 
+from threading import Lock
+
 
 DEFAULT_SYSTEM_CONFIG_DIR = None
 
@@ -97,64 +99,124 @@ class Powerline(object):
 				environ=os.environ,
 				getcwd=getattr(os, 'getcwdu', os.getcwd),
 				home=None):
+		self.ext = ext
+		self.renderer_module = renderer_module or ext
+		self.run_once = run_once
+		self.logger = logger
+		self.environ = environ
+		self.getcwd = getcwd
+		self.home = home
+
 		self.config_paths = self.get_config_paths()
 
-		# Load main config file
-		config = self.load_main_config()
-		common_config = config['common']
-		ext_config = config['ext'][ext]
-		self.ext = ext
+		self.renderer_lock = Lock()
 
-		# Load and initialize colorscheme
-		colorscheme_config = self.load_colorscheme_config(ext_config['colorscheme'])
-		colors_config = self.load_colors_config()
-		colorscheme = Colorscheme(colorscheme_config, colors_config)
+		self.prev_common_config = None
+		self.prev_ext_config = None
 
-		# Load and initialize extension theme
-		theme_config = self.load_theme_config(ext_config.get('theme', 'default'))
-		common_config['paths'] = [os.path.expanduser(path) for path in common_config.get('paths', [])]
-		self.import_paths = common_config['paths']
-		theme_kwargs = {
-			'ext': ext,
-			'common_config': common_config,
-			'run_once': run_once,
-			}
-		local_themes = self.get_local_themes(ext_config.get('local_themes'))
+		self.create_renderer(load_main_config=True, load_colors=True, load_colorscheme=True, load_theme=True)
 
-		# Load and initialize extension renderer
-		renderer_module_name = renderer_module or ext
-		renderer_module_import = 'powerline.renderers.{0}'.format(renderer_module_name)
-		try:
-			Renderer = __import__(renderer_module_import, fromlist=['renderer']).renderer
-		except ImportError as e:
-			sys.stderr.write('Error while importing renderer module: {0}\n'.format(e))
-			sys.exit(1)
-		options = {
-			'term_truecolor': common_config.get('term_truecolor', False),
-			'ambiwidth': common_config.get('ambiwidth', 1),
-			'tmux_escape': common_config.get('additional_escapes') == 'tmux',
-			'screen_escape': common_config.get('additional_escapes') == 'screen',
-		}
+	def create_renderer(self, load_main_config=False, load_colors=False, load_colorscheme=False, load_theme=False):
+		'''(Re)create renderer object. Can be used after Powerline object was 
+		successfully initialized. If any of the below parameters except 
+		``load_main_config`` is True renderer object will be recreated.
 
-		# Create logger
-		if not logger:
-			log_format = common_config.get('log_format', '%(asctime)s:%(levelname)s:%(message)s')
-			formatter = logging.Formatter(log_format)
+		:param bool load_main_config:
+			Determines whether main configuration file (:file:`config.json`) 
+			should be loaded. If appropriate configuration changes implies 
+			``load_colorscheme`` and ``load_theme`` and recreation of renderer 
+			object. Won’t trigger recreation if only unrelated configuration 
+			changed.
+		:param bool load_colors:
+			Determines whether colors configuration from :file:`colors.json` 
+			should be (re)loaded.
+		:param bool load_colorscheme:
+			Determines whether colorscheme configuration should be (re)loaded.
+		:param bool load_theme:
+			Determines whether theme configuration should be reloaded.
 
-			level = getattr(logging, common_config.get('log_level', 'WARNING'))
-			handler = self.get_log_handler(common_config)
-			handler.setLevel(level)
-			handler.setFormatter(formatter)
+		Note: reloading of local themes should be taken care of in renderer.
+		'''
+		common_config_differs = False
+		ext_config_differs = False
+		if load_main_config:
+			config = self.load_main_config()
+			self.common_config = config['common']
+			if self.common_config != self.prev_common_config:
+				common_config_differs = True
+				self.prev_common_config = self.common_config
+				self.common_config['paths'] = [os.path.expanduser(path) for path in self.common_config.get('paths', [])]
+				self.import_paths = self.common_config['paths']
 
-			logger = logging.getLogger('powerline')
-			logger.setLevel(level)
-			logger.addHandler(handler)
+				if not self.logger:
+					log_format = self.common_config.get('log_format', '%(asctime)s:%(levelname)s:%(message)s')
+					formatter = logging.Formatter(log_format)
 
-		pl = PowerlineState(logger=logger, environ=environ, getcwd=getcwd, home=home)
+					level = getattr(logging, self.common_config.get('log_level', 'WARNING'))
+					handler = self.get_log_handler()
+					handler.setLevel(level)
+					handler.setFormatter(formatter)
 
-		self.renderer = Renderer(theme_config, local_themes, theme_kwargs, colorscheme, pl, **options)
+					self.logger = logging.getLogger('powerline')
+					self.logger.setLevel(level)
+					self.logger.addHandler(handler)
 
-	def get_log_handler(self, common_config):
+				self.pl = PowerlineState(logger=self.logger, environ=self.environ, getcwd=self.getcwd, home=self.home)
+
+				self.renderer_options = {
+					'term_truecolor': self.common_config.get('term_truecolor', False),
+					'ambiwidth': self.common_config.get('ambiwidth', 1),
+					'tmux_escape': self.common_config.get('additional_escapes') == 'tmux',
+					'screen_escape': self.common_config.get('additional_escapes') == 'screen',
+				}
+
+				self.theme_kwargs = {
+					'ext': self.ext,
+					'common_config': self.common_config,
+					'run_once': self.run_once,
+					}
+
+			self.ext_config = config['ext'][self.ext]
+			if self.ext_config != self.prev_ext_config:
+				ext_config_differs = True
+				if not self.prev_ext_config or self.ext_config.get('local_themes') != self.prev_ext_config.get('local_themes'):
+					self.local_themes = self.get_local_themes(self.ext_config.get('local_themes'))
+				load_colorscheme = (load_colorscheme
+							or not self.prev_ext_config
+							or self.prev_ext_config['colorscheme'] != self.ext_config['colorscheme'])
+				load_theme = (load_theme
+							or not self.prev_ext_config
+							or self.prev_ext_config['theme'] != self.ext_config['theme'])
+
+		create_renderer = load_colors or load_colorscheme or load_theme or common_config_differs or ext_config_differs
+
+		if load_colors:
+			colors_config = self.load_colors_config()
+
+		if load_colorscheme or load_colors:
+			colorscheme_config = self.load_colorscheme_config(self.ext_config['colorscheme'])
+			self.colorscheme = Colorscheme(colorscheme_config, colors_config)
+
+		if load_theme:
+			self.theme_config = self.load_theme_config(self.ext_config.get('theme', 'default'))
+
+		if create_renderer:
+			renderer_module_import = 'powerline.renderers.{0}'.format(self.renderer_module)
+			try:
+				Renderer = __import__(renderer_module_import, fromlist=['renderer']).renderer
+			except Exception as e:
+				self.pl.exception('Failed to import renderer module: {0}', str(e))
+				sys.exit(1)
+
+			with self.renderer_lock:
+				self.renderer = Renderer(self.theme_config,
+									self.local_themes,
+									self.theme_kwargs,
+									self.colorscheme,
+									self.pl,
+									**self.renderer_options)
+
+	def get_log_handler(self):
 		'''Get log handler.
 
 		:param dict common_config:
@@ -162,7 +224,7 @@ class Powerline(object):
 
 		:return: logging.Handler subclass.
 		'''
-		log_file = common_config.get('log_file', None)
+		log_file = self.common_config.get('log_file', None)
 		if log_file:
 			log_file = os.path.expanduser(log_file)
 			log_dir = os.path.dirname(log_file)
@@ -237,3 +299,16 @@ class Powerline(object):
 			``__init__`` arguments, refer to its documentation.
 		'''
 		return None
+
+	def render(self, *args, **kwargs):
+		'''Lock renderer from modifications and pass all arguments further to 
+		``self.renderer.render()``.
+		'''
+		with self.renderer_lock:
+			return self.renderer.render(*args, **kwargs)
+
+	def shutdown(self):
+		'''Lock renderer from modifications and run its ``.shutdown()`` method.
+		'''
+		with self.renderer_lock:
+			self.renderer.shutdown()
