@@ -138,7 +138,7 @@ class Powerline(object):
 
 		# Create logger
 		if not logger:
-			log_format = common_config.get('format', '%(asctime)s:%(level)s:%(message)s')
+			log_format = common_config.get('format', '%(asctime)s:%(levelname)s:%(message)s')
 			formatter = logging.Formatter(log_format)
 
 			level = getattr(logging, common_config.get('log_level', 'WARNING'))
