@@ -37,6 +37,8 @@ class ThreadedSegment(object):
 			if update_first and self.update_first:
 				self.update()
 			self.start()
+		elif not self.updated:
+			self.update()
 
 		if self.skip:
 			return self.crashed_value
@@ -80,9 +82,10 @@ class ThreadedSegment(object):
 		self.interval = interval
 		self.has_set_interval = True
 
-	def set_state(self, interval=None, **kwargs):
+	def set_state(self, interval=None, update_first=True, **kwargs):
 		if not self.did_set_interval or interval:
 			self.set_interval(interval)
+			self.updated = not (update_first and self.update_first)
 
 	def startup(self, pl, **kwargs):
 		self.run_once = False
@@ -111,12 +114,13 @@ def printed(func):
 
 class KwThreadedSegment(ThreadedSegment):
 	drop_interval = 10 * 60
-	update_first = False
+	update_first = True
 
 	def __init__(self):
 		super(KwThreadedSegment, self).__init__()
 		self.queries = {}
 		self.crashed = set()
+		self.updated = True
 
 	@staticmethod
 	def key(**kwargs):
@@ -157,7 +161,7 @@ class KwThreadedSegment(ThreadedSegment):
 			for key in removes:
 				self.queries.pop(key)
 
-	def set_state(self, interval=None, **kwargs):
+	def set_state(self, interval=None, update_first=True, **kwargs):
 		if not self.did_set_interval or (interval < self.interval):
 			self.set_interval(interval)
 
