@@ -7,8 +7,9 @@ import sys
 import logging
 
 from powerline.colorscheme import Colorscheme
+from powerline.lib.file_watcher import create_file_watcher
 
-from threading import Lock
+from threading import Lock, Thread, Event
 
 
 DEFAULT_SYSTEM_CONFIG_DIR = None
@@ -18,14 +19,18 @@ def open_file(path):
 	return open(path, 'r')
 
 
-def load_json_config(search_paths, config_file, load=json.load, open_file=open_file):
+def find_config_file(search_paths, config_file):
 	config_file += '.json'
 	for path in search_paths:
 		config_file_path = os.path.join(path, config_file)
 		if os.path.isfile(config_file_path):
-			with open_file(config_file_path) as config_file_fp:
-				return load(config_file_fp)
+			return config_file_path
 	raise IOError('Config file not found in search path: {0}'.format(config_file))
+
+
+def load_json_config(config_file_path, load=json.load, open_file=open_file):
+	with open_file(config_file_path) as config_file_fp:
+		return load(config_file_fp)
 
 
 class PowerlineState(object):
@@ -110,6 +115,11 @@ class Powerline(object):
 		self.config_paths = self.get_config_paths()
 
 		self.renderer_lock = Lock()
+		self.configs_lock = Lock()
+		self.shutdown_event = Event()
+		self.watcher = create_file_watcher()
+		self.configs = {}
+		self.thread = None
 
 		self.prev_common_config = None
 		self.prev_ext_config = None
@@ -134,8 +144,6 @@ class Powerline(object):
 			Determines whether colorscheme configuration should be (re)loaded.
 		:param bool load_theme:
 			Determines whether theme configuration should be reloaded.
-
-		Note: reloading of local themes should be taken care of in renderer.
 		'''
 		common_config_differs = False
 		ext_config_differs = False
@@ -208,13 +216,24 @@ class Powerline(object):
 				self.pl.exception('Failed to import renderer module: {0}', str(e))
 				sys.exit(1)
 
+			# Renderer updates configuration file via segments’ .startup thus it 
+			# should be locked to prevent state when configuration was updated, 
+			# but .render still uses old renderer.
 			with self.renderer_lock:
-				self.renderer = Renderer(self.theme_config,
-									self.local_themes,
-									self.theme_kwargs,
-									self.colorscheme,
-									self.pl,
-									**self.renderer_options)
+				try:
+					renderer = Renderer(self.theme_config,
+										self.local_themes,
+										self.theme_kwargs,
+										self.colorscheme,
+										self.pl,
+										**self.renderer_options)
+				except Exception as e:
+					self.pl.exception('Failed to construct renderer object: {0}', str(e))
+				else:
+					self.renderer = renderer
+
+		if not self.run_once and not self.is_alive():
+			self.start()
 
 	def get_log_handler(self):
 		'''Get log handler.
@@ -250,6 +269,14 @@ class Powerline(object):
 		config_paths.append(plugin_path)
 		return config_paths
 
+	def _load_config(self, cfg_path, type):
+		'''Load configuration and setup watcher.'''
+		path = find_config_file(self.config_paths, cfg_path)
+		with self.configs_lock:
+			self.configs[path] = type
+			self.watcher.watch(path)
+		return load_json_config(path)
+
 	def load_theme_config(self, name):
 		'''Get theme configuration.
 
@@ -258,14 +285,14 @@ class Powerline(object):
 
 		:return: dictionary with :ref:`theme configuration <config-themes>`
 		'''
-		return load_json_config(self.config_paths, os.path.join('themes', self.ext, name))
+		return self._load_config(os.path.join('themes', self.ext, name), 'theme')
 
 	def load_main_config(self):
 		'''Get top-level configuration.
 
 		:return: dictionary with :ref:`top-level configuration <config-main>`.
 		'''
-		return load_json_config(self.config_paths, 'config')
+		return self._load_config('config', 'main_config')
 
 	def load_colorscheme_config(self, name):
 		'''Get colorscheme.
@@ -275,14 +302,14 @@ class Powerline(object):
 
 		:return: dictionary with :ref:`colorscheme configuration <config-colorschemes>`.
 		'''
-		return load_json_config(self.config_paths, os.path.join('colorschemes', self.ext, name))
+		return self._load_config(os.path.join('colorschemes', self.ext, name), 'colorscheme')
 
 	def load_colors_config(self):
 		'''Get colorscheme.
 
 		:return: dictionary with :ref:`colors configuration <config-colors>`.
 		'''
-		return load_json_config(self.config_paths, 'colors')
+		return self._load_config('colors', 'colors')
 
 	@staticmethod
 	def get_local_themes(local_themes):
@@ -310,5 +337,33 @@ class Powerline(object):
 	def shutdown(self):
 		'''Lock renderer from modifications and run its ``.shutdown()`` method.
 		'''
+		self.shutdown_event.set()
 		with self.renderer_lock:
 			self.renderer.shutdown()
+
+	def is_alive(self):
+		return self.thread and self.thread.is_alive()
+
+	def start(self):
+		self.thread = Thread(target=self.run)
+		self.thread.start()
+
+	def run(self):
+		while not self.shutdown_event.is_set():
+			kwargs = {}
+			with self.configs_lock:
+				for path, type in self.configs.items():
+					if self.watcher(path):
+						kwargs['load_' + type] = True
+			if kwargs:
+				try:
+					self.create_renderer(**kwargs)
+				except Exception as e:
+					self.pl.exception('Failed to create renderer: {0}', str(e))
+			self.shutdown_event.wait(10)
+
+	def __enter__(self):
+		return self
+
+	def __exit__(self, *args):
+		self.shutdown()

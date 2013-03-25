@@ -17,7 +17,6 @@ class ThreadedSegment(object):
 		self.shutdown_event = Event()
 		self.write_lock = Lock()
 		self.run_once = True
-		self.did_set_interval = False
 		self.thread = None
 		self.skip = False
 		self.crashed_value = None
@@ -48,17 +47,12 @@ class ThreadedSegment(object):
 		return self.thread and self.thread.is_alive()
 
 	def start(self):
-		self.keep_going = True
+		self.shutdown_event.clear()
 		self.thread = Thread(target=self.run)
 		self.thread.start()
 
-	def sleep(self, adjust_time):
-		self.shutdown_event.wait(max(self.interval - adjust_time, self.min_sleep_time))
-		if self.shutdown_event.is_set():
-			self.keep_going = False
-
 	def run(self):
-		while self.keep_going:
+		while not self.shutdown_event.is_set():
 			start_time = monotonic()
 			try:
 				self.update()
@@ -67,7 +61,7 @@ class ThreadedSegment(object):
 				self.skip = True
 			else:
 				self.skip = False
-			self.sleep(monotonic() - start_time)
+			self.shutdown_event.wait(max(self.interval - (monotonic() - start_time), self.min_sleep_time))
 
 	def shutdown(self):
 		self.shutdown_event.set()
@@ -79,19 +73,18 @@ class ThreadedSegment(object):
 		# .set_interval().
 		interval = interval or getattr(self, 'interval')
 		self.interval = interval
-		self.has_set_interval = True
 
 	def set_state(self, interval=None, update_first=True, **kwargs):
-		if not self.did_set_interval or interval:
-			self.set_interval(interval)
-			self.updated = not (update_first and self.update_first)
+		self.set_interval(interval)
+		self.updated = not (update_first and self.update_first)
 
 	def startup(self, pl, **kwargs):
 		self.run_once = False
 		self.pl = pl
 
+		self.set_state(**kwargs)
+
 		if not self.is_alive():
-			self.set_state(**kwargs)
 			self.start()
 
 	def error(self, *args, **kwargs):
@@ -161,11 +154,13 @@ class KwThreadedSegment(ThreadedSegment):
 				self.queries.pop(key)
 
 	def set_state(self, interval=None, update_first=True, **kwargs):
-		if not self.did_set_interval or (interval < self.interval):
-			self.set_interval(interval)
+		self.set_interval(interval)
 
 		if self.update_first:
 			self.update_first = update_first
+
+		with self.write_lock:
+			self.queries.clear()
 
 	@staticmethod
 	def render_one(update_state, **kwargs):
