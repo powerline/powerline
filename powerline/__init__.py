@@ -14,6 +14,8 @@ from threading import Lock, Thread, Event
 
 DEFAULT_SYSTEM_CONFIG_DIR = None
 
+watcher = None
+
 
 def open_file(path):
 	return open(path, 'r')
@@ -104,6 +106,7 @@ class Powerline(object):
 				environ=os.environ,
 				getcwd=getattr(os, 'getcwdu', os.getcwd),
 				home=None):
+		global watcher
 		self.ext = ext
 		self.renderer_module = renderer_module or ext
 		self.run_once = run_once
@@ -117,9 +120,11 @@ class Powerline(object):
 		self.renderer_lock = Lock()
 		self.configs_lock = Lock()
 		self.shutdown_event = Event()
-		self.watcher = create_file_watcher()
 		self.configs = {}
 		self.thread = None
+
+		if not watcher:
+			watcher = create_file_watcher()
 
 		self.prev_common_config = None
 		self.prev_ext_config = None
@@ -271,10 +276,11 @@ class Powerline(object):
 
 	def _load_config(self, cfg_path, type):
 		'''Load configuration and setup watcher.'''
+		global watcher
 		path = find_config_file(self.config_paths, cfg_path)
 		with self.configs_lock:
 			self.configs[path] = type
-			self.watcher.watch(path)
+			watcher.watch(path)
 		return load_json_config(path)
 
 	def load_theme_config(self, name):
@@ -356,11 +362,12 @@ class Powerline(object):
 		self.thread.start()
 
 	def run(self):
+		global watcher
 		while not self.shutdown_event.is_set():
 			kwargs = {}
 			with self.configs_lock:
 				for path, type in self.configs.items():
-					if self.watcher(path):
+					if watcher(path):
 						kwargs['load_' + type] = True
 			if kwargs:
 				try:
