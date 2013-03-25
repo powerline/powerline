@@ -292,6 +292,13 @@ class Powerline(object):
 
 		:return: dictionary with :ref:`top-level configuration <config-main>`.
 		'''
+		with self.configs_lock:
+			self.configs.clear()
+			# Watches for unused files will be cleared automatically after some 
+			# time, no need to do this here, especially considering that
+			# a) most of them are used and thus will be recreated in other
+			#    load_* calls;
+			# b) it is hard to tell which ones stopped being useful.
 		return self._load_config('config', 'main_config')
 
 	def load_colorscheme_config(self, name):
