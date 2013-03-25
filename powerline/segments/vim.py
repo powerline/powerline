@@ -181,7 +181,7 @@ def file_name(pl, segment_info, display_no_file=False, no_file_text='[No file]')
 			return [{
 				'contents': no_file_text,
 				'highlight_group': ['file_name_no_file', 'file_name'],
-				}]
+			}]
 		else:
 			return None
 	file_name = vim_funcs['fnamemodify'](name, ':~:.:t')
@@ -258,7 +258,7 @@ def line_percent(pl, segment_info, gradient=False):
 		'contents': str(int(round(percentage))),
 		'highlight_group': ['line_percent_gradient', 'line_percent'],
 		'gradient_level': percentage,
-		}]
+	}]
 
 
 @requires_segment_info
@@ -371,7 +371,7 @@ class BranchSegment(RepositorySegment):
 			'highlight_group': (['branch_dirty' if repository_status(segment_info=segment_info, **kwargs) else 'branch_clean']
 								if status_colors else []) + ['branch'],
 			'divider_highlight_group': 'branch:divider',
-			}]
+		}]
 
 	def startup(self, status_colors=False, **kwargs):
 		super(BranchSegment, self).startup(**kwargs)
@@ -422,7 +422,7 @@ class FileVCSStatusSegment(KwWindowThreadedSegment):
 					ret.append({
 						'contents': status,
 						'highlight_group': ['file_vcs_status_' + status, 'file_vcs_status'],
-						})
+					})
 				return ret
 		return None
 

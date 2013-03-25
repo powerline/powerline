@@ -109,7 +109,7 @@ class Colorscheme(object):
 			'fg': pick_color(group_props['fg']),
 			'bg': pick_color(group_props['bg']),
 			'attr': get_attr_flag(group_props.get('attr', [])),
-			}
+		}
 
 
 #       0         1         2         3         4         5         6         7         8         9

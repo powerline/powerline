@@ -83,7 +83,7 @@ class BranchSegment(RepositorySegment):
 			return [{
 				'contents': branch,
 				'highlight_group': ['branch_dirty' if repository_status(**kwargs) else 'branch_clean', 'branch'],
-				}]
+			}]
 		else:
 			return branch
 
@@ -153,7 +153,7 @@ def cwd(pl, dir_shorten_len=None, dir_limit_depth=None):
 		ret.append({
 			'contents': part,
 			'divider_highlight_group': 'cwd:divider',
-			})
+		})
 	ret[-1]['highlight_group'] = ['cwd:current_folder', 'cwd']
 	return ret
 
@@ -190,7 +190,7 @@ def fuzzy_time(pl):
 		45: 'quarter to',
 		50: 'ten to',
 		55: 'five to',
-		}
+	}
 	special_case_str = {
 		(23, 58): 'round about midnight',
 		(23, 59): 'round about midnight',
@@ -198,7 +198,7 @@ def fuzzy_time(pl):
 		(0, 1): 'round about midnight',
 		(0, 2): 'round about midnight',
 		(12, 0): 'noon',
-		}
+	}
 
 	now = datetime.now()
 
@@ -337,17 +337,17 @@ weather_conditions_icons = {
 }
 
 temp_conversions = {
-		'C': lambda temp: temp,
-		'F': lambda temp: (temp * 9 / 5) + 32,
-		'K': lambda temp: temp + 273.15,
-		}
+	'C': lambda temp: temp,
+	'F': lambda temp: (temp * 9 / 5) + 32,
+	'K': lambda temp: temp + 273.15,
+}
 
 # Note: there are also unicode characters for units: ℃, ℉ and  K
 temp_units = {
-		'C': '°C',
-		'F': '°F',
-		'K': 'K',
-		}
+	'C': '°C',
+	'F': '°F',
+	'K': 'K',
+}
 
 
 class WeatherSegment(ThreadedSegment):
@@ -371,11 +371,11 @@ class WeatherSegment(ThreadedSegment):
 											location_data['region_name'],
 											location_data['country_name']])
 			query_data = {
-					'q':
-						'use "http://github.com/yql/yql-tables/raw/master/weather/weather.bylocation.xml" as we;'
-						'select * from we where location="{0}" and unit="c"'.format(self.location).encode('utf-8'),
-					'format': 'json',
-					}
+				'q':
+				'use "http://github.com/yql/yql-tables/raw/master/weather/weather.bylocation.xml" as we;'
+				'select * from we where location="{0}" and unit="c"'.format(self.location).encode('utf-8'),
+				'format': 'json',
+			}
 			self.url = 'http://query.yahooapis.com/v1/public/yql?' + urllib_urlencode(query_data)
 
 		raw_response = urllib_read(self.url)
@@ -423,19 +423,19 @@ class WeatherSegment(ThreadedSegment):
 			gradient_level = (self.temp - temp_coldest) * 100.0 / (temp_hottest - temp_coldest)
 		groups = ['weather_condition_' + icon_name for icon_name in self.icon_names] + ['weather_conditions', 'weather']
 		return [
-				{
+			{
 				'contents': icon + ' ',
 				'highlight_group': groups,
 				'divider_highlight_group': 'background:divider',
-				},
-				{
+			},
+			{
 				'contents': temp_format.format(temp=temp),
 				'highlight_group': ['weather_temp_gradient', 'weather_temp', 'weather'],
 				'draw_divider': False,
 				'divider_highlight_group': 'background:divider',
 				'gradient_level': gradient_level,
-				},
-			]
+			},
+		]
 
 
 weather = with_docstring(WeatherSegment(),
@@ -517,7 +517,7 @@ def system_load(pl, format='{avg:.1f}', threshold_good=1, threshold_bad=2):
 			'draw_divider': False,
 			'divider_highlight_group': 'background:divider',
 			'gradient_level': gradient_level,
-			})
+		})
 	ret[0]['draw_divider'] = True
 	ret[0]['contents'] += ' '
 	ret[1]['contents'] += ' '
@@ -602,9 +602,9 @@ def user(pl):
 		return None
 	euid = _geteuid()
 	return [{
-			'contents': username,
-			'highlight_group': 'user' if euid != 0 else ['superuser', 'user'],
-		}]
+		'contents': username,
+		'highlight_group': 'user' if euid != 0 else ['superuser', 'user'],
+	}]
 
 
 if os.path.exists('/proc/uptime'):
@@ -724,7 +724,7 @@ class NetworkLoadSegment(KwThreadedSegment):
 				'contents': format.format(value=humanize_bytes(value, suffix, si_prefix)),
 				'divider_highlight_group': 'background:divider',
 				'highlight_group': hl_groups,
-				})
+			})
 			if is_gradient:
 				max = kwargs[max_key]
 				if value >= max:
@@ -804,13 +804,13 @@ class EmailIMAPSegment(KwThreadedSegment):
 			return [{
 				'contents': str(unread_count),
 				'highlight_group': 'email_alert',
-				}]
+			}]
 		else:
 			return [{
 				'contents': str(unread_count),
 				'highlight_group': ['email_alert_gradient', 'email_alert'],
 				'gradient_level': unread_count * 100.0 / max_msgs,
-				}]
+			}]
 
 
 email_imap_alert = with_docstring(EmailIMAPSegment(),
@@ -841,7 +841,7 @@ class NowPlayingSegment(object):
 		'play': '▶',
 		'pause': '▮▮',
 		'stop': '■',
-		}
+	}
 
 	def __call__(self, player='mpd', format='{state_symbol} {artist} - {title} ({total})', **kwargs):
 		player_func = getattr(self, 'player_{0}'.format(player))
@@ -853,7 +853,7 @@ class NowPlayingSegment(object):
 			'title': None,
 			'elapsed': None,
 			'total': None,
-			}
+		}
 		func_stats = player_func(**kwargs)
 		if not func_stats:
 			return None
@@ -921,7 +921,7 @@ class NowPlayingSegment(object):
 			'title': now_playing.get('title'),
 			'elapsed': self._convert_seconds(now_playing.get('position', 0)),
 			'total': self._convert_seconds(now_playing.get('duration', 0)),
-			}
+		}
 
 	def player_mpd(self, pl, host='localhost', port=6600):
 		try:
@@ -942,7 +942,7 @@ class NowPlayingSegment(object):
 				'title': now_playing.get('title'),
 				'elapsed': self._convert_seconds(now_playing.get('elapsed', 0)),
 				'total': self._convert_seconds(now_playing.get('time', 0)),
-				}
+			}
 		except ImportError:
 			now_playing = self._run_cmd(['mpc', 'current', '-f', '%album%\n%artist%\n%title%\n%time%', '-h', str(host), '-p', str(port)])
 			if not now_playing:
@@ -953,7 +953,7 @@ class NowPlayingSegment(object):
 				'artist': now_playing[1],
 				'title': now_playing[2],
 				'total': now_playing[3],
-				}
+			}
 
 	def player_spotify(self, pl):
 		try:
@@ -981,7 +981,7 @@ class NowPlayingSegment(object):
 			'artist': info.get('xesam:artist')[0],
 			'title': info.get('xesam:title'),
 			'total': self._convert_seconds(info.get('mpris:length') / 1e6),
-			}
+		}
 
 	def player_rhythmbox(self, pl):
 		now_playing = self._run_cmd(['rhythmbox-client', '--no-start', '--no-present', '--print-playing-format', '%at\n%aa\n%tt\n%te\n%td'])
@@ -994,5 +994,5 @@ class NowPlayingSegment(object):
 			'title': now_playing[2],
 			'elapsed': now_playing[3],
 			'total': now_playing[4],
-			}
+		}
 now_playing = NowPlayingSegment()

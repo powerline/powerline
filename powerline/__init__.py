@@ -187,7 +187,7 @@ class Powerline(object):
 					'ext': self.ext,
 					'common_config': self.common_config,
 					'run_once': self.run_once,
-					}
+				}
 
 			self.ext_config = config['ext'][self.ext]
 			if self.ext_config != self.prev_ext_config:
