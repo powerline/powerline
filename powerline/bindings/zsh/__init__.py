@@ -1,7 +1,16 @@
 # vim:fileencoding=utf-8:noet
 import zsh
+import atexit
 from powerline.shell import ShellPowerline
 from powerline.lib import parsedotval
+
+
+used_powerlines = []
+
+
+def shutdown():
+	for powerline in used_powerlines:
+		powerline.renderer.shutdown()
 
 
 def get_var_config(var):
@@ -69,17 +78,17 @@ class Environment(object):
 
 
 class Prompt(object):
-	__slots__ = ('render', 'side', 'savedpsvar', 'savedps', 'args')
+	__slots__ = ('powerline', 'side', 'savedpsvar', 'savedps', 'args')
 
 	def __init__(self, powerline, side, savedpsvar=None, savedps=None):
-		self.render = powerline.renderer.render
+		self.powerline = powerline
 		self.side = side
 		self.savedpsvar = savedpsvar
 		self.savedps = savedps
 		self.args = powerline.args
 
 	def __str__(self):
-		r = self.render(width=zsh.columns(), side=self.side, segment_info=self.args)
+		r = self.powerline.renderer.render(width=zsh.columns(), side=self.side, segment_info=self.args)
 		if type(r) is not str:
 			if type(r) is bytes:
 				return r.decode('utf-8')
@@ -90,6 +99,9 @@ class Prompt(object):
 	def __del__(self):
 		if self.savedps:
 			zsh.setvalue(self.savedpsvar, self.savedps)
+		used_powerlines.remove(self.powerline)
+		if self.powerline not in used_powerlines:
+			self.powerline.renderer.shutdown()
 
 
 def set_prompt(powerline, psvar, side):
@@ -103,5 +115,8 @@ def set_prompt(powerline, psvar, side):
 def setup():
 	environ = Environment()
 	powerline = ShellPowerline(Args(), environ=environ, getcwd=lambda: environ['PWD'])
+	used_powerlines.append(powerline)
+	used_powerlines.append(powerline)
 	set_prompt(powerline, 'PS1', 'left')
 	set_prompt(powerline, 'RPS1', 'right')
+	atexit.register(shutdown)
