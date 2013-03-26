@@ -25,4 +25,11 @@ if __name__ == '__main__':
 			sys.stdout.write(rendered.encode('utf-8'))
 	except KeyboardInterrupt:
 		# If the users sends ^c we don't want a stacktrace
-		sys.exit(0)
+		code = 1
+		for arg in sys.argv:
+			if arg.startswith('--last-exit-code='):
+				code = int(arg.split('=', 1)[-1])
+				break
+
+        	sys.exit(code)
+
