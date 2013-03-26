@@ -41,8 +41,9 @@ class PowerlineState(object):
 		self.getcwd = getcwd
 		self.home = home or environ.get('HOME', None)
 		self.logger = logger
-		self.prefix = None
+		self.prefix = ''
 		self.last_msgs = {}
+		self.use_daemon_threads = use_daemon_threads
 
 	def _log(self, attr, msg, *args, **kwargs):
 		prefix = kwargs.get('prefix') or self.prefix
