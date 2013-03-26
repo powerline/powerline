@@ -7,7 +7,7 @@ import tests.vim as vim_module
 import sys
 import os
 import json
-from tests.lib import Args, urllib_read, replace_module_attr
+from tests.lib import Args, urllib_read, replace_attr
 from tests import TestCase
 
 
@@ -67,7 +67,7 @@ class TestConfig(TestCase):
 		from imp import reload
 		reload(common)
 		from powerline.shell import ShellPowerline
-		with replace_module_attr(common, 'urllib_read', urllib_read):
+		with replace_attr(common, 'urllib_read', urllib_read):
 			powerline = ShellPowerline(Args(ext=['tmux']), run_once=False)
 			powerline.renderer.render()
 			powerline = ShellPowerline(Args(ext=['tmux']), run_once=False)
@@ -76,18 +76,20 @@ class TestConfig(TestCase):
 
 	def test_zsh(self):
 		from powerline.shell import ShellPowerline
-		powerline = ShellPowerline(Args(last_pipe_status=[1, 0], ext=['shell'], renderer_module='zsh_prompt'), run_once=False)
-		powerline.renderer.render()
-		powerline = ShellPowerline(Args(last_pipe_status=[1, 0], ext=['shell'], renderer_module='zsh_prompt'), run_once=False)
-		powerline.renderer.render()
+		args = Args(last_pipe_status=[1, 0], ext=['shell'], renderer_module='zsh_prompt')
+		powerline = ShellPowerline(args, run_once=False)
+		powerline.renderer.render(segment_info=args)
+		powerline = ShellPowerline(args, run_once=False)
+		powerline.renderer.render(segment_info=args)
 		shutdown(powerline)
 
 	def test_bash(self):
 		from powerline.shell import ShellPowerline
-		powerline = ShellPowerline(Args(last_exit_code=1, ext=['shell'], renderer_module='bash_prompt', config=[('ext', {'shell': {'theme': 'default_leftonly'}})]), run_once=False)
-		powerline.renderer.render()
-		powerline = ShellPowerline(Args(last_exit_code=1, ext=['shell'], renderer_module='bash_prompt', config=[('ext', {'shell': {'theme': 'default_leftonly'}})]), run_once=False)
-		powerline.renderer.render()
+		args = Args(last_exit_code=1, ext=['shell'], renderer_module='bash_prompt', config=[('ext', {'shell': {'theme': 'default_leftonly'}})])
+		powerline = ShellPowerline(args, run_once=False)
+		powerline.renderer.render(segment_info=args)
+		powerline = ShellPowerline(args, run_once=False)
+		powerline.renderer.render(segment_info=args)
 		shutdown(powerline)
 
 	def test_ipython(self):
@@ -99,8 +101,10 @@ class TestConfig(TestCase):
 			theme_overrides = {}
 
 		powerline = IpyPowerline()
-		powerline.renderer.render()
-		powerline.renderer.render()
+		segment_info = Args(prompt_count=1)
+		for prompt_type in ['in', 'in2', 'out', 'rewrite']:
+			powerline.renderer.render(matcher_info=prompt_type, segment_info=segment_info)
+			powerline.renderer.render(matcher_info=prompt_type, segment_info=segment_info)
 		shutdown(powerline)
 
 	def test_wm(self):
@@ -108,7 +112,7 @@ class TestConfig(TestCase):
 		from imp import reload
 		reload(common)
 		from powerline import Powerline
-		with replace_module_attr(common, 'urllib_read', urllib_read):
+		with replace_attr(common, 'urllib_read', urllib_read):
 			Powerline(ext='wm', renderer_module='pango_markup', run_once=True).renderer.render()
 		reload(common)
 

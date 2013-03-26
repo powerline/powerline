@@ -4,10 +4,12 @@ from __future__ import absolute_import
 import json
 import os
 import sys
+import logging
 import copy
 
 from powerline.colorscheme import Colorscheme
 from powerline.lib.file_watcher import create_file_watcher
+
 
 DEFAULT_SYSTEM_CONFIG_DIR = None
 
@@ -45,6 +47,42 @@ class ConfigCache(object):
 
 load_json_config = ConfigCache()
 
+class PowerlineState(object):
+	def __init__(self, logger, environ, getcwd, home):
+		self.environ = environ
+		self.getcwd = getcwd
+		self.home = home or environ.get('HOME', None)
+		self.logger = logger
+		self.prefix = None
+		self.last_msgs = {}
+
+	def _log(self, attr, msg, *args, **kwargs):
+		prefix = kwargs.get('prefix') or self.prefix
+		msg = ((prefix + ':') if prefix else '') + msg.format(*args, **kwargs)
+		key = attr + ':' + prefix
+		if msg != self.last_msgs.get(key):
+			getattr(self.logger, attr)(msg)
+			self.last_msgs[key] = msg
+
+	def critical(self, msg, *args, **kwargs):
+		self._log('critical', msg, *args, **kwargs)
+
+	def exception(self, msg, *args, **kwargs):
+		self._log('exception', msg, *args, **kwargs)
+
+	def info(self, msg, *args, **kwargs):
+		self._log('info', msg, *args, **kwargs)
+
+	def error(self, msg, *args, **kwargs):
+		self._log('error', msg, *args, **kwargs)
+
+	def warn(self, msg, *args, **kwargs):
+		self._log('warning', msg, *args, **kwargs)
+
+	def debug(self, msg, *args, **kwargs):
+		self._log('debug', msg, *args, **kwargs)
+
+
 class Powerline(object):
 	'''Main powerline class, entrance point for all powerline uses. Sets
 	powerline up and loads the configuration.
@@ -57,9 +95,29 @@ class Powerline(object):
 	:param str renderer_module:
 		Overrides renderer module (defaults to ``ext``). Should be the name of
 		the package imported like this: ``powerline.renders.{render_module}``.
+	:param bool run_once:
+		Determines whether .renderer.render() method will be run only once
+		during python session.
+	:param Logger logger:
+		If present, no new logger will be created and this logger will be used.
+	:param dict environ:
+		Object with ``.__getitem__`` and ``.get`` methods used to obtain
+		environment variables. Defaults to ``os.environ``.
+	:param func getcwd:
+		Function used to get current working directory. Defaults to
+		``os.getcwdu`` or ``os.getcwd``.
+	:param str home:
+		Home directory. Defaults to ``environ.get('HOME')``.
 	'''
 
-	def __init__(self, ext, renderer_module=None, run_once=False):
+	def __init__(self,
+				ext,
+				renderer_module=None,
+				run_once=False,
+				logger=None,
+				environ=os.environ,
+				getcwd=getattr(os, 'getcwdu', os.getcwd),
+				home=None):
 		self.config_paths = self.get_config_paths()
 
 		# Load main config file
@@ -80,7 +138,6 @@ class Powerline(object):
 		theme_kwargs = {
 			'ext': ext,
 			'common_config': common_config,
-			'segment_info': self.get_segment_info(),
 			'run_once': run_once,
 			}
 		local_themes = self.get_local_themes(ext_config.get('local_themes'))
@@ -99,7 +156,42 @@ class Powerline(object):
 			'tmux_escape': common_config.get('additional_escapes') == 'tmux',
 			'screen_escape': common_config.get('additional_escapes') == 'screen',
 		}
-		self.renderer = Renderer(theme_config, local_themes, theme_kwargs, colorscheme, **options)
+
+		# Create logger
+		if not logger:
+			log_format = common_config.get('log_format', '%(asctime)s:%(levelname)s:%(message)s')
+			formatter = logging.Formatter(log_format)
+
+			level = getattr(logging, common_config.get('log_level', 'WARNING'))
+			handler = self.get_log_handler(common_config)
+			handler.setLevel(level)
+			handler.setFormatter(formatter)
+
+			logger = logging.getLogger('powerline')
+			logger.setLevel(level)
+			logger.addHandler(handler)
+
+		pl = PowerlineState(logger=logger, environ=environ, getcwd=getcwd, home=home)
+
+		self.renderer = Renderer(theme_config, local_themes, theme_kwargs, colorscheme, pl, **options)
+
+	def get_log_handler(self, common_config):
+		'''Get log handler.
+
+		:param dict common_config:
+			Common configuration.
+
+		:return: logging.Handler subclass.
+		'''
+		log_file = common_config.get('log_file', None)
+		if log_file:
+			log_file = os.path.expanduser(log_file)
+			log_dir = os.path.dirname(log_file)
+			if not os.path.isdir(log_dir):
+				os.mkdir(log_dir)
+			return logging.FileHandler(log_file)
+		else:
+			return logging.StreamHandler()
 
 	@staticmethod
 	def get_config_paths():
@@ -164,16 +256,5 @@ class Powerline(object):
 			anything accepted by ``self.renderer.get_theme`` and processable by
 			``self.renderer.add_local_theme``. Renderer module is determined by
 			``__init__`` arguments, refer to its documentation.
-		'''
-		return None
-
-	@staticmethod
-	def get_segment_info():
-		'''Get information for segments that require ``segment_info`` argument.
-		To be overridden in subclasses.
-
-		:return:
-			anything accepted by segments as ``segment_info`` argument. Depends
-			on the segments used, refer to Powerline subclass documentation.
 		'''
 		return None

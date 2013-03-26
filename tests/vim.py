@@ -31,6 +31,27 @@ def _logged(func):
 	return f
 
 
+def _construct_result(r):
+	import sys
+	if sys.version_info < (3,):
+		return r
+	else:
+		if type(r) is str:
+			return r.encode('utf-8')
+		elif type(r) is dict or type(r) is list:
+			raise NotImplementedError
+		return r
+
+
+def _str_func(func):
+	from functools import wraps
+
+	@wraps(func)
+	def f(*args, **kwargs):
+		return _construct_result(func(*args, **kwargs))
+	return f
+
+
 def _log_print():
 	import sys
 	for entry in _log:
@@ -75,6 +96,7 @@ def bindeval(expr):
 
 
 @_logged
+@_str_func
 def _emul_mode(*args):
 	if args and args[0]:
 		return _mode
@@ -83,6 +105,7 @@ def _emul_mode(*args):
 
 
 @_logged
+@_str_func
 def _emul_getbufvar(bufnr, varname):
 	if varname[0] == '&':
 		if bufnr not in _buf_options:
@@ -98,6 +121,7 @@ def _emul_getbufvar(bufnr, varname):
 
 
 @_logged
+@_str_func
 def _emul_getwinvar(winnr, varname):
 	return _win_scopes[winnr][varname]
 
@@ -115,6 +139,7 @@ def _emul_virtcol(expr):
 
 
 @_logged
+@_str_func
 def _emul_fnamemodify(path, modstring):
 	import os
 	_modifiers = {
@@ -130,6 +155,7 @@ def _emul_fnamemodify(path, modstring):
 
 
 @_logged
+@_str_func
 def _emul_expand(expr):
 	if expr == '<abuf>':
 		return _buffer()

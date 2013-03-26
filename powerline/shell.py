@@ -14,13 +14,10 @@ def mergeargs(argvalue):
 
 
 class ShellPowerline(Powerline):
-	def __init__(self, args, run_once=False):
+	def __init__(self, args, **kwargs):
 		self.args = args
 		self.theme_option = mergeargs(args.theme_option) or {}
-		super(ShellPowerline, self).__init__(args.ext[0], args.renderer_module, run_once=run_once)
-
-	def get_segment_info(self):
-		return self.args
+		super(ShellPowerline, self).__init__(args.ext[0], args.renderer_module, **kwargs)
 
 	def load_main_config(self):
 		r = super(ShellPowerline, self).load_main_config()

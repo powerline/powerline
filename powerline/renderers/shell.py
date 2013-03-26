@@ -26,7 +26,7 @@ class ShellRenderer(Renderer):
 		False, the argument is reset to the terminal defaults. If an argument
 		is a valid color or attribute, it's added to the ANSI escape code.
 		'''
-		ansi = []
+		ansi = [0]
 		if fg is not None:
 			if fg is False or fg[0] is False:
 				ansi += [39]

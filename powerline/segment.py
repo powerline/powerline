@@ -64,6 +64,7 @@ def gen_segment_getter(ext, path, theme_configs, default_module=None):
 		contents, contents_func, module = get_segment_info(data, segment)
 		highlight_group = segment_type != 'function' and segment.get('highlight_group') or segment.get('name')
 		return {
+			'name': segment.get('name'),
 			'type': segment_type,
 			'highlight_group': highlight_group,
 			'divider_highlight_group': None,

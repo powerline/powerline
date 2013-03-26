@@ -8,6 +8,7 @@ import os
 import re
 from collections import defaultdict
 from copy import copy
+import logging
 
 
 try:
@@ -84,7 +85,7 @@ class Spec(object):
 		if type(value.value) is not t:
 			echoerr(context=self.cmsg.format(key=context_key(context)),
 					context_mark=context_mark,
-					problem='must be a {0} instance'.format(t.__name__),
+					problem='{0!r} must be a {1} instance, not {2}'.format(value, t.__name__, type(value.value).__name__),
 					problem_mark=value.mark)
 			return False, True
 		return True, False
@@ -380,9 +381,9 @@ def check_config(d, theme, data, context, echoerr):
 	else:
 		# local_themes
 		ext = context[-3][0]
-	if ext not in data['configs']['themes'] or theme not in data['configs']['themes'][ext]:
+	if ext not in data['configs'][d] or theme not in data['configs'][d][ext]:
 		echoerr(context='Error while loading {0} from {1} extension configuration'.format(d[:-1], ext),
-				problem='failed to find configuration file themes/{0}/{1}.json'.format(ext, theme),
+				problem='failed to find configuration file {0}/{1}/{2}.json'.format(d, ext, theme),
 				problem_mark=theme.mark)
 		return True, False, True
 	return True, False, False
@@ -408,6 +409,11 @@ main_spec = (Spec(
 		# only for existence of the path, not for it being a directory
 		paths=Spec().list((lambda value, *args: (True, True, not os.path.exists(value.value))),
 					lambda value: 'path does not exist: {0}'.format(value)).optional(),
+		log_file=Spec().type(str).func(lambda value, *args: (True, True, not os.path.isdir(os.path.dirname(value))),
+						lambda value: 'directory does not exist: {0}'.format(os.path.dirname(value))).optional(),
+		log_level=Spec().re('^[A-Z]+$').func(lambda value, *args: (True, True, not hasattr(logging, value)),
+										lambda value: 'unknown debugging level {0}'.format(value)).optional(),
+		log_format=Spec().type(str).optional(),
 	).context_message('Error while loading common configuration (key {key})'),
 	ext=Spec(
 		vim=Spec(
@@ -415,6 +421,15 @@ main_spec = (Spec(
 			theme=theme_spec(),
 			local_themes=Spec()
 				.unknown_spec(lambda *args: check_matcher_func('vim', *args), theme_spec())
+		),
+		ipython=Spec(
+			colorscheme=colorscheme_spec(),
+			theme=theme_spec(),
+			local_themes=Spec(
+				in2=theme_spec(),
+				out=theme_spec(),
+				rewrite=theme_spec(),
+			),
 		),
 	).unknown_spec(check_ext,
 				Spec(
@@ -687,7 +702,7 @@ def hl_exists(hl_group, data, context, echoerr, allow_gradients=False):
 	for colorscheme, cconfig in data['colorscheme_configs'][ext].items():
 		if hl_group not in cconfig.get('groups', {}):
 			r.append(colorscheme)
-		elif not allow_gradients:
+		elif not allow_gradients or allow_gradients == 'force':
 			group_config = cconfig['groups'][hl_group]
 			hadgradient = False
 			for ckey in ('fg', 'bg'):
@@ -704,14 +719,14 @@ def hl_exists(hl_group, data, context, echoerr, allow_gradients=False):
 					hadgradient = True
 				if allow_gradients is False and not hascolor and hasgradient:
 					echoerr(context='Error while checking highlight group in theme (key {key})'.format(key=context_key(context)),
-							context_mark=hl_group.mark,
+							context_mark=getattr(hl_group, 'mark', None),
 							problem='group {0} is using gradient {1} instead of a color'.format(hl_group, color),
 							problem_mark=color.mark)
 					r.append(colorscheme)
 					continue
 			if allow_gradients == 'force' and not hadgradient:
 					echoerr(context='Error while checking highlight group in theme (key {key})'.format(key=context_key(context)),
-							context_mark=hl_group.mark,
+							context_mark=getattr(hl_group, 'mark', None),
 							problem='group {0} should have at least one gradient color, but it has no'.format(hl_group),
 							problem_mark=group_config.mark)
 					r.append(colorscheme)
@@ -777,6 +792,11 @@ def check_segment_data_key(key, data, context, echoerr):
 	return True, False, False
 
 
+# FIXME More checks, limit existing to ThreadedSegment instances only
+args_spec = Spec(
+	interval=Spec().either(Spec().type(float), Spec().type(int)).optional(),
+	update_first=Spec().type(bool).optional(),
+).unknown_spec(Spec(), Spec()).optional().copy
 highlight_group_spec = Spec().type(unicode).copy
 segment_module_spec = Spec().type(unicode).func(check_segment_module).optional().copy
 segments_spec = Spec().optional().list(
@@ -792,8 +812,7 @@ segments_spec = Spec().optional().list(
 		before=Spec().type(unicode).optional(),
 		width=Spec().either(Spec().unsigned(), Spec().cmp('eq', 'auto')).optional(),
 		align=Spec().oneof(set('lr')).optional(),
-		# FIXME Check args
-		args=Spec().type(dict).optional(),
+		args=args_spec(),
 		contents=Spec().type(unicode).optional(),
 		highlight_group=Spec().list(
 			highlight_group_spec().re('^(?:(?!:divider$).)+$',
@@ -810,8 +829,7 @@ theme_spec = (Spec(
 		Spec(
 			after=Spec().type(unicode).optional(),
 			before=Spec().type(unicode).optional(),
-			# FIXME Check args
-			args=Spec().type(dict).optional(),
+			args=args_spec(),
 			contents=Spec().type(unicode).optional(),
 		),
 	).optional().context_message('Error while loading segment data (key {key})'),

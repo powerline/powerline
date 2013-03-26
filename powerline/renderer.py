@@ -18,9 +18,11 @@ def construct_returned_value(rendered_highlighted, segments, output_raw):
 
 
 class Renderer(object):
-	def __init__(self, theme_config, local_themes, theme_kwargs, colorscheme, **options):
+	def __init__(self, theme_config, local_themes, theme_kwargs, colorscheme, pl, **options):
 		self.__dict__.update(options)
 		self.theme_config = theme_config
+		theme_kwargs['pl'] = pl
+		self.pl = pl
 		self.theme = Theme(theme_config=theme_config, **theme_kwargs)
 		self.local_themes = local_themes
 		self.theme_kwargs = theme_kwargs
@@ -61,10 +63,7 @@ class Renderer(object):
 		reached.
 		'''
 		theme = self.get_theme(matcher_info)
-		segments = theme.get_segments(side)
-
-		if segment_info:
-			theme.segment_info.update(segment_info)
+		segments = theme.get_segments(side, segment_info)
 
 		# Handle excluded/included segments for the current mode
 		segments = [self.get_highlighting(segment, mode) for segment in segments

@@ -7,7 +7,7 @@ from powerline.bindings.vim import getbufvar
 
 
 def help(matcher_info):
-	return getbufvar(matcher_info['bufnr'], '&buftype') == 'help'
+	return str(getbufvar(matcher_info['bufnr'], '&buftype')) == 'help'
 
 
 def cmdwin(matcher_info):

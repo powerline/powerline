@@ -155,6 +155,17 @@ Common configuration is a subdictionary that is a value of ``common`` key in
     :ref:`module segment option <config-themes-seg-module>`. Paths defined here 
     have priority when searching for modules.
 
+``log_file``
+    Defines path which will hold powerline logs. If not present, logging will be 
+    done to stderr.
+
+``log_level``
+    String, determines logging level. Defaults to ``WARNING``.
+
+``log_format``
+    String, determines format of the log messages. Defaults to 
+    ``'%(asctime)s:%(level)s:%(message)s'``.
+
 Extension-specific configuration
 --------------------------------
 

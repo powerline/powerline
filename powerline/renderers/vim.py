@@ -8,11 +8,10 @@ from powerline.colorscheme import ATTR_BOLD, ATTR_ITALIC, ATTR_UNDERLINE
 from powerline.theme import Theme
 
 import vim
+import sys
 
 
-vim_mode = vim_get_func('mode')
-vim_getwinvar = vim_get_func('getwinvar')
-vim_setwinvar = vim_get_func('setwinvar')
+vim_mode = vim_get_func('mode', rettype=str)
 mode_translations = {
 	chr(ord('V') - 0x40): '^V',
 	chr(ord('S') - 0x40): '^S',
@@ -46,26 +45,28 @@ class VimRenderer(Renderer):
 		for matcher in self.local_themes.keys():
 			if matcher(matcher_info):
 				match = self.local_themes[matcher]
-				if 'config' in match:
-					match['theme'] = Theme(theme_config=match.pop('config'), top_theme_config=self.theme_config, **self.theme_kwargs)
-				return match['theme']
+				try:
+					return match['theme']
+				except KeyError:
+					match['theme'] = Theme(theme_config=match['config'], top_theme_config=self.theme_config, **self.theme_kwargs)
+					return match['theme']
 		else:
 			return self.theme
 
 	if hasattr(vim, 'strwidth'):
-		@staticmethod
-		def strwidth(string):
-			# Does not work with tabs, but neither is strwidth from default 
-			# renderer
-			return vim.strwidth(string.encode('utf-8'))
+		if sys.version_info < (3,):
+			@staticmethod
+			def strwidth(string):
+				# Does not work with tabs, but neither is strwidth from default 
+				# renderer
+				return vim.strwidth(string.encode('utf-8'))
+		else:
+			@staticmethod  # NOQA
+			def strwidth(string):
+				return vim.strwidth(string)
 
 	def render(self, window_id, winidx, current):
-		'''Render all segments.
-
-		This method handles replacing of the percent placeholder for vim
-		statuslines, and it caches segment contents which are retrieved and
-		used in non-current windows.
-		'''
+		'''Render all segments.'''
 		if current:
 			mode = vim_mode(1)
 			mode = mode_translations.get(mode, mode)

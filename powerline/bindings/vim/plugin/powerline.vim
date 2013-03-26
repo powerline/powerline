@@ -15,7 +15,8 @@ if ! has('python') && ! has('python3')
 	finish
 endif
 
-let s:powerline_pycmd = substitute(get(g:, 'powerline_pycmd', 'py'), '\v^(py)%[thon](3?)$', '\1\2', '')
+let s:powerline_pycmd = substitute(get(g:, 'powerline_pycmd', has('python') ? 'py' : 'py3'),
+			\'\v^(py)%[thon](3?)$', '\1\2', '')
 let s:powerline_pyeval = get(g:, 'powerline_pyeval', s:powerline_pycmd.'eval')
 
 let s:import_cmd = 'from powerline.vim import VimPowerline'
