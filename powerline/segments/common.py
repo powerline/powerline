@@ -16,6 +16,7 @@ from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment, with_docs
 from powerline.lib.time import monotonic
 from powerline.lib.humanize_bytes import humanize_bytes
 from collections import namedtuple
+from time import sleep
 
 
 def hostname(pl, only_if_ssh=False):
@@ -691,7 +692,7 @@ class NetworkLoadSegment(KwThreadedSegment):
 			idata = {}
 			if self.run_once:
 				idata['prev'] = (monotonic(), _get_bytes(interface))
-				self.sleep(0)
+				self.shutdown_event.wait(self.interval)
 			self.interfaces[interface] = idata
 
 		idata['last'] = (monotonic(), _get_bytes(interface))
