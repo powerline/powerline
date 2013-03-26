@@ -158,10 +158,10 @@ class TestVCS(TestCase):
 				f.write('abc')
 			self.assertEqual(repo.status(), ' U')
 			self.assertEqual(repo.status('file'), '? ')
-			call(['bzr', 'add', '.'], cwd=BZR_REPO, stdout=PIPE)
+			call(['bzr', 'add', '-q', '.'], cwd=BZR_REPO, stdout=PIPE)
 			self.assertEqual(repo.status(), 'D ')
 			self.assertEqual(repo.status('file'), '+N')
-			call(['bzr', 'commit', '-m', 'initial commit'], cwd=BZR_REPO, stdout=PIPE, stderr=PIPE)
+			call(['bzr', 'commit', '-q', '-m', 'initial commit'], cwd=BZR_REPO)
 			self.assertEqual(repo.status(), None)
 			with open(os.path.join(BZR_REPO, 'file'), 'w') as f:
 				f.write('def')
@@ -175,6 +175,22 @@ class TestVCS(TestCase):
 			with open(os.path.join(BZR_REPO, '.bzrignore'), 'w') as f:
 				f.write('ignored')
 			self.assertEqual(repo.status('ignored'), None)
+			# Test changing the dirstate file should invalidate the cache for
+			# all files in the repo
+			with open(os.path.join(BZR_REPO, 'file2'), 'w') as f:
+				f.write('abc')
+			call(['bzr', 'add', 'file2'], cwd=BZR_REPO, stdout=PIPE)
+			call(['bzr', 'commit', '-q', '-m', 'file2 added'], cwd=BZR_REPO)
+			with open(os.path.join(BZR_REPO, 'file'), 'a') as f:
+				f.write('hello')
+			with open(os.path.join(BZR_REPO, 'file2'), 'a') as f:
+				f.write('hello')
+			self.assertEqual(repo.status('file'), ' M')
+			self.assertEqual(repo.status('file2'), ' M')
+			call(['bzr', 'commit', '-q', '-m', 'multi'], cwd=BZR_REPO)
+			self.assertEqual(repo.status('file'), None)
+			self.assertEqual(repo.status('file2'), None)
+
 			# Test changing branch
 			call(['bzr', 'nick', 'branch1'], cwd=BZR_REPO, stdout=PIPE, stderr=PIPE)
 			self.do_branch_rename_test(repo, 'branch1')
