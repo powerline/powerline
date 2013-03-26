@@ -5,31 +5,30 @@ import sys
 import os
 
 try:
-    from powerline.shell import ShellPowerline, get_argparser
+	from powerline.shell import ShellPowerline, get_argparser
 except ImportError:
-    import os
-    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    from powerline.shell import ShellPowerline, get_argparser  # NOQA
+	import os
+	sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+	from powerline.shell import ShellPowerline, get_argparser  # NOQA
 
 if __name__ == '__main__':
-    try:
-        args = get_argparser(description=__doc__).parse_args()
-        kwargs = {}
-        if 'PWD' in os.environ:
-            kwargs['getcwd'] = lambda: os.environ['PWD']
-        powerline = ShellPowerline(args, run_once=True, **kwargs)
-        rendered = powerline.renderer.render(width=args.width, side=args.side, segment_info=args)
-        try:
-            sys.stdout.write(rendered)
-        except UnicodeEncodeError:
-            sys.stdout.write(rendered.encode('utf-8'))
-    except KeyboardInterrupt:
-        # If the users sends ^c we don't want a stacktrace
-        code = 1
-        for arg in sys.argv:
-            if arg.startswith('--last-exit-code='):
-                code = int(arg.split('=', 1)[-1])
-                break
+	try:
+		args = get_argparser(description=__doc__).parse_args()
+		kwargs = {}
+		if 'PWD' in os.environ:
+			kwargs['getcwd'] = lambda: os.environ['PWD']
+		powerline = ShellPowerline(args, run_once=True, **kwargs)
+		rendered = powerline.renderer.render(width=args.width, side=args.side, segment_info=args)
+		try:
+			sys.stdout.write(rendered)
+		except UnicodeEncodeError:
+			sys.stdout.write(rendered.encode('utf-8'))
+	except KeyboardInterrupt:
+		# If the users sends ^c we don't want a stacktrace
+		code = 1
+		for arg in sys.argv:
+			if arg.startswith('--last-exit-code='):
+				code = int(arg.split('=', 1)[-1])
+				break
 
-            sys.exit(code)
-
+        	sys.exit(code)
