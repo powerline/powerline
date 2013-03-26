@@ -6,7 +6,7 @@ from powerline.lib import mergedicts
 
 class IpythonPowerline(Powerline):
 	def __init__(self):
-		super(IpythonPowerline, self).__init__('ipython')
+		super(IpythonPowerline, self).__init__('ipython', use_daemon_threads=True)
 
 	def get_config_paths(self):
 		if self.path:

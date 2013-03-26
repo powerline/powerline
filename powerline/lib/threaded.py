@@ -11,6 +11,7 @@ class ThreadedSegment(object):
 	min_sleep_time = 0.1
 	update_first = True
 	interval = 1
+	daemon = False
 
 	def __init__(self):
 		super(ThreadedSegment, self).__init__()
@@ -49,6 +50,7 @@ class ThreadedSegment(object):
 	def start(self):
 		self.shutdown_event.clear()
 		self.thread = Thread(target=self.run)
+		self.thread.daemon = self.daemon
 		self.thread.start()
 
 	def run(self):
@@ -65,6 +67,8 @@ class ThreadedSegment(object):
 
 	def shutdown(self):
 		self.shutdown_event.set()
+		if self.daemon and self.is_alive():
+			self.thread.join()
 
 	def set_interval(self, interval=None):
 		# Allowing “interval” keyword in configuration.
@@ -81,6 +85,7 @@ class ThreadedSegment(object):
 	def startup(self, pl, **kwargs):
 		self.run_once = False
 		self.pl = pl
+		self.daemon = pl.use_daemon_threads
 
 		self.set_state(**kwargs)
 

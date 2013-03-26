@@ -36,7 +36,7 @@ def load_json_config(config_file_path, load=json.load, open_file=open_file):
 
 
 class PowerlineState(object):
-	def __init__(self, logger, environ, getcwd, home):
+	def __init__(self, use_daemon_threads, logger, environ, getcwd, home):
 		self.environ = environ
 		self.getcwd = getcwd
 		self.home = home or environ.get('HOME', None)
@@ -103,6 +103,7 @@ class Powerline(object):
 				renderer_module=None,
 				run_once=False,
 				logger=None,
+				use_daemon_threads = False,
 				environ=os.environ,
 				getcwd=getattr(os, 'getcwdu', os.getcwd),
 				home=None):
@@ -114,6 +115,7 @@ class Powerline(object):
 		self.environ = environ
 		self.getcwd = getcwd
 		self.home = home
+		self.use_daemon_threads = use_daemon_threads
 
 		self.config_paths = self.get_config_paths()
 
@@ -174,7 +176,7 @@ class Powerline(object):
 					self.logger.setLevel(level)
 					self.logger.addHandler(handler)
 
-				self.pl = PowerlineState(logger=self.logger, environ=self.environ, getcwd=self.getcwd, home=self.home)
+				self.pl = PowerlineState(self.use_daemon_threads, self.logger, self.environ, self.getcwd, self.home)
 
 				self.renderer_options = {
 					'term_truecolor': self.common_config.get('term_truecolor', False),
@@ -234,6 +236,8 @@ class Powerline(object):
 										**self.renderer_options)
 				except Exception as e:
 					self.pl.exception('Failed to construct renderer object: {0}', str(e))
+					if not hasattr(self, 'renderer'):
+						raise
 				else:
 					self.renderer = renderer
 
@@ -351,6 +355,8 @@ class Powerline(object):
 		'''Lock renderer from modifications and run its ``.shutdown()`` method.
 		'''
 		self.shutdown_event.set()
+		if self.use_daemon_threads and self.is_alive():
+			self.thread.join()
 		with self.renderer_lock:
 			self.renderer.shutdown()
 
@@ -359,6 +365,8 @@ class Powerline(object):
 
 	def start(self):
 		self.thread = Thread(target=self.run)
+		if self.use_daemon_threads:
+			self.thread.daemon = True
 		self.thread.start()
 
 	def run(self):
