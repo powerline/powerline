@@ -10,6 +10,7 @@ from powerline.colorscheme import Colorscheme
 from powerline.lib.file_watcher import create_file_watcher
 
 from threading import Lock, Thread, Event
+from collections import defaultdict
 
 
 DEFAULT_SYSTEM_CONFIG_DIR = None
@@ -123,7 +124,7 @@ class Powerline(object):
 		self.renderer_lock = Lock()
 		self.configs_lock = Lock()
 		self.shutdown_event = Event()
-		self.configs = {}
+		self.configs = defaultdict(set)
 		self.thread = None
 
 		if not watcher:
@@ -132,14 +133,14 @@ class Powerline(object):
 		self.prev_common_config = None
 		self.prev_ext_config = None
 
-		self.create_renderer(load_main_config=True, load_colors=True, load_colorscheme=True, load_theme=True)
+		self.create_renderer(load_main=True, load_colors=True, load_colorscheme=True, load_theme=True)
 
-	def create_renderer(self, load_main_config=False, load_colors=False, load_colorscheme=False, load_theme=False):
+	def create_renderer(self, load_main=False, load_colors=False, load_colorscheme=False, load_theme=False):
 		'''(Re)create renderer object. Can be used after Powerline object was 
 		successfully initialized. If any of the below parameters except 
-		``load_main_config`` is True renderer object will be recreated.
+		``load_main`` is True renderer object will be recreated.
 
-		:param bool load_main_config:
+		:param bool load_main:
 			Determines whether main configuration file (:file:`config.json`) 
 			should be loaded. If appropriate configuration changes implies 
 			``load_colorscheme`` and ``load_theme`` and recreation of renderer 
@@ -155,7 +156,8 @@ class Powerline(object):
 		'''
 		common_config_differs = False
 		ext_config_differs = False
-		if load_main_config:
+		if load_main:
+			self._purge_configs('main')
 			config = self.load_main_config()
 			self.common_config = config['common']
 			if self.common_config != self.prev_common_config:
@@ -207,13 +209,16 @@ class Powerline(object):
 		create_renderer = load_colors or load_colorscheme or load_theme or common_config_differs or ext_config_differs
 
 		if load_colors:
+			self._purge_configs('colors')
 			colors_config = self.load_colors_config()
 
 		if load_colorscheme or load_colors:
+			self._purge_configs('colorscheme')
 			colorscheme_config = self.load_colorscheme_config(self.ext_config['colorscheme'])
 			self.colorscheme = Colorscheme(colorscheme_config, colors_config)
 
 		if load_theme:
+			self._purge_configs('theme')
 			self.theme_config = self.load_theme_config(self.ext_config.get('theme', 'default'))
 
 		if create_renderer:
@@ -284,9 +289,16 @@ class Powerline(object):
 		global watcher
 		path = find_config_file(self.config_paths, cfg_path)
 		with self.configs_lock:
-			self.configs[path] = type
+			self.configs[type].add(path)
 			watcher.watch(path)
 		return load_json_config(path)
+
+	def _purge_configs(self, type):
+		try:
+			with self.configs_lock:
+				self.configs.pop(type)
+		except KeyError:
+			pass
 
 	def load_theme_config(self, name):
 		'''Get theme configuration.
@@ -303,14 +315,7 @@ class Powerline(object):
 
 		:return: dictionary with :ref:`top-level configuration <config-main>`.
 		'''
-		with self.configs_lock:
-			self.configs.clear()
-			# Watches for unused files will be cleared automatically after some 
-			# time, no need to do this here, especially considering that
-			# a) most of them are used and thus will be recreated in other
-			#    load_* calls;
-			# b) it is hard to tell which ones stopped being useful.
-		return self._load_config('config', 'main_config')
+		return self._load_config('config', 'main')
 
 	def load_colorscheme_config(self, name):
 		'''Get colorscheme.
@@ -375,9 +380,10 @@ class Powerline(object):
 		while not self.shutdown_event.is_set():
 			kwargs = {}
 			with self.configs_lock:
-				for path, type in self.configs.items():
-					if watcher(path):
-						kwargs['load_' + type] = True
+				for type, paths in self.configs.items():
+					for path in paths:
+						if watcher(path):
+							kwargs['load_' + type] = True
 			if kwargs:
 				try:
 					self.create_renderer(**kwargs)
