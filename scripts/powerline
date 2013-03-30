@@ -13,11 +13,12 @@ except ImportError:
 
 if __name__ == '__main__':
 	args = get_argparser(description=__doc__).parse_args()
-	kwargs = {}
-	if 'PWD' in os.environ:
-		kwargs['getcwd'] = lambda: os.environ['PWD']
 	powerline = ShellPowerline(args, run_once=True, **kwargs)
-	rendered = powerline.render(width=args.width, side=args.side, segment_info=args)
+	rendered = powerline.render(
+		width=args.width,
+		side=args.side,
+		segment_info={'args': args, 'environ': os.environ},
+	)
 	try:
 		sys.stdout.write(rendered)
 	except UnicodeEncodeError:

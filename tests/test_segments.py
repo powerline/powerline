@@ -14,15 +14,22 @@ vim = None
 class TestShell(TestCase):
 	def test_last_status(self):
 		pl = Pl()
-		self.assertEqual(shell.last_status(pl=pl, segment_info=Args(last_exit_code=10)),
+		segment_info = {'args': Args(last_exit_code=10)}
+		self.assertEqual(shell.last_status(pl=pl, segment_info=segment_info),
 				[{'contents': '10', 'highlight_group': 'exit_fail'}])
-		self.assertEqual(shell.last_status(pl=pl, segment_info=Args(last_exit_code=None)), None)
+		segment_info['args'].last_exit_code=0
+		self.assertEqual(shell.last_status(pl=pl, segment_info=segment_info), None)
+		segment_info['args'].last_exit_code=None
+		self.assertEqual(shell.last_status(pl=pl, segment_info=segment_info), None)
 
 	def test_last_pipe_status(self):
 		pl = Pl()
-		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=Args(last_pipe_status=[])), None)
-		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=Args(last_pipe_status=[0, 0, 0])), None)
-		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=Args(last_pipe_status=[0, 2, 0])),
+		segment_info = {'args': Args(last_pipe_status=[])}
+		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info), None)
+		segment_info['args'].last_pipe_status=[0, 0, 0]
+		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info), None)
+		segment_info['args'].last_pipe_status=[0, 2, 0]
+		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info),
 				[{'contents': '0', 'highlight_group': 'exit_success'},
 				{'contents': '2', 'highlight_group': 'exit_fail'},
 				{'contents': '0', 'highlight_group': 'exit_success'}])
@@ -30,77 +37,93 @@ class TestShell(TestCase):
 
 class TestCommon(TestCase):
 	def test_hostname(self):
-		with replace_env('SSH_CLIENT', '192.168.0.12 40921 22') as pl:
+		pl = Pl()
+		with replace_env('SSH_CLIENT', '192.168.0.12 40921 22') as segment_info:
 			with replace_module_module(common, 'socket', gethostname=lambda: 'abc'):
-				self.assertEqual(common.hostname(pl=pl), 'abc')
-				self.assertEqual(common.hostname(pl=pl, only_if_ssh=True), 'abc')
-				pl.environ.pop('SSH_CLIENT')
-				self.assertEqual(common.hostname(pl=pl), 'abc')
-				self.assertEqual(common.hostname(pl=pl, only_if_ssh=True), None)
+				self.assertEqual(common.hostname(pl=pl, segment_info=segment_info), 'abc')
+				self.assertEqual(common.hostname(pl=pl, segment_info=segment_info, only_if_ssh=True), 'abc')
+				segment_info['environ'].pop('SSH_CLIENT')
+				self.assertEqual(common.hostname(pl=pl, segment_info=segment_info), 'abc')
+				self.assertEqual(common.hostname(pl=pl, segment_info=segment_info, only_if_ssh=True), None)
 
 	def test_user(self):
 		new_os = new_module('os', getpid=lambda: 1)
 		new_psutil = new_module('psutil', Process=lambda pid: Args(username='def'))
-		with replace_env('USER', 'def') as pl:
+		pl = Pl()
+		with replace_env('USER', 'def') as segment_info:
 			with replace_attr(common, 'os', new_os):
 				with replace_attr(common, 'psutil', new_psutil):
 					with replace_attr(common, '_geteuid', lambda: 5):
-						self.assertEqual(common.user(pl=pl), [{'contents': 'def', 'highlight_group': 'user'}])
+						self.assertEqual(common.user(pl=pl, segment_info=segment_info), [
+							{'contents': 'def', 'highlight_group': 'user'}
+						])
 					with replace_attr(common, '_geteuid', lambda: 0):
-						self.assertEqual(common.user(pl=pl), [{'contents': 'def', 'highlight_group': ['superuser', 'user']}])
+						self.assertEqual(common.user(pl=pl, segment_info=segment_info), [
+							{'contents': 'def', 'highlight_group': ['superuser', 'user']}
+						])
 
 	def test_branch(self):
 		pl = Pl()
-		pl._cwd = os.getcwd()
+		segment_info = {'getcwd': os.getcwd}
 		with replace_attr(common, 'guess', lambda path: Args(branch=lambda: os.path.basename(path), status=lambda: None, directory='/tmp/tests')):
-			self.assertEqual(common.branch(pl=pl, status_colors=False), 'tests')
-			self.assertEqual(common.branch(pl=pl, status_colors=True),
+			self.assertEqual(common.branch(pl=pl, segment_info=segment_info, status_colors=False), 'tests')
+			self.assertEqual(common.branch(pl=pl, segment_info=segment_info, status_colors=True),
 					[{'contents': 'tests', 'highlight_group': ['branch_clean', 'branch']}])
 		with replace_attr(common, 'guess', lambda path: Args(branch=lambda: os.path.basename(path), status=lambda: 'D  ', directory='/tmp/tests')):
-			self.assertEqual(common.branch(pl=pl, status_colors=False), 'tests')
-			self.assertEqual(common.branch(pl=pl, status_colors=True),
+			self.assertEqual(common.branch(pl=pl, segment_info=segment_info, status_colors=False), 'tests')
+			self.assertEqual(common.branch(pl=pl, segment_info=segment_info, status_colors=True),
 					[{'contents': 'tests', 'highlight_group': ['branch_dirty', 'branch']}])
-			self.assertEqual(common.branch(pl=pl), 'tests')
+			self.assertEqual(common.branch(pl=pl, segment_info=segment_info), 'tests')
 		with replace_attr(common, 'guess', lambda path: None):
-			self.assertEqual(common.branch(pl=pl), None)
+			self.assertEqual(common.branch(pl=pl, segment_info=segment_info), None)
 
 	def test_cwd(self):
 		new_os = new_module('os', path=os.path, sep='/')
 		pl = Pl()
+		cwd = [None]
+
+		def getcwd():
+			wd = cwd[0]
+			if isinstance(wd, Exception):
+				raise wd
+			else:
+				return wd
+
+		segment_info = {'getcwd': getcwd, 'home': None}
 		with replace_attr(common, 'os', new_os):
-			pl._cwd = '/abc/def/ghi/foo/bar'
-			self.assertEqual(common.cwd(pl=pl),
+			cwd[0] = '/abc/def/ghi/foo/bar'
+			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info),
 					[{'contents': '/', 'divider_highlight_group': 'cwd:divider'},
 					{'contents': 'abc', 'divider_highlight_group': 'cwd:divider'},
 					{'contents': 'def', 'divider_highlight_group': 'cwd:divider'},
 					{'contents': 'ghi', 'divider_highlight_group': 'cwd:divider'},
 					{'contents': 'foo', 'divider_highlight_group': 'cwd:divider'},
 					{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'highlight_group': ['cwd:current_folder', 'cwd']}])
-			pl.home = '/abc/def/ghi'
-			self.assertEqual(common.cwd(pl=pl),
+			segment_info['home'] = '/abc/def/ghi'
+			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info),
 					[{'contents': '~', 'divider_highlight_group': 'cwd:divider'},
 					{'contents': 'foo', 'divider_highlight_group': 'cwd:divider'},
 					{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'highlight_group': ['cwd:current_folder', 'cwd']}])
-			self.assertEqual(common.cwd(pl=pl, dir_limit_depth=3),
+			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info, dir_limit_depth=3),
 					[{'contents': '~', 'divider_highlight_group': 'cwd:divider'},
 					{'contents': 'foo', 'divider_highlight_group': 'cwd:divider'},
 					{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'highlight_group': ['cwd:current_folder', 'cwd']}])
-			self.assertEqual(common.cwd(pl=pl, dir_limit_depth=1),
+			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info, dir_limit_depth=1),
 					[{'contents': '⋯', 'divider_highlight_group': 'cwd:divider'},
 					{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'highlight_group': ['cwd:current_folder', 'cwd']}])
-			self.assertEqual(common.cwd(pl=pl, dir_limit_depth=2, dir_shorten_len=2),
+			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info, dir_limit_depth=2, dir_shorten_len=2),
 					[{'contents': '~', 'divider_highlight_group': 'cwd:divider'},
 					{'contents': 'fo', 'divider_highlight_group': 'cwd:divider'},
 					{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'highlight_group': ['cwd:current_folder', 'cwd']}])
 			ose = OSError()
 			ose.errno = 2
-			pl._cwd = ose
-			self.assertEqual(common.cwd(pl=pl, dir_limit_depth=2, dir_shorten_len=2),
+			cwd[0] = ose
+			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info, dir_limit_depth=2, dir_shorten_len=2),
 					[{'contents': '[not found]', 'divider_highlight_group': 'cwd:divider', 'highlight_group': ['cwd:current_folder', 'cwd']}])
-			pl._cwd = OSError()
-			self.assertRaises(OSError, common.cwd, pl=pl, dir_limit_depth=2, dir_shorten_len=2)
-			pl._cwd = ValueError()
-			self.assertRaises(ValueError, common.cwd, pl=pl, dir_limit_depth=2, dir_shorten_len=2)
+			cwd[0] = OSError()
+			self.assertRaises(OSError, common.cwd, pl=pl, segment_info=segment_info, dir_limit_depth=2, dir_shorten_len=2)
+			cwd[0] = ValueError()
+			self.assertRaises(ValueError, common.cwd, pl=pl, segment_info=segment_info, dir_limit_depth=2, dir_shorten_len=2)
 
 	def test_date(self):
 		pl = Pl()
@@ -257,10 +280,11 @@ class TestCommon(TestCase):
 				common.network_load.shutdown()
 
 	def test_virtualenv(self):
-		with replace_env('VIRTUAL_ENV', '/abc/def/ghi') as pl:
-			self.assertEqual(common.virtualenv(pl=pl), 'ghi')
-			pl.environ.pop('VIRTUAL_ENV')
-			self.assertEqual(common.virtualenv(pl=pl), None)
+		pl = Pl()
+		with replace_env('VIRTUAL_ENV', '/abc/def/ghi') as segment_info:
+			self.assertEqual(common.virtualenv(pl=pl, segment_info=segment_info), 'ghi')
+			segment_info['environ'].pop('VIRTUAL_ENV')
+			self.assertEqual(common.virtualenv(pl=pl, segment_info=segment_info), None)
 
 	def test_email_imap_alert(self):
 		# TODO

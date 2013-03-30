@@ -1,6 +1,7 @@
 # vim:fileencoding=utf-8:noet
 import imp
 import sys
+import os
 
 
 class Pl(object):
@@ -8,17 +9,8 @@ class Pl(object):
 		self.errors = []
 		self.warns = []
 		self.debugs = []
-		self._cwd = None
 		self.prefix = None
-		self.environ = {}
-		self.home = None
 		self.use_daemon_threads = True
-
-	def getcwd(self):
-		if isinstance(self._cwd, Exception):
-			raise self._cwd
-		else:
-			return self._cwd
 
 	for meth in ('error', 'warn', 'debug'):
 		exec (('def {0}(self, msg, *args, **kwargs):\n'
@@ -133,9 +125,7 @@ class ItemReplace(object):
 			self.d[self.key] = self.old
 
 
-def replace_env(key, new, d=None):
-	r = None
-	if not d:
-		r = Pl()
-		d = r.environ
-	return ItemReplace(d, key, new, r)
+def replace_env(key, new, environ=None, **kwargs):
+	r = kwargs.copy()
+	r['environ'] = environ or {}
+	return ItemReplace(r['environ'], key, new, r)

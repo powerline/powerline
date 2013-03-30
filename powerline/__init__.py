@@ -64,10 +64,7 @@ def load_json_config(config_file_path, load=json.load, open_file=open_file):
 
 
 class PowerlineState(object):
-	def __init__(self, use_daemon_threads, logger, ext, environ, getcwd, home):
-		self.environ = environ
-		self.getcwd = getcwd
-		self.home = home or environ.get('HOME', None)
+	def __init__(self, use_daemon_threads, logger, ext):
 		self.logger = logger
 		self.ext = ext
 		self.use_daemon_threads = use_daemon_threads
@@ -124,14 +121,6 @@ class Powerline(object):
 		during python session.
 	:param Logger logger:
 		If present, no new logger will be created and this logger will be used.
-	:param dict environ:
-		Object with ``.__getitem__`` and ``.get`` methods used to obtain 
-		environment variables. Defaults to ``os.environ``.
-	:param func getcwd:
-		Function used to get current working directory. Defaults to 
-		``os.getcwdu`` or ``os.getcwd``.
-	:param str home:
-		Home directory. Defaults to ``environ.get('HOME')``.
 	'''
 
 	def __init__(self,
@@ -139,18 +128,12 @@ class Powerline(object):
 				renderer_module=None,
 				run_once=False,
 				logger=None,
-				use_daemon_threads=True,
-				environ=os.environ,
-				getcwd=getattr(os, 'getcwdu', os.getcwd),
-				home=None):
+				use_daemon_threads=True):
 		global watcher
 		self.ext = ext
 		self.renderer_module = renderer_module or ext
 		self.run_once = run_once
 		self.logger = logger
-		self.environ = environ
-		self.getcwd = getcwd
-		self.home = home
 		self.use_daemon_threads = use_daemon_threads
 
 		if '.' not in self.renderer_module:
@@ -221,7 +204,7 @@ class Powerline(object):
 					self.logger.setLevel(level)
 					self.logger.addHandler(handler)
 
-				self.pl = PowerlineState(self.use_daemon_threads, self.logger, self.ext, self.environ, self.getcwd, self.home)
+				self.pl = PowerlineState(self.use_daemon_threads, self.logger, self.ext)
 
 				self.renderer_options.update(
 					pl=self.pl,

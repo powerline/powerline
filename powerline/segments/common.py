@@ -15,29 +15,32 @@ from powerline.lib.vcs import guess
 from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment, with_docstring
 from powerline.lib.time import monotonic
 from powerline.lib.humanize_bytes import humanize_bytes
+from powerline.theme import requires_segment_info
 from collections import namedtuple
 from time import sleep
 
 
-def hostname(pl, only_if_ssh=False):
+@requires_segment_info
+def hostname(pl, segment_info, only_if_ssh=False):
 	'''Return the current hostname.
 
 	:param bool only_if_ssh:
 		only return the hostname if currently in an SSH session
 	'''
-	if only_if_ssh and not pl.environ.get('SSH_CLIENT'):
+	if only_if_ssh and not segment_info['environ'].get('SSH_CLIENT'):
 		return None
 	return socket.gethostname()
 
 
+@requires_segment_info
 class RepositorySegment(KwThreadedSegment):
 	def __init__(self):
 		super(RepositorySegment, self).__init__()
 		self.directories = {}
 
 	@staticmethod
-	def key(pl, **kwargs):
-		return os.path.abspath(pl.getcwd())
+	def key(segment_info, **kwargs):
+		return os.path.abspath(segment_info['getcwd']())
 
 	def update(self, *args):
 		# .compute_state() is running only in this method, and only in one 
@@ -110,7 +113,8 @@ Highlight groups used: ``branch_clean``, ``branch_dirty``, ``branch``.
 ''')
 
 
-def cwd(pl, dir_shorten_len=None, dir_limit_depth=None):
+@requires_segment_info
+def cwd(pl, segment_info, dir_shorten_len=None, dir_limit_depth=None):
 	'''Return the current working directory.
 
 	Returns a segment list to create a breadcrumb-like effect.
@@ -127,7 +131,7 @@ def cwd(pl, dir_shorten_len=None, dir_limit_depth=None):
 	'''
 	import re
 	try:
-		cwd = pl.getcwd()
+		cwd = segment_info['getcwd']()
 	except OSError as e:
 		if e.errno == 2:
 			# user most probably deleted the directory
@@ -136,7 +140,7 @@ def cwd(pl, dir_shorten_len=None, dir_limit_depth=None):
 			cwd = "[not found]"
 		else:
 			raise
-	home = pl.home
+	home = segment_info['home']
 	if home:
 		cwd = re.sub('^' + re.escape(home), '~', cwd, 1)
 	cwd_split = cwd.split(os.sep)
@@ -540,7 +544,7 @@ try:
 			if data:
 				yield interface, data.bytes_recv, data.bytes_sent
 
-	def _get_user(pl):
+	def _get_user(segment_info):
 		return psutil.Process(os.getpid()).username
 
 	def cpu_load_percent(pl, measure_interval=.5):
@@ -567,8 +571,8 @@ except ImportError:
 			if x is not None:
 				yield interface, x[0], x[1]
 
-	def _get_user(pl):  # NOQA
-		return pl.environ.get('USER', None)
+	def _get_user(segment_info):  # NOQA
+		return segment_info['environ'].get('USER', None)
 
 	def cpu_load_percent(pl, measure_interval=.5):  # NOQA
 		'''Return the average CPU load as a percentage.
@@ -587,7 +591,7 @@ username = False
 _geteuid = getattr(os, 'geteuid', lambda: 1)
 
 
-def user(pl):
+def user(pl, segment_info=None):
 	'''Return the current user.
 
 	Highlights the user with the ``superuser`` if the effective user ID is 0.
@@ -605,6 +609,8 @@ def user(pl):
 		'contents': username,
 		'highlight_group': 'user' if euid != 0 else ['superuser', 'user'],
 	}]
+if 'psutil' in globals():
+	user = requires_segment_info(user)
 
 
 if os.path.exists('/proc/uptime'):
@@ -765,9 +771,10 @@ Highlight groups used: ``network_load_sent_gradient`` (gradient) or ``network_lo
 ''')
 
 
-def virtualenv(pl):
+@requires_segment_info
+def virtualenv(pl, segment_info):
 	'''Return the name of the current Python virtualenv.'''
-	return os.path.basename(pl.environ.get('VIRTUAL_ENV', '')) or None
+	return os.path.basename(segment_info['environ'].get('VIRTUAL_ENV', '')) or None
 
 
 _IMAPKey = namedtuple('Key', 'username password server port folder')

@@ -79,8 +79,14 @@ class VimRenderer(Renderer):
 		}
 		segment_info['buffer'] = segment_info['window'].buffer
 		segment_info['bufnr'] = segment_info['buffer'].number
+		segment_info.update(self.segment_info)
 		winwidth = segment_info['window'].width
-		statusline = super(VimRenderer, self).render(mode, winwidth, segment_info=segment_info, matcher_info=segment_info)
+		statusline = super(VimRenderer, self).render(
+			mode=mode,
+			width=winwidth,
+			segment_info=segment_info,
+			matcher_info=segment_info,
+		)
 		return statusline
 
 	def reset_highlight(self):

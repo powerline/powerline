@@ -65,17 +65,17 @@ class TestConfig(TestCase):
 		from powerline.shell import ShellPowerline
 		args = Args(last_pipe_status=[1, 0], ext=['shell'], renderer_module='zsh_prompt')
 		with ShellPowerline(args, run_once=False) as powerline:
-			powerline.render(segment_info=args)
+			powerline.render(segment_info={'args': args})
 		with ShellPowerline(args, run_once=False) as powerline:
-			powerline.render(segment_info=args)
+			powerline.render(segment_info={'args': args})
 
 	def test_bash(self):
 		from powerline.shell import ShellPowerline
 		args = Args(last_exit_code=1, ext=['shell'], renderer_module='bash_prompt', config=[('ext', {'shell': {'theme': 'default_leftonly'}})])
 		with ShellPowerline(args, run_once=False) as powerline:
-			powerline.render(segment_info=args)
+			powerline.render(segment_info={'args': args})
 		with ShellPowerline(args, run_once=False) as powerline:
-			powerline.render(segment_info=args)
+			powerline.render(segment_info={'args': args})
 
 	def test_ipython(self):
 		from powerline.ipython import IpythonPowerline
