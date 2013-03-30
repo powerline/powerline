@@ -7,7 +7,8 @@ __docformat__ = 'restructuredtext en'
 import os
 import sys
 import errno
-import time
+from powerline.lib.time import monotonic
+from time import sleep
 from threading import RLock
 
 
@@ -121,7 +122,7 @@ class INotifyWatch(object):
 			self.process_event(wd, mask, cookie)
 
 	def expire_watches(self):
-		now = time.time()
+		now = monotonic()
 		for path, last_query in tuple(self.last_query.items()):
 			if last_query - now > self.expire_time:
 				self.unwatch(path)
@@ -168,7 +169,7 @@ class INotifyWatch(object):
 		raise OSError if the path does not exist. '''
 		path = self.os.path.abspath(path)
 		with self.lock:
-			self.last_query[path] = time.time()
+			self.last_query[path] = monotonic()
 			self.expire_watches()
 			if path not in self.watches:
 				# Try to re-add the watch, it will fail if the file does not
@@ -269,7 +270,7 @@ class StatWatch(object):
 
 	def close(self):
 		with self.lock:
-			self.watches = {}
+			self.watches.clear()
 
 
 def create_file_watcher(use_stat=False, expire_time=10):
@@ -302,7 +303,7 @@ if __name__ == '__main__':
 		while True:
 			if watcher(sys.argv[-1]):
 				print ('%s has changed' % sys.argv[-1])
-			time.sleep(1)
+			sleep(1)
 	except KeyboardInterrupt:
 		pass
 	watcher.close()
