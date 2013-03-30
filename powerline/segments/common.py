@@ -39,13 +39,13 @@ class RepositorySegment(KwThreadedSegment):
 	def key(pl, **kwargs):
 		return os.path.abspath(pl.getcwd())
 
-	def update(self):
+	def update(self, *args):
 		# .compute_state() is running only in this method, and only in one 
 		# thread, thus operations with .directories do not need write locks 
 		# (.render() method is not using .directories). If this is changed 
 		# .directories needs redesigning
 		self.directories.clear()
-		super(RepositorySegment, self).update()
+		return super(RepositorySegment, self).update(*args)
 
 	def compute_state(self, path):
 		repo = guess(path=path)
@@ -231,19 +231,19 @@ def _external_ip(query_url='http://ipv4.icanhazip.com/'):
 
 
 class ExternalIpSegment(ThreadedSegment):
+	interval = 10
+
 	def set_state(self, query_url='http://ipv4.icanhazip.com/', **kwargs):
 		self.query_url = query_url
 		super(ExternalIpSegment, self).set_state(**kwargs)
 
-	def update(self):
-		ip = _external_ip(query_url=self.query_url)
-		with self.write_lock:
-			self.ip = ip
+	def update(self, old_ip):
+		return _external_ip(query_url=self.query_url)
 
-	def render(self, **kwargs):
-		if not hasattr(self, 'ip'):
+	def render(self, ip, **kwargs):
+		if not ip:
 			return None
-		return [{'contents': self.ip, 'divider_highlight_group': 'background:divider'}]
+		return [{'contents': ip, 'divider_highlight_group': 'background:divider'}]
 
 
 external_ip = with_docstring(ExternalIpSegment(),
@@ -357,10 +357,9 @@ class WeatherSegment(ThreadedSegment):
 	def set_state(self, location_query=None, **kwargs):
 		self.location = location_query
 		self.url = None
-		self.condition = {}
 		super(WeatherSegment, self).set_state(**kwargs)
 
-	def update(self):
+	def update(self, old_weather):
 		import json
 
 		if not self.url:
@@ -398,31 +397,31 @@ class WeatherSegment(ThreadedSegment):
 				icon_names = ('unknown',)
 				self.error('Unknown condition code: {0}', condition_code)
 
-		with self.write_lock:
-			self.temp = temp
-			self.icon_names = icon_names
+		return (temp, icon_names)
 
-	def render(self, icons=None, unit='C', temp_format=None, temp_coldest=-30, temp_hottest=40, **kwargs):
-		if not hasattr(self, 'icon_names'):
+	def render(self, weather, icons=None, unit='C', temp_format=None, temp_coldest=-30, temp_hottest=40, **kwargs):
+		if not weather:
 			return None
 
-		for icon_name in self.icon_names:
+		temp, icon_names = weather
+
+		for icon_name in icon_names:
 			if icons:
 				if icon_name in icons:
 					icon = icons[icon_name]
 					break
 		else:
-			icon = weather_conditions_icons[self.icon_names[-1]]
+			icon = weather_conditions_icons[icon_names[-1]]
 
 		temp_format = temp_format or ('{temp:.0f}' + temp_units[unit])
-		temp = temp_conversions[unit](self.temp)
-		if self.temp <= temp_coldest:
+		converted_temp = temp_conversions[unit](temp)
+		if temp <= temp_coldest:
 			gradient_level = 0
-		elif self.temp >= temp_hottest:
+		elif temp >= temp_hottest:
 			gradient_level = 100
 		else:
-			gradient_level = (self.temp - temp_coldest) * 100.0 / (temp_hottest - temp_coldest)
-		groups = ['weather_condition_' + icon_name for icon_name in self.icon_names] + ['weather_conditions', 'weather']
+			gradient_level = (temp - temp_coldest) * 100.0 / (temp_hottest - temp_coldest)
+		groups = ['weather_condition_' + icon_name for icon_name in icon_names] + ['weather_conditions', 'weather']
 		return [
 			{
 				'contents': icon + ' ',
@@ -430,7 +429,7 @@ class WeatherSegment(ThreadedSegment):
 				'divider_highlight_group': 'background:divider',
 			},
 			{
-				'contents': temp_format.format(temp=temp),
+				'contents': temp_format.format(temp=converted_temp),
 				'highlight_group': ['weather_temp_gradient', 'weather_temp', 'weather'],
 				'draw_divider': False,
 				'divider_highlight_group': 'background:divider',

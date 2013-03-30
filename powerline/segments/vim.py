@@ -318,13 +318,13 @@ class RepositorySegment(KwWindowThreadedSegment):
 		# FIXME os.getcwd() is not a proper variant for non-current buffers
 		return segment_info['buffer'].name or os.getcwd()
 
-	def update(self):
+	def update(self, *args):
 		# .compute_state() is running only in this method, and only in one 
 		# thread, thus operations with .directories do not need write locks 
 		# (.render() method is not using .directories). If this is changed 
 		# .directories needs redesigning
 		self.directories.clear()
-		super(RepositorySegment, self).update()
+		return super(RepositorySegment, self).update(*args)
 
 	def compute_state(self, path):
 		repo = guess(path=path)

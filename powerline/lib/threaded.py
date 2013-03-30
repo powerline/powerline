@@ -16,33 +16,39 @@ class ThreadedSegment(object):
 	def __init__(self):
 		super(ThreadedSegment, self).__init__()
 		self.shutdown_event = Event()
-		self.write_lock = Lock()
 		self.run_once = True
 		self.thread = None
 		self.skip = False
 		self.crashed_value = None
+		self.update_value = None
 
 	def __call__(self, pl, update_first=True, **kwargs):
 		if self.run_once:
 			self.pl = pl
 			self.set_state(**kwargs)
-			self.update()
+			update_value = self.get_update_value(True)
 		elif not self.is_alive():
 			# Without this we will not have to wait long until receiving bug “I 
 			# opened vim, but branch information is only shown after I move 
 			# cursor”.
 			#
 			# If running once .update() is called in __call__.
-			if update_first and self.update_first:
-				self.update()
+			update_value = self.get_update_value(update_first and self.update_first)
 			self.start()
 		elif not self.updated:
-			self.update()
+			update_value = self.get_update_value(True)
+		else:
+			update_value = self.update_value
 
 		if self.skip:
 			return self.crashed_value
-		with self.write_lock:
-			return self.render(update_first=update_first, pl=pl, **kwargs)
+
+		return self.render(update_value, update_first=update_first, pl=pl, **kwargs)
+
+	def get_update_value(self, update=False):
+		if update:
+			self.update_value = self.update(self.update_value)
+		return self.update_value
 
 	def is_alive(self):
 		return self.thread and self.thread.is_alive()
@@ -57,7 +63,7 @@ class ThreadedSegment(object):
 		while not self.shutdown_event.is_set():
 			start_time = monotonic()
 			try:
-				self.update()
+				self.update(self.update_value)
 			except Exception as e:
 				self.error('Exception while updating: {0}', str(e))
 				self.skip = True
@@ -115,57 +121,48 @@ class KwThreadedSegment(ThreadedSegment):
 
 	def __init__(self):
 		super(KwThreadedSegment, self).__init__()
-		self.queries = {}
-		self.crashed = set()
 		self.updated = True
+		self.update_value = ({}, set())
 
 	@staticmethod
 	def key(**kwargs):
 		return frozenset(kwargs.items())
 
-	def render(self, update_first, **kwargs):
+	def render(self, update_value, update_first, **kwargs):
+		queries, crashed = update_value
 		key = self.key(**kwargs)
-		if key in self.crashed:
+		if key in crashed:
 			return self.crashed_value
 
 		try:
-			update_state = self.queries[key][1]
+			update_state = queries[key][1]
 		except KeyError:
 			# Allow only to forbid to compute missing values: in either user 
 			# configuration or in subclasses.
 			update_state = self.compute_state(key) if update_first and self.update_first or self.run_once else None
 
-		# No locks: render method is already running with write_lock acquired.
-		self.queries[key] = (monotonic(), update_state)
+		queries[key] = (monotonic(), update_state)
 		return self.render_one(update_state, **kwargs)
 
-	def update(self):
+	def update(self, old_update_value):
 		updates = {}
-		removes = []
-		for key, (last_query_time, state) in list(self.queries.items()):
+		crashed = set()
+		update_value = (updates, crashed)
+		queries = old_update_value[0]
+		for key, (last_query_time, state) in queries.items():
 			if last_query_time < monotonic() < last_query_time + self.drop_interval:
 				try:
 					updates[key] = (last_query_time, self.compute_state(key))
 				except Exception as e:
 					self.exception('Exception while computing state for {0}: {1}', repr(key), str(e))
-					with self.write_lock:
-						self.crashed.add(key)
-			else:
-				removes.append(key)
-		with self.write_lock:
-			self.queries.update(updates)
-			self.crashed -= set(updates)
-			for key in removes:
-				self.queries.pop(key)
+					crashed.add(key)
+		return update_value
 
 	def set_state(self, interval=None, update_first=True, **kwargs):
 		self.set_interval(interval)
 
 		if self.update_first:
 			self.update_first = update_first
-
-		with self.write_lock:
-			self.queries.clear()
 
 	@staticmethod
 	def render_one(update_state, **kwargs):

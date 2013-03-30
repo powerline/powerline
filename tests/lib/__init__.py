@@ -12,6 +12,7 @@ class Pl(object):
 		self.prefix = None
 		self.environ = {}
 		self.home = None
+		self.use_daemon_threads = True
 
 	def getcwd(self):
 		if isinstance(self._cwd, Exception):
