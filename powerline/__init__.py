@@ -28,7 +28,7 @@ class MultiClientWatcher(object):
 	def __call__(self, file):
 		if file in self.received_events and self not in self.received_events[file]:
 			self.received_events[file].add(self)
-			if self.received_events >= self.subscribers:
+			if self.received_events[file] >= self.subscribers:
 				self.received_events.pop(file)
 			return True
 
@@ -121,6 +121,9 @@ class Powerline(object):
 		during python session.
 	:param Logger logger:
 		If present, no new logger will be created and this logger will be used.
+	:param float interval:
+		When reloading configuration wait for this amount of seconds. Set it to 
+		None if you don’t want to reload configuration automatically.
 	'''
 
 	def __init__(self,
@@ -128,13 +131,15 @@ class Powerline(object):
 				renderer_module=None,
 				run_once=False,
 				logger=None,
-				use_daemon_threads=True):
+				use_daemon_threads=True,
+				interval=10):
 		global watcher
 		self.ext = ext
 		self.renderer_module = renderer_module or ext
 		self.run_once = run_once
 		self.logger = logger
 		self.use_daemon_threads = use_daemon_threads
+		self.interval = interval
 
 		if '.' not in self.renderer_module:
 			self.renderer_module = 'powerline.renderers.' + self.renderer_module
@@ -230,6 +235,7 @@ class Powerline(object):
 				load_theme = (load_theme
 							or not self.prev_ext_config
 							or self.prev_ext_config['theme'] != self.ext_config['theme'])
+				self.prev_ext_config = self.ext_config
 
 		create_renderer = load_colors or load_colorscheme or load_theme or common_config_differs or ext_config_differs
 
@@ -266,7 +272,7 @@ class Powerline(object):
 				else:
 					self.renderer = renderer
 
-		if not self.run_once and not self.is_alive():
+		if not self.run_once and not self.is_alive() and self.interval is not None:
 			self.start()
 
 	def get_log_handler(self):
@@ -408,7 +414,7 @@ class Powerline(object):
 					self.create_renderer(**kwargs)
 				except Exception as e:
 					self.pl.exception('Failed to create renderer: {0}', str(e))
-			self.shutdown_event.wait(10)
+			self.shutdown_event.wait(self.interval)
 
 	def __enter__(self):
 		return self
