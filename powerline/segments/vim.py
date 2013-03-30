@@ -359,15 +359,15 @@ class BranchSegment(RepositorySegment):
 	def process_repo(repo):
 		return repo.branch()
 
-	def render_one(self, update_state, segment_info, status_colors=False, **kwargs):
-		if not update_state:
+	def render_one(self, branch, segment_info, status_colors=False, **kwargs):
+		if not branch:
 			return None
 
 		if status_colors:
 			self.started_repository_status = True
 
 		return [{
-			'contents': update_state,
+			'contents': branch,
 			'highlight_group': (['branch_dirty' if repository_status(segment_info=segment_info, **kwargs) else 'branch_clean']
 								if status_colors else []) + ['branch'],
 			'divider_highlight_group': 'branch:divider',
