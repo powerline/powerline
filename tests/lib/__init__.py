@@ -1,7 +1,6 @@
 # vim:fileencoding=utf-8:noet
 import imp
 import sys
-import os
 
 
 class Pl(object):
@@ -123,6 +122,10 @@ class ItemReplace(object):
 				pass
 		else:
 			self.d[self.key] = self.old
+
+
+def replace_item(d, key, new):
+	return ItemReplace(d, key, new, d)
 
 
 def replace_env(key, new, environ=None, **kwargs):
