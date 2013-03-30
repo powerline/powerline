@@ -64,18 +64,20 @@ def load_json_config(config_file_path, load=json.load, open_file=open_file):
 
 
 class PowerlineState(object):
-	def __init__(self, use_daemon_threads, logger, environ, getcwd, home):
+	def __init__(self, use_daemon_threads, logger, ext, environ, getcwd, home):
 		self.environ = environ
 		self.getcwd = getcwd
 		self.home = home or environ.get('HOME', None)
 		self.logger = logger
+		self.ext = ext
+		self.use_daemon_threads = use_daemon_threads
 		self.prefix = ''
 		self.last_msgs = {}
-		self.use_daemon_threads = use_daemon_threads
 
 	def _log(self, attr, msg, *args, **kwargs):
 		prefix = kwargs.get('prefix') or self.prefix
-		msg = ((prefix + ':') if prefix else '') + msg.format(*args, **kwargs)
+		prefix = self.ext + ((':' + prefix) if prefix else '')
+		msg = prefix + ':' + msg.format(*args, **kwargs)
 		key = attr + ':' + prefix
 		if msg != self.last_msgs.get(key):
 			getattr(self.logger, attr)(msg)
@@ -217,7 +219,7 @@ class Powerline(object):
 					self.logger.setLevel(level)
 					self.logger.addHandler(handler)
 
-				self.pl = PowerlineState(self.use_daemon_threads, self.logger, self.environ, self.getcwd, self.home)
+				self.pl = PowerlineState(self.use_daemon_threads, self.logger, self.ext, self.environ, self.getcwd, self.home)
 
 				self.renderer_options = {
 					'term_truecolor': self.common_config.get('term_truecolor', False),
