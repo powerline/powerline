@@ -166,6 +166,8 @@ class Powerline(object):
 		self.configs = defaultdict(set)
 		self.thread = None
 
+		self.renderer_options = {}
+
 		if not watcher:
 			watcher = create_file_watcher()
 		self.watcher = MultiClientWatcher()
@@ -221,24 +223,24 @@ class Powerline(object):
 
 				self.pl = PowerlineState(self.use_daemon_threads, self.logger, self.ext, self.environ, self.getcwd, self.home)
 
-				self.renderer_options = {
-					'term_truecolor': self.common_config.get('term_truecolor', False),
-					'ambiwidth': self.common_config.get('ambiwidth', 1),
-					'tmux_escape': self.common_config.get('additional_escapes') == 'tmux',
-					'screen_escape': self.common_config.get('additional_escapes') == 'screen',
-				}
-
-				self.theme_kwargs = {
-					'ext': self.ext,
-					'common_config': self.common_config,
-					'run_once': self.run_once,
-				}
+				self.renderer_options.update(
+					pl=self.pl,
+					term_truecolor=self.common_config.get('term_truecolor', False),
+					ambiwidth=self.common_config.get('ambiwidth', 1),
+					tmux_escape=self.common_config.get('additional_escapes') == 'tmux',
+					screen_escape=self.common_config.get('additional_escapes') == 'screen',
+					theme_kwargs={
+						'ext': self.ext,
+						'common_config': self.common_config,
+						'run_once': self.run_once,
+					},
+				)
 
 			self.ext_config = config['ext'][self.ext]
 			if self.ext_config != self.prev_ext_config:
 				ext_config_differs = True
 				if not self.prev_ext_config or self.ext_config.get('local_themes') != self.prev_ext_config.get('local_themes'):
-					self.local_themes = self.get_local_themes(self.ext_config.get('local_themes'))
+					self.renderer_options['local_themes'] = self.get_local_themes(self.ext_config.get('local_themes'))
 				load_colorscheme = (load_colorscheme
 							or not self.prev_ext_config
 							or self.prev_ext_config['colorscheme'] != self.ext_config['colorscheme'])
@@ -250,16 +252,16 @@ class Powerline(object):
 
 		if load_colors:
 			self._purge_configs('colors')
-			colors_config = self.load_colors_config()
+			self.colors_config = self.load_colors_config()
 
 		if load_colorscheme or load_colors:
 			self._purge_configs('colorscheme')
 			colorscheme_config = self.load_colorscheme_config(self.ext_config['colorscheme'])
-			self.colorscheme = Colorscheme(colorscheme_config, colors_config)
+			self.renderer_options['colorscheme'] = Colorscheme(colorscheme_config, self.colors_config)
 
 		if load_theme:
 			self._purge_configs('theme')
-			self.theme_config = self.load_theme_config(self.ext_config.get('theme', 'default'))
+			self.renderer_options['theme_config'] = self.load_theme_config(self.ext_config.get('theme', 'default'))
 
 		if create_renderer:
 			try:
@@ -273,12 +275,7 @@ class Powerline(object):
 			# but .render still uses old renderer.
 			with self.renderer_lock:
 				try:
-					renderer = Renderer(self.theme_config,
-										self.local_themes,
-										self.theme_kwargs,
-										self.colorscheme,
-										self.pl,
-										**self.renderer_options)
+					renderer = Renderer(**self.renderer_options)
 				except Exception as e:
 					self.pl.exception('Failed to construct renderer object: {0}', str(e))
 					if not hasattr(self, 'renderer'):
