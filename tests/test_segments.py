@@ -17,18 +17,18 @@ class TestShell(TestCase):
 		segment_info = {'args': Args(last_exit_code=10)}
 		self.assertEqual(shell.last_status(pl=pl, segment_info=segment_info),
 				[{'contents': '10', 'highlight_group': 'exit_fail'}])
-		segment_info['args'].last_exit_code=0
+		segment_info['args'].last_exit_code = 0
 		self.assertEqual(shell.last_status(pl=pl, segment_info=segment_info), None)
-		segment_info['args'].last_exit_code=None
+		segment_info['args'].last_exit_code = None
 		self.assertEqual(shell.last_status(pl=pl, segment_info=segment_info), None)
 
 	def test_last_pipe_status(self):
 		pl = Pl()
 		segment_info = {'args': Args(last_pipe_status=[])}
 		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info), None)
-		segment_info['args'].last_pipe_status=[0, 0, 0]
+		segment_info['args'].last_pipe_status = [0, 0, 0]
 		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info), None)
-		segment_info['args'].last_pipe_status=[0, 2, 0]
+		segment_info['args'].last_pipe_status = [0, 2, 0]
 		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info),
 				[{'contents': '0', 'highlight_group': 'exit_success'},
 				{'contents': '2', 'highlight_group': 'exit_fail'},
