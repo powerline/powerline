@@ -132,7 +132,7 @@ class Powerline(object):
 				renderer_module=None,
 				run_once=False,
 				logger=None,
-				use_daemon_threads = False,
+				use_daemon_threads=True,
 				environ=os.environ,
 				getcwd=getattr(os, 'getcwdu', os.getcwd),
 				home=None):
