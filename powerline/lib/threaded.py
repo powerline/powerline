@@ -65,7 +65,10 @@ class ThreadedSegment(object):
 			try:
 				self.update_value = self.update(self.update_value)
 			except Exception as e:
-				self.error('Exception while updating: {0}', str(e))
+				self.exception('Exception while updating: {0}', str(e))
+				self.skip = True
+			except KeyboardInterrupt:
+				self.warn('Caught keyboard interrupt while updating')
 				self.skip = True
 			else:
 				self.skip = False
@@ -154,8 +157,12 @@ class KwThreadedSegment(ThreadedSegment):
 				try:
 					updates[key] = (last_query_time, self.compute_state(key))
 				except Exception as e:
-					self.exception('Exception while computing state for {0}: {1}', repr(key), str(e))
+					self.exception('Exception while computing state for {0!r}: {1}', key, str(e))
 					crashed.add(key)
+				except KeyboardInterrupt:
+					self.warn('Interrupt while computing state for {0!r}', key)
+					crashed.add(key)
+
 		return update_value
 
 	def set_state(self, interval=None, update_first=True, **kwargs):
