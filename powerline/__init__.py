@@ -111,7 +111,12 @@ class Powerline(object):
 		colorschemes, render module (``powerline.renders.{ext}``).
 	:param str renderer_module:
 		Overrides renderer module (defaults to ``ext``). Should be the name of 
-		the package imported like this: ``powerline.renders.{render_module}``.
+		the package imported like this: ``powerline.renders.{render_module}``. 
+		If this parameter contains a dot, ``powerline.renderers.`` is not 
+		prepended. There is also a special case for renderers defined in 
+		toplevel modules: ``foo.`` (note: dot at the end) tries to get renderer 
+		from module ``foo`` (because ``foo`` (without dot) tries to get renderer 
+		from module ``powerline.renderers.foo``).
 	:param bool run_once:
 		Determines whether .renderer.render() method will be run only once 
 		during python session.
@@ -145,6 +150,11 @@ class Powerline(object):
 		self.getcwd = getcwd
 		self.home = home
 		self.use_daemon_threads = use_daemon_threads
+
+		if '.' not in self.renderer_module:
+			self.renderer_module = 'powerline.renderers.' + self.renderer_module
+		elif self.renderer_module[-1] == '.':
+			self.renderer_module = self.renderer_module[:-1]
 
 		self.config_paths = self.get_config_paths()
 
@@ -250,9 +260,8 @@ class Powerline(object):
 			self.theme_config = self.load_theme_config(self.ext_config.get('theme', 'default'))
 
 		if create_renderer:
-			renderer_module_import = 'powerline.renderers.{0}'.format(self.renderer_module)
 			try:
-				Renderer = __import__(renderer_module_import, fromlist=['renderer']).renderer
+				Renderer = __import__(self.renderer_module, fromlist=['renderer']).renderer
 			except Exception as e:
 				self.pl.exception('Failed to import renderer module: {0}', str(e))
 				sys.exit(1)
