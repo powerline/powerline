@@ -37,6 +37,16 @@ class TestCommon(TestCase):
 				pl.environ.pop('SSH_CLIENT')
 				self.assertEqual(common.hostname(pl=pl), 'abc')
 				self.assertEqual(common.hostname(pl=pl, only_if_ssh=True), None)
+		with replace_env('SSH_CLIENT', '192.168.0.12 40921 22') as pl:
+			with replace_module_module(common, 'socket', gethostname=lambda: 'abc.mydomain'):
+				self.assertEqual(common.hostname(pl=pl), 'abc.mydomain')
+				self.assertEqual(common.hostname(pl=pl, exclude_domain=True), 'abc')
+				self.assertEqual(common.hostname(pl=pl, only_if_ssh=True), 'abc.mydomain')
+				self.assertEqual(common.hostname(pl=pl, only_if_ssh=True, exclude_domain=True), 'abc')
+				pl.environ.pop('SSH_CLIENT')
+				self.assertEqual(common.hostname(pl=pl), 'abc.mydomain')
+				self.assertEqual(common.hostname(pl=pl, exclude_domain=True), 'abc')
+				self.assertEqual(common.hostname(pl=pl, only_if_ssh=True, exclude_domain=True), None)
 
 	def test_user(self):
 		new_os = new_module('os', getpid=lambda: 1)
