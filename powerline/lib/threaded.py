@@ -126,6 +126,8 @@ class KwThreadedSegment(ThreadedSegment):
 		super(KwThreadedSegment, self).__init__()
 		self.updated = True
 		self.update_value = ({}, set())
+		self.write_lock = Lock()
+		self.new_queries = {}
 
 	@staticmethod
 	def key(**kwargs):
@@ -144,7 +146,8 @@ class KwThreadedSegment(ThreadedSegment):
 			# configuration or in subclasses.
 			update_state = self.compute_state(key) if update_first and self.update_first or self.run_once else None
 
-		queries[key] = (monotonic(), update_state)
+		with self.write_lock:
+			self.new_queries[key] = (monotonic(), update_state)
 		return self.render_one(update_state, **kwargs)
 
 	def update(self, old_update_value):
@@ -152,6 +155,11 @@ class KwThreadedSegment(ThreadedSegment):
 		crashed = set()
 		update_value = (updates, crashed)
 		queries = old_update_value[0]
+		with self.write_lock:
+			if self.new_queries:
+				queries.update(self.new_queries)
+				self.new_queries.clear()
+
 		for key, (last_query_time, state) in queries.items():
 			if last_query_time < monotonic() < last_query_time + self.drop_interval:
 				try:
