@@ -18,6 +18,33 @@ DEFAULT_SYSTEM_CONFIG_DIR = None
 watcher = None
 
 
+class MultiClientWatcher(object):
+	subscribers = set()
+	received_events = {}
+
+	def watch(self, file):
+		watcher.watch(file)
+
+	def __call__(self, file):
+		if file in self.received_events and self not in self.received_events[file]:
+			self.received_events[file].add(self)
+			if self.received_events >= self.subscribers:
+				self.received_events.pop(file)
+			return True
+
+		if watcher(file):
+			self.received_events[file] = set([self])
+			return True
+
+		return False
+
+	def __del__(self):
+		try:
+			self.subscribers.remove(self)
+		except KeyError:
+			pass
+
+
 def open_file(path):
 	return open(path, 'r')
 
@@ -129,6 +156,7 @@ class Powerline(object):
 
 		if not watcher:
 			watcher = create_file_watcher()
+		self.watcher = MultiClientWatcher()
 
 		self.prev_common_config = None
 		self.prev_ext_config = None
@@ -290,7 +318,7 @@ class Powerline(object):
 		path = find_config_file(self.config_paths, cfg_path)
 		with self.configs_lock:
 			self.configs[type].add(path)
-			watcher.watch(path)
+			self.watcher.watch(path)
 		return load_json_config(path)
 
 	def _purge_configs(self, type):
@@ -361,10 +389,10 @@ class Powerline(object):
 		'''Lock renderer from modifications and run its ``.shutdown()`` method.
 		'''
 		self.shutdown_event.set()
-		if self.use_daemon_threads and self.is_alive():
-			self.thread.join()
 		with self.renderer_lock:
 			self.renderer.shutdown()
+		if self.use_daemon_threads and self.is_alive():
+			self.thread.join()
 
 	def is_alive(self):
 		return self.thread and self.thread.is_alive()
@@ -382,7 +410,7 @@ class Powerline(object):
 			with self.configs_lock:
 				for type, paths in self.configs.items():
 					for path in paths:
-						if watcher(path):
+						if self.watcher(path):
 							kwargs['load_' + type] = True
 			if kwargs:
 				try:
