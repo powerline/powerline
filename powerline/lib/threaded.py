@@ -63,7 +63,7 @@ class ThreadedSegment(object):
 		while not self.shutdown_event.is_set():
 			start_time = monotonic()
 			try:
-				self.update(self.update_value)
+				self.update_value = self.update(self.update_value)
 			except Exception as e:
 				self.error('Exception while updating: {0}', str(e))
 				self.skip = True
