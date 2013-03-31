@@ -291,6 +291,28 @@ class TestConfigReload(TestCase):
 				self.assertAccessEvents('colors')
 				self.assertEqual(p.render(), '<5 2 1> s<2 4 False>>><3 4 4>g<4 False False>>><None None None>')
 
+	def test_reload_colorscheme(self):
+		with get_powerline(run_once=False) as p:
+			with replace_item(globals(), 'config', deepcopy(config)):
+				self.assertAccessEvents('config', 'colors', 'colorschemes/test/default', 'themes/test/default')
+				self.assertEqual(p.render(), '<1 2 1> s<2 4 False>>><3 4 4>g<4 False False>>><None None None>')
+
+				config['colorschemes/test/default']['groups']['str1']['bg'] = 'col3'
+				add_watcher_events(p, 'colorschemes/test/default')
+				self.assertAccessEvents('colorschemes/test/default')
+				self.assertEqual(p.render(), '<1 3 1> s<3 4 False>>><3 4 4>g<4 False False>>><None None None>')
+
+	def test_reload_theme(self):
+		with get_powerline(run_once=False) as p:
+			with replace_item(globals(), 'config', deepcopy(config)):
+				self.assertAccessEvents('config', 'colors', 'colorschemes/test/default', 'themes/test/default')
+				self.assertEqual(p.render(), '<1 2 1> s<2 4 False>>><3 4 4>g<4 False False>>><None None None>')
+
+				config['themes/test/default']['segments']['left'][0]['contents'] = 'col3'
+				add_watcher_events(p, 'themes/test/default')
+				self.assertAccessEvents('themes/test/default')
+				self.assertEqual(p.render(), '<1 2 1> col3<2 4 False>>><3 4 4>g<4 False False>>><None None None>')
+
 
 replaces = {
 	'watcher': Watcher(),
