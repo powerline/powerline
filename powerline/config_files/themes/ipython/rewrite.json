@@ -4,14 +4,14 @@
 			{
 				"type": "string",
 				"contents": "",
-				"draw_divider": false,
+				"draw_soft_divider": false,
 				"width": "auto",
 				"highlight_group": ["prompt"]
 			},
 			{
 				"name": "prompt_count",
 				"module": "powerline.segments.ipython",
-				"draw_divider": false
+				"draw_soft_divider": false
 			},
 			{
 				"type": "string",

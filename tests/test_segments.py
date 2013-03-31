@@ -175,35 +175,35 @@ class TestCommon(TestCase):
 		with replace_attr(common, 'urllib_read', urllib_read):
 			self.assertEqual(common.weather(pl=pl), [
 				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_condition_partly_cloudy_day', 'weather_condition_cloudy', 'weather_conditions', 'weather'], 'contents': '☁ '},
-				{'draw_divider': False, 'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '-9°C', 'gradient_level': 30.0}
+				{'draw_soft_divider': False, 'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '-9°C', 'gradient_level': 30.0}
 			])
 			self.assertEqual(common.weather(pl=pl, temp_coldest=0, temp_hottest=100), [
 				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_condition_partly_cloudy_day', 'weather_condition_cloudy', 'weather_conditions', 'weather'], 'contents': '☁ '},
-				{'draw_divider': False, 'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '-9°C', 'gradient_level': 0}
+				{'draw_soft_divider': False, 'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '-9°C', 'gradient_level': 0}
 			])
 			self.assertEqual(common.weather(pl=pl, temp_coldest=-100, temp_hottest=-50), [
 				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_condition_partly_cloudy_day', 'weather_condition_cloudy', 'weather_conditions', 'weather'], 'contents': '☁ '},
-				{'draw_divider': False, 'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '-9°C', 'gradient_level': 100}
+				{'draw_soft_divider': False, 'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '-9°C', 'gradient_level': 100}
 			])
 			self.assertEqual(common.weather(pl=pl, icons={'cloudy': 'o'}), [
 				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_condition_partly_cloudy_day', 'weather_condition_cloudy', 'weather_conditions', 'weather'], 'contents': 'o '},
-				{'draw_divider': False, 'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '-9°C', 'gradient_level': 30.0}
+				{'draw_soft_divider': False, 'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '-9°C', 'gradient_level': 30.0}
 			])
 			self.assertEqual(common.weather(pl=pl, icons={'partly_cloudy_day': 'x'}), [
 				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_condition_partly_cloudy_day', 'weather_condition_cloudy', 'weather_conditions', 'weather'], 'contents': 'x '},
-				{'draw_divider': False, 'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '-9°C', 'gradient_level': 30.0}
+				{'draw_soft_divider': False, 'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '-9°C', 'gradient_level': 30.0}
 			])
 			self.assertEqual(common.weather(pl=pl, unit='F'), [
 				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_condition_partly_cloudy_day', 'weather_condition_cloudy', 'weather_conditions', 'weather'], 'contents': '☁ '},
-				{'draw_divider': False, 'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '16°F', 'gradient_level': 30.0}
+				{'draw_soft_divider': False, 'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '16°F', 'gradient_level': 30.0}
 			])
 			self.assertEqual(common.weather(pl=pl, unit='K'), [
 				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_condition_partly_cloudy_day', 'weather_condition_cloudy', 'weather_conditions', 'weather'], 'contents': '☁ '},
-				{'draw_divider': False, 'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '264K', 'gradient_level': 30.0}
+				{'draw_soft_divider': False, 'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '264K', 'gradient_level': 30.0}
 			])
 			self.assertEqual(common.weather(pl=pl, temp_format='{temp:.1e}C'), [
 				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_condition_partly_cloudy_day', 'weather_condition_cloudy', 'weather_conditions', 'weather'], 'contents': '☁ '},
-				{'draw_divider': False, 'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '-9.0e+00C', 'gradient_level': 30.0}
+				{'draw_soft_divider': False, 'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '-9.0e+00C', 'gradient_level': 30.0}
 			])
 
 	def test_system_load(self):
@@ -211,13 +211,13 @@ class TestCommon(TestCase):
 		with replace_module_module(common, 'os', getloadavg=lambda: (7.5, 3.5, 1.5)):
 			with replace_attr(common, 'cpu_count', lambda: 2):
 				self.assertEqual(common.system_load(pl=pl),
-						[{'contents': '7.5 ', 'highlight_group': ['system_load_gradient', 'system_load'], 'draw_divider': True, 'divider_highlight_group': 'background:divider', 'gradient_level': 100},
-						{'contents': '3.5 ', 'highlight_group': ['system_load_gradient', 'system_load'], 'draw_divider': False, 'divider_highlight_group': 'background:divider', 'gradient_level': 75.0},
-						{'contents': '1.5', 'highlight_group': ['system_load_gradient', 'system_load'], 'draw_divider': False, 'divider_highlight_group': 'background:divider', 'gradient_level': 0}])
+						[{'contents': '7.5 ', 'highlight_group': ['system_load_gradient', 'system_load'], 'draw_soft_divider': True, 'divider_highlight_group': 'background:divider', 'gradient_level': 100},
+						{'contents': '3.5 ', 'highlight_group': ['system_load_gradient', 'system_load'], 'draw_soft_divider': False, 'divider_highlight_group': 'background:divider', 'gradient_level': 75.0},
+						{'contents': '1.5', 'highlight_group': ['system_load_gradient', 'system_load'], 'draw_soft_divider': False, 'divider_highlight_group': 'background:divider', 'gradient_level': 0}])
 				self.assertEqual(common.system_load(pl=pl, format='{avg:.0f}', threshold_good=0, threshold_bad=1),
-						[{'contents': '8 ', 'highlight_group': ['system_load_gradient', 'system_load'], 'draw_divider': True, 'divider_highlight_group': 'background:divider', 'gradient_level': 100},
-						{'contents': '4 ', 'highlight_group': ['system_load_gradient', 'system_load'], 'draw_divider': False, 'divider_highlight_group': 'background:divider', 'gradient_level': 100},
-						{'contents': '2', 'highlight_group': ['system_load_gradient', 'system_load'], 'draw_divider': False, 'divider_highlight_group': 'background:divider', 'gradient_level': 75.0}])
+						[{'contents': '8 ', 'highlight_group': ['system_load_gradient', 'system_load'], 'draw_soft_divider': True, 'divider_highlight_group': 'background:divider', 'gradient_level': 100},
+						{'contents': '4 ', 'highlight_group': ['system_load_gradient', 'system_load'], 'draw_soft_divider': False, 'divider_highlight_group': 'background:divider', 'gradient_level': 100},
+						{'contents': '2', 'highlight_group': ['system_load_gradient', 'system_load'], 'draw_soft_divider': False, 'divider_highlight_group': 'background:divider', 'gradient_level': 75.0}])
 
 	def test_cpu_load_percent(self):
 		pl = Pl()

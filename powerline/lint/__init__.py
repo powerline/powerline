@@ -505,7 +505,7 @@ vim_colorscheme_spec = (Spec(
 ).context_message('Error while loading vim colorscheme'))
 
 
-generic_keys = set(('exclude_modes', 'include_modes', 'width', 'align', 'name', 'draw_divider', 'priority', 'after', 'before'))
+generic_keys = set(('exclude_modes', 'include_modes', 'width', 'align', 'name', 'draw_soft_divider', 'draw_hard_divider', 'priority', 'after', 'before'))
 type_keys = {
 		'function': set(('args', 'module')),
 		'string': set(('contents', 'type', 'highlight_group', 'divider_highlight_group')),
@@ -797,7 +797,8 @@ segments_spec = Spec().optional().list(
 		name=Spec().re('^[a-zA-Z_]\w+$').func(check_segment_name).optional(),
 		exclude_modes=Spec().list(vim_mode_spec()).optional(),
 		include_modes=Spec().list(vim_mode_spec()).optional(),
-		draw_divider=Spec().type(bool).optional(),
+		draw_hard_divider=Spec().type(bool).optional(),
+		draw_soft_divider=Spec().type(bool).optional(),
 		module=segment_module_spec(),
 		priority=Spec().cmp('ge', -1).optional(),
 		after=Spec().type(unicode).optional(),
