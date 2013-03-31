@@ -17,7 +17,6 @@ from powerline.lib.time import monotonic
 from powerline.lib.humanize_bytes import humanize_bytes
 from powerline.theme import requires_segment_info
 from collections import namedtuple
-from time import sleep
 
 
 @requires_segment_info
