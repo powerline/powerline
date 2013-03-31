@@ -1,5 +1,5 @@
 # vim:fileencoding=utf-8:noet
-
+from __future__ import unicode_literals
 import powerline as powerline_module
 import time
 from powerline.renderer import Renderer
@@ -11,18 +11,25 @@ from threading import Lock
 
 class Watcher(object):
 	events = set()
+	lock = Lock()
 
 	def watch(self, file):
 		pass
 
 	def __call__(self, file):
 		if file in self.events:
-			self.events.remove(file)
+			with self.lock:
+				self.events.remove(file)
 			return True
 		return False
 
-	def _add(self, file):
-		self.events.add(file)
+	def _reset(self, files):
+		with self.lock:
+			self.events.clear()
+			self.events.update(files)
+
+	def unsubscribe(self):
+		pass
 
 
 class Logger(object):
@@ -48,6 +55,14 @@ config = {
 	'config': {
 		'common': {
 			'dividers': {
+				"left": {
+					"hard": ">>",
+					"soft": ">",
+				},
+				"right": {
+					"hard": "<<",
+					"soft": "<",
+				},
 			},
 			'spaces': 0,
 		},
@@ -60,16 +75,36 @@ config = {
 	},
 	'colors': {
 		'colors': {
+			"col1": 1,
+			"col2": 2,
+			"col3": 3,
+			"col4": 4,
 		},
 		'gradients': {
 		},
 	},
 	'colorschemes/test/default': {
 		'groups': {
+			"str1": {"fg": "col1", "bg": "col2", "attr": ["bold"]},
+			"str2": {"fg": "col3", "bg": "col4", "attr": ["underline"]},
 		},
 	},
 	'themes/test/default': {
 		'segments': {
+			"left": [
+				{
+					"type": "string",
+					"contents": "s",
+					"highlight_group": ["str1"],
+				},
+				{
+					"type": "string",
+					"contents": "g",
+					"highlight_group": ["str2"],
+				},
+			],
+			"right": [
+			],
 		},
 	},
 }
@@ -95,32 +130,55 @@ def find_config_file(search_paths, config_file):
 
 class SimpleRenderer(Renderer):
 	def hlstyle(self, fg=None, bg=None, attr=None):
-		return '<{fg} {bg} {attr}>'.format(fg=fg, bg=bg, attr=attr)
+		return '<{fg} {bg} {attr}>'.format(fg=fg and fg[0], bg=bg and bg[0], attr=attr)
 
 
 class TestPowerline(powerline_module.Powerline):
+	_created = False
+
 	@staticmethod
 	def get_local_themes(local_themes):
 		return local_themes
+
+	def create_renderer(self, *args, **kwargs):
+		try:
+			r = super(TestPowerline, self).create_renderer(*args, **kwargs)
+		finally:
+			self._created = True
+		return r
+
+	def _created_renderer(self):
+		if self._created:
+			self._created = False
+			return True
+		return False
 
 
 renderer = SimpleRenderer
 
 
 def get_powerline(**kwargs):
-	return TestPowerline(ext='test', renderer_module='tests.test_config_reload', interval=0, logger=Logger(), **kwargs)
+	return TestPowerline(
+		ext='test',
+		renderer_module='tests.test_config_reload',
+		interval=0,
+		logger=Logger(),
+		watcher=Watcher(),
+		**kwargs
+	)
 
 
-# Minimum sleep time on my system is 0.000001, otherwise it fails to update 
-# config
-# This sleep time is 100 times bigger
-def sleep(interval=0.0001):
+def sleep(interval):
 	time.sleep(interval)
 
 
-def add_watcher_events(*args):
-	Watcher.events.update(args)
-	sleep()
+def add_watcher_events(p, *args, **kwargs):
+	p._created_renderer()
+	p.watcher._reset(args)
+	while not p._created_renderer():
+		sleep(kwargs.get('interval', 0.000001))
+		if not kwargs.get('wait', True):
+			return
 
 
 class TestConfigReload(TestCase):
@@ -133,60 +191,75 @@ class TestConfigReload(TestCase):
 	def test_noreload(self):
 		with get_powerline(run_once=True) as p:
 			with replace_item(globals(), 'config', deepcopy(config)):
-				self.assertEqual(p.render(), '<None None None>')
 				self.assertAccessEvents('config', 'colors', 'colorschemes/test/default', 'themes/test/default')
+				self.assertEqual(p.render(), '<1 2 1> s<2 4 False>>><3 4 4>g<4 False False>>><None None None>')
 				config['config']['common']['spaces'] = 1
-				add_watcher_events('config')
+				add_watcher_events(p, 'config', wait=False, interval=0.05)
 				# When running once thread should not start
 				self.assertAccessEvents()
-				self.assertEqual(p.render(), '<None None None>')
+				self.assertEqual(p.render(), '<1 2 1> s<2 4 False>>><3 4 4>g<4 False False>>><None None None>')
 				self.assertEqual(p.logger._pop_msgs(), [])
+				# Without the following assertion test_reload_colors may fail 
+				# for unknown reason (with AssertionError telling about “config” 
+				# accessed one more time then needed)
+				self.assertAccessEvents()
 
 	def test_reload_main(self):
 		with get_powerline(run_once=False) as p:
 			with replace_item(globals(), 'config', deepcopy(config)):
-				self.assertEqual(p.render(), '<None None None>')
 				self.assertAccessEvents('config', 'colors', 'colorschemes/test/default', 'themes/test/default')
+				self.assertEqual(p.render(), '<1 2 1> s<2 4 False>>><3 4 4>g<4 False False>>><None None None>')
 
 				config['config']['common']['spaces'] = 1
-				add_watcher_events('config')
+				add_watcher_events(p, 'config')
 				self.assertAccessEvents('config')
-				self.assertEqual(p.render(), '<None None None>')
+				self.assertEqual(p.render(), '<1 2 1> s <2 4 False>>><3 4 4>g <4 False False>>><None None None>')
 				self.assertEqual(p.logger._pop_msgs(), [])
 
 				config['config']['ext']['test']['theme'] = 'new'
-				add_watcher_events('config')
+				add_watcher_events(p, 'config')
 				self.assertAccessEvents('config', 'themes/test/new')
-				self.assertEqual(p.render(), '<None None None>')
+				self.assertEqual(p.render(), '<1 2 1> s <2 4 False>>><3 4 4>g <4 False False>>><None None None>')
 				# It should normally handle file missing error
 				self.assertEqual(p.logger._pop_msgs(), ['test:Failed to create renderer: themes/test/new'])
 
 				config['config']['ext']['test']['theme'] = 'default'
-				add_watcher_events('config')
+				add_watcher_events(p, 'config')
 				self.assertAccessEvents('config', 'themes/test/default')
-				self.assertEqual(p.render(), '<None None None>')
+				self.assertEqual(p.render(), '<1 2 1> s <2 4 False>>><3 4 4>g <4 False False>>><None None None>')
 				self.assertEqual(p.logger._pop_msgs(), [])
 
 				config['config']['ext']['test']['colorscheme'] = 'new'
-				add_watcher_events('config')
+				add_watcher_events(p, 'config')
 				self.assertAccessEvents('config', 'colorschemes/test/new')
-				self.assertEqual(p.render(), '<None None None>')
+				self.assertEqual(p.render(), '<1 2 1> s <2 4 False>>><3 4 4>g <4 False False>>><None None None>')
 				# It should normally handle file missing error
 				self.assertEqual(p.logger._pop_msgs(), ['test:Failed to create renderer: colorschemes/test/new'])
 
 				config['config']['ext']['test']['colorscheme'] = 'default'
-				add_watcher_events('config')
+				add_watcher_events(p, 'config')
 				self.assertAccessEvents('config', 'colorschemes/test/default')
-				self.assertEqual(p.render(), '<None None None>')
+				self.assertEqual(p.render(), '<1 2 1> s <2 4 False>>><3 4 4>g <4 False False>>><None None None>')
 				self.assertEqual(p.logger._pop_msgs(), [])
 
 				self.assertEqual(p.renderer.local_themes, None)
 				config['config']['ext']['test']['local_themes'] = 'something'
-				add_watcher_events('config')
+				add_watcher_events(p, 'config')
 				self.assertAccessEvents('config')
-				self.assertEqual(p.render(), '<None None None>')
+				self.assertEqual(p.render(), '<1 2 1> s <2 4 False>>><3 4 4>g <4 False False>>><None None None>')
 				self.assertEqual(p.logger._pop_msgs(), [])
 				self.assertEqual(p.renderer.local_themes, 'something')
+
+	def test_reload_colors(self):
+		with get_powerline(run_once=False) as p:
+			with replace_item(globals(), 'config', deepcopy(config)):
+				self.assertAccessEvents('config', 'colors', 'colorschemes/test/default', 'themes/test/default')
+				self.assertEqual(p.render(), '<1 2 1> s<2 4 False>>><3 4 4>g<4 False False>>><None None None>')
+
+				config['colors']['colors']['col1'] = 5
+				add_watcher_events(p, 'colors')
+				self.assertAccessEvents('colors')
+				self.assertEqual(p.render(), '<5 2 1> s<2 4 False>>><3 4 4>g<4 False False>>><None None None>')
 
 
 replaces = {
