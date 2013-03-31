@@ -89,6 +89,12 @@ config = {
 			"str2": {"fg": "col3", "bg": "col4", "attr": ["underline"]},
 		},
 	},
+	'colorschemes/test/2': {
+		'groups': {
+			"str1": {"fg": "col2", "bg": "col3", "attr": ["bold"]},
+			"str2": {"fg": "col1", "bg": "col4", "attr": ["underline"]},
+		},
+	},
 	'themes/test/default': {
 		'segments': {
 			"left": [
@@ -100,6 +106,24 @@ config = {
 				{
 					"type": "string",
 					"contents": "g",
+					"highlight_group": ["str2"],
+				},
+			],
+			"right": [
+			],
+		},
+	},
+	'themes/test/2': {
+		'segments': {
+			"left": [
+				{
+					"type": "string",
+					"contents": "t",
+					"highlight_group": ["str1"],
+				},
+				{
+					"type": "string",
+					"contents": "b",
 					"highlight_group": ["str2"],
 				},
 			],
@@ -216,12 +240,12 @@ class TestConfigReload(TestCase):
 				self.assertEqual(p.render(), '<1 2 1> s <2 4 False>>><3 4 4>g <4 False False>>><None None None>')
 				self.assertEqual(p.logger._pop_msgs(), [])
 
-				config['config']['ext']['test']['theme'] = 'new'
+				config['config']['ext']['test']['theme'] = 'nonexistent'
 				add_watcher_events(p, 'config')
-				self.assertAccessEvents('config', 'themes/test/new')
+				self.assertAccessEvents('config', 'themes/test/nonexistent')
 				self.assertEqual(p.render(), '<1 2 1> s <2 4 False>>><3 4 4>g <4 False False>>><None None None>')
 				# It should normally handle file missing error
-				self.assertEqual(p.logger._pop_msgs(), ['test:Failed to create renderer: themes/test/new'])
+				self.assertEqual(p.logger._pop_msgs(), ['test:Failed to create renderer: themes/test/nonexistent'])
 
 				config['config']['ext']['test']['theme'] = 'default'
 				add_watcher_events(p, 'config')
@@ -229,24 +253,30 @@ class TestConfigReload(TestCase):
 				self.assertEqual(p.render(), '<1 2 1> s <2 4 False>>><3 4 4>g <4 False False>>><None None None>')
 				self.assertEqual(p.logger._pop_msgs(), [])
 
-				config['config']['ext']['test']['colorscheme'] = 'new'
+				config['config']['ext']['test']['colorscheme'] = 'nonexistent'
 				add_watcher_events(p, 'config')
-				self.assertAccessEvents('config', 'colorschemes/test/new')
+				self.assertAccessEvents('config', 'colorschemes/test/nonexistent')
 				self.assertEqual(p.render(), '<1 2 1> s <2 4 False>>><3 4 4>g <4 False False>>><None None None>')
 				# It should normally handle file missing error
-				self.assertEqual(p.logger._pop_msgs(), ['test:Failed to create renderer: colorschemes/test/new'])
+				self.assertEqual(p.logger._pop_msgs(), ['test:Failed to create renderer: colorschemes/test/nonexistent'])
 
-				config['config']['ext']['test']['colorscheme'] = 'default'
+				config['config']['ext']['test']['colorscheme'] = '2'
 				add_watcher_events(p, 'config')
-				self.assertAccessEvents('config', 'colorschemes/test/default')
-				self.assertEqual(p.render(), '<1 2 1> s <2 4 False>>><3 4 4>g <4 False False>>><None None None>')
+				self.assertAccessEvents('config', 'colorschemes/test/2')
+				self.assertEqual(p.render(), '<2 3 1> s <3 4 False>>><1 4 4>g <4 False False>>><None None None>')
+				self.assertEqual(p.logger._pop_msgs(), [])
+
+				config['config']['ext']['test']['theme'] = '2'
+				add_watcher_events(p, 'config')
+				self.assertAccessEvents('config', 'themes/test/2')
+				self.assertEqual(p.render(), '<2 3 1> t <3 4 False>>><1 4 4>b <4 False False>>><None None None>')
 				self.assertEqual(p.logger._pop_msgs(), [])
 
 				self.assertEqual(p.renderer.local_themes, None)
 				config['config']['ext']['test']['local_themes'] = 'something'
 				add_watcher_events(p, 'config')
 				self.assertAccessEvents('config')
-				self.assertEqual(p.render(), '<1 2 1> s <2 4 False>>><3 4 4>g <4 False False>>><None None None>')
+				self.assertEqual(p.render(), '<2 3 1> t <3 4 False>>><1 4 4>b <4 False False>>><None None None>')
 				self.assertEqual(p.logger._pop_msgs(), [])
 				self.assertEqual(p.renderer.local_themes, 'something')
 
