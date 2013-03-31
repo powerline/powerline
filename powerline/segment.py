@@ -76,6 +76,7 @@ def gen_segment_getter(ext, path, theme_configs, default_module=None):
 			'priority': segment.get('priority', -1),
 			'draw_hard_divider': segment.get('draw_hard_divider', True),
 			'draw_soft_divider': segment.get('draw_soft_divider', True),
+			'draw_inner_divider': segment.get('draw_inner_divider', False),
 			'side': side,
 			'exclude_modes': segment.get('exclude_modes', []),
 			'include_modes': segment.get('include_modes', []),

@@ -507,7 +507,7 @@ vim_colorscheme_spec = (Spec(
 
 generic_keys = set(('exclude_modes', 'include_modes', 'width', 'align', 'name', 'draw_soft_divider', 'draw_hard_divider', 'priority', 'after', 'before'))
 type_keys = {
-		'function': set(('args', 'module')),
+		'function': set(('args', 'module', 'draw_inner_divider')),
 		'string': set(('contents', 'type', 'highlight_group', 'divider_highlight_group')),
 		'filler': set(('type', 'highlight_group', 'divider_highlight_group')),
 		}
@@ -799,6 +799,7 @@ segments_spec = Spec().optional().list(
 		include_modes=Spec().list(vim_mode_spec()).optional(),
 		draw_hard_divider=Spec().type(bool).optional(),
 		draw_soft_divider=Spec().type(bool).optional(),
+		draw_inner_divider=Spec().type(bool).optional(),
 		module=segment_module_spec(),
 		priority=Spec().cmp('ge', -1).optional(),
 		after=Spec().type(unicode).optional(),

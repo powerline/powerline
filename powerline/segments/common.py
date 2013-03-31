@@ -438,7 +438,6 @@ class WeatherSegment(ThreadedSegment):
 			{
 				'contents': temp_format.format(temp=converted_temp),
 				'highlight_group': ['weather_temp_gradient', 'weather_temp', 'weather'],
-				'draw_soft_divider': False,
 				'divider_highlight_group': 'background:divider',
 				'gradient_level': gradient_level,
 			},
@@ -521,11 +520,9 @@ def system_load(pl, format='{avg:.1f}', threshold_good=1, threshold_bad=2):
 		ret.append({
 			'contents': format.format(avg=avg),
 			'highlight_group': ['system_load_gradient', 'system_load'],
-			'draw_soft_divider': False,
 			'divider_highlight_group': 'background:divider',
 			'gradient_level': gradient_level,
 		})
-	ret[0]['draw_soft_divider'] = True
 	ret[0]['contents'] += ' '
 	ret[1]['contents'] += ' '
 	return ret
