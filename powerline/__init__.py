@@ -22,10 +22,19 @@ class MultiClientWatcher(object):
 	subscribers = set()
 	received_events = {}
 
+	def __init__(self):
+		global watcher
+		self.subscribers.add(self)
+		if not watcher:
+			watcher = create_file_watcher()
+
 	def watch(self, file):
 		watcher.watch(file)
 
 	def __call__(self, file):
+		if self not in self.subscribers:
+			return False
+
 		if file in self.received_events and self not in self.received_events[file]:
 			self.received_events[file].add(self)
 			if self.received_events[file] >= self.subscribers:
@@ -38,11 +47,13 @@ class MultiClientWatcher(object):
 
 		return False
 
-	def __del__(self):
+	def unsubscribe(self):
 		try:
 			self.subscribers.remove(self)
 		except KeyError:
 			pass
+
+	__del__ = unsubscribe
 
 
 def open_file(path):
@@ -132,8 +143,8 @@ class Powerline(object):
 				run_once=False,
 				logger=None,
 				use_daemon_threads=True,
-				interval=10):
-		global watcher
+				interval=10,
+				watcher=None):
 		self.ext = ext
 		self.renderer_module = renderer_module or ext
 		self.run_once = run_once
@@ -156,9 +167,7 @@ class Powerline(object):
 
 		self.renderer_options = {}
 
-		if not watcher:
-			watcher = create_file_watcher()
-		self.watcher = MultiClientWatcher()
+		self.watcher = watcher or MultiClientWatcher()
 
 		self.prev_common_config = None
 		self.prev_ext_config = None
@@ -245,8 +254,9 @@ class Powerline(object):
 
 		if load_colorscheme or load_colors:
 			self._purge_configs('colorscheme')
-			colorscheme_config = self.load_colorscheme_config(self.ext_config['colorscheme'])
-			self.renderer_options['colorscheme'] = Colorscheme(colorscheme_config, self.colors_config)
+			if load_colorscheme:
+				self.colorscheme_config = self.load_colorscheme_config(self.ext_config['colorscheme'])
+			self.renderer_options['colorscheme'] = Colorscheme(self.colorscheme_config, self.colors_config)
 
 		if load_theme:
 			self._purge_configs('theme')
@@ -311,7 +321,6 @@ class Powerline(object):
 
 	def _load_config(self, cfg_path, type):
 		'''Load configuration and setup watcher.'''
-		global watcher
 		path = find_config_file(self.config_paths, cfg_path)
 		with self.configs_lock:
 			self.configs[type].add(path)
@@ -386,10 +395,11 @@ class Powerline(object):
 		'''Lock renderer from modifications and run its ``.shutdown()`` method.
 		'''
 		self.shutdown_event.set()
-		with self.renderer_lock:
-			self.renderer.shutdown()
 		if self.use_daemon_threads and self.is_alive():
 			self.thread.join()
+		with self.renderer_lock:
+			self.renderer.shutdown()
+		self.watcher.unsubscribe()
 
 	def is_alive(self):
 		return self.thread and self.thread.is_alive()
@@ -401,7 +411,6 @@ class Powerline(object):
 		self.thread.start()
 
 	def run(self):
-		global watcher
 		while not self.shutdown_event.is_set():
 			kwargs = {}
 			with self.configs_lock:
