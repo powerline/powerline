@@ -10,7 +10,7 @@ used_powerlines = []
 
 def shutdown():
 	for powerline in used_powerlines:
-		powerline.renderer.shutdown()
+		powerline.shutdown()
 
 
 def get_var_config(var):
@@ -77,6 +77,9 @@ class Environment(object):
 			return default
 
 
+environ = Environment()
+
+
 class Prompt(object):
 	__slots__ = ('powerline', 'side', 'savedpsvar', 'savedps', 'args')
 
@@ -88,7 +91,11 @@ class Prompt(object):
 		self.args = powerline.args
 
 	def __str__(self):
-		r = self.powerline.renderer.render(width=zsh.columns(), side=self.side, segment_info=self.args)
+		r = self.powerline.render(
+			width=zsh.columns(),
+			side=self.side,
+			segment_info={'args': self.args, 'environ': environ}
+		)
 		if type(r) is not str:
 			if type(r) is bytes:
 				return r.decode('utf-8')
@@ -101,7 +108,7 @@ class Prompt(object):
 			zsh.setvalue(self.savedpsvar, self.savedps)
 		used_powerlines.remove(self.powerline)
 		if self.powerline not in used_powerlines:
-			self.powerline.renderer.shutdown()
+			self.powerline.shutdown()
 
 
 def set_prompt(powerline, psvar, side):
@@ -113,8 +120,7 @@ def set_prompt(powerline, psvar, side):
 
 
 def setup():
-	environ = Environment()
-	powerline = ShellPowerline(Args(), environ=environ, getcwd=lambda: environ['PWD'])
+	powerline = ShellPowerline(Args())
 	used_powerlines.append(powerline)
 	used_powerlines.append(powerline)
 	set_prompt(powerline, 'PS1', 'left')

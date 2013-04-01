@@ -76,11 +76,17 @@ class VimRenderer(Renderer):
 			'window': vim.windows[winidx],
 			'mode': mode,
 			'window_id': window_id,
-			}
+		}
 		segment_info['buffer'] = segment_info['window'].buffer
 		segment_info['bufnr'] = segment_info['buffer'].number
+		segment_info.update(self.segment_info)
 		winwidth = segment_info['window'].width
-		statusline = super(VimRenderer, self).render(mode, winwidth, segment_info=segment_info, matcher_info=segment_info)
+		statusline = super(VimRenderer, self).render(
+			mode=mode,
+			width=winwidth,
+			segment_info=segment_info,
+			matcher_info=segment_info,
+		)
 		return statusline
 
 	def reset_highlight(self):
@@ -109,7 +115,7 @@ class VimRenderer(Renderer):
 				'guibg': None,
 				'attr': ['NONE'],
 				'name': '',
-				}
+			}
 			if fg is not None and fg is not False:
 				hl_group['ctermfg'] = fg[0]
 				hl_group['guifg'] = fg[1]
@@ -132,13 +138,13 @@ class VimRenderer(Renderer):
 				''.join(hl_group['attr'])
 			self.hl_groups[(fg, bg, attr)] = hl_group
 			vim.command('hi {group} ctermfg={ctermfg} guifg={guifg} guibg={guibg} ctermbg={ctermbg} cterm={attr} gui={attr}'.format(
-					group=hl_group['name'],
-					ctermfg=hl_group['ctermfg'],
-					guifg='#{0:06x}'.format(hl_group['guifg']) if hl_group['guifg'] is not None else 'NONE',
-					ctermbg=hl_group['ctermbg'],
-					guibg='#{0:06x}'.format(hl_group['guibg']) if hl_group['guibg'] is not None else 'NONE',
-					attr=','.join(hl_group['attr']),
-				))
+				group=hl_group['name'],
+				ctermfg=hl_group['ctermfg'],
+				guifg='#{0:06x}'.format(hl_group['guifg']) if hl_group['guifg'] is not None else 'NONE',
+				ctermbg=hl_group['ctermbg'],
+				guibg='#{0:06x}'.format(hl_group['guibg']) if hl_group['guibg'] is not None else 'NONE',
+				attr=','.join(hl_group['attr']),
+			))
 		return '%#' + self.hl_groups[(fg, bg, attr)]['name'] + '#'
 
 

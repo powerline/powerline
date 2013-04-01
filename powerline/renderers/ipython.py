@@ -9,6 +9,11 @@ class IpythonRenderer(ShellRenderer):
 	escape_hl_start = '\x01'
 	escape_hl_end = '\x02'
 
+	def get_segment_info(self, segment_info):
+		r = self.segment_info.copy()
+		r['ipython'] = segment_info
+		return r
+
 	def get_theme(self, matcher_info):
 		if matcher_info == 'in':
 			return self.theme

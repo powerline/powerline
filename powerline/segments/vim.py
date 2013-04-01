@@ -181,7 +181,7 @@ def file_name(pl, segment_info, display_no_file=False, no_file_text='[No file]')
 			return [{
 				'contents': no_file_text,
 				'highlight_group': ['file_name_no_file', 'file_name'],
-				}]
+			}]
 		else:
 			return None
 	file_name = vim_funcs['fnamemodify'](name, ':~:.:t')
@@ -258,7 +258,7 @@ def line_percent(pl, segment_info, gradient=False):
 		'contents': str(int(round(percentage))),
 		'highlight_group': ['line_percent_gradient', 'line_percent'],
 		'gradient_level': percentage,
-		}]
+	}]
 
 
 @requires_segment_info
@@ -318,13 +318,13 @@ class RepositorySegment(KwWindowThreadedSegment):
 		# FIXME os.getcwd() is not a proper variant for non-current buffers
 		return segment_info['buffer'].name or os.getcwd()
 
-	def update(self):
+	def update(self, *args):
 		# .compute_state() is running only in this method, and only in one 
 		# thread, thus operations with .directories do not need write locks 
 		# (.render() method is not using .directories). If this is changed 
 		# .directories needs redesigning
 		self.directories.clear()
-		super(RepositorySegment, self).update()
+		return super(RepositorySegment, self).update(*args)
 
 	def compute_state(self, path):
 		repo = guess(path=path)
@@ -359,19 +359,19 @@ class BranchSegment(RepositorySegment):
 	def process_repo(repo):
 		return repo.branch()
 
-	def render_one(self, update_state, segment_info, status_colors=False, **kwargs):
-		if not update_state:
+	def render_one(self, branch, segment_info, status_colors=False, **kwargs):
+		if not branch:
 			return None
 
 		if status_colors:
 			self.started_repository_status = True
 
 		return [{
-			'contents': update_state,
+			'contents': branch,
 			'highlight_group': (['branch_dirty' if repository_status(segment_info=segment_info, **kwargs) else 'branch_clean']
 								if status_colors else []) + ['branch'],
 			'divider_highlight_group': 'branch:divider',
-			}]
+		}]
 
 	def startup(self, status_colors=False, **kwargs):
 		super(BranchSegment, self).startup(**kwargs)
@@ -422,7 +422,7 @@ class FileVCSStatusSegment(KwWindowThreadedSegment):
 					ret.append({
 						'contents': status,
 						'highlight_group': ['file_vcs_status_' + status, 'file_vcs_status'],
-						})
+					})
 				return ret
 		return None
 
