@@ -163,6 +163,8 @@ class Powerline(object):
 		self.configs_lock = Lock()
 		self.shutdown_event = Event()
 		self.configs = defaultdict(set)
+		self.missing = defaultdict(set)
+
 		self.thread = None
 
 		self.renderer_options = {}
@@ -171,6 +173,7 @@ class Powerline(object):
 
 		self.prev_common_config = None
 		self.prev_ext_config = None
+		self.pl = None
 
 		self.create_renderer(load_main=True, load_colors=True, load_colorscheme=True, load_theme=True)
 
@@ -218,7 +221,8 @@ class Powerline(object):
 					self.logger.setLevel(level)
 					self.logger.addHandler(handler)
 
-				self.pl = PowerlineState(self.use_daemon_threads, self.logger, self.ext)
+				if not self.pl:
+					self.pl = PowerlineState(self.use_daemon_threads, self.logger, self.ext)
 
 				self.renderer_options.update(
 					pl=self.pl,
@@ -321,7 +325,12 @@ class Powerline(object):
 
 	def _load_config(self, cfg_path, type):
 		'''Load configuration and setup watcher.'''
-		path = find_config_file(self.config_paths, cfg_path)
+		try:
+			path = find_config_file(self.config_paths, cfg_path)
+		except IOError:
+			with self.configs_lock:
+				self.missing[type].add(cfg_path)
+			raise
 		with self.configs_lock:
 			self.configs[type].add(path)
 			self.watcher.watch(path)
@@ -417,6 +426,14 @@ class Powerline(object):
 				for type, paths in self.configs.items():
 					for path in paths:
 						if self.watcher(path):
+							kwargs['load_' + type] = True
+				for type, cfg_paths in self.missing.items():
+					for cfg_path in cfg_paths:
+						try:
+							find_config_file(self.config_paths, cfg_path)
+						except IOError:
+							pass
+						else:
 							kwargs['load_' + type] = True
 			if kwargs:
 				try:
