@@ -116,6 +116,15 @@ class ThreadedSegment(MultiRunnedThread):
 		if not self.is_alive():
 			self.start()
 
+	def critical(self, *args, **kwargs):
+		self.pl.critical(prefix=self.__class__.__name__, *args, **kwargs)
+
+	def exception(self, *args, **kwargs):
+		self.pl.exception(prefix=self.__class__.__name__, *args, **kwargs)
+
+	def info(self, *args, **kwargs):
+		self.pl.info(prefix=self.__class__.__name__, *args, **kwargs)
+
 	def error(self, *args, **kwargs):
 		self.pl.error(prefix=self.__class__.__name__, *args, **kwargs)
 
