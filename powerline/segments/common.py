@@ -239,6 +239,7 @@ def _external_ip(query_url='http://ipv4.icanhazip.com/'):
 
 class ExternalIpSegment(ThreadedSegment):
 	interval = 10
+	update_first=False
 
 	def set_state(self, query_url='http://ipv4.icanhazip.com/', **kwargs):
 		self.query_url = query_url
@@ -360,6 +361,7 @@ temp_units = {
 
 class WeatherSegment(ThreadedSegment):
 	interval = 600
+	update_first = False
 
 	def set_state(self, location_query=None, **kwargs):
 		self.location = location_query
