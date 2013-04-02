@@ -102,34 +102,48 @@ class TestCommon(TestCase):
 		segment_info = {'getcwd': getcwd, 'home': None}
 		with replace_attr(common, 'os', new_os):
 			cwd[0] = '/abc/def/ghi/foo/bar'
-			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info),
-					[{'contents': '/', 'divider_highlight_group': 'cwd:divider'},
-					{'contents': 'abc', 'divider_highlight_group': 'cwd:divider'},
-					{'contents': 'def', 'divider_highlight_group': 'cwd:divider'},
-					{'contents': 'ghi', 'divider_highlight_group': 'cwd:divider'},
-					{'contents': 'foo', 'divider_highlight_group': 'cwd:divider'},
-					{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'highlight_group': ['cwd:current_folder', 'cwd']}])
+			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info), [
+				{'contents': '/', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
+				{'contents': 'abc', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
+				{'contents': 'def', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
+				{'contents': 'ghi', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
+				{'contents': 'foo', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
+				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_group': ['cwd:current_folder', 'cwd']},
+			])
 			segment_info['home'] = '/abc/def/ghi'
-			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info),
-					[{'contents': '~', 'divider_highlight_group': 'cwd:divider'},
-					{'contents': 'foo', 'divider_highlight_group': 'cwd:divider'},
-					{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'highlight_group': ['cwd:current_folder', 'cwd']}])
-			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info, dir_limit_depth=3),
-					[{'contents': '~', 'divider_highlight_group': 'cwd:divider'},
-					{'contents': 'foo', 'divider_highlight_group': 'cwd:divider'},
-					{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'highlight_group': ['cwd:current_folder', 'cwd']}])
-			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info, dir_limit_depth=1),
-					[{'contents': '⋯', 'divider_highlight_group': 'cwd:divider'},
-					{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'highlight_group': ['cwd:current_folder', 'cwd']}])
-			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info, dir_limit_depth=2, dir_shorten_len=2),
-					[{'contents': '~', 'divider_highlight_group': 'cwd:divider'},
-					{'contents': 'fo', 'divider_highlight_group': 'cwd:divider'},
-					{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'highlight_group': ['cwd:current_folder', 'cwd']}])
+			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info), [
+				{'contents': '~', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
+				{'contents': 'foo', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
+				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_group': ['cwd:current_folder', 'cwd']},
+			])
+			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info, dir_limit_depth=3), [
+				{'contents': '~', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
+				{'contents': 'foo', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
+				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_group': ['cwd:current_folder', 'cwd']}
+			])
+			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info, dir_limit_depth=1), [
+				{'contents': '⋯', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
+				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_group': ['cwd:current_folder', 'cwd']}
+			])
+			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info, dir_limit_depth=1, use_path_separator=True), [
+				{'contents': '⋯/', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False},
+				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False, 'highlight_group': ['cwd:current_folder', 'cwd']}
+			])
+			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info, dir_limit_depth=2, dir_shorten_len=2), [
+				{'contents': '~', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
+				{'contents': 'fo', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
+				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_group': ['cwd:current_folder', 'cwd']}
+			])
+			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info, dir_limit_depth=2, dir_shorten_len=2, use_path_separator=True), [
+				{'contents': '~/', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False},
+				{'contents': 'fo/', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False},
+				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False, 'highlight_group': ['cwd:current_folder', 'cwd']}
+			])
 			ose = OSError()
 			ose.errno = 2
 			cwd[0] = ose
 			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info, dir_limit_depth=2, dir_shorten_len=2),
-					[{'contents': '[not found]', 'divider_highlight_group': 'cwd:divider', 'highlight_group': ['cwd:current_folder', 'cwd']}])
+					[{'contents': '[not found]', 'divider_highlight_group': 'cwd:divider', 'highlight_group': ['cwd:current_folder', 'cwd'], 'draw_inner_divider': True}])
 			cwd[0] = OSError()
 			self.assertRaises(OSError, common.cwd, pl=pl, segment_info=segment_info, dir_limit_depth=2, dir_shorten_len=2)
 			cwd[0] = ValueError()
