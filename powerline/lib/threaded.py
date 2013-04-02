@@ -144,7 +144,7 @@ class KwThreadedSegment(ThreadedSegment):
 		except KeyError:
 			# Allow only to forbid to compute missing values: in either user 
 			# configuration or in subclasses.
-			update_state = self.compute_state(key) if update_first and self.update_first or self.run_once else None
+			update_state = self.compute_state(key) if ((update_first and self.update_first) or self.run_once) else None
 
 		with self.write_lock:
 			self.new_queries[key] = (monotonic(), update_state)
@@ -173,11 +173,8 @@ class KwThreadedSegment(ThreadedSegment):
 
 		return update_value
 
-	def set_state(self, interval=None, update_first=True, **kwargs):
+	def set_state(self, interval=None, **kwargs):
 		self.set_interval(interval)
-
-		if self.update_first:
-			self.update_first = update_first
 
 	@staticmethod
 	def render_one(update_state, **kwargs):
