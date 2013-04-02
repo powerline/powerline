@@ -225,10 +225,10 @@ class TestConfigReload(TestCase):
 				self.assertAccessEvents()
 				self.assertEqual(p.render(), '<1 2 1> s<2 4 False>>><3 4 4>g<4 False False>>><None None None>')
 				self.assertEqual(p.logger._pop_msgs(), [])
-				# Without the following assertion test_reload_colors may fail 
-				# for unknown reason (with AssertionError telling about “config” 
-				# accessed one more time then needed)
-				self.assertAccessEvents()
+		# Without the following assertion test_reload_colors may fail for 
+		# unknown reason (with AssertionError telling about “config” accessed 
+		# one more time then needed)
+		self.assertAccessEvents()
 
 	def test_reload_main(self):
 		with get_powerline(run_once=False) as p:
@@ -281,6 +281,7 @@ class TestConfigReload(TestCase):
 				self.assertEqual(p.render(), '<2 3 1> t <3 4 False>>><1 4 4>b <4 False False>>><None None None>')
 				self.assertEqual(p.logger._pop_msgs(), [])
 				self.assertEqual(p.renderer.local_themes, 'something')
+		self.assertAccessEvents()
 
 	def test_reload_unexistent(self):
 		with get_powerline(run_once=False) as p:
@@ -305,6 +306,7 @@ class TestConfigReload(TestCase):
 				self.assertAccessEvents('colorschemes/test/nonexistentraise')
 				self.assertEqual(p.render(), '<1 3 1> s<3 4 False>>><2 4 4>g<4 False False>>><None None None>')
 				self.assertEqual(p.logger._pop_msgs(), [])
+		self.assertAccessEvents()
 
 	def test_reload_colors(self):
 		with get_powerline(run_once=False) as p:
@@ -317,6 +319,7 @@ class TestConfigReload(TestCase):
 				self.assertAccessEvents('colors')
 				self.assertEqual(p.render(), '<5 2 1> s<2 4 False>>><3 4 4>g<4 False False>>><None None None>')
 				self.assertEqual(p.logger._pop_msgs(), [])
+		self.assertAccessEvents()
 
 	def test_reload_colorscheme(self):
 		with get_powerline(run_once=False) as p:
@@ -329,6 +332,7 @@ class TestConfigReload(TestCase):
 				self.assertAccessEvents('colorschemes/test/default')
 				self.assertEqual(p.render(), '<1 3 1> s<3 4 False>>><3 4 4>g<4 False False>>><None None None>')
 				self.assertEqual(p.logger._pop_msgs(), [])
+		self.assertAccessEvents()
 
 	def test_reload_theme(self):
 		with get_powerline(run_once=False) as p:
@@ -341,6 +345,7 @@ class TestConfigReload(TestCase):
 				self.assertAccessEvents('themes/test/default')
 				self.assertEqual(p.render(), '<1 2 1> col3<2 4 False>>><3 4 4>g<4 False False>>><None None None>')
 				self.assertEqual(p.logger._pop_msgs(), [])
+		self.assertAccessEvents()
 
 
 replaces = {
