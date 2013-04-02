@@ -36,11 +36,69 @@ class TestLib(TestCase):
 		self.assertEqual(humanize_bytes(1000000000, si_prefix=True), '1.00 GB')
 		self.assertEqual(humanize_bytes(1000000000, si_prefix=False), '953.7 MiB')
 
+	def do_test_for_change(self, watcher, path):
+		import time
+		st = time.time()
+		while time.time() - st < 1:
+			if watcher(path):
+				return
+			time.sleep(0.1)
+		self.fail('The change to %s was not detected'%path)
+
+	def test_file_watcher(self):
+		from powerline.lib.file_watcher import create_file_watcher
+		w = create_file_watcher(use_stat=False)
+		if w.is_stat_based:
+			# The granularity of mtime (1 second) means that we cannot use the
+			# same tests for inotify and StatWatch.
+			return
+		f1, f2 = os.path.join(INOTIFY_DIR, 'file1'), os.path.join(INOTIFY_DIR, 'file2')
+		with open(f1, 'wb'):
+			with open(f2, 'wb'):
+				pass
+		ne = os.path.join(INOTIFY_DIR, 'notexists')
+		self.assertRaises(OSError, w, ne)
+		self.assertTrue(w(f1))
+		self.assertTrue(w(f2))
+		os.utime(f1, None), os.utime(f2, None)
+		self.do_test_for_change(w, f1)
+		self.do_test_for_change(w, f2)
+		# Repeat once
+		os.utime(f1, None), os.utime(f2, None)
+		self.do_test_for_change(w, f1)
+		self.do_test_for_change(w, f2)
+		# Check that no false changes are reported
+		self.assertFalse(w(f1), 'Spurious change detected')
+		self.assertFalse(w(f2), 'Spurious change detected')
+		# Check that open the file with 'w' triggers a change
+		with open(f1, 'wb'):
+			with open(f2, 'wb'):
+				pass
+		self.do_test_for_change(w, f1)
+		self.do_test_for_change(w, f2)
+		# Check that writing to a file with 'a' triggers a change
+		with open(f1, 'ab') as f:
+			f.write(b'1')
+		self.do_test_for_change(w, f1)
+		# Check that deleting a file registers as a change
+		os.unlink(f1)
+		self.do_test_for_change(w, f1)
 
 use_mercurial = use_bzr = sys.version_info < (3, 0)
 
 
 class TestVCS(TestCase):
+	def do_branch_rename_test(self, repo, q):
+		import time
+		st = time.time()
+		while time.time() - st < 1:
+			# Give inotify time to deliver events
+			ans = repo.branch()
+			if ans == q:
+				break
+			time.sleep(0.1)
+		self.assertEqual(ans, q)
+
 	def test_git(self):
 		repo = guess(path=GIT_REPO)
 		self.assertNotEqual(repo, None)
@@ -60,6 +118,19 @@ class TestVCS(TestCase):
 			self.assertEqual(repo.status(), 'DI ')
 			self.assertEqual(repo.status('file'), 'AM')
 		os.remove(os.path.join(GIT_REPO, 'file'))
+		# Test changing branch
+		self.assertEqual(repo.branch(), 'master')
+		call(['git', 'branch', 'branch1'], cwd=GIT_REPO)
+		call(['git', 'checkout', '-q', 'branch1'], cwd=GIT_REPO)
+		self.do_branch_rename_test(repo, 'branch1')
+		if 'TRAVIS' not in os.environ:
+			# For some reason the rest of this test fails on travis and only on
+			# travis, and I can't figure out why
+			call(['git', 'branch', 'branch2'], cwd=GIT_REPO)
+			call(['git', 'checkout', '-q', 'branch2'], cwd=GIT_REPO)
+			self.do_branch_rename_test(repo, 'branch2')
+			call(['git', 'checkout', '-q', '--detach', 'branch1'], cwd=GIT_REPO)
+			self.do_branch_rename_test(repo, '[DETACHED HEAD]')
 
 	if use_mercurial:
 		def test_mercurial(self):
@@ -87,17 +158,42 @@ class TestVCS(TestCase):
 				f.write('abc')
 			self.assertEqual(repo.status(), ' U')
 			self.assertEqual(repo.status('file'), '? ')
-			call(['bzr', 'add', '.'], cwd=BZR_REPO, stdout=PIPE)
+			call(['bzr', 'add', '-q', '.'], cwd=BZR_REPO, stdout=PIPE)
 			self.assertEqual(repo.status(), 'D ')
 			self.assertEqual(repo.status('file'), '+N')
-			call(['bzr', 'commit', '-m', 'initial commit'], cwd=BZR_REPO, stdout=PIPE, stderr=PIPE)
+			call(['bzr', 'commit', '-q', '-m', 'initial commit'], cwd=BZR_REPO)
 			self.assertEqual(repo.status(), None)
 			with open(os.path.join(BZR_REPO, 'file'), 'w') as f:
 				f.write('def')
 			self.assertEqual(repo.status(), 'D ')
 			self.assertEqual(repo.status('file'), ' M')
 			self.assertEqual(repo.status('notexist'), None)
-			os.remove(os.path.join(BZR_REPO, 'file'))
+			with open(os.path.join(BZR_REPO, 'ignored'), 'w') as f:
+				f.write('abc')
+			self.assertEqual(repo.status('ignored'), '? ')
+			# Test changing the .bzrignore file should update status
+			with open(os.path.join(BZR_REPO, '.bzrignore'), 'w') as f:
+				f.write('ignored')
+			self.assertEqual(repo.status('ignored'), None)
+			# Test changing the dirstate file should invalidate the cache for
+			# all files in the repo
+			with open(os.path.join(BZR_REPO, 'file2'), 'w') as f:
+				f.write('abc')
+			call(['bzr', 'add', 'file2'], cwd=BZR_REPO, stdout=PIPE)
+			call(['bzr', 'commit', '-q', '-m', 'file2 added'], cwd=BZR_REPO)
+			with open(os.path.join(BZR_REPO, 'file'), 'a') as f:
+				f.write('hello')
+			with open(os.path.join(BZR_REPO, 'file2'), 'a') as f:
+				f.write('hello')
+			self.assertEqual(repo.status('file'), ' M')
+			self.assertEqual(repo.status('file2'), ' M')
+			call(['bzr', 'commit', '-q', '-m', 'multi'], cwd=BZR_REPO)
+			self.assertEqual(repo.status('file'), None)
+			self.assertEqual(repo.status('file2'), None)
+
+			# Test changing branch
+			call(['bzr', 'nick', 'branch1'], cwd=BZR_REPO, stdout=PIPE, stderr=PIPE)
+			self.do_branch_rename_test(repo, 'branch1')
 
 old_HGRCPATH = None
 old_cwd = None
@@ -106,7 +202,7 @@ old_cwd = None
 GIT_REPO = 'git_repo' + os.environ.get('PYTHON', '')
 HG_REPO = 'hg_repo' + os.environ.get('PYTHON', '')
 BZR_REPO = 'bzr_repo' + os.environ.get('PYTHON', '')
-
+INOTIFY_DIR = 'inotify' + os.environ.get('PYTHON', '')
 
 def setUpModule():
 	global old_cwd
@@ -130,12 +226,14 @@ def setUpModule():
 		call(['bzr', 'config', 'email=Foo <bar@example.org>'], cwd=BZR_REPO)
 		call(['bzr', 'config', 'nickname=test_powerline'], cwd=BZR_REPO)
 		call(['bzr', 'config', 'create_signatures=0'], cwd=BZR_REPO)
+	os.mkdir(INOTIFY_DIR)
+
 
 
 def tearDownModule():
 	global old_cwd
 	global old_HGRCPATH
-	for repo_dir in [GIT_REPO] + ([HG_REPO] if use_mercurial else []) + ([BZR_REPO] if use_bzr else []):
+	for repo_dir in [INOTIFY_DIR, GIT_REPO] + ([HG_REPO] if use_mercurial else []) + ([BZR_REPO] if use_bzr else []):
 		for root, dirs, files in list(os.walk(repo_dir, topdown=False)):
 			for file in files:
 				os.remove(os.path.join(root, file))

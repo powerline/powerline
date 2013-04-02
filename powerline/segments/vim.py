@@ -398,37 +398,24 @@ Divider highlight group used: ``branch:divider``.
 
 
 @requires_segment_info
-class FileVCSStatusSegment(KwWindowThreadedSegment):
-	interval = 0.2
+def file_vcs_status(pl, segment_info):
+	'''Return the VCS status for this buffer.
 
-	@staticmethod
-	def key(segment_info, **kwargs):
-		name = segment_info['buffer'].name
-		skip = not (name and (not getbufvar(segment_info['bufnr'], '&buftype')))
-		return name, skip
-
-	@staticmethod
-	def compute_state(key):
-		name, skip = key
-		if not skip:
-			repo = guess(path=name)
-			if repo:
-				status = repo.status(os.path.relpath(name, repo.directory))
-				if not status:
-					return None
-				status = status.strip()
-				ret = []
-				for status in status:
-					ret.append({
-						'contents': status,
-						'highlight_group': ['file_vcs_status_' + status, 'file_vcs_status'],
+	Highlight groups used: ``file_vcs_status``.
+	'''
+	name = segment_info['buffer'].name
+	skip = not (name and (not getbufvar(segment_info['bufnr'], '&buftype')))
+	if not skip:
+		repo = guess(path=name)
+		if repo is not None:
+			status = repo.status(os.path.relpath(name, repo.directory))
+			if not status:
+				return None
+			status = status.strip()
+			ret = []
+			for status in status:
+				ret.append({
+					'contents': status,
+					'highlight_group': ['file_vcs_status_' + status, 'file_vcs_status'],
 					})
-				return ret
-		return None
-
-
-file_vcs_status = with_docstring(FileVCSStatusSegment(),
-'''Return the VCS status for this buffer.
-
-Highlight groups used: ``file_vcs_status``.
-''')
+			return ret

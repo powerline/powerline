@@ -1,4 +1,46 @@
 # vim:fileencoding=utf-8:noet
+
+import os
+import re
+import errno
+
+from powerline.lib.vcs import get_branch_name as _get_branch_name, get_file_status
+
+_ref_pat = re.compile(br'ref:\s*refs/heads/(.+)')
+
+def branch_name_from_config_file(directory, config_file):
+	try:
+		with open(config_file, 'rb') as f:
+			raw = f.read()
+	except EnvironmentError:
+		return os.path.basename(directory)
+	m = _ref_pat.match(raw)
+	if m is not None:
+		return m.group(1).decode('utf-8', 'replace')
+	return '[DETACHED HEAD]'
+
+def get_branch_name(base_dir):
+	head = os.path.join(base_dir, '.git', 'HEAD')
+	try:
+		return _get_branch_name(base_dir, head, branch_name_from_config_file)
+	except OSError as e:
+		if getattr(e, 'errno', None) == errno.ENOTDIR or getattr(e, 'winerror', None) == 3:
+			# We are in a submodule
+			return '(no branch)'
+		raise
+
+def do_status(directory, path, func):
+	if path:
+		gitd = os.path.join(directory, '.git')
+		if os.path.isfile(gitd):
+			with open(gitd, 'rb') as f:
+				raw = f.read().partition(b':')[2].strip()
+				gitd = os.path.abspath(os.path.join(directory, raw))
+		return get_file_status(directory, os.path.join(gitd, 'index'),
+					path, '.gitignore', func)
+	return func(directory, path)
+
+
 try:
 	import pygit2 as git
 
@@ -6,28 +48,12 @@ try:
 		__slots__ = ('directory')
 
 		def __init__(self, directory):
-			self.directory = directory
+			self.directory = os.path.abspath(directory)
 
-		def _repo(self):
-			return git.Repository(self.directory)
-
-		def status(self, path=None):
-			'''Return status of repository or file.
-
-			Without file argument: returns status of the repository:
-
-			:First column: working directory status (D: dirty / space)
-			:Second column: index status (I: index dirty / space)
-			:Third column: presense of untracked files (U: untracked files / space)
-			:None: repository clean
-
-			With file argument: returns status of this file. Output is
-			equivalent to the first two columns of "git status --porcelain"
-			(except for merge statuses as they are not supported by libgit2).
-			'''
+		def do_status(self, directory, path):
 			if path:
 				try:
-					status = self._repo().status_file(path)
+					status = git.Repository(directory).status_file(path)
 				except (KeyError, ValueError):
 					return None
 
@@ -60,7 +86,7 @@ try:
 				wt_column = ' '
 				index_column = ' '
 				untracked_column = ' '
-				for status in self._repo().status().values():
+				for status in git.Repository(directory).status().values():
 					if status & git.GIT_STATUS_WT_NEW:
 						untracked_column = 'U'
 						continue
@@ -76,21 +102,24 @@ try:
 				r = wt_column + index_column + untracked_column
 				return r if r != '   ' else None
 
+		def status(self, path=None):
+			'''Return status of repository or file.
+
+			Without file argument: returns status of the repository:
+
+			:First column: working directory status (D: dirty / space)
+			:Second column: index status (I: index dirty / space)
+			:Third column: presence of untracked files (U: untracked files / space)
+			:None: repository clean
+
+			With file argument: returns status of this file. Output is
+			equivalent to the first two columns of "git status --porcelain"
+			(except for merge statuses as they are not supported by libgit2).
+			'''
+			return do_status(self.directory, path, self.do_status)
+
 		def branch(self):
-			try:
-				ref = self._repo().lookup_reference('HEAD')
-			except KeyError:
-				return None
-
-			try:
-				target = ref.target
-			except ValueError:
-				return '[DETACHED HEAD]'
-
-			if target.startswith('refs/heads/'):
-				return target[11:]
-			else:
-				return '[DETACHED HEAD]'
+			return get_branch_name(self.directory)
 except ImportError:
 	from subprocess import Popen, PIPE
 
@@ -105,22 +134,22 @@ except ImportError:
 		__slots__ = ('directory',)
 
 		def __init__(self, directory):
-			self.directory = directory
+			self.directory = os.path.abspath(directory)
 
-		def _gitcmd(self, *args):
-			return readlines(('git',) + args, self.directory)
+		def _gitcmd(self, directory, *args):
+			return readlines(('git',) + args, directory)
 
-		def status(self, path=None):
+		def do_status(self, directory, path):
 			if path:
 				try:
-					return next(self._gitcmd('status', '--porcelain', '--ignored', '--', path))[:2]
+					return next(self._gitcmd(directory, 'status', '--porcelain', '--ignored', '--', path))[:2]
 				except StopIteration:
 					return None
 			else:
 				wt_column = ' '
 				index_column = ' '
 				untracked_column = ' '
-				for line in self._gitcmd('status', '--porcelain'):
+				for line in self._gitcmd(directory, 'status', '--porcelain'):
 					if line[0] == '?':
 						untracked_column = 'U'
 						continue
@@ -136,8 +165,8 @@ except ImportError:
 				r = wt_column + index_column + untracked_column
 				return r if r != '   ' else None
 
+		def status(self, path=None):
+			return do_status(self.directory, path, self.do_status)
+
 		def branch(self):
-			for line in self._gitcmd('branch', '-l'):
-				if line[0] == '*':
-					return line[2:]
-			return None
+			return get_branch_name(self.directory)
