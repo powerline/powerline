@@ -42,9 +42,19 @@ class TestCommon(TestCase):
 			with replace_module_module(common, 'socket', gethostname=lambda: 'abc'):
 				self.assertEqual(common.hostname(pl=pl, segment_info=segment_info), 'abc')
 				self.assertEqual(common.hostname(pl=pl, segment_info=segment_info, only_if_ssh=True), 'abc')
-				segment_info['environ'].pop('SSH_CLIENT')
+			with replace_module_module(common, 'socket', gethostname=lambda: 'abc.mydomain'):
+				self.assertEqual(common.hostname(pl=pl, segment_info=segment_info), 'abc.mydomain')
+				self.assertEqual(common.hostname(pl=pl, segment_info=segment_info, exclude_domain=True), 'abc')
+				self.assertEqual(common.hostname(pl=pl, segment_info=segment_info, only_if_ssh=True), 'abc.mydomain')
+				self.assertEqual(common.hostname(pl=pl, segment_info=segment_info, only_if_ssh=True, exclude_domain=True), 'abc')
+			segment_info['environ'].pop('SSH_CLIENT')
+			with replace_module_module(common, 'socket', gethostname=lambda: 'abc'):
 				self.assertEqual(common.hostname(pl=pl, segment_info=segment_info), 'abc')
 				self.assertEqual(common.hostname(pl=pl, segment_info=segment_info, only_if_ssh=True), None)
+			with replace_module_module(common, 'socket', gethostname=lambda: 'abc.mydomain'):
+				self.assertEqual(common.hostname(pl=pl, segment_info=segment_info), 'abc.mydomain')
+				self.assertEqual(common.hostname(pl=pl, segment_info=segment_info, exclude_domain=True), 'abc')
+				self.assertEqual(common.hostname(pl=pl, segment_info=segment_info, only_if_ssh=True, exclude_domain=True), None)
 
 	def test_user(self):
 		new_os = new_module('os', getpid=lambda: 1)
