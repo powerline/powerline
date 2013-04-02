@@ -51,7 +51,7 @@ class RepositorySegment(KwThreadedSegment):
 		# (.render() method is not using .directories). If this is changed 
 		# .directories needs redesigning
 		self.directories.clear()
-		return super(RepositorySegment, self).update(*args)
+		return KwThreadedSegment.update(self, *args)
 
 	def compute_state(self, path):
 		repo = guess(path=path)
