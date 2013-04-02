@@ -29,10 +29,11 @@ class TestShell(TestCase):
 		segment_info['args'].last_pipe_status = [0, 0, 0]
 		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info), None)
 		segment_info['args'].last_pipe_status = [0, 2, 0]
-		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info),
-				[{'contents': '0', 'highlight_group': 'exit_success'},
-				{'contents': '2', 'highlight_group': 'exit_fail'},
-				{'contents': '0', 'highlight_group': 'exit_success'}])
+		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info), [
+			{'contents': '0', 'highlight_group': 'exit_success', 'draw_inner_divider': True},
+			{'contents': '2', 'highlight_group': 'exit_fail', 'draw_inner_divider': True},
+			{'contents': '0', 'highlight_group': 'exit_success', 'draw_inner_divider': True}
+		])
 
 
 class TestCommon(TestCase):
