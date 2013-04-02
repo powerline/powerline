@@ -111,29 +111,29 @@ class PowerlineState(object):
 
 
 class Powerline(object):
-	'''Main powerline class, entrance point for all powerline uses. Sets 
+	'''Main powerline class, entrance point for all powerline uses. Sets
 	powerline up and loads the configuration.
 
 	:param str ext:
-		extension used. Determines where configuration files will 
-		searched and what renderer module will be used. Affected: used ``ext`` 
-		dictionary from :file:`powerline/config.json`, location of themes and 
+		extension used. Determines where configuration files will
+		searched and what renderer module will be used. Affected: used ``ext``
+		dictionary from :file:`powerline/config.json`, location of themes and
 		colorschemes, render module (``powerline.renders.{ext}``).
 	:param str renderer_module:
-		Overrides renderer module (defaults to ``ext``). Should be the name of 
-		the package imported like this: ``powerline.renders.{render_module}``. 
-		If this parameter contains a dot, ``powerline.renderers.`` is not 
-		prepended. There is also a special case for renderers defined in 
-		toplevel modules: ``foo.`` (note: dot at the end) tries to get renderer 
-		from module ``foo`` (because ``foo`` (without dot) tries to get renderer 
+		Overrides renderer module (defaults to ``ext``). Should be the name of
+		the package imported like this: ``powerline.renders.{render_module}``.
+		If this parameter contains a dot, ``powerline.renderers.`` is not
+		prepended. There is also a special case for renderers defined in
+		toplevel modules: ``foo.`` (note: dot at the end) tries to get renderer
+		from module ``foo`` (because ``foo`` (without dot) tries to get renderer
 		from module ``powerline.renderers.foo``).
 	:param bool run_once:
-		Determines whether .renderer.render() method will be run only once 
+		Determines whether .renderer.render() method will be run only once
 		during python session.
 	:param Logger logger:
 		If present, no new logger will be created and this logger will be used.
 	:param float interval:
-		When reloading configuration wait for this amount of seconds. Set it to 
+		When reloading configuration wait for this amount of seconds. Set it to
 		None if you don’t want to reload configuration automatically.
 	'''
 
@@ -178,18 +178,18 @@ class Powerline(object):
 		self.create_renderer(load_main=True, load_colors=True, load_colorscheme=True, load_theme=True)
 
 	def create_renderer(self, load_main=False, load_colors=False, load_colorscheme=False, load_theme=False):
-		'''(Re)create renderer object. Can be used after Powerline object was 
-		successfully initialized. If any of the below parameters except 
+		'''(Re)create renderer object. Can be used after Powerline object was
+		successfully initialized. If any of the below parameters except
 		``load_main`` is True renderer object will be recreated.
 
 		:param bool load_main:
-			Determines whether main configuration file (:file:`config.json`) 
-			should be loaded. If appropriate configuration changes implies 
-			``load_colorscheme`` and ``load_theme`` and recreation of renderer 
-			object. Won’t trigger recreation if only unrelated configuration 
+			Determines whether main configuration file (:file:`config.json`)
+			should be loaded. If appropriate configuration changes implies
+			``load_colorscheme`` and ``load_theme`` and recreation of renderer
+			object. Won’t trigger recreation if only unrelated configuration
 			changed.
 		:param bool load_colors:
-			Determines whether colors configuration from :file:`colors.json` 
+			Determines whether colors configuration from :file:`colors.json`
 			should be (re)loaded.
 		:param bool load_colorscheme:
 			Determines whether colorscheme configuration should be (re)loaded.
@@ -273,8 +273,8 @@ class Powerline(object):
 				self.pl.exception('Failed to import renderer module: {0}', str(e))
 				sys.exit(1)
 
-			# Renderer updates configuration file via segments’ .startup thus it 
-			# should be locked to prevent state when configuration was updated, 
+			# Renderer updates configuration file via segments’ .startup thus it
+			# should be locked to prevent state when configuration was updated,
 			# but .render still uses old renderer.
 			with self.renderer_lock:
 				try:
@@ -379,22 +379,22 @@ class Powerline(object):
 
 	@staticmethod
 	def get_local_themes(local_themes):
-		'''Get local themes. No-op here, to be overridden in subclasses if 
+		'''Get local themes. No-op here, to be overridden in subclasses if
 		required.
 
 		:param dict local_themes:
-			Usually accepts ``{matcher_name : theme_name}``. May also receive 
+			Usually accepts ``{matcher_name : theme_name}``. May also receive
 			None in case there is no local_themes configuration.
 
 		:return:
-			anything accepted by ``self.renderer.get_theme`` and processable by 
-			``self.renderer.add_local_theme``. Renderer module is determined by 
+			anything accepted by ``self.renderer.get_theme`` and processable by
+			``self.renderer.add_local_theme``. Renderer module is determined by
 			``__init__`` arguments, refer to its documentation.
 		'''
 		return None
 
 	def render(self, *args, **kwargs):
-		'''Lock renderer from modifications and pass all arguments further to 
+		'''Lock renderer from modifications and pass all arguments further to
 		``self.renderer.render()``.
 		'''
 		with self.renderer_lock:
@@ -405,7 +405,8 @@ class Powerline(object):
 		'''
 		self.shutdown_event.set()
 		if self.use_daemon_threads and self.is_alive():
-			self.thread.join()
+			# Give the thread a chance to shutdown but dont block for too long
+			self.thread.join(0.01)
 		with self.renderer_lock:
 			self.renderer.shutdown()
 		self.watcher.unsubscribe()
