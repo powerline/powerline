@@ -379,10 +379,10 @@ class BranchSegment(RepositorySegment):
 			self.started_repository_status = True
 			repository_status.startup(**kwargs)
 
-	def shutdown(self):
+	def shutdown(self, join):
 		if self.started_repository_status:
-			repository_status.shutdown()
-		super(BranchSegment, self).shutdown()
+			repository_status.shutdown(join)
+		super(BranchSegment, self).shutdown(join)
 
 
 branch = with_docstring(BranchSegment(),
