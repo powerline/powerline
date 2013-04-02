@@ -30,11 +30,11 @@ class VimRenderer(Renderer):
 		super(VimRenderer, self).__init__(*args, **kwargs)
 		self.hl_groups = {}
 
-	def shutdown(self):
-		self.theme.shutdown()
+	def shutdown(self, join):
+		self.theme.shutdown(join)
 		for match in self.local_themes.values():
 			if 'theme' in match:
-				match['theme'].shutdown()
+				match['theme'].shutdown(join)
 
 	def add_local_theme(self, matcher, theme):
 		if matcher in self.local_themes:
