@@ -19,6 +19,13 @@ class ShellRenderer(Renderer):
 	tmux_escape = False
 	screen_escape = False
 
+	def get_segment_info(self, segment_info):
+		r = self.segment_info.copy()
+		r.update(segment_info)
+		if 'PWD' in r['environ']:
+			r['getcwd'] = lambda: r['environ']['PWD']
+		return r
+
 	def hlstyle(self, fg=None, bg=None, attr=None):
 		'''Highlight a segment.
 

@@ -30,11 +30,11 @@ class Theme(object):
 		self.segments = {
 			'left': [],
 			'right': [],
-			}
+		}
 		self.EMPTY_SEGMENT = {
 			'contents': None,
 			'highlight': {'fg': False, 'bg': False, 'attr': 0}
-			}
+		}
 		self.pl = pl
 		theme_configs = [theme_config]
 		if top_theme_config:

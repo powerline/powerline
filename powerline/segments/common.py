@@ -15,36 +15,39 @@ from powerline.lib.vcs import guess
 from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment, with_docstring
 from powerline.lib.time import monotonic
 from powerline.lib.humanize_bytes import humanize_bytes
+from powerline.theme import requires_segment_info
 from collections import namedtuple
 
 
-def hostname(pl, only_if_ssh=False):
+@requires_segment_info
+def hostname(pl, segment_info, only_if_ssh=False):
 	'''Return the current hostname.
 
 	:param bool only_if_ssh:
 		only return the hostname if currently in an SSH session
 	'''
-	if only_if_ssh and not pl.environ.get('SSH_CLIENT'):
+	if only_if_ssh and not segment_info['environ'].get('SSH_CLIENT'):
 		return None
 	return socket.gethostname()
 
 
+@requires_segment_info
 class RepositorySegment(KwThreadedSegment):
 	def __init__(self):
 		super(RepositorySegment, self).__init__()
 		self.directories = {}
 
 	@staticmethod
-	def key(pl, **kwargs):
-		return os.path.abspath(pl.getcwd())
+	def key(segment_info, **kwargs):
+		return os.path.abspath(segment_info['getcwd']())
 
-	def update(self):
+	def update(self, *args):
 		# .compute_state() is running only in this method, and only in one 
 		# thread, thus operations with .directories do not need write locks 
 		# (.render() method is not using .directories). If this is changed 
 		# .directories needs redesigning
 		self.directories.clear()
-		super(RepositorySegment, self).update()
+		return super(RepositorySegment, self).update(*args)
 
 	def compute_state(self, path):
 		repo = guess(path=path)
@@ -83,7 +86,7 @@ class BranchSegment(RepositorySegment):
 			return [{
 				'contents': branch,
 				'highlight_group': ['branch_dirty' if repository_status(**kwargs) else 'branch_clean', 'branch'],
-				}]
+			}]
 		else:
 			return branch
 
@@ -109,7 +112,8 @@ Highlight groups used: ``branch_clean``, ``branch_dirty``, ``branch``.
 ''')
 
 
-def cwd(pl, dir_shorten_len=None, dir_limit_depth=None):
+@requires_segment_info
+def cwd(pl, segment_info, dir_shorten_len=None, dir_limit_depth=None):
 	'''Return the current working directory.
 
 	Returns a segment list to create a breadcrumb-like effect.
@@ -126,7 +130,7 @@ def cwd(pl, dir_shorten_len=None, dir_limit_depth=None):
 	'''
 	import re
 	try:
-		cwd = pl.getcwd()
+		cwd = segment_info['getcwd']()
 	except OSError as e:
 		if e.errno == 2:
 			# user most probably deleted the directory
@@ -135,7 +139,7 @@ def cwd(pl, dir_shorten_len=None, dir_limit_depth=None):
 			cwd = "[not found]"
 		else:
 			raise
-	home = pl.home
+	home = segment_info['home']
 	if home:
 		cwd = re.sub('^' + re.escape(home), '~', cwd, 1)
 	cwd_split = cwd.split(os.sep)
@@ -153,7 +157,7 @@ def cwd(pl, dir_shorten_len=None, dir_limit_depth=None):
 		ret.append({
 			'contents': part,
 			'divider_highlight_group': 'cwd:divider',
-			})
+		})
 	ret[-1]['highlight_group'] = ['cwd:current_folder', 'cwd']
 	return ret
 
@@ -190,7 +194,7 @@ def fuzzy_time(pl):
 		45: 'quarter to',
 		50: 'ten to',
 		55: 'five to',
-		}
+	}
 	special_case_str = {
 		(23, 58): 'round about midnight',
 		(23, 59): 'round about midnight',
@@ -198,7 +202,7 @@ def fuzzy_time(pl):
 		(0, 1): 'round about midnight',
 		(0, 2): 'round about midnight',
 		(12, 0): 'noon',
-		}
+	}
 
 	now = datetime.now()
 
@@ -230,19 +234,19 @@ def _external_ip(query_url='http://ipv4.icanhazip.com/'):
 
 
 class ExternalIpSegment(ThreadedSegment):
+	interval = 10
+
 	def set_state(self, query_url='http://ipv4.icanhazip.com/', **kwargs):
 		self.query_url = query_url
 		super(ExternalIpSegment, self).set_state(**kwargs)
 
-	def update(self):
-		ip = _external_ip(query_url=self.query_url)
-		with self.write_lock:
-			self.ip = ip
+	def update(self, old_ip):
+		return _external_ip(query_url=self.query_url)
 
-	def render(self, **kwargs):
-		if not hasattr(self, 'ip'):
+	def render(self, ip, **kwargs):
+		if not ip:
 			return None
-		return [{'contents': self.ip, 'divider_highlight_group': 'background:divider'}]
+		return [{'contents': ip, 'divider_highlight_group': 'background:divider'}]
 
 
 external_ip = with_docstring(ExternalIpSegment(),
@@ -337,17 +341,17 @@ weather_conditions_icons = {
 }
 
 temp_conversions = {
-		'C': lambda temp: temp,
-		'F': lambda temp: (temp * 9 / 5) + 32,
-		'K': lambda temp: temp + 273.15,
-		}
+	'C': lambda temp: temp,
+	'F': lambda temp: (temp * 9 / 5) + 32,
+	'K': lambda temp: temp + 273.15,
+}
 
 # Note: there are also unicode characters for units: ℃, ℉ and  K
 temp_units = {
-		'C': '°C',
-		'F': '°F',
-		'K': 'K',
-		}
+	'C': '°C',
+	'F': '°F',
+	'K': 'K',
+}
 
 
 class WeatherSegment(ThreadedSegment):
@@ -356,10 +360,9 @@ class WeatherSegment(ThreadedSegment):
 	def set_state(self, location_query=None, **kwargs):
 		self.location = location_query
 		self.url = None
-		self.condition = {}
 		super(WeatherSegment, self).set_state(**kwargs)
 
-	def update(self):
+	def update(self, old_weather):
 		import json
 
 		if not self.url:
@@ -371,11 +374,11 @@ class WeatherSegment(ThreadedSegment):
 											location_data['region_name'],
 											location_data['country_name']])
 			query_data = {
-					'q':
-						'use "http://github.com/yql/yql-tables/raw/master/weather/weather.bylocation.xml" as we;'
-						'select * from we where location="{0}" and unit="c"'.format(self.location).encode('utf-8'),
-					'format': 'json',
-					}
+				'q':
+				'use "http://github.com/yql/yql-tables/raw/master/weather/weather.bylocation.xml" as we;'
+				'select * from we where location="{0}" and unit="c"'.format(self.location).encode('utf-8'),
+				'format': 'json',
+			}
 			self.url = 'http://query.yahooapis.com/v1/public/yql?' + urllib_urlencode(query_data)
 
 		raw_response = urllib_read(self.url)
@@ -397,45 +400,45 @@ class WeatherSegment(ThreadedSegment):
 				icon_names = ('unknown',)
 				self.error('Unknown condition code: {0}', condition_code)
 
-		with self.write_lock:
-			self.temp = temp
-			self.icon_names = icon_names
+		return (temp, icon_names)
 
-	def render(self, icons=None, unit='C', temp_format=None, temp_coldest=-30, temp_hottest=40, **kwargs):
-		if not hasattr(self, 'icon_names'):
+	def render(self, weather, icons=None, unit='C', temp_format=None, temp_coldest=-30, temp_hottest=40, **kwargs):
+		if not weather:
 			return None
 
-		for icon_name in self.icon_names:
+		temp, icon_names = weather
+
+		for icon_name in icon_names:
 			if icons:
 				if icon_name in icons:
 					icon = icons[icon_name]
 					break
 		else:
-			icon = weather_conditions_icons[self.icon_names[-1]]
+			icon = weather_conditions_icons[icon_names[-1]]
 
 		temp_format = temp_format or ('{temp:.0f}' + temp_units[unit])
-		temp = temp_conversions[unit](self.temp)
-		if self.temp <= temp_coldest:
+		converted_temp = temp_conversions[unit](temp)
+		if temp <= temp_coldest:
 			gradient_level = 0
-		elif self.temp >= temp_hottest:
+		elif temp >= temp_hottest:
 			gradient_level = 100
 		else:
-			gradient_level = (self.temp - temp_coldest) * 100.0 / (temp_hottest - temp_coldest)
-		groups = ['weather_condition_' + icon_name for icon_name in self.icon_names] + ['weather_conditions', 'weather']
+			gradient_level = (temp - temp_coldest) * 100.0 / (temp_hottest - temp_coldest)
+		groups = ['weather_condition_' + icon_name for icon_name in icon_names] + ['weather_conditions', 'weather']
 		return [
-				{
+			{
 				'contents': icon + ' ',
 				'highlight_group': groups,
 				'divider_highlight_group': 'background:divider',
-				},
-				{
-				'contents': temp_format.format(temp=temp),
+			},
+			{
+				'contents': temp_format.format(temp=converted_temp),
 				'highlight_group': ['weather_temp_gradient', 'weather_temp', 'weather'],
 				'draw_divider': False,
 				'divider_highlight_group': 'background:divider',
 				'gradient_level': gradient_level,
-				},
-			]
+			},
+		]
 
 
 weather = with_docstring(WeatherSegment(),
@@ -517,7 +520,7 @@ def system_load(pl, format='{avg:.1f}', threshold_good=1, threshold_bad=2):
 			'draw_divider': False,
 			'divider_highlight_group': 'background:divider',
 			'gradient_level': gradient_level,
-			})
+		})
 	ret[0]['draw_divider'] = True
 	ret[0]['contents'] += ' '
 	ret[1]['contents'] += ' '
@@ -540,7 +543,7 @@ try:
 			if data:
 				yield interface, data.bytes_recv, data.bytes_sent
 
-	def _get_user(pl):
+	def _get_user(segment_info):
 		return psutil.Process(os.getpid()).username
 
 	def cpu_load_percent(pl, measure_interval=.5):
@@ -567,8 +570,8 @@ except ImportError:
 			if x is not None:
 				yield interface, x[0], x[1]
 
-	def _get_user(pl):  # NOQA
-		return pl.environ.get('USER', None)
+	def _get_user(segment_info):  # NOQA
+		return segment_info['environ'].get('USER', None)
 
 	def cpu_load_percent(pl, measure_interval=.5):  # NOQA
 		'''Return the average CPU load as a percentage.
@@ -587,7 +590,7 @@ username = False
 _geteuid = getattr(os, 'geteuid', lambda: 1)
 
 
-def user(pl):
+def user(pl, segment_info=None):
 	'''Return the current user.
 
 	Highlights the user with the ``superuser`` if the effective user ID is 0.
@@ -602,9 +605,11 @@ def user(pl):
 		return None
 	euid = _geteuid()
 	return [{
-			'contents': username,
-			'highlight_group': 'user' if euid != 0 else ['superuser', 'user'],
-		}]
+		'contents': username,
+		'highlight_group': 'user' if euid != 0 else ['superuser', 'user'],
+	}]
+if 'psutil' in globals():
+	user = requires_segment_info(user)
 
 
 if os.path.exists('/proc/uptime'):
@@ -691,7 +696,7 @@ class NetworkLoadSegment(KwThreadedSegment):
 			idata = {}
 			if self.run_once:
 				idata['prev'] = (monotonic(), _get_bytes(interface))
-				self.sleep(0)
+				self.shutdown_event.wait(self.interval)
 			self.interfaces[interface] = idata
 
 		idata['last'] = (monotonic(), _get_bytes(interface))
@@ -724,7 +729,7 @@ class NetworkLoadSegment(KwThreadedSegment):
 				'contents': format.format(value=humanize_bytes(value, suffix, si_prefix)),
 				'divider_highlight_group': 'background:divider',
 				'highlight_group': hl_groups,
-				})
+			})
 			if is_gradient:
 				max = kwargs[max_key]
 				if value >= max:
@@ -765,9 +770,10 @@ Highlight groups used: ``network_load_sent_gradient`` (gradient) or ``network_lo
 ''')
 
 
-def virtualenv(pl):
+@requires_segment_info
+def virtualenv(pl, segment_info):
 	'''Return the name of the current Python virtualenv.'''
-	return os.path.basename(pl.environ.get('VIRTUAL_ENV', '')) or None
+	return os.path.basename(segment_info['environ'].get('VIRTUAL_ENV', '')) or None
 
 
 _IMAPKey = namedtuple('Key', 'username password server port folder')
@@ -804,13 +810,13 @@ class EmailIMAPSegment(KwThreadedSegment):
 			return [{
 				'contents': str(unread_count),
 				'highlight_group': 'email_alert',
-				}]
+			}]
 		else:
 			return [{
 				'contents': str(unread_count),
 				'highlight_group': ['email_alert_gradient', 'email_alert'],
 				'gradient_level': unread_count * 100.0 / max_msgs,
-				}]
+			}]
 
 
 email_imap_alert = with_docstring(EmailIMAPSegment(),
@@ -841,7 +847,7 @@ class NowPlayingSegment(object):
 		'play': '▶',
 		'pause': '▮▮',
 		'stop': '■',
-		}
+	}
 
 	def __call__(self, player='mpd', format='{state_symbol} {artist} - {title} ({total})', **kwargs):
 		player_func = getattr(self, 'player_{0}'.format(player))
@@ -853,7 +859,7 @@ class NowPlayingSegment(object):
 			'title': None,
 			'elapsed': None,
 			'total': None,
-			}
+		}
 		func_stats = player_func(**kwargs)
 		if not func_stats:
 			return None
@@ -921,7 +927,7 @@ class NowPlayingSegment(object):
 			'title': now_playing.get('title'),
 			'elapsed': self._convert_seconds(now_playing.get('position', 0)),
 			'total': self._convert_seconds(now_playing.get('duration', 0)),
-			}
+		}
 
 	def player_mpd(self, pl, host='localhost', port=6600):
 		try:
@@ -942,7 +948,7 @@ class NowPlayingSegment(object):
 				'title': now_playing.get('title'),
 				'elapsed': self._convert_seconds(now_playing.get('elapsed', 0)),
 				'total': self._convert_seconds(now_playing.get('time', 0)),
-				}
+			}
 		except ImportError:
 			now_playing = self._run_cmd(['mpc', 'current', '-f', '%album%\n%artist%\n%title%\n%time%', '-h', str(host), '-p', str(port)])
 			if not now_playing:
@@ -953,7 +959,7 @@ class NowPlayingSegment(object):
 				'artist': now_playing[1],
 				'title': now_playing[2],
 				'total': now_playing[3],
-				}
+			}
 
 	def player_spotify(self, pl):
 		try:
@@ -981,7 +987,7 @@ class NowPlayingSegment(object):
 			'artist': info.get('xesam:artist')[0],
 			'title': info.get('xesam:title'),
 			'total': self._convert_seconds(info.get('mpris:length') / 1e6),
-			}
+		}
 
 	def player_rhythmbox(self, pl):
 		now_playing = self._run_cmd(['rhythmbox-client', '--no-start', '--no-present', '--print-playing-format', '%at\n%aa\n%tt\n%te\n%td'])
@@ -994,5 +1000,5 @@ class NowPlayingSegment(object):
 			'title': now_playing[2],
 			'elapsed': now_playing[3],
 			'total': now_playing[4],
-			}
+		}
 now_playing = NowPlayingSegment()
