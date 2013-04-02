@@ -26,7 +26,7 @@ setup(
 	scripts=[
 		'scripts/powerline',
 		'scripts/powerline-lint',
-		],
+	],
 	keywords='',
 	packages=find_packages(exclude=('tests', 'tests.*')),
 	include_package_data=True,
@@ -35,7 +35,7 @@ setup(
 	extras_require={
 		'docs': [
 			'Sphinx',
-			],
-		},
+		],
+	},
 	test_suite='tests' if not old_python else None,
-	)
+)

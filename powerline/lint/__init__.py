@@ -1,5 +1,5 @@
 from powerline.lint.markedjson import load
-from powerline import load_json_config, Powerline
+from powerline import load_json_config, find_config_file, Powerline
 from powerline.lint.markedjson.error import echoerr, MarkedError
 from powerline.segments.vim import vim_modes
 import itertools
@@ -19,14 +19,6 @@ except ImportError:
 
 def open_file(path):
 	return open(path, 'rb')
-
-
-def find_config(search_paths, config_file):
-	config_file += '.json'
-	for path in search_paths:
-		if os.path.isfile(os.path.join(path, config_file)):
-			return path
-	return None
 
 
 EMPTYTUPLE = tuple()
@@ -893,7 +885,7 @@ def check(path=None):
 
 	hadproblem = False
 	try:
-		main_config = load_json_config(search_paths, 'config', load=load_config, open_file=open_file)
+		main_config = load_json_config(find_config_file(search_paths, 'config'), load=load_config, open_file=open_file)
 	except IOError:
 		main_config = {}
 		sys.stderr.write('\nConfiguration file not found: config.json\n')
@@ -909,7 +901,7 @@ def check(path=None):
 	import_paths = [os.path.expanduser(path) for path in main_config.get('common', {}).get('paths', [])]
 
 	try:
-		colors_config = load_json_config(search_paths, 'colors', load=load_config, open_file=open_file)
+		colors_config = load_json_config(find_config_file(search_paths, 'colors'), load=load_config, open_file=open_file)
 	except IOError:
 		colors_config = {}
 		sys.stderr.write('\nConfiguration file not found: colors.json\n')

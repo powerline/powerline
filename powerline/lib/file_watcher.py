@@ -1,15 +1,20 @@
-#!/usr/bin/env python
 # vim:fileencoding=UTF-8:noet
 from __future__ import unicode_literals, absolute_import
 
 __copyright__ = '2013, Kovid Goyal <kovid at kovidgoyal.net>'
 __docformat__ = 'restructuredtext en'
 
-import os, sys, errno, time
+import os
+import sys
+import errno
+from powerline.lib.time import monotonic
+from time import sleep
 from threading import RLock
+
 
 class INotifyError(Exception):
 	pass
+
 
 class INotifyWatch(object):
 
@@ -18,38 +23,38 @@ class INotifyWatch(object):
 	# See <sys/inotify.h> for the flags defined below
 
 	# Supported events suitable for MASK parameter of INOTIFY_ADD_WATCH.
-	ACCESS   = 0x00000001   # File was accessed.
-	MODIFY   = 0x00000002   # File was modified.
-	ATTRIB   = 0x00000004   # Metadata changed.
-	CLOSE_WRITE  = 0x00000008   # Writtable file was closed.
+	ACCESS = 0x00000001         # File was accessed.
+	MODIFY = 0x00000002         # File was modified.
+	ATTRIB = 0x00000004         # Metadata changed.
+	CLOSE_WRITE = 0x00000008    # Writtable file was closed.
 	CLOSE_NOWRITE = 0x00000010  # Unwrittable file closed.
-	OPEN         = 0x00000020   # File was opened.
-	MOVED_FROM   = 0x00000040   # File was moved from X.
-	MOVED_TO      = 0x00000080  # File was moved to Y.
-	CREATE   = 0x00000100   # Subfile was created.
-	DELETE   = 0x00000200   # Subfile was deleted.
-	DELETE_SELF  = 0x00000400   # Self was deleted.
-	MOVE_SELF    = 0x00000800   # Self was moved.
+	OPEN = 0x00000020           # File was opened.
+	MOVED_FROM = 0x00000040     # File was moved from X.
+	MOVED_TO = 0x00000080       # File was moved to Y.
+	CREATE = 0x00000100         # Subfile was created.
+	DELETE = 0x00000200         # Subfile was deleted.
+	DELETE_SELF = 0x00000400    # Self was deleted.
+	MOVE_SELF = 0x00000800      # Self was moved.
 
 	# Events sent by the kernel.
-	UNMOUNT  = 0x00002000   # Backing fs was unmounted.
-	Q_OVERFLOW   = 0x00004000   # Event queued overflowed.
-	IGNORED  = 0x00008000   # File was ignored.
+	UNMOUNT = 0x00002000     # Backing fs was unmounted.
+	Q_OVERFLOW = 0x00004000  # Event queued overflowed.
+	IGNORED = 0x00008000     # File was ignored.
 
 	# Helper events.
-	CLOSE   = (CLOSE_WRITE | CLOSE_NOWRITE)   # Close.
-	MOVE    = (MOVED_FROM | MOVED_TO)     # Moves.
+	CLOSE = (CLOSE_WRITE | CLOSE_NOWRITE)  # Close.
+	MOVE = (MOVED_FROM | MOVED_TO)         # Moves.
 
 	# Special flags.
-	ONLYDIR  = 0x01000000   # Only watch the path if it is a directory.
-	DONT_FOLLOW  = 0x02000000   # Do not follow a sym link.
-	EXCL_UNLINK  = 0x04000000   # Exclude events on unlinked objects.
-	MASK_ADD     = 0x20000000   # Add to the mask of an already existing watch.
-	ISDIR    = 0x40000000   # Event occurred against dir.
-	ONESHOT  = 0x80000000   # Only send event once.
+	ONLYDIR = 0x01000000      # Only watch the path if it is a directory.
+	DONT_FOLLOW = 0x02000000  # Do not follow a sym link.
+	EXCL_UNLINK = 0x04000000  # Exclude events on unlinked objects.
+	MASK_ADD = 0x20000000     # Add to the mask of an already existing watch.
+	ISDIR = 0x40000000        # Event occurred against dir.
+	ONESHOT = 0x80000000      # Only send event once.
 
 	# All events which a program can wait on.
-	ALL_EVENTS   = (ACCESS | MODIFY | ATTRIB | CLOSE_WRITE | CLOSE_NOWRITE |
+	ALL_EVENTS = (ACCESS | MODIFY | ATTRIB | CLOSE_WRITE | CLOSE_NOWRITE |
 					OPEN | MOVED_FROM | MOVED_TO | CREATE | DELETE |
 					DELETE_SELF | MOVE_SELF)
 
@@ -58,7 +63,8 @@ class INotifyWatch(object):
 	NONBLOCK = 0x800
 
 	def __init__(self, inotify_fd, add_watch, rm_watch, read, expire_time=10):
-		import ctypes, struct
+		import ctypes
+		import struct
 		self._add_watch, self._rm_watch = add_watch, rm_watch
 		self._read = read
 		# We keep a reference to os to prevent it from being deleted
@@ -101,9 +107,9 @@ class INotifyWatch(object):
 			if num < 0:
 				en = ctypes.get_errno()
 				if en == errno.EAGAIN:
-					break # No more data
+					break  # No more data
 				if en == errno.EINTR:
-					continue # Interrupted, try again
+					continue  # Interrupted, try again
 				raise OSError(en, self.os.strerror(en))
 			buf.append(self._buf.raw[:num])
 		raw = b''.join(buf)
@@ -116,7 +122,7 @@ class INotifyWatch(object):
 			self.process_event(wd, mask, cookie)
 
 	def expire_watches(self):
-		now = time.time()
+		now = monotonic()
 		for path, last_query in tuple(self.last_query.items()):
 			if last_query - now > self.expire_time:
 				self.unwatch(path)
@@ -163,7 +169,7 @@ class INotifyWatch(object):
 		raise OSError if the path does not exist. '''
 		path = self.os.path.abspath(path)
 		with self.lock:
-			self.last_query[path] = time.time()
+			self.last_query[path] = monotonic()
 			self.expire_watches()
 			if path not in self.watches:
 				# Try to re-add the watch, it will fail if the file does not
@@ -193,6 +199,7 @@ class INotifyWatch(object):
 				del self._add_watch
 				del self._rm_watch
 				del self._inotify_fd
+
 
 def get_inotify(expire_time=10):
 	''' Initialize the inotify based file watcher '''
@@ -226,14 +233,13 @@ def get_inotify(expire_time=10):
 	read = prototype(('read', libc), (
 		(1, "fd"), (1, "buf"), (1, "count")), use_errno=True)
 
-
-	inotify_fd = init1(INotifyWatch.CLOEXEC|INotifyWatch.NONBLOCK)
+	inotify_fd = init1(INotifyWatch.CLOEXEC | INotifyWatch.NONBLOCK)
 	if inotify_fd == -1:
 		raise INotifyError(os.strerror(ctypes.get_errno()))
 	return INotifyWatch(inotify_fd, add_watch, rm_watch, read, expire_time=expire_time)
 
-class StatWatch(object):
 
+class StatWatch(object):
 	is_stat_based = True
 
 	def __init__(self):
@@ -264,7 +270,8 @@ class StatWatch(object):
 
 	def close(self):
 		with self.lock:
-			self.watches = {}
+			self.watches.clear()
+
 
 def create_file_watcher(use_stat=False, expire_time=10):
 	'''
@@ -289,15 +296,14 @@ def create_file_watcher(use_stat=False, expire_time=10):
 
 if __name__ == '__main__':
 	watcher = create_file_watcher()
-	print ('Using watcher: %s'%watcher.__class__.__name__)
-	print ('Watching %s, press Ctrl-C to quit'%sys.argv[-1])
+	print ('Using watcher: %s' % watcher.__class__.__name__)
+	print ('Watching %s, press Ctrl-C to quit' % sys.argv[-1])
 	watcher.watch(sys.argv[-1])
 	try:
 		while True:
 			if watcher(sys.argv[-1]):
-				print ('%s has changed'%sys.argv[-1])
-			time.sleep(1)
+				print ('%s has changed' % sys.argv[-1])
+			sleep(1)
 	except KeyboardInterrupt:
 		pass
 	watcher.close()
-

@@ -9,9 +9,9 @@ def last_status(pl, segment_info):
 
 	Highlight groups used: ``exit_fail``
 	'''
-	if not segment_info.last_exit_code:
+	if not segment_info['args'].last_exit_code:
 		return None
-	return [{'contents': str(segment_info.last_exit_code), 'highlight_group': 'exit_fail'}]
+	return [{'contents': str(segment_info['args'].last_exit_code), 'highlight_group': 'exit_fail'}]
 
 
 @requires_segment_info
@@ -20,8 +20,9 @@ def last_pipe_status(pl, segment_info):
 
 	Highlight groups used: ``exit_fail``, ``exit_success``
 	'''
-	if any(segment_info.last_pipe_status):
+	last_pipe_status = segment_info['args'].last_pipe_status
+	if any(last_pipe_status):
 		return [{"contents": str(status), "highlight_group": "exit_fail" if status else "exit_success"}
-			for status in segment_info.last_pipe_status]
+			for status in last_pipe_status]
 	else:
 		return None
