@@ -143,7 +143,7 @@ class Powerline(object):
 				run_once=False,
 				logger=None,
 				use_daemon_threads=True,
-				interval=10,
+				interval=None,
 				watcher=None):
 		self.ext = ext
 		self.renderer_module = renderer_module or ext
