@@ -603,7 +603,7 @@ def user(pl, segment_info=None):
 	'''
 	global username
 	if username is False:
-		username = _get_user(pl)
+		username = _get_user(segment_info)
 	if username is None:
 		pl.warn('Failed to get username')
 		return None
