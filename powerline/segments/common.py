@@ -117,7 +117,7 @@ Highlight groups used: ``branch_clean``, ``branch_dirty``, ``branch``.
 
 
 @requires_segment_info
-def cwd(pl, segment_info, dir_shorten_len=None, dir_limit_depth=None):
+def cwd(pl, segment_info, dir_shorten_len=None, dir_limit_depth=None, use_path_separator=False):
 	'''Return the current working directory.
 
 	Returns a segment list to create a breadcrumb-like effect.
@@ -126,7 +126,8 @@ def cwd(pl, segment_info, dir_shorten_len=None, dir_limit_depth=None):
 		shorten parent directory names to this length (e.g. :file:`/long/path/to/powerline` → :file:`/l/p/t/powerline`)
 	:param int dir_limit_depth:
 		limit directory depth to this number (e.g. :file:`/long/path/to/powerline` → :file:`⋯/to/powerline`)
-
+	:param bool use_path_separator:
+		Use path separator in place of soft divider.
 
 	Divider highlight group used: ``cwd:divider``.
 
@@ -155,14 +156,20 @@ def cwd(pl, segment_info, dir_shorten_len=None, dir_limit_depth=None):
 	ret = []
 	if not cwd[0]:
 		cwd[0] = '/'
+	draw_inner_divider = not use_path_separator
 	for part in cwd:
 		if not part:
 			continue
+		if use_path_separator:
+			part += os.sep
 		ret.append({
 			'contents': part,
 			'divider_highlight_group': 'cwd:divider',
+			'draw_inner_divider': draw_inner_divider,
 		})
 	ret[-1]['highlight_group'] = ['cwd:current_folder', 'cwd']
+	if use_path_separator:
+		ret[-1]['contents'] = ret[-1]['contents'][:-1]
 	return ret
 
 
@@ -438,7 +445,6 @@ class WeatherSegment(ThreadedSegment):
 			{
 				'contents': temp_format.format(temp=converted_temp),
 				'highlight_group': ['weather_temp_gradient', 'weather_temp', 'weather'],
-				'draw_divider': False,
 				'divider_highlight_group': 'background:divider',
 				'gradient_level': gradient_level,
 			},
@@ -521,11 +527,9 @@ def system_load(pl, format='{avg:.1f}', threshold_good=1, threshold_bad=2):
 		ret.append({
 			'contents': format.format(avg=avg),
 			'highlight_group': ['system_load_gradient', 'system_load'],
-			'draw_divider': False,
 			'divider_highlight_group': 'background:divider',
 			'gradient_level': gradient_level,
 		})
-	ret[0]['draw_divider'] = True
 	ret[0]['contents'] += ' '
 	ret[1]['contents'] += ' '
 	return ret
@@ -612,7 +616,7 @@ def user(pl, segment_info=None):
 		'contents': username,
 		'highlight_group': 'user' if euid != 0 else ['superuser', 'user'],
 	}]
-if 'psutil' in globals():
+if 'psutil' not in globals():
 	user = requires_segment_info(user)
 
 

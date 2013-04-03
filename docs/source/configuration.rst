@@ -379,10 +379,17 @@ Themes
         Segments are removed according to their priority, with low priority 
         segments being removed first.
 
-    ``draw_divider``
+    ``draw_hard_divider``, ``draw_soft_divider``
         Whether to draw a divider between this and the adjacent segment. The 
-        adjacent segment is to the *right* for segments on the *left* side, 
-        and vice versa.
+        adjacent segment is to the *right* for segments on the *left* side, and 
+        vice versa. Hard dividers are used between segments with different 
+        background colors, soft ones are used between segments with same 
+        background. Both options default to ``True``.
+
+    ``draw_inner_divider``
+        Determines whether inner soft dividers are to be drawn for function 
+        segments. Only applicable for functions returning multiple segments. 
+        Defaults to ``False``.
 
     ``exclude_modes``
         A list of modes where this segment will be excluded: The segment is 

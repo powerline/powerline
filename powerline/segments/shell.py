@@ -22,7 +22,7 @@ def last_pipe_status(pl, segment_info):
 	'''
 	last_pipe_status = segment_info['args'].last_pipe_status
 	if any(last_pipe_status):
-		return [{"contents": str(status), "highlight_group": "exit_fail" if status else "exit_success"}
+		return [{'contents': str(status), 'highlight_group': 'exit_fail' if status else 'exit_success', 'draw_inner_divider': True}
 			for status in last_pipe_status]
 	else:
 		return None

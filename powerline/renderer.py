@@ -144,9 +144,10 @@ class Renderer(object):
 			divider_highlighted = ''
 			contents_raw = segment['contents']
 			contents_highlighted = ''
+			draw_divider = segment['draw_' + divider_type + '_divider']
 
 			# Pad segments first
-			if segment['draw_divider'] or (divider_type == 'hard' and segment['width'] != 'auto'):
+			if draw_divider:
 				if segment['side'] == 'left':
 					contents_raw = outer_padding + (segment['_space_left'] * ' ') + contents_raw + ((divider_spaces + segment['_space_right']) * ' ')
 				else:
@@ -174,7 +175,7 @@ class Renderer(object):
 				contents_highlighted = self.hl(self.escape(contents_raw), **segment['highlight'])
 
 			# Append padded raw and highlighted segments to the rendered segment variables
-			if segment['draw_divider'] or (divider_type == 'hard' and segment['width'] != 'auto'):
+			if draw_divider:
 				if segment['side'] == 'left':
 					segment['_rendered_raw'] += contents_raw + divider_raw
 					segment['_rendered_hl'] += contents_highlighted + divider_highlighted
