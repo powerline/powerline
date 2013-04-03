@@ -7,7 +7,26 @@ from powerline.lib.monotonic import monotonic
 from threading import Thread, Lock, Event
 
 
-class ThreadedSegment(object):
+class MultiRunnedThread(object):
+	def __init__(self):
+		self.thread = None
+
+	def is_alive(self):
+		return self.thread and self.thread.is_alive()
+
+	def start(self):
+		self.shutdown_event.clear()
+		self.thread = Thread(target=self.run)
+		self.thread.daemon = self.daemon
+		self.thread.start()
+
+	def join(self, *args, **kwargs):
+		if self.thread:
+			return self.thread.join(*args, **kwargs)
+		return None
+
+
+class ThreadedSegment(MultiRunnedThread):
 	min_sleep_time = 0.1
 	update_first = True
 	interval = 1
@@ -17,7 +36,6 @@ class ThreadedSegment(object):
 		super(ThreadedSegment, self).__init__()
 		self.shutdown_event = Event()
 		self.run_once = True
-		self.thread = None
 		self.skip = False
 		self.crashed_value = None
 		self.update_value = None
@@ -50,15 +68,6 @@ class ThreadedSegment(object):
 			self.update_value = self.update(self.update_value)
 		return self.update_value
 
-	def is_alive(self):
-		return self.thread and self.thread.is_alive()
-
-	def start(self):
-		self.shutdown_event.clear()
-		self.thread = Thread(target=self.run)
-		self.thread.daemon = self.daemon
-		self.thread.start()
-
 	def run(self):
 		while not self.shutdown_event.is_set():
 			start_time = monotonic()
@@ -77,8 +86,9 @@ class ThreadedSegment(object):
 	def shutdown(self):
 		self.shutdown_event.set()
 		if self.daemon and self.is_alive():
-			# Give the worker thread a chance to shutdown, but don't block for too long
-			self.thread.join(.01)
+			# Give the worker thread a chance to shutdown, but don't block for 
+			# too long
+			self.join(0.01)
 
 	def set_interval(self, interval=None):
 		# Allowing “interval” keyword in configuration.
