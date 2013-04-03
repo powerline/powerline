@@ -616,7 +616,7 @@ def user(pl, segment_info=None):
 		'contents': username,
 		'highlight_group': 'user' if euid != 0 else ['superuser', 'user'],
 	}]
-if 'psutil' in globals():
+if 'psutil' not in globals():
 	user = requires_segment_info(user)
 
 
