@@ -159,8 +159,9 @@ class Powerline(object):
 
 		self.config_paths = self.get_config_paths()
 
-		self.renderer_lock = Lock()
 		self.configs_lock = Lock()
+		self.cr_kwargs_lock = Lock()
+		self.create_renderer_kwargs = {}
 		self.shutdown_event = Event()
 		self.configs = defaultdict(set)
 		self.missing = defaultdict(set)
@@ -276,15 +277,14 @@ class Powerline(object):
 			# Renderer updates configuration file via segments’ .startup thus it 
 			# should be locked to prevent state when configuration was updated, 
 			# but .render still uses old renderer.
-			with self.renderer_lock:
-				try:
-					renderer = Renderer(**self.renderer_options)
-				except Exception as e:
-					self.pl.exception('Failed to construct renderer object: {0}', str(e))
-					if not hasattr(self, 'renderer'):
-						raise
-				else:
-					self.renderer = renderer
+			try:
+				renderer = Renderer(**self.renderer_options)
+			except Exception as e:
+				self.pl.exception('Failed to construct renderer object: {0}', str(e))
+				if not hasattr(self, 'renderer'):
+					raise
+			else:
+				self.renderer = renderer
 
 		if not self.run_once and not self.is_alive() and self.interval is not None:
 			self.start()
@@ -397,8 +397,15 @@ class Powerline(object):
 		'''Lock renderer from modifications and pass all arguments further to 
 		``self.renderer.render()``.
 		'''
-		with self.renderer_lock:
-			return self.renderer.render(*args, **kwargs)
+		with self.cr_kwargs_lock:
+			if self.create_renderer_kwargs:
+				try:
+					self.create_renderer(**self.create_renderer_kwargs)
+				except Exception as e:
+					self.pl.exception('Failed to create renderer: {0}', str(e))
+				finally:
+					self.create_renderer_kwargs.clear()
+		return self.renderer.render(*args, **kwargs)
 
 	def shutdown(self):
 		'''Lock renderer from modifications and run its ``.shutdown()`` method.
@@ -406,8 +413,7 @@ class Powerline(object):
 		self.shutdown_event.set()
 		if self.use_daemon_threads and self.is_alive():
 			self.thread.join()
-		with self.renderer_lock:
-			self.renderer.shutdown()
+		self.renderer.shutdown()
 		self.watcher.unsubscribe()
 
 	def is_alive(self):
@@ -422,6 +428,7 @@ class Powerline(object):
 	def run(self):
 		while not self.shutdown_event.is_set():
 			kwargs = {}
+			removes = []
 			with self.configs_lock:
 				for type, paths in self.configs.items():
 					for path in paths:
@@ -435,11 +442,12 @@ class Powerline(object):
 							pass
 						else:
 							kwargs['load_' + type] = True
+							removes.append((type, cfg_path))
+				for type, cfg_path in removes:
+					self.missing[type].remove(cfg_path)
 			if kwargs:
-				try:
-					self.create_renderer(**kwargs)
-				except Exception as e:
-					self.pl.exception('Failed to create renderer: {0}', str(e))
+				with self.cr_kwargs_lock:
+					self.create_renderer_kwargs.update(kwargs)
 			self.shutdown_event.wait(self.interval)
 
 	def __enter__(self):

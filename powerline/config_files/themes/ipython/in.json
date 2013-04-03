@@ -8,13 +8,13 @@
 			{
 				"type": "string",
 				"contents": "In[",
-				"draw_divider": false,
+				"draw_soft_divider": false,
 				"highlight_group": ["prompt"]
 			},
 			{
 				"name": "prompt_count",
 				"module": "powerline.segments.ipython",
-				"draw_divider": false
+				"draw_soft_divider": false
 			},
 			{
 				"type": "string",

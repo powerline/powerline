@@ -3,12 +3,13 @@
 		"left": [
 			{
 				"name": "file_name",
-				"draw_divider": false
+				"draw_soft_divider": false
 			},
 			{
 				"type": "string",
 				"highlight_group": ["background"],
-				"draw_divider": false,
+				"draw_soft_divider": false,
+				"draw_hard_divider": false,
 				"width": "auto"
 			}
 		],
@@ -26,7 +27,7 @@
 			},
 			{
 				"name": "line_current",
-				"draw_divider": false,
+				"draw_soft_divider": false,
 				"width": 3,
 				"align": "r"
 			}
