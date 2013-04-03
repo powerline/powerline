@@ -492,4 +492,4 @@ def tearDownModule():
 
 if __name__ == '__main__':
 	from tests import main
-	main()
+	main(verbosity=10)
