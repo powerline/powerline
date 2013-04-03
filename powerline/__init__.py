@@ -400,10 +400,11 @@ class Powerline(object):
 		with self.cr_kwargs_lock:
 			if self.create_renderer_kwargs:
 				try:
-					cr_kwargs = self.create_renderer(**self.create_renderer_kwargs)
-					self.create_renderer_kwargs.clear()
+					self.create_renderer(**self.create_renderer_kwargs)
 				except Exception as e:
 					self.pl.exception('Failed to create renderer: {0}', str(e))
+				finally:
+					self.create_renderer_kwargs.clear()
 		return self.renderer.render(*args, **kwargs)
 
 	def shutdown(self):
@@ -427,6 +428,7 @@ class Powerline(object):
 	def run(self):
 		while not self.shutdown_event.is_set():
 			kwargs = {}
+			removes = []
 			with self.configs_lock:
 				for type, paths in self.configs.items():
 					for path in paths:
@@ -440,6 +442,9 @@ class Powerline(object):
 							pass
 						else:
 							kwargs['load_' + type] = True
+							removes.append((type, cfg_path))
+				for type, cfg_path in removes:
+					self.missing[type].remove(cfg_path)
 			if kwargs:
 				with self.cr_kwargs_lock:
 					self.create_renderer_kwargs.update(kwargs)
