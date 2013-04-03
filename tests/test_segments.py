@@ -176,8 +176,15 @@ class TestCommon(TestCase):
 
 	def test_uptime(self):
 		pl = Pl()
+		with replace_attr(common, '_get_uptime', lambda: 259200):
+			self.assertEqual(common.uptime(pl=pl), [{'contents': '3d', 'divider_highlight_group': 'background:divider'}])
+		with replace_attr(common, '_get_uptime', lambda: 93784):
+			self.assertEqual(common.uptime(pl=pl), [{'contents': '1d 2h 3m', 'divider_highlight_group': 'background:divider'}])
+			self.assertEqual(common.uptime(pl=pl, shorten_len=4), [{'contents': '1d 2h 3m 4s', 'divider_highlight_group': 'background:divider'}])
 		with replace_attr(common, '_get_uptime', lambda: 65536):
-			self.assertEqual(common.uptime(pl=pl), [{'contents': '0d 18h 12m', 'divider_highlight_group': 'background:divider'}])
+			self.assertEqual(common.uptime(pl=pl), [{'contents': '18h 12m 16s', 'divider_highlight_group': 'background:divider'}])
+			self.assertEqual(common.uptime(pl=pl, shorten_len=2), [{'contents': '18h 12m', 'divider_highlight_group': 'background:divider'}])
+			self.assertEqual(common.uptime(pl=pl, shorten_len=1), [{'contents': '18h', 'divider_highlight_group': 'background:divider'}])
 
 		def _get_uptime():
 			raise NotImplementedError
