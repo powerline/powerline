@@ -122,13 +122,6 @@ class ThreadedSegment(MultiRunnedThread):
 		self.pl.debug(prefix=self.__class__.__name__, *args, **kwargs)
 
 
-def printed(func):
-	def f(*args, **kwargs):
-		print(func.__name__)
-		return func(*args, **kwargs)
-	return f
-
-
 class KwThreadedSegment(ThreadedSegment):
 	drop_interval = 10 * 60
 	update_first = True
