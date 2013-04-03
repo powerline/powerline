@@ -34,7 +34,6 @@ class ThreadedSegment(MultiRunnedThread):
 
 	def __init__(self):
 		super(ThreadedSegment, self).__init__()
-		self.shutdown_event = Event()
 		self.run_once = True
 		self.skip = False
 		self.crashed_value = None
@@ -98,8 +97,9 @@ class ThreadedSegment(MultiRunnedThread):
 		interval = interval or getattr(self, 'interval')
 		self.interval = interval
 
-	def set_state(self, interval=None, update_first=True, **kwargs):
+	def set_state(self, interval=None, update_first=True, shutdown_event=None, **kwargs):
 		self.set_interval(interval)
+		self.shutdown_event = shutdown_event or Event()
 		self.updated = not (update_first and self.update_first)
 
 	def startup(self, pl, **kwargs):
@@ -177,8 +177,9 @@ class KwThreadedSegment(ThreadedSegment):
 
 		return update_value
 
-	def set_state(self, interval=None, **kwargs):
+	def set_state(self, interval=None, shutdown_event=None, **kwargs):
 		self.set_interval(interval)
+		self.shutdown_event = shutdown_event or Event()
 
 	@staticmethod
 	def render_one(update_state, **kwargs):

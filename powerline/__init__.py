@@ -235,6 +235,7 @@ class Powerline(object):
 						'ext': self.ext,
 						'common_config': self.common_config,
 						'run_once': self.run_once,
+						'shutdown_event': self.shutdown_event,
 					},
 				)
 

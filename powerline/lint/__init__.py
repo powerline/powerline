@@ -242,6 +242,11 @@ class Spec(object):
 						msg_func))
 		return self
 
+	def error(self, msg):
+		self.checks.append(('check_func', lambda *args: (True, True, True),
+							lambda value: msg.format(value)))
+		return self
+
 	def either(self, *specs):
 		start = len(self.specs)
 		self.specs.extend(specs)
@@ -788,6 +793,9 @@ def check_segment_data_key(key, data, context, echoerr):
 args_spec = Spec(
 	interval=Spec().either(Spec().type(float), Spec().type(int)).optional(),
 	update_first=Spec().type(bool).optional(),
+	shutdown_event=Spec().error('Shutdown event must be set by powerline').optional(),
+	pl=Spec().error('pl object must be set by powerline').optional(),
+	segment_info=Spec().error('Segment info dictionary must be set by powerline').optional(),
 ).unknown_spec(Spec(), Spec()).optional().copy
 highlight_group_spec = Spec().type(unicode).copy
 segment_module_spec = Spec().type(unicode).func(check_segment_module).optional().copy
