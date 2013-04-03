@@ -67,7 +67,12 @@ class Renderer(object):
 		return segment
 
 	def get_segment_info(self, segment_info):
-		return segment_info or self.segment_info
+		r = self.segment_info.copy()
+		if segment_info:
+			r.update(segment_info)
+		if 'PWD' in r['environ']:
+			r['getcwd'] = lambda: r['environ']['PWD']
+		return r
 
 	def render(self, mode=None, width=None, side=None, output_raw=False, segment_info=None, matcher_info=None):
 		'''Render all segments.
