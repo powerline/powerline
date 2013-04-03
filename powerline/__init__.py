@@ -440,8 +440,8 @@ class Powerline(object):
 							pass
 						else:
 							kwargs['load_' + type] = True
-			with self.cr_kwargs_lock:
-				if kwargs:
+			if kwargs:
+				with self.cr_kwargs_lock:
 					self.create_renderer_kwargs.update(kwargs)
 			self.shutdown_event.wait(self.interval)
 
