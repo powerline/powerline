@@ -68,7 +68,8 @@ class Renderer(object):
 
 	def get_segment_info(self, segment_info):
 		r = self.segment_info.copy()
-		r.update(segment_info)
+		if segment_info:
+			r.update(segment_info)
 		if 'PWD' in r['environ']:
 			r['getcwd'] = lambda: r['environ']['PWD']
 		return r
