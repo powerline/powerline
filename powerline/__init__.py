@@ -160,6 +160,7 @@ class Powerline(object):
 		self.config_paths = self.get_config_paths()
 
 		self.configs_lock = Lock()
+		self.cr_kwargs_lock = Lock()
 		self.create_renderer_kwargs = {}
 		self.shutdown_event = Event()
 		self.configs = defaultdict(set)
@@ -396,14 +397,13 @@ class Powerline(object):
 		'''Lock renderer from modifications and pass all arguments further to 
 		``self.renderer.render()``.
 		'''
-		if self.create_renderer_kwargs:
-			try:
-				with self.configs_lock:
-					cr_kwargs = self.create_renderer_kwargs.copy()
+		with self.cr_kwargs_lock:
+			if self.create_renderer_kwargs:
+				try:
+					cr_kwargs = self.create_renderer(**self.create_renderer_kwargs)
 					self.create_renderer_kwargs.clear()
-				self.create_renderer(**cr_kwargs)
-			except Exception as e:
-				self.pl.exception('Failed to create renderer: {0}', str(e))
+				except Exception as e:
+					self.pl.exception('Failed to create renderer: {0}', str(e))
 		return self.renderer.render(*args, **kwargs)
 
 	def shutdown(self):
@@ -440,6 +440,7 @@ class Powerline(object):
 							pass
 						else:
 							kwargs['load_' + type] = True
+			with self.cr_kwargs_lock:
 				if kwargs:
 					self.create_renderer_kwargs.update(kwargs)
 			self.shutdown_event.wait(self.interval)
