@@ -65,6 +65,9 @@ class VimRenderer(Renderer):
 			def strwidth(string):
 				return vim.strwidth(string)
 
+	def get_segment_info(self, segment_info):
+		return segment_info or self.segment_info
+
 	def render(self, window_id, winidx, current):
 		'''Render all segments.'''
 		if current:
