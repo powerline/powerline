@@ -166,6 +166,10 @@ Common configuration is a subdictionary that is a value of ``common`` key in
     String, determines format of the log messages. Defaults to 
     ``'%(asctime)s:%(level)s:%(message)s'``.
 
+``interval``
+    Number, determines time (in seconds) between checks for changed 
+    configuration. Use ``null`` to disable. Defaults to 10.
+
 Extension-specific configuration
 --------------------------------
 

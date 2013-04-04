@@ -8,6 +8,8 @@ from threading import Thread, Lock, Event
 
 
 class MultiRunnedThread(object):
+	daemon = True
+
 	def __init__(self):
 		self.thread = None
 

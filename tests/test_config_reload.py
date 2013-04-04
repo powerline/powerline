@@ -23,6 +23,7 @@ config = {
 				},
 			},
 			'spaces': 0,
+			'interval': 0,
 		},
 		'ext': {
 			'test': {
@@ -97,7 +98,7 @@ def sleep(interval):
 
 
 def add_watcher_events(p, *args, **kwargs):
-	p.watcher._reset(args)
+	p.config_loader.watcher._reset(args)
 	while not p._will_create_renderer():
 		sleep(kwargs.get('interval', 0.000001))
 		if not kwargs.get('wait', True):
@@ -187,7 +188,7 @@ class TestConfigReload(TestCase):
 				add_watcher_events(p, 'config')
 				self.assertEqual(p.render(), '<1 2 1> s<2 4 False>>><3 4 4>g<4 False False>>><None None None>')
 				self.assertAccessEvents('config')
-				self.assertEqual(p.logger._pop_msgs(), ['exception:test:Failed to create renderer: fcf:colorschemes/test/nonexistentraise'])
+				self.assertIn('exception:test:Failed to create renderer: fcf:colorschemes/test/nonexistentraise', p.logger._pop_msgs())
 
 				config['colorschemes/test/nonexistentraise'] = {
 					'groups': {
