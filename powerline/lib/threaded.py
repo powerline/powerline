@@ -2,7 +2,7 @@
 
 from __future__ import absolute_import
 
-from powerline.lib.time import monotonic
+from powerline.lib.monotonic import monotonic
 
 from threading import Thread, Lock, Event
 
@@ -77,7 +77,8 @@ class ThreadedSegment(object):
 	def shutdown(self):
 		self.shutdown_event.set()
 		if self.daemon and self.is_alive():
-			self.thread.join()
+			# Give the worker thread a chance to shutdown, but don't block for too long
+			self.thread.join(.01)
 
 	def set_interval(self, interval=None):
 		# Allowing “interval” keyword in configuration.

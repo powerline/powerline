@@ -7,17 +7,18 @@ import sys
 
 from datetime import datetime
 import socket
-from multiprocessing import cpu_count
+from multiprocessing import cpu_count as _cpu_count
 
 from powerline.lib import add_divider_highlight_group
 from powerline.lib.url import urllib_read, urllib_urlencode
 from powerline.lib.vcs import guess
 from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment, with_docstring
-from powerline.lib.time import monotonic
+from powerline.lib.monotonic import monotonic
 from powerline.lib.humanize_bytes import humanize_bytes
 from powerline.theme import requires_segment_info
 from collections import namedtuple
 
+cpu_count = None
 
 @requires_segment_info
 def hostname(pl, segment_info, only_if_ssh=False, exclude_domain=False):
@@ -245,7 +246,7 @@ def _external_ip(query_url='http://ipv4.icanhazip.com/'):
 
 
 class ExternalIpSegment(ThreadedSegment):
-	interval = 10
+	interval = 300
 
 	def set_state(self, query_url='http://ipv4.icanhazip.com/', **kwargs):
 		self.query_url = query_url
@@ -485,7 +486,7 @@ Also uses ``weather_conditions_{condition}`` for all weather conditions supporte
 ''')
 
 
-def system_load(pl, format='{avg:.1f}', threshold_good=1, threshold_bad=2):
+def system_load(pl, format='{avg:.1f}', threshold_good=1, threshold_bad=2, track_cpu_count=False):
 	'''Return system load average.
 
 	Highlights using ``system_load_good``, ``system_load_bad`` and
@@ -504,6 +505,9 @@ def system_load(pl, format='{avg:.1f}', threshold_good=1, threshold_bad=2):
 		indicates relative position in this interval:
 		(``100 * (cur-good) / (bad-good)``).
 		Note: both parameters are checked against normalized load averages.
+	:param bool track_cpu_count:
+		if True powerline will continuously poll the system to detect changes 
+		in the number of CPUs.
 
 	Divider highlight group used: ``background:divider``.
 
@@ -511,7 +515,7 @@ def system_load(pl, format='{avg:.1f}', threshold_good=1, threshold_bad=2):
 	'''
 	global cpu_count
 	try:
-		cpu_num = cpu_count()
+		cpu_num = cpu_count = _cpu_count() if cpu_count is None or track_cpu_count else cpu_count
 	except NotImplementedError:
 		pl.warn('Unable to get CPU count: method is not implemented')
 		return None

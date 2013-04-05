@@ -1,7 +1,7 @@
 # vim:fileencoding=utf-8:noet
 
 from functools import wraps
-from powerline.lib.time import monotonic
+from powerline.lib.monotonic import monotonic
 
 
 def default_cache_key(**kwargs):

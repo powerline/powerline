@@ -412,7 +412,8 @@ class Powerline(object):
 		'''
 		self.shutdown_event.set()
 		if self.use_daemon_threads and self.is_alive():
-			self.thread.join()
+			# Give the worker thread a chance to shutdown, but don't block for too long
+			self.thread.join(.01)
 		self.renderer.shutdown()
 		self.watcher.unsubscribe()
 
