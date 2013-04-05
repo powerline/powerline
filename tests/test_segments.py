@@ -224,7 +224,7 @@ class TestCommon(TestCase):
 	def test_system_load(self):
 		pl = Pl()
 		with replace_module_module(common, 'os', getloadavg=lambda: (7.5, 3.5, 1.5)):
-			with replace_attr(common, 'cpu_count', lambda: 2):
+			with replace_attr(common, '_cpu_count', lambda: 2):
 				self.assertEqual(common.system_load(pl=pl),
 						[{'contents': '7.5 ', 'highlight_group': ['system_load_gradient', 'system_load'], 'divider_highlight_group': 'background:divider', 'gradient_level': 100},
 						{'contents': '3.5 ', 'highlight_group': ['system_load_gradient', 'system_load'], 'divider_highlight_group': 'background:divider', 'gradient_level': 75.0},
