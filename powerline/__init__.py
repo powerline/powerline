@@ -407,13 +407,13 @@ class Powerline(object):
 					self.create_renderer_kwargs.clear()
 		return self.renderer.render(*args, **kwargs)
 
-	def shutdown(self):
+	def shutdown(self, join=False):
 		'''Lock renderer from modifications and run its ``.shutdown()`` method.
 		'''
 		self.shutdown_event.set()
-		if self.use_daemon_threads and self.is_alive():
+		if join and self.is_alive():
 			self.thread.join()
-		self.renderer.shutdown()
+		self.renderer.shutdown(join)
 		self.watcher.unsubscribe()
 
 	def is_alive(self):
@@ -454,4 +454,4 @@ class Powerline(object):
 		return self
 
 	def __exit__(self, *args):
-		self.shutdown()
+		self.shutdown(join=True)

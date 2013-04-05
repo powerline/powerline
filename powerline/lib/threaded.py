@@ -74,9 +74,9 @@ class ThreadedSegment(object):
 				self.skip = False
 			self.shutdown_event.wait(max(self.interval - (monotonic() - start_time), self.min_sleep_time))
 
-	def shutdown(self):
+	def shutdown(self, join):
 		self.shutdown_event.set()
-		if self.daemon and self.is_alive():
+		if join and self.is_alive():
 			self.thread.join()
 
 	def set_interval(self, interval=None):
@@ -100,6 +100,15 @@ class ThreadedSegment(object):
 
 		if not self.is_alive():
 			self.start()
+
+	def critical(self, *args, **kwargs):
+		self.pl.critical(prefix=self.__class__.__name__, *args, **kwargs)
+
+	def exception(self, *args, **kwargs):
+		self.pl.exception(prefix=self.__class__.__name__, *args, **kwargs)
+
+	def info(self, *args, **kwargs):
+		self.pl.info(prefix=self.__class__.__name__, *args, **kwargs)
 
 	def error(self, *args, **kwargs):
 		self.pl.error(prefix=self.__class__.__name__, *args, **kwargs)

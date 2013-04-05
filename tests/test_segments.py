@@ -302,7 +302,7 @@ class TestCommon(TestCase):
 					{'divider_highlight_group': 'background:divider', 'contents': 's 2 KiB/s', 'highlight_group': ['network_load_sent_gradient', 'network_load_gradient', 'network_load_sent', 'network_load'], 'gradient_level': ApproxEqual()},
 				])
 			finally:
-				common.network_load.shutdown()
+				common.network_load.shutdown(True)
 
 	def test_virtualenv(self):
 		pl = Pl()

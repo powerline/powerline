@@ -50,11 +50,11 @@ class Theme(object):
 							continue
 				self.segments[side].append(segment)
 
-	def shutdown(self):
+	def shutdown(self, join):
 		for segments in self.segments.values():
 			for segment in segments:
 				try:
-					segment['shutdown']()
+					segment['shutdown'](join)
 				except TypeError:
 					pass
 
