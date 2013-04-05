@@ -637,12 +637,19 @@ else:
 
 
 @add_divider_highlight_group('background:divider')
-def uptime(pl, format='{days}d {hours:02d}h {minutes:02d}m'):
+def uptime(pl, days_format='{days:d}d', hours_format=' {hours:d}h', minutes_format=' {minutes:d}m', seconds_format=' {seconds:d}s', shorten_len=3):
 	'''Return system uptime.
 
-	:param str format:
-		format string, will be passed ``days``, ``hours``, ``minutes`` and 
-		seconds as arguments
+	:param str days_format:
+		day format string, will be passed ``days`` as the argument
+	:param str hours_format:
+		hour format string, will be passed ``hours`` as the argument
+	:param str minutes_format:
+		minute format string, will be passed ``minutes`` as the argument
+	:param str seconds_format:
+		second format string, will be passed ``seconds`` as the argument
+	:param int shorten_len:
+		shorten the amount of units (days, hours, etc.) displayed
 
 	Divider highlight group used: ``background:divider``.
 	'''
@@ -654,7 +661,13 @@ def uptime(pl, format='{days}d {hours:02d}h {minutes:02d}m'):
 	minutes, seconds = divmod(seconds, 60)
 	hours, minutes = divmod(minutes, 60)
 	days, hours = divmod(hours, 24)
-	return format.format(days=int(days), hours=hours, minutes=minutes, seconds=seconds)
+	time_formatted = list(filter(None, [
+		days_format.format(days=days) if days and days_format else None,
+		hours_format.format(hours=hours) if hours and hours_format else None,
+		minutes_format.format(minutes=minutes) if minutes and minutes_format else None,
+		seconds_format.format(seconds=seconds) if seconds and seconds_format else None,
+		]))[0:shorten_len]
+	return ''.join(time_formatted).strip()
 
 
 class NetworkLoadSegment(KwThreadedSegment):
