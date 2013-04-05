@@ -7,10 +7,10 @@ __docformat__ = 'restructuredtext en'
 import os
 import sys
 import errno
-from powerline.lib.time import monotonic
 from time import sleep
 from threading import RLock
 
+from powerline.lib.monotonic import monotonic
 
 class INotifyError(Exception):
 	pass

@@ -13,7 +13,7 @@ from powerline.lib import add_divider_highlight_group
 from powerline.lib.url import urllib_read, urllib_urlencode
 from powerline.lib.vcs import guess
 from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment, with_docstring
-from powerline.lib.time import monotonic
+from powerline.lib.monotonic import monotonic
 from powerline.lib.humanize_bytes import humanize_bytes
 from powerline.theme import requires_segment_info
 from collections import namedtuple

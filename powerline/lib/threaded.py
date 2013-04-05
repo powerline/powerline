@@ -2,7 +2,7 @@
 
 from __future__ import absolute_import
 
-from powerline.lib.time import monotonic
+from powerline.lib.monotonic import monotonic
 
 from threading import Thread, Lock, Event
 
