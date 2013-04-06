@@ -115,9 +115,16 @@ class ConfigLoader(MultiRunnedThread):
 		with self.lock:
 			for path, functions in self.watched.items():
 				for function in functions:
-					if self.watcher(path):
+					try:
+						modified = self.watcher(path)
+					except OSError as e:
+						modified = True
+						self.exception('Error while running watcher for path {0}: {1}', path, str(e))
+					else:
+						if modified:
+							toload.append(path)
+					if modified:
 						function(path)
-						toload.append(path)
 		with self.lock:
 			for key, functions in list(self.missing.items()):
 				remove = False
