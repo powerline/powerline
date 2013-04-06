@@ -18,7 +18,9 @@ from powerline.lib.humanize_bytes import humanize_bytes
 from powerline.theme import requires_segment_info
 from collections import namedtuple
 
+
 cpu_count = None
+
 
 @requires_segment_info
 def hostname(pl, segment_info, only_if_ssh=False, exclude_domain=False):

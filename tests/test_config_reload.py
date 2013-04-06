@@ -6,7 +6,6 @@ from tests import TestCase
 from tests.lib import replace_item
 from tests.lib.config_mock import swap_attributes, get_powerline, pop_events
 from copy import deepcopy
-from threading import Lock
 
 
 config = {

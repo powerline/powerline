@@ -1,7 +1,6 @@
 # vim:fileencoding=utf-8:noet
 
 from __future__ import absolute_import
-import json
 import os
 import sys
 import logging

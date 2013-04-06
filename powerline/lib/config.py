@@ -56,7 +56,7 @@ class ConfigLoader(MultiRunnedThread):
 		'''Register any function that will be called with given key each 
 		interval seconds (interval is defined at __init__). Its result is then 
 		passed to ``function``, but only if the result is true.
-		
+
 		:param function condition_function:
 			Function which will be called each ``interval`` seconds. All 
 			exceptions from it will be ignored.
@@ -79,7 +79,6 @@ class ConfigLoader(MultiRunnedThread):
 		:param set removed_functions:
 			Set of functions previously passed to ``.register()`` method.
 		'''
-		removes = []
 		with self.lock:
 			for path, functions in list(self.watched.items()):
 				functions -= removed_functions
@@ -127,7 +126,6 @@ class ConfigLoader(MultiRunnedThread):
 						function(path)
 		with self.lock:
 			for key, functions in list(self.missing.items()):
-				remove = False
 				for condition_function, function in list(functions):
 					try:
 						path = condition_function(key)
