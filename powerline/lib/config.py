@@ -107,39 +107,41 @@ class ConfigLoader(MultiRunnedThread):
 			return self.loaded[path]
 		except KeyError:
 			r = self._load(path)
-			if self.interval is not None:
-				self.loaded[path] = r
+			self.loaded[path] = r
 			return r
+
+	def update(self):
+		toload = []
+		with self.lock:
+			for path, functions in self.watched.items():
+				for function in functions:
+					if self.watcher(path):
+						function(path)
+						toload.append(path)
+		with self.lock:
+			for key, functions in list(self.missing.items()):
+				remove = False
+				for condition_function, function in list(functions):
+					try:
+						path = condition_function(key)
+					except Exception as e:
+						self.exception('Error while running condition function for key {0}: {1}', key, str(e))
+					else:
+						if path:
+							toload.append(path)
+							function(path)
+							functions.remove((condition_function, function))
+				if not functions:
+					self.missing.pop(key)
+		for path in toload:
+			try:
+				self.loaded[path] = self._load(path)
+			except Exception as e:
+				self.exception('Error while loading {0}: {1}', path, str(e))
 
 	def run(self):
 		while self.interval is not None and not self.shutdown_event.is_set():
-			toload = []
-			with self.lock:
-				for path, functions in self.watched.items():
-					for function in functions:
-						if self.watcher(path):
-							function(path)
-							toload.append(path)
-			with self.lock:
-				for key, functions in list(self.missing.items()):
-					remove = False
-					for condition_function, function in list(functions):
-						try:
-							path = condition_function(key)
-						except Exception as e:
-							self.exception('Error while running condition function for key {0}: {1}', key, str(e))
-						else:
-							if path:
-								toload.append(path)
-								function(path)
-								functions.remove((condition_function, function))
-					if not functions:
-						self.missing.pop(key)
-			for path in toload:
-				try:
-					self.loaded[path] = self._load(path)
-				except Exception as e:
-					self.exception('Error while loading {0}: {1}', path, str(e))
+			self.update()
 			self.shutdown_event.wait(self.interval)
 
 	def exception(self, msg, *args, **kwargs):

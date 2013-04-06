@@ -419,6 +419,7 @@ main_spec = (Spec(
 										lambda value: 'unknown debugging level {0}'.format(value)).optional(),
 		log_format=Spec().type(str).optional(),
 		interval=Spec().either(Spec().cmp('gt', 0.0), Spec().type(type(None))).optional(),
+		reload_config=Spec().type(bool).optional(),
 	).context_message('Error while loading common configuration (key {key})'),
 	ext=Spec(
 		vim=Spec(

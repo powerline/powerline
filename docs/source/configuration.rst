@@ -168,7 +168,13 @@ Common configuration is a subdictionary that is a value of ``common`` key in
 
 ``interval``
     Number, determines time (in seconds) between checks for changed 
-    configuration. Use ``null`` to disable. Defaults to 10.
+    configuration. Checks are done in a seprate thread. Use ``null`` to check 
+    for configuration changes on ``.render()`` call in main thread.
+    Defaults to ``None``.
+
+``reload_config``
+    Boolean, determines whether configuration should be reloaded at all. 
+    Defaults to ``True``.
 
 Extension-specific configuration
 --------------------------------

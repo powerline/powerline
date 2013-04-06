@@ -121,6 +121,7 @@ class Powerline(object):
 		}
 		self.shutdown_event = shutdown_event or Event()
 		self.config_loader = config_loader or ConfigLoader(shutdown_event=self.shutdown_event)
+		self.run_loader_update = False
 
 		self.renderer_options = {}
 
@@ -191,9 +192,10 @@ class Powerline(object):
 					},
 				)
 
-				if not self.run_once:
-					interval = self.common_config.get('interval', 10)
+				if not self.run_once and self.common_config.get('reload_config', True):
+					interval = self.common_config.get('interval', None)
 					self.config_loader.set_interval(interval)
+					self.run_loader_update = (interval is None)
 					if interval is not None and not self.config_loader.is_alive():
 						self.config_loader.start()
 
@@ -347,6 +349,8 @@ class Powerline(object):
 
 	def update_renderer(self):
 		'''Updates/creates a renderer if needed.'''
+		if self.run_loader_update:
+			self.config_loader.update()
 		create_renderer_kwargs = None
 		with self.cr_kwargs_lock:
 			if self.create_renderer_kwargs:

@@ -242,6 +242,20 @@ class TestConfigReload(TestCase):
 				self.assertEqual(p.logger._pop_msgs(), [])
 		pop_events()
 
+	def test_reload_theme_main(self):
+		with replace_item(globals(), 'config', deepcopy(config)):
+			config['config']['common']['interval'] = None
+			with get_powerline(run_once=False) as p:
+				self.assertEqual(p.render(), '<1 2 1> s<2 4 False>>><3 4 4>g<4 False False>>><None None None>')
+				self.assertAccessEvents('config', 'colors', 'colorschemes/test/default', 'themes/test/default')
+
+				config['themes/test/default']['segments']['left'][0]['contents'] = 'col3'
+				add_watcher_events(p, 'themes/test/default', wait=False)
+				self.assertEqual(p.render(), '<1 2 1> col3<2 4 False>>><3 4 4>g<4 False False>>><None None None>')
+				self.assertAccessEvents('themes/test/default')
+				self.assertEqual(p.logger._pop_msgs(), [])
+		pop_events()
+
 
 replaces = {}
 
