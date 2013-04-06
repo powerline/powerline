@@ -5,6 +5,8 @@ from powerline.lib.vcs import guess
 from subprocess import call, PIPE
 import os
 import sys
+from unittest.case import SkipTest
+from functools import partial
 from tests import TestCase
 
 
@@ -36,6 +38,8 @@ class TestLib(TestCase):
 		self.assertEqual(humanize_bytes(1000000000, si_prefix=True), '1.00 GB')
 		self.assertEqual(humanize_bytes(1000000000, si_prefix=False), '953.7 MiB')
 
+class TestFilesystemWatchers(TestCase):
+
 	def do_test_for_change(self, watcher, path):
 		import time
 		st = time.time()
@@ -49,9 +53,7 @@ class TestLib(TestCase):
 		from powerline.lib.file_watcher import create_file_watcher
 		w = create_file_watcher(use_stat=False)
 		if w.is_stat_based:
-			# The granularity of mtime (1 second) means that we cannot use the
-			# same tests for inotify and StatWatch.
-			return
+			raise SkipTest('This test is not suitable for a stat based file watcher')
 		f1, f2 = os.path.join(INOTIFY_DIR, 'file1'), os.path.join(INOTIFY_DIR, 'file2')
 		with open(f1, 'wb'):
 			with open(f2, 'wb'):
@@ -83,6 +85,41 @@ class TestLib(TestCase):
 		# Check that deleting a file registers as a change
 		os.unlink(f1)
 		self.do_test_for_change(w, f1)
+
+	def test_tree_watcher(self):
+		from powerline.lib.tree_watcher import TreeWatcher
+		tw = TreeWatcher()
+		subdir = os.path.join(INOTIFY_DIR, 'subdir')
+		os.mkdir(subdir)
+		if tw.watch(INOTIFY_DIR).is_dummy:
+			raise SkipTest('No tree watcher available')
+		import shutil
+		self.assertTrue(tw(INOTIFY_DIR))
+		self.assertFalse(tw(INOTIFY_DIR))
+		changed = partial(self.do_test_for_change, tw, INOTIFY_DIR)
+		open(os.path.join(INOTIFY_DIR, 'tree1'), 'w').close()
+		changed()
+		open(os.path.join(subdir, 'tree1'), 'w').close()
+		changed()
+		os.unlink(os.path.join(subdir, 'tree1'))
+		changed()
+		os.rmdir(subdir)
+		changed()
+		os.mkdir(subdir)
+		changed()
+		os.rename(subdir, subdir+'1')
+		changed()
+		shutil.rmtree(subdir+'1')
+		changed()
+		os.mkdir(subdir)
+		f = os.path.join(subdir, 'f')
+		open(f, 'w').close()
+		changed()
+		with open(f, 'a') as s:
+			s.write(' ')
+		changed()
+		os.rename(f, f+'1')
+		changed()
 
 use_mercurial = use_bzr = sys.version_info < (3, 0)
 
