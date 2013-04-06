@@ -40,6 +40,7 @@ class ThreadedSegment(MultiRunnedThread):
 		self.skip = False
 		self.crashed_value = None
 		self.update_value = None
+		self.updated = False
 
 	def __call__(self, pl, update_first=True, **kwargs):
 		if self.run_once:
@@ -56,6 +57,7 @@ class ThreadedSegment(MultiRunnedThread):
 			self.start()
 		elif not self.updated:
 			update_value = self.get_update_value(True)
+			self.updated = True
 		else:
 			update_value = self.update_value
 
@@ -102,7 +104,7 @@ class ThreadedSegment(MultiRunnedThread):
 	def set_state(self, interval=None, update_first=True, shutdown_event=None, **kwargs):
 		self.set_interval(interval)
 		self.shutdown_event = shutdown_event or Event()
-		self.updated = not (update_first and self.update_first)
+		self.updated = self.updated or (not (update_first and self.update_first))
 
 	def startup(self, pl, **kwargs):
 		self.run_once = False
