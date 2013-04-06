@@ -128,8 +128,8 @@ class TestConfigReload(TestCase):
 	def test_reload_main(self):
 		with get_powerline(run_once=False) as p:
 			with replace_item(globals(), 'config', deepcopy(config)):
-				self.assertAccessEvents('config', 'colors', 'colorschemes/test/default', 'themes/test/default')
 				self.assertEqual(p.render(), '<1 2 1> s<2 4 False>>><3 4 4>g<4 False False>>><None None None>')
+				self.assertAccessEvents('config', 'colors', 'colorschemes/test/default', 'themes/test/default')
 
 				config['config']['common']['spaces'] = 1
 				add_watcher_events(p, 'config')

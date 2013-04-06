@@ -113,7 +113,12 @@ class Powerline(object):
 		self.find_config_file = lambda cfg_path: find_config_file(config_paths, cfg_path)
 
 		self.cr_kwargs_lock = Lock()
-		self.create_renderer_kwargs = {}
+		self.create_renderer_kwargs = {
+			'load_main': True,
+			'load_colors': True,
+			'load_colorscheme': True,
+			'load_theme': True,
+		}
 		self.shutdown_event = shutdown_event or Event()
 		self.config_loader = config_loader or ConfigLoader(shutdown_event=self.shutdown_event)
 
@@ -122,8 +127,6 @@ class Powerline(object):
 		self.prev_common_config = None
 		self.prev_ext_config = None
 		self.pl = None
-
-		self.create_renderer(load_main=True, load_colors=True, load_colorscheme=True, load_theme=True)
 
 	def create_renderer(self, load_main=False, load_colors=False, load_colorscheme=False, load_theme=False):
 		'''(Re)create renderer object. Can be used after Powerline object was 
@@ -342,18 +345,25 @@ class Powerline(object):
 		'''
 		return None
 
-	def render(self, *args, **kwargs):
-		'''Lock renderer from modifications and pass all arguments further to 
-		``self.renderer.render()``.
-		'''
+	def update_renderer(self):
+		'''Updates/creates a renderer if needed.'''
+		create_renderer_kwargs = None
 		with self.cr_kwargs_lock:
 			if self.create_renderer_kwargs:
-				try:
-					self.create_renderer(**self.create_renderer_kwargs)
-				except Exception as e:
-					self.pl.exception('Failed to create renderer: {0}', str(e))
-				finally:
-					self.create_renderer_kwargs.clear()
+				create_renderer_kwargs = self.create_renderer_kwargs.copy()
+		if create_renderer_kwargs:
+			try:
+				self.create_renderer(**create_renderer_kwargs)
+			except Exception as e:
+				self.pl.exception('Failed to create renderer: {0}', str(e))
+			finally:
+				self.create_renderer_kwargs.clear()
+
+	def render(self, *args, **kwargs):
+		'''Update/create renderer if needed and pass all arguments further to 
+		``self.renderer.render()``.
+		'''
+		self.update_renderer()
 		return self.renderer.render(*args, **kwargs)
 
 	def shutdown(self):
