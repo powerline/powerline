@@ -5,9 +5,8 @@ from powerline.lib.vcs import guess
 from subprocess import call, PIPE
 import os
 import sys
-from unittest.case import SkipTest
 from functools import partial
-from tests import TestCase
+from tests import TestCase, SkipTest
 
 
 class TestLib(TestCase):
