@@ -177,12 +177,14 @@ class Spec(object):
 	def cmp(self, comparison, cint, msg_func=None):
 		if type(cint) is str:
 			self.type(unicode)
+		elif type(cint) is float:
+			self.type(int, float)
 		else:
 			self.type(type(cint))
 		cmp_func = self.cmp_funcs[comparison]
 		msg_func = msg_func or (lambda value: '{0} is not {1} {2}'.format(value, self.cmp_msgs[comparison], cint))
 		self.checks.append(('check_func',
-					(lambda value, *args: (True, True, not cmp_func(value, cint))),
+					(lambda value, *args: (True, True, not cmp_func(value.value, cint))),
 					msg_func))
 		return self
 
@@ -416,7 +418,7 @@ main_spec = (Spec(
 		log_level=Spec().re('^[A-Z]+$').func(lambda value, *args: (True, True, not hasattr(logging, value)),
 										lambda value: 'unknown debugging level {0}'.format(value)).optional(),
 		log_format=Spec().type(str).optional(),
-		interval=Spec().type(int, float, type(None)).optional(),
+		interval=Spec().either(Spec().cmp('gt', 0.0), Spec().type(type(None))).optional(),
 	).context_message('Error while loading common configuration (key {key})'),
 	ext=Spec(
 		vim=Spec(
@@ -797,7 +799,7 @@ def check_segment_data_key(key, data, context, echoerr):
 
 # FIXME More checks, limit existing to ThreadedSegment instances only
 args_spec = Spec(
-	interval=Spec().type(int, float).optional(),
+	interval=Spec().cmp('gt', 0.0).optional(),
 	update_first=Spec().type(bool).optional(),
 	shutdown_event=Spec().error('Shutdown event must be set by powerline').optional(),
 	pl=Spec().error('pl object must be set by powerline').optional(),
@@ -815,7 +817,7 @@ segments_spec = Spec().optional().list(
 		draw_soft_divider=Spec().type(bool).optional(),
 		draw_inner_divider=Spec().type(bool).optional(),
 		module=segment_module_spec(),
-		priority=Spec().cmp('ge', -1).optional(),
+		priority=Spec().either(Spec().cmp('eq', -1), Spec().cmp('ge', 0.0)).optional(),
 		after=Spec().type(unicode).optional(),
 		before=Spec().type(unicode).optional(),
 		width=Spec().either(Spec().unsigned(), Spec().cmp('eq', 'auto')).optional(),
