@@ -4,12 +4,17 @@ from __future__ import unicode_literals, absolute_import
 __copyright__ = '2013, Kovid Goyal <kovid at kovidgoyal.net>'
 __docformat__ = 'restructuredtext en'
 
-import sys, os, errno
+import sys
+import os
+import errno
+
 
 class INotifyError(Exception):
 	pass
 
+
 _inotify = None
+
 
 def load_inotify():
 	''' Initialize the inotify library '''
@@ -53,8 +58,8 @@ def load_inotify():
 		_inotify = (init1, add_watch, rm_watch, read)
 	return _inotify
 
-class INotify(object):
 
+class INotify(object):
 	# See <sys/inotify.h> for the flags defined below
 
 	# Supported events suitable for MASK parameter of INOTIFY_ADD_WATCH.
@@ -98,7 +103,8 @@ class INotify(object):
 	NONBLOCK = 0x800
 
 	def __init__(self, cloexec=True, nonblock=True):
-		import ctypes, struct
+		import ctypes
+		import struct
 		self._init1, self._add_watch, self._rm_watch, self._read = load_inotify()
 		flags = 0
 		if cloexec:
@@ -164,12 +170,9 @@ class INotify(object):
 			pos += self.hdr.size
 			name = None
 			if get_name:
-				name = raw[pos:pos+name_len].rstrip(b'\0').decode(self.fenc)
+				name = raw[pos:pos + name_len].rstrip(b'\0').decode(self.fenc)
 			pos += name_len
 			self.process_event(wd, mask, cookie, name)
 
 	def process_event(self, *args):
 		raise NotImplementedError()
-
-
-

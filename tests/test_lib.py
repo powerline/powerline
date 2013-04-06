@@ -38,8 +38,8 @@ class TestLib(TestCase):
 		self.assertEqual(humanize_bytes(1000000000, si_prefix=True), '1.00 GB')
 		self.assertEqual(humanize_bytes(1000000000, si_prefix=False), '953.7 MiB')
 
-class TestFilesystemWatchers(TestCase):
 
+class TestFilesystemWatchers(TestCase):
 	def do_test_for_change(self, watcher, path):
 		import time
 		st = time.time()
@@ -47,7 +47,7 @@ class TestFilesystemWatchers(TestCase):
 			if watcher(path):
 				return
 			time.sleep(0.1)
-		self.fail('The change to %s was not detected'%path)
+		self.fail('The change to {0} was not detected'.format(path))
 
 	def test_file_watcher(self):
 		from powerline.lib.file_watcher import create_file_watcher
@@ -107,9 +107,9 @@ class TestFilesystemWatchers(TestCase):
 		changed()
 		os.mkdir(subdir)
 		changed()
-		os.rename(subdir, subdir+'1')
+		os.rename(subdir, subdir + '1')
 		changed()
-		shutil.rmtree(subdir+'1')
+		shutil.rmtree(subdir + '1')
 		changed()
 		os.mkdir(subdir)
 		f = os.path.join(subdir, 'f')
@@ -118,7 +118,7 @@ class TestFilesystemWatchers(TestCase):
 		with open(f, 'a') as s:
 			s.write(' ')
 		changed()
-		os.rename(f, f+'1')
+		os.rename(f, f + '1')
 		changed()
 
 use_mercurial = use_bzr = sys.version_info < (3, 0)
@@ -192,6 +192,7 @@ HG_REPO = 'hg_repo' + os.environ.get('PYTHON', '')
 BZR_REPO = 'bzr_repo' + os.environ.get('PYTHON', '')
 INOTIFY_DIR = 'inotify' + os.environ.get('PYTHON', '')
 
+
 def setUpModule():
 	global old_cwd
 	global old_HGRCPATH
@@ -215,7 +216,6 @@ def setUpModule():
 		call(['bzr', 'config', 'nickname=test_powerline'], cwd=BZR_REPO)
 		call(['bzr', 'config', 'create_signatures=0'], cwd=BZR_REPO)
 	os.mkdir(INOTIFY_DIR)
-
 
 
 def tearDownModule():
