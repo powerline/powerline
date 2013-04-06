@@ -34,7 +34,9 @@ class PowerlineState(object):
 	def _log(self, attr, msg, *args, **kwargs):
 		prefix = kwargs.get('prefix') or self.prefix
 		prefix = self.ext + ((':' + prefix) if prefix else '')
-		msg = prefix + ':' + msg.format(*args, **kwargs)
+		if args or kwargs:
+			msg = msg.format(*args, **kwargs)
+		msg = prefix + ':' + msg
 		key = attr + ':' + prefix
 		if msg != self.last_msgs.get(key):
 			getattr(self.logger, attr)(msg)
