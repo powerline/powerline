@@ -19,11 +19,51 @@ def construct_returned_value(rendered_highlighted, segments, output_raw):
 
 
 class Renderer(object):
+	'''Object that is responsible for generating the highlighted string.
+
+	:param dict theme_config:
+		Main theme configuration.
+	:param local_themes:
+		Local themes. Is to be used by subclasses from ``.get_theme()`` method, 
+		base class only records this parameter to a ``.local_themes`` attribute.
+	:param dict theme_kwargs:
+		Keyword arguments for ``Theme`` class constructor.
+	:param Colorscheme colorscheme:
+		Colorscheme object that holds colors configuration.
+	:param PowerlineState pl:
+		Object used for logging.
+	:param int ambiwidth:
+		Width of the characters with east asian width unicode attribute equal to 
+		``A`` (Ambigious).
+	:param dict options:
+		Various options. Are normally not used by base renderer, but all options 
+		are recorded as attributes.
+	'''
+
 	segment_info = {
 		'environ': os.environ,
 		'getcwd': getattr(os, 'getcwdu', os.getcwd),
 		'home': os.environ.get('HOME'),
 	}
+	'''Basic segment info. Is merged with local segment information by 
+	``.get_segment_info()`` method. Keys:
+
+	``environ``
+		Object containing environment variables. Must define at least the 
+		following methods: ``.__getitem__(var)`` that raises ``KeyError`` in 
+		case requested environment variable is not present, ``.get(var, 
+		default=None)`` that works like ``dict.get`` and be able to be passed to 
+		``Popen``.
+
+	``getcwd``
+		Function that returns current working directory. Will be called without 
+		any arguments, should return ``unicode`` or (in python-2) regular 
+		string.
+
+	``home``
+		String containing path to home directory. Should be ``unicode`` or (in 
+		python-2) regular string or ``None``.
+	'''
 
 	def __init__(self,
 				theme_config,
@@ -31,6 +71,7 @@ class Renderer(object):
 				theme_kwargs,
 				colorscheme,
 				pl,
+				ambiwidth=1,
 				**options):
 		self.__dict__.update(options)
 		self.theme_config = theme_config
@@ -41,24 +82,48 @@ class Renderer(object):
 		self.theme_kwargs = theme_kwargs
 		self.colorscheme = colorscheme
 		self.width_data = {
-				'N': 1,                              # Neutral
-				'Na': 1,                             # Narrow
-				'A': getattr(self, 'ambiwidth', 1),  # Ambigious
-				'H': 1,                              # Half-width
-				'W': 2,                              # Wide
-				'F': 2,                              # Fullwidth
-				}
+			'N': 1,          # Neutral
+			'Na': 1,         # Narrow
+			'A': ambiwidth,  # Ambigious
+			'H': 1,          # Half-width
+			'W': 2,          # Wide
+			'F': 2,          # Fullwidth
+		}
 
 	def strwidth(self, string):
+		'''Function that returns string width.
+		
+		Is used to calculate the place given string occupies when handling 
+		``width`` argument to ``.render()`` method. Must take east asian width 
+		into account.
+
+		:param unicode string:
+			String whose width will be calculated.
+
+		:return: unsigned integer.
+		'''
 		return sum((0 if combining(symbol) else self.width_data[east_asian_width(symbol)] for symbol in string))
 
 	def get_theme(self, matcher_info):
+		'''Get Theme object.
+		
+		Is to be overridden by subclasses to support local themes, this variant 
+		only returns ``.theme`` attribute.
+
+		:param matcher_info:
+			Parameter ``matcher_info`` that ``.render()`` method received. 
+			Unused.
+		'''
 		return self.theme
 
 	def shutdown(self):
+		'''Prepare for interpreter shutdown. The only job it is supposed to do 
+		is calling ``.shutdown()`` method for all theme objects. Should be 
+		overridden by subclasses in case they support local themes.
+		'''
 		self.theme.shutdown()
 
-	def get_highlighting(self, segment, mode):
+	def _get_highlighting(self, segment, mode):
 		segment['highlight'] = self.colorscheme.get_highlighting(segment['highlight_group'], mode, segment.get('gradient_level'))
 		if segment['divider_highlight_group']:
 			segment['divider_highlight'] = self.colorscheme.get_highlighting(segment['divider_highlight_group'], mode)
@@ -67,6 +132,21 @@ class Renderer(object):
 		return segment
 
 	def get_segment_info(self, segment_info):
+		'''Get segment information.
+		
+		Must return a dictionary containing at least ``home``, ``environ`` and 
+		``getcwd`` keys (see documentation for ``segment_info`` attribute). This 
+		implementation merges ``segment_info`` dictionary passed to 
+		``.render()`` method with ``.segment_info`` attribute, preferring keys 
+		from the former. It also replaces ``getcwd`` key with function returning 
+		``segment_info['environ']['PWD']`` in case ``PWD`` variable is 
+		available.
+
+		:param dict segment_info:
+			Segment information that was passed to ``.render()`` method.
+
+		:return: dict with segment information.
+		'''
 		r = self.segment_info.copy()
 		if segment_info:
 			r.update(segment_info)
@@ -82,12 +162,30 @@ class Renderer(object):
 		with a negative priority are left. If one or more filler segments are
 		provided they will fill the remaining space until the desired width is
 		reached.
+
+		:param str mode:
+			Mode string. Affects contents (colors and the set of segments) of 
+			rendered string.
+		:param int width:
+			Maximum width text can occupy. May be exceeded if there are too much 
+			non-removable segments.
+		:param str side:
+			One of ``left``, ``right``. Determines which side will be rendered. 
+			If not present all sides are rendered.
+		:param bool output_raw:
+			Changes the output: if this parameter is ``True`` then in place of 
+			one string this method outputs a pair ``(colored_string, 
+			colorless_string)``.
+		:param dict segment_info:
+			Segment information. See also ``.get_segment_info()`` method.
+		:param matcher_info:
+			Matcher information. Is processed in ``.get_theme()`` method.
 		'''
 		theme = self.get_theme(matcher_info)
 		segments = theme.get_segments(side, self.get_segment_info(segment_info))
 
 		# Handle excluded/included segments for the current mode
-		segments = [self.get_highlighting(segment, mode) for segment in segments
+		segments = [self._get_highlighting(segment, mode) for segment in segments
 			if mode not in segment['exclude_modes'] or (segment['include_modes'] and segment in segment['include_modes'])]
 
 		segments = [segment for segment in self._render_segments(theme, segments)]
@@ -199,10 +297,23 @@ class Renderer(object):
 
 	@staticmethod
 	def escape(string):
+		'''Method that escapes segment contents.
+		'''
 		return string
 
 	def hlstyle(fg=None, bg=None, attr=None):
+		'''Output highlight style string.
+
+		Assuming highlighted string looks like ``{style}{contents}`` this method 
+		should output ``{style}``. If it is called without arguments this method 
+		is supposed to reset style to its default.
+		'''
 		raise NotImplementedError
 
 	def hl(self, contents, fg=None, bg=None, attr=None):
+		'''Output highlighted chunk.
+
+		This implementation just outputs ``.hlstyle()`` joined with 
+		``contents``.
+		'''
 		return self.hlstyle(fg, bg, attr) + (contents or '')
