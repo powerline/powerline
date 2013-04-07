@@ -6,8 +6,6 @@ import sys
 from time import sleep
 from powerline.lib.monotonic import monotonic
 from subprocess import Popen, PIPE
-from threading import Thread
-from select import select
 
 powerline = Powerline('wm', renderer_module='pango_markup')
 powerline.update_renderer()
@@ -16,6 +14,7 @@ try:
 	interval = float(sys.argv[1])
 except IndexError:
 	interval = 2
+
 
 def read_to_log(pl, client):
 	for line in client.stdout:
@@ -26,6 +25,7 @@ def read_to_log(pl, client):
 			pl.error(line, prefix='awesome-client')
 	if client.wait():
 		pl.error('Client exited with {0}', client.returncode, prefix='awesome')
+
 
 while True:
 	start_time = monotonic()
