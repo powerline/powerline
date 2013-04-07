@@ -44,7 +44,8 @@ class ThreadedDocumenter(autodoc.FunctionDocumenter):
 						if (arg == 'self' or
 								(arg == 'segment_info' and
 									getattr(self.object, 'powerline_requires_segment_info', None)) or
-								(method == 'render_one' and -i == len(argspec.args)) or
+								(arg == 'pl') or
+								(method.startswith('render') and 1-i == len(argspec.args)) or
 								arg in args):
 							continue
 						if argspec.defaults and len(argspec.defaults) >= -i:
@@ -64,7 +65,8 @@ class ThreadedDocumenter(autodoc.FunctionDocumenter):
 			args = []
 			defaults = []
 			for i, arg in zip(count(-1, -1), reversed(argspec.args)):
-				if (arg == 'segment_info' and getattr(self.object, 'powerline_requires_segment_info', None)):
+				if ((arg == 'segment_info' and getattr(self.object, 'powerline_requires_segment_info', None)) or
+					arg == 'pl'):
 					continue
 				if argspec.defaults and len(argspec.defaults) >= -i:
 					default = argspec.defaults[i]
