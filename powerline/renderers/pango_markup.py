@@ -3,7 +3,7 @@
 from powerline.renderer import Renderer
 from powerline.colorscheme import ATTR_BOLD, ATTR_ITALIC, ATTR_UNDERLINE
 
-from xmlrpclib import escape as _escape
+from xml.sax.saxutils import escape as _escape
 
 
 class PangoMarkupRenderer(Renderer):
