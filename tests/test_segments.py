@@ -244,7 +244,16 @@ class TestCommon(TestCase):
 	def test_cpu_load_percent(self):
 		pl = Pl()
 		with replace_module_module(common, 'psutil', cpu_percent=lambda **kwargs: 52.3):
-			self.assertEqual(common.cpu_load_percent(pl=pl), '52%')
+			self.assertEqual(common.cpu_load_percent(pl=pl), [{
+				'contents': '52%',
+				'gradient_level': 52.3,
+				'highlight_group': ['cpu_load_percent_gradient', 'cpu_load_percent'],
+			}])
+			self.assertEqual(common.cpu_load_percent(pl=pl, format='{0:.1f}%'), [{
+				'contents': '52.3%',
+				'gradient_level': 52.3,
+				'highlight_group': ['cpu_load_percent_gradient', 'cpu_load_percent'],
+			}])
 
 	def test_network_load(self):
 		from time import sleep
