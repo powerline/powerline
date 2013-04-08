@@ -11,24 +11,112 @@ _options = {
 _last_bufnr = 0
 _highlights = {}
 
-buffers = {}
 
-windows = []
-
-
-def _buffer():
-	return windows[_window - 1].buffer.number
+_thread_id = None
 
 
-def _logged(func):
+def _set_thread_id():
+	global _thread_id
+	from threading import current_thread
+	_thread_id = current_thread().ident
+
+
+# Assuming import is done from the main thread
+_set_thread_id()
+
+
+def _vim(func):
 	from functools import wraps
+	from threading import current_thread
 
 	@wraps(func)
 	def f(*args, **kwargs):
+		global _thread_id
+		if _thread_id != current_thread().ident:
+			raise RuntimeError('Accessing vim from separate threads is not allowed')
 		_log.append((func.__name__, args))
 		return func(*args, **kwargs)
 
 	return f
+
+
+class _Buffers(object):
+	@_vim
+	def __init__(self):
+		self.d = {}
+
+	@_vim
+	def __getitem__(self, item):
+		return self.d[item]
+
+	@_vim
+	def __setitem__(self, item, value):
+		self.d[item] = value
+
+	@_vim
+	def __contains__(self, item):
+		return item in self.d
+
+	@_vim
+	def __nonzero__(self):
+		return not not self.d
+
+	@_vim
+	def keys(self):
+		return self.d.keys()
+
+	@_vim
+	def pop(self, *args, **kwargs):
+		return self.d.pop(*args, **kwargs)
+
+
+buffers = _Buffers()
+
+
+class _Windows(object):
+	@_vim
+	def __init__(self):
+		self.l = []
+
+	@_vim
+	def __getitem__(self, item):
+		return self.l[item]
+
+	@_vim
+	def __setitem__(self, item, value):
+		self.l[item] = value
+
+	@_vim
+	def __len__(self):
+		return len(self.l)
+
+	@_vim
+	def __iter__(self):
+		return iter(self.l)
+
+	@_vim
+	def __nonzero__(self):
+		return not not self.l
+
+	@_vim
+	def pop(self, *args, **kwargs):
+		return self.l.pop(*args, **kwargs)
+
+	@_vim
+	def append(self, *args, **kwargs):
+		return self.l.append(*args, **kwargs)
+
+	@_vim
+	def index(self, *args, **kwargs):
+		return self.l.index(*args, **kwargs)
+
+
+windows = _Windows()
+
+
+@_vim
+def _buffer():
+	return windows[_window - 1].buffer.number
 
 
 def _construct_result(r):
@@ -58,7 +146,7 @@ def _log_print():
 		sys.stdout.write(repr(entry) + '\n')
 
 
-@_logged
+@_vim
 def command(cmd):
 	if cmd.startswith('let g:'):
 		import re
@@ -71,7 +159,7 @@ def command(cmd):
 		raise NotImplementedError
 
 
-@_logged
+@_vim
 def eval(expr):
 	if expr.startswith('g:'):
 		return _g[expr[2:]]
@@ -83,7 +171,7 @@ def eval(expr):
 	raise NotImplementedError
 
 
-@_logged
+@_vim
 def bindeval(expr):
 	if expr == 'g:':
 		return _g
@@ -95,7 +183,7 @@ def bindeval(expr):
 		raise NotImplementedError
 
 
-@_logged
+@_vim
 @_str_func
 def _emul_mode(*args):
 	if args and args[0]:
@@ -104,11 +192,11 @@ def _emul_mode(*args):
 		return _mode[0]
 
 
-@_logged
+@_vim
 @_str_func
 def _emul_getbufvar(bufnr, varname):
 	if varname[0] == '&':
-		if bufnr not in _buf_options:
+		if bufnr not in buffers:
 			return ''
 		try:
 			return _buf_options[bufnr][varname[1:]]
@@ -120,25 +208,25 @@ def _emul_getbufvar(bufnr, varname):
 	raise NotImplementedError
 
 
-@_logged
+@_vim
 @_str_func
 def _emul_getwinvar(winnr, varname):
 	return _win_scopes[winnr][varname]
 
 
-@_logged
+@_vim
 def _emul_setwinvar(winnr, varname, value):
 	_win_scopes[winnr][varname] = value
 
 
-@_logged
+@_vim
 def _emul_virtcol(expr):
 	if expr == '.':
 		return windows[_window - 1].cursor[1] + 1
 	raise NotImplementedError
 
 
-@_logged
+@_vim
 @_str_func
 def _emul_fnamemodify(path, modstring):
 	import os
@@ -154,7 +242,7 @@ def _emul_fnamemodify(path, modstring):
 	return path
 
 
-@_logged
+@_vim
 @_str_func
 def _emul_expand(expr):
 	if expr == '<abuf>':
@@ -162,21 +250,21 @@ def _emul_expand(expr):
 	raise NotImplementedError
 
 
-@_logged
+@_vim
 def _emul_bufnr(expr):
 	if expr == '$':
 		return _last_bufnr
 	raise NotImplementedError
 
 
-@_logged
+@_vim
 def _emul_exists(varname):
 	if varname.startswith('g:'):
 		return varname[2:] in _g
 	raise NotImplementedError
 
 
-@_logged
+@_vim
 def _emul_line2byte(line):
 	buflines = _buf_lines[_buffer()]
 	if line == len(buflines) + 1:
@@ -287,7 +375,7 @@ current = _Current()
 _dict = None
 
 
-@_logged
+@_vim
 def _init():
 	global _dict
 
@@ -302,7 +390,7 @@ def _init():
 	return _dict
 
 
-@_logged
+@_vim
 def _get_segment_info():
 	mode_translations = {
 			chr(ord('V') - 0x40): '^V',
@@ -319,12 +407,12 @@ def _get_segment_info():
 	}
 
 
-@_logged
+@_vim
 def _launch_event(event):
 	pass
 
 
-@_logged
+@_vim
 def _start_mode(mode):
 	global _mode
 	if mode == 'i':
@@ -334,7 +422,7 @@ def _start_mode(mode):
 	_mode = mode
 
 
-@_logged
+@_vim
 def _undo():
 	if len(_undostate[_buffer()]) == 1:
 		return
@@ -344,7 +432,7 @@ def _undo():
 		_buf_options[_buffer()]['modified'] = 0
 
 
-@_logged
+@_vim
 def _edit(name=None):
 	global _last_bufnr
 	if _buffer() and buffers[_buffer()].name is None:
@@ -355,14 +443,14 @@ def _edit(name=None):
 		windows[_window - 1].buffer = buf
 
 
-@_logged
+@_vim
 def _new(name=None):
 	global _window
 	_Window(buffer={'name': name})
 	_window = len(windows)
 
 
-@_logged
+@_vim
 def _del_window(winnr):
 	win = windows.pop(winnr - 1)
 	_win_scopes.pop(winnr)
@@ -371,7 +459,7 @@ def _del_window(winnr):
 	return win
 
 
-@_logged
+@_vim
 def _close(winnr, wipe=True):
 	global _window
 	win = _del_window(winnr)
@@ -387,7 +475,7 @@ def _close(winnr, wipe=True):
 		_Window()
 
 
-@_logged
+@_vim
 def _bw(bufnr=None):
 	bufnr = bufnr or _buffer()
 	winnr = 1
@@ -401,12 +489,12 @@ def _bw(bufnr=None):
 	_b(max(buffers.keys()))
 
 
-@_logged
+@_vim
 def _b(bufnr):
 	windows[_window - 1].buffer = buffers[bufnr]
 
 
-@_logged
+@_vim
 def _set_cursor(line, col):
 	windows[_window - 1].cursor = (line, col)
 	if _mode == 'n':
@@ -415,12 +503,12 @@ def _set_cursor(line, col):
 		_launch_event('CursorMovedI')
 
 
-@_logged
+@_vim
 def _get_buffer():
 	return buffers[_buffer()]
 
 
-@_logged
+@_vim
 def _set_bufoption(option, value, bufnr=None):
 	_buf_options[bufnr or _buffer()][option] = value
 	if option == 'filetype':
@@ -440,7 +528,7 @@ class _WithNewBuffer(object):
 		_bw(self.bufnr)
 
 
-@_logged
+@_vim
 def _set_dict(d, new, setfunc=None):
 	if not setfunc:
 		def setfunc(k, v):
@@ -496,7 +584,7 @@ class _WithDict(object):
 			self.d.pop(k)
 
 
-@_logged
+@_vim
 def _with(key, *args, **kwargs):
 	if key == 'buffer':
 		return _WithNewBuffer(_edit, *args, **kwargs)

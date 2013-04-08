@@ -14,14 +14,13 @@ _powerline_tmux_set_columns() {
 }
 
 _powerline_install_precmd() {
-	emulate -L zsh
+	emulate zsh
 	for f in "${precmd_functions[@]}"; do
 		if [[ "$f" = "_powerline_precmd" ]]; then
 			return
 		fi
 	done
 	chpwd_functions+=( _powerline_tmux_set_pwd )
-	setopt nolocaloptions
 	setopt promptpercent
 	setopt promptsubst
 	if zmodload zsh/zpython &>/dev/null ; then

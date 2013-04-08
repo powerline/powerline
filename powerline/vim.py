@@ -46,6 +46,7 @@ class VimPowerline(Powerline):
 			``True`` if theme was added successfully and ``False`` if theme with 
 			the same matcher already exists.
 		'''
+		self.update_renderer()
 		key = self.get_matcher(key)
 		try:
 			self.renderer.add_local_theme(key, {'config': config})

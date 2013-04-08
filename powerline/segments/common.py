@@ -18,7 +18,9 @@ from powerline.lib.humanize_bytes import humanize_bytes
 from powerline.theme import requires_segment_info
 from collections import namedtuple
 
+
 cpu_count = None
+
 
 @requires_segment_info
 def hostname(pl, segment_info, only_if_ssh=False, exclude_domain=False):
@@ -840,7 +842,7 @@ class EmailIMAPSegment(KwThreadedSegment):
 			return [{
 				'contents': str(unread_count),
 				'highlight_group': ['email_alert_gradient', 'email_alert'],
-				'gradient_level': unread_count * 100.0 / max_msgs,
+				'gradient_level': min(unread_count * 100.0 / max_msgs, 100),
 			}]
 
 

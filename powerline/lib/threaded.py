@@ -7,7 +7,28 @@ from powerline.lib.monotonic import monotonic
 from threading import Thread, Lock, Event
 
 
-class ThreadedSegment(object):
+class MultiRunnedThread(object):
+	daemon = True
+
+	def __init__(self):
+		self.thread = None
+
+	def is_alive(self):
+		return self.thread and self.thread.is_alive()
+
+	def start(self):
+		self.shutdown_event.clear()
+		self.thread = Thread(target=self.run)
+		self.thread.daemon = self.daemon
+		self.thread.start()
+
+	def join(self, *args, **kwargs):
+		if self.thread:
+			return self.thread.join(*args, **kwargs)
+		return None
+
+
+class ThreadedSegment(MultiRunnedThread):
 	min_sleep_time = 0.1
 	update_first = True
 	interval = 1
@@ -15,12 +36,11 @@ class ThreadedSegment(object):
 
 	def __init__(self):
 		super(ThreadedSegment, self).__init__()
-		self.shutdown_event = Event()
 		self.run_once = True
-		self.thread = None
 		self.skip = False
 		self.crashed_value = None
 		self.update_value = None
+		self.updated = False
 
 	def __call__(self, pl, update_first=True, **kwargs):
 		if self.run_once:
@@ -37,6 +57,7 @@ class ThreadedSegment(object):
 			self.start()
 		elif not self.updated:
 			update_value = self.get_update_value(True)
+			self.updated = True
 		else:
 			update_value = self.update_value
 
@@ -49,15 +70,6 @@ class ThreadedSegment(object):
 		if update:
 			self.update_value = self.update(self.update_value)
 		return self.update_value
-
-	def is_alive(self):
-		return self.thread and self.thread.is_alive()
-
-	def start(self):
-		self.shutdown_event.clear()
-		self.thread = Thread(target=self.run)
-		self.thread.daemon = self.daemon
-		self.thread.start()
 
 	def run(self):
 		while not self.shutdown_event.is_set():
@@ -77,8 +89,9 @@ class ThreadedSegment(object):
 	def shutdown(self):
 		self.shutdown_event.set()
 		if self.daemon and self.is_alive():
-			# Give the worker thread a chance to shutdown, but don't block for too long
-			self.thread.join(.01)
+			# Give the worker thread a chance to shutdown, but don't block for 
+			# too long
+			self.join(0.01)
 
 	def set_interval(self, interval=None):
 		# Allowing “interval” keyword in configuration.
@@ -88,9 +101,10 @@ class ThreadedSegment(object):
 		interval = interval or getattr(self, 'interval')
 		self.interval = interval
 
-	def set_state(self, interval=None, update_first=True, **kwargs):
+	def set_state(self, interval=None, update_first=True, shutdown_event=None, **kwargs):
 		self.set_interval(interval)
-		self.updated = not (update_first and self.update_first)
+		self.shutdown_event = shutdown_event or Event()
+		self.updated = self.updated or (not (update_first and self.update_first))
 
 	def startup(self, pl, **kwargs):
 		self.run_once = False
@@ -102,6 +116,15 @@ class ThreadedSegment(object):
 		if not self.is_alive():
 			self.start()
 
+	def critical(self, *args, **kwargs):
+		self.pl.critical(prefix=self.__class__.__name__, *args, **kwargs)
+
+	def exception(self, *args, **kwargs):
+		self.pl.exception(prefix=self.__class__.__name__, *args, **kwargs)
+
+	def info(self, *args, **kwargs):
+		self.pl.info(prefix=self.__class__.__name__, *args, **kwargs)
+
 	def error(self, *args, **kwargs):
 		self.pl.error(prefix=self.__class__.__name__, *args, **kwargs)
 
@@ -110,13 +133,6 @@ class ThreadedSegment(object):
 
 	def debug(self, *args, **kwargs):
 		self.pl.debug(prefix=self.__class__.__name__, *args, **kwargs)
-
-
-def printed(func):
-	def f(*args, **kwargs):
-		print(func.__name__)
-		return func(*args, **kwargs)
-	return f
 
 
 class KwThreadedSegment(ThreadedSegment):
@@ -174,8 +190,9 @@ class KwThreadedSegment(ThreadedSegment):
 
 		return update_value
 
-	def set_state(self, interval=None, **kwargs):
+	def set_state(self, interval=None, shutdown_event=None, **kwargs):
 		self.set_interval(interval)
+		self.shutdown_event = shutdown_event or Event()
 
 	@staticmethod
 	def render_one(update_state, **kwargs):

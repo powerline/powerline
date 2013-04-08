@@ -1,5 +1,6 @@
 from powerline.lint.markedjson import load
-from powerline import load_json_config, find_config_file, Powerline
+from powerline import find_config_file, Powerline
+from powerline.lib.config import load_json_config
 from powerline.lint.markedjson.error import echoerr, MarkedError
 from powerline.segments.vim import vim_modes
 import itertools
@@ -73,11 +74,15 @@ class Spec(object):
 				spec.context_message(msg)
 		return self
 
-	def check_type(self, value, context_mark, data, context, echoerr, t):
-		if type(value.value) is not t:
+	def check_type(self, value, context_mark, data, context, echoerr, types):
+		if type(value.value) not in types:
 			echoerr(context=self.cmsg.format(key=context_key(context)),
 					context_mark=context_mark,
-					problem='{0!r} must be a {1} instance, not {2}'.format(value, t.__name__, type(value.value).__name__),
+					problem='{0!r} must be a {1} instance, not {2}'.format(
+						value,
+						', '.join((t.__name__ for t in types)),
+						type(value.value).__name__
+					),
 					problem_mark=value.mark)
 			return False, True
 		return True, False
@@ -141,8 +146,8 @@ class Spec(object):
 				return False, hadproblem
 		return True, hadproblem
 
-	def type(self, t):
-		self.checks.append(('check_type', t))
+	def type(self, *args):
+		self.checks.append(('check_type', args))
 		return self
 
 	cmp_funcs = {
@@ -172,12 +177,14 @@ class Spec(object):
 	def cmp(self, comparison, cint, msg_func=None):
 		if type(cint) is str:
 			self.type(unicode)
+		elif type(cint) is float:
+			self.type(int, float)
 		else:
 			self.type(type(cint))
 		cmp_func = self.cmp_funcs[comparison]
 		msg_func = msg_func or (lambda value: '{0} is not {1} {2}'.format(value, self.cmp_msgs[comparison], cint))
 		self.checks.append(('check_func',
-					(lambda value, *args: (True, True, not cmp_func(value, cint))),
+					(lambda value, *args: (True, True, not cmp_func(value.value, cint))),
 					msg_func))
 		return self
 
@@ -240,6 +247,11 @@ class Spec(object):
 		self.checks.append(('check_func',
 						lambda value, *args: (True, True, value not in collection),
 						msg_func))
+		return self
+
+	def error(self, msg):
+		self.checks.append(('check_func', lambda *args: (True, True, True),
+							lambda value: msg.format(value)))
 		return self
 
 	def either(self, *specs):
@@ -406,6 +418,8 @@ main_spec = (Spec(
 		log_level=Spec().re('^[A-Z]+$').func(lambda value, *args: (True, True, not hasattr(logging, value)),
 										lambda value: 'unknown debugging level {0}'.format(value)).optional(),
 		log_format=Spec().type(str).optional(),
+		interval=Spec().either(Spec().cmp('gt', 0.0), Spec().type(type(None))).optional(),
+		reload_config=Spec().type(bool).optional(),
 	).context_message('Error while loading common configuration (key {key})'),
 	ext=Spec(
 		vim=Spec(
@@ -786,8 +800,11 @@ def check_segment_data_key(key, data, context, echoerr):
 
 # FIXME More checks, limit existing to ThreadedSegment instances only
 args_spec = Spec(
-	interval=Spec().either(Spec().type(float), Spec().type(int)).optional(),
+	interval=Spec().cmp('gt', 0.0).optional(),
 	update_first=Spec().type(bool).optional(),
+	shutdown_event=Spec().error('Shutdown event must be set by powerline').optional(),
+	pl=Spec().error('pl object must be set by powerline').optional(),
+	segment_info=Spec().error('Segment info dictionary must be set by powerline').optional(),
 ).unknown_spec(Spec(), Spec()).optional().copy
 highlight_group_spec = Spec().type(unicode).copy
 segment_module_spec = Spec().type(unicode).func(check_segment_module).optional().copy
@@ -801,7 +818,7 @@ segments_spec = Spec().optional().list(
 		draw_soft_divider=Spec().type(bool).optional(),
 		draw_inner_divider=Spec().type(bool).optional(),
 		module=segment_module_spec(),
-		priority=Spec().cmp('ge', -1).optional(),
+		priority=Spec().either(Spec().cmp('eq', -1), Spec().cmp('ge', 0.0)).optional(),
 		after=Spec().type(unicode).optional(),
 		before=Spec().type(unicode).optional(),
 		width=Spec().either(Spec().unsigned(), Spec().cmp('eq', 'auto')).optional(),
