@@ -572,7 +572,13 @@ try:
 					self.exception('Exception while calculating cpu_percent: {0}', str(e))
 
 		def render(self, cpu_percent, format='{0:.0f}%', **kwargs):
-			return format.format(cpu_percent)
+			if not cpu_percent:
+				return None
+			return [{
+				'contents': format.format(cpu_percent),
+				'gradient_level': cpu_percent,
+				'highlight_group': ['cpu_load_percent_gradient', 'cpu_load_percent'],
+			}]
 except ImportError:
 	def _get_bytes(interface):  # NOQA
 		with open('/sys/class/net/{interface}/statistics/rx_bytes'.format(interface=interface), 'rb') as file_obj:
@@ -618,6 +624,8 @@ Requires the ``psutil`` module.
 
 :param str format:
 	Output format. Accepts measured CPU load as the first argument.
+
+Highlight groups used: ``cpu_load_percent_gradient`` (gradient) or ``cpu_load_percent``.
 ''')
 
 
