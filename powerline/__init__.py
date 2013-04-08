@@ -726,15 +726,24 @@ class Powerline(object):
 				pass
 			yield FailedUnicode(safe_unicode(e))
 
-	def shutdown(self):
-		'''Shut down all background threads. Must be run only prior to exiting 
-		current application.
+	def shutdown(self, set_event=True):
+		'''Shut down all background threads.
+
+		:param bool set_event:
+			Set ``shutdown_event`` and call ``renderer.shutdown`` which should 
+			shut down all threads. Set it to False unless you are exiting an 
+			application.
+
+			If set to False this does nothing more then resolving reference 
+			cycle ``powerline → config_loader → bound methods → powerline`` by 
+			unsubscribing from config_loader events.
 		'''
-		self.shutdown_event.set()
-		try:
-			self.renderer.shutdown()
-		except AttributeError:
-			pass
+		if set_event:
+			self.shutdown_event.set()
+			try:
+				self.renderer.shutdown()
+			except AttributeError:
+				pass
 		functions = tuple(self.cr_callbacks.values())
 		self.config_loader.unregister_functions(set(functions))
 		self.config_loader.unregister_missing(set(((self.find_config_files, function) for function in functions)))
