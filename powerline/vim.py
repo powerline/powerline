@@ -6,7 +6,6 @@ import sys
 from powerline.bindings.vim import vim_get_func, vim_getvar
 from powerline import Powerline
 from powerline.lib import mergedicts
-from powerline.matcher import gen_matcher_getter
 import vim
 from itertools import count
 
@@ -80,18 +79,30 @@ class VimPowerline(Powerline):
 		)
 
 	def get_local_themes(self, local_themes):
-		self.get_matcher = gen_matcher_getter(self.ext, self.import_paths)
-
 		if not local_themes:
 			return {}
 
 		return dict((
-			(
-				(None if key == '__tabline__' else self.get_matcher(key)),
-				{'config': self.load_theme_config(val)}
+			(matcher, {'config': self.load_theme_config(val)})
+			for matcher, key, val in (
+				(
+					(None if k == '__tabline__' else self.get_matcher(k)),
+					k,
+					v
+				)
+				for k, v in local_themes.items()
+			) if (
+				matcher or
+				key == '__tabline__'
 			)
-			for key, val in local_themes.items())
-		)
+		))
+
+	def get_matcher(self, match_name):
+		match_module, separator, match_function = match_name.rpartition('.')
+		if not separator:
+			match_module = 'powerline.matchers.{0}'.format(self.ext)
+			match_function = match_name
+		return self.get_module_attr(match_module, match_function, prefix='matcher_generator')
 
 	def get_config_paths(self):
 		try:

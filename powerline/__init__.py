@@ -407,6 +407,9 @@ class Powerline(object):
 						'common_config': self.common_config,
 						'run_once': self.run_once,
 						'shutdown_event': self.shutdown_event,
+						# Note: creates implicit reference to self meaning 
+						# reference cycle.
+						'get_module_attr': self.get_module_attr,
 					},
 				)
 
@@ -468,11 +471,12 @@ class Powerline(object):
 			self.renderer_options['theme_config'] = self.load_theme_config(self.ext_config.get('theme', 'default'))
 
 		if create_renderer:
-			try:
-				Renderer = __import__(self.renderer_module, fromlist=['renderer']).renderer
-			except Exception as e:
-				self.exception('Failed to import renderer module: {0}', str(e))
-				sys.exit(1)
+			Renderer = self.get_module_attr(self.renderer_module, 'renderer')
+			if not Renderer:
+				if hasattr(self, 'renderer'):
+					return
+				else:
+					raise ImportError('Failed to obtain renderer')
 
 			# Renderer updates configuration file via segments’ .startup thus it 
 			# should be locked to prevent state when configuration was updated, 
@@ -651,6 +655,34 @@ class Powerline(object):
 			else:
 				with self.cr_kwargs_lock:
 					self.cr_kwargs.clear()
+
+	def get_module_attr(self, module, attr, prefix='powerline'):
+		'''Import module and get its attribute.
+
+		Replaces ``from {module} import {attr}``.
+
+		:param str module:
+			Module name, will be passed as first argument to ``__import__``.
+		:param str attr:
+			Module attribute, will be passed to ``__import__`` as the only value 
+			in ``fromlist`` tuple.
+
+		:return:
+			Attribute value or ``None``. Note: there is no way to distinguish 
+			between successfull import of attribute equal to ``None`` and 
+			unsuccessfull import.
+		'''
+		oldpath = sys.path
+		sys.path = self.import_paths + sys.path
+		module = str(module)
+		attr = str(attr)
+		try:
+			return getattr(__import__(module, fromlist=(attr,)), attr)
+		except Exception as e:
+			self.pl.exception('Failed to import attr {0} from module {1}: {2}', attr, module, str(e), prefix=prefix)
+			return None
+		finally:
+			sys.path = oldpath
 
 	def render(self, *args, **kwargs):
 		'''Update/create renderer if needed and pass all arguments further to 
