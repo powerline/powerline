@@ -6,7 +6,6 @@ from tests import TestCase
 from tests.lib import replace_item
 from tests.lib.config_mock import swap_attributes, get_powerline, pop_events
 from copy import deepcopy
-from threading import Lock
 
 
 config = {
@@ -23,6 +22,7 @@ config = {
 				},
 			},
 			'spaces': 0,
+			'interval': 0,
 		},
 		'ext': {
 			'test': {
@@ -97,7 +97,7 @@ def sleep(interval):
 
 
 def add_watcher_events(p, *args, **kwargs):
-	p.watcher._reset(args)
+	p.config_loader.watcher._reset(args)
 	while not p._will_create_renderer():
 		sleep(kwargs.get('interval', 0.000001))
 		if not kwargs.get('wait', True):
@@ -127,8 +127,8 @@ class TestConfigReload(TestCase):
 	def test_reload_main(self):
 		with get_powerline(run_once=False) as p:
 			with replace_item(globals(), 'config', deepcopy(config)):
-				self.assertAccessEvents('config', 'colors', 'colorschemes/test/default', 'themes/test/default')
 				self.assertEqual(p.render(), '<1 2 1> s<2 4 False>>><3 4 4>g<4 False False>>><None None None>')
+				self.assertAccessEvents('config', 'colors', 'colorschemes/test/default', 'themes/test/default')
 
 				config['config']['common']['spaces'] = 1
 				add_watcher_events(p, 'config')
@@ -187,7 +187,7 @@ class TestConfigReload(TestCase):
 				add_watcher_events(p, 'config')
 				self.assertEqual(p.render(), '<1 2 1> s<2 4 False>>><3 4 4>g<4 False False>>><None None None>')
 				self.assertAccessEvents('config')
-				self.assertEqual(p.logger._pop_msgs(), ['exception:test:Failed to create renderer: fcf:colorschemes/test/nonexistentraise'])
+				self.assertIn('exception:test:Failed to create renderer: fcf:colorschemes/test/nonexistentraise', p.logger._pop_msgs())
 
 				config['colorschemes/test/nonexistentraise'] = {
 					'groups': {
@@ -236,6 +236,20 @@ class TestConfigReload(TestCase):
 
 				config['themes/test/default']['segments']['left'][0]['contents'] = 'col3'
 				add_watcher_events(p, 'themes/test/default')
+				self.assertEqual(p.render(), '<1 2 1> col3<2 4 False>>><3 4 4>g<4 False False>>><None None None>')
+				self.assertAccessEvents('themes/test/default')
+				self.assertEqual(p.logger._pop_msgs(), [])
+		pop_events()
+
+	def test_reload_theme_main(self):
+		with replace_item(globals(), 'config', deepcopy(config)):
+			config['config']['common']['interval'] = None
+			with get_powerline(run_once=False) as p:
+				self.assertEqual(p.render(), '<1 2 1> s<2 4 False>>><3 4 4>g<4 False False>>><None None None>')
+				self.assertAccessEvents('config', 'colors', 'colorschemes/test/default', 'themes/test/default')
+
+				config['themes/test/default']['segments']['left'][0]['contents'] = 'col3'
+				add_watcher_events(p, 'themes/test/default', wait=False)
 				self.assertEqual(p.render(), '<1 2 1> col3<2 4 False>>><3 4 4>g<4 False False>>><None None None>')
 				self.assertAccessEvents('themes/test/default')
 				self.assertEqual(p.logger._pop_msgs(), [])

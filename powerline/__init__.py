@@ -1,63 +1,17 @@
 # vim:fileencoding=utf-8:noet
 
 from __future__ import absolute_import
-import json
 import os
 import sys
 import logging
 
 from powerline.colorscheme import Colorscheme
-from powerline.lib.file_watcher import create_file_watcher
+from powerline.lib.config import ConfigLoader
 
-from threading import Lock, Thread, Event
-from collections import defaultdict
+from threading import Lock, Event
 
 
 DEFAULT_SYSTEM_CONFIG_DIR = None
-
-watcher = None
-
-
-class MultiClientWatcher(object):
-	subscribers = set()
-	received_events = {}
-
-	def __init__(self):
-		global watcher
-		self.subscribers.add(self)
-		if not watcher:
-			watcher = create_file_watcher()
-
-	def watch(self, file):
-		watcher.watch(file)
-
-	def __call__(self, file):
-		if self not in self.subscribers:
-			return False
-
-		if file in self.received_events and self not in self.received_events[file]:
-			self.received_events[file].add(self)
-			if self.received_events[file] >= self.subscribers:
-				self.received_events.pop(file)
-			return True
-
-		if watcher(file):
-			self.received_events[file] = set([self])
-			return True
-
-		return False
-
-	def unsubscribe(self):
-		try:
-			self.subscribers.remove(self)
-		except KeyError:
-			pass
-
-	__del__ = unsubscribe
-
-
-def open_file(path):
-	return open(path, 'r')
 
 
 def find_config_file(search_paths, config_file):
@@ -67,11 +21,6 @@ def find_config_file(search_paths, config_file):
 		if os.path.isfile(config_file_path):
 			return config_file_path
 	raise IOError('Config file not found in search path: {0}'.format(config_file))
-
-
-def load_json_config(config_file_path, load=json.load, open_file=open_file):
-	with open_file(config_file_path) as config_file_fp:
-		return load(config_file_fp)
 
 
 class PowerlineState(object):
@@ -85,7 +34,9 @@ class PowerlineState(object):
 	def _log(self, attr, msg, *args, **kwargs):
 		prefix = kwargs.get('prefix') or self.prefix
 		prefix = self.ext + ((':' + prefix) if prefix else '')
-		msg = prefix + ':' + msg.format(*args, **kwargs)
+		if args or kwargs:
+			msg = msg.format(*args, **kwargs)
+		msg = prefix + ':' + msg
 		key = attr + ':' + prefix
 		if msg != self.last_msgs.get(key):
 			getattr(self.logger, attr)(msg)
@@ -132,9 +83,12 @@ class Powerline(object):
 		during python session.
 	:param Logger logger:
 		If present, no new logger will be created and this logger will be used.
-	:param float interval:
-		When reloading configuration wait for this amount of seconds. Set it to 
-		None if you don’t want to reload configuration automatically.
+	:param bool use_daemon_threads:
+		Use daemon threads for.
+	:param Event shutdown_event:
+		Use this Event as shutdown_event.
+	:param ConfigLoader config_loader:
+		Class that manages (re)loading of configuration.
 	'''
 
 	def __init__(self,
@@ -143,40 +97,38 @@ class Powerline(object):
 				run_once=False,
 				logger=None,
 				use_daemon_threads=True,
-				interval=10,
-				watcher=None):
+				shutdown_event=None,
+				config_loader=None):
 		self.ext = ext
 		self.renderer_module = renderer_module or ext
 		self.run_once = run_once
 		self.logger = logger
 		self.use_daemon_threads = use_daemon_threads
-		self.interval = interval
 
 		if '.' not in self.renderer_module:
 			self.renderer_module = 'powerline.renderers.' + self.renderer_module
 		elif self.renderer_module[-1] == '.':
 			self.renderer_module = self.renderer_module[:-1]
 
-		self.config_paths = self.get_config_paths()
+		config_paths = self.get_config_paths()
+		self.find_config_file = lambda cfg_path: find_config_file(config_paths, cfg_path)
 
-		self.configs_lock = Lock()
 		self.cr_kwargs_lock = Lock()
-		self.create_renderer_kwargs = {}
-		self.shutdown_event = Event()
-		self.configs = defaultdict(set)
-		self.missing = defaultdict(set)
-
-		self.thread = None
+		self.create_renderer_kwargs = {
+			'load_main': True,
+			'load_colors': True,
+			'load_colorscheme': True,
+			'load_theme': True,
+		}
+		self.shutdown_event = shutdown_event or Event()
+		self.config_loader = config_loader or ConfigLoader(shutdown_event=self.shutdown_event)
+		self.run_loader_update = False
 
 		self.renderer_options = {}
-
-		self.watcher = watcher or MultiClientWatcher()
 
 		self.prev_common_config = None
 		self.prev_ext_config = None
 		self.pl = None
-
-		self.create_renderer(load_main=True, load_colors=True, load_colorscheme=True, load_theme=True)
 
 	def create_renderer(self, load_main=False, load_colors=False, load_colorscheme=False, load_theme=False):
 		'''(Re)create renderer object. Can be used after Powerline object was 
@@ -224,6 +176,8 @@ class Powerline(object):
 
 				if not self.pl:
 					self.pl = PowerlineState(self.use_daemon_threads, self.logger, self.ext)
+					if not self.config_loader.pl:
+						self.config_loader.pl = self.pl
 
 				self.renderer_options.update(
 					pl=self.pl,
@@ -235,8 +189,16 @@ class Powerline(object):
 						'ext': self.ext,
 						'common_config': self.common_config,
 						'run_once': self.run_once,
+						'shutdown_event': self.shutdown_event,
 					},
 				)
+
+				if not self.run_once and self.common_config.get('reload_config', True):
+					interval = self.common_config.get('interval', None)
+					self.config_loader.set_interval(interval)
+					self.run_loader_update = (interval is None)
+					if interval is not None and not self.config_loader.is_alive():
+						self.config_loader.start()
 
 			self.ext_config = config['ext'][self.ext]
 			if self.ext_config != self.prev_ext_config:
@@ -286,9 +248,6 @@ class Powerline(object):
 			else:
 				self.renderer = renderer
 
-		if not self.run_once and not self.is_alive() and self.interval is not None:
-			self.start()
-
 	def get_log_handler(self):
 		'''Get log handler.
 
@@ -324,24 +283,20 @@ class Powerline(object):
 		return config_paths
 
 	def _load_config(self, cfg_path, type):
-		'''Load configuration and setup watcher.'''
+		'''Load configuration and setup watches.'''
+		function = getattr(self, 'on_' + type + '_change')
 		try:
-			path = find_config_file(self.config_paths, cfg_path)
+			path = self.find_config_file(cfg_path)
 		except IOError:
-			with self.configs_lock:
-				self.missing[type].add(cfg_path)
+			self.config_loader.register_missing(self.find_config_file, function, cfg_path)
 			raise
-		with self.configs_lock:
-			self.configs[type].add(path)
-			self.watcher.watch(path)
-		return load_json_config(path)
+		self.config_loader.register(function, path)
+		return self.config_loader.load(path)
 
 	def _purge_configs(self, type):
-		try:
-			with self.configs_lock:
-				self.configs.pop(type)
-		except KeyError:
-			pass
+		function = getattr(self, 'on_' + type + '_change')
+		self.config_loader.unregister_functions(set((function,)))
+		self.config_loader.unregister_missing(set(((self.find_config_file, function),)))
 
 	def load_theme_config(self, name):
 		'''Get theme configuration.
@@ -393,63 +348,59 @@ class Powerline(object):
 		'''
 		return None
 
-	def render(self, *args, **kwargs):
-		'''Lock renderer from modifications and pass all arguments further to 
-		``self.renderer.render()``.
-		'''
+	def update_renderer(self):
+		'''Updates/creates a renderer if needed.'''
+		if self.run_loader_update:
+			self.config_loader.update()
+		create_renderer_kwargs = None
 		with self.cr_kwargs_lock:
 			if self.create_renderer_kwargs:
-				try:
-					self.create_renderer(**self.create_renderer_kwargs)
-				except Exception as e:
-					self.pl.exception('Failed to create renderer: {0}', str(e))
-				finally:
-					self.create_renderer_kwargs.clear()
+				create_renderer_kwargs = self.create_renderer_kwargs.copy()
+		if create_renderer_kwargs:
+			try:
+				self.create_renderer(**create_renderer_kwargs)
+			except Exception as e:
+				self.pl.exception('Failed to create renderer: {0}', str(e))
+			finally:
+				self.create_renderer_kwargs.clear()
+
+	def render(self, *args, **kwargs):
+		'''Update/create renderer if needed and pass all arguments further to 
+		``self.renderer.render()``.
+		'''
+		self.update_renderer()
 		return self.renderer.render(*args, **kwargs)
 
 	def shutdown(self):
-		'''Lock renderer from modifications and run its ``.shutdown()`` method.
+		'''Shut down all background threads. Must be run only prior to exiting 
+		current application.
 		'''
 		self.shutdown_event.set()
-		if self.use_daemon_threads and self.is_alive():
-			# Give the worker thread a chance to shutdown, but don't block for too long
-			self.thread.join(.01)
 		self.renderer.shutdown()
-		self.watcher.unsubscribe()
+		functions = (
+			self.on_main_change,
+			self.on_colors_change,
+			self.on_colorscheme_change,
+			self.on_theme_change,
+		)
+		self.config_loader.unregister_functions(set(functions))
+		self.config_loader.unregister_missing(set(((find_config_file, function) for function in functions)))
 
-	def is_alive(self):
-		return self.thread and self.thread.is_alive()
+	def on_main_change(self, path):
+		with self.cr_kwargs_lock:
+			self.create_renderer_kwargs['load_main'] = True
 
-	def start(self):
-		self.thread = Thread(target=self.run)
-		if self.use_daemon_threads:
-			self.thread.daemon = True
-		self.thread.start()
+	def on_colors_change(self, path):
+		with self.cr_kwargs_lock:
+			self.create_renderer_kwargs['load_colors'] = True
 
-	def run(self):
-		while not self.shutdown_event.is_set():
-			kwargs = {}
-			removes = []
-			with self.configs_lock:
-				for type, paths in self.configs.items():
-					for path in paths:
-						if self.watcher(path):
-							kwargs['load_' + type] = True
-				for type, cfg_paths in self.missing.items():
-					for cfg_path in cfg_paths:
-						try:
-							find_config_file(self.config_paths, cfg_path)
-						except IOError:
-							pass
-						else:
-							kwargs['load_' + type] = True
-							removes.append((type, cfg_path))
-				for type, cfg_path in removes:
-					self.missing[type].remove(cfg_path)
-			if kwargs:
-				with self.cr_kwargs_lock:
-					self.create_renderer_kwargs.update(kwargs)
-			self.shutdown_event.wait(self.interval)
+	def on_colorscheme_change(self, path):
+		with self.cr_kwargs_lock:
+			self.create_renderer_kwargs['load_colorscheme'] = True
+
+	def on_theme_change(self, path):
+		with self.cr_kwargs_lock:
+			self.create_renderer_kwargs['load_theme'] = True
 
 	def __enter__(self):
 		return self

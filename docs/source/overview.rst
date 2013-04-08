@@ -100,8 +100,14 @@ absolute path to your Powerline installation directory:
 
 If you're using Vundle or Pathogen and don't want Powerline functionality in 
 any other applications, simply add Powerline as a bundle and point the path 
-above to the Powerline bundle directory, e.g.  
-``~/.vim/bundle/powerline/powerline/bindings/vim``.
+above to the Powerline bundle directory, e.g. 
+``~/.vim/bundle/powerline/powerline/bindings/vim``. For vim-addon-manager it is 
+even easier since you don’t need to write this big path or install anything by 
+hand: ``powerline`` is installed and run just like any other plugin using
+
+.. code-block:: vim
+
+    call vam#ActivateAddons(['powerline'])
 
 Shell prompts
 -------------
