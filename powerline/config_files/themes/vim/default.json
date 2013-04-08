@@ -28,7 +28,7 @@
 			{
 				"name": "branch",
 				"exclude_modes": ["nc"],
-				"priority": 60
+				"priority": 30
 			},
 			{
 				"name": "readonly_indicator",
@@ -66,21 +66,21 @@
 				"name": "file_format",
 				"draw_soft_divider": false,
 				"exclude_modes": ["nc"],
-				"priority": 50
+				"priority": 60
 			},
 			{
 				"name": "file_encoding",
 				"exclude_modes": ["nc"],
-				"priority": 50
+				"priority": 60
 			},
 			{
 				"name": "file_type",
 				"exclude_modes": ["nc"],
-				"priority": 50
+				"priority": 60
 			},
 			{
 				"name": "line_percent",
-				"priority": 30,
+				"priority": 50,
 				"width": 4,
 				"align": "r"
 			},
@@ -98,7 +98,7 @@
 			{
 				"name": "virtcol_current",
 				"draw_soft_divider": false,
-				"priority": 30,
+				"priority": 20,
 				"before": ":",
 				"width": 3,
 				"align": "l"
