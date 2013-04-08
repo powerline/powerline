@@ -842,7 +842,7 @@ class EmailIMAPSegment(KwThreadedSegment):
 			return [{
 				'contents': str(unread_count),
 				'highlight_group': ['email_alert_gradient', 'email_alert'],
-				'gradient_level': unread_count * 100.0 / max_msgs,
+				'gradient_level': min(unread_count * 100.0 / max_msgs, 100),
 			}]
 
 
