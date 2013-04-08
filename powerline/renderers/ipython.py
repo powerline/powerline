@@ -25,5 +25,11 @@ class IpythonRenderer(ShellRenderer):
 				match['theme'] = Theme(theme_config=match['config'], top_theme_config=self.theme_config, **self.theme_kwargs)
 				return match['theme']
 
+	def shutdown(self):
+		self.theme.shutdown()
+		for match in self.local_themes.values():
+			if 'theme' in match:
+				match['theme'].shutdown()
+
 
 renderer = IpythonRenderer
