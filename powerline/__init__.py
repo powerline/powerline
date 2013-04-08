@@ -270,6 +270,38 @@ else:
 			raise exception
 
 
+def gen_module_attr_getter(pl, import_paths):
+	def get_module_attr(module, attr, prefix='powerline'):
+		'''Import module and get its attribute.
+
+		Replaces ``from {module} import {attr}``.
+
+		:param str module:
+			Module name, will be passed as first argument to ``__import__``.
+		:param str attr:
+			Module attribute, will be passed to ``__import__`` as the only value 
+			in ``fromlist`` tuple.
+
+		:return:
+			Attribute value or ``None``. Note: there is no way to distinguish 
+			between successfull import of attribute equal to ``None`` and 
+			unsuccessfull import.
+		'''
+		oldpath = sys.path
+		sys.path = import_paths + sys.path
+		module = str(module)
+		attr = str(attr)
+		try:
+			return getattr(__import__(module, fromlist=(attr,)), attr)
+		except Exception as e:
+			pl.exception('Failed to import attr {0} from module {1}: {2}', attr, module, str(e), prefix=prefix)
+			return None
+		finally:
+			sys.path = oldpath
+
+	return get_module_attr
+
+
 class Powerline(object):
 	'''Main powerline class, entrance point for all powerline uses. Sets 
 	powerline up and loads the configuration.
@@ -396,6 +428,8 @@ class Powerline(object):
 				if not self.run_once:
 					self.config_loader.set_watcher(self.common_config['watcher'])
 
+				self.get_module_attr = gen_module_attr_getter(self.pl, self.import_paths)
+
 				self.renderer_options.update(
 					pl=self.pl,
 					term_truecolor=self.common_config['term_truecolor'],
@@ -407,8 +441,6 @@ class Powerline(object):
 						'common_config': self.common_config,
 						'run_once': self.run_once,
 						'shutdown_event': self.shutdown_event,
-						# Note: creates implicit reference to self meaning 
-						# reference cycle.
 						'get_module_attr': self.get_module_attr,
 					},
 				)
@@ -655,34 +687,6 @@ class Powerline(object):
 			else:
 				with self.cr_kwargs_lock:
 					self.cr_kwargs.clear()
-
-	def get_module_attr(self, module, attr, prefix='powerline'):
-		'''Import module and get its attribute.
-
-		Replaces ``from {module} import {attr}``.
-
-		:param str module:
-			Module name, will be passed as first argument to ``__import__``.
-		:param str attr:
-			Module attribute, will be passed to ``__import__`` as the only value 
-			in ``fromlist`` tuple.
-
-		:return:
-			Attribute value or ``None``. Note: there is no way to distinguish 
-			between successfull import of attribute equal to ``None`` and 
-			unsuccessfull import.
-		'''
-		oldpath = sys.path
-		sys.path = self.import_paths + sys.path
-		module = str(module)
-		attr = str(attr)
-		try:
-			return getattr(__import__(module, fromlist=(attr,)), attr)
-		except Exception as e:
-			self.pl.exception('Failed to import attr {0} from module {1}: {2}', attr, module, str(e), prefix=prefix)
-			return None
-		finally:
-			sys.path = oldpath
 
 	def render(self, *args, **kwargs):
 		'''Update/create renderer if needed and pass all arguments further to 
