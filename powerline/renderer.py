@@ -30,7 +30,7 @@ class Renderer(object):
 		Keyword arguments for ``Theme`` class constructor.
 	:param Colorscheme colorscheme:
 		Colorscheme object that holds colors configuration.
-	:param PowerlineState pl:
+	:param PowerlineLogger pl:
 		Object used for logging.
 	:param int ambiwidth:
 		Width of the characters with east asian width unicode attribute equal to 
