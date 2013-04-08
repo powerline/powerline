@@ -186,7 +186,7 @@ class Renderer(object):
 
 		# Handle excluded/included segments for the current mode
 		segments = [self._get_highlighting(segment, mode) for segment in segments
-			if mode not in segment['exclude_modes'] or (segment['include_modes'] and segment in segment['include_modes'])]
+			if mode not in segment['exclude_modes'] and (not segment['include_modes'] or mode in segment['include_modes'])]
 
 		segments = [segment for segment in self._render_segments(theme, segments)]
 
