@@ -82,7 +82,7 @@ function! PowerlineRegisterCachePurgerEvent(event)
 endfunction
 
 augroup Powerline
-	autocmd! ColorScheme * :exec s:powerline_pycmd 'powerline.renderer.reset_highlight()'
+	autocmd! ColorScheme * :exec s:powerline_pycmd 'powerline.reset_highlight()'
 	autocmd! VimEnter    * :redrawstatus!
 	autocmd! VimLeavePre * :exec s:powerline_pycmd 'powerline.shutdown()'
 augroup END
