@@ -3,6 +3,8 @@
 from powerline.renderer import Renderer
 from powerline.colorscheme import ATTR_BOLD, ATTR_ITALIC, ATTR_UNDERLINE
 
+from xml.sax.saxutils import escape as _escape
+
 
 class PangoMarkupRenderer(Renderer):
 	'''Powerline Pango markup segment renderer.'''
@@ -29,6 +31,8 @@ class PangoMarkupRenderer(Renderer):
 			if attr & ATTR_UNDERLINE:
 				awesome_attr += ['underline="single"']
 		return '<span ' + ' '.join(awesome_attr) + '>' + contents + '</span>'
+
+	escape = staticmethod(_escape)
 
 
 renderer = PangoMarkupRenderer

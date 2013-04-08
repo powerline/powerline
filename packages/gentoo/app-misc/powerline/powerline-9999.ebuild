@@ -105,11 +105,11 @@ src_install() {
 		doins init.lua
 		rm init.lua
 		exeinto /usr/share/awesome/lib/powerline
-		doexe powerline/bindings/awesome/powerline.sh
+		doexe powerline/bindings/awesome/powerline-awesome.py
 	else
 		rm powerline/bindings/awesome/powerline.lua
 	fi
-	rm powerline/bindings/awesome/powerline.sh
+	rm powerline/bindings/awesome/powerline-awesome.py
 	# There are no standard location for this, thus using /usr/share/powerline
 	if use tmux ; then
 		elog ""
