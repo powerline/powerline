@@ -560,16 +560,27 @@ try:
 	def _get_user(segment_info):
 		return psutil.Process(os.getpid()).username
 
-	def cpu_load_percent(pl, measure_interval=.5):
-		'''Return the average CPU load as a percentage.
+	class CPULoadPercentSegment(ThreadedSegment):
+		interval = 1
 
-		Requires the ``psutil`` module.
+		def update(self, old_cpu):
+			return psutil.cpu_percent(interval=None)
 
-		:param float measure_interval:
-			interval used to measure CPU load (in seconds)
-		'''
-		cpu_percent = int(psutil.cpu_percent(interval=measure_interval))
-		return '{0}%'.format(cpu_percent)
+		def run(self):
+			while not self.shutdown_event.is_set():
+				try:
+					self.update_value = psutil.cpu_percent(interval=self.interval)
+				except Exception as e:
+					self.exception('Exception while calculating cpu_percent: {0}', str(e))
+
+		def render(self, cpu_percent, format='{0:.0f}%', **kwargs):
+			if not cpu_percent:
+				return None
+			return [{
+				'contents': format.format(cpu_percent),
+				'gradient_level': cpu_percent,
+				'highlight_group': ['cpu_load_percent_gradient', 'cpu_load_percent'],
+			}]
 except ImportError:
 	def _get_bytes(interface):  # NOQA
 		with open('/sys/class/net/{interface}/statistics/rx_bytes'.format(interface=interface), 'rb') as file_obj:
@@ -587,16 +598,37 @@ except ImportError:
 	def _get_user(segment_info):  # NOQA
 		return segment_info['environ'].get('USER', None)
 
-	def cpu_load_percent(pl, measure_interval=.5):  # NOQA
-		'''Return the average CPU load as a percentage.
+	class CPULoadPercentSegment(ThreadedSegment):  # NOQA
+		interval = 1
 
-		Requires the ``psutil`` module.
+		@staticmethod
+		def startup(**kwargs):
+			pass
 
-		:param float measure_interval:
-			interval used to measure CPU load (in seconds)
-		'''
-		pl.warn('psutil package is not installed, thus CPU load is not available')
-		return None
+		@staticmethod
+		def start():
+			pass
+
+		@staticmethod
+		def shutdown():
+			pass
+
+		@staticmethod
+		def render(cpu_percent, pl, format='{0:.0f}%', **kwargs):
+			pl.warn('psutil package is not installed, thus CPU load is not available')
+			return None
+
+
+cpu_load_percent = with_docstring(CPULoadPercentSegment(),
+'''Return the average CPU load as a percentage.
+
+Requires the ``psutil`` module.
+
+:param str format:
+	Output format. Accepts measured CPU load as the first argument.
+
+Highlight groups used: ``cpu_load_percent_gradient`` (gradient) or ``cpu_load_percent``.
+''')
 
 
 username = False
