@@ -73,7 +73,7 @@ def gen_segment_getter(ext, path, theme_configs, default_module=None):
 			'contents_func': contents_func,
 			'contents': contents,
 			'args': get_key(segment, module, 'args', {}) if segment_type == 'function' else {},
-			'priority': segment.get('priority', -1),
+			'priority': segment.get('priority', None),
 			'draw_hard_divider': segment.get('draw_hard_divider', True),
 			'draw_soft_divider': segment.get('draw_soft_divider', True),
 			'draw_inner_divider': segment.get('draw_inner_divider', False),

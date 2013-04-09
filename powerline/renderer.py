@@ -195,7 +195,7 @@ class Renderer(object):
 			return construct_returned_value(''.join([segment['_rendered_hl'] for segment in segments]) + self.hlstyle(), segments, output_raw)
 
 		# Create an ordered list of segments that can be dropped
-		segments_priority = [segment for segment in sorted(segments, key=lambda segment: segment['priority'], reverse=True) if segment['priority'] > 0]
+		segments_priority = [segment for segment in sorted(segments, key=lambda segment: segment['priority'], reverse=True) if segment['priority'] is not None]
 		while sum([segment['_len'] for segment in segments]) > width and len(segments_priority):
 			segments.remove(segments_priority[0])
 			segments_priority.pop(0)
