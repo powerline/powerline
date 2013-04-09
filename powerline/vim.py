@@ -82,3 +82,14 @@ class VimPowerline(Powerline):
 	@staticmethod
 	def get_segment_info():
 		return {}
+
+	def reset_highlight(self):
+		try:
+			self.renderer.reset_highlight()
+		except AttributeError:
+			# Renderer object appears only after first `.render()` call. Thus if 
+			# ColorScheme event happens before statusline is drawn for the first 
+			# time AttributeError will be thrown for the self.renderer. It is 
+			# fine to ignore it: no renderer == no colors to reset == no need to 
+			# do anything.
+			pass
