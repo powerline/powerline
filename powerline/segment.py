@@ -61,8 +61,18 @@ def gen_segment_getter(ext, path, theme_configs, default_module=None):
 			get_segment_info = segment_getters[segment_type]
 		except KeyError:
 			raise TypeError('Unknown segment type: {0}'.format(segment_type))
-		contents, contents_func, module = get_segment_info(data, segment)
-		highlight_group = segment_type != 'function' and segment.get('highlight_group') or segment.get('name')
+
+		try:
+			contents, contents_func, module = get_segment_info(data, segment)
+		except Exception as e:
+			pl.exception('Failed to generate segment from {0!r}: {1}', segment, str(e), prefix='segment_generator')
+			return None
+
+		if segment_type == 'function':
+			highlight_group = [module + '.' + segment['name'], segment['name']]
+		else:
+			highlight_group = segment.get('highlight_group') or segment.get('name')
+
 		return {
 			'name': segment.get('name'),
 			'type': segment_type,
