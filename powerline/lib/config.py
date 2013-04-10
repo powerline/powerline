@@ -200,6 +200,10 @@ class ConfigLoader(MultiRunnedThread):
 				except KeyError:
 					pass
 				self.exception('Error while loading {0}: {1}', path, str(e))
+				try:
+					self.loaded.pop(path)
+				except KeyError:
+					pass
 
 	def run(self):
 		while self.interval is not None and not self.shutdown_event.is_set():
