@@ -427,7 +427,7 @@ main_spec = (Spec(
 			theme=theme_spec(),
 			local_themes=Spec()
 				.unknown_spec(lambda *args: check_matcher_func('vim', *args), theme_spec())
-		),
+		).optional(),
 		ipython=Spec(
 			colorscheme=colorscheme_spec(),
 			theme=theme_spec(),
@@ -436,7 +436,7 @@ main_spec = (Spec(
 				out=theme_spec(),
 				rewrite=theme_spec(),
 			),
-		),
+		).optional(),
 	).unknown_spec(check_ext,
 				Spec(
 					colorscheme=colorscheme_spec(),
