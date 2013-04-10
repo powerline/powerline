@@ -10,8 +10,41 @@ from powerline.lib.config import ConfigLoader
 
 from threading import Lock, Event
 
+try:
+	from __builtin__ import unicode
+except ImportError:
+	unicode = str  # NOQA
+
 
 DEFAULT_SYSTEM_CONFIG_DIR = None
+
+
+def safe_unicode(s):
+	'''Return unicode instance without raising an exception.
+	'''
+	try:
+		try:
+			return unicode(s)
+		except UnicodeDecodeError:
+			try:
+				return unicode(s, 'utf-8')
+			except TypeError:
+				return unicode(str(s), 'utf-8')
+	except Exception as e:
+		return safe_unicode(e)
+
+
+class FailedUnicode(unicode):
+	'''Builtin ``unicode`` (``str`` in python 3) subclass indicating fatal 
+	error.
+
+	If your code for some reason wants to determine whether `.render()` method 
+	failed it should check returned string for being a FailedUnicode instance. 
+	Alternatively you could subclass Powerline and override `.render()` method 
+	to do what you like in place of catching the exception and returning 
+	FailedUnicode.
+	'''
+	pass
 
 
 def find_config_file(search_paths, config_file):
@@ -360,16 +393,28 @@ class Powerline(object):
 			try:
 				self.create_renderer(**create_renderer_kwargs)
 			except Exception as e:
-				self.pl.exception('Failed to create renderer: {0}', str(e))
-			finally:
-				self.create_renderer_kwargs.clear()
+				if self.pl:
+					self.pl.exception('Failed to create renderer: {0}', str(e), prefix='powerline')
+				if hasattr(self, 'renderer'):
+					with self.cr_kwargs_lock:
+						self.create_renderer_kwargs.clear()
+				else:
+					raise
+			else:
+				with self.cr_kwargs_lock:
+					self.create_renderer_kwargs.clear()
 
 	def render(self, *args, **kwargs):
 		'''Update/create renderer if needed and pass all arguments further to 
 		``self.renderer.render()``.
 		'''
-		self.update_renderer()
-		return self.renderer.render(*args, **kwargs)
+		try:
+			self.update_renderer()
+			return self.renderer.render(*args, **kwargs)
+		except Exception as e:
+			if self.pl:
+				self.pl.exception('Failed to render: {0}', str(e), prefix='powerline')
+			return FailedUnicode(safe_unicode(e))
 
 	def shutdown(self):
 		'''Shut down all background threads. Must be run only prior to exiting 
