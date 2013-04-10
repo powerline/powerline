@@ -697,13 +697,13 @@ class NetworkLoadSegment(KwThreadedSegment):
 						total = activity
 						interface = name
 
-		if interface in self.interfaces:
+		try:
 			idata = self.interfaces[interface]
 			try:
 				idata['prev'] = idata['last']
 			except KeyError:
 				pass
-		else:
+		except KeyError:
 			idata = {}
 			if self.run_once:
 				idata['prev'] = (monotonic(), _get_bytes(interface))
