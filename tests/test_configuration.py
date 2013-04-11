@@ -19,7 +19,7 @@ class TestConfig(TestCase):
 	def test_vim(self):
 		from powerline.vim import VimPowerline
 		cfg_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'powerline', 'config_files')
-		buffers = ((('bufoptions',), {'buftype': 'help'}), (('buffer', '[Command Line]'), {}))
+		buffers = ((('bufoptions',), {'buftype': 'help'}), (('buffer', '[Command Line]'), {}), (('bufoptions',), {'buftype': 'quickfix'}))
 		with open(os.path.join(cfg_path, 'config.json'), 'r') as f:
 			self.assertEqual(len(buffers), len(json.load(f)['ext']['vim']['local_themes']))
 		outputs = {}
