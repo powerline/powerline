@@ -13,3 +13,7 @@ def help(matcher_info):
 def cmdwin(matcher_info):
 	name = matcher_info['buffer'].name
 	return name and os.path.basename(name) == '[Command Line]'
+
+
+def quickfix(matcher_info):
+	return str(getbufvar(matcher_info['bufnr'], '&buftype')) == 'quickfix'
