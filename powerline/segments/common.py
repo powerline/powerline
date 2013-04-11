@@ -1020,20 +1020,18 @@ class NowPlayingSegment(object):
 				'total': now_playing[3],
 			}
 
-	def player_spotify(self, pl):
+	def player_dbus(self, player_name, bus_name, player_path, iface_prop, iface_player):
 		try:
 			import dbus
 		except ImportError:
-			sys.stderr.write('Could not add Spotify segment: Requires python-dbus.\n')
+			sys.stderr.write('Could not add ' + player_name + ' segment: Requires python-dbus.\n')
 			return
 		bus = dbus.SessionBus()
-		DBUS_IFACE_PROPERTIES = 'org.freedesktop.DBus.Properties'
-		DBUS_IFACE_PLAYER = 'org.freedesktop.MediaPlayer2'
 		try:
-			player = bus.get_object('com.spotify.qt', '/')
-			iface = dbus.Interface(player, DBUS_IFACE_PROPERTIES)
-			info = iface.Get(DBUS_IFACE_PLAYER, 'Metadata')
-			status = iface.Get(DBUS_IFACE_PLAYER, 'PlaybackStatus')
+			player = bus.get_object(bus_name, player_path)
+			iface = dbus.Interface(player, iface_prop)
+			info = iface.Get(iface_player, 'Metadata')
+			status = iface.Get(iface_player, 'PlaybackStatus')
 		except dbus.exceptions.DBusException:
 			return
 		if not info:
@@ -1047,6 +1045,19 @@ class NowPlayingSegment(object):
 			'title': info.get('xesam:title'),
 			'total': self._convert_seconds(info.get('mpris:length') / 1e6),
 		}
+
+	def player_spotify(self, pl):
+		DBUS_IFACE_PROPERTIES = 'org.freedesktop.DBus.Properties'
+		DBUS_IFACE_PLAYER = 'org.freedesktop.MediaPlayer2'
+		return self.player_dbus('Spotify', 'com.spotify.qt', '/',
+				DBUS_IFACE_PROPERTIES, DBUS_IFACE_PLAYER)
+
+
+	def player_clementine(self, pl):
+		DBUS_IFACE_PROPERTIES = 'org.freedesktop.DBus.Properties'
+		DBUS_IFACE_PLAYER = 'org.mpris.MediaPlayer2.Player'
+		return self.player_dbus('Clementine', 'org.mpris.MediaPlayer2.clementine',
+				'/org/mpris/MediaPlayer2', DBUS_IFACE_PROPERTIES, DBUS_IFACE_PLAYER)
 
 	def player_rhythmbox(self, pl):
 		now_playing = self._run_cmd(['rhythmbox-client', '--no-start', '--no-present', '--print-playing-format', '%at\n%aa\n%tt\n%te\n%td'])
