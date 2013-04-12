@@ -1,6 +1,6 @@
 {
 	"segment_data": {
-		"file_name": {
+		"buffer_name": {
 			"contents": "Location List"
 		}
 	},
@@ -8,7 +8,8 @@
 		"left": [
 			{
 				"type": "string",
-				"name": "file_name",
+				"name": "buffer_name",
+				"highlight_group": ["file_name"],
 				"draw_soft_divider": false
 			},
 			{
