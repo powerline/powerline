@@ -39,17 +39,17 @@ def get_filler(data, segment):
 
 
 segment_getters = {
-		"function": get_function,
-		"string": get_string,
-		"filler": get_filler,
-		}
+	"function": get_function,
+	"string": get_string,
+	"filler": get_filler,
+}
 
 
 def gen_segment_getter(ext, path, theme_configs, default_module=None):
 	data = {
-			'default_module': default_module or 'powerline.segments.' + ext,
-			'path': path,
-			}
+		'default_module': default_module or 'powerline.segments.' + ext,
+		'path': path,
+	}
 
 	def get_key(segment, module, key, default=None):
 		return get_segment_key(segment, theme_configs, key, module, default)
@@ -89,6 +89,6 @@ def gen_segment_getter(ext, path, theme_configs, default_module=None):
 			'_len': 0,
 			'_space_left': 0,
 			'_space_right': 0,
-			}
+		}
 
 	return get
