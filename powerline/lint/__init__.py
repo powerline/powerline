@@ -527,10 +527,11 @@ type_keys = {
 		}
 required_keys = {
 		'function': set(),
-		'string': set(('contents', 'highlight_group')),
-		'filler': set(('highlight_group',)),
+		'string': set(('contents',)),
+		'filler': set(),
 		}
 function_keys = set(('args', 'module'))
+highlight_keys = set(('highlight_group', 'name'))
 
 
 def check_key_compatibility(segment, data, context, echoerr):
@@ -542,6 +543,8 @@ def check_key_compatibility(segment, data, context, echoerr):
 				problem_mark=segment_type.mark)
 		return False, False, True
 
+	hadproblem = False
+
 	keys = set(segment)
 	if not ((keys - generic_keys) < type_keys[segment_type]):
 		unknown_keys = keys - generic_keys - type_keys[segment_type]
@@ -550,7 +553,7 @@ def check_key_compatibility(segment, data, context, echoerr):
 				problem='found keys not used with the current segment type: {0}'.format(
 					', '.join((unicode(key) for key in unknown_keys))),
 				problem_mark=list(unknown_keys)[0].mark)
-		return True, False, True
+		hadproblem = True
 
 	if not (keys > required_keys[segment_type]):
 		missing_keys = required_keys[segment_type] - keys
@@ -558,9 +561,15 @@ def check_key_compatibility(segment, data, context, echoerr):
 				context_mark=context[-1][1].mark,
 				problem='found missing required keys: {0}'.format(
 					', '.join((unicode(key) for key in missing_keys))))
-		return True, False, True
+		hadproblem = True
 
-	return True, False, False
+	if not (segment_type == 'function' or (keys & highlight_keys)):
+		echoerr(context='Error while checking segments (key {key})'.format(key=context_key(context)),
+				context_mark=context[-1][1].mark,
+				problem='found missing keys required to determine highlight group. Either highlight_group or name key must be present')
+		hadproblem = True
+
+	return True, False, hadproblem
 
 
 def check_segment_module(module, data, context, echoerr):
