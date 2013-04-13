@@ -894,10 +894,12 @@ def check_args(get_segment_variants, args, data, context, echoerr):
 
 	if not count:
 		hadproblem = True
-		new_echoerr.echo_all()
-		echoerr(context='Error while checking segment arguments (key {key})'.format(key=context_key(context)),
-				context_mark=context[-2][1].mark,
-				problem='no suitable segments found')
+		if new_echoerr:
+			new_echoerr.echo_all()
+		else:
+			echoerr(context='Error while checking segment arguments (key {key})'.format(key=context_key(context)),
+					context_mark=context[-2][1].mark,
+					problem='no suitable segments found')
 
 	return True, False, hadproblem
 
@@ -912,7 +914,7 @@ def get_one_segment_variant(data, context, echoerr):
 
 def get_all_possible_segments(data, context, echoerr):
 	name = context[-2][0]
-	module, name = (gen_marked_value(value, name.mark) for value in name.rpartition('.')[::2])
+	module, name = name.rpartition('.')[::2]
 	if module:
 		func = import_segment(name, data, context, echoerr, module=module)
 		if func:
