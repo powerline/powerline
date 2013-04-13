@@ -196,6 +196,8 @@ def _emul_mode(*args):
 @_str_func
 def _emul_getbufvar(bufnr, varname):
 	if varname[0] == '&':
+		if bufnr == '%':
+			bufnr = buffers[_buffer()].number
 		if bufnr not in buffers:
 			return ''
 		try:
@@ -316,13 +318,14 @@ class _Buffer(object):
 		self.name = os.path.abspath(name) if name else None
 		_buf_scopes[bufnr] = {}
 		_buf_options[bufnr] = {
-				'modified': 0,
-				'readonly': 0,
-				'fileformat': 'unix',
-				'filetype': '',
-				'buftype': '',
-				'fileencoding': 'utf-8',
-				}
+			'modified': 0,
+			'readonly': 0,
+			'fileformat': 'unix',
+			'filetype': '',
+			'buftype': '',
+			'fileencoding': 'utf-8',
+			'textwidth': 80,
+		}
 		_buf_lines[bufnr] = ['']
 		from copy import copy
 		_undostate[bufnr] = [copy(_buf_lines[bufnr])]
