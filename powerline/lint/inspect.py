@@ -20,16 +20,16 @@ def getconfigargspec(obj):
 				# Note: on <python-2.6 it may return simple tuple, not 
 				# ArgSpec instance.
 				argspec = getargspec(getattr(obj, method))
-				for i, arg in zip(count(-1, -1), reversed(argspec.args)):
+				for i, arg in zip(count(1), reversed(argspec.args)):
 					if (arg == 'self' or
 							(arg == 'segment_info' and
 								getattr(obj, 'powerline_requires_segment_info', None)) or
 							(arg == 'pl') or
-							(method.startswith('render') and (1 if argspec.args[0] == 'self' else 0) - i == len(argspec.args)) or
+							(method.startswith('render') and (1 if argspec.args[0] == 'self' else 0) + i == len(argspec.args)) or
 							arg in args):
 						continue
-					if argspec.defaults and len(argspec.defaults) >= -i:
-						default = argspec.defaults[i]
+					if argspec.defaults and len(argspec.defaults) >= i:
+						default = argspec.defaults[-i]
 						defaults.append(default)
 						args.append(arg)
 					else:

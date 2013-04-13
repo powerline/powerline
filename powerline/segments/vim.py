@@ -274,6 +274,7 @@ def col_current(pl, segment_info):
 	return str(segment_info['window'].cursor[1] + 1)
 
 
+# TODO Add &textwidth-based gradient
 @window_cached
 def virtcol_current(pl):
 	'''Return current visual column with concealed characters ingored
