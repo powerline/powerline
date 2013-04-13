@@ -96,7 +96,8 @@ absolute path to your Powerline installation directory:
 
 .. code-block:: vim
 
-   set rtp+={path}/powerline/bindings/vim
+   set rtp+={path}/powerline/powerline/bindings/vim
+   e.g. ~/Code/dotfiles/vim/.vim/bundle/powerline/powerline/bindings/vim
 
 If you're using Vundle or Pathogen and don't want Powerline functionality in 
 any other applications, simply add Powerline as a bundle and point the path 
