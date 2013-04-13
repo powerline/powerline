@@ -44,12 +44,12 @@ def getconfigargspec(obj):
 		argspec = getargspec(obj)
 		args = []
 		defaults = []
-		for i, arg in zip(count(-1, -1), reversed(argspec.args)):
+		for i, arg in zip(count(1), reversed(argspec.args)):
 			if ((arg == 'segment_info' and getattr(obj, 'powerline_requires_segment_info', None)) or
 				arg == 'pl'):
 				continue
-			if argspec.defaults and len(argspec.defaults) >= -i:
-				default = argspec.defaults[i]
+			if argspec.defaults and len(argspec.defaults) >= i:
+				default = argspec.defaults[-i]
 				defaults.append(default)
 				args.append(arg)
 			else:
