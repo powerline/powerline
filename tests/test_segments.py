@@ -436,8 +436,12 @@ class TestVim(TestCase):
 		segment_info = vim_module._get_segment_info()
 		self.assertEqual(vim.line_current(pl=pl, segment_info=segment_info), '1')
 		self.assertEqual(vim.col_current(pl=pl, segment_info=segment_info), '1')
-		self.assertEqual(vim.virtcol_current(pl=pl, segment_info=segment_info),
-				[{'highlight_group': ['virtcol_current', 'col_current'], 'contents': '1'}])
+		self.assertEqual(vim.virtcol_current(pl=pl, segment_info=segment_info), [{
+			'highlight_group': ['virtcol_current_gradient', 'virtcol_current', 'col_current'], 'contents': '1', 'gradient_level': 100.0 / 80,
+		}])
+		self.assertEqual(vim.virtcol_current(pl=pl, segment_info=segment_info, gradient=False), [{
+			'highlight_group': ['virtcol_current', 'col_current'], 'contents': '1',
+		}])
 
 	def test_modified_buffers(self):
 		pl = Pl()
