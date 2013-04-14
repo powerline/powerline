@@ -286,7 +286,7 @@ def virtcol_current(pl, gradient=True):
 	col = vim_funcs['virtcol']('.')
 	r = [{'contents': str(col), 'highlight_group': ['virtcol_current', 'col_current']}]
 	if gradient:
-		textwidth = getbufvar('%', '&textwidth')
+		textwidth = int(getbufvar('%', '&textwidth'))
 		r[-1]['gradient_level'] = min(col * 100 / textwidth, 100) if textwidth else 0
 		r[-1]['highlight_group'].insert(0, 'virtcol_current_gradient')
 	return r
