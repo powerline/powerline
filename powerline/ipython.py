@@ -23,8 +23,8 @@ class RewriteResult(object):
 
 
 class IpythonPowerline(Powerline):
-	def __init__(self, is_prompt, old_widths):
-		super(IpythonPowerline, self).__init__(
+	def init(self, is_prompt, old_widths):
+		super(IpythonPowerline, self).init(
 			'ipython',
 			renderer_module=('.prompt' if is_prompt else None),
 			use_daemon_threads=True

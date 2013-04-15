@@ -336,14 +336,22 @@ class Powerline(object):
 		Instance of the class that manages (re)loading of the configuration.
 	'''
 
-	def __init__(self,
-	             ext,
-	             renderer_module=None,
-	             run_once=False,
-	             logger=None,
-	             use_daemon_threads=True,
-	             shutdown_event=None,
-	             config_loader=None):
+	def __init__(self, *args, **kwargs):
+		self.init_args = (args, kwargs)
+		self.init(*args, **kwargs)
+
+	def init(self,
+	         ext,
+	         renderer_module=None,
+	         run_once=False,
+	         logger=None,
+	         use_daemon_threads=True,
+	         shutdown_event=None,
+	         config_loader=None):
+		'''Do actual initialization.
+		
+		__init__ function only stores the arguments.
+		'''
 		self.ext = ext
 		self.run_once = run_once
 		self.logger = logger
@@ -732,9 +740,41 @@ class Powerline(object):
 	def setup(self, *args, **kwargs):
 		'''Setup the environment to use powerline.
 
-		To be overridden by subclasses, this one only saves args and kwargs.
+		To be overridden by subclasses, this one only saves args and kwargs and 
+		unsets shutdown_event.
 		'''
+		self.shutdown_event.clear()
 		self.setup_args = (args, kwargs)
+
+	def reload(self):
+		'''Reload powerline after update.
+
+		Should handle most (but not all) powerline updates.
+
+		Purges out all powerline modules and modules imported by powerline for 
+		segment and matcher functions. Requires defining ``setup`` function that 
+		updates reference to main powerline object.
+
+		.. warning::
+			Not guaranteed to work properly, use it at your own risk. It 
+			may break your python code.
+		'''
+		from imp import reload
+		modules = self.imported_modules | set((module for module in sys.modules if module.startswith('powerline')))
+		modules_holder = []
+		for module in modules:
+			try:
+				# Needs to hold module to prevent garbage collecting until they 
+				# are all reloaded.
+				modules_holder.append(sys.modules.pop(module))
+			except KeyError:
+				pass
+		PowerlineClass = getattr(__import__(self.__module__, fromlist=(self.__class__.__name__,)), self.__class__.__name__)
+		self.shutdown(set_event=True)
+		init_args, init_kwargs = self.init_args
+		powerline = PowerlineClass(*init_args, **init_kwargs)
+		setup_args, setup_kwargs = self.setup_args
+		powerline.setup(*setup_args, **setup_kwargs)
 
 	def shutdown(self, set_event=True):
 		'''Shut down all background threads.

@@ -23,8 +23,8 @@ def _override_from(config, override_varname):
 
 
 class VimPowerline(Powerline):
-	def __init__(self, pyeval='PowerlinePyeval', **kwargs):
-		super(VimPowerline, self).__init__('vim', **kwargs)
+	def init(self, pyeval='PowerlinePyeval', **kwargs):
+		super(VimPowerline, self).init('vim', **kwargs)
 		self.last_window_id = 1
 		self.pyeval = pyeval
 		self.window_statusline = '%!' + pyeval + '(\'powerline.statusline({0})\')'

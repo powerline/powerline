@@ -86,11 +86,11 @@ class PowerlinePrompt2(PowerlinePromptOut):
 
 
 class ConfigurableIpythonPowerline(IpythonPowerline):
-	def __init__(self, is_prompt, old_widths, config_overrides=None, theme_overrides={}, paths=None):
+	def init(self, is_prompt, old_widths, config_overrides=None, theme_overrides={}, paths=None):
 		self.config_overrides = config_overrides
 		self.theme_overrides = theme_overrides
 		self.paths = paths
-		super(ConfigurableIpythonPowerline, self).__init__(is_prompt, old_widths)
+		super(ConfigurableIpythonPowerline, self).init(is_prompt, old_widths)
 
 
 def setup(**kwargs):

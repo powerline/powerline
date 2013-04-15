@@ -43,12 +43,12 @@ class PowerlinePromptManager(PromptManager):
 
 
 class ConfigurableIpythonPowerline(IpythonPowerline):
-	def __init__(self, ip, is_prompt, old_widths):
+	def init(self, ip, is_prompt, old_widths):
 		config = ip.config.Powerline
 		self.config_overrides = config.get('config_overrides')
 		self.theme_overrides = config.get('theme_overrides', {})
 		self.paths = config.get('paths')
-		super(ConfigurableIpythonPowerline, self).__init__(is_prompt, old_widths)
+		super(ConfigurableIpythonPowerline, self).init(is_prompt, old_widths)
 
 
 old_prompt_manager = None
