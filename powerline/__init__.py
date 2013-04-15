@@ -270,7 +270,7 @@ else:
 			raise exception
 
 
-def gen_module_attr_getter(pl, import_paths):
+def gen_module_attr_getter(pl, import_paths, imported_modules):
 	def get_module_attr(module, attr, prefix='powerline'):
 		'''Import module and get its attribute.
 
@@ -292,6 +292,7 @@ def gen_module_attr_getter(pl, import_paths):
 		module = str(module)
 		attr = str(attr)
 		try:
+			imported_modules.add(module)
 			return getattr(__import__(module, fromlist=(attr,)), attr)
 		except Exception as e:
 			pl.exception('Failed to import attr {0} from module {1}: {2}', attr, module, str(e), prefix=prefix)
@@ -381,6 +382,7 @@ class Powerline(object):
 		self.prev_common_config = None
 		self.prev_ext_config = None
 		self.pl = None
+		self.imported_modules = set()
 
 	def create_renderer(self, load_main=False, load_colors=False, load_colorscheme=False, load_theme=False):
 		'''(Re)create renderer object. Can be used after Powerline object was 
@@ -428,7 +430,7 @@ class Powerline(object):
 				if not self.run_once:
 					self.config_loader.set_watcher(self.common_config['watcher'])
 
-				self.get_module_attr = gen_module_attr_getter(self.pl, self.import_paths)
+				self.get_module_attr = gen_module_attr_getter(self.pl, self.import_paths, self.imported_modules)
 
 				self.renderer_options.update(
 					pl=self.pl,
