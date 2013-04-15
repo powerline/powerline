@@ -110,6 +110,59 @@ class VimPowerline(Powerline):
 		except KeyError:
 			return super(VimPowerline, self).get_config_paths()
 
+	def setup(self, pyeval=None, pycmd=None, can_replace_pyeval=True):
+		super(VimPowerline, self).setup()
+		import __main__
+		if not pyeval:
+			pyeval = 'pyeval' if sys.version_info < (3,) else 'py3eval'
+			can_replace_pyeval = True
+		if not pycmd:
+			pycmd = get_default_pycmd()
+
+		set_pycmd(pycmd)
+
+		# pyeval() and vim.bindeval were both introduced in one patch
+		if not hasattr(vim, 'bindeval') and can_replace_pyeval:
+			vim.command(('''
+				function! PowerlinePyeval(e)
+					{pycmd} powerline.do_pyeval()
+				endfunction
+			''').format(pycmd=pycmd))
+			pyeval = 'PowerlinePyeval'
+
+		self.pyeval = pyeval
+		self.window_statusline = '%!' + pyeval + '(\'powerline.statusline({0})\')'
+
+		self.update_renderer()
+		__main__.powerline = self
+
+		if (
+			bool(int(vim.eval("has('gui_running') && argc() == 0")))
+			and not vim.current.buffer.name
+			and len(vim.windows) == 1
+		):
+			# Hack to show startup screen. Problems in GUI:
+			# - Defining local value of &statusline option while computing global
+			#   value purges startup screen.
+			# - Defining highlight group while computing statusline purges startup
+			#   screen.
+			# This hack removes the “while computing statusline” part: both things 
+			# are defined, but they are defined right now.
+			#
+			# The above condition disables this hack if no GUI is running, Vim did 
+			# not open any files and there is only one window. Without GUI 
+			# everything works, in other cases startup screen is not shown.
+			self.new_window()
+
+		# Cannot have this in one line due to weird newline handling (in :execute 
+		# context newline is considered part of the command in just the same cases 
+		# when bar is considered part of the command (unless defining function 
+		# inside :execute)). vim.command is :execute equivalent regarding this case.
+		vim.command('augroup Powerline')
+		vim.command('	autocmd! ColorScheme * :{pycmd} powerline.reset_highlight()'.format(pycmd=pycmd))
+		vim.command('	autocmd! VimLeavePre * :{pycmd} powerline.shutdown()'.format(pycmd=pycmd))
+		vim.command('augroup END')
+
 	@staticmethod
 	def get_segment_info():
 		return {}
@@ -211,52 +264,6 @@ def get_default_pycmd():
 	return 'python' if sys.version_info < (3,) else 'python3'
 
 
-def setup(pyeval=None, pycmd=None, can_replace_pyeval=True):
-	import __main__
-	if not pyeval:
-		pyeval = 'pyeval' if sys.version_info < (3,) else 'py3eval'
-		can_replace_pyeval = True
-	if not pycmd:
-		pycmd = get_default_pycmd()
-
-	set_pycmd(pycmd)
-
-	# pyeval() and vim.bindeval were both introduced in one patch
-	if not hasattr(vim, 'bindeval') and can_replace_pyeval:
-		vim.command(('''
-			function! PowerlinePyeval(e)
-				{pycmd} powerline.do_pyeval()
-			endfunction
-		''').format(pycmd=pycmd))
-		pyeval = 'PowerlinePyeval'
-
-	powerline = VimPowerline(pyeval)
-	powerline.update_renderer()
-	__main__.powerline = powerline
-
-	if (
-		bool(int(vim.eval("has('gui_running') && argc() == 0")))
-		and not vim.current.buffer.name
-		and len(vim.windows) == 1
-	):
-		# Hack to show startup screen. Problems in GUI:
-		# - Defining local value of &statusline option while computing global
-		#   value purges startup screen.
-		# - Defining highlight group while computing statusline purges startup
-		#   screen.
-		# This hack removes the “while computing statusline” part: both things 
-		# are defined, but they are defined right now.
-		#
-		# The above condition disables this hack if no GUI is running, Vim did 
-		# not open any files and there is only one window. Without GUI 
-		# everything works, in other cases startup screen is not shown.
-		powerline.new_window()
-
-	# Cannot have this in one line due to weird newline handling (in :execute 
-	# context newline is considered part of the command in just the same cases 
-	# when bar is considered part of the command (unless defining function 
-	# inside :execute)). vim.command is :execute equivalent regarding this case.
-	vim.command('augroup Powerline')
-	vim.command('	autocmd! ColorScheme * :{pycmd} powerline.reset_highlight()'.format(pycmd=pycmd))
-	vim.command('	autocmd! VimLeavePre * :{pycmd} powerline.shutdown()'.format(pycmd=pycmd))
-	vim.command('augroup END')
+def setup(*args, **kwargs):
+	powerline = VimPowerline()
+	return powerline.setup(*args, **kwargs)

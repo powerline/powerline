@@ -382,6 +382,7 @@ class Powerline(object):
 		self.prev_common_config = None
 		self.prev_ext_config = None
 		self.pl = None
+		self.setup_args = None
 		self.imported_modules = set()
 
 	def create_renderer(self, load_main=False, load_colors=False, load_colorscheme=False, load_theme=False):
@@ -727,6 +728,13 @@ class Powerline(object):
 				# prevents us from seeing logger traceback.
 				pass
 			yield FailedUnicode(safe_unicode(e))
+
+	def setup(self, *args, **kwargs):
+		'''Setup the environment to use powerline.
+
+		To be overridden by subclasses, this one only saves args and kwargs.
+		'''
+		self.setup_args = (args, kwargs)
 
 	def shutdown(self, set_event=True):
 		'''Shut down all background threads.

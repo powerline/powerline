@@ -16,8 +16,8 @@ class IpythonInfo(object):
 
 class PowerlinePromptManager(PromptManager):
 	def __init__(self, prompt_powerline, non_prompt_powerline, shell):
-		self.prompt_powerline = prompt_powerline
-		self.non_prompt_powerline = non_prompt_powerline
+		prompt_powerline.setup('prompt_powerline', self)
+		non_prompt_powerline.setup('non_prompt_powerline', self)
 		self.powerline_segment_info = IpythonInfo(shell)
 		self.shell = shell
 

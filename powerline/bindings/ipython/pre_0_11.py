@@ -19,8 +19,8 @@ class IpythonInfo(object):
 
 class PowerlinePrompt(BasePrompt):
 	def __init__(self, powerline, other_powerline, powerline_last_in, old_prompt):
-		self.powerline = powerline
-		self.other_powerline = other_powerline
+		powerline.setup('powerline', self)
+		other_powerline.setup('other_powerline', self)
 		self.powerline_last_in = powerline_last_in
 		self.powerline_segment_info = IpythonInfo(old_prompt.cache)
 		self.cache = old_prompt.cache
