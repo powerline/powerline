@@ -27,7 +27,8 @@
 		"line_current": { "fg": "gray1", "bg": "gray10", "attr": ["bold"] },
 		"line_current_symbol": { "fg": "gray1", "bg": "gray10" },
 		"col_current": { "fg": "gray6", "bg": "gray10" },
-		"modified_buffers": { "fg": "brightyellow", "bg": "gray2" }
+		"modified_buffers": { "fg": "brightyellow", "bg": "gray2" },
+		"now_playing": { "fg": "white", "bg": "gray2" }
 	},
 	"mode_translations": {
 		"nc": {
