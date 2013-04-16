@@ -3,7 +3,7 @@
 FAILED=0
 export PYTHONPATH="${PYTHONPATH}:`realpath .`"
 for file in tests/test_*.py ; do
-	if ! ${PYTHON} $file ; then
+	if ! ${PYTHON} $file --verbose --catch ; then
 		FAILED=1
 	fi
 done

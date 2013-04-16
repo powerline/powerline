@@ -377,14 +377,13 @@ Themes
         can be aligned with the ``align`` property.
 
     ``priority``
-        Optional segment priority. Segments with priority ``-1`` (the 
-        default priority) will always be included, regardless of the width 
-        of the prompt/statusline.
+        Optional segment priority. Segments with priority ``None`` (the default 
+        priority, represented by ``null`` in json) will always be included, 
+        regardless of the width of the prompt/statusline.
 
-        If the priority is ``0`` or more, the segment may be removed if the 
+        If the priority is any number, the segment may be removed if the 
         prompt/statusline width is too small for all the segments to be 
-        rendered. A lower number means that the segment has a higher 
-        priority.
+        rendered. A lower number means that the segment has a higher priority.
 
         Segments are removed according to their priority, with low priority 
         segments being removed first.
