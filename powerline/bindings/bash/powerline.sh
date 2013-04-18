@@ -13,9 +13,10 @@ _powerline_tmux_set_columns() {
 }
 
 _powerline_prompt() {
+	local last_exit_code=$?
 	[[ -z "$POWERLINE_OLD_PROMPT_COMMAND" ]] ||
 		eval $POWERLINE_OLD_PROMPT_COMMAND
-	PS1="$(powerline shell left -r bash_prompt --last_exit_code=$?)"
+	PS1="$(powerline shell left -r bash_prompt --last_exit_code=$last_exit_code)"
 	_powerline_tmux_set_pwd
 }
 
