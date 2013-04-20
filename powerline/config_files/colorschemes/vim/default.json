@@ -28,7 +28,8 @@
 		"line_current_symbol": { "fg": "gray1", "bg": "gray10" },
 		"virtcol_current_gradient": { "fg": "dark_GREEN_Orange_red", "bg": "gray10" },
 		"col_current": { "fg": "gray6", "bg": "gray10" },
-		"modified_buffers": { "fg": "brightyellow", "bg": "gray2" }
+		"modified_buffers": { "fg": "brightyellow", "bg": "gray2" },
+		"ruby_version": { "fg": "brightestred", "bg": "gray2", "attr": ["bold"] }
 	},
 	"mode_translations": {
 		"nc": {
@@ -68,7 +69,8 @@
 			"groups": {
 				"mode": { "fg": "darkestcyan", "bg": "white", "attr": ["bold"] },
 				"background:divider": { "fg": "darkcyan", "bg": "darkestblue" },
-				"branch:divider": { "fg": "darkcyan", "bg": "darkblue" }
+				"branch:divider": { "fg": "darkcyan", "bg": "darkblue" },
+				"ruby_version": { "fg": "white", "bg": "darkestblue", "attr": ["bold"] }
 			}
 		},
 		"v": {
