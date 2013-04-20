@@ -8,12 +8,13 @@ try:
 except ImportError:
 	vim = {}  # NOQA
 
+from subprocess import Popen, PIPE
 from powerline.bindings.vim import vim_get_func, getbufvar
 from powerline.theme import requires_segment_info
 from powerline.lib import add_divider_highlight_group
 from powerline.lib.vcs import guess
 from powerline.lib.humanize_bytes import humanize_bytes
-from powerline.lib.threaded import KwThreadedSegment, with_docstring
+from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment, with_docstring
 from powerline.lib import wraps_saveargs as wraps
 from collections import defaultdict
 
@@ -440,4 +441,27 @@ file_vcs_status = with_docstring(FileVCSStatusSegment(),
 '''Return the VCS status for this buffer.
 
 Highlight groups used: ``file_vcs_status``.
+''')
+
+
+class RVMSegment(ThreadedSegment):
+	interval = 10
+
+	def update(self, old_rvm_current):
+		try:
+			p = Popen(['rvm', 'current'], shell=False, stdout=PIPE, stderr=PIPE)
+			p.stderr.close()
+			return p.stdout.read().rstrip()
+		except OSError:
+			return None
+
+	def render(self, update_value, **kwargs):
+		return [{'contents': update_value,
+			'highlight_group': ['ruby_version']}]
+
+
+rvm_current = with_docstring(RVMSegment(),
+'''Return the rvm current ruby name.
+
+Highlight groups used: ``ruby_version``.
 ''')
