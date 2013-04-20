@@ -456,3 +456,26 @@ rvm_current = with_docstring(RVMSegment(),
 
 Highlight groups used: ``ruby_version``.
 ''')
+
+
+class RbEnvSegment(ThreadedSegment):
+	interval = 10
+
+	def update(self, old_rbenv_version):
+		try:
+			p = Popen(['rbenv', 'version'], shell=False, stdout=PIPE, stderr=PIPE)
+			p.stderr.close()
+			return p.stdout.read().split()[0]
+		except OSError:
+			return None
+
+	def render(self, update_value, **kwargs):
+		return [{'contents': update_value,
+			'highlight_group': ['ruby_version']}]
+
+
+rbenv_version = with_docstring(RbEnvSegment(),
+'''Return the rbenv ruby version.
+
+Highlight groups used: ``ruby_version``.
+''')
