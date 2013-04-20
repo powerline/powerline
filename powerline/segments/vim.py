@@ -8,11 +8,13 @@ try:
 except ImportError:
 	vim = {}  # NOQA
 
+from subprocess import Popen, PIPE
 from powerline.bindings.vim import vim_get_func, getbufvar
 from powerline.theme import requires_segment_info
 from powerline.lib import add_divider_highlight_group
 from powerline.lib.vcs import guess, tree_status
 from powerline.lib.humanize_bytes import humanize_bytes
+from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment, with_docstring
 from powerline.lib import wraps_saveargs as wraps
 from collections import defaultdict
 
@@ -197,7 +199,7 @@ def file_size(pl, suffix='B', si_prefix=False):
 		use SI prefix, e.g. MB instead of MiB
 	:return: file size or None if the file isn't saved or if the size is too big to fit in a number
 	'''
-	# Note: returns file size in &encoding, not in &fileencoding. But returned 
+	# Note: returns file size in &encoding, not in &fileencoding. But returned
 	# size is updated immediately; and it is valid for any buffer
 	file_size = vim_funcs['line2byte'](len(vim.current.buffer) + 1) - 1
 	return humanize_bytes(file_size, suffix, si_prefix)
@@ -355,3 +357,27 @@ def file_vcs_status(pl, segment_info):
 					'highlight_group': ['file_vcs_status_' + status, 'file_vcs_status'],
 					})
 			return ret
+
+
+
+class RVMSegment(ThreadedSegment):
+	interval = 10
+
+	def update(self, old_rvm_current):
+		try:
+			p = Popen(['rvm', 'current'], shell=False, stdout=PIPE, stderr=PIPE)
+			p.stderr.close()
+			return p.stdout.read().rstrip()
+		except OSError:
+			return None
+
+	def render(self, update_value, **kwargs):
+		return [{'contents': update_value,
+			'highlight_group': ['ruby_version']}]
+
+
+rvm_current = with_docstring(RVMSegment(),
+'''Return the rvm current ruby name.
+
+Highlight groups used: ``ruby_version``.
+''')
