@@ -1,6 +1,6 @@
 # vim:fileencoding=utf-8:noet
 
-from __future__ import absolute_import
+from __future__ import absolute_import, division
 
 import os
 try:
@@ -276,13 +276,21 @@ def col_current(pl, segment_info):
 
 # TODO Add &textwidth-based gradient
 @window_cached
-def virtcol_current(pl):
+def virtcol_current(pl, gradient=True):
 	'''Return current visual column with concealed characters ingored
 
-	Highlight groups used: ``virtcol_current`` or ``col_current``.
+	:param bool gradient:
+		Determines whether it should show textwidth-based gradient (gradient level is ``virtcol * 100 / textwidth``).
+
+	Highlight groups used: ``virtcol_current_gradient`` (gradient), ``virtcol_current`` or ``col_current``.
 	'''
-	return [{'contents': str(vim_funcs['virtcol']('.')),
-			'highlight_group': ['virtcol_current', 'col_current']}]
+	col = vim_funcs['virtcol']('.')
+	r = [{'contents': str(col), 'highlight_group': ['virtcol_current', 'col_current']}]
+	if gradient:
+		textwidth = int(getbufvar('%', '&textwidth'))
+		r[-1]['gradient_level'] = min(col * 100 / textwidth, 100) if textwidth else 0
+		r[-1]['highlight_group'].insert(0, 'virtcol_current_gradient')
+	return r
 
 
 def modified_buffers(pl, text='+ ', join_str=','):

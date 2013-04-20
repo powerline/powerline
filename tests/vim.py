@@ -196,6 +196,8 @@ def _emul_mode(*args):
 @_str_func
 def _emul_getbufvar(bufnr, varname):
 	if varname[0] == '&':
+		if bufnr == '%':
+			bufnr = buffers[_buffer()].number
 		if bufnr not in buffers:
 			return ''
 		try:
@@ -322,6 +324,7 @@ class _Buffer(object):
 			'filetype': '',
 			'buftype': '',
 			'fileencoding': 'utf-8',
+			'textwidth': 80,
 		}
 		_buf_lines[bufnr] = ['']
 		from copy import copy
