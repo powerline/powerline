@@ -29,6 +29,9 @@ class Mark:
 		self.buffer = buffer
 		self.pointer = pointer
 
+	def copy(self):
+		return Mark(self.name, self.line, self.column, self.buffer, self.pointer)
+
 	def get_snippet(self, indent=4, max_length=75):
 		if self.buffer is None:
 			return None

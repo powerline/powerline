@@ -316,13 +316,13 @@ class _Buffer(object):
 		self.name = os.path.abspath(name) if name else None
 		_buf_scopes[bufnr] = {}
 		_buf_options[bufnr] = {
-				'modified': 0,
-				'readonly': 0,
-				'fileformat': 'unix',
-				'filetype': '',
-				'buftype': '',
-				'fileencoding': 'utf-8',
-				}
+			'modified': 0,
+			'readonly': 0,
+			'fileformat': 'unix',
+			'filetype': '',
+			'buftype': '',
+			'fileencoding': 'utf-8',
+		}
 		_buf_lines[bufnr] = ['']
 		from copy import copy
 		_undostate[bufnr] = [copy(_buf_lines[bufnr])]
@@ -393,9 +393,9 @@ def _init():
 @_vim
 def _get_segment_info():
 	mode_translations = {
-			chr(ord('V') - 0x40): '^V',
-			chr(ord('S') - 0x40): '^S',
-			}
+		chr(ord('V') - 0x40): '^V',
+		chr(ord('S') - 0x40): '^S',
+	}
 	mode = _mode
 	mode = mode_translations.get(mode, mode)
 	return {
