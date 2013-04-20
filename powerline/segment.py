@@ -45,7 +45,7 @@ segment_getters = {
 }
 
 
-def gen_segment_getter(ext, path, theme_configs, default_module=None):
+def gen_segment_getter(pl, ext, path, theme_configs, default_module=None):
 	data = {
 		'default_module': default_module or 'powerline.segments.' + ext,
 		'path': path,
