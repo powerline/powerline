@@ -44,7 +44,7 @@ class Theme(object):
 		theme_configs = [theme_config]
 		if top_theme_config:
 			theme_configs.append(top_theme_config)
-		get_segment = gen_segment_getter(ext, common_config['paths'], theme_configs, theme_config.get('default_module'))
+		get_segment = gen_segment_getter(pl, ext, common_config['paths'], theme_configs, theme_config.get('default_module'))
 		for side in ['left', 'right']:
 			for segment in theme_config['segments'].get(side, []):
 				segment = get_segment(segment, side)
