@@ -8,13 +8,12 @@ try:
 except ImportError:
 	vim = {}  # NOQA
 
-from subprocess import Popen, PIPE
 from powerline.bindings.vim import vim_get_func, getbufvar
 from powerline.theme import requires_segment_info
 from powerline.lib import add_divider_highlight_group
 from powerline.lib.vcs import guess, tree_status
 from powerline.lib.humanize_bytes import humanize_bytes
-from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment, with_docstring
+from powerline.lib.threaded import KwThreadedSegment, with_docstring
 from powerline.lib import wraps_saveargs as wraps
 from collections import defaultdict
 
@@ -24,7 +23,7 @@ vim_funcs = {
 	'expand': vim_get_func('expand', rettype=str),
 	'bufnr': vim_get_func('bufnr', rettype=int),
 	'line2byte': vim_get_func('line2byte', rettype=int),
-	'syntasticflag': vim_get_func('SyntasticStatuslineFlag', rettype=str)
+	'exists': vim_get_func('exists', rettype=int),
 }
 
 vim_modes = {
@@ -360,6 +359,7 @@ def file_vcs_status(pl, segment_info):
 			return ret
 
 
+<<<<<<< HEAD
 
 class RVMSegment(ThreadedSegment):
 	interval = 10
@@ -410,7 +410,8 @@ Highlight groups used: ``ruby_version``.
 def syntastic_segment(pl):
 	'''Return the syntastic statusline flag
 	'''
-	if vim_funcs['syntasticflag']:
-		return [{'contents': str(vim_funcs['syntasticflag']())}]
+	if int(vim_funcs['exists']('*SyntasticStatuslineFlag')) > 0:
+		syntastic_flag_func = vim_get_func('SyntasticStatuslineFlag', rettype=str)
+		return str(syntastic_flag_func())
 	else:
 		return None
