@@ -27,7 +27,8 @@
 		"line_current":           { "fg": "gray13", "bg": "lightyellow", "attr": ["bold"] },
 		"line_current_symbol":    { "fg": "gray13", "bg": "lightyellow" },
 		"col_current":            { "fg": "azure4", "bg": "lightyellow" },
-		"ruby_version":           { "fg": "red", "bg": "royalblue5", "attr": ["bold"]}
+		"ruby_version":           { "fg": "red", "bg": "royalblue5", "attr": ["bold"]},
+		"syntastic_segment":      { "fg": "brightestred", "bg": "gray2", "attr": ["bold"] }
 	},
 	"mode_translations": {
 		"nc": {
@@ -66,7 +67,8 @@
 				"line_current":           { "fg": "gray13", "bg": "oldlace", "attr": ["bold"] },
 				"line_current_symbol":    { "fg": "gray13", "bg": "oldlace" },
 				"col_current":            { "fg": "azure4", "bg": "oldlace" },
-				"ruby_version":           { "fg": "lightyellow", "bg": "darkgreencopper", "attr": ["bold"] }
+				"ruby_version":           { "fg": "lightyellow", "bg": "darkgreencopper", "attr": ["bold"] },
+				"syntastic_segment":      { "fg": "white", "bg": "darkestblue", "attr": ["bold"] }
 			}
 		},
 		"v": {

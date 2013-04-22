@@ -24,6 +24,7 @@ vim_funcs = {
 	'expand': vim_get_func('expand', rettype=str),
 	'bufnr': vim_get_func('bufnr', rettype=int),
 	'line2byte': vim_get_func('line2byte', rettype=int),
+	'syntasticflag': vim_get_func('SyntasticStatuslineFlag', rettype=str)
 }
 
 vim_modes = {
@@ -488,3 +489,12 @@ rbenv_version = with_docstring(RbEnvSegment(),
 
 Highlight groups used: ``ruby_version``.
 ''')
+
+@window_cached
+def syntastic_segment(pl):
+	'''Return the syntastic statusline flag
+	'''
+	if vim_funcs['syntasticflag']:
+		return [{'contents': str(vim_funcs['syntasticflag']())}]
+	else:
+		return None
