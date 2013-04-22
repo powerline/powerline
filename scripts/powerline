@@ -8,7 +8,8 @@ try:
 	from powerline.shell import ShellPowerline, get_argparser
 except ImportError:
 	import os
-	sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+	sys.path.append(os.path.dirname(os.path.dirname(
+		os.path.abspath(os.path.realpath(__file__)))))
 	from powerline.shell import ShellPowerline, get_argparser  # NOQA
 
 if __name__ == '__main__':
