@@ -23,6 +23,7 @@ vim_funcs = {
 	'expand': vim_get_func('expand', rettype=str),
 	'bufnr': vim_get_func('bufnr', rettype=int),
 	'line2byte': vim_get_func('line2byte', rettype=int),
+	'syntasticflag': vim_get_func('SyntasticStatuslineFlag', rettype=str)
 }
 
 vim_modes = {
@@ -441,3 +442,9 @@ file_vcs_status = with_docstring(FileVCSStatusSegment(),
 
 Highlight groups used: ``file_vcs_status``.
 ''')
+
+@window_cached
+def syntastic_segment(pl):
+	'''Return the syntastic statusline flag
+	'''
+	return [{'contents': str(vim_funcs['syntasticflag']())}]
