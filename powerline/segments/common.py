@@ -120,6 +120,18 @@ Highlight groups used: ``branch_clean``, ``branch_dirty``, ``branch``.
 
 
 @requires_segment_info
+def maildir(pl, segment_info, directory='~/Maildir/new', placeholder='M'):
+	directory = os.path.expandvars(os.path.expanduser(directory))
+	mail = os.listdir(directory)
+	if mail:
+		return [{
+			'contents': '{0}:{1}'.format(placeholder, len(mail)),
+			'highlight_group': 'email_alert',
+		}]
+	else:
+		return None
+
+@requires_segment_info
 def cwd(pl, segment_info, dir_shorten_len=None, dir_limit_depth=None, use_path_separator=False):
 	'''Return the current working directory.
 

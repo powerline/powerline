@@ -12,6 +12,8 @@
 		"cwd:divider": { "fg": "gray7", "bg": "gray4" },
 		"hostname": { "fg": "brightyellow", "bg": "mediumorange" },
 		"exit_fail": { "fg": "white", "bg": "darkestred" },
-		"exit_success": { "fg": "white", "bg": "darkestgreen" }
+		"exit_success": { "fg": "white", "bg": "darkestgreen" },
+		"email_alert": { "fg": "white", "bg": "brightred", "attr": ["bold"] },
+		"email_alert_gradient": { "fg": "white", "bg": "yellow_orange_red", "attr": ["bold"] }
 	}
 }

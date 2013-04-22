@@ -331,6 +331,25 @@ class TestCommon(TestCase):
 		# TODO
 		pass
 
+	def test_maildir(self):
+		pl = Pl()
+		segment_info = {'getcwd': os.getcwd}
+		# No files in Maildir folder means no new mail.
+		with replace_attr(os, 'listdir', lambda path: []):
+			self.assertEqual(common.maildir(pl=pl, segment_info=segment_info, directory='/tmp/maildir'), None)
+		# One new message.
+		with replace_attr(os, 'listdir', lambda path: ['msg1']):
+			self.assertEqual(common.maildir(pl=pl, segment_info=segment_info, directory='/tmp/maildir'),
+					[{'contents': 'M:1', 'highlight_group': 'email_alert'}])
+		# A lot of new messages.
+		with replace_attr(os, 'listdir', lambda path: ['msg'] * 999):
+			self.assertEqual(common.maildir(pl=pl, segment_info=segment_info, directory='/tmp/maildir'),
+					[{'contents': 'M:999', 'highlight_group': 'email_alert'}])
+		# New message, using custom placeholder.
+		with replace_attr(os, 'listdir', lambda path: ['msg1']):
+			self.assertEqual(common.maildir(pl=pl, segment_info=segment_info, directory='/tmp/maildir', placeholder='EMAIL@A'),
+					[{'contents': 'EMAIL@A:1', 'highlight_group': 'email_alert'}])
+
 	def test_now_playing(self):
 		# TODO
 		pass
