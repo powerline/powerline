@@ -8,13 +8,12 @@ try:
 except ImportError:
 	vim = {}  # NOQA
 
-from subprocess import Popen, PIPE
 from powerline.bindings.vim import vim_get_func, getbufvar
 from powerline.theme import requires_segment_info
 from powerline.lib import add_divider_highlight_group
 from powerline.lib.vcs import guess
 from powerline.lib.humanize_bytes import humanize_bytes
-from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment, with_docstring
+from powerline.lib.threaded import KwThreadedSegment, with_docstring
 from powerline.lib import wraps_saveargs as wraps
 from collections import defaultdict
 
@@ -24,7 +23,7 @@ vim_funcs = {
 	'expand': vim_get_func('expand', rettype=str),
 	'bufnr': vim_get_func('bufnr', rettype=int),
 	'line2byte': vim_get_func('line2byte', rettype=int),
-	'syntasticflag': vim_get_func('SyntasticStatuslineFlag', rettype=str)
+	'exists': vim_get_func('exists', rettype=int),
 }
 
 vim_modes = {
@@ -444,57 +443,12 @@ file_vcs_status = with_docstring(FileVCSStatusSegment(),
 Highlight groups used: ``file_vcs_status``.
 ''')
 
-
-class RVMSegment(ThreadedSegment):
-	interval = 10
-
-	def update(self, old_rvm_current):
-		try:
-			p = Popen(['rvm', 'current'], shell=False, stdout=PIPE, stderr=PIPE)
-			p.stderr.close()
-			return p.stdout.read().rstrip()
-		except OSError:
-			return None
-
-	def render(self, update_value, **kwargs):
-		return [{'contents': update_value,
-			'highlight_group': ['ruby_version']}]
-
-
-rvm_current = with_docstring(RVMSegment(),
-'''Return the rvm current ruby name.
-
-Highlight groups used: ``ruby_version``.
-''')
-
-
-class RbEnvSegment(ThreadedSegment):
-	interval = 10
-
-	def update(self, old_rbenv_version):
-		try:
-			p = Popen(['rbenv', 'version'], shell=False, stdout=PIPE, stderr=PIPE)
-			p.stderr.close()
-			return p.stdout.read().split()[0]
-		except OSError:
-			return None
-
-	def render(self, update_value, **kwargs):
-		return [{'contents': update_value,
-			'highlight_group': ['ruby_version']}]
-
-
-rbenv_version = with_docstring(RbEnvSegment(),
-'''Return the rbenv ruby version.
-
-Highlight groups used: ``ruby_version``.
-''')
-
 @window_cached
 def syntastic_segment(pl):
 	'''Return the syntastic statusline flag
 	'''
-	if vim_funcs['syntasticflag']:
-		return [{'contents': str(vim_funcs['syntasticflag']())}]
+	if int(vim_funcs['exists']('*SyntasticStatuslineFlag')) > 0:
+		syntastic_flag_func = vim_get_func('SyntasticStatuslineFlag', rettype=str)
+		return str(syntastic_flag_func())
 	else:
 		return None
