@@ -266,7 +266,7 @@ class Powerline(object):
 			try:
 				Renderer = __import__(self.renderer_module, fromlist=['renderer']).renderer
 			except Exception as e:
-				self.pl.exception('Failed to import renderer module: {0}', str(e))
+				self.exception('Failed to import renderer module: {0}', str(e))
 				sys.exit(1)
 
 			# Renderer updates configuration file via segments’ .startup thus it 
@@ -275,7 +275,7 @@ class Powerline(object):
 			try:
 				renderer = Renderer(**self.renderer_options)
 			except Exception as e:
-				self.pl.exception('Failed to construct renderer object: {0}', str(e))
+				self.exception('Failed to construct renderer object: {0}', str(e))
 				if not hasattr(self, 'renderer'):
 					raise
 			else:
@@ -393,8 +393,7 @@ class Powerline(object):
 			try:
 				self.create_renderer(**create_renderer_kwargs)
 			except Exception as e:
-				if self.pl:
-					self.pl.exception('Failed to create renderer: {0}', str(e), prefix='powerline')
+				self.exception('Failed to create renderer: {0}', str(e))
 				if hasattr(self, 'renderer'):
 					with self.cr_kwargs_lock:
 						self.create_renderer_kwargs.clear()
@@ -412,8 +411,15 @@ class Powerline(object):
 			self.update_renderer()
 			return self.renderer.render(*args, **kwargs)
 		except Exception as e:
-			if self.pl:
-				self.pl.exception('Failed to render: {0}', str(e), prefix='powerline')
+			try:
+				self.exception('Failed to render: {0}', str(e))
+			except Exception as e:
+				# Updates e variable to new value, masking previous one. 
+				# Normally it is the same exception (due to raise in case pl is 
+				# unset), but it may also show error in logger. Note that latter 
+				# is not logged by logger for obvious reasons, thus this also 
+				# prevents us from seeing logger traceback.
+				pass
 			return FailedUnicode(safe_unicode(e))
 
 	def shutdown(self):
@@ -455,3 +461,9 @@ class Powerline(object):
 
 	def __exit__(self, *args):
 		self.shutdown()
+
+	def exception(self, msg, prefix='powerline', *args, **kwargs):
+		if self.pl:
+			return self.pl.exception(msg, prefix=prefix, *args, **kwargs)
+		else:
+			raise
