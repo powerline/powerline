@@ -37,6 +37,7 @@
 			"local_themes": {
 				"cmdwin": "cmdwin",
 				"help": "help",
+				"unite": "unite",
 				"quickfix": "quickfix"
 			}
 		},
