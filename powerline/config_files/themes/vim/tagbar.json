@@ -2,12 +2,9 @@
 	"segments": {
 		"left": [
 			{
-				"name": "mode",
-				"exclude_modes": ["nc"]
-			},
-			{
-				"name": "unite_segment",
-				"draw_soft_divider": true
+				"type": "string",
+				"contents": "Tagbar",
+				"highlight_group": ["file_name"]
 			},
 			{
 				"type": "string",
@@ -16,13 +13,6 @@
 				"draw_hard_divider": false,
 				"width": "auto"
 			}
-		],
-		"right": [
-			{
-				"name": "file_name",
-				"draw_soft_divider": true
-			}
 		]
-
 	}
 }
