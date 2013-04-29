@@ -8,14 +8,16 @@ try:
 except ImportError:
 	vim = {}  # NOQA
 
+from subprocess import Popen, PIPE
 from powerline.bindings.vim import vim_get_func, getbufvar
 from powerline.theme import requires_segment_info
 from powerline.lib import add_divider_highlight_group
 from powerline.lib.vcs import guess, tree_status
 from powerline.lib.humanize_bytes import humanize_bytes
-from powerline.lib.threaded import KwThreadedSegment, with_docstring
+from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment, with_docstring
 from powerline.lib import wraps_saveargs as wraps
 from collections import defaultdict
+
 
 vim_funcs = {
 	'virtcol': vim_get_func('virtcol', rettype=int),
@@ -359,8 +361,6 @@ def file_vcs_status(pl, segment_info):
 			return ret
 
 
-<<<<<<< HEAD
-
 class RVMSegment(ThreadedSegment):
 	interval = 10
 
@@ -405,6 +405,7 @@ rbenv_version = with_docstring(RbEnvSegment(),
 
 Highlight groups used: ``ruby_version``.
 ''')
+
 
 @window_cached
 def syntastic_segment(pl):
