@@ -30,8 +30,8 @@
 		"col_current":            { "fg": "azure4", "bg": "lightyellow" },
 		"ruby_version":           { "fg": "red", "bg": "royalblue5", "attr": ["bold"]},
 		"unite_segment":          { "fg": "lightyellow", "bg": "darkgreencopper" },
-		"syntastic_segment":      { "fg": "brightestred", "bg": "gray2", "attr": ["bold"] }
-		"unite_segment":            { "fg": "lightyellow", "bg": "darkgreencopper" }
+		"syntastic_segment":      { "fg": "brightestred", "bg": "gray2", "attr": ["bold"] },
+		"unite_segment":          { "fg": "lightyellow", "bg": "darkgreencopper" }
 	},
 	"mode_translations": {
 		"nc": {
