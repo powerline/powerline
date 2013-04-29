@@ -1,0 +1,25 @@
+{
+	"segments": {
+		"left": [
+			{
+				"name": "mode",
+				"exclude_modes": ["nc"]
+			},
+			{
+				"name": "file_name",
+				"draw_soft_divider": true
+			},
+			{
+				"name": "unite_segment",
+				"draw_soft_divider": false
+			},
+			{
+				"type": "string",
+				"highlight_group": ["background"],
+				"draw_soft_divider": false,
+				"draw_hard_divider": false,
+				"width": "auto"
+			}
+		]
+	}
+}

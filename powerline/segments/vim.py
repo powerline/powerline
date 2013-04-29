@@ -415,3 +415,15 @@ def syntastic_segment(pl):
 		return str(syntastic_flag_func())
 	else:
 		return None
+
+
+@window_cached
+def unite_segment(pl):
+	'''Return the unite.vim statusline
+	'''
+	if int(vim_funcs['exists']('*unite#get_status_string')) > 0:
+		unite_stl_func = vim_get_func('unite#get_status_string', rettype=str)
+		return str(unite_stl_func())
+	else:
+		return None
+

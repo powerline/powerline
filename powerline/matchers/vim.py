@@ -17,3 +17,7 @@ def cmdwin(matcher_info):
 
 def quickfix(matcher_info):
 	return str(getbufvar(matcher_info['bufnr'], '&buftype')) == 'quickfix'
+
+
+def unite(matcher_info):
+	return str(getbufvar(matcher_info['bufnr'], '&filetype')) == 'unite'
