@@ -56,7 +56,7 @@ class Args(object):
 
 def string(s):
 	if type(s) is bytes:
-		return s.decode('utf-8', errors='replace')
+		return s.decode('utf-8', 'replace')
 	else:
 		return str(s)
 
