@@ -76,6 +76,14 @@ class Environment(object):
 		except IndexError:
 			return default
 
+	@staticmethod
+	def __contains__(key):
+		try:
+			zsh.getvalue(key)
+			return True
+		except IndexError:
+			return False
+
 
 environ = Environment()
 
