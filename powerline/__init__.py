@@ -462,8 +462,10 @@ class Powerline(object):
 	def __exit__(self, *args):
 		self.shutdown()
 
-	def exception(self, msg, prefix='powerline', *args, **kwargs):
+	def exception(self, msg, *args, **kwargs):
+		if 'prefix' not in kwargs:
+			kwargs['prefix'] = 'powerline'
 		if self.pl:
-			return self.pl.exception(msg, prefix=prefix, *args, **kwargs)
+			return self.pl.exception(msg, *args, **kwargs)
 		else:
 			raise
