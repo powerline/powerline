@@ -5,14 +5,15 @@ import sys
 import os
 
 try:
-	from powerline.shell import ShellPowerline, get_argparser
+	from powerline.shell import ShellPowerline, get_argparser, finish_args
 except ImportError:
 	import os
 	sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-	from powerline.shell import ShellPowerline, get_argparser  # NOQA
+	from powerline.shell import ShellPowerline, get_argparser, finish_args  # NOQA
 
 if __name__ == '__main__':
 	args = get_argparser(description=__doc__).parse_args()
+	finish_args(args)
 	powerline = ShellPowerline(args, run_once=True)
 	rendered = powerline.render(
 		width=args.width,
