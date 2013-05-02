@@ -19,6 +19,7 @@
 		"network_load": { "fg": "gray8", "bg": "gray0" },
 		"network_load_gradient": { "fg": "green_yellow_orange_red", "bg": "gray0" },
 		"system_load": { "fg": "gray8", "bg": "gray0" },
-		"system_load_gradient": { "fg": "green_yellow_orange_red", "bg": "gray0" }
+		"system_load_gradient": { "fg": "green_yellow_orange_red", "bg": "gray0" },
+		"environment": { "fg": "gray8", "bg": "gray0" }
 	}
 }

@@ -28,7 +28,8 @@
 		"line_current_symbol": { "fg": "gray1", "bg": "gray10" },
 		"virtcol_current_gradient": { "fg": "dark_GREEN_Orange_red", "bg": "gray10" },
 		"col_current": { "fg": "gray6", "bg": "gray10" },
-		"modified_buffers": { "fg": "brightyellow", "bg": "gray2" }
+		"modified_buffers": { "fg": "brightyellow", "bg": "gray2" },
+		"environment": { "fg": "gray8", "bg": "gray2" }
 	},
 	"mode_translations": {
 		"nc": {
