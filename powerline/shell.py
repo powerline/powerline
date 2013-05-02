@@ -53,6 +53,7 @@ def get_argparser(parser=None, *args, **kwargs):
 	p.add_argument('-c', '--config', metavar='KEY.KEY=VALUE', action='append')
 	p.add_argument('-t', '--theme_option', metavar='THEME.KEY.KEY=VALUE', action='append')
 	p.add_argument('-p', '--config_path', metavar='PATH')
+	p.add_argument('-R', '--renderer_arg', metavar='KEY="VAL"', type=lambda a: dict([parsedotval(a)]))
 	return p
 
 

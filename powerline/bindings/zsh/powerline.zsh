@@ -1,7 +1,8 @@
 _powerline_tmux_setenv() {
 	emulate -L zsh
 	if [[ -n "$TMUX" ]]; then
-		tmux setenv TMUX_"$1"_$(tmux display -p "#D" | tr -d %) "$2"
+		tmux setenv -g TMUX_"$1"_$(tmux display -p "#D" | tr -d %) "$2"
+		tmux refresh -S
 	fi
 }
 
