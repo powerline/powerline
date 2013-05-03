@@ -11,7 +11,7 @@ except ImportError:
 from powerline.bindings.vim import vim_get_func, getbufvar
 from powerline.theme import requires_segment_info
 from powerline.lib import add_divider_highlight_group
-from powerline.lib.vcs import guess
+from powerline.lib.vcs import guess, tree_status
 from powerline.lib.humanize_bytes import humanize_bytes
 from powerline.lib import wraps_saveargs as wraps
 from collections import defaultdict
@@ -325,7 +325,6 @@ def branch(pl, segment_info, status_colors=True):
 			branch = repo.branch()
 			scol = ['branch']
 			if status_colors:
-				from powerline.lib.vcs import tree_status
 				status = tree_status(repo, pl)
 				scol.insert(0, 'branch_dirty' if status and status.strip() else 'branch_clean')
 			return [{
