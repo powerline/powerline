@@ -11,7 +11,7 @@ from multiprocessing import cpu_count as _cpu_count
 
 from powerline.lib import add_divider_highlight_group
 from powerline.lib.url import urllib_read, urllib_urlencode
-from powerline.lib.vcs import guess
+from powerline.lib.vcs import guess, tree_status
 from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment, with_docstring
 from powerline.lib.monotonic import monotonic
 from powerline.lib.humanize_bytes import humanize_bytes
@@ -53,7 +53,6 @@ def branch(pl, segment_info, status_colors=False):
 		branch = repo.branch()
 		scol = ['branch']
 		if status_colors:
-			from powerline.lib.vcs import tree_status
 			status = tree_status(repo, pl)
 			scol.insert(0, 'branch_dirty' if status and status.strip() else 'branch_clean')
 		return [{
