@@ -201,3 +201,23 @@ def guess(path):
 				except:
 					pass
 	return None
+
+def debug():
+	''' To use run python -c "from powerline.lib.vcs import debug; debug()" some_file_to_watch '''
+	import sys
+	dest = sys.argv[-1]
+	repo = guess(dest)
+	if repo is None:
+		print ('%s is not a recognized vcs repo' % dest)
+		raise SystemExit(1)
+	print ('Watching %s' % dest)
+	print ('Press Ctrl-C to exit.')
+	try:
+		while True:
+			if os.path.isdir(dest):
+				print ('Branch name: %s Status: %s' % (repo.branch(), repo.status()))
+			else:
+				print ('File status: %s' % repo.status(dest))
+			raw_input('Press Enter to check again: ')
+	except KeyboardInterrupt:
+		pass
