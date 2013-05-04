@@ -307,7 +307,7 @@ def modified_buffers(pl, text='+ ', join_str=','):
 	return None
 
 @requires_segment_info
-def branch(pl, segment_info, status_colors=True):
+def branch(pl, segment_info, status_colors=False):
 	'''Return the current working branch.
 
 	:param bool status_colors:
