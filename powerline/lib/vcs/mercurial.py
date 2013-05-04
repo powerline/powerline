@@ -1,7 +1,19 @@
 # vim:fileencoding=utf-8:noet
 from __future__ import absolute_import
+
+import os
+
 from mercurial import hg, ui, match
 
+from powerline.lib.vcs import get_branch_name, get_file_status
+
+def branch_name_from_config_file(directory, config_file):
+	try:
+		with open(config_file, 'rb') as f:
+			raw = f.read()
+		return raw.decode('utf-8', 'replace').strip()
+	except Exception:
+		return 'default'
 
 class Repository(object):
 	__slots__ = ('directory', 'ui')
@@ -11,13 +23,13 @@ class Repository(object):
 	repo_statuses_str = (None, 'D ', ' U', 'DU')
 
 	def __init__(self, directory):
-		self.directory = directory
+		self.directory = os.path.abspath(directory)
 		self.ui = ui.ui()
 
-	def _repo(self):
+	def _repo(self, directory):
 		# Cannot create this object once and use always: when repository updates
 		# functions emit invalid results
-		return hg.repository(self.ui, self.directory)
+		return hg.repository(self.ui, directory)
 
 	def status(self, path=None):
 		'''Return status of repository or file.
@@ -32,7 +44,13 @@ class Repository(object):
 		"R"emoved, "D"eleted (removed from filesystem, but still tracked),
 		"U"nknown, "I"gnored, (None)Clean.
 		'''
-		repo = self._repo()
+		if path:
+			return get_file_status(self.directory, os.path.join(self.directory, '.hg', 'dirstate'),
+					path, '.hgignore', self.do_status)
+		return self.do_status(self.directory, path)
+
+	def do_status(self, directory, path):
+		repo = self._repo(directory)
 		if path:
 			m = match.match(None, None, [path], exact=True)
 			statuses = repo.status(match=m, unknown=True, ignored=True)
@@ -48,4 +66,5 @@ class Repository(object):
 			return self.repo_statuses_str[resulting_status]
 
 	def branch(self):
-		return self._repo().dirstate.branch()
+		config_file = os.path.join(self.directory, '.hg', 'branch')
+		return get_branch_name(self.directory, config_file, branch_name_from_config_file)
