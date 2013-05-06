@@ -9,3 +9,4 @@ if python -c 'import sys; sys.exit(1 * (sys.version_info[0] != 2))' ; then
 		pip install unittest2 argparse
 	fi
 fi
+true

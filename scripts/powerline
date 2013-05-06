@@ -15,7 +15,7 @@ if __name__ == '__main__':
 	args = get_argparser(description=__doc__).parse_args()
 	finish_args(args)
 	powerline = ShellPowerline(args, run_once=True)
-	segment_info = {'args': args, 'environ': os.environ},
+	segment_info = {'args': args, 'environ': os.environ}
 	if args.renderer_arg:
 		segment_info.update(args.renderer_arg)
 	rendered = powerline.render(
