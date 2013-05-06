@@ -1,6 +1,6 @@
 {
 	"common": {
-		"term_truecolor": false,
+		"term_truecolor": true,
 		"dividers": {
 			"left": {
 				"hard": " ",
@@ -37,6 +37,8 @@
 			"local_themes": {
 				"cmdwin": "cmdwin",
 				"help": "help",
+				"unite": "unite",
+				"tagbar": "tagbar",
 				"quickfix": "quickfix"
 			}
 		},
