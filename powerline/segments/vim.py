@@ -8,13 +8,16 @@ try:
 except ImportError:
 	vim = {}  # NOQA
 
+from subprocess import Popen, PIPE
 from powerline.bindings.vim import vim_get_func, getbufvar
 from powerline.theme import requires_segment_info
 from powerline.lib import add_divider_highlight_group
 from powerline.lib.vcs import guess, tree_status
 from powerline.lib.humanize_bytes import humanize_bytes
+from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment, with_docstring
 from powerline.lib import wraps_saveargs as wraps
 from collections import defaultdict
+
 
 vim_funcs = {
 	'virtcol': vim_get_func('virtcol', rettype=int),
@@ -22,6 +25,7 @@ vim_funcs = {
 	'expand': vim_get_func('expand', rettype=str),
 	'bufnr': vim_get_func('bufnr', rettype=int),
 	'line2byte': vim_get_func('line2byte', rettype=int),
+	'exists': vim_get_func('exists', rettype=int),
 }
 
 vim_modes = {
@@ -197,7 +201,7 @@ def file_size(pl, suffix='B', si_prefix=False):
 		use SI prefix, e.g. MB instead of MiB
 	:return: file size or None if the file isn't saved or if the size is too big to fit in a number
 	'''
-	# Note: returns file size in &encoding, not in &fileencoding. But returned 
+	# Note: returns file size in &encoding, not in &fileencoding. But returned
 	# size is updated immediately; and it is valid for any buffer
 	file_size = vim_funcs['line2byte'](len(vim.current.buffer) + 1) - 1
 	return humanize_bytes(file_size, suffix, si_prefix)
@@ -355,3 +359,72 @@ def file_vcs_status(pl, segment_info):
 					'highlight_group': ['file_vcs_status_' + status, 'file_vcs_status'],
 					})
 			return ret
+
+
+class RVMSegment(ThreadedSegment):
+	interval = 10
+
+	def update(self, old_rvm_current):
+		try:
+			p = Popen(['rvm', 'current'], shell=False, stdout=PIPE, stderr=PIPE)
+			p.stderr.close()
+			return p.stdout.read().rstrip()
+		except OSError:
+			return None
+
+	def render(self, update_value, **kwargs):
+		return [{'contents': update_value,
+			'highlight_group': ['ruby_version']}]
+
+
+rvm_current = with_docstring(RVMSegment(),
+'''Return the rvm current ruby name.
+
+Highlight groups used: ``ruby_version``.
+''')
+
+
+class RbEnvSegment(ThreadedSegment):
+	interval = 10
+
+	def update(self, old_rbenv_version):
+		try:
+			p = Popen(['rbenv', 'version'], shell=False, stdout=PIPE, stderr=PIPE)
+			p.stderr.close()
+			return p.stdout.read().split()[0]
+		except OSError:
+			return None
+
+	def render(self, update_value, **kwargs):
+		return [{'contents': update_value,
+			'highlight_group': ['ruby_version']}]
+
+
+rbenv_version = with_docstring(RbEnvSegment(),
+'''Return the rbenv ruby version.
+
+Highlight groups used: ``ruby_version``.
+''')
+
+
+@window_cached
+def syntastic_segment(pl):
+	'''Return the syntastic statusline flag
+	'''
+	if int(vim_funcs['exists']('*SyntasticStatuslineFlag')) > 0:
+		syntastic_flag_func = vim_get_func('SyntasticStatuslineFlag', rettype=str)
+		return str(syntastic_flag_func())
+	else:
+		return None
+
+
+@window_cached
+def unite_segment(pl):
+	'''Return the unite.vim statusline
+	'''
+	if int(vim_funcs['exists']('*unite#get_status_string')) > 0:
+		unite_stl_func = vim_get_func('unite#get_status_string', rettype=str)
+		return str(unite_stl_func())
+	else:
+		return None
+
