@@ -15,15 +15,13 @@ _powerline_tmux_set_columns() {
 }
 
 _powerline_install_precmd() {
-	emulate zsh
+	emulate -L zsh
 	for f in "${precmd_functions[@]}"; do
 		if [[ "$f" = "_powerline_precmd" ]]; then
 			return
 		fi
 	done
 	chpwd_functions+=( _powerline_tmux_set_pwd )
-	setopt promptpercent
-	setopt promptsubst
 	if zmodload zsh/zpython &>/dev/null ; then
 		zpython 'from powerline.bindings.zsh import setup as powerline_setup'
 		zpython 'powerline_setup()'
@@ -37,4 +35,6 @@ _powerline_install_precmd() {
 trap "_powerline_tmux_set_columns" SIGWINCH
 _powerline_tmux_set_columns
 
+setopt promptpercent
+setopt promptsubst
 _powerline_install_precmd
