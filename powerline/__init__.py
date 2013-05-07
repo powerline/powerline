@@ -272,7 +272,7 @@ class Powerline(object):
 
 		:return: list of paths
 		'''
-		config_home = os.environ.get('XDG_CONFIG_HOME', os.path.join(os.path.expanduser('~'), '.config'))
+		config_home = os.environ.get('POWERLINE_CONFIG_HOME', os.environ.get('XDG_CONFIG_HOME', os.path.join(os.path.expanduser('~'), '.config')))
 		config_path = os.path.join(config_home, 'powerline')
 		config_paths = [config_path]
 		config_dirs = os.environ.get('XDG_CONFIG_DIRS', DEFAULT_SYSTEM_CONFIG_DIR)
