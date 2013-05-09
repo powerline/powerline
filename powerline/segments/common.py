@@ -1015,10 +1015,10 @@ else:
 		raise NotImplementedError
 
 
-def battery(pl, intervals=5, gamify=False):
+def battery(pl, steps=5, gamify=False):
 	'''Return battery charge status.
 
-	:param int intervals:
+	:param int steps:
 		number of discrete steps to show between 0% and 100% capacity
 	:param bool gamify:
 		measure in hearts (♥) instead of percentages
@@ -1028,8 +1028,8 @@ def battery(pl, intervals=5, gamify=False):
 	except NotImplementedError:
 		pl.warn('Unable to get battery capacity.')
 		return None
-	numer = floor(intervals * capacity / 100)
-	denom = intervals
+	numer = floor(steps * capacity / 100)
+	denom = steps
 	full_heart = '\u2665'
 	open_heart = '\u2661'
 	if gamify:
