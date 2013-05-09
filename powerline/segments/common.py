@@ -1005,10 +1005,14 @@ class NowPlayingSegment(object):
 		}
 now_playing = NowPlayingSegment()
 
+
 if os.path.exists('/sys/class/power_supply/BAT0/capacity'):
 	def _get_capacity():
 		with open('/sys/class/power_supply/BAT0/capacity', 'r') as f:
 			return int(float(f.readline().split()[0]))
+else:
+	def _get_capacity():
+		raise NotImplementedError
 
 
 def battery(pl, intervals=5):
