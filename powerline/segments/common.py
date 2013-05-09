@@ -1022,17 +1022,36 @@ def battery(pl, steps=5, gamify=False):
 		number of discrete steps to show between 0% and 100% capacity
 	:param bool gamify:
 		measure in hearts (♥) instead of percentages
+
+	Highlight groups used: ``battery_gradient`` (gradient), ``battery``.
 	'''
 	try:
 		capacity = _get_capacity()
 	except NotImplementedError:
 		pl.warn('Unable to get battery capacity.')
 		return None
+	ret = []
 	numer = floor(steps * capacity / 100)
 	denom = steps
 	full_heart = '♥'
 	open_heart = '♡'
 	if gamify:
-		return (full_heart * numer) + (open_heart * (denom - numer))
+		ret.append({
+			'contents': full_heart * numer,
+			'draw_soft_divider': False,
+			'highlight_group': ['battery_gradient', 'battery'],
+			'gradient_level': 10
+		})
+		ret.append({
+			'contents': open_heart * (denom - numer),
+			'draw_soft_divider': False,
+			'highlight_group': ['battery_gradient', 'battery'],
+			'gradient_level': 90
+		})
 	else:
-		return '{:3.0%}'.format(numer / denom)
+		ret.append({
+			'contents': '{:3.0%}'.format(numer / denom),
+			'highlight_group': ['battery_gradient', 'battery'],
+			'gradient_level': numer / denom
+		})
+	return ret
