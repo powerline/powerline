@@ -340,6 +340,9 @@ class TestCommon(TestCase):
 		# TODO
 		pass
 
+	def test_battery(self):
+		# TODO
+		pass
 
 class TestVim(TestCase):
 	def test_mode(self):

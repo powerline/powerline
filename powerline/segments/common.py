@@ -8,6 +8,7 @@ import sys
 from datetime import datetime
 import socket
 from multiprocessing import cpu_count as _cpu_count
+from math import floor
 
 from powerline.lib import add_divider_highlight_group
 from powerline.lib.url import urllib_read, urllib_urlencode
@@ -1003,3 +1004,23 @@ class NowPlayingSegment(object):
 			'total': now_playing[4],
 		}
 now_playing = NowPlayingSegment()
+
+if os.path.exists('/sys/class/power_supply/BAT0/capacity'):
+	def _get_capacity():
+		with open('/sys/class/power_supply/BAT0/capacity', 'r') as f:
+			return int(float(f.readline().split()[0]))
+
+
+def battery(pl, intervals=5):
+	'''Return battery charge status.
+
+	:param int intervals:
+		number of discrete steps to show between 0% and 100% capacity
+	'''
+	try:
+		capacity = _get_capacity()
+	except NotImplementedError:
+		pl.warn('Unable to get battery capacity.')
+		return None
+	show = 1 / intervals * floor(intervals * capacity / 100)
+	return '{:3.0%}'.format(show)
