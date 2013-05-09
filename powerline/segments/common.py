@@ -1030,8 +1030,8 @@ def battery(pl, steps=5, gamify=False):
 		return None
 	numer = floor(steps * capacity / 100)
 	denom = steps
-	full_heart = '\u2665'
-	open_heart = '\u2661'
+	full_heart = '♥'
+	open_heart = '♡'
 	if gamify:
 		return (full_heart * numer) + (open_heart * (denom - numer))
 	else:
