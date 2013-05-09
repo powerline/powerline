@@ -1034,7 +1034,6 @@ def battery(pl, steps=5, gamify=False):
 	numer = floor(steps * capacity / 100)
 	denom = steps
 	full_heart = '♥'
-	open_heart = '♡'
 	if gamify:
 		ret.append({
 			'contents': full_heart * numer,
@@ -1043,7 +1042,7 @@ def battery(pl, steps=5, gamify=False):
 			'gradient_level': 10
 		})
 		ret.append({
-			'contents': open_heart * (denom - numer),
+			'contents': full_heart * (denom - numer),
 			'draw_soft_divider': False,
 			'highlight_group': ['battery_gradient', 'battery'],
 			'gradient_level': 90
