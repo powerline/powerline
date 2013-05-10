@@ -1039,13 +1039,13 @@ def battery(pl, steps=5, gamify=False):
 			'contents': full_heart * numer,
 			'draw_soft_divider': False,
 			'highlight_group': ['battery_gradient', 'battery'],
-			'gradient_level': 10
+			'gradient_level': 99
 		})
 		ret.append({
 			'contents': full_heart * (denom - numer),
 			'draw_soft_divider': False,
 			'highlight_group': ['battery_gradient', 'battery'],
-			'gradient_level': 90
+			'gradient_level': 1
 		})
 	else:
 		ret.append({
