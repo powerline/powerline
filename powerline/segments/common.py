@@ -1051,6 +1051,6 @@ def battery(pl, steps=5, gamify=False):
 		ret.append({
 			'contents': '{:3.0%}'.format(numer / denom),
 			'highlight_group': ['battery_gradient', 'battery'],
-			'gradient_level': numer / denom
+			'gradient_level': numer * 100.0 / denom
 		})
 	return ret
