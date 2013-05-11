@@ -42,13 +42,13 @@ else:
 
 if hasattr(vim, 'vars'):
 	def vim_getvar(varname):
-		return vim.vars[bytes(varname)]
+		return vim.vars[str(varname)]
 elif hasattr(vim, 'bindeval'):
 	_vim_globals = vim.bindeval('g:')
 
 	def vim_getvar(varname):  # NOQA
 		try:
-			return _vim_globals[bytes(varname)]
+			return _vim_globals[str(varname)]
 		except (KeyError, IndexError):
 			raise KeyError(varname)
 else:
