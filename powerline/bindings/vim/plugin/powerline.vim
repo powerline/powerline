@@ -41,38 +41,13 @@ finally
 endtry
 
 if !get(g:, 'powerline_debugging_pyeval') && exists('*'. s:powerline_pyeval)
-	let s:pyeval = function(s:powerline_pyeval)
+	let PowerlinePyeval = function(s:powerline_pyeval)
 else
 	exec s:powerline_pycmd 'import json, vim'
-	exec "function! s:pyeval(e)\n".
+	exec "function! PowerlinePyeval(e)\n".
 		\	s:powerline_pycmd." vim.command('return ' + json.dumps(eval(vim.eval('a:e'))))\n".
 		\"endfunction"
 endif
-
-let s:last_window_id = 0
-function! s:GetWinID(winnr)
-	let r = getwinvar(a:winnr, 'window_id')
-	if empty(r)
-		let r = s:last_window_id
-		let s:last_window_id += 1
-		call setwinvar(a:winnr, 'window_id', r)
-	endif
-	" Without this condition it triggers unneeded statusline redraw
-	if getwinvar(a:winnr, '&statusline') isnot# '%!Powerline('.r.')'
-		call setwinvar(a:winnr, '&statusline', '%!Powerline('.r.')')
-	endif
-	return r
-endfunction
-
-function! Powerline(window_id)
-	let winidx = index(map(range(1, winnr('$')), 's:GetWinID(v:val)'), a:window_id)
-	let current = w:window_id is# a:window_id
-	return s:pyeval('powerline.render('. a:window_id .', '. winidx .', '. current .')')
-endfunction
-
-function! PowerlineNew()
-	call map(range(1, winnr('$')), 's:GetWinID(v:val)')
-endfunction
 
 function! PowerlineRegisterCachePurgerEvent(event)
 	exec s:powerline_pycmd 'from powerline.segments.vim import launchevent as powerline_launchevent'
@@ -91,5 +66,4 @@ exec s:powerline_pycmd 'powerline = VimPowerline()'
 exec s:powerline_pycmd 'del VimPowerline'
 " Is immediately changed when PowerlineNew() function is run. Good for global 
 " value.
-set statusline=%!PowerlineNew()
-call PowerlineNew()
+set statusline=%!PowerlinePyeval('powerline.new_window()')
