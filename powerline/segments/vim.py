@@ -51,29 +51,6 @@ bufeventfuncs = defaultdict(lambda: [])
 defined_events = set()
 
 
-def purgeonevents_reg(func, events, is_buffer_event=False):
-	if is_buffer_event:
-		cureventfuncs = bufeventfuncs
-	else:
-		cureventfuncs = eventfuncs
-	for event in events:
-		if event not in defined_events:
-			vim.eval('PowerlineRegisterCachePurgerEvent("' + event + '")')
-			defined_events.add(event)
-		cureventfuncs[event].append(func)
-
-
-def launchevent(event):
-	global eventfuncs
-	global bufeventfuncs
-	for func in eventfuncs[event]:
-		func()
-	if bufeventfuncs[event]:
-		buffer = vim.buffers[int(vim_funcs['expand']('<abuf>')) - 1]
-		for func in bufeventfuncs[event]:
-			func(buffer)
-
-
 # TODO Remove cache when needed
 def window_cached(func):
 	cache = {}

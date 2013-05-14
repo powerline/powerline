@@ -49,13 +49,6 @@ else
 		\"endfunction"
 endif
 
-function! PowerlineRegisterCachePurgerEvent(event)
-	exec s:powerline_pycmd 'from powerline.segments.vim import launchevent as powerline_launchevent'
-	augroup Powerline
-		exec 'autocmd' a:event '*' s:powerline_pycmd.' powerline_launchevent("'.a:event.'")'
-	augroup END
-endfunction
-
 augroup Powerline
 	autocmd! ColorScheme * :exec s:powerline_pycmd 'powerline.reset_highlight()'
 	autocmd! VimEnter    * :redrawstatus!
