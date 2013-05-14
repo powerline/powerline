@@ -82,7 +82,7 @@ class FileStatusCache(dict):
 			parent = nparent
 			ignore_files.add(os.path.join(parent, ignore_file_name))
 		for f in extra_ignore_files:
-			ignore_files.add(os.path.join(directory, *f.split('/')))
+			ignore_files.add(f)
 		self.keypath_ignore_map[keypath] = ignore_files
 		for ignf in ignore_files:
 			self.ignore_map[ignf].add(keypath)
