@@ -37,7 +37,7 @@ def do_status(directory, path, func):
 				raw = f.read().partition(b':')[2].strip()
 				gitd = os.path.abspath(os.path.join(directory, raw))
 		return get_file_status(directory, os.path.join(gitd, 'index'),
-					path, '.gitignore', func, extra_ignore_files=(os.path.join(gitd, '.git/info/exclude'),))
+					path, '.gitignore', func, extra_ignore_files=(os.path.join(gitd, 'info/exclude'),))
 	return func(directory, path)
 
 
