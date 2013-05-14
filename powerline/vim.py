@@ -9,6 +9,9 @@ from powerline.matcher import gen_matcher_getter
 import vim
 from itertools import count
 
+if not hasattr(vim, 'bindeval'):
+	import json
+
 
 vim_exists = vim_get_func('exists', rettype=int)
 vim_getwinvar = vim_get_func('getwinvar')
@@ -26,13 +29,11 @@ def _override_from(config, override_varname):
 	return config
 
 
-WINDOW_STASUSLINE = '%!PowerlinePyeval(\'powerline.statusline({0})\')'
-
-
 class VimPowerline(Powerline):
-	def __init__(self):
+	def __init__(self, pyeval='PowerlinePyeval'):
 		super(VimPowerline, self).__init__('vim')
 		self.last_window_id = 1
+		self.window_statusline = '%!' + pyeval + '(\'powerline.statusline({0})\')'
 
 	def add_local_theme(self, key, config):
 		'''Add local themes at runtime (during vim session).
@@ -111,7 +112,7 @@ class VimPowerline(Powerline):
 					curwindow_id = self.last_window_id
 					self.last_window_id += 1
 					window.vars['powerline_window_id'] = curwindow_id
-				statusline = WINDOW_STASUSLINE.format(curwindow_id)
+				statusline = self.window_statusline.format(curwindow_id)
 				if window.options['statusline'] != statusline:
 					window.options['statusline'] = statusline
 				if curwindow_id == window_id if window_id else window is vim.current.window:
@@ -129,7 +130,7 @@ class VimPowerline(Powerline):
 					curwindow_id = self.last_window_id
 					self.last_window_id += 1
 					vim_setwinvar(winnr, 'powerline_window_id', curwindow_id)
-				statusline = WINDOW_STASUSLINE.format(curwindow_id)
+				statusline = self.window_statusline.format(curwindow_id)
 				if vim_getwinvar(winnr, '&statusline') != statusline:
 					vim_setwinvar(winnr, '&statusline', statusline)
 				if curwindow_id == window_id if window_id else window is vim.current.window:
@@ -146,3 +147,46 @@ class VimPowerline(Powerline):
 	def new_window(self):
 		window, window_id, winnr = self.win_idx(None)
 		return self.render(window, window_id, winnr)
+
+	if not hasattr(vim, 'bindeval'):
+		# Method for PowerlinePyeval function. Is here to reduce the number of 
+		# requirements to __main__ globals to just one powerline object 
+		# (previously it required as well vim and json)
+		@staticmethod
+		def pyeval():
+			vim.command('return ' + json.dumps(eval(vim.eval('a:e'))))
+
+
+def setup(pyeval=None, pycmd=None):
+	import sys
+	import __main__
+	if not pyeval:
+		pyeval = 'pyeval' if sys.version_info < (3,) else 'py3eval'
+	if not pycmd:
+		pycmd = 'python' if sys.version_info < (3,) else 'python3'
+
+	# pyeval() and vim.bindeval were both introduced in one patch
+	if not hasattr(vim, 'bindeval'):
+		vim.command(('''
+				function! PowerlinePyeval(e)
+					{pycmd} powerline.pyeval()
+				endfunction
+			''').format(pycmd=pycmd))
+		pyeval = 'PowerlinePyeval'
+
+	powerline = VimPowerline(pyeval)
+	__main__.powerline = powerline
+
+	# Cannot have this in one line due to weird newline handling (in :execute 
+	# context newline is considered part of the command in just the same cases 
+	# when bar is considered part of the command (unless defining function 
+	# inside :execute)). vim.command is :execute equivalent regarding this case.
+	vim.command('augroup Powerline')
+	vim.command('	autocmd! ColorScheme * :{pycmd} powerline.reset_highlight()'.format(pycmd=pycmd))
+	vim.command('	autocmd! VimEnter    * :redrawstatus!')
+	vim.command('	autocmd! VimLeavePre * :{pycmd} powerline.shutdown()'.format(pycmd=pycmd))
+	vim.command('augroup END')
+
+	# Is immediately changed after new_window function is run. Good for global 
+	# value.
+	vim.command('set statusline=%!{pyeval}(\'powerline.new_window()\')'.format(pyeval=pyeval))
