@@ -154,7 +154,9 @@ class VimPowerline(Powerline):
 		# (previously it required as well vim and json)
 		@staticmethod
 		def pyeval():
-			vim.command('return ' + json.dumps(eval(vim.eval('a:e'))))
+			import __main__
+			vim.command('return ' + json.dumps(eval(vim.eval('a:e'),
+													__main__.__dict__)))
 
 
 def setup(pyeval=None, pycmd=None):
