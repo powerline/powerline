@@ -284,6 +284,7 @@ class _Window(object):
 		global _window_id
 		self.cursor = cursor
 		self.width = width
+		self.number = len(windows) + 1
 		if buffer:
 			if type(buffer) is _Buffer:
 				self.buffer = buffer
@@ -371,6 +372,10 @@ class _Current(object):
 	def buffer(self):
 		return buffers[_buffer()]
 
+	@property
+	def window(self):
+		return windows[_window - 1]
+
 
 current = _Current()
 
@@ -450,6 +455,13 @@ def _edit(name=None):
 def _new(name=None):
 	global _window
 	_Window(buffer={'name': name})
+	_window = len(windows)
+
+
+@_vim
+def _split():
+	global _window
+	_Window(buffer=buffers[_buffer()])
 	_window = len(windows)
 
 
@@ -587,10 +599,34 @@ class _WithDict(object):
 			self.d.pop(k)
 
 
+class _WithSplit(object):
+	def __enter__(self):
+		_split()
+
+	def __exit__(self, *args):
+		_close(2, wipe=False)
+
+
+class _WithBufName(object):
+	def __init__(self, new):
+		self.new = new
+
+	def __enter__(self):
+		buffer = buffers[_buffer()]
+		self.buffer = buffer
+		self.old = buffer.name
+		buffer.name = self.new
+
+	def __exit__(self, *args):
+		self.buffer.name = self.old
+
+
 @_vim
 def _with(key, *args, **kwargs):
 	if key == 'buffer':
 		return _WithNewBuffer(_edit, *args, **kwargs)
+	elif key == 'bufname':
+		return _WithBufName(*args, **kwargs)
 	elif key == 'mode':
 		return _WithMode(*args, **kwargs)
 	elif key == 'bufoptions':
@@ -599,3 +635,5 @@ def _with(key, *args, **kwargs):
 		return _WithDict(_options, **kwargs)
 	elif key == 'globals':
 		return _WithDict(_g, **kwargs)
+	elif key == 'split':
+		return _WithSplit()
