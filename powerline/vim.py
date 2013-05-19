@@ -2,7 +2,7 @@
 
 from __future__ import absolute_import
 
-from powerline.bindings.vim import vim_get_func
+from powerline.bindings.vim import vim_get_func, vim_getvar
 from powerline import Powerline
 from powerline.lib import mergedicts
 from powerline.matcher import gen_matcher_getter
@@ -13,19 +13,12 @@ if not hasattr(vim, 'bindeval'):
 	import json
 
 
-vim_exists = vim_get_func('exists', rettype=int)
-vim_getwinvar = vim_get_func('getwinvar')
-vim_setwinvar = vim_get_func('setwinvar')
-
-
 def _override_from(config, override_varname):
-	if vim_exists(override_varname):
-		# FIXME vim.eval has problem with numeric types, vim.bindeval may be 
-		# absent (and requires converting values to python built-in types), 
-		# vim.eval with typed call like the one I implemented in frawor is slow. 
-		# Maybe eval(vime.eval('string({0})'.format(override_varname)))?
-		overrides = vim.eval(override_varname)
-		mergedicts(config, overrides)
+	try:
+		overrides = vim_getvar(override_varname)
+	except KeyError:
+		return config
+	mergedicts(config, overrides)
 	return config
 
 
@@ -64,14 +57,14 @@ class VimPowerline(Powerline):
 			return True
 
 	def load_main_config(self):
-		return _override_from(super(VimPowerline, self).load_main_config(), 'g:powerline_config_overrides')
+		return _override_from(super(VimPowerline, self).load_main_config(), 'powerline_config_overrides')
 
 	def load_theme_config(self, name):
 		# Note: themes with non-[a-zA-Z0-9_] names are impossible to override 
 		# (though as far as I know exists() won’t throw). Won’t fix, use proper 
 		# theme names.
 		return _override_from(super(VimPowerline, self).load_theme_config(name),
-						'g:powerline_theme_overrides__' + name)
+						'powerline_theme_overrides__' + name)
 
 	def get_local_themes(self, local_themes):
 		if not local_themes:
@@ -82,9 +75,9 @@ class VimPowerline(Powerline):
 					for key, val in local_themes.items()))
 
 	def get_config_paths(self):
-		if vim_exists('g:powerline_config_path'):
-			return [vim.eval('g:powerline_config_path')]
-		else:
+		try:
+			return [vim_getvar('powerline_config_path')]
+		except KeyError:
 			return super(VimPowerline, self).get_config_paths()
 
 	@staticmethod
@@ -120,19 +113,22 @@ class VimPowerline(Powerline):
 					r = (window, curwindow_id, window.number)
 			return r
 	else:
+		_vim_getwinvar = staticmethod(vim_get_func('getwinvar'))
+		_vim_setwinvar = staticmethod(vim_get_func('setwinvar'))
+
 		def win_idx(self, window_id):  # NOQA
 			r = None
 			for winnr, window in zip(count(1), vim.windows):
-				curwindow_id = vim_getwinvar(winnr, 'powerline_window_id')
+				curwindow_id = self._vim_getwinvar(winnr, 'powerline_window_id')
 				if curwindow_id:
 					curwindow_id = int(curwindow_id)
 				else:
 					curwindow_id = self.last_window_id
 					self.last_window_id += 1
-					vim_setwinvar(winnr, 'powerline_window_id', curwindow_id)
+					self._vim_setwinvar(winnr, 'powerline_window_id', curwindow_id)
 				statusline = self.window_statusline.format(curwindow_id)
-				if vim_getwinvar(winnr, '&statusline') != statusline:
-					vim_setwinvar(winnr, '&statusline', statusline)
+				if self._vim_getwinvar(winnr, '&statusline') != statusline:
+					self._vim_setwinvar(winnr, '&statusline', statusline)
 				if curwindow_id == window_id if window_id else window is vim.current.window:
 					assert r is None, "Non-unique window ID"
 					r = (window, curwindow_id, winnr)

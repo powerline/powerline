@@ -7,13 +7,7 @@ try:
 except ImportError:
 	vim = {}
 
-try:
-	_vim_globals = vim.bindeval('g:')
-
-	def vim_set_global_var(var, val):
-		'''Set a global var in vim using bindeval().'''
-		_vim_globals[var] = val
-
+if hasattr(vim, 'bindeval'):
 	def vim_get_func(f, rettype=None):
 		'''Return a vim function binding.'''
 		try:
@@ -23,15 +17,8 @@ try:
 			return func
 		except vim.error:
 			return None
-except AttributeError:
+else:
 	import json
-
-	def vim_set_global_var(var, val):  # NOQA
-		'''Set a global var in vim using vim.command().
-
-		This is a fallback function for older vim versions.
-		'''
-		vim.command('let g:{0}={1}'.format(var, json.dumps(val)))
 
 	class VimFunc(object):
 		'''Evaluate a vim function using vim.eval().
@@ -51,6 +38,36 @@ except AttributeError:
 			return r
 
 	vim_get_func = VimFunc
+
+
+if hasattr(vim, 'vars'):
+	def vim_getvar(varname):
+		return vim.vars[bytes(varname)]
+elif hasattr(vim, 'bindeval'):
+	_vim_globals = vim.bindeval('g:')
+
+	def vim_getvar(varname):  # NOQA
+		try:
+			return _vim_globals[bytes(varname)]
+		except (KeyError, IndexError):
+			raise KeyError(varname)
+else:
+	_vim_exists = vim_get_func('exists', rettype=int)
+
+	def vim_getvar(varname):  # NOQA
+		varname = 'g:' + varname
+		if _vim_exists(varname):
+			return vim.eval(varname)
+		else:
+			raise KeyError(varname)
+
+if hasattr(vim, 'options'):
+	def vim_getbufoption(info, option):
+		return info['buffer'].options[option]
+else:
+	def vim_getbufoption(info, option):  # NOQA
+		return getbufvar(info['bufnr'], '&' + option)
+
 
 if sys.version_info < (3,) or not hasattr(vim, 'bindeval'):
 	getbufvar = vim_get_func('getbufvar')

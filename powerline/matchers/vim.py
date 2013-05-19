@@ -3,11 +3,11 @@
 from __future__ import absolute_import
 
 import os
-from powerline.bindings.vim import getbufvar
+from powerline.bindings.vim import vim_getbufoption
 
 
 def help(matcher_info):
-	return str(getbufvar(matcher_info['bufnr'], '&buftype')) == 'help'
+	return str(vim_getbufoption(matcher_info, 'buftype')) == 'help'
 
 
 def cmdwin(matcher_info):
@@ -16,4 +16,4 @@ def cmdwin(matcher_info):
 
 
 def quickfix(matcher_info):
-	return str(getbufvar(matcher_info['bufnr'], '&buftype')) == 'quickfix'
+	return str(vim_getbufoption(matcher_info, 'buftype')) == 'quickfix'
