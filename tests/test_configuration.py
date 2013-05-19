@@ -24,13 +24,10 @@ class TestConfig(TestCase):
 			self.assertEqual(len(buffers), len(json.load(f)['ext']['vim']['local_themes']))
 		outputs = {}
 		i = 0
-		mode = None
-		args = None
-		kwargs = None
 
 		with vim_module._with('split'):
 			with VimPowerline() as powerline:
-				def check_output(mode):
+				def check_output(mode, args, kwargs):
 					if mode == 'nc':
 						window = vim_module.windows[0]
 						window_id = 2
@@ -49,13 +46,13 @@ class TestConfig(TestCase):
 						exclude = set(('no', 'v', 'V', VBLOCK, 's', 'S', SBLOCK, 'R', 'Rv', 'c', 'cv', 'ce', 'r', 'rm', 'r?', '!'))
 						try:
 							for mode in ['n', 'nc', 'no', 'v', 'V', VBLOCK, 's', 'S', SBLOCK, 'i', 'R', 'Rv', 'c', 'cv', 'ce', 'r', 'rm', 'r?', '!']:
-								check_output(mode)
+								check_output(mode, None, None)
 								for args, kwargs in buffers:
 									i += 1
 									if mode in exclude:
 										continue
 									with vim_module._with(*args, **kwargs):
-										check_output(mode)
+										check_output(mode, args, kwargs)
 						finally:
 							vim_module._start_mode('n')
 
