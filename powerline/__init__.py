@@ -376,7 +376,10 @@ class Powerline(object):
 		current application.
 		'''
 		self.shutdown_event.set()
-		self.renderer.shutdown()
+		try:
+			self.renderer.shutdown()
+		except AttributeError:
+			pass
 		functions = (
 			self.on_main_change,
 			self.on_colors_change,

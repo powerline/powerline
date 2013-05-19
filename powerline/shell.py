@@ -28,7 +28,7 @@ class ShellPowerline(Powerline):
 
 	def load_theme_config(self, name):
 		r = super(ShellPowerline, self).load_theme_config(name)
-		if name in self.theme_option:
+		if self.theme_option and name in self.theme_option:
 			mergedicts(r, self.theme_option[name])
 		return r
 
