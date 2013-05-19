@@ -79,3 +79,21 @@ else:
 		if type(r) is bytes:
 			return r.decode('utf-8')
 		return r
+
+
+class VimEnviron(object):
+	@staticmethod
+	def __getitem__(key):
+		return vim.eval('$' + key)
+
+	@staticmethod
+	def get(key, default=None):
+		return vim.eval('$' + key) or default
+
+	@staticmethod
+	def __setitem__(key, value):
+		return vim.command('let $' + key + '="'
+					+ value.replace('"', '\\"').replace('\\', '\\\\').replace('\n', '\\n').replace('\0', '')
+					+ '"')
+
+environ = VimEnviron()

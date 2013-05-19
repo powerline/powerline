@@ -2,7 +2,7 @@
 
 from __future__ import absolute_import
 
-from powerline.bindings.vim import vim_get_func
+from powerline.bindings.vim import vim_get_func, environ
 from powerline.renderer import Renderer
 from powerline.colorscheme import ATTR_BOLD, ATTR_ITALIC, ATTR_UNDERLINE
 from powerline.theme import Theme
@@ -80,6 +80,7 @@ class VimRenderer(Renderer):
 			'mode': mode,
 			'window_id': window_id,
 			'winnr': winnr,
+			'environ': environ,
 		}
 		segment_info['buffer'] = segment_info['window'].buffer
 		segment_info['bufnr'] = segment_info['buffer'].number
