@@ -41,7 +41,7 @@ class TestConfig(TestCase):
 						self.fail('Duplicate in set #{0} ({1}) for mode {2!r} (previously defined in set #{3} ({4!r}) for mode {5!r})'.format(i, (args, kwargs), mode, *outputs[out]))
 					outputs[out] = (i, (args, kwargs), mode)
 
-				with vim_module._with('bufname', 'foo.txt'):
+				with vim_module._with('bufname', '/tmp/foo.txt'):
 					with vim_module._with('globals', powerline_config_path=cfg_path):
 						exclude = set(('no', 'v', 'V', VBLOCK, 's', 'S', SBLOCK, 'R', 'Rv', 'c', 'cv', 'ce', 'r', 'rm', 'r?', '!'))
 						try:

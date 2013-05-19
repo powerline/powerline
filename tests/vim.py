@@ -358,7 +358,9 @@ class _Buffer(object):
 		bufnr = self.number
 		if _buf_lines:
 			_buf_lines.pop(bufnr)
+		if _undostate:
 			_undostate.pop(bufnr)
+		if _undo_written:
 			_undo_written.pop(bufnr)
 
 
