@@ -1015,7 +1015,7 @@ else:
 		raise NotImplementedError
 
 
-def battery(pl, steps=5, gamify=False):
+def battery(pl, format='{:3.0%}', steps=5, gamify=False):
 	'''Return battery charge status.
 
 	:param int steps:
@@ -1049,7 +1049,7 @@ def battery(pl, steps=5, gamify=False):
 		})
 	else:
 		ret.append({
-			'contents': '{:3.0%}'.format(numer / denom),
+			'contents': format.format(numer / denom),
 			'highlight_group': ['battery_gradient', 'battery'],
 			'gradient_level': numer * 100.0 / denom
 		})
