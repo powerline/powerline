@@ -101,6 +101,10 @@
 		"blue_red": [
 			[39, 74, 68, 67, 103, 97, 96, 132, 131, 167, 203, 197],
 			["19b4fe", "1bb2fc", "1db1fa", "1faff8", "22aef6", "24adf4", "26abf2", "29aaf0", "2ba9ee", "2da7ec", "30a6ea", "32a5e8", "34a3e6", "36a2e4", "39a0e2", "3b9fe1", "3d9edf", "409cdd", "429bdb", "449ad9", "4798d7", "4997d5", "4b96d3", "4d94d1", "5093cf", "5292cd", "5490cb", "578fc9", "598dc7", "5b8cc6", "5e8bc4", "6089c2", "6288c0", "6487be", "6785bc", "6984ba", "6b83b8", "6e81b6", "7080b4", "727eb2", "757db0", "777cae", "797aac", "7b79ab", "7e78a9", "8076a7", "8275a5", "8574a3", "8772a1", "89719f", "8c709d", "8e6e9b", "906d99", "926b97", "956a95", "976993", "996791", "9c668f", "9e658e", "a0638c", "a3628a", "a56188", "a75f86", "a95e84", "ac5c82", "ae5b80", "b05a7e", "b3587c", "b5577a", "b75678", "ba5476", "bc5374", "be5273", "c05071", "c34f6f", "c54e6d", "c74c6b", "ca4b69", "cc4967", "ce4865", "d14763", "d34561", "d5445f", "d7435d", "da415b", "dc4059", "de3f58", "e13d56", "e33c54", "e53a52", "e83950", "ea384e", "ec364c", "ee354a", "f13448", "f33246", "f53144", "f83042", "fa2e40"]
+		],
+		"white_red": [
+			[231, 223, 216, 209, 196],
+			["ffffff", "fffe61", "fffcc4", "fffb28", "fff98b", "fff7ef", "fff651", "fff4b4", "fff318", "fff17b", "ffefdf", "ffee41", "ffeca4", "ffeb08", "ffe96b", "ffe7cf", "ffe631", "ffe494", "ffe2f8", "ffe15b", "ffdfbf", "ffde21", "ffdc84", "ffdae8", "ffd94b", "ffd7af", "ffd602", "ffd455", "ffd2aa", "ffd0fd", "ffcf50", "ffcda5", "ffcbf8", "ffca4b", "ffc8a0", "ffc6f3", "ffc546", "ffc39b", "ffc1ee", "ffc041", "ffbe96", "ffbce9", "ffbb3c", "ffb991", "ffb7e4", "ffb637", "ffb48c", "ffb2df", "ffb132", "ffaf87", "ffadda", "ffac2d", "ffaa82", "ffa8d5", "ffa728", "ffa57d", "ffa3d0", "ffa223", "ffa078", "ff9ecb", "ff9d1e", "ff9b73", "ff99c6", "ff9819", "ff966e", "ff94c1", "ff9314", "ff9169", "ff8fbc", "ff8e0f", "ff8c64", "ff8ab7", "ff890a", "ff875f", "ff81f4", "ff7c8a", "ff771f", "ff71b5", "ff6c4c", "ff66e1", "ff6177", "ff5c0c", "ff56a2", "ff5139", "ff4bce", "ff4664", "ff40f9", "ff3b8f", "ff3626", "ff30bb", "ff2b51", "ff25e6", "ff207c", "ff1b13", "ff15a8", "ff103e", "ff0ad3", "ff0569", "ff0000"]
 		]
 	}
 }

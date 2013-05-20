@@ -8,6 +8,7 @@ import sys
 from datetime import datetime
 import socket
 from multiprocessing import cpu_count as _cpu_count
+from math import floor
 
 from powerline.lib import add_divider_highlight_group
 from powerline.lib.url import urllib_read, urllib_urlencode
@@ -1003,3 +1004,53 @@ class NowPlayingSegment(object):
 			'total': now_playing[4],
 		}
 now_playing = NowPlayingSegment()
+
+
+if os.path.exists('/sys/class/power_supply/BAT0/capacity'):
+	def _get_capacity():
+		with open('/sys/class/power_supply/BAT0/capacity', 'r') as f:
+			return int(float(f.readline().split()[0]))
+else:
+	def _get_capacity():
+		raise NotImplementedError
+
+
+def battery(pl, format='{:3.0%}', steps=5, gamify=False):
+	'''Return battery charge status.
+
+	:param int steps:
+		number of discrete steps to show between 0% and 100% capacity
+	:param bool gamify:
+		measure in hearts (♥) instead of percentages
+
+	Highlight groups used: ``battery_gradient`` (gradient), ``battery``.
+	'''
+	try:
+		capacity = _get_capacity()
+	except NotImplementedError:
+		pl.warn('Unable to get battery capacity.')
+		return None
+	ret = []
+	numer = floor(steps * capacity / 100)
+	denom = steps
+	full_heart = '♥'
+	if gamify:
+		ret.append({
+			'contents': full_heart * numer,
+			'draw_soft_divider': False,
+			'highlight_group': ['battery_gradient', 'battery'],
+			'gradient_level': 99
+		})
+		ret.append({
+			'contents': full_heart * (denom - numer),
+			'draw_soft_divider': False,
+			'highlight_group': ['battery_gradient', 'battery'],
+			'gradient_level': 1
+		})
+	else:
+		ret.append({
+			'contents': format.format(numer / denom),
+			'highlight_group': ['battery_gradient', 'battery'],
+			'gradient_level': numer * 100.0 / denom
+		})
+	return ret
