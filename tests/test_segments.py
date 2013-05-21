@@ -332,6 +332,15 @@ class TestCommon(TestCase):
 			segment_info['environ'].pop('VIRTUAL_ENV')
 			self.assertEqual(common.virtualenv(pl=pl, segment_info=segment_info), None)
 
+	def test_environment(self):
+		pl = Pl()
+		variable = 'FOO';
+		value = 'bar';
+		with replace_env(variable, value) as segment_info:
+			self.assertEqual(common.environment(pl=pl, segment_info=segment_info, variable=variable), value)
+			segment_info['environ'].pop(variable)
+			self.assertEqual(common.environment(pl=pl, segment_info=segment_info, variable=variable), None)
+
 	def test_email_imap_alert(self):
 		# TODO
 		pass
