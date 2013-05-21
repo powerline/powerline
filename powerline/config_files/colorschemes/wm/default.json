@@ -20,6 +20,7 @@
 		"system_load": { "fg": "gray8", "bg": "gray0" },
 		"system_load_good": { "fg": "lightyellowgreen", "bg": "gray0" },
 		"system_load_bad": { "fg": "gold3", "bg": "gray0" },
-		"system_load_ugly": { "fg": "orangered", "bg": "gray0" }
+		"system_load_ugly": { "fg": "orangered", "bg": "gray0" },
+		"environment": { "fg": "gray8", "bg": "gray0" }
 	}
 }
