@@ -43,7 +43,7 @@ def branch(pl, segment_info, status_colors=False):
 	'''Return the current VCS branch.
 
 	:param bool status_colors:
-		determines whether repository status will be used to determine highlighting. Default: True.
+		determines whether repository status will be used to determine highlighting. Default: False.
 
 	Highlight groups used: ``branch_clean``, ``branch_dirty``, ``branch``.
 	'''
