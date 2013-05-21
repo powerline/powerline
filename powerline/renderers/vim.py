@@ -2,7 +2,7 @@
 
 from __future__ import absolute_import
 
-from powerline.bindings.vim import vim_get_func
+from powerline.bindings.vim import vim_get_func, environ
 from powerline.renderer import Renderer
 from powerline.colorscheme import ATTR_BOLD, ATTR_ITALIC, ATTR_UNDERLINE
 from powerline.theme import Theme
@@ -68,17 +68,19 @@ class VimRenderer(Renderer):
 	def get_segment_info(self, segment_info):
 		return segment_info or self.segment_info
 
-	def render(self, window_id, winidx, current):
+	def render(self, window, window_id, winnr):
 		'''Render all segments.'''
-		if current:
+		if window is vim.current.window:
 			mode = vim_mode(1)
 			mode = mode_translations.get(mode, mode)
 		else:
 			mode = 'nc'
 		segment_info = {
-			'window': vim.windows[winidx],
+			'window': window,
 			'mode': mode,
 			'window_id': window_id,
+			'winnr': winnr,
+			'environ': environ,
 		}
 		segment_info['buffer'] = segment_info['window'].buffer
 		segment_info['bufnr'] = segment_info['buffer'].number

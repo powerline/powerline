@@ -91,8 +91,19 @@ Usage
 Vim statusline
 --------------
 
-Add the following line to your :file:`vimrc`, where ``{repository_root}`` is the 
-absolute path to your Powerline installation directory:
+If installed using pip just use
+
+.. code-block:: vim
+
+    python from powerline.vim import setup as powerline_setup
+    python powerline_setup()
+    python del powerline_setup
+
+(replace ``python`` with ``python3`` if appropriate).
+
+If you just cloned the repository add the following line to your :file:`vimrc`, 
+where ``{repository_root}`` is the absolute path to your Powerline installation 
+directory:
 
 .. code-block:: vim
 
@@ -108,6 +119,9 @@ hand: ``powerline`` is installed and run just like any other plugin using
 .. code-block:: vim
 
     call vam#ActivateAddons(['powerline'])
+
+Note: when using Gentoo ebuild you need to specify ``USE=vim`` to enable 
+powerline.
 
 Shell prompts
 -------------
