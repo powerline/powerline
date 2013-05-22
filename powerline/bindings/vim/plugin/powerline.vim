@@ -40,5 +40,6 @@ finally
 	endif
 endtry
 
+execute s:pycmd 'import vim'
 execute s:pycmd 'powerline_setup(pyeval=vim.eval("s:pyeval"), pycmd=vim.eval("s:pycmd"))'
 execute s:pycmd 'del powerline_setup'
