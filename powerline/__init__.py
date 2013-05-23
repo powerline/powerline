@@ -94,6 +94,29 @@ class PowerlineLogger(object):
 		self._log('debug', msg, *args, **kwargs)
 
 
+_fallback_logger = None
+
+
+def _get_fallback_logger():
+	global _fallback_logger
+	if _fallback_logger:
+		return _fallback_logger
+
+	log_format = '%(asctime)s:%(levelname)s:%(message)s'
+	formatter = logging.Formatter(log_format)
+
+	level = logging.WARNING
+	handler = logging.StreamHandler()
+	handler.setLevel(level)
+	handler.setFormatter(formatter)
+
+	logger = logging.getLogger('powerline')
+	logger.setLevel(level)
+	logger.addHandler(handler)
+	_fallback_logger = PowerlineLogger(None, logger, '_fallback_')
+	return _fallback_logger
+
+
 class Powerline(object):
 	'''Main powerline class, entrance point for all powerline uses. Sets 
 	powerline up and loads the configuration.
@@ -465,7 +488,8 @@ class Powerline(object):
 	def exception(self, msg, *args, **kwargs):
 		if 'prefix' not in kwargs:
 			kwargs['prefix'] = 'powerline'
-		if self.pl:
+		try:
 			return self.pl.exception(msg, *args, **kwargs)
-		else:
-			raise
+		except AttributeError:
+			pl = _get_fallback_logger()
+			return pl.exception(msg, *args, **kwargs)
