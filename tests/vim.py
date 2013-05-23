@@ -175,6 +175,10 @@ def eval(expr):
 def bindeval(expr):
 	if expr == 'g:':
 		return vars
+	elif expr == '{}':
+		return {}
+	elif expr == '[]':
+		return []
 	import re
 	match = re.compile(r'^function\("([^"\\]+)"\)$').match(expr)
 	if match:

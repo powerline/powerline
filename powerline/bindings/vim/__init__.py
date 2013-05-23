@@ -17,6 +17,26 @@ if hasattr(vim, 'bindeval'):
 			return func
 		except vim.error:
 			return None
+
+	if hasattr(vim, 'Dictionary'):
+		VimDictionary = vim.Dictionary
+		VimList = vim.List
+		VimFunction = vim.Function
+	else:
+		VimDictionary = type(vim.bindeval('{}'))
+		VimList = type(vim.bindeval('[]'))
+		VimFunction = type(vim.bindeval('function("mode")'))
+
+	_vim_to_python_types = {
+		VimDictionary: lambda value: dict(((key, _vim_to_python(value[key])) for key in value.keys())),
+		VimList: lambda value: [_vim_to_python(item) for item in value],
+		VimFunction: lambda _: None,
+	}
+
+	_id = lambda value: value
+
+	def _vim_to_python(value):
+		return _vim_to_python_types.get(type(value), _id)(value)
 else:
 	import json
 
@@ -42,13 +62,13 @@ else:
 
 if hasattr(vim, 'vars'):
 	def vim_getvar(varname):
-		return vim.vars[str(varname)]
+		return _vim_to_python(vim.vars[str(varname)])
 elif hasattr(vim, 'bindeval'):
 	_vim_globals = vim.bindeval('g:')
 
 	def vim_getvar(varname):  # NOQA
 		try:
-			return _vim_globals[str(varname)]
+			return _vim_to_python(_vim_globals[str(varname)])
 		except (KeyError, IndexError):
 			raise KeyError(varname)
 else:
