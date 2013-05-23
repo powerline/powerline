@@ -711,7 +711,7 @@ class NetworkLoadSegment(KwThreadedSegment):
 			self.interfaces[interface] = idata
 
 		idata['last'] = (monotonic(), _get_bytes(interface))
-		return idata
+		return idata.copy()
 
 	def render_one(self, idata, recv_format='⬇ {value:>8}', sent_format='⬆ {value:>8}', suffix='B/s', si_prefix=False, **kwargs):
 		if not idata or 'prev' not in idata:
@@ -723,14 +723,15 @@ class NetworkLoadSegment(KwThreadedSegment):
 
 		if None in (b1, b2):
 			return None
-		if measure_interval == 0:
-			self.error('Measure interval is zero. This should not happen')
-			return None
 
 		r = []
 		for i, key in zip((0, 1), ('recv', 'sent')):
 			format = locals()[key + '_format']
-			value = (b2[i] - b1[i]) / measure_interval
+			try:
+				value = (b2[i] - b1[i]) / measure_interval
+			except ZeroDivisionError:
+				self.warn('Measure interval zero.')
+				value = 0
 			max_key = key + '_max'
 			is_gradient = max_key in kwargs
 			hl_groups = ['network_load_' + key, 'network_load']
