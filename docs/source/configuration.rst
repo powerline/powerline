@@ -526,3 +526,18 @@ use ``c.Powerline.KEY``. Supported ``KEY`` strings or keyword argument names:
     Sets directory where configuration should be read from. If present, no 
     default locations are searched for configuration. No expansions are 
     performed thus you cannot use paths starting with ``~/``.
+
+Prompt command
+--------------
+
+In addition to the above configuration options you can use 
+``$POWERLINE_COMMAND`` environment variable to tell shell or tmux to use 
+specific powerline implementation. This is mostly useful for putting powerline 
+into different directory or replacing ``powerline`` script with 
+``powerline-client`` for performance reasons.
+
+Note: ``$POWERLINE_COMMAND`` appears in shell scripts without quotes thus you 
+can specify additional parameters in bash. In zsh you will have to make 
+``$POWERLINE_COMMAND`` an array parameter to achieve the same result. In tmux it 
+is passed to ``eval`` and depends on the shell used. POSIX-compatible shells, 
+zsh, bash and fish will split this variable in this case.
