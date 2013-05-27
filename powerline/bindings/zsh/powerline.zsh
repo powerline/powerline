@@ -1,3 +1,11 @@
+if test -z "${POWERLINE_COMMAND}" ; then
+	if which powerline-client &>/dev/null ; then
+		export POWERLINE_COMMAND=powerline-client
+	else
+		export POWERLINE_COMMAND=powerline
+	fi
+fi
+
 _powerline_tmux_setenv() {
 	emulate -L zsh
 	if [[ -n "$TMUX" ]]; then
@@ -27,8 +35,8 @@ _powerline_install_precmd() {
 		zpython 'powerline_setup()'
 		zpython 'del powerline_setup'
 	else
-		PS1='$(powerline shell left -r zsh_prompt --last_exit_code=$? --last_pipe_status="$pipestatus")'
-		RPS1='$(powerline shell right -r zsh_prompt --last_exit_code=$? --last_pipe_status="$pipestatus")'
+		PS1='$($POWERLINE_COMMAND shell left -r zsh_prompt --last_exit_code=$? --last_pipe_status="$pipestatus")'
+		RPS1='$($POWERLINE_COMMAND shell right -r zsh_prompt --last_exit_code=$? --last_pipe_status="$pipestatus")'
 	fi
 }
 
