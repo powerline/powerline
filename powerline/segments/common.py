@@ -876,7 +876,7 @@ class NowPlayingSegment(object):
 		if not func_stats:
 			return None
 		stats.update(func_stats)
-		return format.format(**stats)
+		return format.encode('utf-8').format(**stats)
 
 	@staticmethod
 	def _run_cmd(cmd):
@@ -1012,5 +1012,32 @@ class NowPlayingSegment(object):
 			'title': now_playing[2],
 			'elapsed': now_playing[3],
 			'total': now_playing[4],
+		}
+
+	def player_rdio(self, pl):
+		now_playing = self._run_cmd(['osascript',
+			'-e', 'tell application "Rdio"',
+			'-e', 'set rdio_name to the name of the current track',
+			'-e', 'set rdio_artist to the artist of the current track',
+			'-e', 'set rdio_album to the album of the current track',
+			'-e', 'set rdio_duration to the duration of the current track',
+			'-e', 'set rdio_state to the player state',
+			'-e', 'set rdio_elapsed to the player position',
+			'-e', 'return rdio_name & "\n" & rdio_artist & "\n" & rdio_album & "\n" & rdio_elapsed & "\n" & rdio_duration & "\n" & rdio_state',
+			'-e', 'end tell'])
+		if not now_playing:
+			return
+		now_playing = now_playing.split('\n')
+		state = self._convert_state(now_playing[5])
+		total = self._convert_seconds(now_playing[4])
+		elapsed = self._convert_seconds(float(now_playing[3]) * float(now_playing[4]) / 100)
+		return {
+			'title': now_playing[0],
+			'artist': now_playing[1],
+			'album': now_playing[2],
+			'elapsed': elapsed,
+			'total': total,
+			'state': state,
+			'state_symbol': self.STATE_SYMBOLS.get(state)
 		}
 now_playing = NowPlayingSegment()
