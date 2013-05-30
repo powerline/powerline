@@ -1,8 +1,10 @@
 if test -z "${POWERLINE_COMMAND}" ; then
 	if which powerline-client &>/dev/null ; then
 		export POWERLINE_COMMAND=powerline-client
-	else
+	elif which powerline &>/dev/null ; then
 		export POWERLINE_COMMAND=powerline
+	else
+		export POWERLINE_COMMAND="$0:A:h:h:h:h/scripts/powerline"
 	fi
 fi
 
