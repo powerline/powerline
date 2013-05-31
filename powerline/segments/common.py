@@ -1016,6 +1016,12 @@ class NowPlayingSegment(object):
 
 	def player_rdio(self, pl):
 		now_playing = self._run_cmd(['osascript',
+			'-e', 'tell application "System Events"',
+			'-e', 'set rdio_active to the count(every process whose name is "Rdio")',
+			'-e', 'if rdio_active is 0 then',
+			'-e', 'return',
+			'-e', 'end if',
+			'-e', 'end tell',
 			'-e', 'tell application "Rdio"',
 			'-e', 'set rdio_name to the name of the current track',
 			'-e', 'set rdio_artist to the artist of the current track',
@@ -1028,6 +1034,8 @@ class NowPlayingSegment(object):
 		if not now_playing:
 			return
 		now_playing = now_playing.split('\n')
+		if len(now_playing) != 6:
+			return
 		state = self._convert_state(now_playing[5])
 		total = self._convert_seconds(now_playing[4])
 		elapsed = self._convert_seconds(float(now_playing[3]) * float(now_playing[4]) / 100)
