@@ -36,8 +36,12 @@ def do_status(directory, path, func):
 			with open(gitd, 'rb') as f:
 				raw = f.read().partition(b':')[2].strip()
 				gitd = os.path.abspath(os.path.join(directory, raw))
-		return get_file_status(directory, os.path.join(gitd, 'index'),
-					path, '.gitignore', func, extra_ignore_files=(os.path.join(gitd, 'info/exclude'),))
+		# We need HEAD as without it using fugitive to commit causes the
+		# current file's status (and only the current file) to not be updated
+		# for some reason I cannot be bothered to figure out.
+		return get_file_status(
+			directory, os.path.join(gitd, 'index'),
+			path, '.gitignore', func, extra_ignore_files=tuple(os.path.join(gitd, x) for x in ('HEAD', 'info/exclude')))
 	return func(directory, path)
 
 
