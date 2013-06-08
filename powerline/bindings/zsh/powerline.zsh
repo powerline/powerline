@@ -35,8 +35,8 @@ _powerline_install_precmd() {
 		zpython 'powerline_setup()'
 		zpython 'del powerline_setup'
 	else
-		PS1='$($POWERLINE_COMMAND shell left -r zsh_prompt --last_exit_code=$? --last_pipe_status="$pipestatus")'
-		RPS1='$($POWERLINE_COMMAND shell right -r zsh_prompt --last_exit_code=$? --last_pipe_status="$pipestatus")'
+		PS1='$($POWERLINE_COMMAND shell left -r zsh_prompt --last_exit_code=$? --last_pipe_status="$pipestatus" --jobs="$(jobs)")'
+		RPS1='$($POWERLINE_COMMAND shell right -r zsh_prompt --last_exit_code=$? --last_pipe_status="$pipestatus" --jobs="$(jobs)")'
 	fi
 }
 
