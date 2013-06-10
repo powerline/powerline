@@ -236,6 +236,46 @@ def line_percent(pl, segment_info, gradient=False):
 		'gradient_level': percentage,
 	}]
 
+@requires_segment_info
+def view_percent(pl, segment_info, gradient=False):
+	'''Return the relative position of the displayed text in the file as a percentage or as String:
+		Top	  first line is visible
+		Bot	  last line is visible
+		All	  first and last line are visible
+		45%	  relative position in the file
+
+	:param bool gradient:
+		highlight the percentage with a color gradient (by default a green to red gradient)
+
+	Highlight groups used: ``line_percent_gradient`` (gradient), ``line_percent``.
+	'''
+	line_current = segment_info['window'].cursor[0]
+	line_in_win = int(vim.eval('winline()'))
+	win_height = segment_info['window'].height
+	line_last = len(segment_info['buffer'])
+
+	if (line_current == line_in_win and win_height >= line_last):
+		percentage = 0.0
+		content = 'All'
+	else:
+		pos = (line_current - line_in_win) / (line_last - win_height) if line_last != win_height else 1.0
+		if pos == 0.0:
+			percentage = 0.0
+			content = 'Top'
+		elif 0.0 < pos < 1.0:
+			percentage = round(100 * pos)
+			content = str(int(percentage)) + '%'
+		else:
+			percentage = 100.0
+			content = 'Bot'
+
+	if not gradient:
+		return content
+	return [{
+		'contents': content,
+		'highlight_group': ['line_percent_gradient', 'line_percent'],
+		'gradient_level': percentage,
+	}]
 
 @requires_segment_info
 def line_current(pl, segment_info):
