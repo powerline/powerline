@@ -247,7 +247,7 @@ def view_percent(pl, segment_info, gradient=False):
 	:param bool gradient:
 		highlight the percentage with a color gradient (by default a green to red gradient)
 
-	Highlight groups used: ``line_percent_gradient`` (gradient), ``line_percent``.
+	Highlight groups used: ``view_percent_gradient`` (gradient), ``view_percent``.
 	'''
 	line_current = segment_info['window'].cursor[0]
 	line_in_win = int(vim.eval('winline()'))
@@ -273,7 +273,7 @@ def view_percent(pl, segment_info, gradient=False):
 		return content
 	return [{
 		'contents': content,
-		'highlight_group': ['line_percent_gradient', 'line_percent'],
+		'highlight_group': ['view_percent_gradient', 'view_percent'],
 		'gradient_level': percentage,
 	}]
 

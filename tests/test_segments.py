@@ -452,7 +452,7 @@ class TestVim(TestCase):
 		try:
 			self.assertEqual(vim.view_percent(pl=pl, segment_info=segment_info), 'All')
 			self.assertEqual(vim.view_percent(pl=pl, segment_info=segment_info, gradient=True),
-					[{'contents': 'All', 'highlight_group': ['line_percent_gradient', 'line_percent'], 'gradient_level': 0.0}])
+					[{'contents': 'All', 'highlight_group': ['view_percent_gradient', 'view_percent'], 'gradient_level': 0.0}])
 		finally:
 			vim_module._bw(segment_info['bufnr'])
 
