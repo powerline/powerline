@@ -39,11 +39,6 @@ def get_branch_name(directory, config_file, get_func):
 	global branch_name_cache
 	with branch_lock:
 		# Check if the repo directory was moved/deleted
-		# We cannot use the file_watcher for this as the inotify based file
-		# watcher will mark a directory as changed if any files inside it have
-		# changed, this is a big performance hit in vim, which continuously
-		# changes files inside the repo dir (backup/swap files, for instance).
-		# Check if the repo directory was moved/deleted
 		fw = file_watcher()
 		is_watched = fw.is_watched(directory)
 		try:
