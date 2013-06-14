@@ -41,18 +41,24 @@ def do_status(directory, path, func):
 		# for some reason I cannot be bothered to figure out.
 		return get_file_status(
 			directory, os.path.join(gitd, 'index'),
-			path, '.gitignore', func, extra_ignore_files=tuple(os.path.join(gitd, x) for x in ('HEAD', 'info/exclude')))
+			path, '.gitignore', func, extra_ignore_files=tuple(os.path.join(gitd, x) for x in ('logs/HEAD', 'info/exclude')))
 	return func(directory, path)
 
+def ignore_event(path, name):
+	# Ignore changes to the index.lock file, since they happen frequently and
+	# dont indicate an actual change in the working tree status
+	return False
+	return path.endswith('.git') and name == 'index.lock'
 
 try:
 	import pygit2 as git
 
 	class Repository(object):
-		__slots__ = ('directory')
+		__slots__ = ('directory', 'ignore_event')
 
 		def __init__(self, directory):
 			self.directory = os.path.abspath(directory)
+			self.ignore_event = ignore_event
 
 		def do_status(self, directory, path):
 			if path:
@@ -135,10 +141,11 @@ except ImportError:
 				yield line[:-1].decode('utf-8')
 
 	class Repository(object):
-		__slots__ = ('directory',)
+		__slots__ = ('directory', 'ignore_event')
 
 		def __init__(self, directory):
 			self.directory = os.path.abspath(directory)
+			self.ignore_event = ignore_event
 
 		def _gitcmd(self, directory, *args):
 			return readlines(('git',) + args, directory)
