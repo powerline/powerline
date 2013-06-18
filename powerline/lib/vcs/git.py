@@ -17,7 +17,7 @@ def branch_name_from_config_file(directory, config_file):
 	m = _ref_pat.match(raw)
 	if m is not None:
 		return m.group(1).decode('utf-8', 'replace')
-	return '[DETACHED HEAD]'
+	return raw[:7]
 
 def get_branch_name(base_dir):
 	head = os.path.join(base_dir, '.git', 'HEAD')
