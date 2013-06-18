@@ -5,6 +5,7 @@ from powerline.lib.vcs import guess
 from subprocess import call, PIPE
 import os
 import sys
+import re
 from functools import partial
 from tests import TestCase, SkipTest
 
@@ -130,10 +131,17 @@ class TestVCS(TestCase):
 		while time.time() - st < 1:
 			# Give inotify time to deliver events
 			ans = repo.branch()
-			if ans == q:
-				break
+			if hasattr(q, '__call__'):
+				if q(ans):
+					break
+			else:
+				if ans == q:
+					break
 			time.sleep(0.01)
-		self.assertEqual(ans, q)
+		if hasattr(q, '__call__'):
+			self.assertTrue(q(ans))
+		else:
+			self.assertEqual(ans, q)
 
 	def test_git(self):
 		repo = guess(path=GIT_REPO)
@@ -167,7 +175,7 @@ class TestVCS(TestCase):
 		call(['git', 'checkout', '-q', 'branch2'], cwd=GIT_REPO)
 		self.do_branch_rename_test(repo, 'branch2')
 		call(['git', 'checkout', '-q', '--detach', 'branch1'], cwd=GIT_REPO)
-		self.do_branch_rename_test(repo, '[DETACHED HEAD]')
+		self.do_branch_rename_test(repo, lambda b: re.match(r'^[a-f0-9]+$', b))
 
 	if use_mercurial:
 		def test_mercurial(self):
