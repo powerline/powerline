@@ -41,3 +41,31 @@ def last_pipe_status(pl, segment_info):
 			for status in last_pipe_status]
 	else:
 		return None
+
+
+@requires_segment_info
+def mode(pl, segment_info, override={'vicmd': 'COMMND', 'viins': 'INSERT'}, default='main'):
+	'''Return the current mode.
+	
+	:param dict override:
+		dict for overriding mode strings.
+	:param str default:
+		If current mode is equal to this string then this segment will not get 
+		displayed.
+	'''
+	mode = segment_info['mode']
+	if not mode:
+		pl.warn('No or empty POWERLINE_MODE variable')
+		return None
+	if mode == default:
+		return None
+	try:
+		return override[mode]
+	except KeyError:
+		# Note: with zsh line editor you can emulate as much modes as you wish. 
+		# Thus having unknown mode is not an error: maybe just some developer 
+		# added support for his own zle widgets. As there is no built-in mode() 
+		# function like in VimL and POWERLINE_MODE is likely be defined by our 
+		# code or by somebody knowing what he is doing there is absolutely no 
+		# need in keeping translations dictionary.
+		return mode.upper()

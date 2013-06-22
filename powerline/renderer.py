@@ -150,7 +150,7 @@ class Renderer(object):
 			segment['divider_highlight'] = None
 		return segment
 
-	def get_segment_info(self, segment_info):
+	def get_segment_info(self, segment_info, mode):
 		'''Get segment information.
 		
 		Must return a dictionary containing at least ``home``, ``environ`` and 
@@ -167,6 +167,7 @@ class Renderer(object):
 		:return: dict with segment information.
 		'''
 		r = self.segment_info.copy()
+		r['mode'] = mode
 		if segment_info:
 			r.update(segment_info)
 		if 'PWD' in r['environ']:
@@ -201,7 +202,7 @@ class Renderer(object):
 			Matcher information. Is processed in ``.get_theme()`` method.
 		'''
 		theme = self.get_theme(matcher_info)
-		segments = theme.get_segments(side, self.get_segment_info(segment_info))
+		segments = theme.get_segments(side, self.get_segment_info(segment_info, mode))
 
 		# Handle excluded/included segments for the current mode
 		segments = [self._get_highlighting(segment, mode) for segment in segments

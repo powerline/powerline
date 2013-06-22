@@ -59,6 +59,47 @@ _powerline_setup_prompt() {
 	fi
 }
 
+_powerline_add_widget() {
+	local widget="$1"
+	local function="$2"
+	local old_widget_command="$(zle -l -L $widget)"
+	if [[ "$old_widget_command" = "zle -N $widget $function" ]] ; then
+		return 0
+	elif [[ -z "$old_widget_command" ]] ; then
+		zle -N $widget $function
+	else
+		local save_widget="powerline_save_$widget"
+		local -i i=0
+		while ! test -z "$(zle -l -L $save_widget)" ; do
+			save_widget="${save_widget}_$i"
+			(( i++ ))
+		done
+		eval "${old_widget_command/$widget/$save_widget}"
+		zle -N $widget $function
+		export POWERLINE_SAVE_WIDGET="$save_widget"
+	fi
+}
+
+_powerline_zle_keymap_select() {
+	export POWERLINE_MODE="${KEYMAP}"
+	zle reset-prompt
+	test -z "$POWERLINE_SAVE_WIDGET" || zle $POWERLINE_SAVE_WIDGET
+}
+
+_powerline_set_mode() {
+	local keymap
+	if test -z "$(bindkey -lL main)" ; then
+		keymap=".safe"
+	else
+		keymap="main"
+	fi
+	export POWERLINE_MODE="${keymap}"
+}
+
+_powerline_set_mode
+
+_powerline_add_widget zle-keymap-select _powerline_zle_keymap_select
+
 trap "_powerline_tmux_set_columns" SIGWINCH
 _powerline_tmux_set_columns
 _powerline_tmux_set_pwd

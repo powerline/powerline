@@ -74,7 +74,7 @@ class VimRenderer(Renderer):
 			def strwidth(string):
 				return vim.strwidth(string)
 
-	def get_segment_info(self, segment_info):
+	def get_segment_info(self, segment_info, mode):
 		return segment_info or self.segment_info
 
 	def render(self, window, window_id, winnr):

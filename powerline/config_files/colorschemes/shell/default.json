@@ -14,6 +14,14 @@
 		"hostname": { "fg": "brightyellow", "bg": "mediumorange" },
 		"exit_fail": { "fg": "white", "bg": "darkestred" },
 		"exit_success": { "fg": "white", "bg": "darkestgreen" },
-		"environment": { "fg": "white", "bg": "darkestgreen" }
+		"environment": { "fg": "white", "bg": "darkestgreen" },
+		"mode": { "fg": "darkestgreen", "bg": "brightgreen", "attr": ["bold"] }
+	},
+	"mode_translations": {
+		"vicmd": {
+			"groups": {
+				"mode": {"fg": "darkestcyan", "bg": "white", "attr": ["bold"]}
+			}
+		}
 	}
 }

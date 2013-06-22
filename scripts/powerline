@@ -22,6 +22,7 @@ if __name__ == '__main__':
 		width=args.width,
 		side=args.side,
 		segment_info=segment_info,
+		mode=os.environ.get('POWERLINE_MODE'),
 	)
 	try:
 		sys.stdout.write(rendered)

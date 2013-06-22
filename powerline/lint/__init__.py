@@ -535,15 +535,15 @@ group_name_spec = Spec().re('^\w+(?::\w+)?$').copy
 groups_spec = Spec().unknown_spec(
 	group_name_spec(),
 	group_spec(),
-).copy
+).context_message('Error while loading groups (key {key})').copy
 colorscheme_spec = (Spec(
 	name=name_spec(),
-	groups=groups_spec().context_message('Error while loading groups (key {key})'),
+	groups=groups_spec(),
 ).context_message('Error while loading coloscheme'))
 vim_mode_spec = Spec().oneof(set(list(vim_modes) + ['nc'])).copy
 vim_colorscheme_spec = (Spec(
 	name=name_spec(),
-	groups=groups_spec().context_message('Error while loading groups (key {key})'),
+	groups=groups_spec(),
 	mode_translations=Spec().unknown_spec(
 		vim_mode_spec(),
 		Spec(
@@ -558,6 +558,24 @@ vim_colorscheme_spec = (Spec(
 		),
 	).context_message('Error while loading mode translations (key {key})'),
 ).context_message('Error while loading vim colorscheme'))
+shell_mode_spec = Spec().re('^(?:[\w\-]+|\.safe)$').copy
+shell_colorscheme_spec = (Spec(
+	name=name_spec(),
+	groups=groups_spec(),
+	mode_translations=Spec().unknown_spec(
+		shell_mode_spec(),
+		Spec(
+			colors=Spec().unknown_spec(
+				color_spec(),
+				color_spec(),
+			).optional(),
+			groups=Spec().unknown_spec(
+				group_name_spec().func(check_translated_group_name),
+				group_spec(),
+			).optional(),
+		),
+	).context_message('Error while loading mode translations (key {key})'),
+).context_message('Error while loading shell colorscheme'))
 
 
 generic_keys = set(('exclude_modes', 'include_modes', 'width', 'align', 'name', 'draw_soft_divider', 'draw_hard_divider', 'priority', 'after', 'before'))
@@ -1106,6 +1124,8 @@ def check(path=None, debug=False):
 			colorscheme_configs[ext][colorscheme] = config
 			if ext == 'vim':
 				spec = vim_colorscheme_spec
+			elif ext == 'shell':
+				spec = shell_colorscheme_spec
 			else:
 				spec = colorscheme_spec
 			if spec.match(config, context=(('', config),), data=data, echoerr=ee)[1]:
