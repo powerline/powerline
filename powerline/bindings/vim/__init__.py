@@ -60,17 +60,11 @@ else:
 	vim_get_func = VimFunc
 
 
-if hasattr(vim, 'vars'):
+# It may crash on some old vim versions and I do not remember in which patch 
+# I fixed this crash.
+if hasattr(vim, 'vars') and vim.vvars['version'] > 703:
 	def vim_getvar(varname):
 		return _vim_to_python(vim.vars[str(varname)])
-elif hasattr(vim, 'bindeval'):
-	_vim_globals = vim.bindeval('g:')
-
-	def vim_getvar(varname):  # NOQA
-		try:
-			return _vim_to_python(_vim_globals[str(varname)])
-		except (KeyError, IndexError):
-			raise KeyError(varname)
 else:
 	_vim_exists = vim_get_func('exists', rettype=int)
 
