@@ -1,6 +1,7 @@
 # vim:fileencoding=utf-8:noet
 _log = []
 vars = {}
+vvars = {'version': 703}
 _window = 0
 _mode = 'n'
 _buf_purge_events = set()
