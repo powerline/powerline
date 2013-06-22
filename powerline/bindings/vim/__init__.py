@@ -17,26 +17,6 @@ if hasattr(vim, 'bindeval'):
 			return func
 		except vim.error:
 			return None
-
-	if hasattr(vim, 'Dictionary'):
-		VimDictionary = vim.Dictionary
-		VimList = vim.List
-		VimFunction = vim.Function
-	else:
-		VimDictionary = type(vim.bindeval('{}'))
-		VimList = type(vim.bindeval('[]'))
-		VimFunction = type(vim.bindeval('function("mode")'))
-
-	_vim_to_python_types = {
-		VimDictionary: lambda value: dict(((key, _vim_to_python(value[key])) for key in value.keys())),
-		VimList: lambda value: [_vim_to_python(item) for item in value],
-		VimFunction: lambda _: None,
-	}
-
-	_id = lambda value: value
-
-	def _vim_to_python(value):
-		return _vim_to_python_types.get(type(value), _id)(value)
 else:
 	import json
 
@@ -63,6 +43,17 @@ else:
 # It may crash on some old vim versions and I do not remember in which patch 
 # I fixed this crash.
 if hasattr(vim, 'vars') and vim.vvars['version'] > 703:
+	_vim_to_python_types = {
+		vim.Dictionary: lambda value: dict(((key, _vim_to_python(value[key])) for key in value.keys())),
+		vim.List: lambda value: [_vim_to_python(item) for item in value],
+		vim.Function: lambda _: None,
+	}
+
+	_id = lambda value: value
+
+	def _vim_to_python(value):
+		return _vim_to_python_types.get(type(value), _id)(value)
+
 	def vim_getvar(varname):
 		return _vim_to_python(vim.vars[str(varname)])
 else:
