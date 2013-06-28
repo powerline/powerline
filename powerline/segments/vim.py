@@ -177,6 +177,8 @@ def file_size(pl, suffix='B', si_prefix=False):
 	# Note: returns file size in &encoding, not in &fileencoding. But returned 
 	# size is updated immediately; and it is valid for any buffer
 	file_size = vim_funcs['line2byte'](len(vim.current.buffer) + 1) - 1
+	if file_size < 0:
+		file_size = 0
 	return humanize_bytes(file_size, suffix, si_prefix)
 
 
