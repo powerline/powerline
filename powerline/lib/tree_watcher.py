@@ -31,11 +31,12 @@ class INotifyTreeWatcher(INotify):
 
 	is_dummy = False
 
-	def __init__(self, basedir):
+	def __init__(self, basedir, ignore_event=None):
 		super(INotifyTreeWatcher, self).__init__()
 		self.basedir = realpath(basedir)
 		self.watch_tree()
 		self.modified = True
+		self.ignore_event = (lambda path, name: False) if ignore_event is None else ignore_event
 
 	def watch_tree(self):
 		self.watched_dirs = {}
@@ -93,7 +94,7 @@ class INotifyTreeWatcher(INotify):
 
 				self.MODIFY | self.CREATE | self.DELETE |
 				self.MOVE_SELF | self.MOVED_FROM | self.MOVED_TO |
-				self.ATTRIB | self.MOVE_SELF | self.DELETE_SELF)
+				self.ATTRIB | self.DELETE_SELF)
 		if wd == -1:
 			eno = ctypes.get_errno()
 			if eno == errno.ENOTDIR:
@@ -112,7 +113,7 @@ class INotifyTreeWatcher(INotify):
 			return
 		path = self.watched_rmap.get(wd, None)
 		if path is not None:
-			self.modified = True
+			self.modified = not self.ignore_event(path, name)
 			if mask & self.CREATE:
 				# A new sub-directory might have been created, monitor it.
 				try:
@@ -152,10 +153,10 @@ class TreeWatcher(object):
 		self.last_query_times = {}
 		self.expire_time = expire_time * 60
 
-	def watch(self, path, logger=None):
+	def watch(self, path, logger=None, ignore_event=None):
 		path = realpath(path)
 		try:
-			w = INotifyTreeWatcher(path)
+			w = INotifyTreeWatcher(path, ignore_event=ignore_event)
 		except (INotifyError, DirTooLarge) as e:
 			if logger is not None:
 				logger.warn('Failed to watch path: {0} with error: {1}'.format(path, e))
@@ -176,14 +177,14 @@ class TreeWatcher(object):
 		for path in pop:
 			del self.last_query_times[path]
 
-	def __call__(self, path, logger=None):
+	def __call__(self, path, logger=None, ignore_event=None):
 		path = realpath(path)
 		self.expire_old_queries()
 		self.last_query_times[path] = monotonic()
 		w = self.watches.get(path, None)
 		if w is None:
 			try:
-				self.watch(path)
+				self.watch(path, logger=logger, ignore_event=ignore_event)
 			except NoSuchDir:
 				pass
 			return True

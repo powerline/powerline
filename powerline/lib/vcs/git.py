@@ -36,19 +36,29 @@ def do_status(directory, path, func):
 			with open(gitd, 'rb') as f:
 				raw = f.read().partition(b':')[2].strip()
 				gitd = os.path.abspath(os.path.join(directory, raw))
-		return get_file_status(directory, os.path.join(gitd, 'index'),
-					path, '.gitignore', func, extra_ignore_files=(os.path.join(gitd, 'info/exclude'),))
+		# We need HEAD as without it using fugitive to commit causes the
+		# current file's status (and only the current file) to not be updated
+		# for some reason I cannot be bothered to figure out.
+		return get_file_status(
+			directory, os.path.join(gitd, 'index'),
+			path, '.gitignore', func, extra_ignore_files=tuple(os.path.join(gitd, x) for x in ('logs/HEAD', 'info/exclude')))
 	return func(directory, path)
 
+def ignore_event(path, name):
+	# Ignore changes to the index.lock file, since they happen frequently and
+	# dont indicate an actual change in the working tree status
+	return False
+	return path.endswith('.git') and name == 'index.lock'
 
 try:
 	import pygit2 as git
 
 	class Repository(object):
-		__slots__ = ('directory')
+		__slots__ = ('directory', 'ignore_event')
 
 		def __init__(self, directory):
 			self.directory = os.path.abspath(directory)
+			self.ignore_event = ignore_event
 
 		def do_status(self, directory, path):
 			if path:
@@ -131,10 +141,11 @@ except ImportError:
 				yield line[:-1].decode('utf-8')
 
 	class Repository(object):
-		__slots__ = ('directory',)
+		__slots__ = ('directory', 'ignore_event')
 
 		def __init__(self, directory):
 			self.directory = os.path.abspath(directory)
+			self.ignore_event = ignore_event
 
 		def _gitcmd(self, directory, *args):
 			return readlines(('git',) + args, directory)

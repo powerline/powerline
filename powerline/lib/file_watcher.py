@@ -84,13 +84,17 @@ class INotifyWatch(INotify):
 					eno = ctypes.get_errno()
 					if eno != errno.ENOTDIR:
 						self.handle_error()
-				# Try watching path as a file
-				flags |= (self.MODIFY | self.ATTRIB)
-				wd = self._add_watch(self._inotify_fd, buf, flags)
-				if wd == -1:
-					self.handle_error()
+					# Try watching path as a file
+					flags |= (self.MODIFY | self.ATTRIB)
+					wd = self._add_watch(self._inotify_fd, buf, flags)
+					if wd == -1:
+						self.handle_error()
 				self.watches[path] = wd
 				self.modified[path] = False
+
+	def is_watched(self, path):
+		with self.lock:
+			return realpath(path) in self.watches
 
 	def __call__(self, path):
 		''' Return True if path has been modified since the last call. Can
@@ -140,6 +144,10 @@ class StatWatch(object):
 		path = realpath(path)
 		with self.lock:
 			self.watches.pop(path, None)
+
+	def is_watched(self, path):
+		with self.lock:
+			return realpath(path) in self.watches
 
 	def __call__(self, path):
 		path = realpath(path)
