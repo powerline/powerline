@@ -30,29 +30,23 @@ pkgver() {
 
 package() {
 	cd "${_gitname}"
-	python setup.py install --root="${pkgdir}" --optimize=1 || return 1
+	python setup.py install --root="${pkgdir}" --optimize=1
 
-	msg2 "Installing fonts..."
-	install -dm755 "${pkgdir}/usr/share/fonts/OTF/"
-	install -dm755 "${pkgdir}/etc/fonts/conf.avail"
+	# Fonts
 	install -dm755 "${pkgdir}/etc/fonts/conf.d"
-	install -m644 "font/PowerlineSymbols.otf" "${pkgdir}/usr/share/fonts/OTF/PowerlineSymbols.otf"
-	install -m644 "font/10-powerline-symbols.conf" "${pkgdir}/etc/fonts/conf.avail/10-powerline-symbols.conf"
+	install -Dm644 "font/PowerlineSymbols.otf" "${pkgdir}/usr/share/fonts/OTF/PowerlineSymbols.otf"
+	install -Dm644 "font/10-powerline-symbols.conf" "${pkgdir}/etc/fonts/conf.avail/10-powerline-symbols.conf"
 	ln -s "../conf.avail/10-powerline-symbols.conf" "${pkgdir}/etc/fonts/conf.d/10-powerline-symbols.conf"
 
-	msg2 "Installing vim plugin..."
-	install -dm755 "${pkgdir}/usr/share/vim/vimfiles/plugin"
-	install -m644 "powerline/bindings/vim/plugin/powerline.vim" "${pkgdir}/usr/share/vim/vimfiles/plugin/powerline.vim"
+	# Vim Plugin
+	install -Dm644 "powerline/bindings/vim/plugin/powerline.vim" "${pkgdir}/usr/share/vim/vimfiles/plugin/powerline.vim"
 
-	msg2 "Installing zsh plugin..."
-	install -dm755 "${pkgdir}/usr/share/zsh/site-contrib"
-	install -m644 "powerline/bindings/zsh/powerline.zsh" "${pkgdir}/usr/share/zsh/site-contrib/powerline.zsh"
+	# Zsh Plugin
+	install -Dm644 "powerline/bindings/zsh/powerline.zsh" "${pkgdir}/usr/share/zsh/site-contrib/powerline.zsh"
 
-	msg2 "Installing tmux configuration..."
-	install -dm755 "${pkgdir}/usr/share/tmux"
-	install -m644 "powerline/bindings/tmux/powerline.conf" "${pkgdir}/usr/share/tmux/powerline.conf"
+	# Tmux Configuration
+	install -Dm644 "powerline/bindings/tmux/powerline.conf" "${pkgdir}/usr/share/tmux/powerline.conf"
 
-	msg2 "Installing license..."
-	install -dm755 "${pkgdir}/usr/share/licenses/${pkgname}"
-	install -m644 "LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+	# License
+	install -Dm644 "LICENSE" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
 }
