@@ -1,6 +1,7 @@
 # vim:fileencoding=utf-8:noet
 _log = []
 vars = {}
+vvars = {'version': 703}
 _window = 0
 _mode = 'n'
 _buf_purge_events = set()
@@ -175,6 +176,10 @@ def eval(expr):
 def bindeval(expr):
 	if expr == 'g:':
 		return vars
+	elif expr == '{}':
+		return {}
+	elif expr == '[]':
+		return []
 	import re
 	match = re.compile(r'^function\("([^"\\]+)"\)$').match(expr)
 	if match:
