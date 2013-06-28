@@ -101,6 +101,8 @@ class VimPowerline(Powerline):
 			for window in vim.windows:
 				try:
 					curwindow_id = window.vars['powerline_window_id']
+					if r is not None and curwindow_id == window_id:
+						raise KeyError
 				except KeyError:
 					curwindow_id = self.last_window_id
 					self.last_window_id += 1
@@ -109,7 +111,6 @@ class VimPowerline(Powerline):
 				if window.options['statusline'] != statusline:
 					window.options['statusline'] = statusline
 				if curwindow_id == window_id if window_id else window is vim.current.window:
-					assert r is None, "Non-unique window ID"
 					r = (window, curwindow_id, window.number)
 			return r
 	else:
@@ -120,7 +121,7 @@ class VimPowerline(Powerline):
 			r = None
 			for winnr, window in zip(count(1), vim.windows):
 				curwindow_id = self._vim_getwinvar(winnr, 'powerline_window_id')
-				if curwindow_id:
+				if curwindow_id and not (r is not None and curwindow_id == window_id):
 					curwindow_id = int(curwindow_id)
 				else:
 					curwindow_id = self.last_window_id
@@ -130,7 +131,6 @@ class VimPowerline(Powerline):
 				if self._vim_getwinvar(winnr, '&statusline') != statusline:
 					self._vim_setwinvar(winnr, '&statusline', statusline)
 				if curwindow_id == window_id if window_id else window is vim.current.window:
-					assert r is None, "Non-unique window ID"
 					r = (window, curwindow_id, winnr)
 			return r
 
