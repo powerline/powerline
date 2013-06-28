@@ -51,6 +51,10 @@ class INotifyTreeWatcher(INotify):
 		''' Add watches for this directory and all its descendant directories,
 		recursively. '''
 		base = realpath(base)
+		# There may exist a link which leads to an endless
+		# add_watches loop or to maximum recursion depth exceeded
+		if not top_level and base in self.watched_dirs:
+			return
 		try:
 			is_dir = self.add_watch(base)
 		except OSError as e:
