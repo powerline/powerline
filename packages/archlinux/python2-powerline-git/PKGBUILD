@@ -16,6 +16,7 @@ optdepends=('python2-psutil: improved system information'
 	'mercurial: improved mercurial support'
 	'zsh: better shell prompt'
 	'gvim: vim compiled with Python support')
+provides=('powerline')
 conflicts=('python-powerline-git')
 replaces=('powerline-git')
 install="${_gitname}.install"
