@@ -19,36 +19,42 @@ class TestConfig(TestCase):
 	def test_vim(self):
 		from powerline.vim import VimPowerline
 		cfg_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'powerline', 'config_files')
-		buffers = ((('bufoptions',), {'buftype': 'help'}), (('buffer', '[Command Line]'), {}), (('bufoptions',), {'buftype': 'quickfix'}))
+		buffers = ((('bufoptions',), {'buftype': 'help'}), (('bufname', '[Command Line]'), {}), (('bufoptions',), {'buftype': 'quickfix'}))
 		with open(os.path.join(cfg_path, 'config.json'), 'r') as f:
 			self.assertEqual(len(buffers), len(json.load(f)['ext']['vim']['local_themes']))
 		outputs = {}
 		i = 0
-		mode = None
 
-		with VimPowerline() as powerline:
-			def check_output(*args):
-				out = powerline.render(*args + (0 if mode == 'nc' else 1,))
-				if out in outputs:
-					self.fail('Duplicate in set #{0} for mode {1!r} (previously defined in set #{2} for mode {3!r})'.format(i, mode, *outputs[out]))
-				outputs[out] = (i, mode)
+		with vim_module._with('split'):
+			with VimPowerline() as powerline:
+				def check_output(mode, args, kwargs):
+					if mode == 'nc':
+						window = vim_module.windows[0]
+						window_id = 2
+					else:
+						vim_module._start_mode(mode)
+						window = vim_module.current.window
+						window_id = 1
+					winnr = window.number
+					out = powerline.render(window, window_id, winnr)
+					if out in outputs:
+						self.fail('Duplicate in set #{0} ({1}) for mode {2!r} (previously defined in set #{3} ({4!r}) for mode {5!r})'.format(i, (args, kwargs), mode, *outputs[out]))
+					outputs[out] = (i, (args, kwargs), mode)
 
-			with vim_module._with('buffer', 'foo.txt'):
-				with vim_module._with('globals', powerline_config_path=cfg_path):
-					exclude = set(('no', 'v', 'V', VBLOCK, 's', 'S', SBLOCK, 'R', 'Rv', 'c', 'cv', 'ce', 'r', 'rm', 'r?', '!'))
-					try:
-						for mode in ['n', 'nc', 'no', 'v', 'V', VBLOCK, 's', 'S', SBLOCK, 'i', 'R', 'Rv', 'c', 'cv', 'ce', 'r', 'rm', 'r?', '!']:
-							if mode != 'nc':
-								vim_module._start_mode(mode)
-							check_output(1, 0)
-							for args, kwargs in buffers:
-								i += 1
-								if mode in exclude:
-									continue
-								with vim_module._with(*args, **kwargs):
-									check_output(1, 0)
-					finally:
-						vim_module._start_mode('n')
+				with vim_module._with('bufname', '/tmp/foo.txt'):
+					with vim_module._with('globals', powerline_config_path=cfg_path):
+						exclude = set(('no', 'v', 'V', VBLOCK, 's', 'S', SBLOCK, 'R', 'Rv', 'c', 'cv', 'ce', 'r', 'rm', 'r?', '!'))
+						try:
+							for mode in ['n', 'nc', 'no', 'v', 'V', VBLOCK, 's', 'S', SBLOCK, 'i', 'R', 'Rv', 'c', 'cv', 'ce', 'r', 'rm', 'r?', '!']:
+								check_output(mode, None, None)
+								for args, kwargs in buffers:
+									i += 1
+									if mode in exclude:
+										continue
+									with vim_module._with(*args, **kwargs):
+										check_output(mode, args, kwargs)
+						finally:
+							vim_module._start_mode('n')
 
 	def test_tmux(self):
 		from powerline.segments import common
@@ -71,7 +77,7 @@ class TestConfig(TestCase):
 
 	def test_bash(self):
 		from powerline.shell import ShellPowerline
-		args = Args(last_exit_code=1, ext=['shell'], renderer_module='bash_prompt', config=[('ext', {'shell': {'theme': 'default_leftonly'}})])
+		args = Args(last_exit_code=1, ext=['shell'], renderer_module='bash_prompt', config={'ext': {'shell': {'theme': 'default_leftonly'}}})
 		with ShellPowerline(args, run_once=False) as powerline:
 			powerline.render(segment_info={'args': args})
 		with ShellPowerline(args, run_once=False) as powerline:

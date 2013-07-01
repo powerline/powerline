@@ -60,6 +60,7 @@ def load_inotify():
 
 
 class INotify(object):
+
 	# See <sys/inotify.h> for the flags defined below
 
 	# Supported events suitable for MASK parameter of INOTIFY_ADD_WATCH.

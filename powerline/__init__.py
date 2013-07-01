@@ -23,7 +23,7 @@ def find_config_file(search_paths, config_file):
 	raise IOError('Config file not found in search path: {0}'.format(config_file))
 
 
-class PowerlineState(object):
+class PowerlineLogger(object):
 	def __init__(self, use_daemon_threads, logger, ext):
 		self.logger = logger
 		self.ext = ext
@@ -175,7 +175,7 @@ class Powerline(object):
 					self.logger.addHandler(handler)
 
 				if not self.pl:
-					self.pl = PowerlineState(self.use_daemon_threads, self.logger, self.ext)
+					self.pl = PowerlineLogger(self.use_daemon_threads, self.logger, self.ext)
 					if not self.config_loader.pl:
 						self.config_loader.pl = self.pl
 
@@ -376,7 +376,10 @@ class Powerline(object):
 		current application.
 		'''
 		self.shutdown_event.set()
-		self.renderer.shutdown()
+		try:
+			self.renderer.shutdown()
+		except AttributeError:
+			pass
 		functions = (
 			self.on_main_change,
 			self.on_colors_change,

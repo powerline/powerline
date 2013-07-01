@@ -16,20 +16,27 @@ from powerline.lib.inotify import INotify, INotifyError
 class NoSuchDir(ValueError):
 	pass
 
+class BaseDirChanged(ValueError):
+	pass
 
 class DirTooLarge(ValueError):
+
 	def __init__(self, bdir):
 		ValueError.__init__(self, 'The directory {0} is too large to monitor. Try increasing the value in /proc/sys/fs/inotify/max_user_watches'.format(bdir))
 
+def realpath(path):
+	return os.path.abspath(os.path.realpath(path))
 
 class INotifyTreeWatcher(INotify):
+
 	is_dummy = False
 
-	def __init__(self, basedir):
+	def __init__(self, basedir, ignore_event=None):
 		super(INotifyTreeWatcher, self).__init__()
-		self.basedir = os.path.abspath(basedir)
+		self.basedir = realpath(basedir)
 		self.watch_tree()
 		self.modified = True
+		self.ignore_event = (lambda path, name: False) if ignore_event is None else ignore_event
 
 	def watch_tree(self):
 		self.watched_dirs = {}
@@ -43,7 +50,11 @@ class INotifyTreeWatcher(INotify):
 	def add_watches(self, base, top_level=True):
 		''' Add watches for this directory and all its descendant directories,
 		recursively. '''
-		base = os.path.abspath(base)
+		base = realpath(base)
+		# There may exist a link which leads to an endless
+		# add_watches loop or to maximum recursion depth exceeded
+		if not top_level and base in self.watched_dirs:
+			return
 		try:
 			is_dir = self.add_watch(base)
 		except OSError as e:
@@ -87,7 +98,7 @@ class INotifyTreeWatcher(INotify):
 
 				self.MODIFY | self.CREATE | self.DELETE |
 				self.MOVE_SELF | self.MOVED_FROM | self.MOVED_TO |
-				self.ATTRIB | self.MOVE_SELF | self.DELETE_SELF)
+				self.ATTRIB | self.DELETE_SELF)
 		if wd == -1:
 			eno = ctypes.get_errno()
 			if eno == errno.ENOTDIR:
@@ -106,7 +117,7 @@ class INotifyTreeWatcher(INotify):
 			return
 		path = self.watched_rmap.get(wd, None)
 		if path is not None:
-			self.modified = True
+			self.modified = not self.ignore_event(path, name)
 			if mask & self.CREATE:
 				# A new sub-directory might have been created, monitor it.
 				try:
@@ -119,6 +130,8 @@ class INotifyTreeWatcher(INotify):
 						raise DirTooLarge(self.basedir)
 					else:
 						raise
+			if (mask & self.DELETE_SELF or mask & self.MOVE_SELF) and path == self.basedir:
+				raise BaseDirChanged('The directory %s was moved/deleted' % path)
 
 	def __call__(self):
 		self.read()
@@ -128,25 +141,26 @@ class INotifyTreeWatcher(INotify):
 
 
 class DummyTreeWatcher(object):
+
 	is_dummy = True
 
 	def __init__(self, basedir):
-		self.basedir = os.path.abspath(basedir)
+		self.basedir = realpath(basedir)
 
 	def __call__(self):
 		return False
 
-
 class TreeWatcher(object):
+
 	def __init__(self, expire_time=10):
 		self.watches = {}
 		self.last_query_times = {}
 		self.expire_time = expire_time * 60
 
-	def watch(self, path, logger=None):
-		path = os.path.abspath(path)
+	def watch(self, path, logger=None, ignore_event=None):
+		path = realpath(path)
 		try:
-			w = INotifyTreeWatcher(path)
+			w = INotifyTreeWatcher(path, ignore_event=ignore_event)
 		except (INotifyError, DirTooLarge) as e:
 			if logger is not None:
 				logger.warn('Failed to watch path: {0} with error: {1}'.format(path, e))
@@ -167,19 +181,22 @@ class TreeWatcher(object):
 		for path in pop:
 			del self.last_query_times[path]
 
-	def __call__(self, path, logger=None):
-		path = os.path.abspath(path)
+	def __call__(self, path, logger=None, ignore_event=None):
+		path = realpath(path)
 		self.expire_old_queries()
 		self.last_query_times[path] = monotonic()
 		w = self.watches.get(path, None)
 		if w is None:
 			try:
-				self.watch(path)
+				self.watch(path, logger=logger, ignore_event=ignore_event)
 			except NoSuchDir:
 				pass
 			return True
 		try:
 			return w()
+		except BaseDirChanged:
+			self.watches.pop(path, None)
+			return True
 		except DirTooLarge as e:
 			if logger is not None:
 				logger.warn(str(e))

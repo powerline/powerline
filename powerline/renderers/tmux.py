@@ -40,5 +40,15 @@ class TmuxRenderer(Renderer):
 					tmux_attr += ['nounderscore']
 		return '#[' + ','.join(tmux_attr) + ']'
 
+	def get_segment_info(self, segment_info):
+		r = self.segment_info.copy()
+		if segment_info:
+			r.update(segment_info)
+		if 'pane_id' in r:
+			varname = 'TMUX_PWD_' + r['pane_id'].lstrip('%')
+			if varname in r['environ']:
+				r['getcwd'] = lambda: r['environ'][varname]
+		return r
+
 
 renderer = TmuxRenderer

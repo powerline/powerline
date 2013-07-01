@@ -91,12 +91,23 @@ Usage
 Vim statusline
 --------------
 
-Add the following line to your :file:`vimrc`, where ``{path}`` is the 
-absolute path to your Powerline installation directory:
+If installed using pip just use
 
 .. code-block:: vim
 
-   set rtp+={path}/powerline/bindings/vim
+    python from powerline.vim import setup as powerline_setup
+    python powerline_setup()
+    python del powerline_setup
+
+(replace ``python`` with ``python3`` if appropriate).
+
+If you just cloned the repository add the following line to your :file:`vimrc`, 
+where ``{repository_root}`` is the absolute path to your Powerline installation 
+directory:
+
+.. code-block:: vim
+
+   set rtp+={repository_root}/powerline/bindings/vim
 
 If you're using Vundle or Pathogen and don't want Powerline functionality in 
 any other applications, simply add Powerline as a bundle and point the path 
@@ -109,28 +120,31 @@ hand: ``powerline`` is installed and run just like any other plugin using
 
     call vam#ActivateAddons(['powerline'])
 
+Note: when using Gentoo ebuild you need to specify ``USE=vim`` to enable 
+powerline.
+
 Shell prompts
 -------------
 
 Bash prompt
 ^^^^^^^^^^^
 
-Add the following line to your :file:`bashrc`, where ``{path}`` is the 
-absolute path to your Powerline installation directory:
+Add the following line to your :file:`bashrc`, where ``{repository_root}`` is 
+the absolute path to your Powerline installation directory:
 
 .. code-block:: bash
 
-   . {path}/powerline/bindings/bash/powerline.sh
+   . {repository_root}/powerline/bindings/bash/powerline.sh
 
 Zsh prompt
 ^^^^^^^^^^
 
-Add the following line to your :file:`zshrc`, where ``{path}`` is the 
+Add the following line to your :file:`zshrc`, where ``{repository_root}`` is the 
 absolute path to your Powerline installation directory:
 
 .. code-block:: bash
 
-   . {path}/powerline/bindings/zsh/powerline.zsh
+   . {repository_root}/powerline/bindings/zsh/powerline.zsh
 
 If you are not satisfied with powerline speed in this case, compile zpython 
 branch from https://bitbucket.org/ZyX_I/zsh.
@@ -138,10 +152,10 @@ branch from https://bitbucket.org/ZyX_I/zsh.
 Tmux statusline
 ---------------
 
-Add the following line to your :file:`tmux.conf`, where ``{path}`` is the 
-absolute path to your Powerline installation directory::
+Add the following line to your :file:`tmux.conf`, where ``{repository_root}`` is 
+the absolute path to your Powerline installation directory::
 
-   source '{path}/powerline/bindings/tmux/powerline.conf'
+   source '{repository_root}/powerline/bindings/tmux/powerline.conf'
 
 IPython prompt
 --------------
@@ -174,12 +188,12 @@ Awesome widget
 .. note:: The Powerline widget will spawn a shell script that runs in the 
    background and updates the statusline with ``awesome-client``.
 
-Add the following to your :file:`rc.lua`, where ``{path}`` is the absolute 
-path to your Powerline installation directory:
+Add the following to your :file:`rc.lua`, where ``{repository_root}`` is the 
+absolute path to your Powerline installation directory:
 
 .. code-block:: lua
 
-   package.path = package.path .. ';{path}/powerline/bindings/awesome/?.lua'
+   package.path = package.path .. ';{repository_root}/powerline/bindings/awesome/?.lua'
    require('powerline')
 
 Then add the ``powerline_widget`` to your ``wibox``:

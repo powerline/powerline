@@ -11,7 +11,7 @@ from multiprocessing import cpu_count as _cpu_count
 
 from powerline.lib import add_divider_highlight_group
 from powerline.lib.url import urllib_read, urllib_urlencode
-from powerline.lib.vcs import guess
+from powerline.lib.vcs import guess, tree_status
 from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment, with_docstring
 from powerline.lib.monotonic import monotonic
 from powerline.lib.humanize_bytes import humanize_bytes
@@ -20,6 +20,16 @@ from collections import namedtuple
 
 
 cpu_count = None
+
+
+@requires_segment_info
+def environment(pl, segment_info, variable=None):
+	'''Return the value of any defined environment variable
+
+	:param string variable:
+		The environment variable to return if found
+	'''
+	return segment_info['environ'].get(variable, None)
 
 
 @requires_segment_info
@@ -39,84 +49,26 @@ def hostname(pl, segment_info, only_if_ssh=False, exclude_domain=False):
 
 
 @requires_segment_info
-class RepositorySegment(KwThreadedSegment):
-	def __init__(self):
-		super(RepositorySegment, self).__init__()
-		self.directories = {}
+def branch(pl, segment_info, status_colors=False):
+	'''Return the current VCS branch.
 
-	@staticmethod
-	def key(segment_info, **kwargs):
-		return os.path.abspath(segment_info['getcwd']())
+	:param bool status_colors:
+		determines whether repository status will be used to determine highlighting. Default: False.
 
-	def update(self, *args):
-		# .compute_state() is running only in this method, and only in one 
-		# thread, thus operations with .directories do not need write locks 
-		# (.render() method is not using .directories). If this is changed 
-		# .directories needs redesigning
-		self.directories.clear()
-		return super(RepositorySegment, self).update(*args)
-
-	def compute_state(self, path):
-		repo = guess(path=path)
-		if repo:
-			if repo.directory in self.directories:
-				return self.directories[repo.directory]
-			else:
-				r = self.process_repo(repo)
-				self.directories[repo.directory] = r
-				return r
-
-
-class RepositoryStatusSegment(RepositorySegment):
-	interval = 2
-
-	@staticmethod
-	def process_repo(repo):
-		return repo.status()
-
-
-repository_status = with_docstring(RepositoryStatusSegment(),
-'''Return the status for the current VCS repository.''')
-
-
-class BranchSegment(RepositorySegment):
-	interval = 0.2
-	started_repository_status = False
-
-	@staticmethod
-	def process_repo(repo):
-		return repo.branch()
-
-	@staticmethod
-	def render_one(branch, status_colors=False, **kwargs):
-		if branch and status_colors:
-			return [{
-				'contents': branch,
-				'highlight_group': ['branch_dirty' if repository_status(**kwargs) else 'branch_clean', 'branch'],
-			}]
-		else:
-			return branch
-
-	def startup(self, status_colors=False, **kwargs):
-		super(BranchSegment, self).startup(**kwargs)
+	Highlight groups used: ``branch_clean``, ``branch_dirty``, ``branch``.
+	'''
+	name = segment_info['getcwd']()
+	repo = guess(path=name)
+	if repo is not None:
+		branch = repo.branch()
+		scol = ['branch']
 		if status_colors:
-			self.started_repository_status = True
-			repository_status.startup(**kwargs)
-
-	def shutdown(self):
-		if self.started_repository_status:
-			repository_status.shutdown()
-		super(BranchSegment, self).shutdown()
-
-
-branch = with_docstring(BranchSegment(),
-'''Return the current VCS branch.
-
-:param bool status_colors:
-	determines whether repository status will be used to determine highlighting. Default: True.
-
-Highlight groups used: ``branch_clean``, ``branch_dirty``, ``branch``.
-''')
+			status = tree_status(repo, pl)
+			scol.insert(0, 'branch_dirty' if status and status.strip() else 'branch_clean')
+		return [{
+			'contents': branch,
+			'highlight_group': scol,
+		}]
 
 
 @requires_segment_info
@@ -759,7 +711,7 @@ class NetworkLoadSegment(KwThreadedSegment):
 			self.interfaces[interface] = idata
 
 		idata['last'] = (monotonic(), _get_bytes(interface))
-		return idata
+		return idata.copy()
 
 	def render_one(self, idata, recv_format='⬇ {value:>8}', sent_format='⬆ {value:>8}', suffix='B/s', si_prefix=False, **kwargs):
 		if not idata or 'prev' not in idata:
@@ -771,14 +723,15 @@ class NetworkLoadSegment(KwThreadedSegment):
 
 		if None in (b1, b2):
 			return None
-		if measure_interval == 0:
-			self.error('Measure interval is zero. This should not happen')
-			return None
 
 		r = []
 		for i, key in zip((0, 1), ('recv', 'sent')):
 			format = locals()[key + '_format']
-			value = (b2[i] - b1[i]) / measure_interval
+			try:
+				value = (b2[i] - b1[i]) / measure_interval
+			except ZeroDivisionError:
+				self.warn('Measure interval zero.')
+				value = 0
 			max_key = key + '_max'
 			is_gradient = max_key in kwargs
 			hl_groups = ['network_load_' + key, 'network_load']

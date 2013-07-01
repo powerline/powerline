@@ -1,7 +1,9 @@
 # Maintainer: Kim Silkebækken <kim.silkebaekken+aur@gmail.com>
 
-pkgname=python-powerline-git
-pkgver=20130412
+_gitname=powerline
+_gitbranch=develop
+pkgname="python-${_gitname}-git"
+pkgver=793.4ee5072
 pkgrel=1
 pkgdesc='The ultimate statusline/prompt utility.'
 url='https://github.com/Lokaltog/powerline'
@@ -15,33 +17,19 @@ optdepends=('python-psutil: improved system information'
 	'gvim: vim compiled with Python support')
 conflicts=('python2-powerline-git'
 	'powerline-git')
-install='powerline.install'
-source=()
+install="${_gitname}.install"
+source=("${_gitname}::git://github.com/Lokaltog/${_gitname}.git#branch=${_gitbranch}"
+	"${install}")
+sha256sums=('SKIP'
+	'7b1257cdacce60e19280f7d918e5f3aa6f13b519dff16ecc6f732c881ef63ca1')
 
-_gitroot="https://github.com/Lokaltog/powerline.git"
-_gitname="powerline"
-_gitbranch="develop"
-
-build() {
-	cd "${srcdir}"
-
-	msg "Connecting to GitHub..."
-
-	if [ -d "${srcdir}/${_gitname}" ]; then
-		cd "${_gitname}"
-		git pull origin "${_gitbranch}"
-		msg "The local files are updated."
-	else
-		git clone "${_gitroot}"
-		cd "${_gitname}"
-		git checkout "${_gitbranch}"
-	fi
-
-	msg "Git checkout done or server timeout."
+pkgver() {
+	cd "${_gitname}"
+	echo "$(git rev-list --count ${_gitbranch}).$(git rev-parse --short ${_gitbranch})"
 }
 
 package() {
-	cd "${srcdir}/${_gitname}"
+	cd "${_gitname}"
 	python setup.py install --root="${pkgdir}" --optimize=1 || return 1
 
 	msg2 "Installing fonts..."

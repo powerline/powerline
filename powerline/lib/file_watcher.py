@@ -6,14 +6,18 @@ __docformat__ = 'restructuredtext en'
 
 import os
 import sys
+import errno
 from time import sleep
 from threading import RLock
 
 from powerline.lib.monotonic import monotonic
 from powerline.lib.inotify import INotify, INotifyError
 
+def realpath(path):
+	return os.path.abspath(os.path.realpath(path))
 
 class INotifyWatch(INotify):
+
 	is_stat_based = False
 
 	def __init__(self, expire_time=10):
@@ -55,7 +59,7 @@ class INotifyWatch(INotify):
 	def unwatch(self, path):
 		''' Remove the watch for path. Raises an OSError if removing the watch
 		fails for some reason. '''
-		path = self.os.path.abspath(path)
+		path = realpath(path)
 		with self.lock:
 			self.modified.pop(path, None)
 			self.last_query.pop(path, None)
@@ -65,24 +69,37 @@ class INotifyWatch(INotify):
 					self.handle_error()
 
 	def watch(self, path):
-		''' Register a watch for the file named path. Raises an OSError if path
+		''' Register a watch for the file/directory named path. Raises an OSError if path
 		does not exist. '''
 		import ctypes
-		path = self.os.path.abspath(path)
+		path = realpath(path)
 		with self.lock:
 			if path not in self.watches:
 				bpath = path if isinstance(path, bytes) else path.encode(self.fenc)
-				wd = self._add_watch(self._inotify_fd, ctypes.c_char_p(bpath),
-						self.MODIFY | self.ATTRIB | self.MOVE_SELF | self.DELETE_SELF)
+				flags = self.MOVE_SELF | self.DELETE_SELF
+				buf = ctypes.c_char_p(bpath)
+				# Try watching path as a directory
+				wd = self._add_watch(self._inotify_fd, buf, flags | self.ONLYDIR)
 				if wd == -1:
-					self.handle_error()
+					eno = ctypes.get_errno()
+					if eno != errno.ENOTDIR:
+						self.handle_error()
+					# Try watching path as a file
+					flags |= (self.MODIFY | self.ATTRIB)
+					wd = self._add_watch(self._inotify_fd, buf, flags)
+					if wd == -1:
+						self.handle_error()
 				self.watches[path] = wd
 				self.modified[path] = False
+
+	def is_watched(self, path):
+		with self.lock:
+			return realpath(path) in self.watches
 
 	def __call__(self, path):
 		''' Return True if path has been modified since the last call. Can
 		raise OSError if the path does not exist. '''
-		path = self.os.path.abspath(path)
+		path = realpath(path)
 		with self.lock:
 			self.last_query[path] = monotonic()
 			self.expire_watches()
@@ -119,17 +136,21 @@ class StatWatch(object):
 		self.lock = RLock()
 
 	def watch(self, path):
-		path = os.path.abspath(path)
+		path = realpath(path)
 		with self.lock:
 			self.watches[path] = os.path.getmtime(path)
 
 	def unwatch(self, path):
-		path = os.path.abspath(path)
+		path = realpath(path)
 		with self.lock:
 			self.watches.pop(path, None)
 
+	def is_watched(self, path):
+		with self.lock:
+			return realpath(path) in self.watches
+
 	def __call__(self, path):
-		path = os.path.abspath(path)
+		path = realpath(path)
 		with self.lock:
 			if path not in self.watches:
 				self.watches[path] = os.path.getmtime(path)

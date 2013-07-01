@@ -39,17 +39,17 @@ def get_filler(data, segment):
 
 
 segment_getters = {
-		"function": get_function,
-		"string": get_string,
-		"filler": get_filler,
-		}
+	"function": get_function,
+	"string": get_string,
+	"filler": get_filler,
+}
 
 
-def gen_segment_getter(ext, path, theme_configs, default_module=None):
+def gen_segment_getter(pl, ext, path, theme_configs, default_module=None):
 	data = {
-			'default_module': default_module or 'powerline.segments.' + ext,
-			'path': path,
-			}
+		'default_module': default_module or 'powerline.segments.' + ext,
+		'path': path,
+	}
 
 	def get_key(segment, module, key, default=None):
 		return get_segment_key(segment, theme_configs, key, module, default)
@@ -61,8 +61,18 @@ def gen_segment_getter(ext, path, theme_configs, default_module=None):
 			get_segment_info = segment_getters[segment_type]
 		except KeyError:
 			raise TypeError('Unknown segment type: {0}'.format(segment_type))
-		contents, contents_func, module = get_segment_info(data, segment)
-		highlight_group = segment_type != 'function' and segment.get('highlight_group') or segment.get('name')
+
+		try:
+			contents, contents_func, module = get_segment_info(data, segment)
+		except Exception as e:
+			pl.exception('Failed to generate segment from {0!r}: {1}', segment, str(e), prefix='segment_generator')
+			return None
+
+		if segment_type == 'function':
+			highlight_group = [module + '.' + segment['name'], segment['name']]
+		else:
+			highlight_group = segment.get('highlight_group') or segment.get('name')
+
 		return {
 			'name': segment.get('name'),
 			'type': segment_type,
@@ -73,7 +83,7 @@ def gen_segment_getter(ext, path, theme_configs, default_module=None):
 			'contents_func': contents_func,
 			'contents': contents,
 			'args': get_key(segment, module, 'args', {}) if segment_type == 'function' else {},
-			'priority': segment.get('priority', -1),
+			'priority': segment.get('priority', None),
 			'draw_hard_divider': segment.get('draw_hard_divider', True),
 			'draw_soft_divider': segment.get('draw_soft_divider', True),
 			'draw_inner_divider': segment.get('draw_inner_divider', False),
@@ -89,6 +99,6 @@ def gen_segment_getter(ext, path, theme_configs, default_module=None):
 			'_len': 0,
 			'_space_left': 0,
 			'_space_right': 0,
-			}
+		}
 
 	return get

@@ -17,7 +17,7 @@ class Pl(object):
 
 
 class Args(object):
-	theme_option = None
+	theme_option = {}
 	config = None
 	config_path = None
 	ext = ['shell']

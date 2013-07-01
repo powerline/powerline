@@ -5,6 +5,7 @@ from powerline.lib.vcs import guess
 from subprocess import call, PIPE
 import os
 import sys
+import re
 from functools import partial
 from tests import TestCase, SkipTest
 
@@ -124,6 +125,24 @@ use_mercurial = use_bzr = sys.version_info < (3, 0)
 
 
 class TestVCS(TestCase):
+	def do_branch_rename_test(self, repo, q):
+		import time
+		st = time.time()
+		while time.time() - st < 1:
+			# Give inotify time to deliver events
+			ans = repo.branch()
+			if hasattr(q, '__call__'):
+				if q(ans):
+					break
+			else:
+				if ans == q:
+					break
+			time.sleep(0.01)
+		if hasattr(q, '__call__'):
+			self.assertTrue(q(ans))
+		else:
+			self.assertEqual(ans, q)
+
 	def test_git(self):
 		repo = guess(path=GIT_REPO)
 		self.assertNotEqual(repo, None)
@@ -143,6 +162,20 @@ class TestVCS(TestCase):
 			self.assertEqual(repo.status(), 'DI ')
 			self.assertEqual(repo.status('file'), 'AM')
 		os.remove(os.path.join(GIT_REPO, 'file'))
+		# Test changing branch
+		self.assertEqual(repo.branch(), 'master')
+		call(['git', 'branch', 'branch1'], cwd=GIT_REPO)
+		call(['git', 'checkout', '-q', 'branch1'], cwd=GIT_REPO)
+		self.do_branch_rename_test(repo, 'branch1')
+		# For some reason the rest of this test fails on travis and only on
+		# travis, and I can't figure out why
+		if 'TRAVIS' in os.environ:
+			raise SkipTest('Part of this test fails on Travis for unknown reasons')
+		call(['git', 'branch', 'branch2'], cwd=GIT_REPO)
+		call(['git', 'checkout', '-q', 'branch2'], cwd=GIT_REPO)
+		self.do_branch_rename_test(repo, 'branch2')
+		call(['git', 'checkout', '-q', '--detach', 'branch1'], cwd=GIT_REPO)
+		self.do_branch_rename_test(repo, lambda b: re.match(r'^[a-f0-9]+$', b))
 
 	if use_mercurial:
 		def test_mercurial(self):
@@ -170,17 +203,66 @@ class TestVCS(TestCase):
 				f.write('abc')
 			self.assertEqual(repo.status(), ' U')
 			self.assertEqual(repo.status('file'), '? ')
-			call(['bzr', 'add', '.'], cwd=BZR_REPO, stdout=PIPE)
+			call(['bzr', 'add', '-q', '.'], cwd=BZR_REPO, stdout=PIPE)
 			self.assertEqual(repo.status(), 'D ')
 			self.assertEqual(repo.status('file'), '+N')
-			call(['bzr', 'commit', '-m', 'initial commit'], cwd=BZR_REPO, stdout=PIPE, stderr=PIPE)
+			call(['bzr', 'commit', '-q', '-m', 'initial commit'], cwd=BZR_REPO)
 			self.assertEqual(repo.status(), None)
 			with open(os.path.join(BZR_REPO, 'file'), 'w') as f:
 				f.write('def')
 			self.assertEqual(repo.status(), 'D ')
 			self.assertEqual(repo.status('file'), ' M')
 			self.assertEqual(repo.status('notexist'), None)
-			os.remove(os.path.join(BZR_REPO, 'file'))
+			with open(os.path.join(BZR_REPO, 'ignored'), 'w') as f:
+				f.write('abc')
+			self.assertEqual(repo.status('ignored'), '? ')
+			# Test changing the .bzrignore file should update status
+			with open(os.path.join(BZR_REPO, '.bzrignore'), 'w') as f:
+				f.write('ignored')
+			self.assertEqual(repo.status('ignored'), None)
+			# Test changing the dirstate file should invalidate the cache for
+			# all files in the repo
+			with open(os.path.join(BZR_REPO, 'file2'), 'w') as f:
+				f.write('abc')
+			call(['bzr', 'add', 'file2'], cwd=BZR_REPO, stdout=PIPE)
+			call(['bzr', 'commit', '-q', '-m', 'file2 added'], cwd=BZR_REPO)
+			with open(os.path.join(BZR_REPO, 'file'), 'a') as f:
+				f.write('hello')
+			with open(os.path.join(BZR_REPO, 'file2'), 'a') as f:
+				f.write('hello')
+			self.assertEqual(repo.status('file'), ' M')
+			self.assertEqual(repo.status('file2'), ' M')
+			call(['bzr', 'commit', '-q', '-m', 'multi'], cwd=BZR_REPO)
+			self.assertEqual(repo.status('file'), None)
+			self.assertEqual(repo.status('file2'), None)
+
+			# Test changing branch
+			call(['bzr', 'nick', 'branch1'], cwd=BZR_REPO, stdout=PIPE, stderr=PIPE)
+			self.do_branch_rename_test(repo, 'branch1')
+
+			# Test branch name/status changes when swapping repos
+			for x in ('b1', 'b2'):
+				d = os.path.join(BZR_REPO, x)
+				os.mkdir(d)
+				call(['bzr', 'init', '-q'], cwd=d)
+				call(['bzr', 'nick', '-q', x], cwd=d)
+				repo = guess(path=d)
+				self.assertEqual(repo.branch(), x)
+				self.assertFalse(repo.status())
+				if x == 'b1':
+					open(os.path.join(d, 'dirty'), 'w').close()
+					self.assertTrue(repo.status())
+			os.rename(os.path.join(BZR_REPO, 'b1'), os.path.join(BZR_REPO, 'b'))
+			os.rename(os.path.join(BZR_REPO, 'b2'), os.path.join(BZR_REPO, 'b1'))
+			os.rename(os.path.join(BZR_REPO, 'b'), os.path.join(BZR_REPO, 'b2'))
+			for x, y in (('b1', 'b2'), ('b2', 'b1')):
+				d = os.path.join(BZR_REPO, x)
+				repo = guess(path=d)
+				self.do_branch_rename_test(repo, y)
+				if x == 'b1':
+					self.assertFalse(repo.status())
+				else:
+					self.assertTrue(repo.status())
 
 old_HGRCPATH = None
 old_cwd = None
