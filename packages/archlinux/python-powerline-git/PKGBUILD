@@ -2,7 +2,8 @@
 
 _gitname=powerline
 _gitbranch=develop
-pkgname="python-${_gitname}-git"
+pkgname=("python-${_gitname}-git" "powerline-fontpatcher")
+pkgbase=powerline
 pkgver=793.4ee5072
 pkgrel=1
 pkgdesc='The ultimate statusline/prompt utility.'
@@ -36,7 +37,20 @@ prepare() {
 	patch -p1 < ../fontpatcher.py.patch
 }
 
-package() {
+package_powerline-fontpatcher() {
+	pkgdesc='OTF/TTF font patcher for powerline symbols'
+	depends=('python2' 'fontforge')
+
+	cd "${_gitname}"
+
+	msg2 "Installing fontpatcher..."
+	install -dm755 "${pkgdir}/usr/share/$_gitname"
+	install -dm755 "${pkgdir}/usr/bin"
+	install -m755 "font/fontpatcher.py" "${pkgdir}/usr/bin/"
+	install -m644 "font/fontpatcher-symbols.sfd" "${pkgdir}/usr/share/$_gitname"
+}
+
+package_python-powerline-git() {
 	cd "${_gitname}"
 	python setup.py install --root="${pkgdir}" --optimize=1 || return 1
 
@@ -47,12 +61,6 @@ package() {
 	install -m644 "font/PowerlineSymbols.otf" "${pkgdir}/usr/share/fonts/OTF/PowerlineSymbols.otf"
 	install -m644 "font/10-powerline-symbols.conf" "${pkgdir}/etc/fonts/conf.avail/10-powerline-symbols.conf"
 	ln -s "../conf.avail/10-powerline-symbols.conf" "${pkgdir}/etc/fonts/conf.d/10-powerline-symbols.conf"
-
-	msg2 "Installing fontpatcher..."
-	install -dm755 "${pkgdir}/usr/share/$_gitname"
-	install -dm755 "${pkgdir}/usr/bin"
-	install -m755 "font/fontpatcher.py" "${pkgdir}/usr/bin/"
-	install -m644 "font/fontpatcher-symbols.sfd" "${pkgdir}/usr/share/$_gitname"
 
 	msg2 "Installing vim plugin..."
 	install -dm755 "${pkgdir}/usr/share/vim/vimfiles/plugin"
