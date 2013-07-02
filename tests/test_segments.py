@@ -432,16 +432,24 @@ class TestVim(TestCase):
 			self.assertEqual(vim.file_type(pl=pl, segment_info=segment_info),
 					[{'divider_highlight_group': 'background:divider', 'contents': 'python'}])
 
-	def test_line_percent(self):
+	def test_position(self):
 		pl = Pl()
 		segment_info = vim_module._get_segment_info()
 		segment_info['buffer'][0:-1] = [str(i) for i in range(100)]
 		try:
-			self.assertEqual(vim.line_percent(pl=pl, segment_info=segment_info), '1')
+			self.assertEqual(vim.position(pl=pl, segment_info=segment_info, use_line_pos=True), '1%')
 			vim_module._set_cursor(50, 0)
-			self.assertEqual(vim.line_percent(pl=pl, segment_info=segment_info), '50')
-			self.assertEqual(vim.line_percent(pl=pl, segment_info=segment_info, gradient=True),
-					[{'contents': '50', 'highlight_group': ['line_percent_gradient', 'line_percent'], 'gradient_level': 50 * 100.0 / 101}])
+			self.assertEqual(vim.position(pl=pl, segment_info=segment_info, use_line_pos=True), '50%')
+			self.assertEqual(vim.position(pl=pl, segment_info=segment_info, use_line_pos=True, gradient=True),
+					[{'contents': '50%', 'highlight_group': ['position_gradient', 'position'], 'gradient_level': 50 * 100.0 / 101}])
+
+			vim_module._set_cursor(1, 0)
+			segment_info['buffer'][:] = ['1']
+
+			self.assertEqual(vim.position(pl=pl, segment_info=segment_info), 'All')
+			self.assertEqual(vim.position(pl=pl, segment_info=segment_info, position_strings=('Comienzo', 'Final', 'Todo')), 'Todo')
+			self.assertEqual(vim.position(pl=pl, segment_info=segment_info, gradient=True),
+					[{'contents': 'All', 'highlight_group': ['position_gradient', 'position'], 'gradient_level': 0.0}])
 		finally:
 			vim_module._bw(segment_info['bufnr'])
 

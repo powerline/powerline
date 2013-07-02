@@ -6,9 +6,8 @@
 		"modified_indicator": {
 			"args": { "text": "+" }
 		},
-		"line_percent": {
-			"args": { "gradient": true },
-			"after": "%"
+		"position": {
+			"args": { "gradient": true }
 		},
 		"line_current_symbol": {
 			"contents": " "
@@ -79,9 +78,9 @@
 				"priority": 60
 			},
 			{
-				"name": "line_percent",
+				"name": "position",
 				"priority": 50,
-				"width": 4,
+				"width": 3,
 				"align": "r"
 			},
 			{
