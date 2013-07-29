@@ -244,10 +244,10 @@ def position(pl, segment_info, use_line_pos=False, position_strings=('Top', 'Bot
 			content = position_strings[2]
 		else:
 			pos = (line_current - line_in_win) / (line_last - win_height) if line_last != win_height else 1.0
-			if pos == 0.0:
+			if pos <= 0.0:
 				percentage = 0.0
 				content = position_strings[0]
-			elif 0.0 < pos < 1.0:
+			elif pos < 1.0:
 				percentage = round(100 * pos)
 				content = str(int(percentage)) + '%'
 			else:
