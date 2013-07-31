@@ -26,6 +26,8 @@ def load_inotify():
 			# if the one chosen by ctypes is compatible with the currently
 			# loaded one.
 			raise INotifyError('INotify not available on windows')
+		if sys.platform == 'darwin':
+			raise INotifyError('INotify not available on OS X')
 		import ctypes
 		if not hasattr(ctypes, 'c_ssize_t'):
 			raise INotifyError('You need python >= 2.7 to use inotify')

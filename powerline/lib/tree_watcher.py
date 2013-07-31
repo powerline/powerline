@@ -162,7 +162,7 @@ class TreeWatcher(object):
 		try:
 			w = INotifyTreeWatcher(path, ignore_event=ignore_event)
 		except (INotifyError, DirTooLarge) as e:
-			if logger is not None:
+			if logger is not None and not isinstance(e, INotifyError):
 				logger.warn('Failed to watch path: {0} with error: {1}'.format(path, e))
 			w = DummyTreeWatcher(path)
 		self.watches[path] = w
