@@ -2,3 +2,4 @@
 !.gitignore
 !PKGBUILD
 !*.install
+!*.patch
