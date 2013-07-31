@@ -2,20 +2,15 @@
 
 _gitname=powerline
 _gitbranch=develop
-pkgname=("python-${_gitname}-git" "powerline-fontpatcher-git")
+pkgname="python-${_gitname}-git" # Workaround for missing split package support in AUR
+true && pkgname=("python-${_gitname}-git" "${_gitname}-fontpatcher-git")
 pkgbase=powerline
-pkgver=808.5c88c0a
+pkgver=822.225ac48
 pkgrel=1
-pkgdesc='The ultimate statusline/prompt utility.'
 url='https://github.com/Lokaltog/powerline'
 license=('MIT')
 arch=('any')
-depends=('python>=3.2')
 makedepends=('git' 'python-distribute')
-optdepends=('python-psutil: improved system information'
-            'python-pygit2: improved git support'
-            'zsh: better shell prompt'
-            'gvim: vim compiled with Python support')
 provides=('powerline')
 conflicts=('python2-powerline-git'
            'powerline-git')
@@ -49,6 +44,13 @@ package_powerline-fontpatcher-git() {
 }
 
 package_python-powerline-git() {
+	pkgdesc='The ultimate statusline/prompt utility.'
+	depends=('python>=3.2')
+	optdepends=('python-psutil: improved system information'
+	            'python-pygit2: improved git support'
+	            'zsh: better shell prompt'
+	            'gvim: vim compiled with Python support')
+
 	cd "${_gitname}"
 	python setup.py install --root="${pkgdir}" --optimize=1
 
