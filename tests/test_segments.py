@@ -481,6 +481,17 @@ class TestVim(TestCase):
 		finally:
 			vim_module._bw(segment_info['bufnr'])
 
+	def test_view_percent(self):
+		pl = Pl()
+		segment_info = vim_module._get_segment_info()
+		segment_info['buffer'][0] = '1'
+		try:
+			self.assertEqual(vim.view_percent(pl=pl, segment_info=segment_info), 'All')
+			self.assertEqual(vim.view_percent(pl=pl, segment_info=segment_info, gradient=True),
+					[{'contents': 'All', 'highlight_group': ['view_percent_gradient', 'view_percent'], 'gradient_level': 0.0}])
+		finally:
+			vim_module._bw(segment_info['bufnr'])
+
 	def test_cursor_current(self):
 		pl = Pl()
 		segment_info = vim_module._get_segment_info()
