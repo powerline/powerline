@@ -497,7 +497,10 @@ try:
 	import psutil
 
 	def _get_bytes(interface):
-		io_counters = psutil.network_io_counters(pernic=True)
+		try:
+			io_counters = psutil.net_io_counters(pernic=True)
+		except AttributeError:
+			io_counters = psutil.network_io_counters(pernic=True)
 		if_io = io_counters.get(interface)
 		if not if_io:
 			return None
