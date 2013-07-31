@@ -1017,3 +1017,54 @@ class NowPlayingSegment(object):
 			'total': now_playing[4],
 		}
 now_playing = NowPlayingSegment()
+
+
+if os.path.exists('/sys/class/power_supply/BAT0/capacity'):
+	def _get_capacity():
+		with open('/sys/class/power_supply/BAT0/capacity', 'r') as f:
+			return int(float(f.readline().split()[0]))
+else:
+	def _get_capacity():
+		raise NotImplementedError
+
+
+def battery(pl, format='{batt:3.0%}', steps=5, gamify=False):
+	'''Return battery charge status.
+
+	:param int steps:
+		number of discrete steps to show between 0% and 100% capacity
+	:param bool gamify:
+		measure in hearts (♥) instead of percentages
+
+	Highlight groups used: ``battery_gradient`` (gradient), ``battery``.
+	'''
+	try:
+		capacity = _get_capacity()
+	except NotImplementedError:
+		pl.warn('Unable to get battery capacity.')
+		return None
+	ret = []
+	denom = int(steps)
+	numer = int(denom * capacity / 100)
+	full_heart = '♥'
+	if gamify:
+		ret.append({
+			'contents': full_heart * numer,
+			'draw_soft_divider': False,
+			'highlight_group': ['battery_gradient', 'battery'],
+			'gradient_level': 99
+		})
+		ret.append({
+			'contents': full_heart * (denom - numer),
+			'draw_soft_divider': False,
+			'highlight_group': ['battery_gradient', 'battery'],
+			'gradient_level': 1
+		})
+	else:
+		batt = numer / float(denom)
+		ret.append({
+			'contents': format.format(batt=batt),
+			'highlight_group': ['battery_gradient', 'battery'],
+			'gradient_level': batt * 100
+		})
+	return ret

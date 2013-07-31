@@ -349,6 +349,42 @@ class TestCommon(TestCase):
 		# TODO
 		pass
 
+	def test_battery(self):
+		pl = Pl()
+
+		def _get_capacity():
+			return 86
+
+		with replace_attr(common, '_get_capacity', _get_capacity):
+			self.assertEqual(common.battery(pl=pl), [{
+				'contents': '80%',
+				'highlight_group': ['battery_gradient', 'battery'],
+				'gradient_level': 80.0
+			}])
+			self.assertEqual(common.battery(pl=pl, format='{batt:.2f}'), [{
+				'contents': '0.80',
+				'highlight_group': ['battery_gradient', 'battery'],
+				'gradient_level': 80.0
+			}])
+			self.assertEqual(common.battery(pl=pl, steps=7), [{
+				'contents': '86%',
+				'highlight_group': ['battery_gradient', 'battery'],
+				'gradient_level': 85.71428571428571
+			}])
+			self.assertEqual(common.battery(pl=pl, gamify=True), [
+				{
+					'contents': '♥♥♥♥',
+					'draw_soft_divider': False,
+					'highlight_group': ['battery_gradient', 'battery'],
+					'gradient_level': 99
+				},
+				{
+					'contents': '♥',
+					'draw_soft_divider': False,
+					'highlight_group': ['battery_gradient', 'battery'],
+					'gradient_level': 1
+				}
+			])
 
 class TestVim(TestCase):
 	def test_mode(self):

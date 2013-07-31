@@ -20,6 +20,8 @@
 		"network_load_gradient": { "fg": "green_yellow_orange_red", "bg": "gray0" },
 		"system_load": { "fg": "gray8", "bg": "gray0" },
 		"system_load_gradient": { "fg": "green_yellow_orange_red", "bg": "gray0" },
-		"environment": { "fg": "gray8", "bg": "gray0" }
+		"environment": { "fg": "gray8", "bg": "gray0" },
+		"battery": { "fg": "gray8", "bg": "gray0" },
+		"battery_gradient": { "fg": "white_red", "bg": "gray0" }
 	}
 }
