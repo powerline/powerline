@@ -54,6 +54,12 @@
 				"before": " "
 			},
 			{
+				"name": "buffers",
+				"exclude_modes": ["nc"],
+				"draw_inner_divider": false,
+				"draw_soft_divider": false
+			},
+			{
 				"type": "string",
 				"highlight_group": ["background"],
 				"draw_soft_divider": false,

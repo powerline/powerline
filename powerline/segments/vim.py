@@ -17,11 +17,14 @@ from powerline.lib import wraps_saveargs as wraps
 from collections import defaultdict
 
 vim_funcs = {
-	'virtcol': vim_get_func('virtcol', rettype=int),
-	'fnamemodify': vim_get_func('fnamemodify', rettype=str),
-	'expand': vim_get_func('expand', rettype=str),
+	'bufexists': vim_get_func('bufexists', rettype=int),
+	'buflisted': vim_get_func('buflisted', rettype=int),
+	'bufname': vim_get_func('bufname', rettype=str),
 	'bufnr': vim_get_func('bufnr', rettype=int),
+	'expand': vim_get_func('expand', rettype=str),
+	'fnamemodify': vim_get_func('fnamemodify', rettype=str),
 	'line2byte': vim_get_func('line2byte', rettype=int),
+	'virtcol': vim_get_func('virtcol', rettype=int),
 }
 
 vim_modes = {
@@ -115,6 +118,48 @@ def readonly_indicator(pl, segment_info, text=''):
 		text to display if the current buffer is read-only
 	'''
 	return text if int(vim_getbufoption(segment_info, 'readonly')) else None
+
+
+@requires_segment_info
+def buffers(pl, segment_info, fname_modifier=':~:.:t', show_bufnr=True, wrap_current=False):
+	'''Return a list of buffers, with the current buffer highlighted.
+
+	Returns a list similar to `vim-bufferline 
+	<https://github.com/bling/vim-bufferline>`_.
+
+	:param string fname_modifier:
+		vim file name modifier for buffer (see :help fnamemodify)
+	:param bool show_bufnr:
+		show buffer number before buffer name
+	:param bool wrap_current:
+		wrap the current buffer in square braces for increased visibility
+	'''
+	buf_curr = vim_funcs['bufnr']('%')
+	buf_last = vim_funcs['bufnr']('$')
+	buffers = []
+	for buf in range(1, buf_last + 1):
+		buf_name_raw = vim_funcs['bufname'](buf)
+		buf_name = '-' if not buf_name_raw else vim_funcs['fnamemodify'](buf_name_raw, fname_modifier)
+		buf_exists = vim_funcs['bufexists'](buf)
+		buf_listed = vim_funcs['buflisted'](buf)
+		priority = 100 if buf == buf_curr else 1000 - (100 - buf)
+		if not (buf_exists and buf_listed):
+			continue
+		buf_attr = ''
+		if int(vim_getbufoption(segment_info, 'modified')):
+			buf_attr += '+'
+		if show_bufnr:
+			buffers.append({
+				'contents': str(buf) + ' ',
+				'highlight_group': ['buffers:number' + (':current' if buf == buf_curr else ''), 'buffers:number', 'buffers'],
+				'priority': priority,
+				})
+		buffers.append({
+			'contents': buf_name + buf_attr if not (wrap_current and buf == buf_curr) else '[' + buf_name + buf_attr + ']',
+			'highlight_group': ['buffers' + (':current' if buf == buf_curr else ''), 'buffers'],
+			'priority': priority,
+			})
+	return buffers
 
 
 @requires_segment_info
