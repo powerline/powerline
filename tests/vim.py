@@ -228,8 +228,15 @@ def _emul_setwinvar(winnr, varname, value):
 
 @_vim
 def _emul_virtcol(expr):
-	if expr == '.':
+	if expr == '.' or isinstance(expr, list):
 		return windows[_window - 1].cursor[1] + 1
+	raise NotImplementedError
+
+
+@_vim
+def _emul_getpos(expr):
+	if expr == '.' or expr == 'v':
+		return [0, windows[_window - 1].cursor[0] + 1, windows[_window - 1].cursor[1] + 1, 0]
 	raise NotImplementedError
 
 

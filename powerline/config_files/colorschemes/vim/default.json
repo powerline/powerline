@@ -4,6 +4,7 @@
 		"background": { "fg": "white", "bg": "gray2" },
 		"background:divider": { "fg": "gray6", "bg": "gray2" },
 		"mode": { "fg": "darkestgreen", "bg": "brightgreen", "attr": ["bold"] },
+		"visual_range": { "fg": "brightestorange", "bg": "darkorange", "attr": ["bold"] },
 		"modified_indicator": { "fg": "brightyellow", "bg": "gray4", "attr": ["bold"] },
 		"paste_indicator": { "fg": "white", "bg": "mediumorange", "attr": ["bold"] },
 		"readonly_indicator": { "fg": "brightestred", "bg": "gray4" },

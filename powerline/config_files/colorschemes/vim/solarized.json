@@ -4,6 +4,7 @@
 		"background":               { "fg": "oldlace", "bg": "royalblue5" },
 		"background:divider":       { "fg": "lightskyblue4", "bg": "royalblue5" },
 		"mode":                     { "fg": "oldlace", "bg": "green", "attr": ["bold"] },
+		"visual_range":             { "fg": "green", "bg": "oldlace", "attr": ["bold"] },
 		"modified_indicator":       { "fg": "yellow", "bg": "darkgreencopper", "attr": ["bold"] },
 		"paste_indicator":          { "fg": "oldlace", "bg": "orange", "attr": ["bold"] },
 		"readonly_indicator":       { "fg": "red", "bg": "darkgreencopper" },
