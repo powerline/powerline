@@ -21,6 +21,11 @@
 				"exclude_modes": ["nc"]
 			},
 			{
+				"name": "visual_range",
+				"exclude_modes": ["nc"],
+				"priority": 10
+			},
+			{
 				"name": "paste_indicator",
 				"exclude_modes": ["nc"],
 				"priority": 10

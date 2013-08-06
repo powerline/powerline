@@ -399,6 +399,10 @@ class TestVim(TestCase):
 			self.assertEqual(vim.mode(pl=pl, segment_info=segment_info), 'V·BLCK')
 			self.assertEqual(vim.mode(pl=pl, segment_info=segment_info, override={'^V': 'VBLK'}), 'VBLK')
 
+	def test_visual_range(self):
+		# TODO
+		pass
+
 	def test_modified_indicator(self):
 		pl = Pl()
 		segment_info = vim_module._get_segment_info()
