@@ -18,6 +18,7 @@ from collections import defaultdict
 
 vim_funcs = {
 	'virtcol': vim_get_func('virtcol', rettype=int),
+	'getpos': vim_get_func('getpos'),
 	'fnamemodify': vim_get_func('fnamemodify', rettype=str),
 	'expand': vim_get_func('expand', rettype=str),
 	'bufnr': vim_get_func('bufnr', rettype=int),
@@ -85,6 +86,31 @@ def mode(pl, segment_info, override=None):
 		return override[mode]
 	except KeyError:
 		return vim_modes[mode]
+
+
+@requires_segment_info
+def visual_range(pl, segment_info):
+	'''Return the current visual selection range.
+
+	Returns a value similar to `showcmd`.
+	'''
+	if segment_info['mode'] not in ('v', 'V', '^V'):
+		return None
+	pos_start = vim_funcs['getpos']('v')
+	pos_end = vim_funcs['getpos']('.')
+	# Workaround for vim's "excellent" handling of multibyte characters and display widths
+	pos_start[2] = vim_funcs['virtcol']([pos_start[1], pos_start[2], pos_start[3]])
+	pos_end[2] = vim_funcs['virtcol']([pos_end[1], pos_end[2], pos_end[3]])
+	visual_start = (int(pos_start[1]), int(pos_start[2]))
+	visual_end = (int(pos_end[1]), int(pos_end[2]))
+	diff_rows = abs(visual_end[0] - visual_start[0]) + 1
+	diff_cols = abs(visual_end[1] - visual_start[1]) + 1
+	if segment_info['mode'] == '^V':
+		return '{0} × {1}'.format(diff_rows, diff_cols)
+	elif segment_info['mode'] == 'V' or diff_rows > 1:
+		return '{0} rows'.format(diff_rows)
+	else:
+		return '{0} cols'.format(diff_cols)
 
 
 @requires_segment_info
