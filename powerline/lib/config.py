@@ -11,7 +11,7 @@ import json
 
 
 def open_file(path):
-	return open(path, 'r')
+	return open(path, 'rb')
 
 
 def load_json_config(config_file_path, load=json.load, open_file=open_file):
