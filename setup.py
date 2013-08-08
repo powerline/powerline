@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # vim:fileencoding=utf-8:noet
-from __future__ import unicode_literals
 import os
 import sys
 
@@ -20,7 +19,7 @@ setup(
 	description='The ultimate statusline/prompt utility.',
 	long_description=README,
 	classifiers=[],
-	author='Kim Silkebækken',
+	author=u'Kim Silkebækken',
 	author_email='kim.silkebaekken+vim@gmail.com',
 	url='https://github.com/Lokaltog/powerline',
 	scripts=[
