@@ -25,6 +25,9 @@ Python package
 .. note:: You need to use the GitHub URI when installing Powerline! This 
    project is currently unavailable on the PyPI due to a naming conflict 
    with an unrelated project.
+   
+.. note:: If you installed Python via homebrew, you do not need to specify
+   the --user flag while installing Powerline
 
 Vim installation
 ----------------
