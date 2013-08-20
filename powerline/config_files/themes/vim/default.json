@@ -59,6 +59,11 @@
 				"before": " "
 			},
 			{
+				"exclude_modes": ["nc"],
+				"module": "powerline.segments.plugin.syntastic",
+				"name": "syntastic"
+			},
+			{
 				"type": "string",
 				"highlight_group": ["background"],
 				"draw_soft_divider": false,
