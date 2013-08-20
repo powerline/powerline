@@ -16,6 +16,8 @@ def generate_directories(path):
 	if os.path.isdir(path):
 		yield path
 	while True:
+		if os.path.ismount(path):
+			break
 		old_path = path
 		path = os.path.dirname(path)
 		if path == old_path or not path:
