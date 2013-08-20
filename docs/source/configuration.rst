@@ -455,6 +455,10 @@ Vim configuration can be overridden using the following options:
     directory which will be searched for configuration. When this option is 
     present, none of the other locations are searched.
 
+``g:powerline_no_python_error``
+    If this variable is set to a true value it will prevent Powerline from reporting 
+    an error when loaded in a copy of vim without the necessary Python support.
+
 Powerline script overrides
 --------------------------
 
