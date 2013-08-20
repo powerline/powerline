@@ -31,7 +31,7 @@
 		"col_current":              { "fg": "azure4", "bg": "lightyellow" },
 		"environment":              { "fg": "gray61", "bg": "royalblue5" },
 		"error":                    { "fg": "oldlace", "bg": "red", "attr": ["bold"] },
-		"warning":                  { "fg": "oldlace", "bg": "orange", "attr": ["bold"] }
+		"warning":                  { "fg": "oldlace", "bg": "orange", "attr": ["bold"] },
 		"current_tag":              { "fg": "oldlace", "bg": "royalblue5", "attr": ["bold"] }
 	},
 	"mode_translations": {
