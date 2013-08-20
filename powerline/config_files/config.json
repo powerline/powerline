@@ -39,7 +39,8 @@
 				"help": "help",
 				"quickfix": "quickfix",
 
-				"powerline.matchers.plugin.nerdtree.nerdtree": "plugin/nerdtree"
+				"powerline.matchers.plugin.nerdtree.nerdtree": "plugin/nerdtree",
+				"powerline.matchers.plugin.ctrlp.ctrlp": "plugin/ctrlp"
 			}
 		},
 		"wm": {
