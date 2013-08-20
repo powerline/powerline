@@ -1,0 +1,17 @@
+{
+	"default_module": "powerline.segments.plugin.nerdtree",
+	"segments": {
+		"left": [
+			{
+				"name": "nerdtree"
+			},
+			{
+				"type": "string",
+				"highlight_group": ["background"],
+				"draw_soft_divider": false,
+				"draw_hard_divider": false,
+				"width": "auto"
+			}
+		]
+	}
+}

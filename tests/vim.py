@@ -156,6 +156,9 @@ def command(cmd):
 	elif cmd.startswith('hi '):
 		sp = cmd.split()
 		_highlights[sp[1]] = sp[2:]
+	elif cmd.startswith('function! Powerline_plugin_ctrlp'):
+		# Ignore CtrlP updating functions
+		pass
 	else:
 		raise NotImplementedError
 
@@ -169,6 +172,8 @@ def eval(expr):
 	elif expr.startswith('PowerlineRegisterCachePurgerEvent'):
 		_buf_purge_events.add(expr[expr.find('"') + 1:expr.rfind('"') - 1])
 		return "0"
+	elif expr.startswith('exists('):
+		return '0'
 	raise NotImplementedError
 
 
