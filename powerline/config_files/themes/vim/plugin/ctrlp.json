@@ -3,7 +3,10 @@
 	"segments": {
 		"left": [
 			{
-				"name": "ctrlp_left"
+				"name": "ctrlp",
+				"args": {
+					"side": "left"
+				}
 			},
 			{
 				"type": "string",
@@ -15,7 +18,10 @@
 		],
 		"right": [
 			{
-				"name": "ctrlp_right"
+				"name": "ctrlp",
+				"args": {
+					"side": "right"
+				}
 			}
 		]
 	}
