@@ -4,16 +4,21 @@ Powerline
 :Author: Kim Silkebækken (kim.silkebaekken+vim@gmail.com)
 :Source: https://github.com/Lokaltog/powerline
 :Version: beta
-:Build status:
-    .. image:: https://api.travis-ci.org/Lokaltog/powerline.png?branch=develop
-       :target: `travis-build-status`_
-       :alt: Build status
-
-.. _travis-build-status: https://travis-ci.org/Lokaltog/powerline
 
 **Powerline is a statusline plugin for vim, and provides statuslines and 
 prompts for several other applications, including zsh, bash, tmux, IPython, 
 Awesome and Qtile.**
+
+* `Support forum`_ (powerline-support@googlegroups.com)
+* `Development discussion`_ (powerline-dev@googlegroups.com)
+
+.. image:: https://api.travis-ci.org/Lokaltog/powerline.png?branch=develop
+   :target: `travis-build-status`_
+   :alt: Build status
+
+.. _travis-build-status: https://travis-ci.org/Lokaltog/powerline
+.. _`Support forum`: https://groups.google.com/forum/#!forum/powerline-support
+.. _`Development discussion`: https://groups.google.com/forum/#!forum/powerline-dev
 
 Features
 --------
