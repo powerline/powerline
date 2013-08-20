@@ -15,9 +15,9 @@
 		],
 		"right": [
 			{
-				"name": "line_percent",
+				"name": "position",
 				"priority": 30,
-				"width": 4,
+				"width": 3,
 				"align": "r"
 			},
 			{

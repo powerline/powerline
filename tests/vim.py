@@ -166,6 +166,8 @@ def eval(expr):
 		return vars[expr[2:]]
 	elif expr.startswith('&'):
 		return options[expr[1:]]
+	elif expr == 'winline()':
+		return 1
 	elif expr.startswith('PowerlineRegisterCachePurgerEvent'):
 		_buf_purge_events.add(expr[expr.find('"') + 1:expr.rfind('"') - 1])
 		return "0"
@@ -291,10 +293,11 @@ _window_id = 0
 
 
 class _Window(object):
-	def __init__(self, buffer=None, cursor=(1, 0), width=80):
+	def __init__(self, buffer=None, cursor=(1, 0), width=80, height=20):
 		global _window_id
 		self.cursor = cursor
 		self.width = width
+		self.height = height
 		self.number = len(windows) + 1
 		if buffer:
 			if type(buffer) is _Buffer:
