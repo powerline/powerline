@@ -104,10 +104,10 @@ def cwd(pl, segment_info, dir_shorten_len=None, dir_limit_depth=None, use_path_s
 		cwd = re.sub('^' + re.escape(home), '~', cwd, 1)
 	cwd_split = cwd.split(os.sep)
 	cwd_split_len = len(cwd_split)
-	if dir_limit_depth and cwd_split_len > dir_limit_depth + 1:
-		del(cwd_split[0:-dir_limit_depth])
-		cwd_split.insert(0, '⋯')
 	cwd = [i[0:dir_shorten_len] if dir_shorten_len and i else i for i in cwd_split[:-1]] + [cwd_split[-1]]
+	if dir_limit_depth and cwd_split_len > dir_limit_depth + 1:
+		del(cwd[0:-dir_limit_depth])
+		cwd.insert(0, '⋯')
 	ret = []
 	if not cwd[0]:
 		cwd[0] = '/'
