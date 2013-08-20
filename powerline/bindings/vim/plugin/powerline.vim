@@ -10,8 +10,10 @@ function! s:CriticalError(message)
 endfunction
 
 if ! has('python') && ! has('python3')
-	call s:CriticalError('You need vim compiled with Python 2.6+ or 3.2+ support
-		\ for Powerline to work. Please consult the documentation for more details.')
+	if !exists('g:powerline_no_python_error')
+		call s:CriticalError('You need vim compiled with Python 2.6+ or 3.2+ support
+			\ for Powerline to work. Please consult the documentation for more details.')
+	endif
 	finish
 endif
 
