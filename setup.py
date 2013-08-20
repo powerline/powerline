@@ -20,7 +20,7 @@ setup(
 	description='The ultimate statusline/prompt utility.',
 	long_description=README,
 	classifiers=[],
-	author='Kim Silkebækken',
+	author='Kim Silkebaekken',
 	author_email='kim.silkebaekken+vim@gmail.com',
 	url='https://github.com/Lokaltog/powerline',
 	scripts=[
