@@ -33,6 +33,7 @@ def ctrlp_stl_left_main(pl, focus, byfname, regex, prev, item, next, marked):
 			'highlight_group': ['ctrlp.item', 'file_name'],
 			'draw_inner_divider': True,
 			'width': 10,
+			'align': 'c',
 		},
 		{
 			'contents': ' ' + next,
