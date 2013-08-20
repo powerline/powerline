@@ -1,0 +1,26 @@
+{
+	"default_module": "powerline.segments.common",
+	"segments": {
+		"left": [
+			{
+				"name": "virtualenv"
+			},
+			{
+				"type": "string",
+				"contents": "In[",
+				"draw_soft_divider": false,
+				"highlight_group": ["prompt"]
+			},
+			{
+				"name": "prompt_count",
+				"module": "powerline.segments.ipython",
+				"draw_soft_divider": false
+			},
+			{
+				"type": "string",
+				"contents": "]",
+				"highlight_group": ["prompt"]
+			}
+		]
+	}
+}

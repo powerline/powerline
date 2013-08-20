@@ -1,0 +1,126 @@
+{
+	"segment_data": {
+		"branch": {
+			"before": " "
+		},
+		"modified_indicator": {
+			"args": { "text": "+" }
+		},
+		"line_percent": {
+			"args": { "gradient": true },
+			"after": "%"
+		},
+		"line_current_symbol": {
+			"contents": " "
+		}
+	},
+	"segments": {
+		"left": [
+			{
+				"name": "mode",
+				"exclude_modes": ["nc"]
+			},
+			{
+				"name": "visual_range",
+				"exclude_modes": ["nc"],
+				"priority": 10
+			},
+			{
+				"name": "paste_indicator",
+				"exclude_modes": ["nc"],
+				"priority": 10
+			},
+			{
+				"name": "branch",
+				"exclude_modes": ["nc"],
+				"priority": 30
+			},
+			{
+				"name": "readonly_indicator",
+				"draw_soft_divider": false,
+				"after": " "
+			},
+			{
+				"name": "file_directory",
+				"priority": 40,
+				"draw_soft_divider": false
+			},
+			{
+				"name": "file_name",
+				"draw_soft_divider": false
+			},
+			{
+				"name": "file_vcs_status",
+				"before": " ",
+				"draw_soft_divider": false
+			},
+			{
+				"name": "modified_indicator",
+				"before": " "
+			},
+			{
+				"exclude_modes": ["nc"],
+				"module": "powerline.segments.plugin.syntastic",
+				"name": "syntastic",
+				"priority": 50
+			},
+			{
+				"exclude_modes": ["nc"],
+				"module": "powerline.segments.plugin.tagbar",
+				"name": "current_tag",
+				"draw_soft_divider": false,
+				"priority": 50
+			},
+			{
+				"type": "string",
+				"highlight_group": ["background"],
+				"draw_soft_divider": false,
+				"draw_hard_divider": false,
+				"width": "auto"
+			}
+		],
+		"right": [
+			{
+				"name": "file_format",
+				"draw_soft_divider": false,
+				"exclude_modes": ["nc"],
+				"priority": 60
+			},
+			{
+				"name": "file_encoding",
+				"exclude_modes": ["nc"],
+				"priority": 60
+			},
+			{
+				"name": "file_type",
+				"exclude_modes": ["nc"],
+				"priority": 60
+			},
+			{
+				"name": "line_percent",
+				"priority": 50,
+				"width": 4,
+				"align": "r"
+			},
+			{
+				"type": "string",
+				"name": "line_current_symbol",
+				"highlight_group": ["line_current_symbol", "line_current"]
+			},
+			{
+				"name": "line_current",
+				"draw_soft_divider": false,
+				"width": 3,
+				"align": "r"
+			},
+			{
+				"name": "virtcol_current",
+				"draw_soft_divider": false,
+				"priority": 20,
+				"before": ":",
+				"width": 3,
+				"align": "l"
+			}
+		]
+	}
+}

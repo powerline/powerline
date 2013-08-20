@@ -1,0 +1,5 @@
+*
+!.gitignore
+!PKGBUILD
+!*.install
+!*.patch

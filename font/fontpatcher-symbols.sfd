@@ -1,0 +1,235 @@
+SplineFontDB: 3.0
+FontName: PowerlineSymbols
+FullName: PowerlineSymbols
+FamilyName: PowerlineSymbols
+Weight: Medium
+Copyright: Created with FontForge 2.0 (http://fontforge.sf.net)
+UComments: "2012-12-17: Created." 
+Version: 001.000
+ItalicAngle: 0
+UnderlinePosition: -100
+UnderlineWidth: 50
+Ascent: 1638
+Descent: 410
+LayerCount: 2
+Layer: 0 0 "Back"  1
+Layer: 1 0 "Fore"  0
+XUID: [1021 211 26716215 11183012]
+OS2Version: 0
+OS2_WeightWidthSlopeOnly: 0
+OS2_UseTypoMetrics: 1
+CreationTime: 1355758773
+ModificationTime: 1355865048
+OS2TypoAscent: 0
+OS2TypoAOffset: 1
+OS2TypoDescent: 0
+OS2TypoDOffset: 1
+OS2TypoLinegap: 0
+OS2WinAscent: 0
+OS2WinAOffset: 1
+OS2WinDescent: 0
+OS2WinDOffset: 1
+HheadAscent: 0
+HheadAOffset: 1
+HheadDescent: 0
+HheadDOffset: 1
+OS2Vendor: 'PfEd'
+MarkAttachClasses: 1
+DEI: 91125
+Encoding: UnicodeBmp
+Compacted: 1
+UnicodeInterp: none
+NameList: Adobe Glyph List
+DisplaySize: -24
+AntiAlias: 1
+FitToEm: 1
+WinInfo: 0 31 16
+BeginPrivate: 0
+EndPrivate
+BeginChars: 65536 8
+
+StartChar: uniE0A0
+Encoding: 57504 57504 0
+Width: 1060
+Flags: HW
+LayerCount: 2
+Fore
+SplineSet
+426 -365 m 1
+ 150 -365 l 1
+ 150 117 l 2
+ 150 236.333333333 176.333333333 333.666666667 229 409 c 1
+ 265 461.666666667 321.333333333 513 398 563 c 2
+ 550 662 l 2
+ 610 701.333333333 652.833333333 747.5 678.5 800.5 c 128
+ 704.166666667 853.5 717 923.333333333 717 1010 c 2
+ 717 1339 l 1
+ 508 1339 l 1
+ 800 1681 l 1
+ 1092 1339 l 1
+ 883 1339 l 1
+ 883 954 l 2
+ 883 826 865.166666667 727.833333333 829.5 659.5 c 128
+ 793.833333333 591.166666667 740.333333333 533.666666667 669 487 c 1
+ 594 437 l 2
+ 532 396.333333333 489.333333333 355 466 313 c 0
+ 439.333333333 265.666666667 426 200.333333333 426 117 c 2
+ 426 -365 l 1
+426 820 m 1
+ 150 642 l 1
+ 150 1950 l 1
+ 426 1950 l 1
+ 426 820 l 1
+EndSplineSet
+EndChar
+
+StartChar: uniE0A1
+Encoding: 57505 57505 1
+Width: 1060
+Flags: HW
+LayerCount: 2
+Fore
+SplineSet
+700 963 m 1
+ 700 831 l 1
+ 194 831 l 1
+ 194 1731 l 1
+ 349 1731 l 1
+ 349 963 l 1
+ 700 963 l 1
+706 750 m 1
+ 865 750 l 1
+ 865 -150 l 1
+ 698 -150 l 1
+ 453 435 l 1
+ 472 45 l 1
+ 472 -150 l 1
+ 315 -150 l 1
+ 315 750 l 1
+ 480 750 l 1
+ 727 163 l 1
+ 706 592 l 1
+ 706 750 l 1
+EndSplineSet
+EndChar
+
+StartChar: uniE0A2
+Encoding: 57506 57506 2
+Width: 1060
+Flags: HW
+LayerCount: 2
+Fore
+SplineSet
+265 0 m 2
+ 171 0 124 47 124 141 c 2
+ 124 830 l 2
+ 124 930.666666667 164.333333333 981 245 981 c 1
+ 245 1287 l 2
+ 245 1378.33333333 273 1454.33333333 329 1515 c 0
+ 383 1573 450 1602 530 1602 c 256
+ 610 1602 677 1573 731 1515 c 0
+ 787 1454.33333333 815 1378.33333333 815 1287 c 2
+ 815 981 l 1
+ 895.666666667 981 936 930.666666667 936 830 c 2
+ 936 141 l 2
+ 936 47 889 0 795 0 c 2
+ 265 0 l 2
+530 1472 m 256
+ 485.333333333 1472 449.5 1455.33333333 422.5 1422 c 128
+ 395.5 1388.66666667 382 1343.66666667 382 1287 c 2
+ 382 981 l 1
+ 678 981 l 1
+ 678 1287 l 2
+ 678 1343.66666667 664.5 1388.66666667 637.5 1422 c 128
+ 610.5 1455.33333333 574.666666667 1472 530 1472 c 256
+586 236 m 1
+ 586 559 l 1
+ 631.333333333 582.333333333 654 619.333333333 654 670 c 0
+ 654 704 641.833333333 733.166666667 617.5 757.5 c 128
+ 593.166666667 781.833333333 564 794 530 794 c 256
+ 496 794 466.833333333 781.833333333 442.5 757.5 c 128
+ 418.166666667 733.166666667 406 704 406 670 c 0
+ 406 619.333333333 428.666666667 582.333333333 474 559 c 1
+ 474 236 l 1
+ 586 236 l 1
+EndSplineSet
+EndChar
+
+StartChar: uniE0B0
+Encoding: 57520 57520 3
+Width: 1060
+Flags: HW
+LayerCount: 2
+Fore
+SplineSet
+0 1950 m 1
+ 1060 788 l 1
+ 0 -375 l 1
+ 0 1950 l 1
+EndSplineSet
+EndChar
+
+StartChar: uniE0B1
+Encoding: 57521 57521 4
+Width: 1060
+Flags: HW
+LayerCount: 2
+Fore
+SplineSet
+-57 1812 m 1
+ 39 1907 l 1
+ 1060 788 l 1
+ 39 -331 l 1
+ -57 -236 l 1
+ 875 788 l 1
+ -57 1812 l 1
+EndSplineSet
+EndChar
+
+StartChar: uniE0B2
+Encoding: 57522 57522 5
+Width: 1060
+Flags: HW
+LayerCount: 2
+Fore
+SplineSet
+1060 -375 m 1
+ 0 788 l 1
+ 1060 1950 l 1
+ 1060 -375 l 1
+EndSplineSet
+EndChar
+
+StartChar: uniE0B3
+Encoding: 57523 57523 6
+Width: 1060
+Flags: HW
+LayerCount: 2
+Fore
+SplineSet
+185 788 m 1
+ 1117 -236 l 1
+ 1021 -331 l 1
+ 0 788 l 1
+ 1021 1907 l 1
+ 1117 1812 l 1
+ 185 788 l 1
+EndSplineSet
+EndChar
+
+StartChar: block
+Encoding: 9608 9608 7
+Width: 1060
+Flags: HW
+LayerCount: 2
+Fore
+SplineSet
+0 1950 m 1
+ 1060 1950 l 1
+ 1060 -375 l 1
+ 0 -375 l 1
+ 0 1950 l 1
+EndSplineSet
+EndChar
+EndChars
+EndSplineFont

@@ -1,0 +1,48 @@
+post_install() {
+	echo "Updating font cache..."
+	fc-cache -f
+
+	echo "
+IMPORTANT
+=========
+
+Powerline requires custom glyphs to work properly. A font with these glyphs has 
+been installed along with a fontconfig file which enables the glyphs for many 
+common coding fonts.
+
+If Powerline doesn't work out of the box on your system, please submit an issue 
+on GitHub: https://github.com/Lokaltog/powerline/issues
+
+Consult the documentation for detailed installation instructions and 
+troubleshooting information: https://powerline.readthedocs.org/en/latest/
+
+You may need to update your PYTHONPATH environment variable by adding the 
+following line to your /etc/profile, .zshrc, etc.:
+
+    export PYTHONPATH=/usr/lib/python3.3/site-packages
+
+Vim installation
+----------------
+
+The plugin has been installed and is enabled by default.
+
+Zsh installation
+----------------
+
+Add the following line to your ~/.zshrc:
+
+    . /usr/share/zsh/site-contrib/powerline.zsh
+
+Tmux installation
+-----------------
+
+Add the following line to your ~/.tmux.conf:
+
+    source '/usr/share/tmux/powerline.conf'
+"
+}
+
+post_remove() {
+	echo "Updating font cache..."
+	fc-cache -f
+}

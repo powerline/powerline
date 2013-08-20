@@ -1,0 +1,13 @@
+{
+	"default_module": "powerline.segments.common",
+	"segments": {
+		"left": [
+			{
+				"type": "string",
+				"contents": "",
+				"width": "auto",
+				"highlight_group": ["prompt"]
+			}
+		]
+	}
+}

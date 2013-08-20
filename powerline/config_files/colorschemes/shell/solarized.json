@@ -1,0 +1,18 @@
+{
+	"name": "Solarized Dark",
+	"groups": {
+		"user":               { "fg": "oldlace", "bg": "blue", "attr": ["bold"] },
+		"superuser":          { "fg": "oldlace", "bg": "red", "attr": ["bold"] },
+		"virtualenv":         { "fg": "oldlace", "bg": "green" },
+		"branch":             { "fg": "gray61", "bg": "royalblue5" },
+		"branch_dirty":       { "fg": "yellow", "bg": "royalblue5" },
+		"branch_clean":       { "fg": "gray61", "bg": "royalblue5" },
+		"cwd":                { "fg": "lightyellow", "bg": "darkgreencopper" },
+		"cwd:current_folder": { "fg": "oldlace", "bg": "darkgreencopper", "attr": ["bold"] },
+		"cwd:divider":        { "fg": "gray61", "bg": "darkgreencopper" },
+		"hostname":           { "fg": "oldlace", "bg": "darkgreencopper" },
+		"exit_fail":          { "fg": "oldlace", "bg": "red" },
+		"exit_success":       { "fg": "oldlace", "bg": "green" },
+		"environment":        { "fg": "oldlace", "bg": "green" }
+	}
+}

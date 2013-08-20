@@ -1,0 +1,29 @@
+#!/usr/bin/env python
+# vim:fileencoding=utf-8:noet
+'''Powerline prompt and statusline script.'''
+import sys
+import os
+
+try:
+	from powerline.shell import ShellPowerline, get_argparser, finish_args
+except ImportError:
+	import os
+	sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+	from powerline.shell import ShellPowerline, get_argparser, finish_args  # NOQA
+
+if __name__ == '__main__':
+	args = get_argparser(description=__doc__).parse_args()
+	finish_args(args)
+	powerline = ShellPowerline(args, run_once=True)
+	segment_info = {'args': args, 'environ': os.environ}
+	if args.renderer_arg:
+		segment_info.update(args.renderer_arg)
+	rendered = powerline.render(
+		width=args.width,
+		side=args.side,
+		segment_info=segment_info,
+	)
+	try:
+		sys.stdout.write(rendered)
+	except UnicodeEncodeError:
+		sys.stdout.write(rendered.encode('utf-8'))

@@ -1,0 +1,53 @@
+{
+	"common": {
+		"term_truecolor": false,
+		"dividers": {
+			"left": {
+				"hard": " ",
+				"soft": " "
+			},
+			"right": {
+				"hard": " ",
+				"soft": " "
+			}
+		},
+		"spaces": 1
+	},
+	"ext": {
+		"ipython": {
+			"colorscheme": "default",
+			"theme": "in",
+			"local_themes": {
+				"rewrite": "rewrite",
+				"out": "out",
+				"in2": "in2"
+			}
+		},
+		"shell": {
+			"colorscheme": "default",
+			"theme": "default"
+		},
+		"tmux": {
+			"colorscheme": "default",
+			"theme": "default"
+		},
+		"vim": {
+			"colorscheme": "default",
+			"theme": "default",
+			"local_themes": {
+				"cmdwin": "cmdwin",
+				"help": "help",
+				"quickfix": "quickfix",
+
+				"powerline.matchers.plugin.nerdtree.nerdtree": "plugin/nerdtree",
+				"powerline.matchers.plugin.ctrlp.ctrlp": "plugin/ctrlp",
+				"powerline.matchers.plugin.gundo.gundo": "plugin/gundo",
+				"powerline.matchers.plugin.gundo.gundo_preview": "plugin/gundo-preview"
+			}
+		},
+		"wm": {
+			"colorscheme": "default",
+			"theme": "default"
+		}
+	}
+}

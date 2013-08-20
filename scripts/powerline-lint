@@ -1,0 +1,14 @@
+#!/usr/bin/env python
+# vim:fileencoding=utf-8:noet
+'''Powerline configuration checker.'''
+import argparse
+from powerline.lint import check
+import sys
+
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('-p', '--config_path', metavar='PATH')
+
+if __name__ == '__main__':
+	args = parser.parse_args()
+	sys.exit(check(args.config_path))

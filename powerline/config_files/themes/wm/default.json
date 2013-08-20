@@ -1,0 +1,31 @@
+{
+	"default_module": "powerline.segments.common",
+	"segments": {
+		"right": [
+			{
+				"name": "weather",
+				"priority": 50
+			},
+			{
+				"name": "date"
+			},
+			{
+				"name": "date",
+				"args": {
+					"format": "%H:%M",
+					"istime": true
+				},
+				"before": "⌚ "
+			},
+			{
+				"name": "email_imap_alert",
+				"before": "✉ ",
+				"priority": 10,
+				"args": {
+					"username": "",
+					"password": ""
+				}
+			}
+		]
+	}
+}
