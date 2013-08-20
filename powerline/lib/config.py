@@ -8,10 +8,11 @@ from threading import Event, Lock
 from collections import defaultdict
 
 import json
+import codecs
 
 
 def open_file(path):
-	return open(path, 'r')
+	return codecs.open(path, encoding='utf-8')
 
 
 def load_json_config(config_file_path, load=json.load, open_file=open_file):
