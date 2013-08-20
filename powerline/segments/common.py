@@ -1019,14 +1019,24 @@ class NowPlayingSegment(object):
 now_playing = NowPlayingSegment()
 
 
-if os.path.exists('/sys/class/power_supply/BAT0/capacity'):
-	def _get_capacity():
+def _get_capacity():
+	if os.path.exists('/sys/class/power_supply/BAT0/capacity'):
 		with open('/sys/class/power_supply/BAT0/capacity', 'r') as f:
 			return int(float(f.readline().split()[0]))
-else:
-	def _get_capacity():
-		raise NotImplementedError
+	else:
+		# MacOSX
+		import subprocess
+		if subprocess.call("type ioreg", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) == 0:
+			cmd = 'ioreg -n AppleSmartBattery -r \
+			 | awk \'$1~/Capacity/{c[$1]=$3} END{OFMT="%.2f%%"; max=c["\"MaxCapacity\""]; print (max>0? 100*c["\"CurrentCapacity\""]/max: "?")}\''
+			# Set locale to default C to make sure to use a period as decimal separator
+			batteryUsageCmd = 'ioreg -n AppleSmartBattery -r | LC_ALL=C awk \'$1~/Capacity/{c[$1]=$3} END{OFMT="%g"; max=c["\\\"MaxCapacity\\\""]; print (max>0? 100*c["\\\"CurrentCapacity\\\""]/max: "?")}\''
+			p = subprocess.Popen(batteryUsageCmd, stdout=subprocess.PIPE, shell=True)
+			batteryUsage = int(float(p.communicate()[0].strip()))
 
+			return batteryUsage
+
+		raise NotImplementedError
 
 def battery(pl, format='{batt:3.0%}', steps=5, gamify=False):
 	'''Return battery charge status.
