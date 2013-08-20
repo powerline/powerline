@@ -1,20 +1,14 @@
 # vim:fileencoding=utf-8:noet
 
 import vim
+from powerline.bindings.vim import getbufvar
 
 
-def ctrlp_left(pl):
-	ctrlp_type = vim.eval('getbufvar("%", "powerline_ctrlp_type")')
-	ctrlp_args = vim.eval('getbufvar("%", "powerline_ctrlp_args")')
+def ctrlp(pl, side):
+	ctrlp_type = getbufvar('%', 'powerline_ctrlp_type')
+	ctrlp_args = getbufvar('%', 'powerline_ctrlp_args')
 
-	return globals()['ctrlp_stl_left_' + ctrlp_type](pl, *ctrlp_args)
-
-
-def ctrlp_right(pl):
-	ctrlp_type = vim.eval('getbufvar("%", "powerline_ctrlp_type")')
-	ctrlp_args = vim.eval('getbufvar("%", "powerline_ctrlp_args")')
-
-	return globals()['ctrlp_stl_right_' + ctrlp_type](pl, *ctrlp_args)
+	return globals()['ctrlp_stl_{0}_{1}'.format(side, ctrlp_type)](pl, *ctrlp_args)
 
 
 def ctrlp_stl_left_main(pl, focus, byfname, regex, prev, item, next, marked):
