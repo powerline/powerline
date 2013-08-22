@@ -131,10 +131,10 @@ class INotify(object):
 	def handle_error(self):
 		import ctypes
 		eno = ctypes.get_errno()
-		extra = b''
+		extra = ''
 		if eno == errno.ENOSPC:
-			extra = b'You may need to increase the inotify limits on your system, via /proc/sys/inotify/max_user_*'
-		raise OSError(eno, self.os.strerror(eno) + extra)
+			extra = 'You may need to increase the inotify limits on your system, via /proc/sys/inotify/max_user_*'
+		raise OSError(eno, self.os.strerror(eno) + str(extra))
 
 	def __del__(self):
 		# This method can be called during interpreter shutdown, which means we
