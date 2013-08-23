@@ -1,0 +1,99 @@
+{
+	"name": "Solarized Light",
+	"groups": {
+		"background":               { "fg": "solarized.base03", "bg": "solarized.base2" },
+		"background:divider":       { "fg": "solarized.base0", "bg": "solarized.base2" },
+		"mode":                     { "fg": "solarized.base3", "bg": "solarized.green", "attr": ["bold"] },
+		"visual_range":             { "fg": "solarized.orange", "bg": "solarized.base03", "attr": ["bold"] },
+		"modified_indicator":       { "fg": "solarized.yellow", "bg": "solarized.base1", "attr": ["bold"] },
+		"paste_indicator":          { "fg": "solarized.base03", "bg": "solarized.orange", "attr": ["bold"] },
+		"readonly_indicator":       { "fg": "solarized.red", "bg": "solarized.base1" },
+		"branch":                   { "fg": "solarized.base02", "bg": "solarized.base1" },
+		"branch_dirty":             { "fg": "solarized.yellow", "bg": "solarized.base1" },
+		"branch_clean":             { "fg": "solarized.base02", "bg": "solarized.base1" },
+		"branch:divider":           { "fg": "solarized.base01", "bg": "solarized.base1" },
+		"file_directory":           { "fg": "solarized.base02", "bg": "solarized.base1" },
+		"file_name":                { "fg": "solarized.base03", "bg": "solarized.base1", "attr": ["bold"] },
+		"file_size":                { "fg": "solarized.base03", "bg": "solarized.base1" },
+		"file_name_no_file":        { "fg": "solarized.base03", "bg": "solarized.base1", "attr": ["bold"] },
+		"file_name_empty":          { "fg": "solarized.base03", "bg": "solarized.base1" },
+		"file_format":              { "fg": "solarized.base01", "bg": "solarized.base2" },
+		"file_encoding":            { "fg": "solarized.base01", "bg": "solarized.base2" },
+		"file_type":                { "fg": "solarized.base01", "bg": "solarized.base2" },
+		"file_vcs_status":          { "fg": "solarized.red", "bg": "solarized.base1" },
+		"file_vcs_status_M":        { "fg": "solarized.yellow", "bg": "solarized.base1" },
+		"file_vcs_status_A":        { "fg": "solarized.green", "bg": "solarized.base1" },
+		"line_percent":             { "fg": "solarized.base03", "bg": "solarized.base01" },
+		"line_percent_gradient":    { "fg": "green_yellow_orange_red", "bg": "solarized.base01" },
+		"line_current":             { "fg": "solarized.base3", "bg": "solarized.base02", "attr": ["bold"] },
+		"line_current_symbol":      { "fg": "solarized.base3", "bg": "solarized.base02" },
+		"virtcol_current_gradient": { "fg": "green_yellow_orange_red", "bg": "solarized.base02" },
+		"col_current":              { "fg": "solarized.base00", "bg": "solarized.base02" },
+		"environment":              { "fg": "solarized.base01", "bg": "solarized.base2" },
+		"error":                    { "fg": "solarized.base03", "bg": "solarized.red", "attr": ["bold"] },
+		"warning":                  { "fg": "solarized.base03", "bg": "solarized.orange", "attr": ["bold"] },
+		"current_tag":              { "fg": "solarized.base03", "bg": "solarized.base2", "attr": ["bold"] }
+	},
+	"mode_translations": {
+		"nc": {
+			"colors": {
+				"solarized.base1": "solarized.base2",
+				"solarized.base0": "solarized.base2",
+				"solarized.base00": "solarized.base1",
+				"solarized.base01": "solarized.base0",
+				"solarized.base02": "solarized.base00",
+				"solarized.base03": "solarized.base01",
+				"green_yellow_orange_red": "solarized.base2"
+			}
+		},
+		"i": {
+			"groups": {
+				"background":               { "fg": "solarized.base03", "bg": "solarized.base2" },
+				"background:divider":       { "fg": "solarized.base02", "bg": "solarized.base1" },
+				"mode":                     { "fg": "solarized.base3", "bg": "solarized.blue", "attr": ["bold"] },
+				"modified_indicator":       { "fg": "solarized.yellow", "bg": "solarized.base02", "attr": ["bold"] },
+				"paste_indicator":          { "fg": "solarized.base03", "bg": "solarized.orange", "attr": ["bold"] },
+				"readonly_indicator":       { "fg": "solarized.red", "bg": "solarized.base02" },
+				"branch":                   { "fg": "solarized.base1", "bg": "solarized.base02" },
+				"branch:divider":           { "fg": "solarized.base0", "bg": "solarized.base02" },
+				"file_directory":           { "fg": "solarized.base1", "bg": "solarized.base02" },
+				"file_name":                { "fg": "solarized.base2", "bg": "solarized.base02", "attr": ["bold"] },
+				"file_size":                { "fg": "solarized.base2", "bg": "solarized.base02" },
+				"file_name_no_file":        { "fg": "solarized.base2", "bg": "solarized.base02", "attr": ["bold"] },
+				"file_name_empty":          { "fg": "solarized.base2", "bg": "solarized.base02" },
+				"file_format":              { "fg": "solarized.base02", "bg": "solarized.base1" },
+				"file_encoding":            { "fg": "solarized.base02", "bg": "solarized.base1" },
+				"file_type":                { "fg": "solarized.base02", "bg": "solarized.base1" },
+				"file_vcs_status":          { "fg": "solarized.red", "bg": "solarized.base02" },
+				"file_vcs_status_M":        { "fg": "solarized.yellow", "bg": "solarized.base02" },
+				"file_vcs_status_A":        { "fg": "solarized.green", "bg": "solarized.base02" },
+				"line_percent":             { "fg": "solarized.base03", "bg": "solarized.base01" },
+				"line_percent_gradient":    { "fg": "solarized.base03", "bg": "solarized.base01" },
+				"line_current":             { "fg": "solarized.base3", "bg": "solarized.base03", "attr": ["bold"] },
+				"line_current_symbol":      { "fg": "solarized.base3", "bg": "solarized.base03" },
+				"virtcol_current_gradient": { "fg": "solarized.base3", "bg": "solarized.base03" },
+				"col_current":              { "fg": "solarized.base0", "bg": "solarized.base03" }
+			}
+		},
+		"v": {
+			"groups": {
+				"mode": { "fg": "solarized.base3", "bg": "solarized.orange", "attr": ["bold"] }
+			}
+		},
+		"V": {
+			"groups": {
+				"mode": { "fg": "solarized.base3", "bg": "solarized.orange", "attr": ["bold"] }
+			}
+		},
+		"^V": {
+			"groups": {
+				"mode": { "fg": "solarized.base3", "bg": "solarized.orange", "attr": ["bold"] }
+			}
+		},
+		"R": {
+			"groups": {
+				"mode": { "fg": "solarized.base3", "bg": "solarized.red", "attr": ["bold"] }
+			}
+		}
+	}
+}
