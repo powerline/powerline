@@ -1027,14 +1027,12 @@ def _get_capacity():
 		# MacOSX
 		import subprocess
 		if subprocess.call("type ioreg", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) == 0:
-			cmd = 'ioreg -n AppleSmartBattery -r \
-			 | awk \'$1~/Capacity/{c[$1]=$3} END{OFMT="%.2f"; max=c["\"MaxCapacity\""]; print (max>0? 100*c["\"CurrentCapacity\""]/max: "?")}\''
 			# Set locale to default C to make sure to use a period as decimal separator
 			batteryUsageCmd = 'ioreg -n AppleSmartBattery -r | LC_ALL=C awk \'$1~/Capacity/{c[$1]=$3} END{OFMT="%g"; max=c["\\\"MaxCapacity\\\""]; print (max>0? 100*c["\\\"CurrentCapacity\\\""]/max: "?")}\''
 			p = subprocess.Popen(batteryUsageCmd, stdout=subprocess.PIPE, shell=True)
-			batteryUsage = float(p.communicate()[0].strip())
-
-			return batteryUsage
+			result = p.communicate()[0].strip()
+			if ("?" != result):
+				return float(result)
 
 		raise NotImplementedError
 
