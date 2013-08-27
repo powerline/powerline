@@ -134,7 +134,7 @@ class INotify(object):
 		extra = ''
 		if eno == errno.ENOSPC:
 			extra = 'You may need to increase the inotify limits on your system, via /proc/sys/inotify/max_user_*'
-		raise OSError(eno, self.os.strerror(eno) + extra)
+		raise OSError(eno, self.os.strerror(eno) + str(extra))
 
 	def __del__(self):
 		# This method can be called during interpreter shutdown, which means we
