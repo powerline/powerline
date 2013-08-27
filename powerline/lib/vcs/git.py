@@ -24,7 +24,7 @@ def git_directory(directory):
 	if os.path.isfile(path):
 		with open(path, 'rb') as f:
 			raw = f.read().partition(b':')[2].strip()
-			return os.path.abspath(os.path.join(directory, raw))
+			return os.path.abspath(os.path.join(directory, raw.decode('utf-8')))
 	else:
 		return path
 
