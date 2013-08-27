@@ -11,7 +11,8 @@ license=('MIT')
 arch=('any')
 makedepends=('git' 'python2-distribute')
 depends=('python2>=2.6')
-optdepends=('python2-psutil: improved system information'
+optdepends=('python2-powerline-fontpatcher-git: font patcher for Powerline symbols'
+	    'python2-psutil: improved system information'
 	    'python2-pygit2: improved git support'
 	    'mercurial: improved mercurial support'
 	    'zsh: better shell prompt'
