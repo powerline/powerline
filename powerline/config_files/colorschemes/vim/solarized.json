@@ -28,6 +28,7 @@
 		"virtcol_current_gradient": { "fg": "GREEN_Orange_red", "bg": "lightyellow", "attr": [] },
 		"col_current":              { "fg": "azure4", "bg": "lightyellow", "attr": [] },
 		"environment":              { "fg": "gray61", "bg": "royalblue5", "attr": [] },
+		"attached_clients":         { "fg": "gray61", "bg": "royalblue5", "attr": [] },
 		"error":                    { "fg": "oldlace", "bg": "red", "attr": ["bold"] },
 		"warning":                  { "fg": "oldlace", "bg": "orange", "attr": ["bold"] },
 		"current_tag":              { "fg": "oldlace", "bg": "royalblue5", "attr": ["bold"] }

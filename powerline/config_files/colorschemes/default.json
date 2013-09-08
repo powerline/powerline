@@ -38,6 +38,7 @@
 		"cwd":                       { "fg": "gray9", "bg": "gray4", "attr": [] },
 		"cwd:current_folder":        { "fg": "gray10", "bg": "gray4", "attr": ["bold"] },
 		"cwd:divider":               { "fg": "gray7", "bg": "gray4", "attr": [] },
-		"virtualenv":                { "fg": "white", "bg": "darkcyan", "attr": [] }
+		"virtualenv":                { "fg": "white", "bg": "darkcyan", "attr": [] },
+		"attached_clients":          { "fg": "gray8", "bg": "gray0", "attr": [] }
 	}
 }
