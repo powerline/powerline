@@ -41,6 +41,14 @@ def urllib_read(query_url):
 	else:
 		raise NotImplementedError
 
+class Process(object):
+	def __init__(self, output, err):
+		self.output = output
+		self.err = err
+
+	def communicate(self):
+		return self.output, self.err
+
 
 class ModuleReplace(object):
 	def __init__(self, name, new):

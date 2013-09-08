@@ -17,7 +17,8 @@
 		"exit_fail":            { "fg": "oldlace", "bg": "red" },
 		"exit_success":         { "fg": "oldlace", "bg": "green" },
 		"environment":          { "fg": "oldlace", "bg": "green" },
-		"mode":                 { "fg": "oldlace", "bg": "green", "attr": ["bold"] }
+		"mode":                 { "fg": "oldlace", "bg": "green", "attr": ["bold"] },
+		"attached_clients":     { "fg": "oldlace", "bg": "green" }
 	},
 	"mode_translations": {
 		"vicmd": {
