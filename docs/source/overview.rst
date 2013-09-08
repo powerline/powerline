@@ -47,7 +47,7 @@ if your terminal emulator supports it.
    lxterminal            Linux   |i_yes|               |i_yes|               |i_no|
    MacVim                OS X    |i_yes|               |i_no|                |i_yes|
    rxvt-unicode          Linux   |i_partial| [#]_      |i_no|                |i_no|
-   st                    Linux   |i_yes|               |i_yes|               |i_no|
+   st                    Linux   |i_yes|               |i_yes|               |i_yes|
    Terminal.app          OS X    |i_yes|               |i_no|                |i_no|
    Xfce Terminal         Linux   |i_yes|               |i_yes|               |i_no|
    xterm                 Linux   |i_yes|               |i_no|                |i_partial| [#]_
