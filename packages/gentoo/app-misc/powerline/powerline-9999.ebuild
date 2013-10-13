@@ -8,7 +8,7 @@ PYTHON_COMPAT=( python{2_6,2_7,3_2,3_3} )
 #if LIVE
 EGIT_REPO_URI="https://github.com/Lokaltog/${PN}"
 EGIT_BRANCH="develop"
-inherit git
+inherit git-2
 #endif
 
 inherit distutils-r1 eutils font
