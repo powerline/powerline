@@ -93,10 +93,12 @@ Installation
 Usage
 =====
 
+.. _vim-vimrc:
+
 Vim statusline
 --------------
 
-If installed using pip just use
+If installed using pip just add
 
 .. code-block:: vim
 
@@ -104,7 +106,7 @@ If installed using pip just use
     python powerline_setup()
     python del powerline_setup
 
-(replace ``python`` with ``python3`` if appropriate).
+(replace ``python`` with ``python3`` if appropriate) to your :file:`vimrc`.
 
 If you just cloned the repository add the following line to your :file:`vimrc`, 
 where ``{repository_root}`` is the absolute path to your Powerline installation 
