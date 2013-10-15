@@ -8,6 +8,7 @@ import sys
 from datetime import datetime
 import socket
 from multiprocessing import cpu_count as _cpu_count
+from functools import partial
 
 from powerline.lib import add_divider_highlight_group
 from powerline.lib.url import urllib_read, urllib_urlencode
@@ -332,7 +333,7 @@ class WeatherSegment(ThreadedSegment):
 		import json
 
 		if not self.url:
-			# Do not lock attribute assignments in this branch: they are used 
+			# Do not lock attribute assignments in this branch: they are used
 			# only in .update()
 			if not self.location:
 				location_data = json.loads(urllib_read('http://freegeoip.net/json/' + _external_ip()))
@@ -425,12 +426,12 @@ weather conditions.
 :param str temp_format:
 	format string, receives ``temp`` as an argument. Should also hold unit.
 :param float temp_coldest:
-	coldest temperature. Any temperature below it will have gradient level equal 
+	coldest temperature. Any temperature below it will have gradient level equal
 	to zero.
 :param float temp_hottest:
-	hottest temperature. Any temperature above it will have gradient level equal 
-	to 100. Temperatures between ``temp_coldest`` and ``temp_hottest`` receive 
-	gradient level that indicates relative position in this interval 
+	hottest temperature. Any temperature above it will have gradient level equal
+	to 100. Temperatures between ``temp_coldest`` and ``temp_hottest`` receive
+	gradient level that indicates relative position in this interval
 	(``100 * (cur-coldest) / (hottest-coldest)``).
 
 Divider highlight group used: ``background:divider``.
@@ -450,17 +451,17 @@ def system_load(pl, format='{avg:.1f}', threshold_good=1, threshold_bad=2, track
 	:param str format:
 		format string, receives ``avg`` as an argument
 	:param float threshold_good:
-		threshold for gradient level 0: any normalized load average below this 
+		threshold for gradient level 0: any normalized load average below this
 		value will have this gradient level.
 	:param float threshold_bad:
-		threshold for gradient level 100: any normalized load average above this 
-		value will have this gradient level. Load averages between 
-		``threshold_good`` and ``threshold_bad`` receive gradient level that 
+		threshold for gradient level 100: any normalized load average above this
+		value will have this gradient level. Load averages between
+		``threshold_good`` and ``threshold_bad`` receive gradient level that
 		indicates relative position in this interval:
 		(``100 * (cur-good) / (bad-good)``).
 		Note: both parameters are checked against normalized load averages.
 	:param bool track_cpu_count:
-		if True powerline will continuously poll the system to detect changes 
+		if True powerline will continuously poll the system to detect changes
 		in the number of CPUs.
 
 	Divider highlight group used: ``background:divider``.
@@ -621,7 +622,7 @@ elif 'psutil' in globals():
 	from time import time
 
 	def _get_uptime():  # NOQA
-		# psutil.BOOT_TIME is not subject to clock adjustments, but time() is. 
+		# psutil.BOOT_TIME is not subject to clock adjustments, but time() is.
 		# Thus it is a fallback to /proc/uptime reading and not the reverse.
 		return int(time() - psutil.BOOT_TIME)
 else:
@@ -773,10 +774,10 @@ falls back to reading
 :param str sent_format:
 	format string, receives ``value`` as argument
 :param float recv_max:
-	maximum number of received bytes per second. Is only used to compute 
+	maximum number of received bytes per second. Is only used to compute
 	gradient level
 :param float sent_max:
-	maximum number of sent bytes per second. Is only used to compute gradient 
+	maximum number of sent bytes per second. Is only used to compute gradient
 	level
 
 Divider highlight group used: ``background:divider``.
@@ -848,8 +849,8 @@ email_imap_alert = with_docstring(EmailIMAPSegment(),
 :param str folder:
 	folder to check for e-mails
 :param int max_msgs:
-	Maximum number of messages. If there are more messages then max_msgs then it 
-	will use gradient level equal to 100, otherwise gradient level is equal to 
+	Maximum number of messages. If there are more messages then max_msgs then it
+	will use gradient level equal to 100, otherwise gradient level is equal to
 	``100 * msgs_num / max_msgs``. If not present gradient is not computed.
 
 Highlight groups used: ``email_alert_gradient`` (gradient), ``email_alert``.
@@ -1068,3 +1069,57 @@ def battery(pl, format='{batt:3.0%}', steps=5, gamify=False):
 			'gradient_level': batt * 100
 		})
 	return ret
+
+do_find = object()
+_battery = do_find
+
+def _find_battery(pl):
+	try:
+		import dbus
+	except ImportError:
+		pl.warn('Cannot get battery stats as DBUS not available')
+		return
+	bus = dbus.SystemBus()
+	try:
+		up = bus.get_object('org.freedesktop.UPower', '/org/freedesktop/UPower')
+	except dbus.exceptions.DBusException as e:
+		if getattr(e, '_dbus_error_name', None) == 'org.freedesktop.DBus.Error.ServiceUnknown':
+			pl.warn('Cannot get batter stats as UPower service is not available')
+			return
+		raise
+	for devpath in up.EnumerateDevices(dbus_interface='org.freedesktop.UPower'):
+		dev = bus.get_object('org.freedesktop.UPower', devpath)
+		devtype = int(dev.Get('org.freedesktop.UPower.Device', 'Type', dbus_interface='org.freedesktop.DBus.Properties'))
+		if devtype != 2:
+			continue
+		if not bool(dev.Get('org.freedesktop.UPower.Device', 'IsPresent', dbus_interface='org.freedesktop.DBus.Properties')):
+			continue
+		if not bool(dev.Get('org.freedesktop.UPower.Device', 'PowerSupply', dbus_interface='org.freedesktop.DBus.Properties')):
+			continue
+		return partial(dbus.Interface(dev, dbus_interface='org.freedesktop.DBus.Properties').Get, 'org.freedesktop.UPower.Device')
+
+def find_battery(pl):
+	global _battery
+	if _battery is do_find:
+		_battery = _find_battery(pl)
+	return _battery
+
+def battery_time(pl):
+	dev = find_battery(pl)
+	if dev is None:
+		return None
+	state = int(dev('State'))
+	if state not in (1, 2):
+		return None
+	tleft = int(dev('TimeToFull' if state == 1 else 'TimeToEmpty'))
+	percentage = float(dev('Percentage'))
+	prefix = '+' if state == 1 else '-'
+	if tleft == 0:
+		return None
+	minutes = tleft // 60
+	hours, minutes = minutes // 60, minutes % 60
+	return [{
+		'contents': '%s %02d:%02d' % (prefix, hours, minutes),
+		'highlight_group': ['battery_gradient', 'battery'],
+		'gradient_level': percentage
+	}]
