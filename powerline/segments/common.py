@@ -335,10 +335,10 @@ class WeatherSegment(ThreadedSegment):
 			# Do not lock attribute assignments in this branch: they are used 
 			# only in .update()
 			if not self.location:
-				location_data = json.loads(urllib_read('http://freegeoip.net/json/' + _external_ip()))
+				location_data = json.loads(urllib_read('http://freegeoip.net/json/'))
 				self.location = ','.join([location_data['city'],
-											location_data['region_name'],
-											location_data['country_name']])
+											location_data['region_code'],
+											location_data['country_code']])
 			query_data = {
 				'q':
 				'use "http://github.com/yql/yql-tables/raw/master/weather/weather.bylocation.xml" as we;'
