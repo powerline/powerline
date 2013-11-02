@@ -6,7 +6,6 @@ from powerline.lib.config import load_json_config
 from powerline.lint.markedjson.error import echoerr, MarkedError
 from powerline.segments.vim import vim_modes
 from powerline.lint.inspect import getconfigargspec
-from powerline.lint.markedjson.markedvalue import gen_marked_value
 from powerline.lib.threaded import ThreadedSegment
 import itertools
 import sys

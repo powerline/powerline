@@ -71,8 +71,8 @@ class BaseResolver:
 				return
 		if index_check is True and current_index is not None:
 			return
-		if (index_check is False or index_check is None)	\
-				and current_index is None:
+		if ((index_check is False or index_check is None)
+			and current_index is None):
 			return
 		if isinstance(index_check, str):
 			if not (isinstance(current_index, ScalarNode)

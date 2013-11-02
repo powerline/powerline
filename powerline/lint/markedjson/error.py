@@ -53,13 +53,13 @@ class Mark:
 				break
 		snippet = [self.buffer[start:self.pointer], self.buffer[self.pointer], self.buffer[self.pointer + 1:end]]
 		snippet = [strtrans(s) for s in snippet]
-		return ' ' * indent + head + ''.join(snippet) + tail + '\n'  \
-				+ ' ' * (indent + len(head) + len(snippet[0])) + '^'
+		return (' ' * indent + head + ''.join(snippet) + tail + '\n'
+				+ ' ' * (indent + len(head) + len(snippet[0])) + '^')
 
 	def __str__(self):
 		snippet = self.get_snippet()
-		where = "  in \"%s\", line %d, column %d"	\
-				% (self.name, self.line + 1, self.column + 1)
+		where = ("  in \"%s\", line %d, column %d"
+				% (self.name, self.line + 1, self.column + 1))
 		if snippet is not None:
 			where += ":\n" + snippet
 		if type(where) is str:
