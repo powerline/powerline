@@ -1,6 +1,9 @@
 # vim:fileencoding=utf-8:noet
 
-import vim
+try:
+	import vim
+except ImportError:
+	vim = object()  # NOQA
 
 from powerline.bindings.vim import getbufvar
 from powerline.segments.vim import window_cached
@@ -8,6 +11,10 @@ from powerline.segments.vim import window_cached
 
 @window_cached
 def nerdtree(pl):
+	'''Return directory that is shown by the current buffer.
+
+	Highlight groups used: ``nerdtree.path`` or ``file_name``.
+	'''
 	ntr = getbufvar('%', 'NERDTreeRoot')
 	if not ntr:
 		return

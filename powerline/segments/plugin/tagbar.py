@@ -1,6 +1,9 @@
 # vim:fileencoding=utf-8:noet
 
-import vim
+try:
+	import vim
+except ImportError:
+	vim = object()  # NOQA
 
 from powerline.segments.vim import window_cached
 
