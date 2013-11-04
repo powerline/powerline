@@ -150,6 +150,16 @@ absolute path to your Powerline installation directory:
 
    . {repository_root}/powerline/bindings/zsh/powerline.zsh
 
+Fish prompt
+^^^^^^^^^^^
+
+Add the following line to your :file:`config.fish`, where ``{repository_root}`` 
+is the absolute path to your Powerline installation directory:
+
+.. code-block:: bash
+
+   . {repository_root}/powerline/bindings/fish/powerline.fish
+
 Tmux statusline
 ---------------
 
