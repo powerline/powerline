@@ -9,7 +9,10 @@
 			{
 				"type": "string",
 				"name": "buffer_name",
-				"highlight_group": ["file_name"],
+				"highlight_group": ["file_name"]
+			},
+			{
+				"name": "window_title",
 				"draw_soft_divider": false
 			},
 			{

@@ -250,6 +250,20 @@ def file_type(pl, segment_info):
 
 
 @requires_segment_info
+def window_title(pl, segment_info):
+	'''Return the window title.
+
+	This currently looks at the ``quickfix_title`` window variable,
+	which is used by Syntastic and Vim itself.
+
+	It is used in the quickfix theme.'''
+	try:
+		return segment_info['window'].vars['quickfix_title']
+	except KeyError:
+		return None
+
+
+@requires_segment_info
 def line_percent(pl, segment_info, gradient=False):
 	'''Return the cursor position in the file as a percentage.
 
