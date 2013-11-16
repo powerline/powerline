@@ -36,6 +36,7 @@ _powerline_precmd() {
 	# wrong number of jobs. You need to filter the lines first. Or not use 
 	# jobs built-in at all.
 	_POWERLINE_JOBNUM=${(%):-%j}
+	_powerline_set_true_keymap_name "${${(Q)${${(z)${"$(bindkey -lL main)"}}[3]}}:-.safe}"
 }
 
 _powerline_setup_prompt() {
@@ -47,6 +48,7 @@ _powerline_setup_prompt() {
 	done
 	precmd_functions+=( _powerline_precmd )
 	chpwd_functions+=( _powerline_tmux_set_pwd )
+	_powerline_set_true_keymap_name "${${(Q)${${(z)${"$(bindkey -lL main)"}}[3]}}:-.safe}"
 	if zmodload zsh/zpython &>/dev/null ; then
 		zpython 'from powerline.bindings.zsh import setup as powerline_setup'
 		zpython 'powerline_setup()'
@@ -80,25 +82,22 @@ _powerline_add_widget() {
 	fi
 }
 
+_powerline_set_true_keymap_name() {
+	export POWERLINE_MODE="${1}"
+	local plm_bk="$(bindkey -lL ${POWERLINE_MODE})"
+	if [[ $plm_bk = 'bindkey -A'* ]] ; then
+		_powerline_set_true_keymap_name ${(Q)${${(z)plm_bk}[3]}}
+	fi
+}
+
 _powerline_zle_keymap_select() {
-	export POWERLINE_MODE="${KEYMAP}"
+	_powerline_set_true_keymap_name $KEYMAP
 	zle reset-prompt
 	test -z "$POWERLINE_SAVE_WIDGET" || zle $POWERLINE_SAVE_WIDGET
 }
 
-_powerline_set_mode() {
-	local keymap
-	if test -z "$(bindkey -lL main)" ; then
-		keymap=".safe"
-	else
-		keymap="main"
-	fi
-	export POWERLINE_MODE="${keymap}"
-}
-
-_powerline_set_mode
-
 _powerline_add_widget zle-keymap-select _powerline_zle_keymap_select
+_powerline_precmd
 
 trap "_powerline_tmux_set_columns" SIGWINCH
 _powerline_tmux_set_columns
