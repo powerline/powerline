@@ -44,19 +44,22 @@ def last_pipe_status(pl, segment_info):
 
 
 @requires_segment_info
-def mode(pl, segment_info, override={'vicmd': 'COMMND', 'viins': 'INSERT'}, default='main'):
+def mode(pl, segment_info, override={'vicmd': 'COMMND', 'viins': 'INSERT'}, default=None):
 	'''Return the current mode.
 	
 	:param dict override:
 		dict for overriding mode strings.
 	:param str default:
 		If current mode is equal to this string then this segment will not get 
-		displayed.
+		displayed. If not specified the value is taken from 
+		``$POWERLINE_DEFAULT_MODE`` variable. This variable is set by zsh 
+		bindings for any mode that does not start from ``vi``.
 	'''
 	mode = segment_info['mode']
 	if not mode:
 		pl.warn('No or empty POWERLINE_MODE variable')
 		return None
+	default = default or segment_info['environ'].get('POWERLINE_DEFAULT_MODE')
 	if mode == default:
 		return None
 	try:

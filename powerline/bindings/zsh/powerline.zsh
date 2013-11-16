@@ -99,6 +99,10 @@ _powerline_zle_keymap_select() {
 _powerline_add_widget zle-keymap-select _powerline_zle_keymap_select
 _powerline_precmd
 
+if [[ "$POWERLINE_MODE" != vi* ]] ; then
+	export POWERLINE_DEFAULT_MODE="$POWERLINE_MODE"
+fi
+
 trap "_powerline_tmux_set_columns" SIGWINCH
 _powerline_tmux_set_columns
 _powerline_tmux_set_pwd
