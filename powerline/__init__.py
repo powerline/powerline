@@ -488,8 +488,5 @@ class Powerline(object):
 	def exception(self, msg, *args, **kwargs):
 		if 'prefix' not in kwargs:
 			kwargs['prefix'] = 'powerline'
-		try:
-			return self.pl.exception(msg, *args, **kwargs)
-		except AttributeError:
-			pl = _get_fallback_logger()
-			return pl.exception(msg, *args, **kwargs)
+		pl = getattr(self, 'pl', None) or _get_fallback_logger()
+		return pl.exception(msg, *args, **kwargs)
