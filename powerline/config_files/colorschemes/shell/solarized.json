@@ -1,6 +1,7 @@
 {
 	"name": "Solarized Dark",
 	"groups": {
+		"jobnum":             { "fg": "oldlace", "bg": "darkgreencopper" },
 		"user":               { "fg": "oldlace", "bg": "blue", "attr": ["bold"] },
 		"superuser":          { "fg": "oldlace", "bg": "red", "attr": ["bold"] },
 		"virtualenv":         { "fg": "oldlace", "bg": "green" },
