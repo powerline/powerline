@@ -30,7 +30,7 @@ _powerline_prompt() {
 	local last_exit_code=$?
 	[[ -z "$POWERLINE_OLD_PROMPT_COMMAND" ]] ||
 		eval $POWERLINE_OLD_PROMPT_COMMAND
-	PS1="$($POWERLINE_COMMAND shell left -r bash_prompt --last_exit_code=$last_exit_code)"
+	PS1="$($POWERLINE_COMMAND shell left -r bash_prompt --last_exit_code=$last_exit_code --jobs="$(jobs)")"
 	_powerline_tmux_set_pwd
 	return $last_exit_code
 }

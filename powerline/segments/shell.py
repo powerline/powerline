@@ -4,6 +4,17 @@ from powerline.theme import requires_segment_info
 
 
 @requires_segment_info
+def jobs(pl, segment_info):
+	'''Return the number of background jobs.
+
+	Highlight groups used: ``jobs``
+	'''
+	if not segment_info['args'].jobs:
+		return None
+	return str(len(segment_info['args'].jobs.splitlines()))
+
+
+@requires_segment_info
 def last_status(pl, segment_info):
 	'''Return last exit code.
 
