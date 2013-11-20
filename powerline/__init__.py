@@ -121,7 +121,7 @@ class Powerline(object):
 			'load_theme': True,
 		}
 		self.shutdown_event = shutdown_event or Event()
-		self.config_loader = config_loader or ConfigLoader(shutdown_event=self.shutdown_event)
+		self.config_loader = config_loader or ConfigLoader(shutdown_event=self.shutdown_event, run_once=run_once)
 		self.run_loader_update = False
 
 		self.renderer_options = {}
