@@ -97,7 +97,10 @@ def sleep(interval):
 
 
 def add_watcher_events(p, *args, **kwargs):
-	p.config_loader.watcher._reset(args)
+	try:
+		p.config_loader.watcher._reset(args)
+	except AttributeError:
+		return
 	while not p._will_create_renderer():
 		sleep(kwargs.get('interval', 0.000001))
 		if not kwargs.get('wait', True):
@@ -118,7 +121,6 @@ class TestConfigReload(TestCase):
 				# When running once thread should not start
 				self.assertEqual(p.render(), '<1 2 1> s<2 4 False>>><3 4 4>g<4 False False>>><None None None>')
 				self.assertAccessEvents()
-				self.assertEqual(p.logger._pop_msgs(), [])
 		# Without the following assertion test_reload_colors may fail for 
 		# unknown reason (with AssertionError telling about “config” accessed 
 		# one more time then needed)
@@ -253,6 +255,20 @@ class TestConfigReload(TestCase):
 				self.assertEqual(p.render(), '<1 2 1> col3<2 4 False>>><3 4 4>g<4 False False>>><None None None>')
 				self.assertAccessEvents('themes/test/default')
 				self.assertEqual(p.logger._pop_msgs(), [])
+				self.assertTrue(p.config_loader.watcher._calls)
+		pop_events()
+
+	def test_run_once_no_theme_reload(self):
+		with replace_item(globals(), 'config', deepcopy(config)):
+			config['config']['common']['interval'] = None
+			with get_powerline(run_once=True) as p:
+				self.assertEqual(p.render(), '<1 2 1> s<2 4 False>>><3 4 4>g<4 False False>>><None None None>')
+				self.assertAccessEvents('config', 'colors', 'colorschemes/test/default', 'themes/test/default')
+
+				config['themes/test/default']['segments']['left'][0]['contents'] = 'col3'
+				add_watcher_events(p, 'themes/test/default', wait=False)
+				self.assertEqual(p.render(), '<1 2 1> s<2 4 False>>><3 4 4>g<4 False False>>><None None None>')
+				self.assertAccessEvents()
 		pop_events()
 
 
