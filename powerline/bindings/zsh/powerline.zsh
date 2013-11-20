@@ -124,10 +124,10 @@ _powerline_setup_prompt() {
 		zpython 'del _powerline_setup'
 	else
 		if test -z "${POWERLINE_COMMAND}" ; then
-			if which powerline-client &>/dev/null ; then
-				export POWERLINE_COMMAND=powerline-client
-			elif which powerline &>/dev/null ; then
+			if which powerline &>/dev/null ; then
 				export POWERLINE_COMMAND=powerline
+			elif which powerline-render &>/dev/null ; then
+				export POWERLINE_COMMAND=powerline-render
 			else
 				export POWERLINE_COMMAND="$0:A:h:h:h:h/scripts/powerline"
 			fi

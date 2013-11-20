@@ -11,10 +11,10 @@ if ! ( $?POWERLINE_NO_TCSH_TMUX_SUPPORT || $?POWERLINE_NO_SHELL_TMUX_SUPPORT ) t
 endif
 if ! ( $?POWERLINE_NO_TCSH_PROMPT || $?POWERLINE_NO_SHELL_PROMPT ) then
 	if ! $?POWERLINE_COMMAND then
-		if ( { which powerline-client > /dev/null } ) then
-			setenv POWERLINE_COMMAND powerline-client
-		else if ( { which powerline > /dev/null } ) then
+		if ( { which powerline > /dev/null } ) then
 			setenv POWERLINE_COMMAND powerline
+		else if ( { which powerline-render > /dev/null } ) then
+			setenv POWERLINE_COMMAND powerline-render
 		else
 			setenv POWERLINE_COMMAND $POWERLINE_SOURCED:h:h:h:h:q/scripts/powerline
 		endif

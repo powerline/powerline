@@ -20,10 +20,10 @@ function powerline-setup
 
 	if test -z "$POWERLINE_NO_FISH_PROMPT$POWERLINE_NO_SHELL_PROMPT"
 		if test -z "$POWERLINE_COMMAND"
-			if which powerline-client >/dev/null
-				set -g -x POWERLINE_COMMAND powerline-client
-			else if which powerline >/dev/null
+			if which powerline >/dev/null
 				set -g -x POWERLINE_COMMAND powerline
+			else if which powerline-render >/dev/null
+				set -g -x POWERLINE_COMMAND powerline-render
 			else
 				set -g -x POWERLINE_COMMAND (dirname (status -f))/../../../scripts/powerline
 			end
