@@ -62,7 +62,6 @@ class Watcher(object):
 				return True
 		return False
 
-	@log_call
 	def _reset(self, files):
 		with self.lock:
 			self.events.clear()
@@ -112,13 +111,16 @@ renderer = SimpleRenderer
 
 
 def get_powerline(**kwargs):
-	return TestPowerline(
+	watcher = Watcher()
+	pl = TestPowerline(
 		ext='test',
 		renderer_module='tests.lib.config_mock',
 		logger=Logger(),
-		config_loader=ConfigLoader(load=load_json_config, watcher=Watcher(), run_once=kwargs.get('run_once')),
+		config_loader=ConfigLoader(load=load_json_config, watcher=watcher, run_once=kwargs.get('run_once')),
 		**kwargs
 	)
+	pl._watcher = watcher
+	return pl
 
 
 config_container = None
