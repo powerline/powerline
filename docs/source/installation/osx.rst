@@ -26,6 +26,11 @@ Python package
    project is currently unavailable on the PyPI due to a naming conflict 
    with an unrelated project.
 
+.. note:: If you are powerline developer you should be aware that ``pip install 
+   --editable`` does not currently fully work. If you
+   install powerline this way you will be missing ``powerline`` executable and 
+   need to symlink it. It will be located in ``scripts/powerline``.
+
 Vim installation
 ----------------
 
