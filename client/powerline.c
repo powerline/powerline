@@ -1,4 +1,5 @@
-/* vim:fileencoding=utf-8:noet */
+/* vim:fileencoding=utf-8:noet
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
