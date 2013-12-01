@@ -21,12 +21,6 @@ def compile_client():
 
 	if hasattr(sys, 'getwindowsversion'):
 		raise NotImplementedError()
-	if sys.version_info >= (3, 0):
-		# FIXME Python 3 doesn't allow compiled C files to be included in the 
-		# scripts list below. This is because Python 3 distutils tries to 
-		# decode the file to ASCII, and fails when powerline-client is 
-		# a binary.
-		raise NotImplementedError()
 	else:
 		from distutils.ccompiler import new_compiler
 		compiler = new_compiler().compiler
@@ -49,12 +43,30 @@ setup(
 	author='Kim Silkebækken',
 	author_email='kim.silkebaekken+vim@gmail.com',
 	url='https://github.com/Lokaltog/powerline',
+	# XXX Python 3 doesn't allow compiled C files to be included in the scripts 
+	# list below. This is because Python 3 distutils tries to decode the file to 
+	# ASCII, and fails when powerline-client is a binary.
+	#
+	# XXX Python 2 fucks up script contents*. Not using it to install scripts 
+	# any longer.
+	# * Consider the following input:
+	#     % alias hex1=$'hexdump -e \'"" 1/1 "%02X\n"\''
+	#     % diff <(hex1 ./scripts/powerline) <(hex1 ~/.local/bin/powerline)
+	#   This will show output like
+	#     375c375
+	#     < 0D
+	#     ---
+	#     > 0A
+	#   (repeated, with diff segment header numbers growing up).
+	#
+	# FIXME Current solution does not work with `pip install -e`. Still better 
+	# then solution that is not working at all.
 	scripts=[
-		'scripts/powerline',
 		'scripts/powerline-lint',
 		'scripts/powerline-daemon',
 		'scripts/powerline-render',
 	],
+	data_files=[('bin', ['scripts/powerline'])],
 	keywords='',
 	packages=find_packages(exclude=('tests', 'tests.*')),
 	include_package_data=True,
