@@ -115,7 +115,7 @@ def cwd(pl, segment_info, dir_shorten_len=None, dir_limit_depth=None, use_path_s
 	for part in cwd:
 		if not part:
 			continue
-		if use_path_separator:
+		if use_path_separator and not part == os.sep:
 			part += os.sep
 		ret.append({
 			'contents': part,
@@ -123,7 +123,7 @@ def cwd(pl, segment_info, dir_shorten_len=None, dir_limit_depth=None, use_path_s
 			'draw_inner_divider': draw_inner_divider,
 		})
 	ret[-1]['highlight_group'] = ['cwd:current_folder', 'cwd']
-	if use_path_separator:
+	if use_path_separator and len(ret) > 1:
 		ret[-1]['contents'] = ret[-1]['contents'][:-1]
 	return ret
 
