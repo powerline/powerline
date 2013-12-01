@@ -27,7 +27,7 @@ mode_translations = {
 class VimRenderer(Renderer):
 	'''Powerline vim segment renderer.'''
 
-	character_translations = Renderer.character_translations
+	character_translations = Renderer.character_translations.copy()
 	character_translations[ord('%')] = '%%'
 
 	def __init__(self, *args, **kwargs):

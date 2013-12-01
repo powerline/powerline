@@ -9,7 +9,7 @@ from powerline.colorscheme import ATTR_BOLD, ATTR_ITALIC, ATTR_UNDERLINE
 class TmuxRenderer(Renderer):
 	'''Powerline tmux segment renderer.'''
 
-	character_translations = Renderer.character_translations
+	character_translations = Renderer.character_translations.copy()
 	character_translations[ord('#')] = '##[]'
 
 	def hlstyle(self, fg=None, bg=None, attr=None):

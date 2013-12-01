@@ -21,7 +21,7 @@ class ShellRenderer(Renderer):
 	tmux_escape = False
 	screen_escape = False
 
-	character_translations = Renderer.character_translations
+	character_translations = Renderer.character_translations.copy()
 	character_translations[ord('\\')] = '\\\\'
 
 	def hlstyle(self, fg=None, bg=None, attr=None):
