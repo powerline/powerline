@@ -13,7 +13,7 @@ still skim through this guide so you know how the plugin works.
 
 * `Arch Linux (AUR), Python 2 version <https://aur.archlinux.org/packages/python2-powerline-git/>`_
 * `Arch Linux (AUR), Python 3 version <https://aur.archlinux.org/packages/python-powerline-git/>`_
-* Gentoo Live ebuild (:file:`packages/gentoo/app-misc/powerline/`)
+* Gentoo Live ebuild in `raiagent <https://github.com/leycec/raiagent>`_ overlay
 
 If you're running a distribution without an official package you'll have to 
 follow the installation guide below:
