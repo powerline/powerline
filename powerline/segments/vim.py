@@ -1,6 +1,6 @@
 # vim:fileencoding=utf-8:noet
 
-from __future__ import absolute_import, division
+from __future__ import unicode_literals, absolute_import, division
 
 import os
 try:
@@ -8,7 +8,8 @@ try:
 except ImportError:
 	vim = {}  # NOQA
 
-from powerline.bindings.vim import vim_get_func, getbufvar, vim_getbufoption
+from powerline.bindings.vim import (vim_get_func, getbufvar, vim_getbufoption,
+									buffer_name)
 from powerline.theme import requires_segment_info
 from powerline.lib import add_divider_highlight_group
 from powerline.lib.vcs import guess, tree_status
@@ -19,8 +20,8 @@ from collections import defaultdict
 vim_funcs = {
 	'virtcol': vim_get_func('virtcol', rettype=int),
 	'getpos': vim_get_func('getpos'),
-	'fnamemodify': vim_get_func('fnamemodify', rettype=str),
-	'expand': vim_get_func('expand', rettype=str),
+	'fnamemodify': vim_get_func('fnamemodify'),
+	'expand': vim_get_func('expand'),
 	'bufnr': vim_get_func('bufnr', rettype=int),
 	'line2byte': vim_get_func('line2byte', rettype=int),
 	'line': vim_get_func('line', rettype=int),
@@ -157,14 +158,18 @@ def file_directory(pl, segment_info, shorten_user=True, shorten_cwd=True, shorte
 	:param bool shorten_home:
 		shorten all directories in :file:`/home/` to :file:`~user/` instead of :file:`/home/user/`.
 	'''
-	name = segment_info['buffer'].name
+	name = buffer_name(segment_info['buffer'])
 	if not name:
 		return None
+	import sys
 	file_directory = vim_funcs['fnamemodify'](name, (':~' if shorten_user else '')
 												+ (':.' if shorten_cwd else '') + ':h')
+	if not file_directory:
+		return None
 	if shorten_home and file_directory.startswith('/home/'):
-		file_directory = '~' + file_directory[6:]
-	return file_directory + os.sep if file_directory else None
+		file_directory = b'~' + file_directory[6:]
+	file_directory = file_directory.decode('utf-8', 'powerline_vim_strtrans_error')
+	return file_directory + os.sep
 
 
 @requires_segment_info
@@ -178,7 +183,7 @@ def file_name(pl, segment_info, display_no_file=False, no_file_text='[No file]')
 
 	Highlight groups used: ``file_name_no_file`` or ``file_name``, ``file_name``.
 	'''
-	name = segment_info['buffer'].name
+	name = buffer_name(segment_info['buffer'])
 	if not name:
 		if display_no_file:
 			return [{
@@ -187,8 +192,7 @@ def file_name(pl, segment_info, display_no_file=False, no_file_text='[No file]')
 			}]
 		else:
 			return None
-	file_name = vim_funcs['fnamemodify'](name, ':~:.:t')
-	return file_name
+	return os.path.basename(name).decode('utf-8', 'powerline_vim_strtrans_error')
 
 
 @window_cached
