@@ -40,12 +40,13 @@ class FontPatcher(object):
 
 			# Rename font
 			if self.rename_font:
-				target_font.familyname += ' for Powerline'
-				target_font.fullname += ' for Powerline'
+				parts = target_font.fullname.partition(target_font.familyname)
+				target_font.fullname = '{0}{1}line{2}'.format(*parts)
 				fontname, style = re.match("^([^-]*)(?:(-.*))?$", target_font.fontname).groups()
-				target_font.fontname = fontname + 'ForPowerline'
+				target_font.fontname = fontname + 'line'
 				if style is not None:
 					target_font.fontname += style
+				target_font.familyname += 'line'
 				target_font.appendSFNTName('English (US)', 'Preferred Family', target_font.familyname)
 				target_font.appendSFNTName('English (US)', 'Compatible Full', target_font.fullname)
 
