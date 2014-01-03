@@ -27,6 +27,11 @@ args = parser.parse_args()
 
 class FontPatcher(object):
 	def __init__(self, source_font, target_fonts, rename_font=True):
+		# Warn user when patching a TrueType Collection
+		for target_font in target_fonts:
+		    if os.path.splitext(target_font.name)[1].lower() == '.ttc':
+			sys.stderr.write('File {0} contains several different fonts. Consider splitting into separate TTFs to avoid data loss.\n'.format(target_font.name))
+
 		self.source_font = fontforge.open(source_font.name)
 		self.target_fonts = (fontforge.open(target_font.name) for target_font in target_fonts)
 		self.rename_font = rename_font
@@ -40,13 +45,12 @@ class FontPatcher(object):
 
 			# Rename font
 			if self.rename_font:
-				parts = target_font.fullname.partition(target_font.familyname)
-				target_font.fullname = '{0}{1}line{2}'.format(*parts)
+				target_font.familyname += ' for Powerline'
+				target_font.fullname += ' for Powerline'
 				fontname, style = re.match("^([^-]*)(?:(-.*))?$", target_font.fontname).groups()
-				target_font.fontname = fontname + 'line'
+				target_font.fontname = fontname + 'ForPowerline'
 				if style is not None:
 					target_font.fontname += style
-				target_font.familyname += 'line'
 				target_font.appendSFNTName('English (US)', 'Preferred Family', target_font.familyname)
 				target_font.appendSFNTName('English (US)', 'Compatible Full', target_font.fullname)
 
