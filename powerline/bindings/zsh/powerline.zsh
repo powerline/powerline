@@ -56,6 +56,7 @@ _powerline_install_precmd() {
 
 trap "_powerline_tmux_set_columns" SIGWINCH
 _powerline_tmux_set_columns
+_powerline_tmux_set_pwd
 
 setopt promptpercent
 setopt promptsubst
