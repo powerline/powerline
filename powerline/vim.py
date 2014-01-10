@@ -144,6 +144,13 @@ class VimPowerline(Powerline):
 		window, window_id, winnr = self.win_idx(None)
 		return self.render(window, window_id, winnr)
 
+	def render(self, window, window_id, winnr):
+		'''Wrap ``Powerline.render`` and return a error message (string) in case of failure.'''
+		try:
+			return super(VimPowerline, self).render(window, window_id, winnr)
+		except Exception as e:
+			return "Powerline failed to render: {0}".format(str(e))
+
 	if not hasattr(vim, 'bindeval'):
 		# Method for PowerlinePyeval function. Is here to reduce the number of 
 		# requirements to __main__ globals to just one powerline object 

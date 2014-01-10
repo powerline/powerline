@@ -118,9 +118,13 @@ class ConfigLoader(MultiRunnedThread):
 			# No locks: GIL does what we need
 			return deepcopy(self.loaded[path])
 		except KeyError:
-			r = self._load(path)
-			self.loaded[path] = deepcopy(r)
-			return r
+			try:
+				r = self._load(path)
+			except Exception as e:
+				self.exception('Error while loading {0}: {1}', path, str(e))
+			else:
+				self.loaded[path] = deepcopy(r)
+				return r
 
 	def update(self):
 		toload = []
