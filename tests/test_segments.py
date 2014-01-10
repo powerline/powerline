@@ -80,6 +80,10 @@ class TestCommon(TestCase):
 						self.assertEqual(common.user(pl=pl, segment_info=segment_info), [
 							{'contents': 'def', 'highlight_group': 'user'}
 						])
+						self.assertEqual(common.user(pl=pl, segment_info=segment_info, hide_user='abc'), [
+							{'contents': 'def', 'highlight_group': 'user'}
+						])
+						self.assertEqual(common.user(pl=pl, segment_info=segment_info, hide_user='def'), None)
 					with replace_attr(common, '_geteuid', lambda: 0):
 						self.assertEqual(common.user(pl=pl, segment_info=segment_info), [
 							{'contents': 'def', 'highlight_group': ['superuser', 'user']}

@@ -591,8 +591,11 @@ username = False
 _geteuid = getattr(os, 'geteuid', lambda: 1)
 
 
-def user(pl, segment_info=None):
+def user(pl, segment_info=None, hide_user=None):
 	'''Return the current user.
+
+	:param str hide_user:
+		will suppress display of username if it matches the given string
 
 	Highlights the user with the ``superuser`` if the effective user ID is 0.
 
@@ -603,6 +606,8 @@ def user(pl, segment_info=None):
 		username = _get_user(segment_info)
 	if username is None:
 		pl.warn('Failed to get username')
+		return None
+	if username == hide_user:
 		return None
 	euid = _geteuid()
 	return [{
