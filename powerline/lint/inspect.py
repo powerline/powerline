@@ -4,6 +4,7 @@ from inspect import ArgSpec, getargspec
 from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment
 from itertools import count
 
+
 def getconfigargspec(obj):
 	if isinstance(obj, ThreadedSegment):
 		args = ['interval']

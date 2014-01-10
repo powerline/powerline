@@ -6,7 +6,6 @@ from powerline.lib.config import load_json_config
 from powerline.lint.markedjson.error import echoerr, MarkedError
 from powerline.segments.vim import vim_modes
 from powerline.lint.inspect import getconfigargspec
-from powerline.lint.markedjson.markedvalue import gen_marked_value
 from powerline.lib.threaded import ThreadedSegment
 import itertools
 import sys
@@ -43,9 +42,22 @@ def context_key(context):
 	return key_sep.join((c[0] for c in context))
 
 
-class DelayedEchoErr(object):
-	def __init__(self, echoerr):
+class EchoErr(object):
+	__slots__ = ('echoerr', 'logger',)
+
+	def __init__(self, echoerr, logger):
 		self.echoerr = echoerr
+		self.logger = logger
+
+	def __call__(self, *args, **kwargs):
+		self.echoerr(*args, **kwargs)
+
+
+class DelayedEchoErr(EchoErr):
+	__slots__ = ('echoerr', 'logger', 'errs')
+
+	def __init__(self, echoerr):
+		super(DelayedEchoErr, self).__init__(echoerr, echoerr.logger)
 		self.errs = []
 
 	def __call__(self, *args, **kwargs):
@@ -331,7 +343,9 @@ class Spec(object):
 							if khadproblem:
 								hadproblem = True
 							if proceed:
-								valspec.match(value[key], value.mark, data, context + ((key, value[key]),), echoerr)
+								proceed, vhadproblem = valspec.match(value[key], value.mark, data, context + ((key, value[key]),), echoerr)
+								if vhadproblem:
+									hadproblem = True
 								break
 						else:
 							hadproblem = True
@@ -603,7 +617,9 @@ def check_segment_module(module, data, context, echoerr):
 	with WithPath(data['import_paths']):
 		try:
 			__import__(unicode(module))
-		except ImportError:
+		except ImportError as e:
+			if echoerr.logger.level >= logging.DEBUG:
+				echoerr.logger.exception(e)
 			echoerr(context='Error while checking segments (key {key})'.format(key=context_key(context)),
 					problem='failed to import module {0}'.format(module),
 					problem_mark=module.mark)
@@ -984,13 +1000,19 @@ theme_spec = (Spec(
 ).context_message('Error while loading theme'))
 
 
-def check(path=None):
+def check(path=None, debug=False):
 	search_paths = [path] if path else Powerline.get_config_paths()
 
+	logger = logging.getLogger('powerline-lint')
+	logger.setLevel(logging.DEBUG if debug else logging.ERROR)
+	logger.addHandler(logging.StreamHandler())
+
+	ee = EchoErr(echoerr, logger)
+
 	dirs = {
-			'themes': defaultdict(lambda: []),
-			'colorschemes': defaultdict(lambda: [])
-			}
+		'themes': defaultdict(lambda: []),
+		'colorschemes': defaultdict(lambda: [])
+	}
 	for path in reversed(search_paths):
 		for subdir in ('themes', 'colorschemes'):
 			d = os.path.join(path, subdir)
@@ -1004,14 +1026,16 @@ def check(path=None):
 				sys.stderr.write('Path {0} is supposed to be a directory, but it is not\n'.format(d))
 
 	configs = {
-			'themes': defaultdict(lambda: {}),
-			'colorschemes': defaultdict(lambda: {})
-			}
+		'themes': defaultdict(lambda: {}),
+		'colorschemes': defaultdict(lambda: {})
+	}
 	for subdir in ('themes', 'colorschemes'):
 		for ext in dirs[subdir]:
 			for d in dirs[subdir][ext]:
 				for config in os.listdir(d):
-					if config.endswith('.json'):
+					if os.path.isdir(os.path.join(d, config)):
+						dirs[subdir][ext].append(os.path.join(d, config))
+					elif config.endswith('.json'):
 						configs[subdir][ext][config[:-5]] = os.path.join(d, config)
 
 	diff = set(configs['themes']) ^ set(configs['colorschemes'])
@@ -1022,7 +1046,7 @@ def check(path=None):
 				ext,
 				'configuration' if (ext in dirs['themes'] and ext in dirs['colorschemes']) else 'directory',
 				'themes' if ext in configs['themes'] else 'colorschemes',
-				))
+			))
 
 	lhadproblem = [False]
 
@@ -1044,7 +1068,7 @@ def check(path=None):
 		sys.stderr.write(str(e) + '\n')
 		hadproblem = True
 	else:
-		if main_spec.match(main_config, data={'configs': configs}, context=(('', main_config),))[1]:
+		if main_spec.match(main_config, data={'configs': configs}, context=(('', main_config),), echoerr=ee)[1]:
 			hadproblem = True
 
 	import_paths = [os.path.expanduser(path) for path in main_config.get('common', {}).get('paths', [])]
@@ -1060,7 +1084,7 @@ def check(path=None):
 		sys.stderr.write(str(e) + '\n')
 		hadproblem = True
 	else:
-		if colors_spec.match(colors_config, context=(('', colors_config),))[1]:
+		if colors_spec.match(colors_config, context=(('', colors_config),), echoerr=ee)[1]:
 			hadproblem = True
 
 	if lhadproblem[0]:
@@ -1084,7 +1108,7 @@ def check(path=None):
 				spec = vim_colorscheme_spec
 			else:
 				spec = colorscheme_spec
-			if spec.match(config, context=(('', config),), data=data)[1]:
+			if spec.match(config, context=(('', config),), data=data, echoerr=ee)[1]:
 				hadproblem = True
 
 	theme_configs = defaultdict(lambda: {})
@@ -1105,6 +1129,6 @@ def check(path=None):
 				'main_config': main_config, 'ext_theme_configs': configs, 'colors_config': colors_config}
 		for theme, config in configs.items():
 			data['theme'] = theme
-			if theme_spec.match(config, context=(('', config),), data=data)[1]:
+			if theme_spec.match(config, context=(('', config),), data=data, echoerr=ee)[1]:
 				hadproblem = True
 	return hadproblem

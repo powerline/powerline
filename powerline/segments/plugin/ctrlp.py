@@ -1,10 +1,18 @@
 # vim:fileencoding=utf-8:noet
 
-import vim
+try:
+	import vim
+except ImportError:
+	vim = object()  # NOQA
+
 from powerline.bindings.vim import getbufvar
 
 
 def ctrlp(pl, side):
+	'''
+
+	Highlight groups used: ``ctrlp.regex`` or ``background``, ``ctrlp.prev`` or ``background``, ``ctrlp.item`` or ``file_name``, ``ctrlp.next`` or ``background``, ``ctrlp.marked`` or ``background``, ``ctrlp.focus`` or ``background``, ``ctrlp.byfname`` or ``background``, ``ctrlp.progress`` or ``file_name``, ``ctrlp.progress`` or ``file_name``.
+	'''
 	ctrlp_type = getbufvar('%', 'powerline_ctrlp_type')
 	ctrlp_args = getbufvar('%', 'powerline_ctrlp_args')
 
@@ -12,6 +20,10 @@ def ctrlp(pl, side):
 
 
 def ctrlp_stl_left_main(pl, focus, byfname, regex, prev, item, next, marked):
+	'''
+
+	Highlight groups used: ``ctrlp.regex`` or ``background``, ``ctrlp.prev`` or ``background``, ``ctrlp.item`` or ``file_name``, ``ctrlp.next`` or ``background``, ``ctrlp.marked`` or ``background``.
+	'''
 	marked = marked[2:-1]
 	segments = []
 
@@ -54,6 +66,10 @@ def ctrlp_stl_left_main(pl, focus, byfname, regex, prev, item, next, marked):
 
 
 def ctrlp_stl_right_main(pl, focus, byfname, regex, prev, item, next, marked):
+	'''
+
+	Highlight groups used: ``ctrlp.focus`` or ``background``, ``ctrlp.byfname`` or ``background``.
+	'''
 	segments = [
 		{
 			'contents': focus,
@@ -72,6 +88,10 @@ def ctrlp_stl_right_main(pl, focus, byfname, regex, prev, item, next, marked):
 
 
 def ctrlp_stl_left_prog(pl, progress):
+	'''
+
+	Highlight groups used: ``ctrlp.progress`` or ``file_name``.
+	'''
 	return [
 		{
 			'contents': 'Loading...',
@@ -81,6 +101,10 @@ def ctrlp_stl_left_prog(pl, progress):
 
 
 def ctrlp_stl_right_prog(pl, progress):
+	'''
+
+	Highlight groups used: ``ctrlp.progress`` or ``file_name``.
+	'''
 	return [
 		{
 			'contents': progress,

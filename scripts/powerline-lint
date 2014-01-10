@@ -8,7 +8,8 @@ import sys
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('-p', '--config_path', metavar='PATH')
+parser.add_argument('-d', '--debug', action='store_const', const=True)
 
 if __name__ == '__main__':
 	args = parser.parse_args()
-	sys.exit(check(args.config_path))
+	sys.exit(check(args.config_path, args.debug))
