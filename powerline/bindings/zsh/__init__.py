@@ -53,6 +53,11 @@ class Args(object):
 		except IndexError:
 			return None
 
+	@property
+	def jobnum(self):
+		zsh.eval('integer POWERLINE_JOBNUM=${(%):-%j}')
+		return zsh.getvalue('POWERLINE_JOBNUM')
+
 
 def string(s):
 	if type(s) is bytes:
