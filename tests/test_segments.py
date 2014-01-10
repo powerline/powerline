@@ -35,6 +35,17 @@ class TestShell(TestCase):
 			{'contents': '0', 'highlight_group': 'exit_success', 'draw_inner_divider': True}
 		])
 
+	def test_jobnum(self):
+		pl = Pl()
+		segment_info = {'args': Args(jobnum=0)}
+		self.assertEqual(shell.jobnum(pl=pl, segment_info=segment_info), None)
+		self.assertEqual(shell.jobnum(pl=pl, segment_info=segment_info, show_zero=False), None)
+		self.assertEqual(shell.jobnum(pl=pl, segment_info=segment_info, show_zero=True), '0')
+		segment_info = {'args': Args(jobnum=1)}
+		self.assertEqual(shell.jobnum(pl=pl, segment_info=segment_info), '1')
+		self.assertEqual(shell.jobnum(pl=pl, segment_info=segment_info, show_zero=False), '1')
+		self.assertEqual(shell.jobnum(pl=pl, segment_info=segment_info, show_zero=True), '1')
+
 
 class TestCommon(TestCase):
 	def test_hostname(self):

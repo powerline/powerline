@@ -1,6 +1,7 @@
 {
 	"name": "Default color scheme for shell prompts",
 	"groups": {
+		"jobnum": { "fg": "brightyellow", "bg": "mediumorange" },
 		"user": { "fg": "white", "bg": "darkblue", "attr": ["bold"] },
 		"superuser": { "fg": "white", "bg": "brightred", "attr": ["bold"] },
 		"virtualenv": { "fg": "white", "bg": "darkcyan" },

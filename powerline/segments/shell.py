@@ -4,6 +4,21 @@ from powerline.theme import requires_segment_info
 
 
 @requires_segment_info
+def jobnum(pl, segment_info, show_zero=False):
+	'''Return the number of jobs.
+
+	:param bool show_zero:
+		If False (default) shows nothing if there are no jobs. Otherwise shows 
+		zero for no jobs.
+	'''
+	jobnum = segment_info['args'].jobnum
+	if jobnum is None or (not show_zero and jobnum == 0):
+		return None
+	else:
+		return str(jobnum)
+
+
+@requires_segment_info
 def last_status(pl, segment_info):
 	'''Return last exit code.
 

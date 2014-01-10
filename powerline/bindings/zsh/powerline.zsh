@@ -35,8 +35,22 @@ _powerline_install_precmd() {
 		zpython 'powerline_setup()'
 		zpython 'del powerline_setup'
 	else
-		PS1='$($POWERLINE_COMMAND shell left -r zsh_prompt --last_exit_code=$? --last_pipe_status="$pipestatus")'
-		RPS1='$($POWERLINE_COMMAND shell right -r zsh_prompt --last_exit_code=$? --last_pipe_status="$pipestatus")'
+		local add_args='--last_exit_code=$? --last_pipe_status="$pipestatus"'
+		# If you are wondering why I am not using the same code as I use for 
+		# bash ($(jobs|wc -l)): consider the following test:
+		#     echo abc | less
+		#     <C-z>
+		# . This way jobs will print
+		#     [1]  + done       echo abc |
+		#            suspended  less -M
+		# ([ is in first column). You see: any line counting thingie will return 
+		# wrong number of jobs. You need to filter the lines first. Or not use 
+		# jobs built-in at all.
+		#
+		# This and above variants also do not use subshell.
+		add_args+=' --jobnum=${(%):-%j}'
+		PS1='$($POWERLINE_COMMAND shell left -r zsh_prompt '$add_args')'
+		RPS1='$($POWERLINE_COMMAND shell right -r zsh_prompt '$add_args')'
 	fi
 }
 
