@@ -4,6 +4,7 @@ from powerline.renderer import Renderer
 from powerline.lib.config import ConfigLoader
 from powerline import Powerline
 from copy import deepcopy
+from functools import wraps
 
 
 access_log = []
@@ -34,13 +35,26 @@ def pop_events():
 	return r
 
 
+def log_call(func):
+	@wraps(func)
+	def ret(self, *args, **kwargs):
+		self._calls.append((func.__name__, args, kwargs))
+		return func(self, *args, **kwargs)
+	return ret
+
+
 class Watcher(object):
 	events = set()
 	lock = Lock()
 
+	def __init__(self):
+		self._calls = []
+
+	@log_call
 	def watch(self, file):
 		pass
 
+	@log_call
 	def __call__(self, file):
 		with self.lock:
 			if file in self.events:
@@ -53,6 +67,7 @@ class Watcher(object):
 			self.events.clear()
 			self.events.update(files)
 
+	@log_call
 	def unsubscribe(self):
 		pass
 
@@ -96,13 +111,16 @@ renderer = SimpleRenderer
 
 
 def get_powerline(**kwargs):
-	return TestPowerline(
+	watcher = Watcher()
+	pl = TestPowerline(
 		ext='test',
 		renderer_module='tests.lib.config_mock',
 		logger=Logger(),
-		config_loader=ConfigLoader(load=load_json_config, watcher=Watcher()),
+		config_loader=ConfigLoader(load=load_json_config, watcher=watcher, run_once=kwargs.get('run_once')),
 		**kwargs
 	)
+	pl._watcher = watcher
+	return pl
 
 
 config_container = None
