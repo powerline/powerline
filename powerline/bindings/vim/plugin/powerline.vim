@@ -27,7 +27,7 @@ try
 				\  ."	".s:import_cmd."\n"
 				\  ."except ImportError:\n"
 				\  ."	import sys, vim\n"
-				\  ."	sys.path.append(vim.eval('expand(\"<sfile>:h:h:h:h:h\")'))\n"
+				\  ."	sys.path.insert(0, vim.eval('expand(\"<sfile>:h:h:h:h:h\")'))\n"
 				\  ."	".s:import_cmd
 	let s:launched = 1
 finally
