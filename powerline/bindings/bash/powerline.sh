@@ -38,6 +38,6 @@ _powerline_prompt() {
 trap "_powerline_tmux_set_columns" SIGWINCH
 _powerline_tmux_set_columns
 
-[[ "$PROMPT_COMMAND" == "_powerline_prompt" ]] ||
+[[ "$PROMPT_COMMAND" != "${PROMPT_COMMAND/_powerline_prompt/}" ]] ||
 	POWERLINE_OLD_PROMPT_COMMAND="$PROMPT_COMMAND"
 export PROMPT_COMMAND="_powerline_prompt"
