@@ -4,6 +4,7 @@
 		"background":               { "fg": "gray13", "bg": "darkgreencopper" },
 		"background:divider":       { "fg": "azure4", "bg": "darkgreencopper" },
 		"mode":                     { "fg": "oldlace", "bg": "green", "attr": ["bold"] },
+		"visual_range":             { "fg": "green", "bg": "oldlace", "attr": ["bold"] },
 		"modified_indicator":       { "fg": "yellow", "bg": "lightyellow", "attr": ["bold"] },
 		"paste_indicator":          { "fg": "red", "bg": "lightyellow", "attr": ["bold"] },
 		"readonly_indicator":       { "fg": "red", "bg": "lightyellow" },
@@ -28,7 +29,10 @@
 		"line_current_symbol":      { "fg": "oldlace", "bg": "royalblue5" },
 		"virtcol_current_gradient": { "fg": "yellow_orange_red", "bg": "royalblue5" },
 		"col_current":              { "fg": "lightskyblue4", "bg": "royalblue5" },
-		"environment":              { "fg": "gray61", "bg": "darkgreencopper" }
+		"environment":              { "fg": "gray61", "bg": "darkgreencopper" },
+		"error":                    { "fg": "gray13", "bg": "red", "attr": ["bold"] },
+		"warning":                  { "fg": "gray13", "bg": "lightyellow", "attr": ["bold"] },
+		"current_tag":              { "fg": "gray13", "bg": "darkgreencopper", "attr": ["bold"] }
 	},
 	"mode_translations": {
 		"nc": {
