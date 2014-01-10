@@ -1,8 +1,11 @@
 if test -z "${POWERLINE_COMMAND}" ; then
 	if which powerline-client &>/dev/null ; then
 		export POWERLINE_COMMAND=powerline-client
-	else
+	elif which powerline &>/dev/null ; then
 		export POWERLINE_COMMAND=powerline
+	else
+		# `$0` is set to `-bash` when using SSH so that won't work
+		export POWERLINE_COMMAND="$(dirname "$BASH_SOURCE")/../../../scripts/powerline"
 	fi
 fi
 
