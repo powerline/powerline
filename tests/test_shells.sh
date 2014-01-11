@@ -13,7 +13,7 @@ fi
 
 get_output() {
 	OUTPUT="`safe_echo "$INPUT" | LANG=C $@ 2>&1 | sed 's/ \+\x08\+//g' | tail -n +6`"
-	OUTPUT="`safe_echo "$OUTPUT" | sed -e s/$(cat tests/shell/3rd/pid)/PID/g -e 's/\x1b/\\\\e/g'`"
+	OUTPUT="`safe_echo "$OUTPUT" | sed -e s/$(cat tests/shell/3rd/pid)/PID/g -e 's/\x1b/\\\\e/g' | python -c 'import socket, sys; hostname=socket.gethostname(); exec ("""for line in sys.stdin:\n sys.stdout.write(line.replace(hostname, "HOSTNAME"))""")'`"
 	safe_echo "$OUTPUT"
 }
 
@@ -39,7 +39,7 @@ POWERLINE_COMMAND="$POWERLINE_COMMAND -t default_leftonly.segment_data.hostname.
 exit
 '
 
-BASH_OUTPUT="`get_output bash -i`"
+BASH_OUTPUT="`get_output bash --noprofile -i`"
 
 EXPECTED_BASH_OUTPUT='\e[0;38;5;231;48;5;31;1m zyx \e[0;38;5;31;48;5;240;22m \e[0;38;5;250;48;5;240m⋯ \e[0;38;5;245;48;5;240;22m \e[0;38;5;250;48;5;240mtests \e[0;38;5;245;48;5;240;22m \e[0;38;5;250;48;5;240mshell \e[0;38;5;245;48;5;240;22m \e[0;38;5;252;48;5;240;1m3rd \e[0;38;5;240;49;22m \e[0mPOWERLINE_COMMAND="$POWERLINE_COMMAND -c ext.shell.theme=default_leftonly"
 \e[0;38;5;231;48;5;31;1m zyx \e[0;38;5;31;48;5;236;22m \e[0;38;5;250;48;5;236m BRANCH \e[0;38;5;236;48;5;240;22m \e[0;38;5;250;48;5;240m⋯ \e[0;38;5;245;48;5;240;22m \e[0;38;5;250;48;5;240mtests \e[0;38;5;245;48;5;240;22m \e[0;38;5;250;48;5;240mshell \e[0;38;5;245;48;5;240;22m \e[0;38;5;252;48;5;240;1m3rd \e[0;38;5;240;49;22m \e[0mcd .git
@@ -53,7 +53,7 @@ EXPECTED_BASH_OUTPUT='\e[0;38;5;231;48;5;31;1m zyx \e[0;38;5;31;48;5;240;22m�
 [1]+  Terminated              bash -c "echo \$\$>pid ; while true ; do sleep 0.1s ; done"
 \e[0;38;5;231;48;5;31;1m zyx \e[0;38;5;31;48;5;236;22m \e[0;38;5;250;48;5;236m BRANCH \e[0;38;5;236;48;5;240;22m \e[0;38;5;250;48;5;240m⋯ \e[0;38;5;245;48;5;240;22m \e[0;38;5;250;48;5;240mtests \e[0;38;5;245;48;5;240;22m \e[0;38;5;250;48;5;240mshell \e[0;38;5;245;48;5;240;22m \e[0;38;5;252;48;5;240;1m3rd \e[0;38;5;240;49;22m \e[0mfalse
 \e[0;38;5;231;48;5;31;1m zyx \e[0;38;5;31;48;5;236;22m \e[0;38;5;250;48;5;236m BRANCH \e[0;38;5;236;48;5;240;22m \e[0;38;5;250;48;5;240m⋯ \e[0;38;5;245;48;5;240;22m \e[0;38;5;250;48;5;240mtests \e[0;38;5;245;48;5;240;22m \e[0;38;5;250;48;5;240mshell \e[0;38;5;245;48;5;240;22m \e[0;38;5;252;48;5;240;1m3rd \e[0;38;5;240;48;5;52;22m \e[0;38;5;231;48;5;52m1 \e[0;38;5;52;49;22m \e[0mPOWERLINE_COMMAND="$POWERLINE_COMMAND -t default_leftonly.segment_data.hostname.args.only_if_ssh=false"
-\e[0;38;5;220;48;5;166m  zyx-desktop \e[0;38;5;166;48;5;31;22m \e[0;38;5;231;48;5;31;1mzyx \e[0;38;5;31;48;5;236;22m \e[0;38;5;250;48;5;236m BRANCH \e[0;38;5;236;48;5;240;22m \e[0;38;5;250;48;5;240m⋯ \e[0;38;5;245;48;5;240;22m \e[0;38;5;250;48;5;240mtests \e[0;38;5;245;48;5;240;22m \e[0;38;5;250;48;5;240mshell \e[0;38;5;245;48;5;240;22m \e[0;38;5;252;48;5;240;1m3rd \e[0;38;5;240;49;22m \e[0mexit
+\e[0;38;5;220;48;5;166m  HOSTNAME \e[0;38;5;166;48;5;31;22m \e[0;38;5;231;48;5;31;1mzyx \e[0;38;5;31;48;5;236;22m \e[0;38;5;250;48;5;236m BRANCH \e[0;38;5;236;48;5;240;22m \e[0;38;5;250;48;5;240m⋯ \e[0;38;5;245;48;5;240;22m \e[0;38;5;250;48;5;240mtests \e[0;38;5;245;48;5;240;22m \e[0;38;5;250;48;5;240mshell \e[0;38;5;245;48;5;240;22m \e[0;38;5;252;48;5;240;1m3rd \e[0;38;5;240;49;22m \e[0mexit
 exit'
 if [ "b$EXPECTED_BASH_OUTPUT" != "b$BASH_OUTPUT" ] ; then
 	safe_echo "$EXPECTED_BASH_OUTPUT" > tests/shell/expected
