@@ -171,9 +171,13 @@ def eval(expr):
 		return options[expr[1:]]
 	elif expr.startswith('PowerlineRegisterCachePurgerEvent'):
 		_buf_purge_events.add(expr[expr.find('"') + 1:expr.rfind('"') - 1])
-		return "0"
+		return '0'
 	elif expr.startswith('exists('):
 		return '0'
+	elif expr == 'getbufvar("%", "NERDTreeRoot").path.str()':
+		import os
+		assert os.path.basename(buffers[_buffer()].name).startswith('NERD_tree_')
+		return '/usr/include'
 	raise NotImplementedError
 
 
@@ -205,6 +209,7 @@ def _emul_mode(*args):
 @_vim
 @_str_func
 def _emul_getbufvar(bufnr, varname):
+	import re
 	if varname[0] == '&':
 		if bufnr == '%':
 			bufnr = buffers[_buffer()].number
@@ -217,6 +222,12 @@ def _emul_getbufvar(bufnr, varname):
 				return options[varname[1:]]
 			except KeyError:
 				return ''
+	elif re.match('^[a-zA-Z_]+$', varname):
+		if bufnr == '%':
+			bufnr = buffers[_buffer()].number
+		if bufnr not in buffers:
+			return ''
+		return buffers[bufnr].vars[varname]
 	raise NotImplementedError
 
 
@@ -625,10 +636,14 @@ class _WithBufName(object):
 		self.new = new
 
 	def __enter__(self):
+		import os
 		buffer = buffers[_buffer()]
 		self.buffer = buffer
 		self.old = buffer.name
 		buffer.name = self.new
+		if buffer.name and os.path.basename(buffer.name) == 'ControlP':
+			buffer.vars['powerline_ctrlp_type'] = 'main'
+			buffer.vars['powerline_ctrlp_args'] = ['focus', 'byfname', '0', 'prev', 'item', 'next', 'marked']
 
 	def __exit__(self, *args):
 		self.buffer.name = self.old
