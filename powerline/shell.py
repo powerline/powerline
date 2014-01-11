@@ -62,6 +62,6 @@ def finish_args(args):
 	if args.config:
 		args.config = mergeargs((parsedotval(v) for v in args.config))
 	if args.theme_option:
-		args.theme_option = mergeargs((parsedotval(v) for v in args.config))
+		args.theme_option = mergeargs((parsedotval(v) for v in args.theme_option))
 	else:
 		args.theme_option = {}
