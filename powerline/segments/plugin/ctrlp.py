@@ -6,8 +6,10 @@ except ImportError:
 	vim = object()  # NOQA
 
 from powerline.bindings.vim import getbufvar
+from powerline.segments.vim import window_cached
 
 
+@window_cached
 def ctrlp(pl, side):
 	'''
 
