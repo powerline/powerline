@@ -35,6 +35,10 @@
 				}
 			},
 			{
+				"module": "powerline.segments.shell",
+				"name": "jobnum"
+			},
+			{
 				"name": "last_status",
 				"module": "powerline.segments.shell"
 			}
