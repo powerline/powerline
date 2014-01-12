@@ -20,7 +20,7 @@ for script in tests/*.vim ; do
 		FAILED=1
 	fi
 done
-if ! sh tests/test_shells.sh ; then
+if ! sh tests/test_shells/test.sh ; then
 	echo "Failed shells"
 	FAILED=1
 fi
