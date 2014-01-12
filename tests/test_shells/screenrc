@@ -1,0 +1,3 @@
+width  1024
+height    1
+logfile "tests/shell/screen.log"
