@@ -24,12 +24,8 @@ run_test() {
 	while screen -S "$SESNAME" -X blankerprg "" > /dev/null ; do
 		sleep 1s
 	done
-	sed -i -e "1,3 d" \
-	       -e s/$(cat tests/shell/3rd/pid)/PID/g \
-	       -e "s/$(python -c 'import re, socket; print (re.escape(socket.gethostname()))')/HOSTNAME/g" \
-	       -e "s/$(python -c 'import os, re; print (re.escape(os.environ["USER"]))')/USER/g" \
-	       tests/shell/screen.log
-	if ! diff -u tests/test_shells/${SH}.ok tests/shell/screen.log ; then
+	./tests/test_shells/postproc.py tests/shell/screen.log
+	if ! diff -u tests/test_shells/${SH}.ok tests/shell/screen.log | cat -v ; then
 		return 1
 	fi
 	return 0
