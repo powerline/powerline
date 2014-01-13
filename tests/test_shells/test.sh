@@ -27,6 +27,7 @@ run_test() {
 	sed -i -e "1,3 d" \
 	       -e s/$(cat tests/shell/3rd/pid)/PID/g \
 	       -e "s/$(python -c 'import re, socket; print (re.escape(socket.gethostname()))')/HOSTNAME/g" \
+	       -e "s/$(python -c 'import os, re; print (re.escape(os.environ["USER"]))')/USER/g" \
 	       tests/shell/screen.log
 	if ! diff -u tests/test_shells/${SH}.ok tests/shell/screen.log ; then
 		return 1
