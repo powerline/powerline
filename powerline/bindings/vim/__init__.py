@@ -66,6 +66,18 @@ else:
 		else:
 			raise KeyError(varname)
 
+if hasattr(vim, 'vars') and vim.vvars['version'] > 703:
+	def bufvar_exists(buffer, varname):
+		buffer = buffer or vim.current.buffer
+		return varname in buffer.vars
+else:
+	def bufvar_exists(buffer, varname):  # NOQA
+		if not buffer or buffer.number == vim.current.buffer.number:
+			return vim.eval('exists("b:{0}")'.format(varname))
+		else:
+			return vim.eval('has_key(getbufvar({0}, ""), {1})'
+							.format(buffer.number, varname))
+
 if hasattr(vim, 'options'):
 	def vim_getbufoption(info, option):
 		return info['buffer'].options[option]

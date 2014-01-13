@@ -5,7 +5,7 @@ try:
 except ImportError:
 	vim = object()  # NOQA
 
-from powerline.bindings.vim import getbufvar
+from powerline.bindings.vim import bufvar_exists
 from powerline.segments.vim import window_cached
 
 
@@ -15,9 +15,8 @@ def nerdtree(pl):
 
 	Highlight groups used: ``nerdtree.path`` or ``file_name``.
 	'''
-	ntr = getbufvar('%', 'NERDTreeRoot')
-	if not ntr:
-		return
+	if not bufvar_exists(None, 'NERDTreeRoot'):
+		return None
 	path_str = vim.eval('getbufvar("%", "NERDTreeRoot").path.str()')
 	return [{
 		'contents': path_str,

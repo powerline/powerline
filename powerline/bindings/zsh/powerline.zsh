@@ -24,13 +24,28 @@ _powerline_tmux_set_columns() {
 	_powerline_tmux_setenv COLUMNS "$COLUMNS"
 }
 
-_powerline_install_precmd() {
+_powerline_precmd() {
+	# If you are wondering why I am not using the same code as I use for bash 
+	# ($(jobs|wc -l)): consider the following test:
+	#     echo abc | less
+	#     <C-z>
+	# . This way jobs will print
+	#     [1]  + done       echo abc |
+	#            suspended  less -M
+	# ([ is in first column). You see: any line counting thingie will return 
+	# wrong number of jobs. You need to filter the lines first. Or not use 
+	# jobs built-in at all.
+	_POWERLINE_JOBNUM=${(%):-%j}
+}
+
+_powerline_setup_prompt() {
 	emulate -L zsh
 	for f in "${precmd_functions[@]}"; do
 		if [[ "$f" = "_powerline_precmd" ]]; then
 			return
 		fi
 	done
+	precmd_functions+=( _powerline_precmd )
 	chpwd_functions+=( _powerline_tmux_set_pwd )
 	if zmodload zsh/zpython &>/dev/null ; then
 		zpython 'from powerline.bindings.zsh import setup as powerline_setup'
@@ -38,19 +53,7 @@ _powerline_install_precmd() {
 		zpython 'del powerline_setup'
 	else
 		local add_args='--last_exit_code=$? --last_pipe_status="$pipestatus"'
-		# If you are wondering why I am not using the same code as I use for 
-		# bash ($(jobs|wc -l)): consider the following test:
-		#     echo abc | less
-		#     <C-z>
-		# . This way jobs will print
-		#     [1]  + done       echo abc |
-		#            suspended  less -M
-		# ([ is in first column). You see: any line counting thingie will return 
-		# wrong number of jobs. You need to filter the lines first. Or not use 
-		# jobs built-in at all.
-		#
-		# This and above variants also do not use subshell.
-		add_args+=' --jobnum=${(%):-%j}'
+		add_args+=' --jobnum=$_POWERLINE_JOBNUM'
 		PS1='$($POWERLINE_COMMAND shell left -r zsh_prompt '$add_args')'
 		RPS1='$($POWERLINE_COMMAND shell right -r zsh_prompt '$add_args')'
 	fi
@@ -62,4 +65,4 @@ _powerline_tmux_set_pwd
 
 setopt promptpercent
 setopt promptsubst
-_powerline_install_precmd
+_powerline_setup_prompt
