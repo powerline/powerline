@@ -9,5 +9,5 @@ if python -c 'import sys; sys.exit(1 * (sys.version_info[0] != 2))' ; then
 		pip install unittest2 argparse
 	fi
 fi
-apt-get install zsh screen
+sudo apt-get install -qq zsh screen
 true
