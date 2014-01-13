@@ -17,7 +17,7 @@ run_test() {
 	screen -L -c tests/test_shells/screenrc -d -m -S "$SESNAME" \
 		env LANG=en_US.UTF-8 BINDFILE="$BINDFILE" "$@"
 	screen -S "$SESNAME" -X readreg a tests/test_shells/input.$SH
-	sleep 5s
+	sleep 0.3s
 	screen -S "$SESNAME" -p 0 -X width 300 1
 	screen -S "$SESNAME" -p 0 -X logfile tests/shell/screen.log
 	screen -S "$SESNAME" -p 0 -X paste a
@@ -39,12 +39,14 @@ if ! run_test bash --norc --noprofile -i ; then
 	echo "Failed bash"
 	FAILED=1
 fi
+cp tests/shell/screen.log tests/bash.log
 rm tests/shell/screen.log
 
 if ! run_test zsh -f -i ; then
 	echo "Failed zsh"
 	FAILED=1
 fi
+cp tests/shell/screen.log tests/zsh.log
 rm tests/shell/screen.log
 
 rm -r tests/shell
