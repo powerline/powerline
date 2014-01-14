@@ -73,12 +73,17 @@ class TestCommon(TestCase):
 		new_psutil = new_module('psutil', Process=lambda pid: Args(username='def'))
 		pl = Pl()
 		with replace_env('USER', 'def') as segment_info:
+			common.username = False
 			with replace_attr(common, 'os', new_os):
 				with replace_attr(common, 'psutil', new_psutil):
 					with replace_attr(common, '_geteuid', lambda: 5):
 						self.assertEqual(common.user(pl=pl, segment_info=segment_info), [
 							{'contents': 'def', 'highlight_group': 'user'}
 						])
+						self.assertEqual(common.user(pl=pl, segment_info=segment_info, hide_user='abc'), [
+							{'contents': 'def', 'highlight_group': 'user'}
+						])
+						self.assertEqual(common.user(pl=pl, segment_info=segment_info, hide_user='def'), None)
 					with replace_attr(common, '_geteuid', lambda: 0):
 						self.assertEqual(common.user(pl=pl, segment_info=segment_info), [
 							{'contents': 'def', 'highlight_group': ['superuser', 'user']}
