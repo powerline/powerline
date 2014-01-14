@@ -595,7 +595,7 @@ def user(pl, segment_info=None, hide_user=None):
 	'''Return the current user.
 
 	:param str hide_user:
-		will suppress display of username if it matches the given string
+		Omit showing segment for users with names equal to this string.
 
 	Highlights the user with the ``superuser`` if the effective user ID is 0.
 
