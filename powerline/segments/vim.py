@@ -265,6 +265,44 @@ def line_percent(pl, segment_info, gradient=False):
 	}]
 
 
+@window_cached
+def position(pl, position_strings=('Top', 'Bot', 'All'), gradient=False):
+	'''Return the position of the current view in the file as a percentage.
+
+	:param tuple position_strings:
+		use these three strings to indicate whether we are at top or bottom or see the complete file
+
+	:param bool gradient:
+		highlight the percentage with a color gradient (by default a green to red gradient)
+
+	Highlight groups used: ``position_gradient`` (gradient), ``position``.
+	'''
+	line_last = len(vim.current.buffer)
+
+	winline_first = int(vim.eval('line("w0")'))
+	winline_last = int(vim.eval('line("w$")'))
+	if winline_first == 1 and winline_last == line_last:
+		percentage = 0.0
+		content = position_strings[2]
+	elif winline_first == 1:
+		percentage = 0.0
+		content = position_strings[0]
+	elif winline_last == line_last:
+		percentage = 100.0
+		content = position_strings[1]
+	else:
+		percentage = winline_first * 100.0 / (line_last - winline_last + winline_first)
+		content = str(int(round(percentage))) + '%'
+
+	if not gradient:
+		return content
+	return [{
+		'contents': content,
+		'highlight_group': ['position_gradient', 'position'],
+		'gradient_level': percentage,
+	}]
+
+
 @requires_segment_info
 def line_current(pl, segment_info):
 	'''Return the current cursor line.'''

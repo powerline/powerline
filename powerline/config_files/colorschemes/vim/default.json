@@ -25,6 +25,8 @@
 		"file_vcs_status_A":        { "fg": "brightgreen", "bg": "gray4" },
 		"line_percent":             { "fg": "gray9", "bg": "gray4" },
 		"line_percent_gradient":    { "fg": "green_yellow_red", "bg": "gray4" },
+		"position":                 { "fg": "gray9", "bg": "gray4" },
+		"position_gradient":        { "fg": "green_yellow_red", "bg": "gray4" },
 		"line_current":             { "fg": "gray1", "bg": "gray10", "attr": ["bold"] },
 		"line_current_symbol":      { "fg": "gray1", "bg": "gray10" },
 		"virtcol_current_gradient": { "fg": "dark_GREEN_Orange_red", "bg": "gray10" },

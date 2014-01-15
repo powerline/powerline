@@ -501,6 +501,19 @@ class TestVim(TestCase):
 		finally:
 			vim_module._bw(segment_info['bufnr'])
 
+	def test_position(self):
+		pl = Pl()
+		segment_info = vim_module._get_segment_info()
+		try:
+			segment_info['buffer'][:] = ['1']
+			vim_module._set_cursor(1, 0)
+			self.assertEqual(vim.position(pl=pl, segment_info=segment_info), 'All')
+			self.assertEqual(vim.position(pl=pl, segment_info=segment_info, position_strings=('Comienzo', 'Final', 'Todo')), 'Todo')
+			self.assertEqual(vim.position(pl=pl, segment_info=segment_info, gradient=True),
+					[{'contents': 'All', 'highlight_group': ['position_gradient', 'position'], 'gradient_level': 0.0}])
+		finally:
+			vim_module._bw(segment_info['bufnr'])
+
 	def test_cursor_current(self):
 		pl = Pl()
 		segment_info = vim_module._get_segment_info()

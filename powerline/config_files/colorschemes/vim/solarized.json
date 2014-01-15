@@ -25,6 +25,8 @@
 		"file_vcs_status_A":        { "fg": "green", "bg": "darkgreencopper" },
 		"line_percent":             { "fg": "oldlace", "bg": "lightskyblue4" },
 		"line_percent_gradient":    { "fg": "green_yellow_orange_red", "bg": "lightskyblue4" },
+		"position":                 { "fg": "oldlace", "bg": "lightskyblue4" },
+		"position_gradient":        { "fg": "green_yellow_orange_red", "bg": "lightskyblue4" },
 		"line_current":             { "fg": "gray13", "bg": "lightyellow", "attr": ["bold"] },
 		"line_current_symbol":      { "fg": "gray13", "bg": "lightyellow" },
 		"virtcol_current_gradient": { "fg": "GREEN_Orange_red", "bg": "gray10" },
@@ -68,6 +70,8 @@
 				"file_vcs_status_A":      { "fg": "green", "bg": "lightyellow" },
 				"line_percent":           { "fg": "oldlace", "bg": "gray61" },
 				"line_percent_gradient":  { "fg": "oldlace", "bg": "gray61" },
+				"position":               { "fg": "oldlace", "bg": "gray61" },
+				"position_gradient":      { "fg": "oldlace", "bg": "gray61" },
 				"line_current":           { "fg": "gray13", "bg": "oldlace", "attr": ["bold"] },
 				"line_current_symbol":    { "fg": "gray13", "bg": "oldlace" },
 				"col_current":            { "fg": "azure4", "bg": "oldlace" }
