@@ -27,6 +27,11 @@ args = parser.parse_args()
 
 class FontPatcher(object):
 	def __init__(self, source_font, target_fonts, rename_font=True):
+		# Warn user when patching a TrueType Collection
+		for target_font in target_fonts:
+		    if os.path.splitext(target_font.name)[1].lower() == '.ttc':
+			sys.stderr.write('File {0} contains several different fonts. Consider splitting into separate TTFs to avoid data loss.\n'.format(target_font.name))
+
 		self.source_font = fontforge.open(source_font.name)
 		self.target_fonts = (fontforge.open(target_font.name) for target_font in target_fonts)
 		self.rename_font = rename_font
