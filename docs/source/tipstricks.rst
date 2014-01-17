@@ -25,6 +25,17 @@ immediately:
        augroup END
    endif
 
+Fix Powerline highlighting when autosourcing .vimrc
+---------------------------------------------------
+
+If you are autosourcing your :file:`vimrc` file through an autocmd, you can 
+put this in your :file`.vimrc`, solving any issues you may have had with Powerline
+losing its color
+
+.. code-block:: vim
+
+   autocmd BufWritePost .vimrc doautocmd ColorScheme .vimrc
+
 Useful settings
 ---------------
 
