@@ -39,6 +39,7 @@ class TestParser(TestCase):
 				(['shell', '--theme_option'],            'expected one argument'),
 				(['shell', '--config_path'],             'expected one argument'),
 				(['shell', '--renderer_arg'],            'expected one argument'),
+				(['shell', '--jobnum'],                  'expected one argument'),
 				(['-r', 'zsh_prompt'],                   'too few arguments|the following arguments are required: ext'),
 				(['shell', '--last_exit_code', 'i'],     'invalid int value'),
 				(['shell', '--last_pipe_status', '1 i'], 'invalid <lambda> value'),
@@ -63,6 +64,7 @@ class TestParser(TestCase):
 					'-r', 'zsh_prompt',
 					'--last_exit_code', '10',
 					'--last_pipe_status', '10 20 30',
+					'--jobnum=10',
 					'-w', '100',
 					'-c', 'common.term_truecolor=true',
 					'-c', 'common.spaces=4',
@@ -75,6 +77,7 @@ class TestParser(TestCase):
 					'renderer_module': 'zsh_prompt',
 					'last_exit_code': 10,
 					'last_pipe_status': [10, 20, 30],
+					'jobnum': 10,
 					'width': 100,
 					'config': {'common': {'term_truecolor': True, 'spaces': 4}},
 					'theme_option': {
