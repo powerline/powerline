@@ -33,6 +33,15 @@ def file_watcher():
 		_file_watcher = create_file_watcher()
 	return _file_watcher
 
+_branch_watcher = None
+
+def branch_watcher():
+	global _branch_watcher
+	if _branch_watcher is None:
+		from powerline.lib.file_watcher import create_file_watcher
+		_branch_watcher = create_file_watcher()
+	return _branch_watcher
+
 branch_name_cache = {}
 branch_lock = Lock()
 file_status_lock = Lock()
@@ -41,7 +50,7 @@ def get_branch_name(directory, config_file, get_func):
 	global branch_name_cache
 	with branch_lock:
 		# Check if the repo directory was moved/deleted
-		fw = file_watcher()
+		fw = branch_watcher()
 		is_watched = fw.is_watched(directory)
 		try:
 			changed = fw(directory)

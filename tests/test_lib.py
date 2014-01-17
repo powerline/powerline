@@ -54,10 +54,11 @@ class TestFilesystemWatchers(TestCase):
 		w = create_file_watcher(use_stat=False)
 		if w.is_stat_based:
 			raise SkipTest('This test is not suitable for a stat based file watcher')
-		f1, f2 = os.path.join(INOTIFY_DIR, 'file1'), os.path.join(INOTIFY_DIR, 'file2')
+		f1, f2, f3 = map(lambda x: os.path.join(INOTIFY_DIR, 'file%d' % x), (1, 2, 3))
 		with open(f1, 'wb'):
 			with open(f2, 'wb'):
-				pass
+				with open(f3, 'wb'):
+					pass
 		ne = os.path.join(INOTIFY_DIR, 'notexists')
 		self.assertRaises(OSError, w, ne)
 		self.assertTrue(w(f1))
@@ -85,6 +86,13 @@ class TestFilesystemWatchers(TestCase):
 		# Check that deleting a file registers as a change
 		os.unlink(f1)
 		self.do_test_for_change(w, f1)
+		# Test that changing the inode of a file does not cause it to stop
+		# being watched
+		os.rename(f3, f2)
+		self.do_test_for_change(w, f2)
+		self.assertFalse(w(f2), 'Spurious change detected')
+		os.utime(f2, None)
+		self.do_test_for_change(w, f2)
 
 	def test_tree_watcher(self):
 		from powerline.lib.tree_watcher import TreeWatcher
