@@ -24,6 +24,8 @@ with codecs.open(fname, 'r', encoding='utf-8') as R:
 			if not found_cd:
 				found_cd = ('cd tests/shell/3rd' in line)
 				continue
+			if 'true is the last line' in line:
+				break
 			line = line.translate({
 				ord('\r'): None
 			})

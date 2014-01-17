@@ -12,4 +12,5 @@ bash -c "echo \$\$>pid ; while true ; do sleep 0.1s ; done" &
 false
 kill `cat pid` ; sleep 1s
 false
+true is the last line
 exit
