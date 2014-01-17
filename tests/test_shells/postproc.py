@@ -24,6 +24,9 @@ with codecs.open(fname, 'r', encoding='utf-8') as R:
 			if not found_cd:
 				found_cd = ('cd tests/shell/3rd' in line)
 				continue
+			line = line.translate({
+				ord('\r'): None
+			})
 			line = line.replace(pid, 'PID')
 			line = line.replace(hostname, 'HOSTNAME')
 			line = line.replace(user, 'USER')
