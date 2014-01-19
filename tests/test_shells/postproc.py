@@ -29,9 +29,9 @@ with codecs.open(fname, 'r', encoding='utf-8') as R:
 			line = line.translate({
 				ord('\r'): None
 			})
-			line = line.replace(pid, 'PID')
 			line = line.replace(hostname, 'HOSTNAME')
 			line = line.replace(user, 'USER')
+			line = line.replace(pid, 'PID')
 			W.write(line)
 
 os.rename(new_fname, fname)

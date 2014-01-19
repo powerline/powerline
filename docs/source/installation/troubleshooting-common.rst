@@ -60,3 +60,15 @@ My vim statusline is not displayed completely and has too much spaces
 * Be sure you have ``ambiwidth`` option set to ``single``.
 * Alternative: set :ref:`ambiwidth <config-common-ambiwidth>` to 2, remove fancy 
   dividers (they suck when ``ambiwidth`` is set to double).
+
+When using `z <https://github.com/rupa/z>` powerline shows wrong number of jobs
+-------------------------------------------------------------------------------
+
+This happens because `z <https://github.com/rupa/z>` is launching some jobs in 
+the background from ``$POWERLINE_COMMAND`` and these jobs fail to finish before 
+powerline prompt is run.
+
+Solution to this problem is simple: be sure that :file:`z.sh` is sourced 
+strictly after :file:`powerline/bindings/bash/powerline.sh`. This way background 
+jobs are spawned by `z <https://github.com/rupa/z>` after powerline has done its 
+job.

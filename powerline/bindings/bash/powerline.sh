@@ -31,9 +31,7 @@ _powerline_tmux_set_columns() {
 
 _powerline_prompt() {
 	local last_exit_code=$?
-	[[ -z "$POWERLINE_OLD_PROMPT_COMMAND" ]] ||
-		eval $POWERLINE_OLD_PROMPT_COMMAND
-	PS1="$($POWERLINE_COMMAND shell left -r bash_prompt --last_exit_code=$last_exit_code --jobnum="$(jobs|wc -l)")"
+	PS1="$($POWERLINE_COMMAND shell left -r bash_prompt --last_exit_code=$last_exit_code --jobnum="$(jobs -p|wc -l)")"
 	_powerline_tmux_set_pwd
 	return $last_exit_code
 }
@@ -42,5 +40,4 @@ trap "_powerline_tmux_set_columns" SIGWINCH
 _powerline_tmux_set_columns
 
 [[ "$PROMPT_COMMAND" != "${PROMPT_COMMAND/_powerline_prompt/}" ]] ||
-	POWERLINE_OLD_PROMPT_COMMAND="$PROMPT_COMMAND"
-export PROMPT_COMMAND="_powerline_prompt"
+	export PROMPT_COMMAND="${PROMPT_COMMAND}"$'\n'"_powerline_prompt;"
