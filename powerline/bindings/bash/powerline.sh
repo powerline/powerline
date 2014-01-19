@@ -31,7 +31,7 @@ _powerline_tmux_set_columns() {
 
 _powerline_prompt() {
 	local last_exit_code=$?
-	PS1="$($POWERLINE_COMMAND shell left -r bash_prompt --last_exit_code=$last_exit_code --jobnum="$(jobs|wc -l)")"
+	PS1="$($POWERLINE_COMMAND shell left -r bash_prompt --last_exit_code=$last_exit_code --jobnum="$(jobs -p|wc -l)")"
 	_powerline_tmux_set_pwd
 	return $last_exit_code
 }
