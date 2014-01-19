@@ -7,12 +7,13 @@ function powerline
 		end
 	end
 	function --on-variable POWERLINE_COMMAND _powerline_update
+		set -l addargs "--last_exit_code=\$status --last_pipe_status=\$status --jobnum=(jobs -p | wc -l)"
 		eval "
 		function fish_prompt
-			$POWERLINE_COMMAND shell left --last_exit_code=\$status --last_pipe_status=\$status
+			$POWERLINE_COMMAND shell left $addargs
 		end
 		function fish_right_prompt
-			$POWERLINE_COMMAND shell right --last_exit_code=\$status --last_pipe_status=\$status
+			$POWERLINE_COMMAND shell right $addargs
 		end
 		"
 	end
