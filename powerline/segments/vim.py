@@ -23,6 +23,7 @@ vim_funcs = {
 	'expand': vim_get_func('expand', rettype=str),
 	'bufnr': vim_get_func('bufnr', rettype=int),
 	'line2byte': vim_get_func('line2byte', rettype=int),
+	'line': vim_get_func('line', rettype=int),
 }
 
 vim_modes = {
@@ -266,11 +267,11 @@ def line_percent(pl, segment_info, gradient=False):
 
 
 @window_cached
-def position(pl, position_strings=('Top', 'Bot', 'All'), gradient=False):
+def position(pl, position_strings={'top':'Top', 'bottom':'Bot', 'all':'All'}, gradient=False):
 	'''Return the position of the current view in the file as a percentage.
 
-	:param tuple position_strings:
-		use these three strings to indicate whether we are at top or bottom or see the complete file
+	:param dict position_strings:
+		dict for translation of the position strings, e.g. ``{"top":"Oben", "bottom":"Unten", "all":"Alles"}``
 
 	:param bool gradient:
 		highlight the percentage with a color gradient (by default a green to red gradient)
@@ -279,17 +280,17 @@ def position(pl, position_strings=('Top', 'Bot', 'All'), gradient=False):
 	'''
 	line_last = len(vim.current.buffer)
 
-	winline_first = int(vim.eval('line("w0")'))
-	winline_last = int(vim.eval('line("w$")'))
+	winline_first = vim_funcs['line']('w0')
+	winline_last = vim_funcs['line']('w$')
 	if winline_first == 1 and winline_last == line_last:
 		percentage = 0.0
-		content = position_strings[2]
+		content = position_strings['all']
 	elif winline_first == 1:
 		percentage = 0.0
-		content = position_strings[0]
+		content = position_strings['top']
 	elif winline_last == line_last:
 		percentage = 100.0
-		content = position_strings[1]
+		content = position_strings['bottom']
 	else:
 		percentage = winline_first * 100.0 / (line_last - winline_last + winline_first)
 		content = str(int(round(percentage))) + '%'

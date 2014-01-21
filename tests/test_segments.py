@@ -508,7 +508,7 @@ class TestVim(TestCase):
 			segment_info['buffer'][:] = ['1']
 			vim_module._set_cursor(1, 0)
 			self.assertEqual(vim.position(pl=pl, segment_info=segment_info), 'All')
-			self.assertEqual(vim.position(pl=pl, segment_info=segment_info, position_strings=('Comienzo', 'Final', 'Todo')), 'Todo')
+			self.assertEqual(vim.position(pl=pl, segment_info=segment_info, position_strings={'top':'Comienzo', 'bottom':'Final', 'all':'Todo'}), 'Todo')
 			self.assertEqual(vim.position(pl=pl, segment_info=segment_info, gradient=True),
 					[{'contents': 'All', 'highlight_group': ['position_gradient', 'position'], 'gradient_level': 0.0}])
 		finally:

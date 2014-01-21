@@ -169,10 +169,6 @@ def eval(expr):
 		return vars[expr[2:]]
 	elif expr.startswith('&'):
 		return options[expr[1:]]
-	elif expr == 'line("w0")':
-		return 1
-	elif expr == 'line("w$")':
-		return 1
 	elif expr.startswith('PowerlineRegisterCachePurgerEvent'):
 		_buf_purge_events.add(expr[expr.find('"') + 1:expr.rfind('"') - 1])
 		return '0'
@@ -303,6 +299,15 @@ def _emul_line2byte(line):
 	buflines = _buf_lines[_buffer()]
 	if line == len(buflines) + 1:
 		return sum((len(s) for s in buflines)) + 1
+	raise NotImplementedError
+
+
+@_vim
+def _emul_line(expr):
+	if expr == 'w0':
+		return 1
+	if expr == 'w$':
+		return 1
 	raise NotImplementedError
 
 
