@@ -91,7 +91,7 @@ segments that you may want to customize right away:
            "name": "weather",
            "priority": 50,
            "args": {
-               "unit": "f",
+               "unit": "F",
                "location_query": "oslo, norway"
            }
        },
