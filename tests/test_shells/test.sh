@@ -12,9 +12,13 @@ else
 fi
 
 check_screen_log() {
-	diff -u tests/test_shells/${1}.ok tests/shell/screen.log
-	# Explicit is better then implicit
-	return $?
+	if test -e tests/test_shells/${1}.ok ; then
+		diff -u tests/test_shells/${1}.ok tests/shell/screen.log
+		return $?
+	else
+		cat tests/shell/screen.log
+		return 1
+	fi
 }
 
 run_test() {
@@ -37,6 +41,7 @@ run_test() {
 	if ! check_screen_log ${SH} ; then
 		# Repeat the diff to make it better viewable in travis output
 		check_screen_log ${SH} | cat -v
+		echo "Failed ${SH}"
 		return 1
 	fi
 	return 0
@@ -47,17 +52,19 @@ git init tests/shell/3rd
 git --git-dir=tests/shell/3rd/.git checkout -b BRANCH
 
 if ! run_test bash --norc --noprofile -i ; then
-	echo "Failed bash"
 	FAILED=1
 fi
-cp tests/shell/screen.log tests/bash.log
 rm tests/shell/screen.log
 
 if ! run_test zsh -f -i ; then
-	echo "Failed zsh"
 	FAILED=1
 fi
-cp tests/shell/screen.log tests/zsh.log
+rm tests/shell/screen.log
+
+export XDG_CONFIG_HOME=/dev/null
+if ! run_test fish -i ; then
+	FAILED=1
+fi
 rm tests/shell/screen.log
 
 rm -r tests/shell
