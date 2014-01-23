@@ -158,7 +158,8 @@ is the absolute path to your Powerline installation directory:
 
 .. code-block:: bash
 
-   . {repository_root}/powerline/bindings/fish/powerline.fish
+   set fish_function_path $fish_function_path "{repository_root}/powerline/bindings/fish"
+   powerline-setup
 
 Tmux statusline
 ---------------
