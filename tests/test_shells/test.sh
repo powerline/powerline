@@ -69,7 +69,8 @@ if ! run_test zsh -f -i ; then
 	FAILED=1
 fi
 
-export XDG_CONFIG_HOME=/dev/null
+mkdir tests/shell/fish_home
+export XDG_CONFIG_HOME="$PWD/tests/shell/fish_home"
 if ! run_test fish -i ; then
 	FAILED=1
 fi
