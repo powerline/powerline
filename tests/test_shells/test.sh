@@ -35,9 +35,20 @@ run_test() {
 	./tests/test_shells/postproc.py tests/shell/screen.log ${SH}
 	cp tests/shell/screen.log tests/shell/${SH}.log
 	if ! check_screen_log ${SH} ; then
+		echo '____________________________________________________________'
 		# Repeat the diff to make it better viewable in travis output
+		echo "Diff (cat -v):"
+		echo '============================================================'
 		check_screen_log ${SH} | cat -v
-		echo "Failed ${SH}"
+		echo '____________________________________________________________'
+		echo "Failed ${SH}. Full output:"
+		echo '============================================================'
+		cat tests/shell/${SH}.full.log
+		echo '____________________________________________________________'
+		echo "Full output (cat -v):"
+		echo '============================================================'
+		cat -v tests/shell/${SH}.full.log
+		echo '____________________________________________________________'
 		rm tests/shell/screen.log
 		return 1
 	fi
