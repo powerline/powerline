@@ -49,6 +49,7 @@ run_test() {
 		echo '============================================================'
 		cat -v tests/shell/${SH}.full.log
 		echo '____________________________________________________________'
+		${SH} --version
 		rm tests/shell/screen.log
 		return 1
 	fi
