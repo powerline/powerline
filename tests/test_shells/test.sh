@@ -1,30 +1,30 @@
 #!/bin/sh
 FAILED=0
-
-if [ "$(echo '\e')" != '\e' ] ; then
-	safe_echo() {
-		echo -E "$@"
-	}
-else
-	safe_echo() {
-		echo "$@"
-	}
-fi
+ONLY_SHELL="$1"
 
 check_screen_log() {
-	diff -u tests/test_shells/${1}.ok tests/shell/screen.log
-	# Explicit is better then implicit
-	return $?
+	if test -e tests/test_shells/${1}.ok ; then
+		diff -u tests/test_shells/${1}.ok tests/shell/screen.log
+		return $?
+	else
+		cat tests/shell/screen.log
+		return 1
+	fi
 }
 
 run_test() {
 	SH="$1"
-	SESNAME="powerline-shell-test-$$"
+	SESNAME="powerline-shell-test-${SH}-$$"
+
+	test "x$ONLY_SHELL" = "x" || test "x$ONLY_SHELL" = "x$SH" || return 0
+
+	which "${SH}" || return 0
+
 	screen -L -c tests/test_shells/screenrc -d -m -S "$SESNAME" \
 		env LANG=en_US.UTF-8 BINDFILE="$BINDFILE" "$@"
 	screen -S "$SESNAME" -X readreg a tests/test_shells/input.$SH
 	# Wait for screen to initialize
-	sleep 0.3s
+	sleep 1s
 	screen -S "$SESNAME" -p 0 -X width 300 1
 	screen -S "$SESNAME" -p 0 -X logfile tests/shell/screen.log
 	screen -S "$SESNAME" -p 0 -X paste a
@@ -33,32 +33,50 @@ run_test() {
 	while screen -S "$SESNAME" -X blankerprg "" > /dev/null ; do
 		sleep 0.1s
 	done
-	./tests/test_shells/postproc.py tests/shell/screen.log
+	cp tests/shell/screen.log tests/shell/${SH}.full.log
+	./tests/test_shells/postproc.py tests/shell/screen.log ${SH}
+	cp tests/shell/screen.log tests/shell/${SH}.log
 	if ! check_screen_log ${SH} ; then
+		echo '____________________________________________________________'
 		# Repeat the diff to make it better viewable in travis output
+		echo "Diff (cat -v):"
+		echo '============================================================'
 		check_screen_log ${SH} | cat -v
+		echo '____________________________________________________________'
+		echo "Failed ${SH}. Full output:"
+		echo '============================================================'
+		cat tests/shell/${SH}.full.log
+		echo '____________________________________________________________'
+		echo "Full output (cat -v):"
+		echo '============================================================'
+		cat -v tests/shell/${SH}.full.log
+		echo '____________________________________________________________'
+		${SH} --version
+		rm tests/shell/screen.log
 		return 1
 	fi
+	rm tests/shell/screen.log
 	return 0
 }
 
+test -d tests/shell && rm -r tests/shell
 mkdir tests/shell
 git init tests/shell/3rd
 git --git-dir=tests/shell/3rd/.git checkout -b BRANCH
 
 if ! run_test bash --norc --noprofile -i ; then
-	echo "Failed bash"
 	FAILED=1
 fi
-cp tests/shell/screen.log tests/bash.log
-rm tests/shell/screen.log
 
 if ! run_test zsh -f -i ; then
-	echo "Failed zsh"
 	FAILED=1
 fi
-cp tests/shell/screen.log tests/zsh.log
-rm tests/shell/screen.log
 
-rm -r tests/shell
+mkdir tests/shell/fish_home
+export XDG_CONFIG_HOME="$PWD/tests/shell/fish_home"
+if ! run_test fish -i ; then
+	FAILED=1
+fi
+
+test "x$ONLY_SHELL" = "x" && rm -r tests/shell
 exit $FAILED
