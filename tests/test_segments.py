@@ -161,6 +161,22 @@ class TestCommon(TestCase):
 				{'contents': 'fo/', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False},
 				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False, 'highlight_group': ['cwd:current_folder', 'cwd']}
 			])
+			cwd[0] = '/etc'
+			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info, use_path_separator=False), [
+				{'contents': '/', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
+				{'contents': 'etc', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_group': ['cwd:current_folder', 'cwd']},
+			])
+			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info, use_path_separator=True), [
+				{'contents': '/', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False},
+				{'contents': 'etc', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False, 'highlight_group': ['cwd:current_folder', 'cwd']},
+			])
+			cwd[0] = '/'
+			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info, use_path_separator=False), [
+				{'contents': '/', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_group': ['cwd:current_folder', 'cwd']},
+			])
+			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info, use_path_separator=True), [
+				{'contents': '/', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False, 'highlight_group': ['cwd:current_folder', 'cwd']},
+			])
 			ose = OSError()
 			ose.errno = 2
 			cwd[0] = ose

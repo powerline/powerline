@@ -125,6 +125,8 @@ def cwd(pl, segment_info, dir_shorten_len=None, dir_limit_depth=None, use_path_s
 	ret[-1]['highlight_group'] = ['cwd:current_folder', 'cwd']
 	if use_path_separator:
 		ret[-1]['contents'] = ret[-1]['contents'][:-1]
+		if len(ret) > 1 and ret[0]['contents'][0] == os.sep:
+			ret[0]['contents'] = ret[0]['contents'][1:]
 	return ret
 
 
