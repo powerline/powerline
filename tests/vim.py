@@ -304,10 +304,12 @@ def _emul_line2byte(line):
 
 @_vim
 def _emul_line(expr):
+	cursorline = windows[_window - 1].cursor[0] + 1
+	numlines = len(_buf_lines[_buffer()])
 	if expr == 'w0':
-		return 1
+		return max(cursorline-5, 1)
 	if expr == 'w$':
-		return 1
+		return min(cursorline+5, numlines)
 	raise NotImplementedError
 
 
