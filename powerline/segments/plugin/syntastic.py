@@ -22,7 +22,7 @@ def syntastic(pl, err_format='ERR:  {first_line} ({num}) ', warn_format='WARN
 	'''
 	if not int(vim.eval('exists("g:SyntasticLoclist")')):
 		return
-	has_errors = not int(vim.eval('g:SyntasticLoclist.current().isEmpty()'))
+	has_errors = int(vim.eval('g:SyntasticLoclist.current().hasErrorsOrWarningsToDisplay()'))
 	if not has_errors:
 		return
 	errors = vim.eval('g:SyntasticLoclist.current().errors()')
