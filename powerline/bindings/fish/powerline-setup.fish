@@ -1,4 +1,4 @@
-function powerline
+function powerline-setup
 	if test -z "$POWERLINE_COMMAND"
 		if which powerline-client >/dev/null
 			set -g -x POWERLINE_COMMAND powerline-client
@@ -33,4 +33,3 @@ function powerline
 	_powerline_tmux_set_columns
 	_powerline_tmux_set_pwd
 end
-powerline
