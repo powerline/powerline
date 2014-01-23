@@ -23,6 +23,7 @@ vim_funcs = {
 	'expand': vim_get_func('expand', rettype=str),
 	'bufnr': vim_get_func('bufnr', rettype=int),
 	'line2byte': vim_get_func('line2byte', rettype=int),
+	'line': vim_get_func('line', rettype=int),
 }
 
 vim_modes = {
@@ -261,6 +262,44 @@ def line_percent(pl, segment_info, gradient=False):
 	return [{
 		'contents': str(int(round(percentage))),
 		'highlight_group': ['line_percent_gradient', 'line_percent'],
+		'gradient_level': percentage,
+	}]
+
+
+@window_cached
+def position(pl, position_strings={'top':'Top', 'bottom':'Bot', 'all':'All'}, gradient=False):
+	'''Return the position of the current view in the file as a percentage.
+
+	:param dict position_strings:
+		dict for translation of the position strings, e.g. ``{"top":"Oben", "bottom":"Unten", "all":"Alles"}``
+
+	:param bool gradient:
+		highlight the percentage with a color gradient (by default a green to red gradient)
+
+	Highlight groups used: ``position_gradient`` (gradient), ``position``.
+	'''
+	line_last = len(vim.current.buffer)
+
+	winline_first = vim_funcs['line']('w0')
+	winline_last = vim_funcs['line']('w$')
+	if winline_first == 1 and winline_last == line_last:
+		percentage = 0.0
+		content = position_strings['all']
+	elif winline_first == 1:
+		percentage = 0.0
+		content = position_strings['top']
+	elif winline_last == line_last:
+		percentage = 100.0
+		content = position_strings['bottom']
+	else:
+		percentage = winline_first * 100.0 / (line_last - winline_last + winline_first)
+		content = str(int(round(percentage))) + '%'
+
+	if not gradient:
+		return content
+	return [{
+		'contents': content,
+		'highlight_group': ['position_gradient', 'position'],
 		'gradient_level': percentage,
 	}]
 
