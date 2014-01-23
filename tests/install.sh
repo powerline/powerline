@@ -9,5 +9,7 @@ if python -c 'import sys; sys.exit(1 * (sys.version_info[0] != 2))' ; then
 		pip install unittest2 argparse
 	fi
 fi
-sudo apt-get install -qq screen zsh fish
+sudo apt-get install -qq screen zsh
+# Travis has too outdated fish. It cannot be used for tests.
+# sudo apt-get install fish
 true

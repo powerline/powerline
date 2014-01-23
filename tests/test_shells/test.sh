@@ -18,6 +18,8 @@ run_test() {
 
 	test "x$ONLY_SHELL" = "x" || test "x$ONLY_SHELL" = "x$SH" || return 0
 
+	which "${SH}" || return 0
+
 	screen -L -c tests/test_shells/screenrc -d -m -S "$SESNAME" \
 		env LANG=en_US.UTF-8 BINDFILE="$BINDFILE" "$@"
 	screen -S "$SESNAME" -X readreg a tests/test_shells/input.$SH
