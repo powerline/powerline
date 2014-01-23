@@ -32,7 +32,7 @@ run_test() {
 		sleep 0.1s
 	done
 	cp tests/shell/screen.log tests/shell/${SH}.full.log
-	./tests/test_shells/postproc.py tests/shell/screen.log
+	./tests/test_shells/postproc.py tests/shell/screen.log ${SH}
 	cp tests/shell/screen.log tests/shell/${SH}.log
 	if ! check_screen_log ${SH} ; then
 		# Repeat the diff to make it better viewable in travis output
