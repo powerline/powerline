@@ -22,7 +22,7 @@ user = os.environ['USER']
 with codecs.open(fname, 'r', encoding='utf-8') as R:
 	with codecs.open(new_fname, 'w', encoding='utf-8') as W:
 		found_cd = False
-		for line in R:
+		for line in (R if shell != 'fish' else R.read().split('\n')):
 			if not found_cd:
 				found_cd = ('cd tests/shell/3rd' in line)
 				continue
