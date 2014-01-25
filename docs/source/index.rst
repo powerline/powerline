@@ -6,20 +6,13 @@ Powerline
    :maxdepth: 2
    :glob:
 
-   introduction
    overview
-   configuration
-   tipstricks
-   fontpatching
-   license-credits
-
-Segments
-========
-
-.. toctree::
-   segments/common
-   segments/shell
-   segments/vim
+   installation
+   usage
+   configuration-and-customization
+   troubleshooting
+   tips-and-tricks
+   license-and-credits
 
 Indices and tables
 ==================

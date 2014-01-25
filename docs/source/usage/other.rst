@@ -1,0 +1,6 @@
+*************
+Other plugins
+*************
+
+tmux statusline
+---------------
