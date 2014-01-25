@@ -10,10 +10,20 @@ extensions = ['powerline_autodoc', 'sphinx.ext.todo', 'sphinx.ext.coverage', 'sp
 source_suffix = '.rst'
 master_doc = 'index'
 project = u'Powerline'
-copyright = u'Kim Silkebækken'
 version = 'beta'
 release = 'beta'
 exclude_patterns = ['_build']
 pygments_style = 'sphinx'
-html_theme = 'default'
+html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
+html_show_copyright = False
+
+on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+
+if not on_rtd:  # only import and set the theme if we're building docs locally
+	try:
+		import sphinx_rtd_theme
+		html_theme = 'sphinx_rtd_theme'
+		html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+	except ImportError:
+		pass
