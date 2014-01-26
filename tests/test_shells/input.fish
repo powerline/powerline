@@ -11,8 +11,8 @@ set VIRTUAL_ENV
 bash -c "echo \$\$>pid ; while true ; do sleep 0.1s ; done" &
 false
 kill (cat pid) ; sleep 1s
-cd (printf '\x1b[32m')
-cd ../(printf '\x08')
+cd "$DIR1"
+cd ../"$DIR2"
 cd ../'\[\]'
 cd ../'%%'
 cd ../'#[bold]'

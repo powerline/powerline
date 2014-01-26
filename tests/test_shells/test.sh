@@ -61,8 +61,10 @@ test -d tests/shell && rm -r tests/shell
 mkdir tests/shell
 git init tests/shell/3rd
 git --git-dir=tests/shell/3rd/.git checkout -b BRANCH
-mkdir tests/shell/3rd/"$(printf '\x1b[32m')"
-mkdir tests/shell/3rd/"$(printf '\x08')"
+export DIR1="[32m"
+export DIR2=""
+mkdir tests/shell/3rd/"$DIR1"
+mkdir tests/shell/3rd/"$DIR2"
 mkdir tests/shell/3rd/'\[\]'
 mkdir tests/shell/3rd/'%%'
 mkdir tests/shell/3rd/'#[bold]'
