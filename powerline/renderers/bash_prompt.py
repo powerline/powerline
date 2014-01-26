@@ -13,6 +13,7 @@ class BashPromptRenderer(ShellRenderer):
 	character_translations = ShellRenderer.character_translations.copy()
 	character_translations[ord('$')] = '\\$'
 	character_translations[ord('`')] = '\\`'
+	character_translations[ord('\\')] = '\\\\'
 
 
 renderer = BashPromptRenderer

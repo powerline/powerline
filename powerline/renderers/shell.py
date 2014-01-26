@@ -22,7 +22,6 @@ class ShellRenderer(Renderer):
 	screen_escape = False
 
 	character_translations = Renderer.character_translations.copy()
-	character_translations[ord('\\')] = '\\\\'
 
 	def hlstyle(self, fg=None, bg=None, attr=None):
 		'''Highlight a segment.
