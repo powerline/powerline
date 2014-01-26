@@ -141,7 +141,7 @@ class TestConfigReload(TestCase):
 				self.assertEqual(p.render(), '<1 2 1> s <2 4 False>>><3 4 4>g <4 False False>>><None None None>')
 				self.assertAccessEvents('config', 'themes/test/nonexistent')
 				# It should normally handle file missing error
-				self.assertEqual(p.logger._pop_msgs(), ['exception:test:Failed to create renderer: themes/test/nonexistent'])
+				self.assertEqual(p.logger._pop_msgs(), ['exception:test:powerline:Failed to create renderer: themes/test/nonexistent'])
 
 				config['config']['ext']['test']['theme'] = 'default'
 				add_watcher_events(p, 'config')
@@ -154,7 +154,7 @@ class TestConfigReload(TestCase):
 				self.assertEqual(p.render(), '<1 2 1> s <2 4 False>>><3 4 4>g <4 False False>>><None None None>')
 				self.assertAccessEvents('config', 'colorschemes/test/nonexistent')
 				# It should normally handle file missing error
-				self.assertEqual(p.logger._pop_msgs(), ['exception:test:Failed to create renderer: colorschemes/test/nonexistent'])
+				self.assertEqual(p.logger._pop_msgs(), ['exception:test:powerline:Failed to create renderer: colorschemes/test/nonexistent'])
 
 				config['config']['ext']['test']['colorscheme'] = '2'
 				add_watcher_events(p, 'config')
@@ -187,7 +187,7 @@ class TestConfigReload(TestCase):
 				add_watcher_events(p, 'config')
 				self.assertEqual(p.render(), '<1 2 1> s<2 4 False>>><3 4 4>g<4 False False>>><None None None>')
 				self.assertAccessEvents('config')
-				self.assertIn('exception:test:Failed to create renderer: fcf:colorschemes/test/nonexistentraise', p.logger._pop_msgs())
+				self.assertIn('exception:test:powerline:Failed to create renderer: fcf:colorschemes/test/nonexistentraise', p.logger._pop_msgs())
 
 				config['colorschemes/test/nonexistentraise'] = {
 					'groups': {
