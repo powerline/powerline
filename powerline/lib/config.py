@@ -155,6 +155,10 @@ class ConfigLoader(MultiRunnedThread):
 			try:
 				self.loaded[path] = deepcopy(self._load(path))
 			except Exception as e:
+				try:
+					self.loaded.pop(path)
+				except KeyError:
+					pass
 				self.exception('Error while loading {0}: {1}', path, str(e))
 
 	def run(self):

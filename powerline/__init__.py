@@ -10,8 +10,41 @@ from powerline.lib.config import ConfigLoader
 
 from threading import Lock, Event
 
+try:
+	from __builtin__ import unicode
+except ImportError:
+	unicode = str  # NOQA
+
 
 DEFAULT_SYSTEM_CONFIG_DIR = None
+
+
+def safe_unicode(s):
+	'''Return unicode instance without raising an exception.
+	'''
+	try:
+		try:
+			return unicode(s)
+		except UnicodeDecodeError:
+			try:
+				return unicode(s, 'utf-8')
+			except TypeError:
+				return unicode(str(s), 'utf-8')
+	except Exception as e:
+		return safe_unicode(e)
+
+
+class FailedUnicode(unicode):
+	'''Builtin ``unicode`` (``str`` in python 3) subclass indicating fatal 
+	error.
+
+	If your code for some reason wants to determine whether `.render()` method 
+	failed it should check returned string for being a FailedUnicode instance. 
+	Alternatively you could subclass Powerline and override `.render()` method 
+	to do what you like in place of catching the exception and returning 
+	FailedUnicode.
+	'''
+	pass
 
 
 def find_config_file(search_paths, config_file):
@@ -59,6 +92,29 @@ class PowerlineLogger(object):
 
 	def debug(self, msg, *args, **kwargs):
 		self._log('debug', msg, *args, **kwargs)
+
+
+_fallback_logger = None
+
+
+def _get_fallback_logger():
+	global _fallback_logger
+	if _fallback_logger:
+		return _fallback_logger
+
+	log_format = '%(asctime)s:%(levelname)s:%(message)s'
+	formatter = logging.Formatter(log_format)
+
+	level = logging.WARNING
+	handler = logging.StreamHandler()
+	handler.setLevel(level)
+	handler.setFormatter(formatter)
+
+	logger = logging.getLogger('powerline')
+	logger.setLevel(level)
+	logger.addHandler(handler)
+	_fallback_logger = PowerlineLogger(None, logger, '_fallback_')
+	return _fallback_logger
 
 
 class Powerline(object):
@@ -233,7 +289,7 @@ class Powerline(object):
 			try:
 				Renderer = __import__(self.renderer_module, fromlist=['renderer']).renderer
 			except Exception as e:
-				self.pl.exception('Failed to import renderer module: {0}', str(e))
+				self.exception('Failed to import renderer module: {0}', str(e))
 				sys.exit(1)
 
 			# Renderer updates configuration file via segments’ .startup thus it 
@@ -242,7 +298,7 @@ class Powerline(object):
 			try:
 				renderer = Renderer(**self.renderer_options)
 			except Exception as e:
-				self.pl.exception('Failed to construct renderer object: {0}', str(e))
+				self.exception('Failed to construct renderer object: {0}', str(e))
 				if not hasattr(self, 'renderer'):
 					raise
 			else:
@@ -360,16 +416,34 @@ class Powerline(object):
 			try:
 				self.create_renderer(**create_renderer_kwargs)
 			except Exception as e:
-				self.pl.exception('Failed to create renderer: {0}', str(e))
-			finally:
-				self.create_renderer_kwargs.clear()
+				self.exception('Failed to create renderer: {0}', str(e))
+				if hasattr(self, 'renderer'):
+					with self.cr_kwargs_lock:
+						self.create_renderer_kwargs.clear()
+				else:
+					raise
+			else:
+				with self.cr_kwargs_lock:
+					self.create_renderer_kwargs.clear()
 
 	def render(self, *args, **kwargs):
 		'''Update/create renderer if needed and pass all arguments further to 
 		``self.renderer.render()``.
 		'''
-		self.update_renderer()
-		return self.renderer.render(*args, **kwargs)
+		try:
+			self.update_renderer()
+			return self.renderer.render(*args, **kwargs)
+		except Exception as e:
+			try:
+				self.exception('Failed to render: {0}', str(e))
+			except Exception as e:
+				# Updates e variable to new value, masking previous one. 
+				# Normally it is the same exception (due to raise in case pl is 
+				# unset), but it may also show error in logger. Note that latter 
+				# is not logged by logger for obvious reasons, thus this also 
+				# prevents us from seeing logger traceback.
+				pass
+			return FailedUnicode(safe_unicode(e))
 
 	def shutdown(self):
 		'''Shut down all background threads. Must be run only prior to exiting 
@@ -410,3 +484,9 @@ class Powerline(object):
 
 	def __exit__(self, *args):
 		self.shutdown()
+
+	def exception(self, msg, *args, **kwargs):
+		if 'prefix' not in kwargs:
+			kwargs['prefix'] = 'powerline'
+		pl = getattr(self, 'pl', None) or _get_fallback_logger()
+		return pl.exception(msg, *args, **kwargs)
