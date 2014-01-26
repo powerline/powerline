@@ -1,5 +1,7 @@
 # vim:fileencoding=utf-8:noet
 
+from __future__ import unicode_literals
+
 from powerline.segments import shell, common
 import tests.vim as vim_module
 import sys
@@ -467,6 +469,10 @@ class TestVim(TestCase):
 		segment_info = vim_module._get_segment_info()
 		self.assertEqual(vim.file_directory(pl=pl, segment_info=segment_info), None)
 		with replace_env('HOME', '/home/foo', os.environ):
+			with vim_module._with('buffer', '/tmp/’’/abc') as segment_info:
+				self.assertEqual(vim.file_directory(pl=pl, segment_info=segment_info), '/tmp/’’/')
+			with vim_module._with('buffer', b'/tmp/\xFF\xFF/abc') as segment_info:
+				self.assertEqual(vim.file_directory(pl=pl, segment_info=segment_info), '/tmp/<ff><ff>/')
 			with vim_module._with('buffer', '/tmp/abc') as segment_info:
 				self.assertEqual(vim.file_directory(pl=pl, segment_info=segment_info), '/tmp/')
 				os.environ['HOME'] = '/tmp'
@@ -484,6 +490,8 @@ class TestVim(TestCase):
 			self.assertEqual(vim.file_name(pl=pl, segment_info=segment_info), 'abc')
 		with vim_module._with('buffer', '/tmp/’’') as segment_info:
 			self.assertEqual(vim.file_name(pl=pl, segment_info=segment_info), '’’')
+		with vim_module._with('buffer', b'/tmp/\xFF\xFF') as segment_info:
+			self.assertEqual(vim.file_name(pl=pl, segment_info=segment_info), '<ff><ff>')
 
 	def test_file_size(self):
 		pl = Pl()

@@ -11,6 +11,14 @@ VIRTUAL_ENV=
 bash -c "echo \$\$>pid ; while true ; do sleep 0.1s ; done" &
 false
 kill `cat pid` ; sleep 1s
+cd "$DIR1"
+cd ../"$DIR2"
+cd ../'\[\]'
+cd ../'%%'
+cd ../'#[bold]'
+cd ../'(echo)'
+cd ../'$(echo)'
+cd ../'`echo`'
 false
 true is the last line
 exit

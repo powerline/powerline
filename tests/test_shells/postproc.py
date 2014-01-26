@@ -8,11 +8,11 @@ import sys
 import codecs
 
 
-fname = sys.argv[1]
-new_fname = fname + '.new'
-pid_fname = 'tests/shell/3rd/pid'
+shell = sys.argv[1]
+fname = os.path.join('tests', 'shell', shell + '.full.log')
+new_fname = os.path.join('tests', 'shell', shell + '.log')
+pid_fname = os.path.join('tests', 'shell', '3rd', 'pid')
 
-shell = sys.argv[2]
 
 with open(pid_fname, 'r') as P:
 	pid = P.read().strip()
@@ -42,5 +42,3 @@ with codecs.open(fname, 'r', encoding='utf-8') as R:
 				except ValueError:
 					line = ''
 			W.write(line)
-
-os.rename(new_fname, fname)

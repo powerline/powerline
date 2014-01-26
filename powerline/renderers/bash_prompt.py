@@ -1,5 +1,7 @@
 # vim:fileencoding=utf-8:noet
 
+from __future__ import absolute_import, unicode_literals
+
 from powerline.renderers.shell import ShellRenderer
 
 
@@ -8,9 +10,10 @@ class BashPromptRenderer(ShellRenderer):
 	escape_hl_start = '\['
 	escape_hl_end = '\]'
 
-	@staticmethod
-	def escape(string):
-		return string.replace('\\', '\\\\').replace('$', '\\$').replace('`', '\\`')
+	character_translations = ShellRenderer.character_translations.copy()
+	character_translations[ord('$')] = '\\$'
+	character_translations[ord('`')] = '\\`'
+	character_translations[ord('\\')] = '\\\\'
 
 
 renderer = BashPromptRenderer

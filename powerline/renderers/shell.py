@@ -1,5 +1,7 @@
 # vim:fileencoding=utf-8:noet
 
+from __future__ import absolute_import, unicode_literals
+
 from powerline.renderer import Renderer
 from powerline.colorscheme import ATTR_BOLD, ATTR_ITALIC, ATTR_UNDERLINE
 
@@ -18,6 +20,8 @@ class ShellRenderer(Renderer):
 	term_truecolor = False
 	tmux_escape = False
 	screen_escape = False
+
+	character_translations = Renderer.character_translations.copy()
 
 	def hlstyle(self, fg=None, bg=None, attr=None):
 		'''Highlight a segment.
@@ -61,10 +65,6 @@ class ShellRenderer(Renderer):
 		elif self.screen_escape:
 			r = '\033P' + r.replace('\033', '\033\033') + '\033\\'
 		return self.escape_hl_start + r + self.escape_hl_end
-
-	@staticmethod
-	def escape(string):
-		return string.replace('\\', '\\\\')
 
 
 renderer = ShellRenderer
