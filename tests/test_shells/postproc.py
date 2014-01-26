@@ -41,4 +41,11 @@ with codecs.open(fname, 'r', encoding='utf-8') as R:
 					line = line[start : end+4] + '\n'
 				except ValueError:
 					line = ''
+			elif shell == 'tcsh':
+				try:
+					start = line.index('\033[0;')
+					end = line.index(' ', start)
+					line = line[start : end] + '\033[0m\n'
+				except ValueError:
+					line = ''
 			W.write(line)
