@@ -7,7 +7,7 @@ cd .git
 cd ..
 VIRTUAL_ENV="$HOME/.virtenvs/some-virtual-environment"
 VIRTUAL_ENV=
-bash -c "echo \$\$>pid ; while true ; do sleep 0.1s ; done" &
+bash -c 'echo $$>pid ; while true ; do sleep 0.1s ; done' &
 false
 kill `cat pid` ; sleep 1s
 cd "$DIR1"

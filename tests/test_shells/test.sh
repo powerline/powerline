@@ -86,5 +86,9 @@ if ! run_test fish -i ; then
 	FAILED=1
 fi
 
+if ! run_test tcsh -f -i ; then
+	FAILED=1
+fi
+
 test "x$ONLY_SHELL" = "x" && rm -r tests/shell
 exit $FAILED
