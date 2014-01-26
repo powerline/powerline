@@ -14,6 +14,14 @@
 		"hostname":           { "fg": "oldlace", "bg": "darkgreencopper" },
 		"exit_fail":          { "fg": "oldlace", "bg": "red" },
 		"exit_success":       { "fg": "oldlace", "bg": "green" },
-		"environment":        { "fg": "oldlace", "bg": "green" }
+		"environment":        { "fg": "oldlace", "bg": "green" },
+		"mode":               { "fg": "oldlace", "bg": "green", "attr": ["bold"] }
+	},
+	"mode_translations": {
+		"vicmd": {
+			"groups": {
+				"mode": { "fg": "oldlace", "bg": "blue", "attr": ["bold"] }
+			}
+		}
 	}
 }
