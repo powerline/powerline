@@ -61,7 +61,14 @@ test -d tests/shell && rm -r tests/shell
 mkdir tests/shell
 git init tests/shell/3rd
 git --git-dir=tests/shell/3rd/.git checkout -b BRANCH
+mkdir tests/shell/3rd/"$(printf '\x1b[32m')"
 mkdir tests/shell/3rd/"$(printf '\x08')"
+mkdir tests/shell/3rd/'\[\]'
+mkdir tests/shell/3rd/'%%'
+mkdir tests/shell/3rd/'#[bold]'
+mkdir tests/shell/3rd/'(echo)'
+mkdir tests/shell/3rd/'$(echo)'
+mkdir tests/shell/3rd/'`echo`'
 
 if ! run_test bash --norc --noprofile -i ; then
 	FAILED=1
