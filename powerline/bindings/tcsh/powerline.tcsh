@@ -16,6 +16,6 @@ if ! $?POWERLINE_COMMAND then
 endif
 alias _powerline_tmux_set_pwd 'if $?TMUX tmux setenv -g TMUX_PWD_`tmux display -p "#D" | tr -d %` $PWD:q ; if $?TMUX tmux refresh -S'
 alias _powerline_set_prompt 'set prompt="`$POWERLINE_COMMAND shell left -r zsh_prompt --last_exit_code=$?`"'
-alias _powerline_set_rprompt 'set rprompt="`$POWERLINE_COMMAND shell right -r zsh_prompt --last_exit_code=$?`"'
+alias _powerline_set_rprompt 'set rprompt="`$POWERLINE_COMMAND shell right -r zsh_prompt --last_exit_code=$?` "'
 alias cwdcmd "`alias cwdcmd` ; _powerline_tmux_set_pwd"
 alias precmd "`alias precmd` ; _powerline_set_prompt ; _powerline_set_rprompt"
