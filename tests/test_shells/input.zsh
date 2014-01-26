@@ -20,7 +20,7 @@ cd ../'(echo)'
 cd ../'$(echo)'
 cd ../'`echo`'
 cd ..
-POWERLINE_COMMAND=( $POWERLINE_COMMAND[1,5] ) ; bindkey -v
+POWERLINE_COMMAND=( $POWERLINE_COMMAND[1,4] ${${POWERLINE_COMMAND[5]}/_leftonly} ) ; bindkey -v
 
 
 echo abc
