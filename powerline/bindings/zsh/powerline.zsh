@@ -76,6 +76,9 @@ _powerline_add_widget() {
 			save_widget="${save_widget}_$i"
 			(( i++ ))
 		done
+		# If widget was defined with `zle -N widget` (without `function` 
+		# argument) then this function will be handy.
+		eval "function $save_widget() { emulate -L zsh; $widget \$@ }"
 		eval "${old_widget_command/$widget/$save_widget}"
 		zle -N $widget $function
 		export POWERLINE_SAVE_WIDGET="$save_widget"
