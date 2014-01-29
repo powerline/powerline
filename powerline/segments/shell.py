@@ -57,7 +57,7 @@ def mode(pl, segment_info, override={'vicmd': 'COMMND', 'viins': 'INSERT'}, defa
 	'''
 	mode = segment_info['mode']
 	if not mode:
-		pl.warn('No or empty POWERLINE_MODE variable')
+		pl.debug('No or empty POWERLINE_MODE variable')
 		return None
 	default = default or segment_info['environ'].get('POWERLINE_DEFAULT_MODE')
 	if mode == default:

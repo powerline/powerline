@@ -16,11 +16,11 @@ _powerline_tmux_setenv() {
 	fi
 }
 
-POWERLINE_SAVED_PWD=
+_POWERLINE_SAVED_PWD=
 
 _powerline_tmux_set_pwd() {
-	if test "x$POWERLINE_SAVED_PWD" != "x$PWD" ; then
-		POWERLINE_SAVED_PWD="$PWD"
+	if test "x$_POWERLINE_SAVED_PWD" != "x$PWD" ; then
+		_POWERLINE_SAVED_PWD="$PWD"
 		_powerline_tmux_setenv PWD "$PWD"
 	fi
 }
