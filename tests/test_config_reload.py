@@ -99,7 +99,7 @@ def sleep(interval):
 def add_watcher_events(p, *args, **kwargs):
 	p._watcher._reset(args)
 	while not p._will_create_renderer():
-		sleep(kwargs.get('interval', 0.000001))
+		sleep(kwargs.get('interval', 0.1))
 		if not kwargs.get('wait', True):
 			return
 
@@ -185,6 +185,13 @@ class TestConfigReload(TestCase):
 
 				config['config']['ext']['test']['colorscheme'] = 'nonexistentraise'
 				add_watcher_events(p, 'config')
+				# It may appear that p.logger._pop_msgs() is called after given 
+				# exception is added to the mesagges, but before config_loader 
+				# exception was added (this one: 
+				# “exception:test:config_loader:Error while running condition 
+				# function for key colorschemes/test/nonexistentraise: 
+				# fcf:colorschemes/test/nonexistentraise”).
+				# sleep(0.1)
 				self.assertEqual(p.render(), '<1 2 1> s<2 4 False>>><3 4 4>g<4 False False>>><None None None>')
 				self.assertAccessEvents('config')
 				self.assertIn('exception:test:powerline:Failed to create renderer: fcf:colorschemes/test/nonexistentraise', p.logger._pop_msgs())
