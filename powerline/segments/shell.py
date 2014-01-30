@@ -57,9 +57,9 @@ def mode(pl, segment_info, override={'vicmd': 'COMMND', 'viins': 'INSERT'}, defa
 	'''
 	mode = segment_info['mode']
 	if not mode:
-		pl.debug('No or empty POWERLINE_MODE variable')
+		pl.debug('No or empty _POWERLINE_MODE variable')
 		return None
-	default = default or segment_info['environ'].get('POWERLINE_DEFAULT_MODE')
+	default = default or segment_info['environ'].get('_POWERLINE_DEFAULT_MODE')
 	if mode == default:
 		return None
 	try:
@@ -68,7 +68,7 @@ def mode(pl, segment_info, override={'vicmd': 'COMMND', 'viins': 'INSERT'}, defa
 		# Note: with zsh line editor you can emulate as much modes as you wish. 
 		# Thus having unknown mode is not an error: maybe just some developer 
 		# added support for his own zle widgets. As there is no built-in mode() 
-		# function like in VimL and POWERLINE_MODE is likely be defined by our 
+		# function like in VimL and _POWERLINE_MODE is likely be defined by our 
 		# code or by somebody knowing what he is doing there is absolutely no 
 		# need in keeping translations dictionary.
 		return mode.upper()
