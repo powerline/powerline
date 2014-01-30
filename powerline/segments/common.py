@@ -1011,6 +1011,55 @@ class NowPlayingSegment(object):
 			'total': self._convert_seconds(info.get('mpris:length') / 1e6),
 		}
 
+	def player_spotify_mac(self, pl):
+		ascript = '''
+		tell application "System Events"
+			set process_list to (name of every process)
+		end tell
+
+		if process_list contains "Spotify" then
+			tell application "Spotify"
+				if player state is playing or player state is paused then
+					set track_name to name of current track
+					set artist_name to artist of current track
+					set album_name to album of current track
+					set track_length to duration of current track
+					set trim_length to 40
+					set now_playing to player state & album_name & artist_name & track_name & track_length
+					if length of now_playing is less than trim_length then
+						set now_playing_trim to now_playing
+					else
+						set now_playing_trim to characters 1 thru trim_length of now_playing as string
+					end if
+				else
+					return player state
+				end if
+
+			end tell
+		else
+			return "stopped"
+		end if
+		'''
+
+		spotify = asrun(ascript)
+
+		spotify_status = spotify.split(", ")
+		state = self._convert_state(spotify_status[0])
+		if state == 'stop':
+			return
+		colour = '#[fg=colour2,bg=colour232] '
+		if state == 'pause':
+			colour = '#[fg=white]'
+		return {
+			'state': state,
+			'state_symbol': colour + self.STATE_SYMBOLS.get(state) + "  #[default]",
+			'album': spotify_status[1],
+			'artist': "#[bold]" + spotify_status[2] +"#[default]",
+			'title': spotify_status[3],
+			'total': self._convert_seconds(int(spotify_status[4]))
+		}
+
+
 	def player_rhythmbox(self, pl):
 		now_playing = self._run_cmd(['rhythmbox-client', '--no-start', '--no-present', '--print-playing-format', '%at\n%aa\n%tt\n%te\n%td'])
 		if not now_playing:
@@ -1075,3 +1124,17 @@ def battery(pl, format='{batt:3.0%}', steps=5, gamify=False):
 			'gradient_level': batt * 100
 		})
 	return ret
+
+def asrun(ascript):
+  "Run the given AppleScript and return the standard output and error."
+  from subprocess import Popen, PIPE
+  osa = Popen(['osascript', '-'],
+                         stdin=PIPE,
+                         stdout=PIPE)
+  return osa.communicate(ascript)[0]
+
+def asquote(astr):
+  "Return the AppleScript equivalent of the given string."
+
+  astr = astr.replace('"', '" & quote & "')
+  return '"{}"'.format(astr)
