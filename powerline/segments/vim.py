@@ -9,7 +9,7 @@ except ImportError:
 	vim = {}  # NOQA
 
 from powerline.bindings.vim import (vim_get_func, getbufvar, vim_getbufoption,
-									buffer_name)
+									buffer_name, vim_getwinvar)
 from powerline.theme import requires_segment_info
 from powerline.lib import add_divider_highlight_group
 from powerline.lib.vcs import guess, tree_status
@@ -247,6 +247,20 @@ def file_type(pl, segment_info):
 	Divider highlight group used: ``background:divider``.
 	'''
 	return vim_getbufoption(segment_info, 'filetype') or None
+
+
+@requires_segment_info
+def window_title(pl, segment_info):
+	'''Return the window title.
+
+	This currently looks at the ``quickfix_title`` window variable,
+	which is used by Syntastic and Vim itself.
+
+	It is used in the quickfix theme.'''
+	try:
+		return vim_getwinvar(segment_info, 'quickfix_title')
+	except KeyError:
+		return None
 
 
 @requires_segment_info

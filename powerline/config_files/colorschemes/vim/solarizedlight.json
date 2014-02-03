@@ -14,6 +14,7 @@
 		"branch:divider":           { "fg": "gray61", "bg": "lightyellow" },
 		"file_directory":           { "fg": "royalblue5", "bg": "lightyellow" },
 		"file_name":                { "fg": "gray13", "bg": "lightyellow", "attr": ["bold"] },
+		"window_title":             { "fg": "gray13", "bg": "lightyellow" },
 		"file_size":                { "fg": "gray13", "bg": "lightyellow" },
 		"file_name_no_file":        { "fg": "gray13", "bg": "lightyellow", "attr": ["bold"] },
 		"file_name_empty":          { "fg": "gray13", "bg": "lightyellow" },

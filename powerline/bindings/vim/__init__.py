@@ -43,7 +43,7 @@ else:
 
 # It may crash on some old vim versions and I do not remember in which patch 
 # I fixed this crash.
-if hasattr(vim, 'vars') and vim.vvars['version'] > 703:
+if hasattr(vim, 'vvars') and vim.vvars['version'] > 703:
 	_vim_to_python_types = {
 		vim.Dictionary: lambda value: dict(((key, _vim_to_python(value[key])) for key in value.keys())),
 		vim.List: lambda value: [_vim_to_python(item) for item in value],
@@ -57,6 +57,13 @@ if hasattr(vim, 'vars') and vim.vvars['version'] > 703:
 
 	def vim_getvar(varname):
 		return _vim_to_python(vim.vars[str(varname)])
+
+	def bufvar_exists(buffer, varname):
+		buffer = buffer or vim.current.buffer
+		return varname in buffer.vars
+
+	def vim_getwinvar(segment_info, varname):
+		return _vim_to_python(segment_info['window'].vars[str(varname)])
 else:
 	_vim_exists = vim_get_func('exists', rettype=int)
 
@@ -67,17 +74,19 @@ else:
 		else:
 			raise KeyError(varname)
 
-if hasattr(vim, 'vars') and vim.vvars['version'] > 703:
-	def bufvar_exists(buffer, varname):
-		buffer = buffer or vim.current.buffer
-		return varname in buffer.vars
-else:
 	def bufvar_exists(buffer, varname):  # NOQA
 		if not buffer or buffer.number == vim.current.buffer.number:
 			return vim.eval('exists("b:{0}")'.format(varname))
 		else:
 			return vim.eval('has_key(getbufvar({0}, ""), {1})'
 							.format(buffer.number, varname))
+
+	def vim_getwinvar(segment_info, varname):  # NOQA
+		result = vim.eval('getwinvar({0}, "{1}")'.format(segment_info['winnr'], varname))
+		if result == '':
+			if not int(vim.eval('has_key(getwinvar({0}, ""), "{1}")'.format(segment_info['winnr'], varname))):
+				raise KeyError(varname)
+		return result
 
 if hasattr(vim, 'options'):
 	def vim_getbufoption(info, option):
