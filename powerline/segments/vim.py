@@ -9,7 +9,7 @@ except ImportError:
 	vim = {}  # NOQA
 
 from powerline.bindings.vim import (vim_get_func, getbufvar, vim_getbufoption,
-									buffer_name)
+									buffer_name, vim_getwinvar)
 from powerline.theme import requires_segment_info
 from powerline.lib import add_divider_highlight_group
 from powerline.lib.vcs import guess, tree_status
@@ -258,7 +258,7 @@ def window_title(pl, segment_info):
 
 	It is used in the quickfix theme.'''
 	try:
-		return segment_info['window'].vars['quickfix_title']
+		return vim_getwinvar(segment_info, 'quickfix_title')
 	except KeyError:
 		return None
 
