@@ -890,13 +890,13 @@ class NowPlayingSegment(object):
 		return format.format(**stats)
 
 	@staticmethod
-	def _run_cmd(cmd):
+	def _run_cmd(pl, cmd):
 		from subprocess import Popen, PIPE
 		try:
 			p = Popen(cmd, stdout=PIPE)
 			stdout, err = p.communicate()
 		except OSError as e:
-			sys.stderr.write('Could not execute command ({0}): {1}\n'.format(e, cmd))
+			pl.exception('Could not execute command ({0}): {1}'.format(e, cmd))
 			return None
 		return stdout.strip()
 
@@ -934,7 +934,7 @@ class NowPlayingSegment(object):
 		method takes anything in ignore_levels and brings the key inside that
 		to the first level of the dictionary.
 		'''
-		now_playing_str = self._run_cmd(['cmus-remote', '-Q'])
+		now_playing_str = self._run_cmd(pl, ['cmus-remote', '-Q'])
 		if not now_playing_str:
 			return
 		ignore_levels = ('tag', 'set',)
@@ -973,7 +973,7 @@ class NowPlayingSegment(object):
 				'total': self._convert_seconds(now_playing.get('time', 0)),
 			}
 		except ImportError:
-			now_playing = self._run_cmd(['mpc', 'current', '-f', '%album%\n%artist%\n%title%\n%time%', '-h', str(host), '-p', str(port)])
+			now_playing = self._run_cmd(pl, ['mpc', 'current', '-f', '%album%\n%artist%\n%title%\n%time%', '-h', str(host), '-p', str(port)])
 			if not now_playing:
 				return
 			now_playing = now_playing.split('\n')
@@ -988,7 +988,7 @@ class NowPlayingSegment(object):
 		try:
 			import dbus
 		except ImportError:
-			sys.stderr.write('Could not add Spotify segment: Requires python-dbus.\n')
+			pl.exception('Could not add Spotify segment: requires python-dbus.')
 			return
 		bus = dbus.SessionBus()
 		DBUS_IFACE_PROPERTIES = 'org.freedesktop.DBus.Properties'
@@ -1068,7 +1068,7 @@ class NowPlayingSegment(object):
 		player_spotify = player_spotify_dbus  # NOQA
 
 	def player_rhythmbox(self, pl):
-		now_playing = self._run_cmd(['rhythmbox-client', '--no-start', '--no-present', '--print-playing-format', '%at\n%aa\n%tt\n%te\n%td'])
+		now_playing = self._run_cmd(pl, ['rhythmbox-client', '--no-start', '--no-present', '--print-playing-format', '%at\n%aa\n%tt\n%te\n%td'])
 		if not now_playing:
 			return
 		now_playing = now_playing.split('\n')
