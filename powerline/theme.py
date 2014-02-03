@@ -51,7 +51,7 @@ class Theme(object):
 				if not run_once:
 					if segment['startup']:
 						try:
-							segment['startup'](pl=pl, shutdown_event=shutdown_event, **segment['args'])
+							segment['startup'](pl, shutdown_event)
 						except Exception as e:
 							pl.error('Exception during {0} startup: {1}', segment['name'], str(e))
 							continue
@@ -84,11 +84,7 @@ class Theme(object):
 				if segment['type'] == 'function':
 					self.pl.prefix = segment['name']
 					try:
-						if (hasattr(segment['contents_func'], 'powerline_requires_segment_info')
-								and segment['contents_func'].powerline_requires_segment_info):
-							contents = segment['contents_func'](pl=self.pl, segment_info=segment_info, **segment['args'])
-						else:
-							contents = segment['contents_func'](pl=self.pl, **segment['args'])
+						contents = segment['contents_func'](self.pl, segment_info)
 					except Exception as e:
 						self.pl.exception('Exception while computing segment: {0}', str(e))
 						continue

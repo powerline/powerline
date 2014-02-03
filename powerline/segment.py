@@ -63,7 +63,7 @@ def gen_segment_getter(pl, ext, path, theme_configs, default_module=None):
 			raise TypeError('Unknown segment type: {0}'.format(segment_type))
 
 		try:
-			contents, contents_func, module = get_segment_info(data, segment)
+			contents, _contents_func, module = get_segment_info(data, segment)
 		except Exception as e:
 			pl.exception('Failed to generate segment from {0!r}: {1}', segment, str(e), prefix='segment_generator')
 			return None
@@ -72,6 +72,23 @@ def gen_segment_getter(pl, ext, path, theme_configs, default_module=None):
 			highlight_group = [module + '.' + segment['name'], segment['name']]
 		else:
 			highlight_group = segment.get('highlight_group') or segment.get('name')
+
+		if segment_type == 'function':
+			args = dict(((str(k), v) for k, v in get_key(segment, module, 'args', {}).items()))
+			try:
+				_startup_func = _contents_func.startup
+			except AttributeError:
+				startup_func = None
+			else:
+				startup_func = lambda pl, shutdown_event: _startup_func(pl=pl, shutdown_event=shutdown_event, **args)
+
+			if hasattr(_contents_func, 'powerline_requires_segment_info'):
+				contents_func = lambda pl, segment_info: _contents_func(pl=pl, segment_info=segment_info, **args)
+			else:
+				contents_func = lambda pl, segment_info: _contents_func(pl=pl, **args)
+		else:
+			startup_func = None
+			contents_func = None
 
 		return {
 			'name': segment.get('name'),
@@ -82,7 +99,7 @@ def gen_segment_getter(pl, ext, path, theme_configs, default_module=None):
 			'after': get_key(segment, module, 'after', ''),
 			'contents_func': contents_func,
 			'contents': contents,
-			'args': get_key(segment, module, 'args', {}) if segment_type == 'function' else {},
+			'args': args if segment_type == 'function' else {},
 			'priority': segment.get('priority', None),
 			'draw_hard_divider': segment.get('draw_hard_divider', True),
 			'draw_soft_divider': segment.get('draw_soft_divider', True),
@@ -93,7 +110,7 @@ def gen_segment_getter(pl, ext, path, theme_configs, default_module=None):
 			'width': segment.get('width'),
 			'align': segment.get('align', 'l'),
 			'shutdown': getattr(contents_func, 'shutdown', None),
-			'startup': getattr(contents_func, 'startup', None),
+			'startup': startup_func,
 			'_rendered_raw': '',
 			'_rendered_hl': '',
 			'_len': 0,
