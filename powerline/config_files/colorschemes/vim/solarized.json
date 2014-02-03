@@ -14,6 +14,7 @@
 		"branch:divider":           { "fg": "gray61", "bg": "darkgreencopper" },
 		"file_directory":           { "fg": "lightyellow", "bg": "darkgreencopper" },
 		"file_name":                { "fg": "oldlace", "bg": "darkgreencopper", "attr": ["bold"] },
+		"window_title":             { "fg": "oldlace", "bg": "darkgreencopper" },
 		"file_size":                { "fg": "oldlace", "bg": "darkgreencopper" },
 		"file_name_no_file":        { "fg": "oldlace", "bg": "darkgreencopper", "attr": ["bold"] },
 		"file_name_empty":          { "fg": "oldlace", "bg": "darkgreencopper" },
