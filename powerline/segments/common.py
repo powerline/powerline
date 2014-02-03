@@ -10,6 +10,7 @@ import socket
 from multiprocessing import cpu_count as _cpu_count
 
 from powerline.lib import add_divider_highlight_group
+from powerline.lib.apple_script_runner import asrun, asquote
 from powerline.lib.url import urllib_read, urllib_urlencode
 from powerline.lib.vcs import guess, tree_status
 from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment, with_docstring
@@ -1009,6 +1010,51 @@ class NowPlayingSegment(object):
 			'artist': info.get('xesam:artist')[0],
 			'title': info.get('xesam:title'),
 			'total': self._convert_seconds(info.get('mpris:length') / 1e6),
+		}
+
+	def player_spotify_mac(self, pl):
+		ascript = '''
+		tell application "System Events"
+			set process_list to (name of every process)
+		end tell
+
+		if process_list contains "Spotify" then
+			tell application "Spotify"
+				if player state is playing or player state is paused then
+					set track_name to name of current track
+					set artist_name to artist of current track
+					set album_name to album of current track
+					set track_length to duration of current track
+					set trim_length to 40
+					set now_playing to player state & album_name & artist_name & track_name & track_length
+					if length of now_playing is less than trim_length then
+						set now_playing_trim to now_playing
+					else
+						set now_playing_trim to characters 1 thru trim_length of now_playing as string
+					end if
+				else
+					return player state
+				end if
+
+			end tell
+		else
+			return "stopped"
+		end if
+		'''
+
+		spotify = asrun(ascript)
+
+		spotify_status = spotify.split(", ")
+		state = self._convert_state(spotify_status[0])
+		if state == 'stop':
+			return
+		return {
+			'state': state,
+			'state_symbol': self.STATE_SYMBOLS.get(state),
+			'album': spotify_status[1],
+			'artist': spotify_status[2],
+			'title': spotify_status[3],
+			'total': self._convert_seconds(int(spotify_status[4]))
 		}
 
 	def player_rhythmbox(self, pl):
