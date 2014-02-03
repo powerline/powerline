@@ -1032,11 +1032,13 @@ class NowPlayingSegment(object):
 		'''
 
 		spotify = asrun(pl, ascript)
+		if not asrun:
+			return None
 
 		spotify_status = spotify.split(", ")
 		state = self._convert_state(spotify_status[0])
 		if state == 'stop':
-			return
+			return None
 		return {
 			'state': state,
 			'state_symbol': self.STATE_SYMBOLS.get(state),
