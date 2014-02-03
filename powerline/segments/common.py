@@ -10,7 +10,7 @@ import socket
 from multiprocessing import cpu_count as _cpu_count
 
 from powerline.lib import add_divider_highlight_group
-from powerline.lib.apple_script_runner import asrun, asquote
+from powerline.lib.shell import asrun, run_cmd
 from powerline.lib.url import urllib_read, urllib_urlencode
 from powerline.lib.vcs import guess, tree_status
 from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment, with_docstring
@@ -890,17 +890,6 @@ class NowPlayingSegment(object):
 		return format.format(**stats)
 
 	@staticmethod
-	def _run_cmd(pl, cmd):
-		from subprocess import Popen, PIPE
-		try:
-			p = Popen(cmd, stdout=PIPE)
-			stdout, err = p.communicate()
-		except OSError as e:
-			pl.exception('Could not execute command ({0}): {1}'.format(e, cmd))
-			return None
-		return stdout.strip()
-
-	@staticmethod
 	def _convert_state(state):
 		state = state.lower()
 		if 'play' in state:
@@ -934,7 +923,7 @@ class NowPlayingSegment(object):
 		method takes anything in ignore_levels and brings the key inside that
 		to the first level of the dictionary.
 		'''
-		now_playing_str = self._run_cmd(pl, ['cmus-remote', '-Q'])
+		now_playing_str = run_cmd(pl, ['cmus-remote', '-Q'])
 		if not now_playing_str:
 			return
 		ignore_levels = ('tag', 'set',)
@@ -973,7 +962,7 @@ class NowPlayingSegment(object):
 				'total': self._convert_seconds(now_playing.get('time', 0)),
 			}
 		except ImportError:
-			now_playing = self._run_cmd(pl, ['mpc', 'current', '-f', '%album%\n%artist%\n%title%\n%time%', '-h', str(host), '-p', str(port)])
+			now_playing = run_cmd(pl, ['mpc', 'current', '-f', '%album%\n%artist%\n%title%\n%time%', '-h', str(host), '-p', str(port)])
 			if not now_playing:
 				return
 			now_playing = now_playing.split('\n')
@@ -1042,12 +1031,14 @@ class NowPlayingSegment(object):
 		end if
 		'''
 
-		spotify = asrun(ascript)
+		spotify = asrun(pl, ascript)
+		if not asrun:
+			return None
 
 		spotify_status = spotify.split(", ")
 		state = self._convert_state(spotify_status[0])
 		if state == 'stop':
-			return
+			return None
 		return {
 			'state': state,
 			'state_symbol': self.STATE_SYMBOLS.get(state),
@@ -1068,7 +1059,7 @@ class NowPlayingSegment(object):
 		player_spotify = player_spotify_dbus  # NOQA
 
 	def player_rhythmbox(self, pl):
-		now_playing = self._run_cmd(pl, ['rhythmbox-client', '--no-start', '--no-present', '--print-playing-format', '%at\n%aa\n%tt\n%te\n%td'])
+		now_playing = run_cmd(pl, ['rhythmbox-client', '--no-start', '--no-present', '--print-playing-format', '%at\n%aa\n%tt\n%te\n%td'])
 		if not now_playing:
 			return
 		now_playing = now_playing.split('\n')
