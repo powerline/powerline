@@ -10,7 +10,7 @@ import socket
 from multiprocessing import cpu_count as _cpu_count
 
 from powerline.lib import add_divider_highlight_group
-from powerline.lib.shell import asrun, asquote, run_cmd
+from powerline.lib.shell import asrun, run_cmd
 from powerline.lib.url import urllib_read, urllib_urlencode
 from powerline.lib.vcs import guess, tree_status
 from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment, with_docstring
