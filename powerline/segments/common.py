@@ -1077,6 +1077,12 @@ if os.path.exists('/sys/class/power_supply/BAT0/capacity'):
 	def _get_capacity():
 		with open('/sys/class/power_supply/BAT0/capacity', 'r') as f:
 			return int(float(f.readline().split()[0]))
+elif os.path.exists('/usr/bin/pmset'):
+	import subprocess
+	import re
+	def _get_capacity():
+		return int(re.findall(r'\d+(?=\%)',
+			subprocess.check_output('/usr/bin/pmset -g batt', shell=True))[0])
 else:
 	def _get_capacity():
 		raise NotImplementedError
