@@ -11,7 +11,7 @@ def run_cmd(pl, cmd, stdin=None):
 		return None
 	else:
 		stdout, err = p.communicate(stdin)
-	return stdout.strip()
+	return stdout.strip().decode('utf-8')
 
 
 def asrun(pl, ascript):
