@@ -1,5 +1,5 @@
 {
-	"name": "Solarized Light",
+	"name": "Solarized light for vim",
 	"groups": {
 		"background":               { "fg": "gray13", "bg": "darkgreencopper" },
 		"background:divider":       { "fg": "azure4", "bg": "darkgreencopper" },
