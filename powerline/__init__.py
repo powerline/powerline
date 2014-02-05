@@ -494,6 +494,8 @@ class Powerline(object):
 			else:
 				if not cfg_path.endswith('__'):
 					loaded += 1
+				# TODO Either make sure `attr` list is always present or make 
+				# mergedicts not merge group definitions.
 				mergedicts(config, lvl_config)
 		if not loaded:
 			for exception in exceptions:
