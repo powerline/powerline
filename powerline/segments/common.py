@@ -1077,6 +1077,13 @@ if os.path.exists('/sys/class/power_supply/BAT0/capacity'):
 	def _get_capacity():
 		with open('/sys/class/power_supply/BAT0/capacity', 'r') as f:
 			return int(float(f.readline().split()[0]))
+elif os.path.exists('/usr/bin/pmset'):
+	def _get_capacity():
+		import re
+		import subprocess
+		battery_summary = subprocess.check_output(['pmset', '-g', 'batt']).decode('utf8')
+		batt_percent = re.search(r'\d+%', battery_summary).group(0)
+		return int(batt_percent.replace('%', ''))
 else:
 	def _get_capacity():
 		raise NotImplementedError
