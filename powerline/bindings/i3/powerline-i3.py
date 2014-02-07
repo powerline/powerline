@@ -25,12 +25,11 @@ lock = Lock()
 
 def render( event=None, data=None, sub=None ):
 	global lock
-	lock.acquire()
-	s  = '[\n' + powerline.render(side='right')[:-2] + '\n]\n'
-	s += ',[\n' + powerline.render(side='left' )[:-2] + '\n]'
-	print ',[\n' + s + '\n]'
-	sys.stdout.flush()
-	lock.release()
+	with lock:
+		s  = '[\n' + powerline.render(side='right')[:-2] + '\n]\n'
+		s += ',[\n' + powerline.render(side='left' )[:-2] + '\n]'
+		print ',[\n' + s + '\n]'
+		sys.stdout.flush()
 
 sub = i3.Subscription( render, 'workspace' )
 
