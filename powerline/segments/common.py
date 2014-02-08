@@ -91,7 +91,7 @@ def cwd(pl, segment_info, dir_shorten_len=None, dir_limit_depth=None, use_path_s
 	'''
 	import re
 	try:
-		cwd = segment_info['getcwd']()
+		cwd = segment_info['getcwd']().decode('utf-8')
 	except OSError as e:
 		if e.errno == 2:
 			# user most probably deleted the directory
