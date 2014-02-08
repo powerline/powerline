@@ -386,7 +386,7 @@ class TestCommon(TestCase):
 	def test_battery(self):
 		pl = Pl()
 
-		def _get_capacity():
+		def _get_capacity(pl):
 			return 86
 
 		with replace_attr(common, '_get_capacity', _get_capacity):

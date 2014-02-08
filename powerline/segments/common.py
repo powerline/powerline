@@ -1076,11 +1076,17 @@ now_playing = NowPlayingSegment()
 
 
 if os.path.exists('/sys/class/power_supply/BAT0/capacity'):
-	def _get_capacity():
+	def _get_capacity(pl):
 		with open('/sys/class/power_supply/BAT0/capacity', 'r') as f:
 			return int(float(f.readline().split()[0]))
+elif os.path.exists('/usr/bin/pmset'):
+	def _get_capacity(pl):
+		import re
+		battery_summary = run_cmd(pl, ['pmset', '-g', 'batt'])
+		battery_percent = re.search(r'(\d+)%', battery_summary).group(1)
+		return int(battery_percent)
 else:
-	def _get_capacity():
+	def _get_capacity(pl):
 		raise NotImplementedError
 
 
@@ -1095,7 +1101,7 @@ def battery(pl, format='{batt:3.0%}', steps=5, gamify=False):
 	Highlight groups used: ``battery_gradient`` (gradient), ``battery``.
 	'''
 	try:
-		capacity = _get_capacity()
+		capacity = _get_capacity(pl)
 	except NotImplementedError:
 		pl.warn('Unable to get battery capacity.')
 		return None
