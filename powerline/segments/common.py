@@ -4,6 +4,7 @@ from __future__ import unicode_literals, absolute_import
 
 import os
 import sys
+import re
 
 from datetime import datetime
 import socket
@@ -89,7 +90,6 @@ def cwd(pl, segment_info, dir_shorten_len=None, dir_limit_depth=None, use_path_s
 
 	Highlight groups used: ``cwd:current_folder`` or ``cwd``. It is recommended to define all highlight groups.
 	'''
-	import re
 	try:
 		cwd = segment_info['getcwd']()
 	except OSError as e:
@@ -672,7 +672,6 @@ def uptime(pl, days_format='{days:d}d', hours_format=' {hours:d}h', minutes_form
 
 
 class NetworkLoadSegment(KwThreadedSegment):
-	import re
 	interfaces = {}
 	replace_num_pat = re.compile(r'[a-zA-Z]+')
 
@@ -815,14 +814,14 @@ class EmailIMAPSegment(KwThreadedSegment):
 			return None
 		try:
 			import imaplib
-			import re
+		except imaplib.IMAP4.error as e:
+			unread_count = str(e)
+		else:
 			mail = imaplib.IMAP4_SSL(key.server, key.port)
 			mail.login(key.username, key.password)
 			rc, message = mail.status(key.folder, '(UNSEEN)')
 			unread_str = message[0].decode('utf-8')
 			unread_count = int(re.search('UNSEEN (\d+)', unread_str).group(1))
-		except imaplib.IMAP4.error as e:
-			unread_count = str(e)
 		return unread_count
 
 	@staticmethod
@@ -944,6 +943,18 @@ class NowPlayingSegment(object):
 	def player_mpd(self, pl, host='localhost', port=6600):
 		try:
 			import mpd
+		except ImportError:
+			now_playing = run_cmd(pl, ['mpc', 'current', '-f', '%album%\n%artist%\n%title%\n%time%', '-h', str(host), '-p', str(port)])
+			if not now_playing:
+				return
+			now_playing = now_playing.split('\n')
+			return {
+				'album': now_playing[0],
+				'artist': now_playing[1],
+				'title': now_playing[2],
+				'total': now_playing[3],
+			}
+		else:
 			client = mpd.MPDClient()
 			client.connect(host, port)
 			now_playing = client.currentsong()
@@ -960,17 +971,6 @@ class NowPlayingSegment(object):
 				'title': now_playing.get('title'),
 				'elapsed': self._convert_seconds(now_playing.get('elapsed', 0)),
 				'total': self._convert_seconds(now_playing.get('time', 0)),
-			}
-		except ImportError:
-			now_playing = run_cmd(pl, ['mpc', 'current', '-f', '%album%\n%artist%\n%title%\n%time%', '-h', str(host), '-p', str(port)])
-			if not now_playing:
-				return
-			now_playing = now_playing.split('\n')
-			return {
-				'album': now_playing[0],
-				'artist': now_playing[1],
-				'title': now_playing[2],
-				'total': now_playing[3],
 			}
 
 	def player_spotify_dbus(self, pl, dbus=None):
