@@ -1,19 +1,7 @@
 # vim:fileencoding=utf-8:noet
 
-from .segment import gen_segment_getter
-
-
-try:
-	from __builtin__ import unicode
-except ImportError:
-	unicode = str  # NOQA
-
-
-def u(s):
-	if type(s) is unicode:
-		return s
-	else:
-		return unicode(s, 'utf-8')
+from powerline.segment import gen_segment_getter
+from powerline.lib.unicode import u, unicode
 
 
 def requires_segment_info(func):
