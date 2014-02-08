@@ -1090,7 +1090,7 @@ else:
 		raise NotImplementedError
 
 
-def battery(pl, format='{batt:3.0%}', steps=100, gamify=False):
+def battery(pl, format='{batt:3.0%}', steps=5, gamify=False):
 	'''Return battery charge status.
 
 	:param int steps:
