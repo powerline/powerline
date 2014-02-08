@@ -101,8 +101,9 @@ def cwd(pl, segment_info, dir_shorten_len=None, dir_limit_depth=None, use_path_s
 			cwd = "[not found]"
 		else:
 			raise
-	home = u(segment_info['home'])
+	home = segment_info['home']
 	if home:
+		home = u(home)
 		cwd = re.sub('^' + re.escape(home), '~', cwd, 1)
 	cwd_split = cwd.split(os.sep)
 	cwd_split_len = len(cwd_split)
