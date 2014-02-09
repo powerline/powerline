@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # vim:fileencoding=utf-8:noet
+from __future__ import print_function
 
 from powerline import Powerline
 from powerline.lib.monotonic import monotonic
@@ -17,9 +18,9 @@ powerline.update_renderer()
 
 interval = 0.5
 
-print '{"version": 1, "custom_workspace": true}'
-print '['
-print '	[[],[]]'
+print( '{"version": 1, "custom_workspace": true}' )
+print( '[' )
+print( '	[[],[]]' )
 
 lock = Lock()
 
@@ -28,7 +29,7 @@ def render( event=None, data=None, sub=None ):
 	with lock:
 		s  = '[\n' + powerline.render(side='right')[:-2] + '\n]\n'
 		s += ',[\n' + powerline.render(side='left' )[:-2] + '\n]'
-		print ',[\n' + s + '\n]'
+		print( ',[\n' + s + '\n]' )
 		sys.stdout.flush()
 
 sub = i3.Subscription( render, 'workspace' )
