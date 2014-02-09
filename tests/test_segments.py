@@ -386,25 +386,29 @@ class TestCommon(TestCase):
 	def test_battery(self):
 		pl = Pl()
 
+		battery_capacity = 86
 		def _get_capacity(pl):
-			return 86
+			return battery_capacity
 
 		with replace_attr(common, '_get_capacity', _get_capacity):
 			self.assertEqual(common.battery(pl=pl), [{
-				'contents': '80%',
+				'contents': '86%',
 				'highlight_group': ['battery_gradient', 'battery'],
-				'gradient_level': 80.0
+				'gradient_level': 86.0
 			}])
+
 			self.assertEqual(common.battery(pl=pl, format='{batt:.2f}'), [{
-				'contents': '0.80',
+				'contents': '0.86',
 				'highlight_group': ['battery_gradient', 'battery'],
-				'gradient_level': 80.0
+				'gradient_level': 86.0
 			}])
+
 			self.assertEqual(common.battery(pl=pl, steps=7), [{
 				'contents': '86%',
 				'highlight_group': ['battery_gradient', 'battery'],
 				'gradient_level': 85.71428571428571
 			}])
+
 			self.assertEqual(common.battery(pl=pl, gamify=True), [
 				{
 					'contents': '♥♥♥♥',
@@ -419,6 +423,47 @@ class TestCommon(TestCase):
 					'gradient_level': 1
 				}
 			])
+
+			# Display and gradient should be calculated properly
+			testformat='{batt:3.0%}'
+			for steps in [5, 25, 50, 75, 86, 100]:
+				for battery_capacity in xrange(100):
+					lerp = (steps * battery_capacity / 100)
+					fraction = lerp/float(steps)
+					self.assertEqual(common.battery(pl=pl, format=testformat, steps=steps), [{
+						'contents': testformat.format(batt=fraction),
+						'highlight_group': ['battery_gradient', 'battery'],
+						'gradient_level': fraction * 100
+					}])
+
+			# Steps should default to 100 for percentage display
+			battery_capacity = 1
+			self.assertEqual(common.battery(pl=pl), [{
+				'contents': ' 1%',
+				'highlight_group': ['battery_gradient', 'battery'],
+				'gradient_level': 1
+			}])
+			battery_capacity = 100
+			self.assertEqual(common.battery(pl=pl), [{
+				'contents': '100%',
+				'highlight_group': ['battery_gradient', 'battery'],
+				'gradient_level': 100
+			}])
+
+			# Steps should default to 5 with gamify
+			battery_capacity=100
+			self.assertEqual(common.battery(pl=pl, gamify=True), [{
+				'contents': '♥♥♥♥♥',
+				'draw_soft_divider': False,
+				'highlight_group': ['battery_gradient', 'battery'],
+				'gradient_level': 99
+			},
+			{
+				'contents': '',
+				'draw_soft_divider': False,
+				'highlight_group': ['battery_gradient', 'battery'],
+				'gradient_level': 1
+			}])
 
 class TestVim(TestCase):
 	def test_mode(self):
