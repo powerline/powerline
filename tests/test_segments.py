@@ -391,30 +391,44 @@ class TestCommon(TestCase):
 
 		with replace_attr(common, '_get_capacity', _get_capacity):
 			self.assertEqual(common.battery(pl=pl), [{
-				'contents': '80%',
+				'contents': '86%',
 				'highlight_group': ['battery_gradient', 'battery'],
-				'gradient_level': 80.0
+				'gradient_level': 86
 			}])
-			self.assertEqual(common.battery(pl=pl, format='{batt:.2f}'), [{
-				'contents': '0.80',
+			self.assertEqual(common.battery(pl=pl, format='{capacity:.2f}'), [{
+				'contents': '0.86',
 				'highlight_group': ['battery_gradient', 'battery'],
-				'gradient_level': 80.0
+				'gradient_level': 86
 			}])
 			self.assertEqual(common.battery(pl=pl, steps=7), [{
 				'contents': '86%',
 				'highlight_group': ['battery_gradient', 'battery'],
-				'gradient_level': 85.71428571428571
+				'gradient_level': 86
 			}])
 			self.assertEqual(common.battery(pl=pl, gamify=True), [
 				{
 					'contents': '♥♥♥♥',
-					'draw_soft_divider': False,
+					'draw_inner_divider': False,
 					'highlight_group': ['battery_gradient', 'battery'],
 					'gradient_level': 99
 				},
 				{
 					'contents': '♥',
-					'draw_soft_divider': False,
+					'draw_inner_divider': False,
+					'highlight_group': ['battery_gradient', 'battery'],
+					'gradient_level': 1
+				}
+			])
+			self.assertEqual(common.battery(pl=pl, gamify=True, full_heart='+', empty_heart='-', steps='10'), [
+				{
+					'contents': '++++++++',
+					'draw_inner_divider': False,
+					'highlight_group': ['battery_gradient', 'battery'],
+					'gradient_level': 99
+				},
+				{
+					'contents': '--',
+					'draw_inner_divider': False,
 					'highlight_group': ['battery_gradient', 'battery'],
 					'gradient_level': 1
 				}

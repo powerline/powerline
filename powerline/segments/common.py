@@ -1,6 +1,6 @@
 # vim:fileencoding=utf-8:noet
 
-from __future__ import unicode_literals, absolute_import
+from __future__ import unicode_literals, absolute_import, division
 
 import os
 import sys
@@ -1090,13 +1090,21 @@ else:
 		raise NotImplementedError
 
 
-def battery(pl, format='{batt:3.0%}', steps=5, gamify=False):
+def battery(pl, format='{capacity:3.0%}', steps=5, gamify=False, full_heart='♥', empty_heart='♥'):
 	'''Return battery charge status.
 
+	:param str format:
+		Percent format in case gamify is False.
 	:param int steps:
-		number of discrete steps to show between 0% and 100% capacity
+		Number of discrete steps to show between 0% and 100% capacity if gamify
+		is True.
 	:param bool gamify:
-		measure in hearts (♥) instead of percentages
+		Measure in hearts (♥) instead of percentages.
+	:param str full_heart:
+		Heart displayed for “full” part of battery.
+	:param str empty_heart:
+		Heart displayed for “used” part of battery. It is also displayed using
+		another gradient level, so it is OK for it to be the same as full_heart.
 
 	Highlight groups used: ``battery_gradient`` (gradient), ``battery``.
 	'''
@@ -1106,27 +1114,25 @@ def battery(pl, format='{batt:3.0%}', steps=5, gamify=False):
 		pl.warn('Unable to get battery capacity.')
 		return None
 	ret = []
-	denom = int(steps)
-	numer = int(denom * capacity / 100)
-	full_heart = '♥'
 	if gamify:
+		denom = int(steps)
+		numer = int(denom * capacity / 100)
 		ret.append({
 			'contents': full_heart * numer,
-			'draw_soft_divider': False,
+			'draw_inner_divider': False,
 			'highlight_group': ['battery_gradient', 'battery'],
-			'gradient_level': 99
+			'gradient_level': 99,
 		})
 		ret.append({
-			'contents': full_heart * (denom - numer),
-			'draw_soft_divider': False,
+			'contents': empty_heart * (denom - numer),
+			'draw_inner_divider': False,
 			'highlight_group': ['battery_gradient', 'battery'],
-			'gradient_level': 1
+			'gradient_level': 1,
 		})
 	else:
-		batt = numer / float(denom)
 		ret.append({
-			'contents': format.format(batt=batt),
+			'contents': format.format(capacity=(capacity / 100.0)),
 			'highlight_group': ['battery_gradient', 'battery'],
-			'gradient_level': batt * 100
+			'gradient_level': capacity,
 		})
 	return ret
