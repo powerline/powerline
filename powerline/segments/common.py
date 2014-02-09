@@ -1090,7 +1090,7 @@ else:
 		raise NotImplementedError
 
 
-def battery(pl, format='{batt:3.0%}', steps=5, gamify=False):
+def battery(pl, format='{batt:3.0%}', steps=0, gamify=False):
 	'''Return battery charge status.
 
 	:param int steps:
@@ -1105,6 +1105,15 @@ def battery(pl, format='{batt:3.0%}', steps=5, gamify=False):
 	except NotImplementedError:
 		pl.warn('Unable to get battery capacity.')
 		return None
+
+	# If steps is not specified
+	# default to 5 for gamify or 100 for percentages
+	if steps == 0:
+		if gamify:
+			steps = 5
+		else:
+			steps = 100
+	
 	ret = []
 	denom = int(steps)
 	numer = int(denom * capacity / 100)
