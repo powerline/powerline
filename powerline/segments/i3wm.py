@@ -4,10 +4,11 @@ from powerline.theme import requires_segment_info
 import i3
 
 def calcgrp( w ):
-	group = ["workspace"]
+	group = []
+	if w['focused']: group.append( 'w_focused' )
 	if w['urgent']: group.append( 'w_urgent' )
 	if w['visible']: group.append( 'w_visible' )
-	if w['focused']: return "w_focused"
+	group.append( 'workspace' )
 	return group
 
 def workspaces( pl ):
