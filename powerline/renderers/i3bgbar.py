@@ -23,16 +23,7 @@ class i3bgbarRenderer(Renderer):
 		if bg is not None:
 			if bg is not False and bg[1] is not False:
 				segment['background_color'] = "#{0:06x}".format(bg[1])
-		"""
-		if attr is not None and attr is not False:
-			if attr & ATTR_BOLD:
-				awesome_attr += ['font_weight="bold"']
-			if attr & ATTR_ITALIC:
-				awesome_attr += ['font_style="italic"']
-			if attr & ATTR_UNDERLINE:
-				awesome_attr += ['underline="single"']
-		"""
-		return json.dumps( segment ) + ",\n"
+		return json.dumps( segment ) + ",\n" # i3bar "pseudo json" requires one line at a time
 
 
 renderer = i3bgbarRenderer
