@@ -300,7 +300,7 @@ weather_conditions_icons = {
 	'cloudy':        '☁',
 	'snowy':         '❅',
 	'stormy':        '☈',
-	'foggy':         '〰',
+	'foggy':         '▒',
 	'sunny':         '☼',
 	'night':         '☾',
 	'windy':         '☴',
