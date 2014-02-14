@@ -807,7 +807,7 @@ class EmailIMAPSegment(KwThreadedSegment):
 	interval = 60
 
 	@staticmethod
-	def key(username, password, server='imap.gmail.com', port=993, folder='INBOX', **kwargs):
+	def key(username=os.getenv('POWERLINE_IMAP_EMAIL'), password=os.getenv('POWERLINE_IMAP_PASSWORD'), server='imap.gmail.com', port=993, folder='INBOX', **kwargs):
 		return _IMAPKey(username, password, server, port, folder)
 
 	def compute_state(self, key):
