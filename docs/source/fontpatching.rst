@@ -42,7 +42,8 @@ Code point  Glyph  Description
 Usage
 =====
 
-The font patcher is located at :file:`powerline/font/fontpatcher.py`.  
+The font patcher, fontpatcher.py, is located in the `powerline-fontpatcher 
+<https://github.com/Lokaltog/powerline-fontpatcher>`_ repository on GitHub.
 It requires Python 2.7 and FontForge compiled with Python bindings to work.
 
 Patched fonts are renamed by default (" for Powerline" is added to the font 
