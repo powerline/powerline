@@ -1,11 +1,14 @@
 # vim:fileencoding=utf-8:noet
 
 from powerline.renderer import Renderer
-from powerline.colorscheme import ATTR_BOLD, ATTR_ITALIC, ATTR_UNDERLINE
 import json
 
-class i3bgbarRenderer(Renderer):
-	'''i3bgbar Segment Renderer'''
+
+class I3barRenderer(Renderer):
+	'''I3bar Segment Renderer.
+
+	Currently works only for i3bgbar (i3 bar with custom patches).
+	'''
 
 	@staticmethod
 	def hlstyle(*args, **kwargs):
@@ -13,9 +16,11 @@ class i3bgbarRenderer(Renderer):
 		return ''
 
 	def hl(self, contents, fg=None, bg=None, attr=None):
-		'''Highlight a segment.'''
-
-		segment = { "full_text": contents, "separator": False, "separator_block_width": 0 } # no seperators
+		segment = {
+			"full_text": contents,
+			"separator": False,
+			"separator_block_width": 0,  # no seperators
+		}
 
 		if fg is not None:
 			if fg is not False and fg[1] is not False:
@@ -23,7 +28,8 @@ class i3bgbarRenderer(Renderer):
 		if bg is not None:
 			if bg is not False and bg[1] is not False:
 				segment['background_color'] = "#{0:06x}".format(bg[1])
-		return json.dumps( segment ) + ",\n" # i3bar "pseudo json" requires one line at a time
+		# i3bar "pseudo json" requires one line at a time
+		return json.dumps(segment) + ",\n"
 
 
-renderer = i3bgbarRenderer
+renderer = I3barRenderer
