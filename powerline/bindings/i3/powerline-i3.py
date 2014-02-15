@@ -10,31 +10,34 @@ import time
 import i3
 from threading import Lock
 
-name = 'wm'
-if len( sys.argv ) > 1:
-	name = sys.argv[1]
-powerline = Powerline(name, renderer_module='i3bgbar')
-powerline.update_renderer()
 
-interval = 0.5
+if __name__ == '__main__':
+	name = 'wm'
+	if len(sys.argv) > 1:
+		name = sys.argv[1]
 
-print( '{"version": 1, "custom_workspace": true}' )
-print( '[' )
-print( '	[[],[]]' )
+	powerline = Powerline(name, renderer_module='i3bgbar')
+	powerline.update_renderer()
 
-lock = Lock()
+	interval = 0.5
 
-def render( event=None, data=None, sub=None ):
-	global lock
-	with lock:
-		s  = '[\n' + powerline.render(side='right')[:-2] + '\n]\n'
-		s += ',[\n' + powerline.render(side='left' )[:-2] + '\n]'
-		print( ',[\n' + s + '\n]' )
-		sys.stdout.flush()
+	print ('{"version": 1, "custom_workspace": true}')
+	print ('[')
+	print ('\t[[],[]]')
 
-sub = i3.Subscription( render, 'workspace' )
+	lock = Lock()
 
-while True:
-	start_time = monotonic()
-	render()
-	time.sleep(max(interval - (monotonic() - start_time), 0.1))
+	def render(event=None, data=None, sub=None):
+		global lock
+		with lock:
+			s = '[\n' + powerline.render(side='right')[:-2] + '\n]\n'
+			s += ',[\n' + powerline.render(side='left')[:-2] + '\n]'
+			print (',[\n' + s + '\n]')
+			sys.stdout.flush()
+
+	sub = i3.Subscription(render, 'workspace')
+
+	while True:
+		start_time = monotonic()
+		render()
+		time.sleep(max(interval - (monotonic() - start_time), 0.1))

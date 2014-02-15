@@ -235,13 +235,15 @@ Add the following to your :file:`~/.config/qtile/config.py`:
        ),
    ]
 
-with i3bar replacement
------------------
+I3 bar
+------
 
-.. note:: Until the patch is done in i3, you will need a custom ``i3bar`` build called ``i3bgbar``.
-    The source is available `here <https://github.com/S0lll0s/i3bgbar>`_.
+.. note:: Until the patch is done in i3, you will need a custom ``i3bar`` build
+          called ``i3bgbar``. The source is available `here 
+          <https://github.com/S0lll0s/i3bgbar>`_.
 
 Add the following to your :file:`~/.i3/config`::
+
     bar {
         i3bar_command i3bgbar
 
@@ -249,4 +251,5 @@ Add the following to your :file:`~/.i3/config`::
         font pango:PowerlineFont 12
     }
 
-where ``i3bgbar`` may be replaced with the path to the custom i3bar binary and ``PowerlineFont`` is any system font with powerline support.
+where ``i3bgbar`` may be replaced with the path to the custom i3bar binary and 
+``PowerlineFont`` is any system font with powerline support.
