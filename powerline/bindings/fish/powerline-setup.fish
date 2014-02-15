@@ -2,8 +2,10 @@ function powerline-setup
 	if test -z "$POWERLINE_COMMAND"
 		if which powerline-client >/dev/null
 			set -g -x POWERLINE_COMMAND powerline-client
-		else
+		else if which powerline >/dev/null
 			set -g -x POWERLINE_COMMAND powerline
+		else
+			set -g -x POWERLINE_COMMAND (dirname (status -f))/../../../scripts/powerline
 		end
 	end
 	function --on-variable POWERLINE_COMMAND _powerline_update
@@ -18,18 +20,18 @@ function powerline-setup
 		"
 	end
 	_powerline_update
-	function _powerline_tmux_setenv
-		if test -n "$TMUX"
+	if test -w "$TMUX"
+		function _powerline_tmux_setenv
 			tmux setenv -g TMUX_$argv[1]_(tmux display -p "#D" | tr -d "%") "$argv[2]"
 			tmux refresh -S
 		end
+		function --on-variable PWD _powerline_tmux_set_pwd
+			_powerline_tmux_setenv PWD "$PWD"
+		end
+		function --on-signal WINCH _powerline_tmux_set_columns
+			_powerline_tmux_setenv COLUMNS "$COLUMNS"
+		end
+		_powerline_tmux_set_columns
+		_powerline_tmux_set_pwd
 	end
-	function --on-variable PWD _powerline_tmux_set_pwd
-		_powerline_tmux_setenv PWD "$PWD"
-	end
-	function --on-signal WINCH _powerline_tmux_set_columns
-		_powerline_tmux_setenv COLUMNS "$COLUMNS"
-	end
-	_powerline_tmux_set_columns
-	_powerline_tmux_set_pwd
 end
