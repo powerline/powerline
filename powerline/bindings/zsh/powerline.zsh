@@ -39,7 +39,53 @@ _powerline_init_tmux_support() {
 	fi
 }
 
-_powerline_precmd() {
+_powerline_init_modes_support() {
+	emulate -L zsh
+
+	test -z "$ZSH_VERSION" && return 0
+
+	typeset -ga VS
+	VS=( ${(s:.:)ZSH_VERSION} )
+
+	# Mode support requires >=zsh-4.3.11
+	if (( VS[1] < 4 || (VS[1] == 4 && (VS[2] < 3 || (VS[2] == 3 && VS[3] < 11))) )) ; then
+		return 0
+	fi
+
+	function -g _powerline_get_main_keymap_name() {
+		REPLY="${${(Q)${${(z)${"$(bindkey -lL main)"}}[3]}}:-.safe}"
+	}
+
+	function -g _powerline_set_true_keymap_name() {
+		export _POWERLINE_MODE="${1}"
+		local plm_bk="$(bindkey -lL ${_POWERLINE_MODE})"
+		if [[ $plm_bk = 'bindkey -A'* ]] ; then
+			_powerline_set_true_keymap_name ${(Q)${${(z)plm_bk}[3]}}
+		fi
+	}
+
+	function -g _powerline_zle_keymap_select() {
+		_powerline_set_true_keymap_name $KEYMAP
+		zle reset-prompt
+		test -z "$_POWERLINE_SAVE_WIDGET" || zle $_POWERLINE_SAVE_WIDGET
+	}
+
+	function -g _powerline_set_main_keymap_name() {
+		local REPLY
+		_powerline_get_main_keymap_name
+		_powerline_set_true_keymap_name "$REPLY"
+	}
+
+	if [[ "$_POWERLINE_MODE" != vi* ]] ; then
+		export _POWERLINE_DEFAULT_MODE="$_POWERLINE_MODE"
+	fi
+
+	_powerline_add_widget zle-keymap-select _powerline_zle_keymap_select
+	_powerline_set_main_keymap_name
+	precmd_functions+=( _powerline_set_main_keymap_name )
+}
+
+_powerline_set_jobnum() {
 	# If you are wondering why I am not using the same code as I use for bash 
 	# ($(jobs|wc -l)): consider the following test:
 	#     echo abc | less
@@ -51,18 +97,16 @@ _powerline_precmd() {
 	# wrong number of jobs. You need to filter the lines first. Or not use 
 	# jobs built-in at all.
 	_POWERLINE_JOBNUM=${(%):-%j}
-	_powerline_set_true_keymap_name "${${(Q)${${(z)${"$(bindkey -lL main)"}}[3]}}:-.safe}"
 }
 
 _powerline_setup_prompt() {
 	emulate -L zsh
 	for f in "${precmd_functions[@]}"; do
-		if [[ "$f" = "_powerline_precmd" ]]; then
+		if [[ "$f" = "_powerline_set_jobnum" ]]; then
 			return
 		fi
 	done
-	precmd_functions+=( _powerline_precmd )
-	_powerline_set_true_keymap_name "${${(Q)${${(z)${"$(bindkey -lL main)"}}[3]}}:-.safe}"
+	precmd_functions+=( _powerline_set_jobnum )
 	if zmodload zsh/zpython &>/dev/null ; then
 		zpython 'from powerline.bindings.zsh import setup as _powerline_setup'
 		zpython '_powerline_setup()'
@@ -99,28 +143,8 @@ _powerline_add_widget() {
 	fi
 }
 
-_powerline_set_true_keymap_name() {
-	export _POWERLINE_MODE="${1}"
-	local plm_bk="$(bindkey -lL ${_POWERLINE_MODE})"
-	if [[ $plm_bk = 'bindkey -A'* ]] ; then
-		_powerline_set_true_keymap_name ${(Q)${${(z)plm_bk}[3]}}
-	fi
-}
-
-_powerline_zle_keymap_select() {
-	_powerline_set_true_keymap_name $KEYMAP
-	zle reset-prompt
-	test -z "$_POWERLINE_SAVE_WIDGET" || zle $_POWERLINE_SAVE_WIDGET
-}
-
-_powerline_add_widget zle-keymap-select _powerline_zle_keymap_select
-_powerline_precmd
-
-if [[ "$_POWERLINE_MODE" != vi* ]] ; then
-	export _POWERLINE_DEFAULT_MODE="$_POWERLINE_MODE"
-fi
-
 setopt promptpercent
 setopt promptsubst
 _powerline_setup_prompt
 _powerline_init_tmux_support
+_powerline_init_modes_support
