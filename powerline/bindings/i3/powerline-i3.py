@@ -16,7 +16,7 @@ if __name__ == '__main__':
 	if len(sys.argv) > 1:
 		name = sys.argv[1]
 
-	powerline = Powerline(name, renderer_module='i3bgbar')
+	powerline = Powerline(name, renderer_module='i3bar')
 	powerline.update_renderer()
 
 	interval = 0.5

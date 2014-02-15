@@ -4,8 +4,11 @@ from powerline.renderer import Renderer
 import json
 
 
-class i3bgbarRenderer(Renderer):
-	'''i3bgbar Segment Renderer'''
+class I3barRenderer(Renderer):
+	'''I3bar Segment Renderer.
+
+	Currently works only for i3bgbar (i3 bar with custom patches).
+	'''
 
 	@staticmethod
 	def hlstyle(*args, **kwargs):
@@ -13,8 +16,6 @@ class i3bgbarRenderer(Renderer):
 		return ''
 
 	def hl(self, contents, fg=None, bg=None, attr=None):
-		'''Highlight a segment.'''
-
 		segment = {
 			"full_text": contents,
 			"separator": False,
@@ -31,4 +32,4 @@ class i3bgbarRenderer(Renderer):
 		return json.dumps(segment) + ",\n"
 
 
-renderer = i3bgbarRenderer
+renderer = I3barRenderer
