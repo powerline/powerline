@@ -117,29 +117,3 @@ Solution to this problem is simple: be sure that :file:`z.sh` is sourced
 strictly after :file:`powerline/bindings/bash/powerline.sh`. This way background 
 jobs are spawned by `z <https://github.com/rupa/z>`_ after powerline has done 
 its job.
-
-
-I am experiencing problems after update
----------------------------------------
-
-First, check out that you have only one powerline installed. Do
-
-    .. code-block:: vim
-
-       python import powerline
-       python print(powerline.__file__)
-
-(replace ``python`` with ``python3`` if appropriate) and check out that printed 
-file location is the one you have recently updated. If it is not you have the 
-following alternatives:
-
-* Always remember to update all installations of powerline you have.
-* (Here and below I assume you have double vim and pip installation.) Use code 
-  from first paragraph of :ref:`vim-vimrc` section and remove vim installation.
-* Remove existing pip installation and use
-
-    .. code-block:: sh
-
-       pip install -e ~/.vim/bundle/powerline
-
-  to reinstall.
