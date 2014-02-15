@@ -2,8 +2,10 @@ function powerline-setup
 	if test -z "$POWERLINE_COMMAND"
 		if which powerline-client >/dev/null
 			set -g -x POWERLINE_COMMAND powerline-client
-		else
+		else if which powerline >/dev/null
 			set -g -x POWERLINE_COMMAND powerline
+		else
+			set -g -x POWERLINE_COMMAND (dirname (status -f))/../../../scripts/powerline
 		end
 	end
 	function --on-variable POWERLINE_COMMAND _powerline_update
