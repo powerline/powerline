@@ -3,12 +3,12 @@ if exists('g:powerline_loaded')
 endif
 let g:powerline_loaded = 1
 
-if ! has('python') && ! has('python3')
+if !has('python') && !has('python3')
 	if !exists('g:powerline_no_python_error')
 		echohl ErrorMsg
-			echom 'You need vim compiled with Python 2.6, 2.7 or 3.2 and later support'
-			echom 'for Powerline to work. Please consult the documentation for more'
-			echom 'details.'
+			echomsg 'You need vim compiled with Python 2.6, 2.7 or 3.2 and later support'
+			echomsg 'for Powerline to work. Please consult the documentation for more'
+			echomsg 'details.'
 		echohl None
 	endif
 	finish
@@ -32,12 +32,12 @@ finally
 	unlet s:import_cmd
 	if !exists('s:launched')
 		echohl ErrorMsg
-			echom 'An error occurred while importing powerline package.'
-			echom 'This could be caused by invalid sys.path setting,'
-			echom 'or by an incompatible Python version (powerline requires'
-			echom 'Python 2.6, 2.7 or 3.2 and later to work). Please consult'
-			echom 'the troubleshooting section in the documentation for'
-			echom 'possible solutions.'
+			echomsg 'An error occurred while importing powerline package.'
+			echomsg 'This could be caused by invalid sys.path setting,'
+			echomsg 'or by an incompatible Python version (powerline requires'
+			echomsg 'Python 2.6, 2.7 or 3.2 and later to work). Please consult'
+			echomsg 'the troubleshooting section in the documentation for'
+			echomsg 'possible solutions.'
 		echohl None
 		let s:pystr  =     "def powerline_troubleshoot():\n"
 		let s:pystr .=     "	import sys\n"
