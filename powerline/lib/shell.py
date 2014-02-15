@@ -7,7 +7,7 @@ def run_cmd(pl, cmd, stdin=None):
 	try:
 		p = Popen(cmd, stdout=PIPE, stdin=PIPE)
 	except OSError as e:
-		pl.exception('Could not execute command ({0}): {1}'.format(e, cmd))
+		pl.exception('Could not execute command ({0}): {1}', e, cmd)
 		return None
 	else:
 		stdout, err = p.communicate(stdin)
