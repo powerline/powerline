@@ -9,24 +9,35 @@ if test -z "${POWERLINE_COMMAND}" ; then
 	fi
 fi
 
-_powerline_tmux_setenv() {
-	if [[ -n "$TMUX" ]]; then
-		tmux setenv -g TMUX_"$1"_`tmux display -p "#D" | tr -d %` "$2"
-		tmux refresh -S
+_powerline_init_tmux_support() {
+	# Note: `test -w ""` returns false, so first condition may be removed
+	if test -n "$TMUX" && test -w "$TMUX" ; then
+		# TMUX variable may be unset to create new tmux session inside this one
+		_POWERLINE_TMUX="$TMUX"
+
+		_powerline_tmux_setenv() {
+			TMUX="$_POWERLINE_TMUX" tmux setenv -g TMUX_"$1"_`tmux display -p "#D" | tr -d %` "$2"
+			TMUX="$_POWERLINE_TMUX" tmux refresh -S
+		}
+
+		_powerline_tmux_set_pwd() {
+			if test "x$_POWERLINE_SAVED_PWD" != "x$PWD" ; then
+				_POWERLINE_SAVED_PWD="$PWD"
+				_powerline_tmux_setenv PWD "$PWD"
+			fi
+		}
+
+		_powerline_tmux_set_columns() {
+			_powerline_tmux_setenv COLUMNS "$COLUMNS"
+		}
+
+		trap "_powerline_tmux_set_columns" SIGWINCH
+		_powerline_tmux_set_columns
+	else
+		_powerline_tmux_set_pwd() {
+			return 0
+		}
 	fi
-}
-
-_POWERLINE_SAVED_PWD=
-
-_powerline_tmux_set_pwd() {
-	if test "x$_POWERLINE_SAVED_PWD" != "x$PWD" ; then
-		_POWERLINE_SAVED_PWD="$PWD"
-		_powerline_tmux_setenv PWD "$PWD"
-	fi
-}
-
-_powerline_tmux_set_columns() {
-	_powerline_tmux_setenv COLUMNS "$COLUMNS"
 }
 
 _powerline_prompt() {
@@ -36,8 +47,7 @@ _powerline_prompt() {
 	return $last_exit_code
 }
 
-trap "_powerline_tmux_set_columns" SIGWINCH
-_powerline_tmux_set_columns
-
 [[ "$PROMPT_COMMAND" != "${PROMPT_COMMAND/_powerline_prompt/}" ]] ||
 	export PROMPT_COMMAND="${PROMPT_COMMAND}"$'\n'"_powerline_prompt"
+
+_powerline_init_tmux_support

@@ -8,20 +8,35 @@ if test -z "${POWERLINE_COMMAND}" ; then
 	fi
 fi
 
-_powerline_tmux_setenv() {
+integer _POWERLINE_JOBNUM
+
+_powerline_init_tmux_support() {
 	emulate -L zsh
-	if [[ -n "$TMUX" ]]; then
-		tmux setenv -g TMUX_"$1"_$(tmux display -p "#D" | tr -d %) "$2"
-		tmux refresh -S
+	# Note: `test -w ""` returns false, so first condition may be removed
+	if test -n "$TMUX" && test -w "$TMUX" ; then
+		# TMUX variable may be unset to create new tmux session inside this one
+		typeset -g _POWERLINE_TMUX="$TMUX"
+
+		function -g _powerline_tmux_setenv() {
+			emulate -L zsh
+			local -x TMUX="$_POWERLINE_TMUX"
+			tmux setenv -g TMUX_"$1"_$(tmux display -p "#D" | tr -d %) "$2"
+			tmux refresh -S
+		}
+
+		function -g _powerline_tmux_set_pwd() {
+			_powerline_tmux_setenv PWD "$PWD"
+		}
+
+		function -g _powerline_tmux_set_columns() {
+			_powerline_tmux_setenv COLUMNS "$COLUMNS"
+		}
+
+		chpwd_functions+=( _powerline_tmux_set_pwd )
+		trap "_powerline_tmux_set_columns" SIGWINCH
+		_powerline_tmux_set_columns
+		_powerline_tmux_set_pwd
 	fi
-}
-
-_powerline_tmux_set_pwd() {
-	_powerline_tmux_setenv PWD "$PWD"
-}
-
-_powerline_tmux_set_columns() {
-	_powerline_tmux_setenv COLUMNS "$COLUMNS"
 }
 
 _powerline_precmd() {
@@ -47,7 +62,6 @@ _powerline_setup_prompt() {
 		fi
 	done
 	precmd_functions+=( _powerline_precmd )
-	chpwd_functions+=( _powerline_tmux_set_pwd )
 	_powerline_set_true_keymap_name "${${(Q)${${(z)${"$(bindkey -lL main)"}}[3]}}:-.safe}"
 	if zmodload zsh/zpython &>/dev/null ; then
 		zpython 'from powerline.bindings.zsh import setup as _powerline_setup'
@@ -106,10 +120,7 @@ if [[ "$_POWERLINE_MODE" != vi* ]] ; then
 	export _POWERLINE_DEFAULT_MODE="$_POWERLINE_MODE"
 fi
 
-trap "_powerline_tmux_set_columns" SIGWINCH
-_powerline_tmux_set_columns
-_powerline_tmux_set_pwd
-
 setopt promptpercent
 setopt promptsubst
 _powerline_setup_prompt
+_powerline_init_tmux_support
