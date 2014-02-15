@@ -39,16 +39,16 @@ finally
 			echom 'the troubleshooting section in the documentation for'
 			echom 'possible solutions.'
 		echohl None
-		let s:pystr  = "def powerline_troubleshoot():\n"
-		let s:pystr .= "	import sys\n"
-		let s:pystr .= "	if sys.version_info < (2, 6):\n"
-		let s:pystr .= "		print('Too old python version: ' + sys.version + ' (first supported is 2.6)')\n"
-		let s:pystr .= "	elif sys.version_info[0] == 3 and sys.version_info[1] < 2:\n"
-		let s:pystr .= "		print('Too old python 3 version: ' + sys.version + ' (first supported is 3.2)')\n"
-		let s:pystr .= "	try:\n"
-		let s:pystr .= "		import powerline\n"
-		let s:pystr .= "	except ImportError:\n"
-		let s:pystr .= "		print('Unable to import powerline, is it installed?')\n"
+		let s:pystr  =     "def powerline_troubleshoot():\n"
+		let s:pystr .=     "	import sys\n"
+		let s:pystr .=     "	if sys.version_info < (2, 6):\n"
+		let s:pystr .=     "		print('Too old python version: ' + sys.version + ' (first supported is 2.6)')\n"
+		let s:pystr .=     "	elif sys.version_info[0] == 3 and sys.version_info[1] < 2:\n"
+		let s:pystr .=     "		print('Too old python 3 version: ' + sys.version + ' (first supported is 3.2)')\n"
+		let s:pystr .=     "	try:\n"
+		let s:pystr .=     "		import powerline\n"
+		let s:pystr .=     "	except ImportError:\n"
+		let s:pystr .=     "		print('Unable to import powerline, is it installed?')\n"
 		if expand('<sfile>')[:4] isnot# '/usr/'
 			let s:pystr .= "	else:\n"
 			let s:pystr .= "		import os\n"
