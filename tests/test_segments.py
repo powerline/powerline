@@ -48,6 +48,103 @@ class TestShell(TestCase):
 		self.assertEqual(shell.jobnum(pl=pl, segment_info=segment_info, show_zero=False), '1')
 		self.assertEqual(shell.jobnum(pl=pl, segment_info=segment_info, show_zero=True), '1')
 
+	def test_continuation(self):
+		pl = Pl()
+		self.assertEqual(shell.continuation(pl=pl, segment_info={}), None)
+		segment_info = {'parser_state': 'if cmdsubst'}
+		self.assertEqual(shell.continuation(pl=pl, segment_info=segment_info), [
+			{
+				'contents': 'if',
+				'draw_inner_divider': True,
+				'highlight_group': 'continuation:current',
+				'width': 'auto',
+				'align': 'l',
+			},
+		])
+		self.assertEqual(shell.continuation(pl=pl, segment_info=segment_info, right_align=True), [
+			{
+				'contents': 'if',
+				'draw_inner_divider': True,
+				'highlight_group': 'continuation:current',
+				'width': 'auto',
+				'align': 'r',
+			},
+		])
+		self.assertEqual(shell.continuation(pl=pl, segment_info=segment_info, omit_cmdsubst=False), [
+			{
+				'contents': 'if',
+				'draw_inner_divider': True,
+				'highlight_group': 'continuation',
+			},
+			{
+				'contents': 'cmdsubst',
+				'draw_inner_divider': True,
+				'highlight_group': 'continuation:current',
+				'width': 'auto',
+				'align': 'l',
+			},
+		])
+		self.assertEqual(shell.continuation(pl=pl, segment_info=segment_info, omit_cmdsubst=False, right_align=True), [
+			{
+				'contents': 'if',
+				'draw_inner_divider': True,
+				'highlight_group': 'continuation',
+				'width': 'auto',
+				'align': 'r',
+			},
+			{
+				'contents': 'cmdsubst',
+				'draw_inner_divider': True,
+				'highlight_group': 'continuation:current',
+			},
+		])
+		self.assertEqual(shell.continuation(pl=pl, segment_info=segment_info, omit_cmdsubst=True, right_align=True), [
+			{
+				'contents': 'if',
+				'draw_inner_divider': True,
+				'highlight_group': 'continuation:current',
+				'width': 'auto',
+				'align': 'r',
+			},
+		])
+		self.assertEqual(shell.continuation(pl=pl, segment_info=segment_info, omit_cmdsubst=True, right_align=True, renames={'if': 'IF'}), [
+			{
+				'contents': 'IF',
+				'draw_inner_divider': True,
+				'highlight_group': 'continuation:current',
+				'width': 'auto',
+				'align': 'r',
+			},
+		])
+		self.assertEqual(shell.continuation(pl=pl, segment_info=segment_info, omit_cmdsubst=True, right_align=True, renames={'if': None}), [
+			{
+				'contents': '',
+				'highlight_group': 'continuation:current',
+				'width': 'auto',
+				'align': 'r',
+			},
+		])
+		segment_info = {'parser_state': 'then then then cmdsubst'}
+		self.assertEqual(shell.continuation(pl=pl, segment_info=segment_info), [
+			{
+				'contents': 'then',
+				'draw_inner_divider': True,
+				'highlight_group': 'continuation',
+			},
+			{
+				'contents': 'then',
+				'draw_inner_divider': True,
+				'highlight_group': 'continuation',
+			},
+			{
+				'contents': 'then',
+				'draw_inner_divider': True,
+				'highlight_group': 'continuation:current',
+				'width': 'auto',
+				'align': 'l',
+			},
+		])
+
 
 class TestCommon(TestCase):
 	def test_hostname(self):
