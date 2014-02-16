@@ -79,8 +79,7 @@ def continuation(pl, segment_info, omit_cmdsubst=True, right_align=False, rename
 	'''Display parser state.
 
 	:param bool omit_cmdsubst:
-		Do not display cmdsubst parser state if it is the last, but not the only 
-		one.
+		Do not display cmdsubst parser state if it is the last one.
 	:param bool right_align:
 		Align to the right.
 	:param dict renames:
@@ -89,7 +88,7 @@ def continuation(pl, segment_info, omit_cmdsubst=True, right_align=False, rename
 
 	Highlight groups used: ``continuation``, ``continuation:current``.
 	'''
-	if not segment_info['parser_state']:
+	if not segment_info.get('parser_state'):
 		return None
 	ret = []
 
@@ -102,7 +101,7 @@ def continuation(pl, segment_info, omit_cmdsubst=True, right_align=False, rename
 				'draw_inner_divider': True,
 			})
 
-	if omit_cmdsubst and len(ret) > 1 and ret[-1]['contents'] == 'cmdsubst':
+	if omit_cmdsubst and ret[-1]['contents'] == 'cmdsubst':
 		ret.pop(-1)
 
 	if not ret:
