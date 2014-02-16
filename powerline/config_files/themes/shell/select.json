@@ -3,10 +3,10 @@
 		"left": [
 			{
 				"type": "string",
-				"contents": "Select",
+				"contents": "Select variant",
 				"width": "auto",
 				"align": "r",
-				"highlight_group": ["prompt"]
+				"highlight_group": ["continuation:current"]
 			}
 		]
 	}
