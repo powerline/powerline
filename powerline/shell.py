@@ -54,7 +54,7 @@ def get_argparser(parser=None, *args, **kwargs):
 	p.add_argument('-c', '--config', metavar='KEY.KEY=VALUE', action='append')
 	p.add_argument('-t', '--theme_option', metavar='THEME.KEY.KEY=VALUE', action='append')
 	p.add_argument('-p', '--config_path', metavar='PATH')
-	p.add_argument('-R', '--renderer_arg', metavar='KEY="VAL"', type=lambda a: dict((parsedotval(a),)))
+	p.add_argument('-R', '--renderer_arg', metavar='KEY="VAL"', action='append')
 	return p
 
 
@@ -65,3 +65,5 @@ def finish_args(args):
 		args.theme_option = mergeargs((parsedotval(v) for v in args.theme_option))
 	else:
 		args.theme_option = {}
+	if args.renderer_arg:
+		args.renderer_arg = mergeargs((parsedotval(v) for v in args.renderer_arg))
