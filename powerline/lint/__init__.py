@@ -478,6 +478,14 @@ main_spec = (Spec(
 				rewrite=theme_spec(),
 			),
 		).optional(),
+		shell=Spec(
+			colorscheme=colorscheme_spec(),
+			theme=theme_spec(),
+			local_themes=Spec(
+				continuation=theme_spec(),
+				select=theme_spec(),
+			),
+		).optional(),
 	).unknown_spec(check_ext,
 				Spec(
 					colorscheme=colorscheme_spec(),
