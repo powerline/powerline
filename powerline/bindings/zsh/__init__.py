@@ -55,8 +55,8 @@ class Args(object):
 
 	@property
 	def jobnum(self):
-		zsh.eval('integer POWERLINE_JOBNUM=${(%):-%j}')
-		return zsh.getvalue('POWERLINE_JOBNUM')
+		zsh.eval('integer _POWERLINE_JOBNUM=${(%):-%j}')
+		return zsh.getvalue('_POWERLINE_JOBNUM')
 
 
 def string(s):
@@ -94,22 +94,29 @@ environ = Environment()
 
 
 class Prompt(object):
-	__slots__ = ('powerline', 'side', 'savedpsvar', 'savedps', 'args')
+	__slots__ = ('powerline', 'side', 'savedpsvar', 'savedps', 'args', 'theme')
 
-	def __init__(self, powerline, side, savedpsvar=None, savedps=None):
+	def __init__(self, powerline, side, theme, savedpsvar=None, savedps=None):
 		self.powerline = powerline
 		self.side = side
 		self.savedpsvar = savedpsvar
 		self.savedps = savedps
 		self.args = powerline.args
+		self.theme = theme
 
 	def __str__(self):
-		segment_info = {'args': self.args, 'environ': environ},
+		zsh.eval('_POWERLINE_PARSER_STATE="${(%):-%_}"')
+		segment_info = {
+			'args': self.args,
+			'environ': environ,
+			'client_id': 1,
+			'local_theme': self.theme,
+			'parser_state': zsh.getvalue('_POWERLINE_PARSER_STATE'),
+		}
 		r = self.powerline.render(
 			width=zsh.columns(),
 			side=self.side,
 			segment_info=segment_info,
-			matcher_info=segment_info,
 		)
 		if type(r) is not str:
 			if type(r) is bytes:
@@ -126,10 +133,13 @@ class Prompt(object):
 			self.powerline.shutdown()
 
 
-def set_prompt(powerline, psvar, side):
-	savedps = zsh.getvalue(psvar)
+def set_prompt(powerline, psvar, side, theme):
+	try:
+		savedps = zsh.getvalue(psvar)
+	except IndexError:
+		savedps = None
 	zpyvar = 'ZPYTHON_POWERLINE_' + psvar
-	prompt = Prompt(powerline, side, psvar, savedps)
+	prompt = Prompt(powerline, side, theme, psvar, savedps)
 	zsh.set_special_string(zpyvar, prompt)
 	zsh.setvalue(psvar, '${' + zpyvar + '}')
 
@@ -138,6 +148,9 @@ def setup():
 	powerline = ShellPowerline(Args())
 	used_powerlines.append(powerline)
 	used_powerlines.append(powerline)
-	set_prompt(powerline, 'PS1', 'left')
-	set_prompt(powerline, 'RPS1', 'right')
+	set_prompt(powerline, 'PS1', 'left', None)
+	set_prompt(powerline, 'RPS1', 'right', None)
+	set_prompt(powerline, 'PS2', 'left', 'continuation')
+	set_prompt(powerline, 'RPS2', 'right', 'continuation')
+	set_prompt(powerline, 'PS3', 'left', 'select')
 	atexit.register(shutdown)
