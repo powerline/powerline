@@ -1,12 +1,9 @@
 {
+	"default_module": "powerline.segments.shell",
 	"segments": {
 		"left": [
 			{
-				"type": "string",
-				"contents": "",
-				"width": "auto",
-				"align": "r",
-				"highlight_group": ["prompt"]
+				"name": "continuation"
 			}
 		],
 		"right": [

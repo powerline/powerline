@@ -72,3 +72,48 @@ def mode(pl, segment_info, override={'vicmd': 'COMMND', 'viins': 'INSERT'}, defa
 		# code or by somebody knowing what he is doing there is absolutely no 
 		# need in keeping translations dictionary.
 		return mode.upper()
+
+
+@requires_segment_info
+def continuation(pl, segment_info, omit_cmdsubst=True, right_align=False, renames={}):
+	'''Display parser state.
+
+	:param bool omit_cmdsubst:
+		Do not display cmdsubst parser state if it is the last, but not the only 
+		one.
+	:param bool right_align:
+		Align to the right.
+	:param dict renames:
+		Rename states: ``{old_name : new_name}``. If ``new_name`` is ``None`` 
+		then given state is not displayed.
+
+	Highlight groups used: ``continuation``, ``continuation:current``.
+	'''
+	if not segment_info['parser_state']:
+		return None
+	ret = []
+
+	for state in segment_info['parser_state'].split():
+		state = renames.get(state, state)
+		if state:
+			ret.append({
+				'contents': state,
+				'highlight_group': 'continuation',
+				'draw_inner_divider': True,
+			})
+
+	if omit_cmdsubst and len(ret) > 1 and ret[-1]['contents'] == 'cmdsubst':
+		ret.pop(-1)
+
+	if not ret:
+		ret.append({
+			'contents': ''
+		})
+
+	if right_align:
+		ret[0].update(width='auto', align='r')
+		ret[-1]['highlight_group'] = 'continuation:current'
+	else:
+		ret[-1].update(width='auto', align='l', highlight_group='continuation:current')
+
+	return ret
