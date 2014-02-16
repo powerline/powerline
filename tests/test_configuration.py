@@ -85,10 +85,18 @@ class TestConfig(TestCase):
 	def test_zsh(self):
 		from powerline.shell import ShellPowerline
 		args = Args(last_pipe_status=[1, 0], jobnum=0, ext=['shell'], renderer_module='zsh_prompt')
+		segment_info = {'args': args}
 		with ShellPowerline(args, run_once=False) as powerline:
-			powerline.render(segment_info={'args': args})
+			powerline.render(segment_info=segment_info)
 		with ShellPowerline(args, run_once=False) as powerline:
-			powerline.render(segment_info={'args': args})
+			powerline.render(segment_info=segment_info)
+		segment_info['local_theme'] = 'select'
+		with ShellPowerline(args, run_once=False) as powerline:
+			powerline.render(segment_info=segment_info)
+		segment_info['local_theme'] = 'continuation'
+		segment_info['parser_state'] = 'if cmdsubst'
+		with ShellPowerline(args, run_once=False) as powerline:
+			powerline.render(segment_info=segment_info)
 
 	def test_bash(self):
 		from powerline.shell import ShellPowerline

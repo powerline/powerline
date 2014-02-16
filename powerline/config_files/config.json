@@ -25,7 +25,11 @@
 		},
 		"shell": {
 			"colorscheme": "default",
-			"theme": "default"
+			"theme": "default",
+			"local_themes": {
+				"continuation": "continuation",
+				"select": "select"
+			}
 		},
 		"tmux": {
 			"colorscheme": "default",

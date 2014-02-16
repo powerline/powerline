@@ -43,7 +43,6 @@ class TestParser(TestCase):
 				(['-r', 'zsh_prompt'],                   'too few arguments|the following arguments are required: ext'),
 				(['shell', '--last_exit_code', 'i'],     'invalid int value'),
 				(['shell', '--last_pipe_status', '1 i'], 'invalid <lambda> value'),
-				(['shell', '-R', 'abc'],                 'invalid <lambda> value'),
 			]:
 				self.assertRaises(SystemExit, parser.parse_args, raising_args)
 				self.assertFalse(out.getvalue())
