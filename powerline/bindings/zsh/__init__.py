@@ -104,10 +104,12 @@ class Prompt(object):
 		self.args = powerline.args
 
 	def __str__(self):
+		segment_info = {'args': self.args, 'environ': environ},
 		r = self.powerline.render(
 			width=zsh.columns(),
 			side=self.side,
-			segment_info={'args': self.args, 'environ': environ}
+			segment_info=segment_info,
+			matcher_info=segment_info,
 		)
 		if type(r) is not str:
 			if type(r) is bytes:

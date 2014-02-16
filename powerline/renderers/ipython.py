@@ -22,7 +22,11 @@ class IpythonRenderer(ShellRenderer):
 			try:
 				return match['theme']
 			except KeyError:
-				match['theme'] = Theme(theme_config=match['config'], top_theme_config=self.theme_config, **self.theme_kwargs)
+				match['theme'] = Theme(
+					theme_config=match['config'],
+					top_theme_config=self.theme_config,
+					**self.theme_kwargs
+				)
 				return match['theme']
 
 	def shutdown(self):

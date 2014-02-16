@@ -38,6 +38,13 @@ class ShellPowerline(Powerline):
 		else:
 			return super(ShellPowerline, self).get_config_paths()
 
+	def get_local_themes(self, local_themes):
+		if not local_themes:
+			return {}
+
+		return dict(((key, {'config': self.load_theme_config(val)})
+					for key, val in local_themes.items()))
+
 
 def get_argparser(parser=None, *args, **kwargs):
 	if not parser:

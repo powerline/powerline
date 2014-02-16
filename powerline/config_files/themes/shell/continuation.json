@@ -1,0 +1,15 @@
+{
+	"segments": {
+		"left": [
+			{
+				"type": "string",
+				"contents": "",
+				"width": "auto",
+				"align": "r",
+				"highlight_group": ["prompt"]
+			}
+		],
+		"right": [
+		]
+	}
+}

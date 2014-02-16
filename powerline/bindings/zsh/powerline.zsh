@@ -113,9 +113,13 @@ _powerline_setup_prompt() {
 		zpython 'del _powerline_setup'
 	else
 		local add_args='--last_exit_code=$? --last_pipe_status="$pipestatus"'
+		add_args+=' --renderer_arg="client_id=$$"'
 		add_args+=' --jobnum=$_POWERLINE_JOBNUM'
 		PS1='$($POWERLINE_COMMAND shell left -r zsh_prompt '$add_args')'
 		RPS1='$($POWERLINE_COMMAND shell right -r zsh_prompt '$add_args')'
+		PS2='$($POWERLINE_COMMAND shell left -r zsh_prompt -R local_theme=continuation '$add_args')'
+		RPS2='$($POWERLINE_COMMAND shell right -r zsh_prompt -R local_theme=continuation '$add_args')'
+		PS3='$($POWERLINE_COMMAND shell left -r zsh_prompt -R local_theme=select '$add_args')'
 	fi
 }
 
