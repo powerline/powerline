@@ -1,0 +1,15 @@
+{
+	"groups": {
+		"branch_clean":     "branch",
+		"environment":      "information:unimportant",
+		"file_size":        "information:unimportant",
+		"file_format":      "information:unimportant",
+		"file_encoding":    "file_format",
+		"file_type":        "file_format",
+		"branch":           "information:additional",
+		"file_directory":   "information:additional",
+		"file_name_empty":  "file_directory",
+		"line_percent":     "information:additional",
+		"position":         "information:additional"
+	}
+}
