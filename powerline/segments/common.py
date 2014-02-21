@@ -75,6 +75,26 @@ def branch(pl, segment_info, status_colors=False):
 
 
 @requires_segment_info
+def head(pl, segment_info):
+	'''Return the name of the current head object (i.e. the git sha1)
+
+	Highlight groups used: ``head`` or ``branch``.
+	'''
+	name = segment_info['getcwd']()
+	repo = guess(path=name)
+	if repo is not None:
+		head = repo.head()
+		branch = repo.branch()
+		if head == branch:
+			return None
+		else:
+			return [{
+				'contents': head,
+				'highlight_group': ['head', 'branch'],
+			}]
+
+
+@requires_segment_info
 def cwd(pl, segment_info, dir_shorten_len=None, dir_limit_depth=None, use_path_separator=False):
 	'''Return the current working directory.
 
