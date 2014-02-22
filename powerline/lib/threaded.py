@@ -37,7 +37,7 @@ class ThreadedSegment(MultiRunnedThread):
 	def __init__(self):
 		super(ThreadedSegment, self).__init__()
 		self.run_once = True
-		self.skip = False
+		self.crashed = False
 		self.crashed_value = None
 		self.update_value = None
 		self.updated = False
@@ -59,31 +59,34 @@ class ThreadedSegment(MultiRunnedThread):
 			update_value = self.get_update_value(True)
 			self.updated = True
 		else:
-			update_value = self.update_value
+			update_value = self.get_update_value()
 
-		if self.skip:
+		if self.crashed:
 			return self.crashed_value
 
 		return self.render(update_value, update_first=update_first, pl=pl, **kwargs)
 
+	def set_update_value(self):
+		try:
+			self.update_value = self.update(self.update_value)
+		except Exception as e:
+			self.exception('Exception while updating: {0}', str(e))
+			self.crashed = True
+		except KeyboardInterrupt:
+			self.warn('Caught keyboard interrupt while updating')
+			self.crashed = True
+		else:
+			self.crashed = False
+
 	def get_update_value(self, update=False):
 		if update:
-			self.update_value = self.update(self.update_value)
+			self.set_update_value()
 		return self.update_value
 
 	def run(self):
 		while not self.shutdown_event.is_set():
 			start_time = monotonic()
-			try:
-				self.update_value = self.update(self.update_value)
-			except Exception as e:
-				self.exception('Exception while updating: {0}', str(e))
-				self.skip = True
-			except KeyboardInterrupt:
-				self.warn('Caught keyboard interrupt while updating')
-				self.skip = True
-			else:
-				self.skip = False
+			self.set_update_value()
 			self.shutdown_event.wait(max(self.interval - (monotonic() - start_time), self.min_sleep_time))
 
 	def shutdown(self):
