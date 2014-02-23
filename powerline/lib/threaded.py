@@ -157,7 +157,7 @@ class KwThreadedSegment(ThreadedSegment):
 	def key(**kwargs):
 		return frozenset(kwargs.items())
 
-	def render(self, update_value, update_first, key=None, **kwargs):
+	def render(self, update_value, update_first, key=None, after_update=False, **kwargs):
 		queries, crashed = update_value
 		if key is None:
 			key = self.key(**kwargs)
@@ -170,7 +170,17 @@ class KwThreadedSegment(ThreadedSegment):
 			with self.write_lock:
 				self.new_queries.append(key)
 			if self.do_update_first or self.run_once:
-				return self.render(update_value=self.get_update_value(True), update_first=False, key=key, **kwargs)
+				if after_update:
+					self.error('internal error: value was not computed even though update_first was set')
+					update_state = None
+				else:
+					return self.render(
+						update_value=self.get_update_value(True),
+						update_first=False,
+						key=key,
+						after_update=True,
+						**kwargs
+					)
 			else:
 				update_state = None
 
