@@ -53,13 +53,10 @@ class ThreadedSegment(MultiRunnedThread):
 			# cursor”.
 			#
 			# If running once .update() is called in __call__.
-			update_value = self.get_update_value(update_first and self.update_first)
 			self.start()
-		elif not self.updated:
-			update_value = self.get_update_value(True)
-			self.updated = True
+			update_value = self.get_update_value(self.do_update_first)
 		else:
-			update_value = self.get_update_value()
+			update_value = self.get_update_value(not self.updated)
 
 		if self.crashed:
 			return self.crashed_value
@@ -77,6 +74,7 @@ class ThreadedSegment(MultiRunnedThread):
 			self.crashed = True
 		else:
 			self.crashed = False
+			self.updated = True
 
 	def get_update_value(self, update=False):
 		if update:
@@ -84,10 +82,16 @@ class ThreadedSegment(MultiRunnedThread):
 		return self.update_value
 
 	def run(self):
-		while not self.shutdown_event.is_set():
+		if self.do_update_first:
 			start_time = monotonic()
-			self.set_update_value()
-			self.shutdown_event.wait(max(self.interval - (monotonic() - start_time), self.min_sleep_time))
+			while not self.shutdown_event.wait(max(self.interval - (monotonic() - start_time), self.min_sleep_time)):
+				start_time = monotonic()
+				self.set_update_value()
+		else:
+			while not self.shutdown_event.is_set():
+				start_time = monotonic()
+				self.set_update_value()
+				self.shutdown_event.wait(max(self.interval - (monotonic() - start_time), self.min_sleep_time))
 
 	def shutdown(self):
 		self.shutdown_event.set()
@@ -107,7 +111,8 @@ class ThreadedSegment(MultiRunnedThread):
 	def set_state(self, interval=None, update_first=True, shutdown_event=None, **kwargs):
 		self.set_interval(interval)
 		self.shutdown_event = shutdown_event or Event()
-		self.updated = self.updated or (not (update_first and self.update_first))
+		self.do_update_first = update_first and self.update_first
+		self.updated = self.updated or (not self.do_update_first)
 
 	def startup(self, pl, **kwargs):
 		self.run_once = False
