@@ -158,9 +158,10 @@ class KwThreadedSegment(ThreadedSegment):
 	def key(**kwargs):
 		return frozenset(kwargs.items())
 
-	def render(self, update_value, update_first, **kwargs):
+	def render(self, update_value, update_first, key=None, **kwargs):
 		queries, crashed = update_value
-		key = self.key(**kwargs)
+		if key is None:
+			key = self.key(**kwargs)
 		if key in crashed:
 			return self.crashed_value
 
@@ -169,8 +170,8 @@ class KwThreadedSegment(ThreadedSegment):
 		except KeyError:
 			with self.write_lock:
 				self.new_queries.append(key)
-			if update_first and self.update_first:
-				return self.render(update_value=self.get_update_value(True), update_first=False, **kwargs)
+			if self.do_update_first or self.run_once:
+				return self.render(update_value=self.get_update_value(True), update_first=False, key=key, **kwargs)
 			else:
 				update_state = None
 
@@ -207,8 +208,9 @@ class KwThreadedSegment(ThreadedSegment):
 
 		return update_value
 
-	def set_state(self, interval=None, shutdown_event=None, **kwargs):
+	def set_state(self, interval=None, update_first=True, shutdown_event=None, **kwargs):
 		self.set_interval(interval)
+		self.do_update_first = update_first and self.update_first
 		self.shutdown_event = shutdown_event or Event()
 
 	@staticmethod
