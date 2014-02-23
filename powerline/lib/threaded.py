@@ -144,7 +144,6 @@ class ThreadedSegment(MultiRunnedThread):
 
 
 class KwThreadedSegment(ThreadedSegment):
-	drop_interval = 10 * 60
 	update_first = True
 
 	def __init__(self):
@@ -198,7 +197,7 @@ class KwThreadedSegment(ThreadedSegment):
 			self.new_queries = []
 
 		for key, (last_query_time, state) in queries.items():
-			if last_query_time < monotonic() < last_query_time + self.drop_interval:
+			if last_query_time < monotonic() < last_query_time + self.interval:
 				updates[key] = (last_query_time, state)
 			else:
 				self.update_one(crashed, updates, key)
