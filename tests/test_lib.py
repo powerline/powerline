@@ -1,11 +1,15 @@
 # vim:fileencoding=utf-8:noet
+from __future__ import division
+
 from powerline.lib import mergedicts, add_divider_highlight_group
 from powerline.lib.humanize_bytes import humanize_bytes
 from powerline.lib.vcs import guess
-from subprocess import call, PIPE
+from powerline.lib.monotonic import monotonic
 import os
 import sys
 import re
+from time import sleep
+from subprocess import call, PIPE
 from functools import partial
 from tests import TestCase, SkipTest
 
@@ -41,12 +45,11 @@ class TestLib(TestCase):
 
 class TestFilesystemWatchers(TestCase):
 	def do_test_for_change(self, watcher, path):
-		import time
-		st = time.time()
-		while time.time() - st < 1:
+		st = monotonic()
+		while monotonic() - st < 1:
 			if watcher(path):
 				return
-			time.sleep(0.1)
+			sleep(0.1)
 		self.fail('The change to {0} was not detected'.format(path))
 
 	def test_file_watcher(self):
@@ -134,9 +137,8 @@ use_mercurial = use_bzr = sys.version_info < (3, 0)
 
 class TestVCS(TestCase):
 	def do_branch_rename_test(self, repo, q):
-		import time
-		st = time.time()
-		while time.time() - st < 1:
+		st = monotonic()
+		while monotonic() - st < 1:
 			# Give inotify time to deliver events
 			ans = repo.branch()
 			if hasattr(q, '__call__'):
@@ -145,7 +147,7 @@ class TestVCS(TestCase):
 			else:
 				if ans == q:
 					break
-			time.sleep(0.01)
+			sleep(0.01)
 		if hasattr(q, '__call__'):
 			self.assertTrue(q(ans))
 		else:
