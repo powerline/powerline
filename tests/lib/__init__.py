@@ -5,13 +5,14 @@ import sys
 
 class Pl(object):
 	def __init__(self):
+		self.exceptions = []
 		self.errors = []
 		self.warns = []
 		self.debugs = []
 		self.prefix = None
 		self.use_daemon_threads = True
 
-	for meth in ('error', 'warn', 'debug'):
+	for meth in ('error', 'warn', 'debug', 'exception'):
 		exec (('def {0}(self, msg, *args, **kwargs):\n'
 				'	self.{0}s.append((kwargs.get("prefix") or self.prefix, msg, args, kwargs))\n').format(meth))
 
