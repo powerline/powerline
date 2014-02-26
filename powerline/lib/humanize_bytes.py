@@ -17,6 +17,6 @@ def humanize_bytes(num, suffix='B', si_prefix=False):
 	unit, decimals = unit_list[exponent]
 	if unit and not si_prefix:
 		unit = unit.upper() + 'i'
-	return '{{quotient:.{decimals}f}} {{unit}}{{suffix}}'\
-		.format(decimals=decimals)\
-		.format(quotient=quotient, unit=unit, suffix=suffix)
+	return ('{{quotient:.{decimals}f}} {{unit}}{{suffix}}'
+		.format(decimals=decimals)
+		.format(quotient=quotient, unit=unit, suffix=suffix))

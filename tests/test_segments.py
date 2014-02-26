@@ -476,8 +476,8 @@ class TestCommon(TestCase):
 
 	def test_environment(self):
 		pl = Pl()
-		variable = 'FOO';
-		value = 'bar';
+		variable = 'FOO'
+		value = 'bar'
 		with replace_env(variable, value) as segment_info:
 			self.assertEqual(common.environment(pl=pl, segment_info=segment_info, variable=variable), value)
 			segment_info['environ'].pop(variable)
@@ -541,6 +541,7 @@ class TestCommon(TestCase):
 					'gradient_level': 1
 				}
 			])
+
 
 class TestVim(TestCase):
 	def test_mode(self):
@@ -659,10 +660,10 @@ class TestVim(TestCase):
 			vim_module._set_cursor(0, 0)
 			self.assertEqual(vim.position(pl=pl, segment_info=segment_info), 'Top')
 			vim_module._set_cursor(97, 0)
-			self.assertEqual(vim.position(pl=pl, segment_info=segment_info, position_strings={'top':'Comienzo', 'bottom':'Final', 'all':'Todo'}), 'Final')
+			self.assertEqual(vim.position(pl=pl, segment_info=segment_info, position_strings={'top': 'Comienzo', 'bottom': 'Final', 'all': 'Todo'}), 'Final')
 			segment_info['buffer'][0:-1] = [str(i) for i in range(2)]
 			vim_module._set_cursor(0, 0)
-			self.assertEqual(vim.position(pl=pl, segment_info=segment_info, position_strings={'top':'Comienzo', 'bottom':'Final', 'all':'Todo'}), 'Todo')
+			self.assertEqual(vim.position(pl=pl, segment_info=segment_info, position_strings={'top': 'Comienzo', 'bottom': 'Final', 'all': 'Todo'}), 'Todo')
 			self.assertEqual(vim.position(pl=pl, segment_info=segment_info, gradient=True),
 					[{'contents': 'All', 'highlight_group': ['position_gradient', 'position'], 'gradient_level': 0.0}])
 		finally:

@@ -307,9 +307,9 @@ def _emul_line(expr):
 	cursorline = windows[_window - 1].cursor[0] + 1
 	numlines = len(_buf_lines[_buffer()])
 	if expr == 'w0':
-		return max(cursorline-5, 1)
+		return max(cursorline - 5, 1)
 	if expr == 'w$':
-		return min(cursorline+5, numlines)
+		return min(cursorline + 5, numlines)
 	raise NotImplementedError
 
 
@@ -401,7 +401,6 @@ class _Buffer(object):
 			import os
 			if type(name) is not bytes:
 				name = name.encode('utf-8')
-			import sys
 			self._name = os.path.abspath(name)
 
 	def __getitem__(self, line):

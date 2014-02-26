@@ -140,12 +140,12 @@ class VimRenderer(Renderer):
 					hl_group['attr'].append('italic')
 				if attr & ATTR_UNDERLINE:
 					hl_group['attr'].append('underline')
-			hl_group['name'] = 'Pl_' + \
-				str(hl_group['ctermfg']) + '_' + \
-				str(hl_group['guifg']) + '_' + \
-				str(hl_group['ctermbg']) + '_' + \
-				str(hl_group['guibg']) + '_' + \
-				''.join(hl_group['attr'])
+			hl_group['name'] = ('Pl_' +
+						str(hl_group['ctermfg']) + '_' +
+						str(hl_group['guifg']) + '_' +
+						str(hl_group['ctermbg']) + '_' +
+						str(hl_group['guibg']) + '_' +
+						''.join(hl_group['attr']))
 			self.hl_groups[(fg, bg, attr)] = hl_group
 			vim.command('hi {group} ctermfg={ctermfg} guifg={guifg} guibg={guibg} ctermbg={ctermbg} cterm={attr} gui={attr}'.format(
 				group=hl_group['name'],

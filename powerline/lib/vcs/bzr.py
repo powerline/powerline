@@ -10,15 +10,16 @@ from bzrlib import (workingtree, status, library_state, trace, ui)
 
 from powerline.lib.vcs import get_branch_name, get_file_status
 
+
 class CoerceIO(StringIO):
 	def write(self, arg):
 		if isinstance(arg, bytes):
 			arg = arg.decode('utf-8', 'replace')
 		return super(CoerceIO, self).write(arg)
 
-state = None
 
 nick_pat = re.compile(br'nickname\s*=\s*(.+)')
+
 
 def branch_name_from_config_file(directory, config_file):
 	ans = None
@@ -33,8 +34,11 @@ def branch_name_from_config_file(directory, config_file):
 		pass
 	return ans or os.path.basename(directory)
 
-class Repository(object):
 
+state = None
+
+
+class Repository(object):
 	def __init__(self, directory):
 		if isinstance(directory, bytes):
 			directory = directory.decode(sys.getfilesystemencoding() or sys.getdefaultencoding() or 'utf-8')
@@ -75,7 +79,7 @@ class Repository(object):
 			return
 		if path:
 			ans = raw[:2]
-			if ans == 'I ': # Ignored
+			if ans == 'I ':  # Ignored
 				ans = None
 			return ans
 		dirtied = untracked = ' '
@@ -90,4 +94,3 @@ class Repository(object):
 	def branch(self):
 		config_file = os.path.join(self.directory, '.bzr', 'branch', 'branch.conf')
 		return get_branch_name(self.directory, config_file, branch_name_from_config_file)
-

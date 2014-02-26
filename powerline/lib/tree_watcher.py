@@ -16,19 +16,21 @@ from powerline.lib.inotify import INotify, INotifyError
 class NoSuchDir(ValueError):
 	pass
 
+
 class BaseDirChanged(ValueError):
 	pass
 
-class DirTooLarge(ValueError):
 
+class DirTooLarge(ValueError):
 	def __init__(self, bdir):
 		ValueError.__init__(self, 'The directory {0} is too large to monitor. Try increasing the value in /proc/sys/fs/inotify/max_user_watches'.format(bdir))
+
 
 def realpath(path):
 	return os.path.abspath(os.path.realpath(path))
 
-class INotifyTreeWatcher(INotify):
 
+class INotifyTreeWatcher(INotify):
 	is_dummy = False
 
 	def __init__(self, basedir, ignore_event=None):
@@ -141,7 +143,6 @@ class INotifyTreeWatcher(INotify):
 
 
 class DummyTreeWatcher(object):
-
 	is_dummy = True
 
 	def __init__(self, basedir):
@@ -150,8 +151,8 @@ class DummyTreeWatcher(object):
 	def __call__(self):
 		return False
 
-class TreeWatcher(object):
 
+class TreeWatcher(object):
 	def __init__(self, expire_time=10):
 		self.watches = {}
 		self.last_query_times = {}
@@ -202,6 +203,7 @@ class TreeWatcher(object):
 				logger.warn(str(e))
 			self.watches[path] = DummyTreeWatcher(path)
 			return False
+
 
 if __name__ == '__main__':
 	w = INotifyTreeWatcher(sys.argv[-1])
