@@ -222,7 +222,6 @@ class TestThreaded(TestCase):
 	def test_kw_threaded_segment(self):
 		log = []
 		pl = Pl()
-		lock = threading.Lock()
 		event = threading.Event()
 
 		class TestSegment(KwThreadedSegment):
@@ -237,8 +236,7 @@ class TestThreaded(TestCase):
 				event.set()
 				sleep(0.1)
 				log.append(('compute_state', key))
-				with lock:
-					ret = key
+				ret = key
 				if isinstance(ret, Exception):
 					raise ret
 				else:
