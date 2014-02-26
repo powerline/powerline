@@ -84,7 +84,10 @@ class ThreadedSegment(MultiRunnedThread):
 	def run(self):
 		if self.do_update_first:
 			start_time = monotonic()
-			while not self.shutdown_event.wait(max(self.interval - (monotonic() - start_time), self.min_sleep_time)):
+			while True:
+				self.shutdown_event.wait(max(self.interval - (monotonic() - start_time), self.min_sleep_time))
+				if self.shutdown_event.is_set():
+					break
 				start_time = monotonic()
 				self.set_update_value()
 		else:
