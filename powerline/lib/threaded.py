@@ -37,7 +37,7 @@ class ThreadedSegment(MultiRunnedThread):
 	def __init__(self):
 		super(ThreadedSegment, self).__init__()
 		self.run_once = True
-		self.skip = False
+		self.crashed = False
 		self.crashed_value = None
 		self.update_value = None
 		self.updated = False
@@ -53,38 +53,48 @@ class ThreadedSegment(MultiRunnedThread):
 			# cursor”.
 			#
 			# If running once .update() is called in __call__.
-			update_value = self.get_update_value(update_first and self.update_first)
 			self.start()
-		elif not self.updated:
-			update_value = self.get_update_value(True)
-			self.updated = True
+			update_value = self.get_update_value(self.do_update_first)
 		else:
-			update_value = self.update_value
+			update_value = self.get_update_value(not self.updated)
 
-		if self.skip:
+		if self.crashed:
 			return self.crashed_value
 
 		return self.render(update_value, update_first=update_first, pl=pl, **kwargs)
 
+	def set_update_value(self):
+		try:
+			self.update_value = self.update(self.update_value)
+		except Exception as e:
+			self.exception('Exception while updating: {0}', str(e))
+			self.crashed = True
+		except KeyboardInterrupt:
+			self.warn('Caught keyboard interrupt while updating')
+			self.crashed = True
+		else:
+			self.crashed = False
+			self.updated = True
+
 	def get_update_value(self, update=False):
 		if update:
-			self.update_value = self.update(self.update_value)
+			self.set_update_value()
 		return self.update_value
 
 	def run(self):
-		while not self.shutdown_event.is_set():
+		if self.do_update_first:
 			start_time = monotonic()
-			try:
-				self.update_value = self.update(self.update_value)
-			except Exception as e:
-				self.exception('Exception while updating: {0}', str(e))
-				self.skip = True
-			except KeyboardInterrupt:
-				self.warn('Caught keyboard interrupt while updating')
-				self.skip = True
-			else:
-				self.skip = False
-			self.shutdown_event.wait(max(self.interval - (monotonic() - start_time), self.min_sleep_time))
+			while True:
+				self.shutdown_event.wait(max(self.interval - (monotonic() - start_time), self.min_sleep_time))
+				if self.shutdown_event.is_set():
+					break
+				start_time = monotonic()
+				self.set_update_value()
+		else:
+			while not self.shutdown_event.is_set():
+				start_time = monotonic()
+				self.set_update_value()
+				self.shutdown_event.wait(max(self.interval - (monotonic() - start_time), self.min_sleep_time))
 
 	def shutdown(self):
 		self.shutdown_event.set()
@@ -104,7 +114,8 @@ class ThreadedSegment(MultiRunnedThread):
 	def set_state(self, interval=None, update_first=True, shutdown_event=None, **kwargs):
 		self.set_interval(interval)
 		self.shutdown_event = shutdown_event or Event()
-		self.updated = self.updated or (not (update_first and self.update_first))
+		self.do_update_first = update_first and self.update_first
+		self.updated = self.updated or (not self.do_update_first)
 
 	def startup(self, pl, **kwargs):
 		self.run_once = False
@@ -136,7 +147,6 @@ class ThreadedSegment(MultiRunnedThread):
 
 
 class KwThreadedSegment(ThreadedSegment):
-	drop_interval = 10 * 60
 	update_first = True
 
 	def __init__(self):
@@ -144,54 +154,75 @@ class KwThreadedSegment(ThreadedSegment):
 		self.updated = True
 		self.update_value = ({}, set())
 		self.write_lock = Lock()
-		self.new_queries = {}
+		self.new_queries = []
 
 	@staticmethod
 	def key(**kwargs):
 		return frozenset(kwargs.items())
 
-	def render(self, update_value, update_first, **kwargs):
+	def render(self, update_value, update_first, key=None, after_update=False, **kwargs):
 		queries, crashed = update_value
-		key = self.key(**kwargs)
+		if key is None:
+			key = self.key(**kwargs)
 		if key in crashed:
 			return self.crashed_value
 
 		try:
 			update_state = queries[key][1]
 		except KeyError:
-			# Allow only to forbid to compute missing values: in either user 
-			# configuration or in subclasses.
-			update_state = self.compute_state(key) if ((update_first and self.update_first) or self.run_once) else None
+			with self.write_lock:
+				self.new_queries.append(key)
+			if self.do_update_first or self.run_once:
+				if after_update:
+					self.error('internal error: value was not computed even though update_first was set')
+					update_state = None
+				else:
+					return self.render(
+						update_value=self.get_update_value(True),
+						update_first=False,
+						key=key,
+						after_update=True,
+						**kwargs
+					)
+			else:
+				update_state = None
 
-		with self.write_lock:
-			self.new_queries[key] = (monotonic(), update_state)
 		return self.render_one(update_state, **kwargs)
+
+	def update_one(self, crashed, updates, key):
+		try:
+			updates[key] = (monotonic(), self.compute_state(key))
+		except Exception as e:
+			self.exception('Exception while computing state for {0!r}: {1}', key, str(e))
+			crashed.add(key)
+		except KeyboardInterrupt:
+			self.warn('Interrupt while computing state for {0!r}', key)
+			crashed.add(key)
 
 	def update(self, old_update_value):
 		updates = {}
 		crashed = set()
 		update_value = (updates, crashed)
 		queries = old_update_value[0]
+
+		new_queries = self.new_queries
 		with self.write_lock:
-			if self.new_queries:
-				queries.update(self.new_queries)
-				self.new_queries.clear()
+			self.new_queries = []
 
 		for key, (last_query_time, state) in queries.items():
-			if last_query_time < monotonic() < last_query_time + self.drop_interval:
-				try:
-					updates[key] = (last_query_time, self.compute_state(key))
-				except Exception as e:
-					self.exception('Exception while computing state for {0!r}: {1}', key, str(e))
-					crashed.add(key)
-				except KeyboardInterrupt:
-					self.warn('Interrupt while computing state for {0!r}', key)
-					crashed.add(key)
+			if last_query_time < monotonic() < last_query_time + self.interval:
+				updates[key] = (last_query_time, state)
+			else:
+				self.update_one(crashed, updates, key)
+
+		for key in new_queries:
+			self.update_one(crashed, updates, key)
 
 		return update_value
 
-	def set_state(self, interval=None, shutdown_event=None, **kwargs):
+	def set_state(self, interval=None, update_first=True, shutdown_event=None, **kwargs):
 		self.set_interval(interval)
+		self.do_update_first = update_first and self.update_first
 		self.shutdown_event = shutdown_event or Event()
 
 	@staticmethod
