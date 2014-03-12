@@ -48,6 +48,6 @@ _powerline_prompt() {
 }
 
 [[ "$PROMPT_COMMAND" != "${PROMPT_COMMAND/_powerline_prompt/}" ]] ||
-	export PROMPT_COMMAND="${PROMPT_COMMAND}"$'\n'"_powerline_prompt"
+	export PROMPT_COMMAND="_powerline_prompt; ${PROMPT_COMMAND}"
 
 _powerline_init_tmux_support
