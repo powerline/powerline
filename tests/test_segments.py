@@ -169,7 +169,18 @@ class TestCommon(TestCase):
 
 	def test_user(self):
 		new_os = new_module('os', getpid=lambda: 1)
-		new_psutil = new_module('psutil', Process=lambda pid: Args(username='def'))
+
+		class Process(object):
+			def __init__(self, pid):
+				pass
+
+			def username(self):
+				return 'def'
+
+			if hasattr(common, 'psutil') and not callable(common.psutil.Process.username):
+				username = property(username)
+
+		new_psutil = new_module('psutil', Process=Process)
 		pl = Pl()
 		with replace_env('USER', 'def') as segment_info:
 			common.username = False
