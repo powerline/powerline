@@ -120,6 +120,14 @@
 				"before": ":",
 				"width": 3,
 				"align": "l"
+			},
+			{
+				"name": "buffer_number",
+				"after": "@"
+			},
+			{
+				"name": "window_number",
+				"draw_soft_divider": false
 			}
 		]
 	}

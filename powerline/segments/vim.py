@@ -368,6 +368,20 @@ def modified_buffers(pl, text='+ ', join_str=','):
 		return text + join_str.join(buffer_mod)
 	return None
 
+
+@requires_segment_info
+def buffer_number(segment_info, **kwargs):
+	'''Return the current buffer number.'''
+	return str(segment_info['bufnr'])
+
+
+@requires_segment_info
+def window_number(segment_info, **kwargs):
+	'''Return the current window number.'''
+	s = repr(segment_info['window'])  # '<window 42>'
+	return str(int(s.split(' ')[-1][:-1])+1)
+
+
 @requires_segment_info
 def branch(pl, segment_info, status_colors=False):
 	'''Return the current working branch.
@@ -394,6 +408,7 @@ def branch(pl, segment_info, status_colors=False):
 				'highlight_group': scol,
 				'divider_highlight_group': 'branch:divider',
 			}]
+
 
 @requires_segment_info
 def file_vcs_status(pl, segment_info):

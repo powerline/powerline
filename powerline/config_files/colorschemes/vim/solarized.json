@@ -1,6 +1,8 @@
 {
 	"name": "Solarized Dark",
 	"groups": {
+		"buffer_number":            { "fg": "gray61", "bg": "royalblue5" },
+		"window_number":            { "fg": "gray61", "bg": "royalblue5" },
 		"background":               { "fg": "oldlace", "bg": "royalblue5" },
 		"background:divider":       { "fg": "lightskyblue4", "bg": "royalblue5" },
 		"mode":                     { "fg": "oldlace", "bg": "green", "attr": ["bold"] },

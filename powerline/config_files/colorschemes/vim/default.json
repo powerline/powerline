@@ -1,6 +1,8 @@
 {
 	"name": "Default color scheme",
 	"groups": {
+		"buffer_number":            { "fg": "gray8", "bg": "gray2" },
+		"window_number":            { "fg": "gray8", "bg": "gray2" },
 		"background":               { "fg": "white", "bg": "gray2" },
 		"background:divider":       { "fg": "gray6", "bg": "gray2" },
 		"mode":                     { "fg": "darkestgreen", "bg": "brightgreen", "attr": ["bold"] },
