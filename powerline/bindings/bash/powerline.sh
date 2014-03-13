@@ -47,7 +47,7 @@ _powerline_prompt() {
 	return $last_exit_code
 }
 
-[[ "$PROMPT_COMMAND" != "${PROMPT_COMMAND/_powerline_prompt/}" ]] ||
-	export PROMPT_COMMAND="${PROMPT_COMMAND}"$'\n'"_powerline_prompt"
+test "x$PROMPT_COMMAND" != "x${PROMPT_COMMAND%_powerline_prompt*}" ||
+	export PROMPT_COMMAND=$'_powerline_prompt\n'"${PROMPT_COMMAND}"
 
 _powerline_init_tmux_support
