@@ -158,8 +158,19 @@ def date(pl, format='%Y-%m-%d', istime=False):
 	}]
 
 
-def fuzzy_time(pl):
-	'''Display the current time as fuzzy time, e.g. "quarter past six".'''
+UNICODE_TEXT_TRANSLATION = {
+	ord('\''): '’',
+	ord('-'): '‐',
+}
+
+
+def fuzzy_time(pl, unicode_text=True):
+	'''Display the current time as fuzzy time, e.g. "quarter past six".
+
+	:param bool unicode_text:
+		If true then hyphenminuses (regular ASCII ``-``) and single quotes are 
+		replaced with unicode dashes and apostrophes.
+	'''
 	hour_str = ['twelve', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven']
 	minute_str = {
 		5: 'five past',
@@ -202,10 +213,15 @@ def fuzzy_time(pl):
 
 	minute = int(round(now.minute / 5.0) * 5)
 	if minute == 60 or minute == 0:
-		return ' '.join([hour, 'o\'clock'])
+		result = ' '.join([hour, 'o\'clock'])
 	else:
 		minute = minute_str[minute]
-		return ' '.join([minute, hour])
+		result = ' '.join([minute, hour])
+
+	if unicode_text:
+		result = result.translate(UNICODE_TEXT_TRANSLATION)
+
+	return result
 
 
 def _external_ip(query_url='http://ipv4.icanhazip.com/'):

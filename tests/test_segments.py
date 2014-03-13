@@ -326,9 +326,13 @@ class TestCommon(TestCase):
 			time.minute = 59
 			self.assertEqual(common.fuzzy_time(pl=pl), 'round about midnight')
 			time.minute = 33
-			self.assertEqual(common.fuzzy_time(pl=pl), 'twenty-five to twelve')
+			self.assertEqual(common.fuzzy_time(pl=pl), 'twenty‐five to twelve')
 			time.minute = 60
-			self.assertEqual(common.fuzzy_time(pl=pl), 'twelve o\'clock')
+			self.assertEqual(common.fuzzy_time(pl=pl), 'twelve o’clock')
+			time.minute = 33
+			self.assertEqual(common.fuzzy_time(pl=pl, unicode_text=False), 'twenty-five to twelve')
+			time.minute = 60
+			self.assertEqual(common.fuzzy_time(pl=pl, unicode_text=False), 'twelve o\'clock')
 
 	def test_external_ip(self):
 		pl = Pl()
