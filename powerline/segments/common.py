@@ -517,11 +517,11 @@ try:
 			if data:
 				yield interface, data.bytes_recv, data.bytes_sent
 
-	# Pre psutil-2.0.0: psutil.Process.username has type property
+	# psutil-2.0.0: psutil.Process.username is unbound method
 	if callable(psutil.Process.username):
 		def _get_user(segment_info):
 			return psutil.Process(os.getpid()).username()
-	# psutil-2.0.0: psutil.Process.username is unbound method
+	# pre psutil-2.0.0: psutil.Process.username has type property
 	else:
 		def _get_user(segment_info):
 			return psutil.Process(os.getpid()).username
