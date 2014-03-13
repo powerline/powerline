@@ -517,8 +517,14 @@ try:
 			if data:
 				yield interface, data.bytes_recv, data.bytes_sent
 
-	def _get_user(segment_info):
-		return psutil.Process(os.getpid()).username
+	# Pre psutil-2.0.0: psutil.Process.username has type property
+	if callable(psutil.Process.username):
+		def _get_user(segment_info):
+			return psutil.Process(os.getpid()).username()
+	# psutil-2.0.0: psutil.Process.username is unbound method
+	else:
+		def _get_user(segment_info):
+			return psutil.Process(os.getpid()).username
 
 	class CPULoadPercentSegment(ThreadedSegment):
 		interval = 1
