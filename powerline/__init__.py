@@ -7,31 +7,12 @@ import logging
 
 from powerline.colorscheme import Colorscheme
 from powerline.lib.config import ConfigLoader
+from powerline.lib.unicode import safe_unicode
 
 from threading import Lock, Event
 
-try:
-	from __builtin__ import unicode
-except ImportError:
-	unicode = str  # NOQA
-
 
 DEFAULT_SYSTEM_CONFIG_DIR = None
-
-
-def safe_unicode(s):
-	'''Return unicode instance without raising an exception.
-	'''
-	try:
-		try:
-			return unicode(s)
-		except UnicodeDecodeError:
-			try:
-				return unicode(s, 'utf-8')
-			except TypeError:
-				return unicode(str(s), 'utf-8')
-	except Exception as e:
-		return safe_unicode(e)
 
 
 class FailedUnicode(unicode):
@@ -69,7 +50,7 @@ class PowerlineLogger(object):
 		prefix = self.ext + ((':' + prefix) if prefix else '')
 		if args or kwargs:
 			msg = msg.format(*args, **kwargs)
-		msg = prefix + ':' + msg
+		msg = prefix + ':' + safe_unicode(msg)
 		key = attr + ':' + prefix
 		if msg != self.last_msgs.get(key):
 			getattr(self.logger, attr)(msg)
