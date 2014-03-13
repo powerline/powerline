@@ -75,17 +75,22 @@ def branch(pl, segment_info, status_colors=False):
 
 
 @requires_segment_info
-def cwd(pl, segment_info, dir_shorten_len=None, dir_limit_depth=None, use_path_separator=False):
+def cwd(pl, segment_info, dir_shorten_len=None, dir_limit_depth=None, use_path_separator=False, ellipsis='⋯'):
 	'''Return the current working directory.
 
 	Returns a segment list to create a breadcrumb-like effect.
 
 	:param int dir_shorten_len:
-		shorten parent directory names to this length (e.g. :file:`/long/path/to/powerline` → :file:`/l/p/t/powerline`)
+		shorten parent directory names to this length (e.g. 
+		:file:`/long/path/to/powerline` → :file:`/l/p/t/powerline`)
 	:param int dir_limit_depth:
-		limit directory depth to this number (e.g. :file:`/long/path/to/powerline` → :file:`⋯/to/powerline`)
+		limit directory depth to this number (e.g. 
+		:file:`/long/path/to/powerline` → :file:`⋯/to/powerline`)
 	:param bool use_path_separator:
 		Use path separator in place of soft divider.
+	:param str ellipsis:
+		Specifies what to use in place of omitted directories. Use None to not 
+		show this subsegment at all.
 
 	Divider highlight group used: ``cwd:divider``.
 
@@ -110,7 +115,8 @@ def cwd(pl, segment_info, dir_shorten_len=None, dir_limit_depth=None, use_path_s
 	cwd = [i[0:dir_shorten_len] if dir_shorten_len and i else i for i in cwd_split[:-1]] + [cwd_split[-1]]
 	if dir_limit_depth and cwd_split_len > dir_limit_depth + 1:
 		del(cwd[0:-dir_limit_depth])
-		cwd.insert(0, '⋯')
+		if ellipsis is not None:
+			cwd.insert(0, ellipsis)
 	ret = []
 	if not cwd[0]:
 		cwd[0] = '/'
