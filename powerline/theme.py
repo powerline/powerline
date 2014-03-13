@@ -1,7 +1,7 @@
 # vim:fileencoding=utf-8:noet
 
 from powerline.segment import gen_segment_getter
-from powerline.lib.unicode import u, unicode
+from powerline.lib.unicode import u
 
 
 def requires_segment_info(func):

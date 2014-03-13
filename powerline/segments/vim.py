@@ -161,7 +161,6 @@ def file_directory(pl, segment_info, shorten_user=True, shorten_cwd=True, shorte
 	name = buffer_name(segment_info['buffer'])
 	if not name:
 		return None
-	import sys
 	file_directory = vim_funcs['fnamemodify'](name, (':~' if shorten_user else '')
 												+ (':.' if shorten_cwd else '') + ':h')
 	if not file_directory:
@@ -285,7 +284,7 @@ def line_percent(pl, segment_info, gradient=False):
 
 
 @window_cached
-def position(pl, position_strings={'top':'Top', 'bottom':'Bot', 'all':'All'}, gradient=False):
+def position(pl, position_strings={'top': 'Top', 'bottom': 'Bot', 'all': 'All'}, gradient=False):
 	'''Return the position of the current view in the file as a percentage.
 
 	:param dict position_strings:
@@ -368,6 +367,7 @@ def modified_buffers(pl, text='+ ', join_str=','):
 		return text + join_str.join(buffer_mod)
 	return None
 
+
 @requires_segment_info
 def branch(pl, segment_info, status_colors=False):
 	'''Return the current working branch.
@@ -394,6 +394,7 @@ def branch(pl, segment_info, status_colors=False):
 				'highlight_group': scol,
 				'divider_highlight_group': 'branch:divider',
 			}]
+
 
 @requires_segment_info
 def file_vcs_status(pl, segment_info):

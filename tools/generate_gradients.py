@@ -138,8 +138,8 @@ palettes = {
 	'256': (cterm_to_hex, lambda c: c),
 	None: (cterm_to_hex[16:], lambda c: c + 16),
 }
-r = [get_rgb(*color) for color in gradient]
-r2 = [find_color(color, *palettes[args.palette])[0] for color in gradient]
+r = [get_rgb(*col) for col in gradient]
+r2 = [find_color(col, *palettes[args.palette])[0] for col in gradient]
 r3 = [i[0] for i in groupby(r2)]
 print(json.dumps(r))
 print(json.dumps(r2))

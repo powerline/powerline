@@ -75,17 +75,22 @@ def branch(pl, segment_info, status_colors=False):
 
 
 @requires_segment_info
-def cwd(pl, segment_info, dir_shorten_len=None, dir_limit_depth=None, use_path_separator=False):
+def cwd(pl, segment_info, dir_shorten_len=None, dir_limit_depth=None, use_path_separator=False, ellipsis='⋯'):
 	'''Return the current working directory.
 
 	Returns a segment list to create a breadcrumb-like effect.
 
 	:param int dir_shorten_len:
-		shorten parent directory names to this length (e.g. :file:`/long/path/to/powerline` → :file:`/l/p/t/powerline`)
+		shorten parent directory names to this length (e.g. 
+		:file:`/long/path/to/powerline` → :file:`/l/p/t/powerline`)
 	:param int dir_limit_depth:
-		limit directory depth to this number (e.g. :file:`/long/path/to/powerline` → :file:`⋯/to/powerline`)
+		limit directory depth to this number (e.g. 
+		:file:`/long/path/to/powerline` → :file:`⋯/to/powerline`)
 	:param bool use_path_separator:
 		Use path separator in place of soft divider.
+	:param str ellipsis:
+		Specifies what to use in place of omitted directories. Use None to not 
+		show this subsegment at all.
 
 	Divider highlight group used: ``cwd:divider``.
 
@@ -110,7 +115,8 @@ def cwd(pl, segment_info, dir_shorten_len=None, dir_limit_depth=None, use_path_s
 	cwd = [i[0:dir_shorten_len] if dir_shorten_len and i else i for i in cwd_split[:-1]] + [cwd_split[-1]]
 	if dir_limit_depth and cwd_split_len > dir_limit_depth + 1:
 		del(cwd[0:-dir_limit_depth])
-		cwd.insert(0, '⋯')
+		if ellipsis is not None:
+			cwd.insert(0, ellipsis)
 	ret = []
 	if not cwd[0]:
 		cwd[0] = '/'
@@ -138,6 +144,8 @@ def date(pl, format='%Y-%m-%d', istime=False):
 
 	:param str format:
 		strftime-style date format string
+	:param bool istime:
+		If true then segment uses ``time`` highlight group.
 
 	Divider highlight group used: ``time:divider``.
 
@@ -150,8 +158,19 @@ def date(pl, format='%Y-%m-%d', istime=False):
 	}]
 
 
-def fuzzy_time(pl):
-	'''Display the current time as fuzzy time, e.g. "quarter past six".'''
+UNICODE_TEXT_TRANSLATION = {
+	ord('\''): '’',
+	ord('-'): '‐',
+}
+
+
+def fuzzy_time(pl, unicode_text=True):
+	'''Display the current time as fuzzy time, e.g. "quarter past six".
+
+	:param bool unicode_text:
+		If true then hyphenminuses (regular ASCII ``-``) and single quotes are 
+		replaced with unicode dashes and apostrophes.
+	'''
 	hour_str = ['twelve', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven']
 	minute_str = {
 		5: 'five past',
@@ -194,10 +213,15 @@ def fuzzy_time(pl):
 
 	minute = int(round(now.minute / 5.0) * 5)
 	if minute == 60 or minute == 0:
-		return ' '.join([hour, 'o\'clock'])
+		result = ' '.join([hour, 'o\'clock'])
 	else:
 		minute = minute_str[minute]
-		return ' '.join([minute, hour])
+		result = ' '.join([minute, hour])
+
+	if unicode_text:
+		result = result.translate(UNICODE_TEXT_TRANSLATION)
+
+	return result
 
 
 def _external_ip(query_url='http://ipv4.icanhazip.com/'):
@@ -223,14 +247,14 @@ class ExternalIpSegment(ThreadedSegment):
 external_ip = with_docstring(ExternalIpSegment(),
 '''Return external IP address.
 
-Suggested URIs:
-
-* http://ipv4.icanhazip.com/
-* http://ipv6.icanhazip.com/
-* http://icanhazip.com/ (returns IPv6 address if available, else IPv4)
-
 :param str query_url:
 	URI to query for IP address, should return only the IP address as a text string
+
+	Suggested URIs:
+
+	* http://ipv4.icanhazip.com/
+	* http://ipv6.icanhazip.com/
+	* http://icanhazip.com/ (returns IPv6 address if available, else IPv4)
 
 Divider highlight group used: ``background:divider``.
 ''')

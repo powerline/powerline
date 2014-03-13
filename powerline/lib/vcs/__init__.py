@@ -1,15 +1,10 @@
 # vim:fileencoding=utf-8:noet
 from __future__ import absolute_import
 
-import os, errno
+import os
+import errno
 from threading import Lock
 from collections import defaultdict
-
-vcs_props = (
-	('git', '.git', os.path.exists),
-	('mercurial', '.hg', os.path.isdir),
-	('bzr', '.bzr', os.path.isdir),
-)
 
 
 def generate_directories(path):
@@ -24,7 +19,9 @@ def generate_directories(path):
 			break
 		yield path
 
+
 _file_watcher = None
+
 
 def file_watcher():
 	global _file_watcher
@@ -33,7 +30,9 @@ def file_watcher():
 		_file_watcher = create_file_watcher()
 	return _file_watcher
 
+
 _branch_watcher = None
+
 
 def branch_watcher():
 	global _branch_watcher
@@ -42,9 +41,11 @@ def branch_watcher():
 		_branch_watcher = create_file_watcher()
 	return _branch_watcher
 
+
 branch_name_cache = {}
 branch_lock = Lock()
 file_status_lock = Lock()
+
 
 def get_branch_name(directory, config_file, get_func):
 	global branch_name_cache
@@ -79,8 +80,8 @@ def get_branch_name(directory, config_file, get_func):
 			branch_name_cache[config_file] = get_func(directory, config_file)
 		return branch_name_cache[config_file]
 
-class FileStatusCache(dict):
 
+class FileStatusCache(dict):
 	def __init__(self):
 		self.dirstate_map = defaultdict(set)
 		self.ignore_map = defaultdict(set)
@@ -112,7 +113,9 @@ class FileStatusCache(dict):
 		for ignf in self.keypath_ignore_map[keypath]:
 			yield ignf
 
+
 file_status_cache = FileStatusCache()
+
 
 def get_file_status(directory, dirstate_file, file_path, ignore_file_name, get_func, extra_ignore_files=()):
 	global file_status_cache
@@ -175,8 +178,8 @@ def get_file_status(directory, dirstate_file, file_path, ignore_file_name, get_f
 			file_status_cache[keypath] = ans = get_func(directory, file_path)
 			return ans
 
-class TreeStatusCache(dict):
 
+class TreeStatusCache(dict):
 	def __init__(self):
 		from powerline.lib.tree_watcher import TreeWatcher
 		self.tw = TreeWatcher()
@@ -196,13 +199,23 @@ class TreeStatusCache(dict):
 			logger.warn('Failed to check %s for changes, with error: %s'% key, e)
 		return self.cache_and_get(key, repo.status)
 
+
 _tree_status_cache = None
+
 
 def tree_status(repo, logger):
 	global _tree_status_cache
 	if _tree_status_cache is None:
 		_tree_status_cache = TreeStatusCache()
 	return _tree_status_cache(repo, logger)
+
+
+vcs_props = (
+	('git', '.git', os.path.exists),
+	('mercurial', '.hg', os.path.isdir),
+	('bzr', '.bzr', os.path.isdir),
+)
+
 
 def guess(path):
 	for directory in generate_directories(path):
@@ -219,8 +232,12 @@ def guess(path):
 					pass
 	return None
 
+
 def debug():
-	''' To use run python -c "from powerline.lib.vcs import debug; debug()" some_file_to_watch '''
+	'''Test run guess(), repo.branch() and repo.status()
+
+	To use run python -c "from powerline.lib.vcs import debug; debug()" 
+	some_file_to_watch '''
 	import sys
 	dest = sys.argv[-1]
 	repo = guess(os.path.abspath(dest))

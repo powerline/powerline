@@ -18,9 +18,11 @@ class TestParser(TestCase):
 		parser = get_argparser()
 		out = StrIO()
 		err = StrIO()
+
 		def flush():
 			out.truncate(0)
 			err.truncate(0)
+
 		with replace_attr(sys, 'stdout', out, 'stderr', err):
 			for raising_args, raising_reg in [
 				([],                                     'too few arguments|the following arguments are required: ext'),
@@ -69,7 +71,7 @@ class TestParser(TestCase):
 					'-c', 'common.spaces=4',
 					'-t', 'default.segment_data.hostname.before=H:',
 					'-p', '.',
-					'-R', 'smth={"abc":"def"}'
+					'-R', 'smth={"abc":"def"}',
 				], {
 					'ext': ['shell'],
 					'side': 'left',

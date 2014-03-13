@@ -13,11 +13,12 @@ from threading import RLock
 from powerline.lib.monotonic import monotonic
 from powerline.lib.inotify import INotify, INotifyError
 
+
 def realpath(path):
 	return os.path.abspath(os.path.realpath(path))
 
-class INotifyWatch(INotify):
 
+class INotifyWatch(INotify):
 	is_stat_based = False
 
 	def __init__(self, expire_time=10):

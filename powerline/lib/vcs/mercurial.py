@@ -7,6 +7,7 @@ from mercurial import hg, ui, match
 
 from powerline.lib.vcs import get_branch_name, get_file_status
 
+
 def branch_name_from_config_file(directory, config_file):
 	try:
 		with open(config_file, 'rb') as f:
@@ -14,6 +15,7 @@ def branch_name_from_config_file(directory, config_file):
 		return raw.decode('utf-8', 'replace').strip()
 	except Exception:
 		return 'default'
+
 
 class Repository(object):
 	__slots__ = ('directory', 'ui')

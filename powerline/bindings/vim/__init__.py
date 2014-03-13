@@ -129,6 +129,7 @@ if sys.version_info < (3,):
 		return buf.name
 else:
 	vim_bufname = vim_get_func('bufname')
+
 	def buffer_name(buf):  # NOQA
 		try:
 			name = buf.name
