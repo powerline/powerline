@@ -144,6 +144,8 @@ def date(pl, format='%Y-%m-%d', istime=False):
 
 	:param str format:
 		strftime-style date format string
+	:param bool istime:
+		If true then segment uses ``time`` highlight group.
 
 	Divider highlight group used: ``time:divider``.
 
