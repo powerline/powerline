@@ -247,14 +247,14 @@ class ExternalIpSegment(ThreadedSegment):
 external_ip = with_docstring(ExternalIpSegment(),
 '''Return external IP address.
 
-Suggested URIs:
-
-* http://ipv4.icanhazip.com/
-* http://ipv6.icanhazip.com/
-* http://icanhazip.com/ (returns IPv6 address if available, else IPv4)
-
 :param str query_url:
 	URI to query for IP address, should return only the IP address as a text string
+
+	Suggested URIs:
+
+	* http://ipv4.icanhazip.com/
+	* http://ipv6.icanhazip.com/
+	* http://icanhazip.com/ (returns IPv6 address if available, else IPv4)
 
 Divider highlight group used: ``background:divider``.
 ''')
