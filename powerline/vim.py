@@ -181,7 +181,6 @@ def setup(pyeval=None, pycmd=None):
 	# inside :execute)). vim.command is :execute equivalent regarding this case.
 	vim.command('augroup Powerline')
 	vim.command('	autocmd! ColorScheme * :{pycmd} powerline.reset_highlight()'.format(pycmd=pycmd))
-	vim.command('	autocmd! VimEnter    * :redrawstatus!')
 	vim.command('	autocmd! VimLeavePre * :{pycmd} powerline.shutdown()'.format(pycmd=pycmd))
 	vim.command('augroup END')
 
