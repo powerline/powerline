@@ -43,3 +43,16 @@ def safe_unicode(s):
 				return unicode(s, getpreferredencoding())
 	except Exception as e:
 		return safe_unicode(e)
+
+
+class FailedUnicode(unicode):
+	'''Builtin ``unicode`` (``str`` in python 3) subclass indicating fatal 
+	error.
+
+	If your code for some reason wants to determine whether `.render()` method 
+	failed it should check returned string for being a FailedUnicode instance. 
+	Alternatively you could subclass Powerline and override `.render()` method 
+	to do what you like in place of catching the exception and returning 
+	FailedUnicode.
+	'''
+	pass

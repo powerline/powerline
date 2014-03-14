@@ -7,25 +7,12 @@ import logging
 
 from powerline.colorscheme import Colorscheme
 from powerline.lib.config import ConfigLoader
-from powerline.lib.unicode import safe_unicode
+from powerline.lib.unicode import safe_unicode, FailedUnicode
 
 from threading import Lock, Event
 
 
 DEFAULT_SYSTEM_CONFIG_DIR = None
-
-
-class FailedUnicode(unicode):
-	'''Builtin ``unicode`` (``str`` in python 3) subclass indicating fatal 
-	error.
-
-	If your code for some reason wants to determine whether `.render()` method 
-	failed it should check returned string for being a FailedUnicode instance. 
-	Alternatively you could subclass Powerline and override `.render()` method 
-	to do what you like in place of catching the exception and returning 
-	FailedUnicode.
-	'''
-	pass
 
 
 def find_config_file(search_paths, config_file):
