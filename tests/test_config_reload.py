@@ -187,9 +187,14 @@ class TestConfigReload(TestCase):
 				# fcf:colorschemes/test/nonexistentraise”).
 				# sleep(0.1)
 				self.assertEqual(p.render(), '<1 2 1> s<2 4 False>>><3 4 4>g<4 False False>>><None None None>')
-				self.assertAccessEvents('config')
+				# For colorschemes/{test/,}*raise find_config_file raises 
+				# IOError, but it does not do so for colorschemes/test/__main__, 
+				# so powerline is trying to load this, but not other 
+				# colorschemes/*
+				self.assertAccessEvents('config', 'colorschemes/test/__main__')
 				self.assertIn('exception:test:powerline:Failed to create renderer: fcf:colorschemes/test/nonexistentraise', p.logger._pop_msgs())
 
+				config['colorschemes/nonexistentraise'] = {}
 				config['colorschemes/test/nonexistentraise'] = {
 					'groups': {
 						"str1": {"fg": "col1", "bg": "col3", "attr": ["bold"]},
@@ -199,7 +204,8 @@ class TestConfigReload(TestCase):
 				while not p._will_create_renderer():
 					sleep(0.1)
 				self.assertEqual(p.render(), '<1 3 1> s<3 4 False>>><2 4 4>g<4 False False>>><None None None>')
-				self.assertAccessEvents('colorschemes/test/nonexistentraise')
+				# Same as above
+				self.assertAccessEvents('colorschemes/nonexistentraise', 'colorschemes/test/nonexistentraise', 'colorschemes/test/__main__')
 				self.assertEqual(p.logger._pop_msgs(), [])
 		pop_events()
 
