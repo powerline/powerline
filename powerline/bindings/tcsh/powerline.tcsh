@@ -14,7 +14,7 @@ if ! $?POWERLINE_COMMAND then
 		setenv POWERLINE_COMMAND $POWERLINE_SOURCED:h:h:h:h:q/scripts/powerline
 	endif
 endif
-alias _powerline_tmux_set_pwd 'if ( $?TMUX && { test -w $TMUX:q } ) tmux setenv -g TMUX_PWD_`tmux display -p "#D" | tr -d %` $PWD:q ; if ( $?TMUX && { test -w $TMUX:q } ) tmux refresh -S'
+alias _powerline_tmux_set_pwd 'if ( $?TMUX && { tmux source-file /dev/null >&/dev/null } ) tmux setenv -g TMUX_PWD_`tmux display -p "#D" | tr -d %` $PWD:q ; if ( $?TMUX && { tmux source-file /dev/null >&/dev/null } ) tmux refresh -S'
 alias _powerline_set_prompt 'set prompt="`$POWERLINE_COMMAND shell left -r tcsh_prompt --last_exit_code=$?`"'
 alias _powerline_set_rprompt 'set rprompt="`$POWERLINE_COMMAND shell right -r tcsh_prompt --last_exit_code=$?` "'
 alias cwdcmd "`alias cwdcmd` ; _powerline_tmux_set_pwd"

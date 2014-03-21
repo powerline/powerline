@@ -10,8 +10,7 @@ if test -z "${POWERLINE_COMMAND}" ; then
 fi
 
 _powerline_init_tmux_support() {
-	# Note: `test -w ""` returns false, so first condition may be removed
-	if test -n "$TMUX" && test -w "$TMUX" ; then
+	if test -n "$TMUX" && tmux source-file /dev/null &>/dev/null ; then
 		# TMUX variable may be unset to create new tmux session inside this one
 		_POWERLINE_TMUX="$TMUX"
 
