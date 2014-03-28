@@ -12,7 +12,7 @@ integer _POWERLINE_JOBNUM
 
 _powerline_init_tmux_support() {
 	emulate -L zsh
-	if test -n "$TMUX" && tmux source-file /dev/null &>/dev/null ; then
+	if test -n "$TMUX" && tmux refresh -S &>/dev/null ; then
 		# TMUX variable may be unset to create new tmux session inside this one
 		typeset -g _POWERLINE_TMUX="$TMUX"
 

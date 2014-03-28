@@ -21,7 +21,7 @@ function powerline-setup
 	end
 	_powerline_update
 	if test -n "$TMUX"
-		if tmux source-file /dev/null ^/dev/null
+		if tmux refresh -S ^/dev/null
 			function _powerline_tmux_setenv
 				tmux setenv -g TMUX_$argv[1]_(tmux display -p "#D" | tr -d "%") "$argv[2]"
 				tmux refresh -S
