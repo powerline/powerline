@@ -513,7 +513,8 @@ try:
 				yield interface, data.bytes_recv, data.bytes_sent
 
 	def _get_user(segment_info):
-		return psutil.Process(os.getpid()).username
+		res = psutil.Process(os.getpid()).username
+		return res if type(res) is str else res()
 
 	class CPULoadPercentSegment(ThreadedSegment):
 		interval = 1
