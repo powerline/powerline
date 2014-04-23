@@ -28,8 +28,13 @@ def git_directory(directory):
 	path = os.path.join(directory, '.git')
 	if os.path.isfile(path):
 		with open(path, 'rb') as f:
-			raw = f.read().partition(b':')[2].strip()
-			return os.path.abspath(os.path.join(directory, raw.decode(sys.getfilesystemencoding() or 'utf-8')))
+			raw = f.read()
+			if not raw.startswith(b'gitdir: '):
+				raise IOError('invalid gitfile format')
+			raw = raw[8:].decode(sys.getfilesystemencoding() or 'utf-8')
+			if not raw:
+				raise IOError('no path in gitfile')
+			return os.path.abspath(os.path.join(directory, raw))
 	else:
 		return path
 
