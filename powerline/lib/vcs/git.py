@@ -1,6 +1,9 @@
 # vim:fileencoding=utf-8:noet
 
+from __future__ import (unicode_literals, absolute_import, print_function)
+
 import os
+import sys
 import re
 
 from powerline.lib.vcs import get_branch_name as _get_branch_name, get_file_status
@@ -25,7 +28,12 @@ def git_directory(directory):
 	path = os.path.join(directory, '.git')
 	if os.path.isfile(path):
 		with open(path, 'rb') as f:
-			raw = f.read().partition(b':')[2].strip()
+			raw = f.read()
+			if not raw.startswith(b'gitdir: '):
+				raise IOError('invalid gitfile format')
+			raw = raw[8:].decode(sys.getfilesystemencoding() or 'utf-8')
+			if not raw:
+				raise IOError('no path in gitfile')
 			return os.path.abspath(os.path.join(directory, raw))
 	else:
 		return path
