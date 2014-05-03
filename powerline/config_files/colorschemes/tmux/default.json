@@ -1,6 +1,10 @@
 {
 	"name": "Default color scheme for terminal prompts",
 	"groups": {
+		"global": { "fg": "darkestred", "bg": "gray0" },
+		"window_status_left": { "fg": "gray10", "bg": "gray0" },
+		"window_status_right": { "fg": "gray10", "bg": "gray0" },
+		"current_window_status_left": { "fg": "gray10", "bg": "gray0" },
 		"background:divider": { "fg": "gray5", "bg": "gray0" },
 		"session": { "fg": "black", "bg": "gray10", "attr": ["bold"] },
 		"date": { "fg": "gray8", "bg": "gray2" },

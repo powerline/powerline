@@ -243,7 +243,7 @@ class Renderer(object):
 	def _render_segments(self, theme, segments, render_highlighted=True):
 		'''Internal segment rendering method.
 
-		This method loops through the segment array and compares the
+		This method loops through the segment list and compares the
 		foreground/background colors and divider properties and returns the
 		rendered statusline as a string.
 
@@ -261,60 +261,72 @@ class Renderer(object):
 			next_segment = segments[index + 1] if index < segments_len - 1 else theme.EMPTY_SEGMENT
 			compare_segment = next_segment if segment['side'] == 'left' else prev_segment
 			outer_padding = ' ' if (index == 0 and segment['side'] == 'left') or (index == segments_len - 1 and segment['side'] == 'right') else ''
-			divider_type = 'soft' if compare_segment['highlight']['bg'] == segment['highlight']['bg'] else 'hard'
+			yield self._render_segment(
+			    theme,
+			    segment,
+			    compare_segment,
+			    outer_padding,
+			    render_highlighted
+			)
 
-			divider_raw = theme.get_divider(segment['side'], divider_type)
-			divider_spaces = theme.get_spaces()
-			divider_highlighted = ''
-			contents_raw = segment['contents']
-			contents_highlighted = ''
-			draw_divider = segment['draw_' + divider_type + '_divider']
+	def _render_segment(self, theme, segment, compare_segment, outer_padding, render_highlighted, translate_characters=True, divider_type=None):
+		divider_type = divider_type or 'soft' if compare_segment['highlight']['bg'] == segment['highlight']['bg'] else 'hard'
 
-			# Pad segments first
-			if draw_divider:
-				if segment['side'] == 'left':
-					contents_raw = outer_padding + (segment['_space_left'] * ' ') + contents_raw + ((divider_spaces + segment['_space_right']) * ' ')
-				else:
-					contents_raw = ((divider_spaces + segment['_space_left']) * ' ') + contents_raw + (segment['_space_right'] * ' ') + outer_padding
+		divider_raw = theme.get_divider(segment['side'], divider_type)
+		divider_spaces = theme.get_spaces()
+		divider_highlighted = ''
+		contents_raw = segment['contents']
+		contents_highlighted = ''
+		draw_divider = segment['draw_' + divider_type + '_divider']
+
+		# Pad segments first
+		if draw_divider:
+			if segment['side'] == 'left':
+				contents_raw = outer_padding + (segment['_space_left'] * ' ') + contents_raw + ((divider_spaces + segment['_space_right']) * ' ')
 			else:
-				if segment['side'] == 'left':
-					contents_raw = outer_padding + (segment['_space_left'] * ' ') + contents_raw + (segment['_space_right'] * ' ')
-				else:
-					contents_raw = (segment['_space_left'] * ' ') + contents_raw + (segment['_space_right'] * ' ') + outer_padding
+				contents_raw = ((divider_spaces + segment['_space_left']) * ' ') + contents_raw + (segment['_space_right'] * ' ') + outer_padding
+		else:
+			if segment['side'] == 'left':
+				contents_raw = outer_padding + (segment['_space_left'] * ' ') + contents_raw + (segment['_space_right'] * ' ')
+			else:
+				contents_raw = (segment['_space_left'] * ' ') + contents_raw + (segment['_space_right'] * ' ') + outer_padding
 
-			# Replace spaces with no-break spaces
-			divider_raw = divider_raw.replace(' ', NBSP)
+		# Replace spaces with no-break spaces
+		divider_raw = divider_raw.replace(' ', NBSP)
+		if translate_characters:
 			contents_raw = contents_raw.translate(self.np_character_translations)
 
-			# Apply highlighting to padded dividers and contents
-			if render_highlighted:
-				if divider_type == 'soft':
-					divider_highlight_group_key = 'highlight' if segment['divider_highlight_group'] is None else 'divider_highlight'
-					divider_fg = segment[divider_highlight_group_key]['fg']
-					divider_bg = segment[divider_highlight_group_key]['bg']
-				else:
-					divider_fg = segment['highlight']['bg']
-					divider_bg = compare_segment['highlight']['bg']
-				divider_highlighted = self.hl(divider_raw, divider_fg, divider_bg, False)
-				contents_highlighted = self.hl(self.escape(contents_raw), **segment['highlight'])
-
-			# Append padded raw and highlighted segments to the rendered segment variables
-			if draw_divider:
-				if segment['side'] == 'left':
-					segment['_rendered_raw'] += contents_raw + divider_raw
-					segment['_rendered_hl'] += contents_highlighted + divider_highlighted
-				else:
-					segment['_rendered_raw'] += divider_raw + contents_raw
-					segment['_rendered_hl'] += divider_highlighted + contents_highlighted
+		# Apply highlighting to padded dividers and contents
+		if render_highlighted:
+			if divider_type == 'soft':
+				divider_highlight_group_key = 'highlight' if segment['divider_highlight_group'] is None else 'divider_highlight'
+				divider_fg = segment[divider_highlight_group_key]['fg']
+				divider_bg = segment[divider_highlight_group_key]['bg']
 			else:
-				if segment['side'] == 'left':
-					segment['_rendered_raw'] += contents_raw
-					segment['_rendered_hl'] += contents_highlighted
-				else:
-					segment['_rendered_raw'] += contents_raw
-					segment['_rendered_hl'] += contents_highlighted
-			segment['_len'] = self.strwidth(segment['_rendered_raw'])
-			yield segment
+				divider_fg = segment['highlight']['bg']
+				divider_bg = compare_segment['highlight']['bg']
+			divider_highlighted = self.hl(divider_raw, divider_fg, divider_bg, False)
+
+			maybe_escaped_contents = self.escape(contents_raw) if translate_characters else contents_raw
+			contents_highlighted = self.hl(maybe_escaped_contents, **segment['highlight'])
+
+		# Append padded raw and highlighted segments to the rendered segment variables
+		if draw_divider:
+			if segment['side'] == 'left':
+				segment['_rendered_raw'] += contents_raw + divider_raw
+				segment['_rendered_hl'] += contents_highlighted + divider_highlighted
+			else:
+				segment['_rendered_raw'] += divider_raw + contents_raw
+				segment['_rendered_hl'] += divider_highlighted + contents_highlighted
+		else:
+			if segment['side'] == 'left':
+				segment['_rendered_raw'] += contents_raw
+				segment['_rendered_hl'] += contents_highlighted
+			else:
+				segment['_rendered_raw'] += contents_raw
+				segment['_rendered_hl'] += contents_highlighted
+		segment['_len'] = self.strwidth(segment['_rendered_raw'])
+		return segment
 
 	@classmethod
 	def escape(cls, string):

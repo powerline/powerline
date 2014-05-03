@@ -23,6 +23,7 @@ class Theme(object):
 		self.segments = {
 			'left': [],
 			'right': [],
+			'misc': []
 		}
 		self.EMPTY_SEGMENT = {
 			'contents': None,
@@ -32,10 +33,10 @@ class Theme(object):
 		theme_configs = [theme_config]
 		if top_theme_config:
 			theme_configs.append(top_theme_config)
-		get_segment = gen_segment_getter(pl, ext, common_config['paths'], theme_configs, theme_config.get('default_module'))
-		for side in ['left', 'right']:
+		self.get_segment = gen_segment_getter(pl, ext, common_config['paths'], theme_configs, theme_config.get('default_module'))
+		for side in ['left', 'right', 'misc']:
 			for segment in theme_config['segments'].get(side, []):
-				segment = get_segment(segment, side)
+				segment = self.get_segment(segment, side)
 				if not run_once:
 					if segment['startup']:
 						try:
@@ -60,6 +61,13 @@ class Theme(object):
 	def get_spaces(self):
 		return self.spaces
 
+	def set_default_segments(self, side, default_segments):
+		segment_names = set([segment['name']
+							 for segment in self.segments[side]])
+		for default_segment in default_segments:
+			if default_segment['name'] not in segment_names:
+				self.segments[side].append(default_segment)
+
 	def get_segments(self, side=None, segment_info=None):
 		'''Return all segments.
 
@@ -82,7 +90,7 @@ class Theme(object):
 					if isinstance(contents, list):
 						segment_base = segment.copy()
 						if contents:
-							draw_divider_position = -1 if side == 'left' else 0
+							draw_divider_position = 0 if side == 'right' else -1
 							for key, i, newval in (
 								('before', 0, ''),
 								('after', -1, ''),
