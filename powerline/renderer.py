@@ -209,7 +209,7 @@ class Renderer(object):
 		segments = [self._get_highlighting(segment, mode) for segment in segments
 			if mode not in segment['exclude_modes'] and (not segment['include_modes'] or mode in segment['include_modes'])]
 
-		segments = [segment for segment in self._render_segments(theme, segments)]
+		segments = list(self._render_segments(theme, segments))
 
 		if not width:
 			# No width specified, so we don't need to crop or pad anything
@@ -222,7 +222,7 @@ class Renderer(object):
 			segments_priority.pop(0)
 
 		# Distribute the remaining space on spacer segments
-		segments_spacers = [segment for segment in segments if segment['width'] == 'auto']
+		segments_spacers = filter(segments, lambda segment: segment['width'] == 'auto')
 		if segments_spacers:
 			distribute_len, distribute_len_remainder = divmod(width - sum([segment['_len'] for segment in segments]), len(segments_spacers))
 			for segment in segments_spacers:

@@ -306,9 +306,12 @@ class Powerline(object):
 		config_paths.append(plugin_path)
 		return config_paths
 
+	def _get_change_function(self, type):
+		return getattr(self, 'on_' + type + '_change')
+
 	def _load_config(self, cfg_path, type):
 		'''Load configuration and setup watches.'''
-		function = getattr(self, 'on_' + type + '_change')
+		function = self._get_change_function(type)
 		try:
 			path = self.find_config_file(cfg_path)
 		except IOError:
@@ -318,7 +321,7 @@ class Powerline(object):
 		return self.config_loader.load(path)
 
 	def _purge_configs(self, type):
-		function = getattr(self, 'on_' + type + '_change')
+		function = self._get_change_function(type)
 		self.config_loader.unregister_functions(set((function,)))
 		self.config_loader.unregister_missing(set(((self.find_config_file, function),)))
 
