@@ -45,16 +45,16 @@ segment_getters = {
 }
 
 
-def get_attr_func(contents_func, key, kwargs):
+def get_attr_func(contents_func, key, args):
 	try:
 		func = getattr(contents_func, key)
 	except AttributeError:
 		return None
 	else:
-		if kwargs is None:
+		if args is None:
 			return lambda : func()
 		else:
-			return lambda pl, shutdown_event: func(pl=pl, shutdown_event=shutdown_event, **kwargs)
+			return lambda pl, shutdown_event: func(pl=pl, shutdown_event=shutdown_event, **args)
 
 
 def gen_segment_getter(pl, ext, path, theme_configs, default_module=None):
@@ -86,14 +86,14 @@ def gen_segment_getter(pl, ext, path, theme_configs, default_module=None):
 			highlight_group = segment.get('highlight_group') or segment.get('name')
 
 		if segment_type == 'function':
-			kwargs = dict(((str(k), v) for k, v in get_key(segment, module, 'args', {}).items()))
-			startup_func = get_attr_func(_contents_func, 'startup', kwargs)
+			args = dict(((str(k), v) for k, v in get_key(segment, module, 'args', {}).items()))
+			startup_func = get_attr_func(_contents_func, 'startup', args)
 			shutdown_func = get_attr_func(_contents_func, 'shutdown', None)
 
 			if hasattr(_contents_func, 'powerline_requires_segment_info'):
-				contents_func = lambda pl, segment_info: _contents_func(pl=pl, segment_info=segment_info, **kwargs)
+				contents_func = lambda pl, segment_info: _contents_func(pl=pl, segment_info=segment_info, **args)
 			else:
-				contents_func = lambda pl, segment_info: _contents_func(pl=pl, **kwargs)
+				contents_func = lambda pl, segment_info: _contents_func(pl=pl, **args)
 		else:
 			startup_func = None
 			shutdown_func = None
