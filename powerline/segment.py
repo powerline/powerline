@@ -45,6 +45,18 @@ segment_getters = {
 }
 
 
+def get_attr_func(contents_func, key, args):
+	try:
+		func = getattr(contents_func, key)
+	except AttributeError:
+		return None
+	else:
+		if args is None:
+			return lambda : func()
+		else:
+			return lambda pl, shutdown_event: func(pl=pl, shutdown_event=shutdown_event, **args)
+
+
 def gen_segment_getter(pl, ext, path, theme_configs, default_module=None):
 	data = {
 		'default_module': default_module or 'powerline.segments.' + ext,
@@ -75,12 +87,8 @@ def gen_segment_getter(pl, ext, path, theme_configs, default_module=None):
 
 		if segment_type == 'function':
 			args = dict(((str(k), v) for k, v in get_key(segment, module, 'args', {}).items()))
-			try:
-				_startup_func = _contents_func.startup
-			except AttributeError:
-				startup_func = None
-			else:
-				startup_func = lambda pl, shutdown_event: _startup_func(pl=pl, shutdown_event=shutdown_event, **args)
+			startup_func = get_attr_func(_contents_func, 'startup', args)
+			shutdown_func = get_attr_func(_contents_func, 'shutdown', None)
 
 			if hasattr(_contents_func, 'powerline_requires_segment_info'):
 				contents_func = lambda pl, segment_info: _contents_func(pl=pl, segment_info=segment_info, **args)
@@ -88,6 +96,7 @@ def gen_segment_getter(pl, ext, path, theme_configs, default_module=None):
 				contents_func = lambda pl, segment_info: _contents_func(pl=pl, **args)
 		else:
 			startup_func = None
+			shutdown_func = None
 			contents_func = None
 
 		return {
@@ -109,8 +118,8 @@ def gen_segment_getter(pl, ext, path, theme_configs, default_module=None):
 			'include_modes': segment.get('include_modes', []),
 			'width': segment.get('width'),
 			'align': segment.get('align', 'l'),
-			'shutdown': getattr(contents_func, 'shutdown', None),
 			'startup': startup_func,
+			'shutdown': shutdown_func,
 			'_rendered_raw': '',
 			'_rendered_hl': '',
 			'_len': 0,
