@@ -1,7 +1,7 @@
 # vim:fileencoding=utf-8:noet
 from __future__ import division
 
-from powerline.lib import mergedicts, add_divider_highlight_group
+from powerline.lib import mergedicts, add_divider_highlight_group, REMOVE_THIS_KEY
 from powerline.lib.humanize_bytes import humanize_bytes
 from powerline.lib.vcs import guess
 from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment
@@ -354,6 +354,8 @@ class TestLib(TestCase):
 		self.assertEqual(d, {'abc': {'def': {'ghi': 'jkl'}}})
 		mergedicts(d, {'abc': {'mno': 'pqr'}})
 		self.assertEqual(d, {'abc': {'def': {'ghi': 'jkl'}, 'mno': 'pqr'}})
+		mergedicts(d, {'abc': {'def': REMOVE_THIS_KEY}})
+		self.assertEqual(d, {'abc': {'mno': 'pqr'}})
 
 	def test_add_divider_highlight_group(self):
 		def decorated_function_name(**kwargs):

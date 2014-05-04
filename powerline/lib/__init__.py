@@ -3,6 +3,9 @@ from functools import wraps
 import json
 
 
+REMOVE_THIS_KEY = object()
+
+
 def wraps_saveargs(wrapped):
 	def dec(wrapper):
 		r = wraps(wrapped)(wrapper)
@@ -17,6 +20,8 @@ def mergedicts(d1, d2):
 	for k in d2:
 		if k in d1 and type(d1[k]) is dict and type(d2[k]) is dict:
 			mergedicts(d1[k], d2[k])
+		elif d2[k] is REMOVE_THIS_KEY:
+			d1.pop(k, None)
 		else:
 			d1[k] = d2[k]
 
@@ -45,7 +50,9 @@ def keyvaluesplit(s):
 	idx = s.index('=')
 	o = s[:idx]
 	rest = s[idx + 1:]
-	if rest[0] in '"{[0193456789' or rest in ('null', 'true', 'false'):
+	if not rest:
+		val = REMOVE_THIS_KEY
+	elif rest[0] in '"{[0193456789' or rest in ('null', 'true', 'false'):
 		val = json.loads(s[idx + 1:])
 	else:
 		val = rest
