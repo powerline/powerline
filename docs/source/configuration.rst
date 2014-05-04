@@ -472,10 +472,16 @@ Powerline script has a number of options controlling powerline behavior. Here
     example: ``{"K1": V1, "K2": V2}``) is recursively merged with the contents 
     of the file.
 
+    If ``VALUE`` is omitted then corresponding key will be removed from the 
+    configuration (if it was present).
+
 ``-t THEME_NAME.KEY.NESTED_KEY=VALUE`` or ``--theme_option=THEME_NAME.KEY.NESTED_KEY=VALUE``
     Overrides options from :file:`powerline/themes/{ext}/{THEME_NAME}.json`. 
     ``KEY.NESTED_KEY=VALUE`` is processed like described above, ``{ext}`` is the 
     first argument to powerline script. May be passed multiple times.
+
+    If ``VALUE`` is omitted then corresponding key will be removed from the 
+    configuration (if it was present).
 
 ``-p PATH`` or ``--config_path=PATH``
     Sets directory where configuration should be read from. If present, no 
