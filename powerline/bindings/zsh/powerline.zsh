@@ -150,6 +150,10 @@ _powerline_add_widget() {
 
 setopt promptpercent
 setopt promptsubst
-_powerline_setup_prompt
-_powerline_init_tmux_support
-_powerline_init_modes_support
+if test -z "$POWERLINE_NO_ZSH_PROMPT$POWERLINE_NO_SHELL_PROMPT" ; then
+	_powerline_setup_prompt
+	_powerline_init_modes_support
+fi
+if test -z "$POWERLINE_NO_ZSH_TMUX_SUPPORT$POWERLINE_NO_SHELL_TMUX_SUPPORT" ; then
+	_powerline_init_tmux_support
+fi

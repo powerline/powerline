@@ -14,8 +14,12 @@ if ! $?POWERLINE_COMMAND then
 		setenv POWERLINE_COMMAND $POWERLINE_SOURCED:h:h:h:h:q/scripts/powerline
 	endif
 endif
-alias _powerline_tmux_set_pwd 'if ( $?TMUX && { tmux refresh -S >&/dev/null } ) tmux setenv -g TMUX_PWD_`tmux display -p "#D" | tr -d %` $PWD:q ; if ( $?TMUX ) tmux refresh -S >&/dev/null'
-alias _powerline_set_prompt 'set prompt="`$POWERLINE_COMMAND shell left -r tcsh_prompt --last_exit_code=$?`"'
-alias _powerline_set_rprompt 'set rprompt="`$POWERLINE_COMMAND shell right -r tcsh_prompt --last_exit_code=$?` "'
-alias cwdcmd "`alias cwdcmd` ; _powerline_tmux_set_pwd"
-alias precmd "`alias precmd` ; _powerline_set_prompt ; _powerline_set_rprompt"
+if ! ( $?POWERLINE_NO_TCSH_TMUX_SUPPORT || $?POWERLINE_NO_SHELL_TMUX_SUPPORT ) then
+	alias _powerline_tmux_set_pwd 'if ( $?TMUX && { tmux refresh -S >&/dev/null } ) tmux setenv -g TMUX_PWD_`tmux display -p "#D" | tr -d %` $PWD:q ; if ( $?TMUX ) tmux refresh -S >&/dev/null'
+	alias cwdcmd "`alias cwdcmd` ; _powerline_tmux_set_pwd"
+endif
+if ! ( $?POWERLINE_NO_TCSH_PROMPT || $?POWERLINE_NO_SHELL_PROMPT ) then
+	alias _powerline_set_prompt 'set prompt="`$POWERLINE_COMMAND shell left -r tcsh_prompt --last_exit_code=$?`"'
+	alias _powerline_set_rprompt 'set rprompt="`$POWERLINE_COMMAND shell right -r tcsh_prompt --last_exit_code=$?` "'
+	alias precmd "`alias precmd` ; _powerline_set_prompt ; _powerline_set_rprompt"
+endif
