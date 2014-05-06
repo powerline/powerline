@@ -164,13 +164,18 @@ is the absolute path to your Powerline installation directory:
    set fish_function_path $fish_function_path "{repository_root}/powerline/bindings/fish"
    powerline-setup
 
+.. _tmux-statusline:
+
 Tmux statusline
 ---------------
 
-Add the following line to your :file:`tmux.conf`, where ``{repository_root}`` is 
-the absolute path to your Powerline installation directory::
+Add the following lines to your :file:`.tmux.conf`, where ``{repository_root}``
+is the absolute path to your Powerline installation directory (please note that
+the definition of the ``POWERLINE_BINDINGS_DIR`` variable is required for full
+powerline support)::
 
-   source '{repository_root}/powerline/bindings/tmux/powerline.conf'
+   POWERLINE_BINDINGS_DIR="{repository_root}/powerline/bindings"
+   source "$POWERLINE_BINDINGS_DIR/tmux/powerline.conf"
 
 IPython prompt
 --------------
