@@ -17,7 +17,8 @@
 		"exit_fail": { "fg": "white", "bg": "darkestred" },
 		"exit_success": { "fg": "white", "bg": "darkestgreen" },
 		"environment": { "fg": "white", "bg": "darkestgreen" },
-		"mode": { "fg": "darkestgreen", "bg": "brightgreen", "attr": ["bold"] }
+		"mode": { "fg": "darkestgreen", "bg": "brightgreen", "attr": ["bold"] },
+		"attached_clients": { "fg": "white", "bg": "darkestgreen" }
 	},
 	"mode_translations": {
 		"vicmd": {

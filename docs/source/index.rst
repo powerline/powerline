@@ -20,6 +20,7 @@ Segments
    segments/common
    segments/shell
    segments/vim
+   segments/tmux
 
 Indices and tables
 ==================

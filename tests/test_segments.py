@@ -2,11 +2,11 @@
 
 from __future__ import unicode_literals
 
-from powerline.segments import shell, common
+from powerline.segments import shell, tmux, common
 import tests.vim as vim_module
 import sys
 import os
-from tests.lib import Args, urllib_read, replace_attr, new_module, replace_module_module, replace_env, Pl
+from tests.lib import Args, urllib_read, replace_attr, new_module, replace_module_module, replace_env, Pl, Process
 from tests import TestCase
 
 
@@ -144,6 +144,21 @@ class TestShell(TestCase):
 				'align': 'l',
 			},
 		])
+
+
+class TestTmux(TestCase):
+	def test_attached_clients(self):
+		def popen_mock(parameters, **kwargs):
+			if "list-panes" == parameters[1]:
+				return Process("session_name", "")
+			elif "list-clients" == parameters[1]:
+				clients = ["/dev/pts/2: 0 [191x51 xterm-256color] (utf8)", "/dev/pts/3: 0 [191x51 xterm-256color] (utf8)"]
+				return Process(os.linesep.join(clients), "")
+
+		pl = Pl()
+		with replace_attr(tmux, 'Popen', popen_mock):
+			self.assertEqual(tmux.attached_clients(pl=pl, ), "2")
+			self.assertEqual(tmux.attached_clients(pl=pl, minimum=3), None)
 
 
 class TestCommon(TestCase):
