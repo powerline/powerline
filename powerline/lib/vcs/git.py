@@ -6,6 +6,7 @@ import os
 import sys
 import re
 
+from subprocess import Popen, PIPE
 from powerline.lib.vcs import get_branch_name as _get_branch_name, get_file_status
 
 
@@ -21,7 +22,14 @@ def branch_name_from_config_file(directory, config_file):
 	m = _ref_pat.match(raw)
 	if m is not None:
 		return m.group(1).decode('utf-8', 'replace')
-	return raw[:7]
+
+	p = Popen(("git", "name-rev", "--name-only", "--no-undefined", "--always", "HEAD"), stdout=PIPE, stderr=PIPE, cwd=directory)
+	name = p.communicate()[0].strip()
+
+	if(name == raw):
+		return "#" + raw[:7]
+	else:
+		return "#" + name
 
 
 def git_directory(directory):
@@ -144,8 +152,6 @@ try:
 		def branch(self):
 			return get_branch_name(self.directory)
 except ImportError:
-	from subprocess import Popen, PIPE
-
 	def readlines(cmd, cwd):
 		p = Popen(cmd, shell=False, stdout=PIPE, stderr=PIPE, cwd=cwd)
 		p.stderr.close()
