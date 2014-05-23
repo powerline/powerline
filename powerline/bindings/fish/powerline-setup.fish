@@ -9,6 +9,9 @@ function powerline-setup
 				set -g -x POWERLINE_COMMAND (dirname (status -f))/../../../scripts/powerline
 			end
 		end
+		function --on-variable fish_bind_mode _powerline_bind_mode
+			set -g -x _POWERLINE_MODE $fish_bind_mode
+		end
 		function --on-variable POWERLINE_COMMAND _powerline_update
 			set -l addargs "--last_exit_code=\$status --last_pipe_status=\$status --jobnum=(jobs -p | wc -l)"
 			eval "
@@ -20,6 +23,7 @@ function powerline-setup
 			end
 			"
 		end
+		_powerline_bind_mode
 		_powerline_update
 	end
 	if test -z "$POWERLINE_NO_FISH_TMUX_SUPPORT$POWERLINE_NO_SHELL_TMUX_SUPPORT"
