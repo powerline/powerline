@@ -35,6 +35,11 @@ function powerline-setup
 		end
 		function --on-variable fish_bind_mode _powerline_bind_mode
 			set -g -x _POWERLINE_MODE $fish_bind_mode
+			if test x$fish_key_bindings != xfish_vi_key_bindings
+				set -g -x _POWERLINE_DEFAULT_MODE default
+			else
+				set -g -e _POWERLINE_DEFAULT_MODE
+			end
 		end
 		function --on-variable POWERLINE_COMMAND _powerline_update
 			set -l addargs "--last_exit_code=\$status"
