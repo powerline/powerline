@@ -33,6 +33,9 @@ function powerline-setup
 		if test -z "$POWERLINE_COMMAND"
 			set -g POWERLINE_COMMAND (eval $POWERLINE_CONFIG shell command)
 		end
+		function --on-variable fish_bind_mode _powerline_bind_mode
+			set -g -x _POWERLINE_MODE $fish_bind_mode
+		end
 		function --on-variable POWERLINE_COMMAND _powerline_update
 			set -l addargs "--last_exit_code=\$status"
 			set -l addargs "$addargs --last_pipe_status=\$status"
@@ -67,6 +70,7 @@ function powerline-setup
 			"
 			_powerline_set_columns
 		end
+		_powerline_bind_mode
 		_powerline_update
 	end
 	if eval $POWERLINE_CONFIG shell --shell=fish uses tmux
