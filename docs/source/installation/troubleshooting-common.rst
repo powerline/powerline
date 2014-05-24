@@ -9,8 +9,6 @@ I'm using tmux and Powerline looks like crap, what's wrong?
 * If you're using iTerm2, make sure that you have enabled the setting 
   :guilabel:`Set locale variables automatically` in :menuselection:`Profiles 
   --> Terminal --> Environment`.
-* Check to ensure that ``POWERLINE_BINDINGS_DIR`` is properly defined in your
-  ``.tmux.conf`` file as indicated in the :ref:`tmux usage <tmux-statusline>`
 
 I’m using tmux/screen and Powerline is colorless
 ------------------------------------------------
@@ -20,9 +18,6 @@ I’m using tmux/screen and Powerline is colorless
 * Alternative: set :ref:`additional_escapes <config-common-additional_escapes>` 
   to ``"tmux"`` or ``"screen"``. Note that it is known to work perfectly in 
   screen, but in tmux it may produce ugly spaces.
-* For ``tmux``, check to ensure that ``POWERLINE_BINDINGS_DIR`` is properly
-  defined in your ``.tmux.conf`` file as indicated in the :ref:`tmux usage
-  <tmux-statusline>`
 
 
 After an update something stopped working

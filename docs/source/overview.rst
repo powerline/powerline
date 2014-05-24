@@ -169,13 +169,15 @@ is the absolute path to your Powerline installation directory:
 Tmux statusline
 ---------------
 
-Add the following lines to your :file:`.tmux.conf`, where ``{repository_root}``
-is the absolute path to your Powerline installation directory (please note that
-the definition of the ``POWERLINE_BINDINGS_DIR`` variable is required for full
-powerline support)::
+Add the following lines to your :file:`.tmux.conf`, where ``{repository_root}`` 
+is the absolute path to your Powerline installation directory::
 
-   POWERLINE_BINDINGS_DIR="{repository_root}/powerline/bindings"
-   source "$POWERLINE_BINDINGS_DIR/tmux/powerline.conf"
+   source "{repository_root}/tmux/powerline.conf"
+
+.. note::
+    The availability of the ``powerline-config`` command is required for 
+    powerline support. You may specify location of this script via 
+    ``$POWERLINE_CONFIG_COMMAND`` environment variable.
 
 IPython prompt
 --------------
