@@ -1105,9 +1105,15 @@ class NowPlayingSegment(object):
 now_playing = NowPlayingSegment()
 
 
-if os.path.exists('/sys/class/power_supply/BAT0/capacity'):
+if os.path.exists('/sys/class/power_supply/'):
+	_linux_bat_fmt = '/sys/class/power_supply/{0}/capacity'
+	_linux_bat = 'BAT0'
+	if not os.path.exists(_linux_bat_fmt.format(_linux_bat)):
+		_linux_bat = 'BAT1'
+	if not os.path.exists(_linux_bat_fmt.format(_linux_bat)):
+		raise NotImplementedError
 	def _get_capacity(pl):
-		with open('/sys/class/power_supply/BAT0/capacity', 'r') as f:
+		with open(_linux_bat_fmt.format(_linux_bat), 'r') as f:
 			return int(float(f.readline().split()[0]))
 elif os.path.exists('/usr/bin/pmset'):
 	def _get_capacity(pl):
