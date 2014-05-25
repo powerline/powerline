@@ -1111,10 +1111,12 @@ if os.path.exists('/sys/class/power_supply/'):
 	if not os.path.exists(_linux_bat_fmt.format(_linux_bat)):
 		_linux_bat = 'BAT1'
 	if not os.path.exists(_linux_bat_fmt.format(_linux_bat)):
-		raise NotImplementedError
-	def _get_capacity(pl):
-		with open(_linux_bat_fmt.format(_linux_bat), 'r') as f:
-			return int(float(f.readline().split()[0]))
+		def _get_capacity(pl):
+			raise NotImplementedError
+	else:
+		def _get_capacity(pl):
+			with open(_linux_bat_fmt.format(_linux_bat), 'r') as f:
+				return int(float(f.readline().split()[0]))
 elif os.path.exists('/usr/bin/pmset'):
 	def _get_capacity(pl):
 		import re
