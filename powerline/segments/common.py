@@ -979,7 +979,7 @@ class NowPlayingSegment(object):
 			now_playing = run_cmd(pl, ['mpc', 'current', '-f', '%album%\n%artist%\n%title%\n%time%', '-h', str(host), '-p', str(port)])
 			if not now_playing:
 				return
-			now_playing = now_playing.split('\n')
+			now_playing = now_playing.decode('utf-8').split('\n')
 			return {
 				'album': now_playing[0],
 				'artist': now_playing[1],
