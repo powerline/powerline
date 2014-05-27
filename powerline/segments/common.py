@@ -1105,25 +1105,29 @@ class NowPlayingSegment(object):
 now_playing = NowPlayingSegment()
 
 
-if os.path.exists('/sys/class/power_supply/'):
-	_linux_bat_fmt = '/sys/class/power_supply/{0}/capacity'
-	_linux_bat = 'BAT0'
-	if not os.path.exists(_linux_bat_fmt.format(_linux_bat)):
-		_linux_bat = 'BAT1'
-	if not os.path.exists(_linux_bat_fmt.format(_linux_bat)):
+try:
+	if os.path.exists('/sys/class/power_supply/'):
+		_linux_bat_fmt = '/sys/class/power_supply/{0}/capacity'
+		_linux_bat = 'BAT0'
+		if not os.path.exists(_linux_bat_fmt.format(_linux_bat)):
+			_linux_bat = 'BAT1'
+		if not os.path.exists(_linux_bat_fmt.format(_linux_bat)):
+			raise NotImplementedError
+		def _get_capacity(pl):
+			with open(_linux_bat_fmt.format(_linux_bat), 'r') as f:
+				return int(float(f.readline().split()[0]))
+	else:
 		raise NotImplementedError
-	def _get_capacity(pl):
-		with open(_linux_bat_fmt.format(_linux_bat), 'r') as f:
-			return int(float(f.readline().split()[0]))
-elif os.path.exists('/usr/bin/pmset'):
-	def _get_capacity(pl):
-		import re
-		battery_summary = run_cmd(pl, ['pmset', '-g', 'batt'])
-		battery_percent = re.search(r'(\d+)%', battery_summary).group(1)
-		return int(battery_percent)
-else:
-	def _get_capacity(pl):
-		raise NotImplementedError
+except NotImplementedError:
+	if os.path.exists('/usr/bin/pmset'):
+		def _get_capacity(pl):
+			import re
+			battery_summary = run_cmd(pl, ['pmset', '-g', 'batt'])
+			battery_percent = re.search(r'(\d+)%', battery_summary).group(1)
+			return int(battery_percent)
+	else:
+		def _get_capacity(pl):
+			raise NotImplementedError
 
 
 def battery(pl, format='{capacity:3.0%}', steps=5, gamify=False, full_heart='♥', empty_heart='♥'):
