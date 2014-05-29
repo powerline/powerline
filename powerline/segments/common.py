@@ -376,7 +376,11 @@ class WeatherSegment(ThreadedSegment):
 			}
 			self.url = 'http://query.yahooapis.com/v1/public/yql?' + urllib_urlencode(query_data)
 
-		raw_response = urllib_read(self.url)
+		try:
+			raw_response = urllib_read(self.url)
+		except Exception:
+			self.error('Failed to connect')
+			return
 		if not raw_response:
 			self.error('Failed to get response')
 			return
