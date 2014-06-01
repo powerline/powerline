@@ -1,6 +1,7 @@
 # vim:fileencoding=utf-8:noet
 
 from subprocess import Popen, PIPE
+from locale import getlocale, getdefaultlocale, LC_MESSAGES
 
 
 def run_cmd(pl, cmd, stdin=None):
@@ -11,6 +12,8 @@ def run_cmd(pl, cmd, stdin=None):
 		return None
 	else:
 		stdout, err = p.communicate(stdin)
+		encoding = getlocale(LC_MESSAGES)[1] or getdefaultlocale()[1] or 'utf-8'
+		stdout = stdout.decode(encoding)
 	return stdout.strip()
 
 
