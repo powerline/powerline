@@ -107,7 +107,7 @@ _powerline_setup_prompt() {
 		fi
 	done
 	precmd_functions+=( _powerline_set_jobnum )
-	if zmodload zsh/zpython &>/dev/null ; then
+	if zmodload libzpython &>/dev/null || zmodload zsh/zpython &>/dev/null ; then
 		zpython 'from powerline.bindings.zsh import setup as _powerline_setup'
 		zpython '_powerline_setup()'
 		zpython 'del _powerline_setup'
