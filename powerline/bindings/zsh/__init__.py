@@ -55,7 +55,6 @@ class Args(object):
 
 	@property
 	def jobnum(self):
-		zsh.eval('integer _POWERLINE_JOBNUM=${(%):-%j}')
 		return zsh.getvalue('_POWERLINE_JOBNUM')
 
 
