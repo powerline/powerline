@@ -99,6 +99,10 @@ _powerline_set_jobnum() {
 	_POWERLINE_JOBNUM=${(%):-%j}
 }
 
+_powerline_update_counter() {
+	zpython '_powerline.precmd()'
+}
+
 _powerline_setup_prompt() {
 	emulate -L zsh
 	for f in "${precmd_functions[@]}"; do
@@ -108,8 +112,9 @@ _powerline_setup_prompt() {
 	done
 	precmd_functions+=( _powerline_set_jobnum )
 	if zmodload libzpython &>/dev/null || zmodload zsh/zpython &>/dev/null ; then
+		precmd_functions+=( _powerline_update_counter )
 		zpython 'from powerline.bindings.zsh import setup as _powerline_setup'
-		zpython '_powerline_setup()'
+		zpython '_powerline = _powerline_setup()'
 		zpython 'del _powerline_setup'
 	else
 		local add_args='--last_exit_code=$? --last_pipe_status="$pipestatus"'

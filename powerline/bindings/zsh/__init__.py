@@ -21,16 +21,9 @@ def get_var_config(var):
 
 
 class Args(object):
+	__slots__ = ('last_pipe_status', 'last_exit_code')
 	ext = ['shell']
 	renderer_module = 'zsh_prompt'
-
-	@property
-	def last_exit_code(self):
-		return zsh.last_exit_code()
-
-	@property
-	def last_pipe_status(self):
-		return zsh.pipestatus()
 
 	@property
 	def config(self):
@@ -55,7 +48,6 @@ class Args(object):
 
 	@property
 	def jobnum(self):
-		zsh.eval('integer _POWERLINE_JOBNUM=${(%):-%j}')
 		return zsh.getvalue('_POWERLINE_JOBNUM')
 
 
@@ -93,6 +85,13 @@ class Environment(object):
 environ = Environment()
 
 
+class ZshPowerline(ShellPowerline):
+	def precmd(self):
+		self.args.last_pipe_status = zsh.pipestatus()
+		self.args.last_exit_code = zsh.last_exit_code()
+		zsh.eval('_POWERLINE_PARSER_STATE="${(%):-%_}"')
+
+
 class Prompt(object):
 	__slots__ = ('powerline', 'side', 'savedpsvar', 'savedps', 'args', 'theme')
 
@@ -105,7 +104,6 @@ class Prompt(object):
 		self.theme = theme
 
 	def __str__(self):
-		zsh.eval('_POWERLINE_PARSER_STATE="${(%):-%_}"')
 		segment_info = {
 			'args': self.args,
 			'environ': environ,
@@ -145,7 +143,7 @@ def set_prompt(powerline, psvar, side, theme):
 
 
 def setup():
-	powerline = ShellPowerline(Args())
+	powerline = ZshPowerline(Args())
 	used_powerlines.append(powerline)
 	used_powerlines.append(powerline)
 	set_prompt(powerline, 'PS1', 'left', None)
@@ -154,3 +152,4 @@ def setup():
 	set_prompt(powerline, 'RPS2', 'right', 'continuation')
 	set_prompt(powerline, 'PS3', 'left', 'select')
 	atexit.register(shutdown)
+	return powerline
