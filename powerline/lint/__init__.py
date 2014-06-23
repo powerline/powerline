@@ -73,25 +73,31 @@ class DelayedEchoErr(EchoErr):
 
 class Spec(object):
 	def __init__(self, **keys):
-		new_keys = {}
-		self.specs = list(keys.values())
-		for k, v in keys.items():
-			new_keys[k] = len(self.specs)
-			self.specs.append(v)
-		self.keys = new_keys
+		self.specs = []
+		self.keys = {}
 		self.checks = []
 		self.cmsg = ''
 		self.isoptional = False
 		self.uspecs = []
 		self.ufailmsg = lambda key: 'found unknown key: {0}'.format(key)
-		if keys:
+		self.did_type = False
+		self.update(**keys)
+
+	def update(self, **keys):
+		for k, v in keys.items():
+			self.keys[k] = len(self.specs)
+			self.specs.append(v)
+		if self.keys and not self.did_type:
 			self.type(dict)
+			self.did_type = True
+		return self
 
 	def copy(self):
-		return self.__class__().update(self.__dict__)
+		return self.__class__()._update(self.__dict__)
 
-	def update(self, d):
+	def _update(self, d):
 		self.__dict__.update(d)
+		self.keys = copy(self.keys)
 		self.checks = copy(self.checks)
 		self.uspecs = copy(self.uspecs)
 		self.specs = [spec.copy() for spec in self.specs]
@@ -1005,6 +1011,13 @@ segments_spec = Spec().optional().list(
 			lambda value: 'it is recommended that divider highlight group names end with ":divider"').optional(),
 	).func(check_full_segment_data),
 ).copy
+segdict_spec=Spec(
+	left=segments_spec().context_message('Error while loading segments from left side (key {key})'),
+	right=segments_spec().context_message('Error while loading segments from right side (key {key})'),
+).func(
+	lambda value, *args: (True, True, not (('left' in value) or ('right' in value))),
+	lambda value: 'segments dictionary must contain either left, right or both keys'
+).context_message('Error while loading segments (key {key})').copy
 theme_spec = (Spec(
 	default_module=segment_module_spec(),
 	segment_data=Spec().unknown_spec(
@@ -1016,13 +1029,7 @@ theme_spec = (Spec(
 			contents=Spec().type(unicode).optional(),
 		),
 	).optional().context_message('Error while loading segment data (key {key})'),
-	segments=Spec(
-		left=segments_spec().context_message('Error while loading segments from left side (key {key})'),
-		right=segments_spec().context_message('Error while loading segments from right side (key {key})'),
-	).func(
-		lambda value, *args: (True, True, not (('left' in value) or ('right' in value))),
-		lambda value: 'segments dictionary must contain either left, right or both keys'
-	).context_message('Error while loading segments (key {key})'),
+	segments=segdict_spec().update(above=Spec().list(segdict_spec()).optional()),
 ).context_message('Error while loading theme'))
 
 
