@@ -305,8 +305,22 @@ Themes
     step 2 is obviously avoided.
 
 ``segments``
-    A dict with a ``left`` and a ``right`` list, consisting of segment 
-    dicts. Each segment has the following options:
+    A dict with a ``left`` and a ``right`` lists, consisting of segment 
+    dictionaries. Shell themes may also contain ``above`` list of dictionaries. 
+    Each item in ``above`` list may have ``left`` and ``right`` keys like this 
+    dictionary, but no ``above`` key.
+
+    .. _config-themes-above:
+
+    ``above`` list is used for multiline shell configurations.
+
+    ``left`` and ``right`` lists are used for segments that should be put on the 
+    left or right side in the output. Actual mechanizm of putting segments on 
+    the left or the right depends on used renderer, but most renderers require 
+    one to specify segment with :ref:`width <config-themes-seg-width>` ``auto`` 
+    on either side to make generated line fill all of the available width.
+
+    Each segment dictionary has the following options:
 
     ``type``
         The segment type. Can be one of ``function`` (default), ``string`` 
@@ -368,6 +382,8 @@ Themes
         right (``r``).
 
     ``width``
+        .. _config-themes-seg-width:
+
         Enforces a specific width for this segment.
 
         This segment will work as a spacer if the width is set to ``auto``.
@@ -565,6 +581,15 @@ disable support for all shells). These variables have no effect after
 configuration script was sourced (in fish case: after ``powerline-setup`` 
 function was run). To disable specific feature support set one of these 
 variables to some non-empty value.
+
+If you do not want to disable prompt in shell, but yet do not want to launch 
+python twice to get :ref:`above <config-themes-above>` lines you do not use in 
+tcsh you should set ``$POWERLINE_NO_TCSH_ABOVE`` or 
+``$POWERLINE_NO_SHELL_ABOVE`` variable.
+
+If you do not want to see additional space which is added to the right prompt in 
+fish in order to support multiline prompt you should set 
+``$POWERLINE_NO_FISH_ABOVE`` or ``$POWERLINE_NO_SHELL_ABOVE`` variables.
 
 .. note::
 
