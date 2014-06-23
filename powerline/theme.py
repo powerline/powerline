@@ -2,11 +2,19 @@
 
 from powerline.segment import gen_segment_getter
 from powerline.lib.unicode import u
+import itertools
 
 
 def requires_segment_info(func):
 	func.powerline_requires_segment_info = True
 	return func
+
+
+def new_empty_segment_line():
+	return {
+		'left': [],
+		'right': []
+	}
 
 
 class Theme(object):
@@ -20,10 +28,7 @@ class Theme(object):
 				shutdown_event=None):
 		self.dividers = theme_config.get('dividers', common_config['dividers'])
 		self.spaces = theme_config.get('spaces', common_config['spaces'])
-		self.segments = {
-			'left': [],
-			'right': [],
-		}
+		self.segments = []
 		self.EMPTY_SEGMENT = {
 			'contents': None,
 			'highlight': {'fg': False, 'bg': False, 'attr': 0}
@@ -33,25 +38,29 @@ class Theme(object):
 		if top_theme_config:
 			theme_configs.append(top_theme_config)
 		get_segment = gen_segment_getter(pl, ext, common_config['paths'], theme_configs, theme_config.get('default_module'))
-		for side in ['left', 'right']:
-			for segment in theme_config['segments'].get(side, []):
-				segment = get_segment(segment, side)
-				if not run_once:
-					if segment['startup']:
-						try:
-							segment['startup'](pl, shutdown_event)
-						except Exception as e:
-							pl.error('Exception during {0} startup: {1}', segment['name'], str(e))
-							continue
-				self.segments[side].append(segment)
+		for segdict in itertools.chain((theme_config['segments'],),
+										theme_config['segments'].get('above', ())):
+			self.segments.append(new_empty_segment_line())
+			for side in ['left', 'right']:
+				for segment in segdict.get(side, []):
+					segment = get_segment(segment, side)
+					if not run_once:
+						if segment['startup']:
+							try:
+								segment['startup'](pl, shutdown_event)
+							except Exception as e:
+								pl.error('Exception during {0} startup: {1}', segment['name'], str(e))
+								continue
+					self.segments[-1][side].append(segment)
 
 	def shutdown(self):
-		for segments in self.segments.values():
-			for segment in segments:
-				try:
-					segment['shutdown']()
-				except TypeError:
-					pass
+		for line in self.segments:
+			for segments in line.values():
+				for segment in segments:
+					try:
+						segment['shutdown']()
+					except TypeError:
+						pass
 
 	def get_divider(self, side='left', type='soft'):
 		'''Return segment divider.'''
@@ -60,15 +69,22 @@ class Theme(object):
 	def get_spaces(self):
 		return self.spaces
 
-	def get_segments(self, side=None, segment_info=None):
+	def get_line_number(self):
+		return len(self.segments)
+
+	def get_segments(self, side=None, line=0, segment_info=None):
 		'''Return all segments.
 
 		Function segments are called, and all segments get their before/after
 		and ljust/rjust properties applied.
+
+		:param int line:
+			Line number for which segments should be obtained. Is counted from 
+			zero (botmost line).
 		'''
 		for side in [side] if side else ['left', 'right']:
 			parsed_segments = []
-			for segment in self.segments[side]:
+			for segment in self.segments[line][side]:
 				if segment['type'] == 'function':
 					self.pl.prefix = segment['name']
 					try:

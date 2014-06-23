@@ -175,7 +175,20 @@ class Renderer(object):
 			r['getcwd'] = lambda: r['environ']['PWD']
 		return r
 
-	def render(self, mode=None, width=None, side=None, output_raw=False, segment_info=None, matcher_info=None):
+	def render_above_lines(self, **kwargs):
+		'''Render all segments in the {theme}/segments/above list
+
+		Rendering happens in the reversed order. Parameters are the same as in 
+		.render() method.
+
+		:yield: rendered line.
+		'''
+
+		theme = self.get_theme(kwargs.get('matcher_info', None))
+		for line in range(theme.get_line_number() - 1, 0, -1):
+			yield self.render(side=None, line=line, **kwargs)
+
+	def render(self, mode=None, width=None, side=None, line=0, output_raw=False, segment_info=None, matcher_info=None):
 		'''Render all segments.
 
 		When a width is provided, low-priority segments are dropped one at
@@ -193,6 +206,9 @@ class Renderer(object):
 		:param str side:
 			One of ``left``, ``right``. Determines which side will be rendered. 
 			If not present all sides are rendered.
+		:param int line:
+			Line number for which segments should be obtained. Is counted from 
+			zero (botmost line).
 		:param bool output_raw:
 			Changes the output: if this parameter is ``True`` then in place of 
 			one string this method outputs a pair ``(colored_string, 
@@ -203,7 +219,7 @@ class Renderer(object):
 			Matcher information. Is processed in ``.get_theme()`` method.
 		'''
 		theme = self.get_theme(matcher_info)
-		segments = theme.get_segments(side, self.get_segment_info(segment_info, mode))
+		segments = theme.get_segments(side, line, self.get_segment_info(segment_info, mode))
 
 		# Handle excluded/included segments for the current mode
 		segments = [self._get_highlighting(segment, mode) for segment in segments
