@@ -1,4 +1,6 @@
 # vim:fileencoding=utf-8:noet
+from __future__ import absolute_import, unicode_literals, division, print_function
+
 import zsh
 import atexit
 from powerline.shell import ShellPowerline
@@ -89,21 +91,22 @@ class ZshPowerline(ShellPowerline):
 	def precmd(self):
 		self.args.last_pipe_status = zsh.pipestatus()
 		self.args.last_exit_code = zsh.last_exit_code()
-		zsh.eval('_POWERLINE_PARSER_STATE="${(%):-%_}"')
 
 
 class Prompt(object):
-	__slots__ = ('powerline', 'side', 'savedpsvar', 'savedps', 'args', 'theme')
+	__slots__ = ('powerline', 'side', 'savedpsvar', 'savedps', 'args', 'theme', 'above')
 
-	def __init__(self, powerline, side, theme, savedpsvar=None, savedps=None):
+	def __init__(self, powerline, side, theme, savedpsvar=None, savedps=None, above=False):
 		self.powerline = powerline
 		self.side = side
+		self.above = above
 		self.savedpsvar = savedpsvar
 		self.savedps = savedps
 		self.args = powerline.args
 		self.theme = theme
 
 	def __str__(self):
+		zsh.eval('_POWERLINE_PARSER_STATE="${(%):-%_}"')
 		segment_info = {
 			'args': self.args,
 			'environ': environ,
@@ -111,7 +114,14 @@ class Prompt(object):
 			'local_theme': self.theme,
 			'parser_state': zsh.getvalue('_POWERLINE_PARSER_STATE'),
 		}
-		r = self.powerline.render(
+		r = ''
+		if self.above:
+			for line in self.powerline.render_above_lines(
+				width=zsh.columns() - 1,
+				segment_info=segment_info,
+			):
+				r += line + '\n'
+		r += self.powerline.render(
 			width=zsh.columns(),
 			side=self.side,
 			segment_info=segment_info,
@@ -131,13 +141,13 @@ class Prompt(object):
 			self.powerline.shutdown()
 
 
-def set_prompt(powerline, psvar, side, theme):
+def set_prompt(powerline, psvar, side, theme, above=False):
 	try:
 		savedps = zsh.getvalue(psvar)
 	except IndexError:
 		savedps = None
 	zpyvar = 'ZPYTHON_POWERLINE_' + psvar
-	prompt = Prompt(powerline, side, theme, psvar, savedps)
+	prompt = Prompt(powerline, side, theme, psvar, savedps, above)
 	zsh.set_special_string(zpyvar, prompt)
 	zsh.setvalue(psvar, '${' + zpyvar + '}')
 
@@ -146,7 +156,7 @@ def setup():
 	powerline = ZshPowerline(Args())
 	used_powerlines.append(powerline)
 	used_powerlines.append(powerline)
-	set_prompt(powerline, 'PS1', 'left', None)
+	set_prompt(powerline, 'PS1', 'left', None, above=True)
 	set_prompt(powerline, 'RPS1', 'right', None)
 	set_prompt(powerline, 'PS2', 'left', 'continuation')
 	set_prompt(powerline, 'RPS2', 'right', 'continuation')
