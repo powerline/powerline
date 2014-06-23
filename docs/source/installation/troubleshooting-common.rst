@@ -117,3 +117,17 @@ Solution to this problem is simple: be sure that :file:`z.sh` is sourced
 strictly after :file:`powerline/bindings/bash/powerline.sh`. This way background 
 jobs are spawned by `z <https://github.com/rupa/z>`_ after powerline has done 
 its job.
+
+I am suffering bad lags before displaying shell prompt
+------------------------------------------------------
+
+To get rid of these lags there currently are two options:
+
+* Take ``powerline-daemon`` script and one of ``powerline-client`` 
+  implementations from ``feature/daemon`` branch (all ``powerline-client`` 
+  implementations leave in ``client`` folder: you need to either compile 
+  ``powerline.c`` or install ``socat`` and use ``powerline.sh`` 
+  (``powerline.py`` is much slower)). Fortunately this branch will be merged in 
+  the future.
+* Compile and install ``libzpython`` module that lives in 
+  https://bitbucket.org/ZyX_I/zpython. This variant is zsh-specific.
