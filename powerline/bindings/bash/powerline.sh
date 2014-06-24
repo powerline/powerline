@@ -28,9 +28,15 @@ _powerline_init_tmux_support() {
 	fi
 }
 
+_run_powerline() {
+	# Arguments: side, last_exit_code, jobnum
+	$POWERLINE_COMMAND shell $1 -w $COLUMNS -r bash_prompt --last_exit_code=$2 --jobnum=$3
+}
+
 _powerline_prompt() {
 	local last_exit_code=$?
-	PS1="$($POWERLINE_COMMAND shell left -r bash_prompt --last_exit_code=$last_exit_code --jobnum="$(jobs -p|wc -l)")"
+	local jobnum="$(jobs -p|wc -l)"
+	PS1="$(_run_powerline aboveleft $last_exit_code $jobnum)"
 	_powerline_tmux_set_pwd
 	return $last_exit_code
 }

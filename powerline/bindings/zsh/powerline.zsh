@@ -111,21 +111,27 @@ _powerline_setup_prompt() {
 		fi
 	done
 	precmd_functions+=( _powerline_set_jobnum )
-	if zmodload libzpython &>/dev/null || zmodload zsh/zpython &>/dev/null ; then
+	if test -z "${POWERLINE_NO_ZSH_ZPYTHON}" && { zmodload libzpython || zmodload zsh/zpython } &>/dev/null ; then
 		precmd_functions+=( _powerline_update_counter )
 		zpython 'from powerline.bindings.zsh import setup as _powerline_setup'
 		zpython '_powerline = _powerline_setup()'
 		zpython 'del _powerline_setup'
 	else
-		local add_args='--last_exit_code=$? --last_pipe_status="$pipestatus"'
+		local add_args='--last_exit_code=$?'
+		add_args+=' --last_pipe_status="$pipestatus"'
 		add_args+=' --renderer_arg="client_id=$$"'
 		add_args+=' --jobnum=$_POWERLINE_JOBNUM'
-		local add_args_2=$add_args' -R parser_state=${(%%):-%_} -R local_theme=continuation'
-		PS1='$($POWERLINE_COMMAND shell left -r zsh_prompt '$add_args')'
+		local new_args_2=' -R parser_state=${(%%):-%_}'
+		new_args_2+=' -R local_theme=continuation'
+		local add_args_3=$add_args' -R local_theme=select'
+		local add_args_2=$add_args$new_args_2
+		add_args+=' --width=$(( COLUMNS - 1 ))'
+		local add_args_r2=$add_args$new_args_2
+		PS1='$($POWERLINE_COMMAND shell aboveleft -r zsh_prompt '$add_args')'
 		RPS1='$($POWERLINE_COMMAND shell right -r zsh_prompt '$add_args')'
 		PS2='$($POWERLINE_COMMAND shell left -r zsh_prompt '$add_args_2')'
-		RPS2='$($POWERLINE_COMMAND shell right -r zsh_prompt '$add_args_2')'
-		PS3='$($POWERLINE_COMMAND shell left -r zsh_prompt -R local_theme=select '$add_args')'
+		RPS2='$($POWERLINE_COMMAND shell right -r zsh_prompt '$add_args_r2')'
+		PS3='$($POWERLINE_COMMAND shell left -r zsh_prompt '$add_args_3')'
 	fi
 }
 

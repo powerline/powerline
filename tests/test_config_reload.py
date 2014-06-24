@@ -1,10 +1,10 @@
 # vim:fileencoding=utf-8:noet
 from __future__ import unicode_literals
 import powerline as powerline_module
-import time
+from time import sleep
 from tests import TestCase
 from tests.lib import replace_item
-from tests.lib.config_mock import swap_attributes, get_powerline, pop_events
+from tests.lib.config_mock import swap_attributes, get_powerline, pop_events, add_watcher_events
 from copy import deepcopy
 
 
@@ -90,18 +90,6 @@ config = {
 		},
 	},
 }
-
-
-def sleep(interval):
-	time.sleep(interval)
-
-
-def add_watcher_events(p, *args, **kwargs):
-	p._watcher._reset(args)
-	while not p._will_create_renderer():
-		sleep(kwargs.get('interval', 0.1))
-		if not kwargs.get('wait', True):
-			return
 
 
 class TestConfigReload(TestCase):

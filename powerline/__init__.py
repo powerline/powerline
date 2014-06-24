@@ -413,6 +413,25 @@ class Powerline(object):
 				pass
 			return FailedUnicode(safe_unicode(e))
 
+	def render_above_lines(self, *args, **kwargs):
+		'''Like .render(), but for ``self.renderer.render_above_lines()``
+		'''
+		try:
+			self.update_renderer()
+			for line in self.renderer.render_above_lines(*args, **kwargs):
+				yield line
+		except Exception as e:
+			try:
+				self.exception('Failed to render: {0}', str(e))
+			except Exception as e:
+				# Updates e variable to new value, masking previous one. 
+				# Normally it is the same exception (due to raise in case pl is 
+				# unset), but it may also show error in logger. Note that latter 
+				# is not logged by logger for obvious reasons, thus this also 
+				# prevents us from seeing logger traceback.
+				pass
+			yield FailedUnicode(safe_unicode(e))
+
 	def shutdown(self):
 		'''Shut down all background threads. Must be run only prior to exiting 
 		current application.

@@ -10,15 +10,35 @@ function powerline-setup
 			end
 		end
 		function --on-variable POWERLINE_COMMAND _powerline_update
-			set -l addargs "--last_exit_code=\$status --last_pipe_status=\$status --jobnum=(jobs -p | wc -l)"
+			set -l addargs "--last_exit_code=\$status"
+			set -l addargs "$addargs --last_pipe_status=\$status"
+			set -l addargs "$addargs --jobnum=(jobs -p | wc -l)"
+			set -l addargs "$addargs --width=\$_POWERLINE_COLUMNS"
+			set -l promptside
+			set -l rpromptpast
+			set -l columnsexpr
+			if test -z "$POWERLINE_NO_FISH_ABOVE$POWERLINE_NO_SHELL_ABOVE"
+				set promptside aboveleft
+				set rpromptpast 'echo -n " "'
+				set columnsexpr '(math $COLUMNS - 1)'
+			else
+				set promptside left
+				set rpromptpast
+				set columnsexpr '$COLUMNS'
+			end
 			eval "
 			function fish_prompt
-				$POWERLINE_COMMAND shell left $addargs
+				$POWERLINE_COMMAND shell $promptside $addargs
 			end
 			function fish_right_prompt
 				$POWERLINE_COMMAND shell right $addargs
+				$rpromptpast
+			end
+			function --on-signal WINCH _powerline_set_columns
+				set -g _POWERLINE_COLUMNS $columnsexpr
 			end
 			"
+			_powerline_set_columns
 		end
 		_powerline_update
 	end
