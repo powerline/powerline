@@ -38,6 +38,7 @@ def hl_iter(value):
 
 
 class Colorscheme(object):
+
 	def __init__(self, colorscheme_config, colors_config):
 		'''Initialize a colorscheme.'''
 		self.colors = {}
@@ -63,6 +64,14 @@ class Colorscheme(object):
 			else:
 				self.gradients[gradient_name] = (
 					(gradient[0], [cterm_to_hex[color] for color in gradient[0]]))
+
+	@property
+	def global_colors(self):
+		global_map = self.groups.get("global", {})
+		return {
+			key: self.colors[value]
+			for key, value in global_map.iteritems()
+		}
 
 	def get_gradient(self, gradient, gradient_level):
 		if gradient in self.gradients:
