@@ -4,6 +4,7 @@ from powerline.renderer import Renderer
 from powerline.lib.config import ConfigLoader
 from powerline import Powerline
 from copy import deepcopy
+from time import sleep
 from functools import wraps
 
 
@@ -96,6 +97,15 @@ class SimpleRenderer(Renderer):
 		return '<{fg} {bg} {attr}>'.format(fg=fg and fg[0], bg=bg and bg[0], attr=attr)
 
 
+class EvenSimplerRenderer(Renderer):
+	def hlstyle(self, fg=None, bg=None, attr=None):
+		return '{{{fg}{bg}{attr}}}'.format(
+			fg=fg and fg[0] or '-',
+			bg=bg and bg[0] or '-',
+			attr=attr if attr else '',
+		)
+
+
 class TestPowerline(Powerline):
 	_created = False
 
@@ -111,7 +121,12 @@ renderer = SimpleRenderer
 
 
 def get_powerline(**kwargs):
+	global renderer
 	watcher = Watcher()
+	if kwargs.pop('simpler_renderer', False):
+		renderer = EvenSimplerRenderer
+	else:
+		renderer = SimpleRenderer
 	pl = TestPowerline(
 		ext='test',
 		renderer_module='tests.lib.config_mock',
@@ -138,3 +153,11 @@ def swap_attributes(cfg_container, powerline_module, replaces):
 		setattr(powerline_module, attr, val)
 		replaces[attr] = old_val
 	return replaces
+
+
+def add_watcher_events(p, *args, **kwargs):
+	p._watcher._reset(args)
+	while not p._will_create_renderer():
+		sleep(kwargs.get('interval', 0.1))
+		if not kwargs.get('wait', True):
+			return
