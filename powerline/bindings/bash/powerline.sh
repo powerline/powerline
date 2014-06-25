@@ -26,8 +26,8 @@ _powerline_init_tmux_support() {
 			return 0
 		}
 	fi
-	test "x$PROMPT_COMMAND" != "x${PROMPT_COMMAND%_powerline_tmux_set_pwd*}" ||
-		export PROMPT_COMMAND=$'_powerline_tmux_set_pwd\n'"${PROMPT_COMMAND}"
+	test "x$PROMPT_COMMAND" != "x${PROMPT_COMMAND/_powerline_tmux_set_pwd}" ||
+		export PROMPT_COMMAND="${PROMPT_COMMAND}"$'\n_powerline_tmux_set_pwd'
 }
 
 _run_powerline() {
