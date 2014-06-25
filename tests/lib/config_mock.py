@@ -121,16 +121,23 @@ renderer = SimpleRenderer
 
 
 def get_powerline(**kwargs):
+	return get_powerline_raw(
+		TestPowerline,
+		ext='test',
+		renderer_module='tests.lib.config_mock',
+		logger=Logger(),
+		**kwargs
+	)
+
+
+def get_powerline_raw(PowerlineClass, **kwargs):
 	global renderer
 	watcher = Watcher()
 	if kwargs.pop('simpler_renderer', False):
 		renderer = EvenSimplerRenderer
 	else:
 		renderer = SimpleRenderer
-	pl = TestPowerline(
-		ext='test',
-		renderer_module='tests.lib.config_mock',
-		logger=Logger(),
+	pl = PowerlineClass(
 		config_loader=ConfigLoader(load=load_json_config, watcher=watcher, run_once=kwargs.get('run_once')),
 		**kwargs
 	)
