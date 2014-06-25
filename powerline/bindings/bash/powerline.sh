@@ -26,6 +26,8 @@ _powerline_init_tmux_support() {
 			return 0
 		}
 	fi
+	test "x$PROMPT_COMMAND" != "x${PROMPT_COMMAND%_powerline_tmux_set_pwd*}" ||
+		export PROMPT_COMMAND=$'_powerline_tmux_set_pwd\n'"${PROMPT_COMMAND}"
 }
 
 _run_powerline() {
@@ -37,7 +39,6 @@ _powerline_prompt() {
 	local last_exit_code=$?
 	local jobnum="$(jobs -p|wc -l)"
 	PS1="$(_run_powerline aboveleft $last_exit_code $jobnum)"
-	_powerline_tmux_set_pwd
 	return $last_exit_code
 }
 
