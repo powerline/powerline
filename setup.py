@@ -26,6 +26,7 @@ setup(
 	scripts=[
 		'scripts/powerline',
 		'scripts/powerline-lint',
+		'scripts/powerline-config',
 	],
 	keywords='',
 	packages=find_packages(exclude=('tests', 'tests.*')),
