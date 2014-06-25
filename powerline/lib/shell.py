@@ -11,6 +11,17 @@ def _get_shell_encoding():
 
 
 def run_cmd(pl, cmd, stdin=None):
+	'''Run command and return its stdout, stripped
+
+	If running command fails returns None and logs failure to ``pl`` argument.
+
+	:param PowerlineLogger pl:
+		Logger used to log failures.
+	:param list cmd:
+		Command which will be run.
+	:param str stdin:
+		String passed to command. May be None.
+	'''
 	try:
 		p = Popen(cmd, stdout=PIPE, stdin=PIPE)
 	except OSError as e:
