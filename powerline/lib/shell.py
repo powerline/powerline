@@ -23,7 +23,7 @@ def run_cmd(pl, cmd, stdin=None):
 		String passed to command. May be None.
 	'''
 	try:
-		p = Popen(cmd, stdout=PIPE, stdin=PIPE)
+		p = Popen(cmd, shell=False, stdout=PIPE, stdin=PIPE)
 	except OSError as e:
 		pl.exception('Could not execute command ({0}): {1}', e, cmd)
 		return None
