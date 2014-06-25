@@ -7,6 +7,7 @@ import sys
 import re
 
 from powerline.lib.vcs import get_branch_name as _get_branch_name, get_file_status
+from powerline.lib.shell import readlines
 
 
 _ref_pat = re.compile(br'ref:\s*refs/heads/(.+)')
@@ -144,15 +145,6 @@ try:
 		def branch(self):
 			return get_branch_name(self.directory)
 except ImportError:
-	from subprocess import Popen, PIPE
-
-	def readlines(cmd, cwd):
-		p = Popen(cmd, shell=False, stdout=PIPE, stderr=PIPE, cwd=cwd)
-		p.stderr.close()
-		with p.stdout:
-			for line in p.stdout:
-				yield line[:-1].decode('utf-8')
-
 	class Repository(object):
 		__slots__ = ('directory', 'ignore_event')
 
