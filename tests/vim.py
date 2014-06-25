@@ -11,6 +11,9 @@ options = {
 }
 _last_bufnr = 0
 _highlights = {}
+from collections import defaultdict as _defaultdict
+_environ = _defaultdict(lambda: '')
+del _defaultdict
 
 
 _thread_id = None
@@ -169,6 +172,8 @@ def eval(expr):
 		return vars[expr[2:]]
 	elif expr.startswith('&'):
 		return options[expr[1:]]
+	elif expr.startswith('$'):
+		return _environ[expr[1:]]
 	elif expr.startswith('PowerlineRegisterCachePurgerEvent'):
 		_buf_purge_events.add(expr[expr.find('"') + 1:expr.rfind('"') - 1])
 		return '0'
@@ -708,6 +713,8 @@ def _with(key, *args, **kwargs):
 		return _WithDict(options, **kwargs)
 	elif key == 'globals':
 		return _WithDict(vars, **kwargs)
+	elif key == 'environ':
+		return _WithDict(_environ, **kwargs)
 	elif key == 'split':
 		return _WithSplit()
 

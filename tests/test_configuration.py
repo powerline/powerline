@@ -1,11 +1,15 @@
 # vim:fileencoding=utf-8:noet
 from __future__ import unicode_literals, absolute_import, division
+import tests.vim as vim_module
 import powerline as powerline_module
 from tests import TestCase
 from tests.lib import replace_item
 from tests.lib.config_mock import swap_attributes, get_powerline, pop_events
+from tests.lib.config_mock import get_powerline_raw
 from functools import wraps
 from copy import deepcopy
+import sys
+import os
 
 
 config = {
@@ -29,6 +33,10 @@ config = {
 				'theme': 'default',
 				'colorscheme': 'default',
 			},
+			'vim': {
+				'theme': 'default',
+				'colorscheme': 'default',
+			},
 		},
 	},
 	'colors': {
@@ -45,6 +53,11 @@ config = {
 		'groups': {
 			'str1': {'fg': 'col1', 'bg': 'col2', 'attr': ['bold']},
 			'str2': {'fg': 'col3', 'bg': 'col4', 'attr': ['underline']},
+		},
+	},
+	'colorschemes/vim/default': {
+		'groups': {
+			'environment': {'fg': 'col3', 'bg': 'col4', 'attr': ['underline']},
 		},
 	},
 	'themes/test/default': {
@@ -69,6 +82,19 @@ config = {
 					'width': 'auto',
 					'align': 'right',
 					'highlight_group': ['str2'],
+				},
+			],
+		},
+	},
+	'themes/vim/default': {
+		'default_module': 'powerline.segments.common',
+		'segments': {
+			'left': [
+				{
+					'name': 'environment',
+					'args': {
+						'variable': 'TEST',
+					},
 				},
 			],
 		},
@@ -122,15 +148,34 @@ class TestSingleLine(TestCase):
 				], width=10)
 
 
+class TestVim(TestCase):
+	def test_environ_update(self):
+		# Regression test: test that segment obtains environment from vim, not 
+		# from os.environ.
+		from powerline.vim import VimPowerline
+		with vim_module._with('environ', TEST='abc'):
+			with get_powerline_raw(VimPowerline) as powerline:
+				window = vim_module.current.window
+				window_id = 1
+				winnr = window.number
+				self.assertEqual(powerline.render(window, window_id, winnr), '%#Pl_3_8404992_4_192_underline#\xa0abc%#Pl_4_192_NONE_None_NONE#>>')
+				vim_module._environ['TEST'] = 'def'
+				self.assertEqual(powerline.render(window, window_id, winnr), '%#Pl_3_8404992_4_192_underline#\xa0def%#Pl_4_192_NONE_None_NONE#>>')
+
+
 replaces = {}
 
 
 def setUpModule():
 	global replaces
 	replaces = swap_attributes(globals(), powerline_module, replaces)
+	sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'path')))
 
 
-tearDownModule = setUpModule
+def tearDownModule():
+	global replaces
+	replaces = swap_attributes(globals(), powerline_module, replaces)
+	sys.path.pop(0)
 
 
 if __name__ == '__main__':
