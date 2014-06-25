@@ -30,6 +30,9 @@ class VimRenderer(Renderer):
 	character_translations = Renderer.character_translations.copy()
 	character_translations[ord('%')] = '%%'
 
+	segment_info = Renderer.segment_info.copy()
+	segment_info.update(environ=environ)
+
 	def __init__(self, *args, **kwargs):
 		if not hasattr(vim, 'strwidth'):
 			# Hope nobody want to change this at runtime
@@ -84,16 +87,15 @@ class VimRenderer(Renderer):
 			mode = mode_translations.get(mode, mode)
 		else:
 			mode = 'nc'
-		segment_info = {
+		segment_info = self.segment_info.copy()
+		segment_info.update({
 			'window': window,
 			'mode': mode,
 			'window_id': window_id,
 			'winnr': winnr,
-			'environ': environ,
-		}
+		})
 		segment_info['buffer'] = segment_info['window'].buffer
 		segment_info['bufnr'] = segment_info['buffer'].number
-		segment_info.update(self.segment_info)
 		winwidth = segment_info['window'].width
 		statusline = super(VimRenderer, self).render(
 			mode=mode,
