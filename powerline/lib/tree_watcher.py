@@ -119,7 +119,8 @@ class INotifyTreeWatcher(INotify):
 			return
 		path = self.watched_rmap.get(wd, None)
 		if path is not None:
-			self.modified = not self.ignore_event(path, name)
+			if not self.ignore_event(path, name):
+				self.modified = True
 			if mask & self.CREATE:
 				# A new sub-directory might have been created, monitor it.
 				try:

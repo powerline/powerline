@@ -57,22 +57,18 @@ def do_status(directory, path, func):
 	return func(directory, path)
 
 
-def ignore_event(path, name):
-	# Ignore changes to the index.lock file, since they happen frequently and
-	# dont indicate an actual change in the working tree status
-	return False
-	return path.endswith('.git') and name == 'index.lock'
-
-
 try:
 	import pygit2 as git
 
 	class Repository(object):
-		__slots__ = ('directory', 'ignore_event')
+		__slots__ = ('directory',)
 
 		def __init__(self, directory):
 			self.directory = os.path.abspath(directory)
-			self.ignore_event = ignore_event
+
+		@staticmethod
+		def ignore_event(path, name):
+			return False
 
 		def do_status(self, directory, path):
 			if path:
@@ -146,11 +142,17 @@ try:
 			return get_branch_name(self.directory)
 except ImportError:
 	class Repository(object):
-		__slots__ = ('directory', 'ignore_event')
+		__slots__ = ('directory',)
 
 		def __init__(self, directory):
 			self.directory = os.path.abspath(directory)
-			self.ignore_event = ignore_event
+
+		@staticmethod
+		def ignore_event(path, name):
+			# Ignore changes to the index.lock file, since they happen 
+			# frequently and dont indicate an actual change in the working tree 
+			# status
+			return path.endswith('.git') and name == 'index.lock'
 
 		def _gitcmd(self, directory, *args):
 			return readlines(('git',) + args, directory)
