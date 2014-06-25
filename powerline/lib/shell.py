@@ -4,6 +4,14 @@ from __future__ import absolute_import, unicode_literals, division, print_functi
 
 from subprocess import Popen, PIPE
 from locale import getlocale, getdefaultlocale, LC_MESSAGES
+from functools import partial
+import sys
+
+
+if sys.platform.startswith('win32'):
+	# Prevent windows from launching consoles when calling commands
+	# http://msdn.microsoft.com/en-us/library/windows/desktop/ms684863(v=vs.85).aspx
+	Popen = partial(Popen, creationflags=0x08000000)
 
 
 def _get_shell_encoding():
