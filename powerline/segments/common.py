@@ -5,10 +5,11 @@ from __future__ import unicode_literals, absolute_import, division
 import os
 import sys
 import re
+import socket
 
 from datetime import datetime
-import socket
 from multiprocessing import cpu_count as _cpu_count
+from functools import partial
 
 from powerline.lib import add_divider_highlight_group
 from powerline.lib.shell import asrun, run_cmd
@@ -1105,29 +1106,153 @@ class NowPlayingSegment(object):
 now_playing = NowPlayingSegment()
 
 
-try:
-	if os.path.exists('/sys/class/power_supply/'):
-		_linux_bat_fmt = '/sys/class/power_supply/{0}/capacity'
-		_linux_bat = 'BAT0'
-		if not os.path.exists(_linux_bat_fmt.format(_linux_bat)):
-			_linux_bat = 'BAT1'
-		if not os.path.exists(_linux_bat_fmt.format(_linux_bat)):
-			raise NotImplementedError
-		def _get_capacity(pl):
-			with open(_linux_bat_fmt.format(_linux_bat), 'r') as f:
-				return int(float(f.readline().split()[0]))
+def _get_battery(pl):
+	try:
+		import dbus
+	except ImportError:
+		pl.debug('Not using DBUS+UPower as dbus is not available')
 	else:
-		raise NotImplementedError
-except NotImplementedError:
-	if os.path.exists('/usr/bin/pmset'):
+		try:
+			bus = dbus.SystemBus()
+		except Exception as e:
+			pl.exception('Failed to connect to system bus: {0}', str(e))
+		else:
+			interface = 'org.freedesktop.UPower'
+			try:
+				up = bus.get_object(interface, '/org/freedesktop/UPower')
+			except dbus.exceptions.DBusException as e:
+				if getattr(e, '_dbus_error_name', '').endswidth('ServiceUnknown'):
+					pl.debug('Not using DBUS+UPower as UPower is not available via dbus')
+				else:
+					pl.exception('Failed to get UPower service with dbus: {0}', str(e))
+			else:
+				devinterface = 'org.freedesktop.DBus.Properties'
+				devtype_name = interface + '.Device'
+				for devpath in up.EnumerateDevices(dbus_interface=interface):
+					dev = bus.get_object(interface, devpath)
+					devget = lambda what: dev.Get(
+						devtype_name,
+						what,
+						dbus_interface=devinterface
+					)
+					if int(devget('Type'))!= 2:
+						pl.debug('Not using DBUS+UPower with {0}: invalid type', devpath)
+						continue
+					if not bool(devget('IsPresent')):
+						pl.debug('Not using DBUS+UPower with {0}: not present', devpath)
+						continue
+					if not bool(devget('PowerSupply')):
+						pl.debug('Not using DBUS+UPower with {0}: not a power supply', devpath)
+						continue
+					pl.debug('Using DBUS+UPower with {0}', devpath)
+					return lambda pl: float(partial(
+						dbus.Interface(dev, dbus_interface=devinterface).Get,
+						devtype_name,
+						'Percentage'
+					))
+				pl.debug('Not using DBUS+UPower as no batteries were found')
+
+	if os.path.isdir('/sys/class/power_supply'):
+		linux_bat_fmt = '/sys/class/power_supply/{0}/capacity'
+		for linux_bat in os.listdir('/sys/class/power_supply'):
+			cap_path = linux_bat_fmt.format(linux_bat)
+			if linux_bat.startswith('BAT') and os.path.exists(cap_path):
+				pl.debug('Using /sys/class/power_supply with battery {0}', linux_bat)
+
+				def _get_capacity(pl):
+					with open(cap_path, 'r') as f:
+						return int(float(f.readline().split()[0]))
+
+				return _get_capacity
+		pl.debug('Not using /sys/class/power_supply as no batteries were found')
+	else:
+		pl.debug('Not using /sys/class/power_supply: no directory')
+
+	try:
+		from shutil import which  # Python-3.3 and later
+	except ImportError:
+		pl.info('Using dumb “which” which only checks for file in /usr/bin')
+		which = lambda f: (lambda fp: os.path.exists(fp) and fp)(os.path.join('/usr/bin', f))
+
+	if which('pmset'):
+		pl.debug('Using pmset')
+
 		def _get_capacity(pl):
 			import re
 			battery_summary = run_cmd(pl, ['pmset', '-g', 'batt'])
 			battery_percent = re.search(r'(\d+)%', battery_summary).group(1)
 			return int(battery_percent)
+
+		return _get_capacity
 	else:
+		pl.debug('Not using pmset: executable not found')
+
+	if sys.platform.startswith('win'):
+		# From http://stackoverflow.com/a/21083571/273566, reworked
+		try:
+			from win32com.client import GetObject
+		except ImportError:
+			pl.debug('Not using win32com.client as it is not available')
+		else:
+			try:
+				wmi = GetObject('winmgmts:')
+			except Exception as e:
+				pl.exception('Failed to run GetObject from win32com.client: {0}', str(e))
+			else:
+				for battery in wmi.InstancesOf('Win32_Battery'):
+					pl.debug('Using win32com.client with Win32_Battery')
+
+					def _get_capacity(pl):
+						# http://msdn.microsoft.com/en-us/library/aa394074(v=vs.85).aspx
+						return battery.EstimatedChargeRemaining
+
+					return _get_capacity
+				pl.debug('Not using win32com.client as no batteries were found')
+
+		from ctypes import Structure, c_byte, c_ulong, windll, byref
+
+		class PowerClass(Structure):
+			_fields_ = [
+				('ACLineStatus', c_byte),
+				('BatteryFlag', c_byte),
+				('BatteryLifePercent', c_byte),
+				('Reserved1', c_byte),
+				('BatteryLifeTime', c_ulong),
+				('BatteryFullLifeTime', c_ulong)
+			]
+
 		def _get_capacity(pl):
-			raise NotImplementedError
+			powerclass = PowerClass()
+			result = windll.kernel32.GetSystemPowerStatus(byref(powerclass))
+			# http://msdn.microsoft.com/en-us/library/windows/desktop/aa372693(v=vs.85).aspx
+			if result:
+				return None
+			return powerclass.BatteryLifePercent
+
+		if _get_capacity() is None:
+			pl.debug('Not using GetSystemPowerStatus because it failed')
+		else:
+			pl.debug('Using GetSystemPowerStatus')
+
+		return _get_capacity
+
+	raise NotImplementedError
+
+
+def _get_capacity(pl):
+	global _get_capacity
+
+	def _failing_get_capacity(pl):
+		raise NotImplementedError
+
+	try:
+		_get_capacity = _get_battery(pl)
+	except NotImplementedError:
+		_get_capacity = _failing_get_capacity
+	except Exception as e:
+		pl.exception('Exception while obtaining battery capacity getter: {0}', str(e))
+		_get_capacity = _failing_get_capacity
+	return _get_capacity(pl)
 
 
 def battery(pl, format='{capacity:3.0%}', steps=5, gamify=False, full_heart='♥', empty_heart='♥'):
@@ -1151,7 +1276,7 @@ def battery(pl, format='{capacity:3.0%}', steps=5, gamify=False, full_heart='♥
 	try:
 		capacity = _get_capacity(pl)
 	except NotImplementedError:
-		pl.warn('Unable to get battery capacity.')
+		pl.info('Unable to get battery capacity.')
 		return None
 	ret = []
 	if gamify:
