@@ -172,7 +172,7 @@ Tmux statusline
 Add the following lines to your :file:`.tmux.conf`, where ``{repository_root}`` 
 is the absolute path to your Powerline installation directory::
 
-   source "{repository_root}/tmux/powerline.conf"
+   source "{repository_root}/powerline/bindings/tmux/powerline.conf"
 
 .. note::
     The availability of the ``powerline-config`` command is required for 
