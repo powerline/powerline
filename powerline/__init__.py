@@ -8,11 +8,9 @@ import logging
 from powerline.colorscheme import Colorscheme
 from powerline.lib.config import ConfigLoader
 from powerline.lib.unicode import safe_unicode, FailedUnicode
+from powerline.config import DEFAULT_SYSTEM_CONFIG_DIR
 
 from threading import Lock, Event
-
-
-DEFAULT_SYSTEM_CONFIG_DIR = None
 
 
 def find_config_file(search_paths, config_file):

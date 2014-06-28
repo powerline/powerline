@@ -7,6 +7,8 @@ import os
 import subprocess
 import re
 
+from powerline.config import TMUX_CONFIG_DIRECTORY
+
 
 TmuxVersionInfo = namedtuple('TmuxVersionInfo', ('major', 'minor', 'suffix'))
 
@@ -65,7 +67,7 @@ CONFIG_PRIORITY = {
 
 def list_all_tmux_configs():
 	'''List all version-specific tmux configuration files'''
-	directory = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tmux')
+	directory = TMUX_CONFIG_DIRECTORY
 	for root, dirs, files in os.walk(directory):
 		dirs[:] = ()
 		for fname in files:
