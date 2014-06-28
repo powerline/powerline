@@ -232,7 +232,7 @@ def guess(path, create_watcher):
 
 
 def get_fallback_create_watcher():
-	from powerline.lib.file_watcher import create_file_watcher
+	from powerline.lib.watcher import create_file_watcher
 	from powerline import get_fallback_logger
 	from functools import partial
 	return partial(create_file_watcher, get_fallback_logger(), 'auto')

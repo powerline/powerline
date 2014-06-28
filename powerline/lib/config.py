@@ -1,7 +1,7 @@
 # vim:fileencoding=utf-8:noet
 
 from powerline.lib.threaded import MultiRunnedThread
-from powerline.lib.file_watcher import create_file_watcher
+from powerline.lib.watcher import create_file_watcher
 from copy import deepcopy
 
 from threading import Event, Lock

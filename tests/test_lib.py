@@ -6,7 +6,7 @@ from powerline.lib.humanize_bytes import humanize_bytes
 from powerline.lib.vcs import guess, get_fallback_create_watcher
 from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment
 from powerline.lib.monotonic import monotonic
-from powerline.lib.file_watcher import create_file_watcher, INotifyError
+from powerline.lib.watcher import create_file_watcher, INotifyError
 from powerline.lib.vcs.git import git_directory
 from powerline import get_fallback_logger
 import threading

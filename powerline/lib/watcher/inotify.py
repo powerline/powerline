@@ -1,21 +1,14 @@
 # vim:fileencoding=utf-8:noet
 from __future__ import unicode_literals, absolute_import
 
-__copyright__ = '2013, Kovid Goyal <kovid at kovidgoyal.net>'
-__docformat__ = 'restructuredtext en'
-
-import os
-import sys
 import errno
-from time import sleep
+import os
+
 from threading import RLock
 
+from powerline.lib.inotify import INotify
 from powerline.lib.monotonic import monotonic
-from powerline.lib.inotify import INotify, INotifyError
-
-
-def realpath(path):
-	return os.path.abspath(os.path.realpath(path))
+from powerline.lib.path import realpath
 
 
 class INotifyWatch(INotify):
@@ -142,97 +135,3 @@ class INotifyWatch(INotify):
 				except OSError:
 					pass
 			super(INotifyWatch, self).close()
-
-
-class StatWatch(object):
-	def __init__(self):
-		self.watches = {}
-		self.lock = RLock()
-
-	def watch(self, path):
-		path = realpath(path)
-		with self.lock:
-			self.watches[path] = os.path.getmtime(path)
-
-	def unwatch(self, path):
-		path = realpath(path)
-		with self.lock:
-			self.watches.pop(path, None)
-
-	def is_watched(self, path):
-		with self.lock:
-			return realpath(path) in self.watches
-
-	def __call__(self, path):
-		path = realpath(path)
-		with self.lock:
-			if path not in self.watches:
-				self.watches[path] = os.path.getmtime(path)
-				return True
-			mtime = os.path.getmtime(path)
-			if mtime != self.watches[path]:
-				self.watches[path] = mtime
-				return True
-			return False
-
-	def close(self):
-		with self.lock:
-			self.watches.clear()
-
-
-def create_file_watcher(pl, watcher_type='auto', expire_time=10):
-	'''
-	Create an object that can watch for changes to specified files
-
-	Use ``.__call__()`` method of the returned object to start watching the file 
-	or check whether file has changed since last call.
-
-	Use ``.unwatch()`` method of the returned object to stop watching the file.
-
-	Uses inotify if available, otherwise tracks mtimes. expire_time is the 
-	number of minutes after the last query for a given path for the inotify 
-	watch for that path to be automatically removed. This conserves kernel 
-	resources.
-
-	:param PowerlineLogger pl:
-		Logger.
-	:param str watcher_type:
-		One of ``inotify`` (linux only), ``stat``, ``auto``. Determines what 
-		watcher will be used. ``auto`` will use ``inotify`` if available.
-	:param int expire_time:
-		Number of minutes since last ``.__call__()`` before inotify watcher will 
-		stop watching given file.
-	'''
-	if watcher_type == 'stat':
-		pl.debug('Using requested stat-based watcher', prefix='watcher')
-		return StatWatch()
-	if watcher_type == 'inotify':
-		# Explicitly selected inotify watcher: do not catch INotifyError then.
-		pl.debug('Using requested inotify watcher', prefix='watcher')
-		return INotifyWatch(expire_time=expire_time)
-
-	if sys.platform.startswith('linux'):
-		try:
-			pl.debug('Trying to use inotify watcher', prefix='watcher')
-			return INotifyWatch(expire_time=expire_time)
-		except INotifyError:
-			pl.info('Failed to create inotify watcher', prefix='watcher')
-
-	pl.debug('Using stat-based watcher')
-	return StatWatch()
-
-
-if __name__ == '__main__':
-	from powerline import get_fallback_logger
-	watcher = create_file_watcher(get_fallback_logger())
-	print ('Using watcher: %s' % watcher.__class__.__name__)
-	print ('Watching %s, press Ctrl-C to quit' % sys.argv[-1])
-	watcher.watch(sys.argv[-1])
-	try:
-		while True:
-			if watcher(sys.argv[-1]):
-				print ('%s has changed' % sys.argv[-1])
-			sleep(1)
-	except KeyboardInterrupt:
-		pass
-	watcher.close()
