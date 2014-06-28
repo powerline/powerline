@@ -33,6 +33,8 @@ def git_directory(directory):
 			if not raw.startswith(b'gitdir: '):
 				raise IOError('invalid gitfile format')
 			raw = raw[8:].decode(sys.getfilesystemencoding() or 'utf-8')
+			if raw[-1] == '\n':
+				raw = raw[:-1]
 			if not raw:
 				raise IOError('no path in gitfile')
 			return os.path.abspath(os.path.join(directory, raw))
