@@ -172,10 +172,6 @@ class TreeWatcher(object):
 		self.watches[path] = w
 		return w
 
-	def is_actually_watched(self, path):
-		w = self.watches.get(path, None)
-		return not getattr(w, 'is_dummy', True)
-
 	def expire_old_queries(self):
 		pop = []
 		now = monotonic()
