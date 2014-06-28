@@ -6,7 +6,7 @@ from powerline.lib.humanize_bytes import humanize_bytes
 from powerline.lib.vcs import guess, get_fallback_create_watcher
 from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment
 from powerline.lib.monotonic import monotonic
-from powerline.lib.watcher import create_file_watcher, INotifyError
+from powerline.lib.watcher import create_file_watcher, create_tree_watcher, INotifyError
 from powerline.lib.vcs.git import git_directory
 from powerline import get_fallback_logger
 import threading
@@ -14,6 +14,7 @@ import os
 import sys
 import re
 import platform
+import shutil
 from time import sleep
 from subprocess import call, PIPE
 from functools import partial
@@ -433,13 +434,11 @@ class TestFilesystemWatchers(TestCase):
 		self.do_test_for_change(w, f2)
 
 	def test_tree_watcher(self):
-		from powerline.lib.tree_watcher import TreeWatcher
-		tw = TreeWatcher()
+		tw = create_tree_watcher(get_fallback_logger())
 		subdir = os.path.join(INOTIFY_DIR, 'subdir')
 		os.mkdir(subdir)
 		if tw.watch(INOTIFY_DIR).is_dummy:
 			raise SkipTest('No tree watcher available')
-		import shutil
 		self.assertTrue(tw(INOTIFY_DIR))
 		self.assertFalse(tw(INOTIFY_DIR))
 		changed = partial(self.do_test_for_change, tw, INOTIFY_DIR)

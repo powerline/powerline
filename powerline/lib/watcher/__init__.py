@@ -4,7 +4,9 @@ from __future__ import unicode_literals, absolute_import
 import sys
 
 from powerline.lib.watcher.stat import StatFileWatcher
-from powerline.lib.watcher.inotify import INotifyFileWatcher, INotifyError
+from powerline.lib.watcher.inotify import INotifyFileWatcher
+from powerline.lib.watcher.tree import TreeWatcher
+from powerline.lib.inotify import INotifyError
 
 
 def create_file_watcher(pl, watcher_type='auto', expire_time=10):
@@ -47,3 +49,18 @@ def create_file_watcher(pl, watcher_type='auto', expire_time=10):
 
 	pl.debug('Using stat-based watcher')
 	return StatFileWatcher()
+
+
+def create_tree_watcher(pl, watcher_type='auto', expire_time=10):
+	'''Create an object that can watch for changes in specified directories
+
+	:param PowerlineLogger pl:
+		Logger.
+	:param str watcher_type:
+		Watcher type. Currently the only supported types are ``inotify`` (linux 
+		only), ``dummy`` and ``auto``.
+	:param int expire_time:
+		Number of minutes since last ``.__call__()`` before inotify watcher will 
+		stop watching given file.
+	'''
+	return TreeWatcher(pl, watcher_type, expire_time)
