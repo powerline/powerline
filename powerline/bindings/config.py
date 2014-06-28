@@ -7,10 +7,10 @@ import os
 import subprocess
 import re
 
+from powerline.config import TMUX_CONFIG_DIRECTORY
+
 
 TmuxVersionInfo = namedtuple('TmuxVersionInfo', ('major', 'minor', 'suffix'))
-
-TMUX_CONFIG_DIRECTORY = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tmux')
 
 
 def get_tmux_executable_name():
