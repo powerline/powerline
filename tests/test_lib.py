@@ -519,7 +519,7 @@ class TestVCS(TestCase):
 			call(['git', 'checkout', '-q', 'branch2'], cwd=GIT_REPO)
 			self.do_branch_rename_test(repo, 'branch2')
 			call(['git', 'checkout', '-q', '--detach', 'branch1'], cwd=GIT_REPO)
-			self.do_branch_rename_test(repo, lambda b: re.match(r'^[a-f0-9]+$', b))
+			self.do_branch_rename_test(repo, lambda b: re.match(br'^[a-f0-9]+$', b))
 		finally:
 			call(['git', 'checkout', '-q', 'master'], cwd=GIT_REPO)
 
