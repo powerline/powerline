@@ -80,9 +80,10 @@ class GitRepository(object):
 		return self.do_status(self.directory, path)
 
 	def branch(self):
-		head = os.path.join(git_directory(self.directory), 'HEAD')
+		directory = git_directory(self.directory)
+		head = os.path.join(directory, 'HEAD')
 		return get_branch_name(
-			directory=self.directory,
+			directory=directory,
 			config_file=head,
 			get_func=branch_name_from_config_file,
 			create_watcher=self.create_watcher,
