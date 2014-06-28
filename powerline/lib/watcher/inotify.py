@@ -11,9 +11,9 @@ from powerline.lib.monotonic import monotonic
 from powerline.lib.path import realpath
 
 
-class INotifyWatch(INotify):
+class INotifyFileWatcher(INotify):
 	def __init__(self, expire_time=10):
-		super(INotifyWatch, self).__init__()
+		super(INotifyFileWatcher, self).__init__()
 		self.watches = {}
 		self.modified = {}
 		self.last_query = {}
@@ -134,4 +134,4 @@ class INotifyWatch(INotify):
 					self.unwatch(path)
 				except OSError:
 					pass
-			super(INotifyWatch, self).close()
+			super(INotifyFileWatcher, self).close()

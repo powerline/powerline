@@ -8,7 +8,7 @@ from threading import RLock
 from powerline.lib.path import realpath
 
 
-class StatWatch(object):
+class StatFileWatcher(object):
 	def __init__(self):
 		self.watches = {}
 		self.lock = RLock()

@@ -3,8 +3,8 @@ from __future__ import unicode_literals, absolute_import
 
 import sys
 
-from powerline.lib.watcher.stat import StatWatch
-from powerline.lib.watcher.inotify import INotifyWatch, INotifyError
+from powerline.lib.watcher.stat import StatFileWatcher
+from powerline.lib.watcher.inotify import INotifyFileWatcher, INotifyError
 
 
 def create_file_watcher(pl, watcher_type='auto', expire_time=10):
@@ -32,18 +32,18 @@ def create_file_watcher(pl, watcher_type='auto', expire_time=10):
 	'''
 	if watcher_type == 'stat':
 		pl.debug('Using requested stat-based watcher', prefix='watcher')
-		return StatWatch()
+		return StatFileWatcher()
 	if watcher_type == 'inotify':
 		# Explicitly selected inotify watcher: do not catch INotifyError then.
 		pl.debug('Using requested inotify watcher', prefix='watcher')
-		return INotifyWatch(expire_time=expire_time)
+		return INotifyFileWatcher(expire_time=expire_time)
 
 	if sys.platform.startswith('linux'):
 		try:
 			pl.debug('Trying to use inotify watcher', prefix='watcher')
-			return INotifyWatch(expire_time=expire_time)
+			return INotifyFileWatcher(expire_time=expire_time)
 		except INotifyError:
 			pl.info('Failed to create inotify watcher', prefix='watcher')
 
 	pl.debug('Using stat-based watcher')
-	return StatWatch()
+	return StatFileWatcher()
