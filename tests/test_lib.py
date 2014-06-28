@@ -515,8 +515,6 @@ class TestVCS(TestCase):
 			self.do_branch_rename_test(repo, 'branch1')
 			# For some reason the rest of this test fails on travis and only on
 			# travis, and I can't figure out why
-			if 'TRAVIS' in os.environ:
-				raise SkipTest('Part of this test fails on Travis for unknown reasons')
 			call(['git', 'branch', 'branch2'], cwd=GIT_REPO)
 			call(['git', 'checkout', '-q', 'branch2'], cwd=GIT_REPO)
 			self.do_branch_rename_test(repo, 'branch2')
