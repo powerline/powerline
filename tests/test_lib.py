@@ -7,6 +7,7 @@ from powerline.lib.vcs import guess, get_fallback_create_watcher
 from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment
 from powerline.lib.monotonic import monotonic
 from powerline.lib.file_watcher import create_file_watcher, INotifyError
+from powerline.lib.vcs.git import git_directory
 from powerline import get_fallback_logger
 import threading
 import os
@@ -508,18 +509,38 @@ class TestVCS(TestCase):
 		os.remove(os.path.join(GIT_REPO, 'file'))
 		# Test changing branch
 		self.assertEqual(repo.branch(), 'master')
-		call(['git', 'branch', 'branch1'], cwd=GIT_REPO)
-		call(['git', 'checkout', '-q', 'branch1'], cwd=GIT_REPO)
-		self.do_branch_rename_test(repo, 'branch1')
-		# For some reason the rest of this test fails on travis and only on
-		# travis, and I can't figure out why
-		if 'TRAVIS' in os.environ:
-			raise SkipTest('Part of this test fails on Travis for unknown reasons')
-		call(['git', 'branch', 'branch2'], cwd=GIT_REPO)
-		call(['git', 'checkout', '-q', 'branch2'], cwd=GIT_REPO)
-		self.do_branch_rename_test(repo, 'branch2')
-		call(['git', 'checkout', '-q', '--detach', 'branch1'], cwd=GIT_REPO)
-		self.do_branch_rename_test(repo, lambda b: re.match(r'^[a-f0-9]+$', b))
+		try:
+			call(['git', 'branch', 'branch1'], cwd=GIT_REPO)
+			call(['git', 'checkout', '-q', 'branch1'], cwd=GIT_REPO)
+			self.do_branch_rename_test(repo, 'branch1')
+			# For some reason the rest of this test fails on travis and only on
+			# travis, and I can't figure out why
+			if 'TRAVIS' in os.environ:
+				raise SkipTest('Part of this test fails on Travis for unknown reasons')
+			call(['git', 'branch', 'branch2'], cwd=GIT_REPO)
+			call(['git', 'checkout', '-q', 'branch2'], cwd=GIT_REPO)
+			self.do_branch_rename_test(repo, 'branch2')
+			call(['git', 'checkout', '-q', '--detach', 'branch1'], cwd=GIT_REPO)
+			self.do_branch_rename_test(repo, lambda b: re.match(r'^[a-f0-9]+$', b))
+		finally:
+			call(['git', 'checkout', '-q', 'master'], cwd=GIT_REPO)
+
+	def test_git_sym(self):
+		create_watcher = get_fallback_create_watcher()
+		dotgit = os.path.join(GIT_REPO, '.git')
+		spacegit = os.path.join(GIT_REPO, ' .git ')
+		os.rename(dotgit, spacegit)
+		try:
+			with open(dotgit, 'w') as F:
+				F.write('gitdir:  .git \n')
+			gitdir = git_directory(GIT_REPO)
+			self.assertTrue(os.path.isdir(gitdir))
+			self.assertEqual(gitdir, os.path.abspath(spacegit))
+			repo = guess(path=GIT_REPO, create_watcher=create_watcher)
+			self.assertEqual(repo.branch(), 'master')
+		finally:
+			os.remove(dotgit)
+			os.rename(spacegit, dotgit)
 
 	if use_mercurial:
 		def test_mercurial(self):
