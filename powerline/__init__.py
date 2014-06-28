@@ -63,7 +63,7 @@ class PowerlineLogger(object):
 _fallback_logger = None
 
 
-def _get_fallback_logger():
+def get_fallback_logger():
 	global _fallback_logger
 	if _fallback_logger:
 		return _fallback_logger
@@ -179,15 +179,31 @@ class Powerline(object):
 			self.common_config = config['common']
 			if self.common_config != self.prev_common_config:
 				common_config_differs = True
+
 				self.prev_common_config = self.common_config
-				self.common_config['paths'] = [os.path.expanduser(path) for path in self.common_config.get('paths', [])]
+
+				self.common_config.setdefault('paths', [])
+				self.common_config.setdefault('watcher', 'auto')
+				self.common_config.setdefault('log_level', 'WARNING')
+				self.common_config.setdefault('log_format', '%(asctime)s:%(levelname)s:%(message)s')
+				self.common_config.setdefault('term_truecolor', False)
+				self.common_config.setdefault('ambiwidth', 1)
+				self.common_config.setdefault('additional_escapes', None)
+				self.common_config.setdefault('reload_config', True)
+				self.common_config.setdefault('interval', None)
+				self.common_config.setdefault('log_file', None)
+
+				self.common_config['paths'] = [
+					os.path.expanduser(path) for path in self.common_config['paths']
+				]
+
 				self.import_paths = self.common_config['paths']
 
 				if not self.logger:
-					log_format = self.common_config.get('log_format', '%(asctime)s:%(levelname)s:%(message)s')
+					log_format = self.common_config['log_format']
 					formatter = logging.Formatter(log_format)
 
-					level = getattr(logging, self.common_config.get('log_level', 'WARNING'))
+					level = getattr(logging, self.common_config['log_level'])
 					handler = self.get_log_handler()
 					handler.setLevel(level)
 					handler.setFormatter(formatter)
@@ -198,15 +214,17 @@ class Powerline(object):
 
 				if not self.pl:
 					self.pl = PowerlineLogger(self.use_daemon_threads, self.logger, self.ext)
-					if not self.config_loader.pl:
-						self.config_loader.pl = self.pl
+					self.config_loader.pl = self.pl
+
+				if not self.run_once:
+					self.config_loader.set_watcher(self.common_config['watcher'])
 
 				self.renderer_options.update(
 					pl=self.pl,
-					term_truecolor=self.common_config.get('term_truecolor', False),
-					ambiwidth=self.common_config.get('ambiwidth', 1),
-					tmux_escape=self.common_config.get('additional_escapes') == 'tmux',
-					screen_escape=self.common_config.get('additional_escapes') == 'screen',
+					term_truecolor=self.common_config['term_truecolor'],
+					ambiwidth=self.common_config['ambiwidth'],
+					tmux_escape=self.common_config['additional_escapes'] == 'tmux',
+					screen_escape=self.common_config['additional_escapes'] == 'screen',
 					theme_kwargs={
 						'ext': self.ext,
 						'common_config': self.common_config,
@@ -215,8 +233,8 @@ class Powerline(object):
 					},
 				)
 
-				if not self.run_once and self.common_config.get('reload_config', True):
-					interval = self.common_config.get('interval', None)
+				if not self.run_once and self.common_config['reload_config']:
+					interval = self.common_config['interval']
 					self.config_loader.set_interval(interval)
 					self.run_loader_update = (interval is None)
 					if interval is not None and not self.config_loader.is_alive():
@@ -278,7 +296,7 @@ class Powerline(object):
 
 		:return: logging.Handler subclass.
 		'''
-		log_file = self.common_config.get('log_file', None)
+		log_file = self.common_config['log_file']
 		if log_file:
 			log_file = os.path.expanduser(log_file)
 			log_dir = os.path.dirname(log_file)
@@ -473,5 +491,5 @@ class Powerline(object):
 	def exception(self, msg, *args, **kwargs):
 		if 'prefix' not in kwargs:
 			kwargs['prefix'] = 'powerline'
-		pl = getattr(self, 'pl', None) or _get_fallback_logger()
+		pl = getattr(self, 'pl', None) or get_fallback_logger()
 		return pl.exception(msg, *args, **kwargs)

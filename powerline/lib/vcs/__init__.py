@@ -23,22 +23,20 @@ def generate_directories(path):
 _file_watcher = None
 
 
-def file_watcher():
+def file_watcher(create_watcher):
 	global _file_watcher
 	if _file_watcher is None:
-		from powerline.lib.file_watcher import create_file_watcher
-		_file_watcher = create_file_watcher()
+		_file_watcher = create_watcher()
 	return _file_watcher
 
 
 _branch_watcher = None
 
 
-def branch_watcher():
+def branch_watcher(create_watcher):
 	global _branch_watcher
 	if _branch_watcher is None:
-		from powerline.lib.file_watcher import create_file_watcher
-		_branch_watcher = create_file_watcher()
+		_branch_watcher = create_watcher()
 	return _branch_watcher
 
 
@@ -47,11 +45,11 @@ branch_lock = Lock()
 file_status_lock = Lock()
 
 
-def get_branch_name(directory, config_file, get_func):
+def get_branch_name(directory, config_file, get_func, create_watcher):
 	global branch_name_cache
 	with branch_lock:
 		# Check if the repo directory was moved/deleted
-		fw = branch_watcher()
+		fw = branch_watcher(create_watcher)
 		is_watched = fw.is_watched(directory)
 		try:
 			changed = fw(directory)
@@ -117,7 +115,7 @@ class FileStatusCache(dict):
 file_status_cache = FileStatusCache()
 
 
-def get_file_status(directory, dirstate_file, file_path, ignore_file_name, get_func, extra_ignore_files=()):
+def get_file_status(directory, dirstate_file, file_path, ignore_file_name, get_func, create_watcher, extra_ignore_files=()):
 	global file_status_cache
 	keypath = file_path if os.path.isabs(file_path) else os.path.join(directory, file_path)
 	file_status_cache.update_maps(keypath, directory, dirstate_file, ignore_file_name, extra_ignore_files)
@@ -129,7 +127,7 @@ def get_file_status(directory, dirstate_file, file_path, ignore_file_name, get_f
 			return ans
 
 		# Check if any relevant files have changed
-		file_changed = file_watcher()
+		file_changed = file_watcher(create_watcher)
 		changed = False
 		# Check if dirstate has changed
 		try:
@@ -217,7 +215,7 @@ vcs_props = (
 )
 
 
-def guess(path):
+def guess(path, create_watcher):
 	for directory in generate_directories(path):
 		for vcs, vcs_dir, check in vcs_props:
 			repo_dir = os.path.join(directory, vcs_dir)
@@ -227,20 +225,28 @@ def guess(path):
 				try:
 					if vcs not in globals():
 						globals()[vcs] = getattr(__import__('powerline.lib.vcs', fromlist=[vcs]), vcs)
-					return globals()[vcs].Repository(directory)
+					return globals()[vcs].Repository(directory, create_watcher)
 				except:
 					pass
 	return None
 
 
+def get_fallback_create_watcher():
+	from powerline.lib.file_watcher import create_file_watcher
+	from powerline import get_fallback_logger
+	from functools import partial
+	return partial(create_file_watcher, get_fallback_logger(), 'auto')
+
+
 def debug():
 	'''Test run guess(), repo.branch() and repo.status()
 
-	To use run python -c "from powerline.lib.vcs import debug; debug()" 
-	some_file_to_watch '''
+	To use::
+		python -c "from powerline.lib.vcs import debug; debug()" some_file_to_watch.
+	'''
 	import sys
 	dest = sys.argv[-1]
-	repo = guess(os.path.abspath(dest))
+	repo = guess(os.path.abspath(dest), get_fallback_create_watcher)
 	if repo is None:
 		print ('%s is not a recognized vcs repo' % dest)
 		raise SystemExit(1)

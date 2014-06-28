@@ -39,10 +39,11 @@ state = None
 
 
 class Repository(object):
-	def __init__(self, directory):
+	def __init__(self, directory, create_watcher):
 		if isinstance(directory, bytes):
 			directory = directory.decode(sys.getfilesystemencoding() or sys.getdefaultencoding() or 'utf-8')
 		self.directory = os.path.abspath(directory)
+		self.create_watcher = create_watcher
 
 	def status(self, path=None):
 		'''Return status of repository or file.
@@ -57,8 +58,14 @@ class Repository(object):
 		those returned by bzr status -S
 		'''
 		if path is not None:
-			return get_file_status(self.directory, os.path.join(self.directory, '.bzr', 'checkout', 'dirstate'),
-								path, '.bzrignore', self.do_status)
+			return get_file_status(
+				directory=self.directory,
+				dirstate_file=os.path.join(self.directory, '.bzr', 'checkout', 'dirstate'),
+				file_path=path,
+				ignore_file_name='.bzrignore',
+				get_func=self.do_status,
+				create_watcher=self.create_watcher,
+			)
 		return self.do_status(self.directory, path)
 
 	def do_status(self, directory, path):
@@ -93,4 +100,9 @@ class Repository(object):
 
 	def branch(self):
 		config_file = os.path.join(self.directory, '.bzr', 'branch', 'branch.conf')
-		return get_branch_name(self.directory, config_file, branch_name_from_config_file)
+		return get_branch_name(
+			directory=self.directory,
+			config_file=config_file,
+			get_func=branch_name_from_config_file,
+			create_watcher=self.create_watcher,
+		)

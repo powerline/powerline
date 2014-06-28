@@ -138,7 +138,12 @@ def get_powerline_raw(PowerlineClass, **kwargs):
 	else:
 		renderer = SimpleRenderer
 	pl = PowerlineClass(
-		config_loader=ConfigLoader(load=load_json_config, watcher=watcher, run_once=kwargs.get('run_once')),
+		config_loader=ConfigLoader(
+			load=load_json_config,
+			watcher=watcher,
+			watcher_type='test',
+			run_once=kwargs.get('run_once')
+		),
 		**kwargs
 	)
 	pl._watcher = watcher

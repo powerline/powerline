@@ -3,9 +3,11 @@ from __future__ import division
 
 from powerline.lib import mergedicts, add_divider_highlight_group, REMOVE_THIS_KEY
 from powerline.lib.humanize_bytes import humanize_bytes
-from powerline.lib.vcs import guess
+from powerline.lib.vcs import guess, get_fallback_create_watcher
 from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment
 from powerline.lib.monotonic import monotonic
+from powerline.lib.file_watcher import create_file_watcher, INotifyError
+from powerline import get_fallback_logger
 import threading
 import os
 import sys
@@ -384,9 +386,9 @@ class TestFilesystemWatchers(TestCase):
 		self.fail('The change to {0} was not detected'.format(path))
 
 	def test_file_watcher(self):
-		from powerline.lib.file_watcher import create_file_watcher
-		w = create_file_watcher(use_stat=False)
-		if w.is_stat_based:
+		try:
+			w = create_file_watcher(pl=get_fallback_logger(), watcher_type='inotify')
+		except INotifyError:
 			raise SkipTest('This test is not suitable for a stat based file watcher')
 		f1, f2, f3 = map(lambda x: os.path.join(INOTIFY_DIR, 'file%d' % x), (1, 2, 3))
 		with open(f1, 'wb'):
@@ -485,7 +487,8 @@ class TestVCS(TestCase):
 			self.assertEqual(ans, q)
 
 	def test_git(self):
-		repo = guess(path=GIT_REPO)
+		create_watcher = get_fallback_create_watcher()
+		repo = guess(path=GIT_REPO, create_watcher=create_watcher)
 		self.assertNotEqual(repo, None)
 		self.assertEqual(repo.branch(), 'master')
 		self.assertEqual(repo.status(), None)
@@ -520,7 +523,8 @@ class TestVCS(TestCase):
 
 	if use_mercurial:
 		def test_mercurial(self):
-			repo = guess(path=HG_REPO)
+			create_watcher = get_fallback_create_watcher()
+			repo = guess(path=HG_REPO, create_watcher=create_watcher)
 			self.assertNotEqual(repo, None)
 			self.assertEqual(repo.branch(), 'default')
 			self.assertEqual(repo.status(), None)
@@ -536,7 +540,8 @@ class TestVCS(TestCase):
 
 	if use_bzr:
 		def test_bzr(self):
-			repo = guess(path=BZR_REPO)
+			create_watcher = get_fallback_create_watcher()
+			repo = guess(path=BZR_REPO, create_watcher=create_watcher)
 			self.assertNotEqual(repo, None, 'No bzr repo found. Do you have bzr installed?')
 			self.assertEqual(repo.branch(), 'test_powerline')
 			self.assertEqual(repo.status(), None)
@@ -587,7 +592,7 @@ class TestVCS(TestCase):
 				os.mkdir(d)
 				call(['bzr', 'init', '-q'], cwd=d)
 				call(['bzr', 'nick', '-q', x], cwd=d)
-				repo = guess(path=d)
+				repo = guess(path=d, create_watcher=create_watcher)
 				self.assertEqual(repo.branch(), x)
 				self.assertFalse(repo.status())
 				if x == 'b1':
@@ -598,7 +603,7 @@ class TestVCS(TestCase):
 			os.rename(os.path.join(BZR_REPO, 'b'), os.path.join(BZR_REPO, 'b2'))
 			for x, y in (('b1', 'b2'), ('b2', 'b1')):
 				d = os.path.join(BZR_REPO, x)
-				repo = guess(path=d)
+				repo = guess(path=d, create_watcher=create_watcher)
 				self.do_branch_rename_test(repo, y)
 				if x == 'b1':
 					self.assertFalse(repo.status())

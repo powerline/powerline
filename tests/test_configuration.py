@@ -4,7 +4,7 @@ import tests.vim as vim_module
 import powerline as powerline_module
 from tests import TestCase
 from tests.lib import replace_item
-from tests.lib.config_mock import swap_attributes, get_powerline, pop_events
+from tests.lib.config_mock import swap_attributes, get_powerline
 from tests.lib.config_mock import get_powerline_raw
 from functools import wraps
 from copy import deepcopy
@@ -27,6 +27,7 @@ config = {
 			},
 			'spaces': 0,
 			'interval': 0,
+			'watcher': 'test',
 		},
 		'ext': {
 			'test': {

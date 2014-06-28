@@ -6,7 +6,7 @@ import os
 import sys
 import re
 
-from powerline.lib.vcs import get_branch_name as _get_branch_name, get_file_status
+from powerline.lib.vcs import get_branch_name, get_file_status
 from powerline.lib.shell import readlines
 
 
@@ -40,32 +40,57 @@ def git_directory(directory):
 		return path
 
 
-def get_branch_name(base_dir):
-	head = os.path.join(git_directory(base_dir), 'HEAD')
-	return _get_branch_name(base_dir, head, branch_name_from_config_file)
+class GitRepository(object):
+	__slots__ = ('directory', 'create_watcher')
 
+	def __init__(self, directory, create_watcher):
+		self.directory = os.path.abspath(directory)
+		self.create_watcher = create_watcher
 
-def do_status(directory, path, func):
-	if path:
-		gitd = git_directory(directory)
-		# We need HEAD as without it using fugitive to commit causes the
-		# current file's status (and only the current file) to not be updated
-		# for some reason I cannot be bothered to figure out.
-		return get_file_status(
-			directory, os.path.join(gitd, 'index'),
-			path, '.gitignore', func, extra_ignore_files=tuple(os.path.join(gitd, x) for x in ('logs/HEAD', 'info/exclude')))
-	return func(directory, path)
+	def status(self, path=None):
+		'''Return status of repository or file.
+
+		Without file argument: returns status of the repository:
+
+		:First column: working directory status (D: dirty / space)
+		:Second column: index status (I: index dirty / space)
+		:Third column: presence of untracked files (U: untracked files / space)
+		:None: repository clean
+
+		With file argument: returns status of this file. Output is
+		equivalent to the first two columns of "git status --porcelain"
+		(except for merge statuses as they are not supported by libgit2).
+		'''
+		if path:
+			gitd = git_directory(self.directory)
+			# We need HEAD as without it using fugitive to commit causes the
+			# current file's status (and only the current file) to not be updated
+			# for some reason I cannot be bothered to figure out.
+			return get_file_status(
+				directory=self.directory,
+				dirstate_file=os.path.join(gitd, 'index'),
+				file_path=path,
+				ignore_file_name='.gitignore',
+				get_func=self.do_status,
+				create_watcher=self.create_watcher,
+				extra_ignore_files=tuple(os.path.join(gitd, x) for x in ('logs/HEAD', 'info/exclude')),
+			)
+		return self.do_status(self.directory, path)
+
+	def branch(self):
+		head = os.path.join(git_directory(self.directory), 'HEAD')
+		return get_branch_name(
+			directory=self.directory,
+			config_file=head,
+			get_func=branch_name_from_config_file,
+			create_watcher=self.create_watcher,
+		)
 
 
 try:
 	import pygit2 as git
 
-	class Repository(object):
-		__slots__ = ('directory',)
-
-		def __init__(self, directory):
-			self.directory = os.path.abspath(directory)
-
+	class Repository(GitRepository):
 		@staticmethod
 		def ignore_event(path, name):
 			return False
@@ -121,32 +146,8 @@ try:
 						index_column = 'I'
 				r = wt_column + index_column + untracked_column
 				return r if r != '   ' else None
-
-		def status(self, path=None):
-			'''Return status of repository or file.
-
-			Without file argument: returns status of the repository:
-
-			:First column: working directory status (D: dirty / space)
-			:Second column: index status (I: index dirty / space)
-			:Third column: presence of untracked files (U: untracked files / space)
-			:None: repository clean
-
-			With file argument: returns status of this file. Output is
-			equivalent to the first two columns of "git status --porcelain"
-			(except for merge statuses as they are not supported by libgit2).
-			'''
-			return do_status(self.directory, path, self.do_status)
-
-		def branch(self):
-			return get_branch_name(self.directory)
 except ImportError:
-	class Repository(object):
-		__slots__ = ('directory',)
-
-		def __init__(self, directory):
-			self.directory = os.path.abspath(directory)
-
+	class Repository(GitRepository):
 		@staticmethod
 		def ignore_event(path, name):
 			# Ignore changes to the index.lock file, since they happen 
@@ -182,9 +183,3 @@ except ImportError:
 
 				r = wt_column + index_column + untracked_column
 				return r if r != '   ' else None
-
-		def status(self, path=None):
-			return do_status(self.directory, path, self.do_status)
-
-		def branch(self):
-			return get_branch_name(self.directory)

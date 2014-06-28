@@ -460,13 +460,14 @@ main_spec = (Spec(
 		# only for existence of the path, not for it being a directory
 		paths=Spec().list((lambda value, *args: (True, True, not os.path.exists(os.path.expanduser(value.value)))),
 					lambda value: 'path does not exist: {0}'.format(value)).optional(),
-		log_file=Spec().type(str).func(lambda value, *args: (True, True, not os.path.isdir(os.path.dirname(os.path.expanduser(value)))),
+		log_file=Spec().type(unicode).func(lambda value, *args: (True, True, not os.path.isdir(os.path.dirname(os.path.expanduser(value)))),
 						lambda value: 'directory does not exist: {0}'.format(os.path.dirname(value))).optional(),
 		log_level=Spec().re('^[A-Z]+$').func(lambda value, *args: (True, True, not hasattr(logging, value)),
 										lambda value: 'unknown debugging level {0}'.format(value)).optional(),
-		log_format=Spec().type(str).optional(),
+		log_format=Spec().type(unicode).optional(),
 		interval=Spec().either(Spec().cmp('gt', 0.0), Spec().type(type(None))).optional(),
 		reload_config=Spec().type(bool).optional(),
+		watcher=Spec().type(unicode).oneof(set(('auto', 'inotify', 'stat'))).optional(),
 	).context_message('Error while loading common configuration (key {key})'),
 	ext=Spec(
 		vim=Spec(

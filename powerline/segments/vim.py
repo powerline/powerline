@@ -10,7 +10,7 @@ except ImportError:
 
 from powerline.bindings.vim import (vim_get_func, getbufvar, vim_getbufoption,
 									buffer_name, vim_getwinvar)
-from powerline.theme import requires_segment_info
+from powerline.theme import requires_segment_info, requires_filesystem_watcher
 from powerline.lib import add_divider_highlight_group
 from powerline.lib.vcs import guess, tree_status
 from powerline.lib.humanize_bytes import humanize_bytes
@@ -368,8 +368,9 @@ def modified_buffers(pl, text='+ ', join_str=','):
 	return None
 
 
+@requires_filesystem_watcher
 @requires_segment_info
-def branch(pl, segment_info, status_colors=False):
+def branch(pl, segment_info, create_watcher, status_colors=False):
 	'''Return the current working branch.
 
 	:param bool status_colors:
@@ -382,7 +383,7 @@ def branch(pl, segment_info, status_colors=False):
 	name = segment_info['buffer'].name
 	skip = not (name and (not vim_getbufoption(segment_info, 'buftype')))
 	if not skip:
-		repo = guess(path=name)
+		repo = guess(path=name, create_watcher=create_watcher)
 		if repo is not None:
 			branch = repo.branch()
 			scol = ['branch']
@@ -396,8 +397,9 @@ def branch(pl, segment_info, status_colors=False):
 			}]
 
 
+@requires_filesystem_watcher
 @requires_segment_info
-def file_vcs_status(pl, segment_info):
+def file_vcs_status(pl, segment_info, create_watcher):
 	'''Return the VCS status for this buffer.
 
 	Highlight groups used: ``file_vcs_status``.
@@ -405,7 +407,7 @@ def file_vcs_status(pl, segment_info):
 	name = segment_info['buffer'].name
 	skip = not (name and (not vim_getbufoption(segment_info, 'buftype')))
 	if not skip:
-		repo = guess(path=name)
+		repo = guess(path=name, create_watcher=create_watcher)
 		if repo is not None:
 			status = repo.status(os.path.relpath(name, repo.directory))
 			if not status:

@@ -25,6 +25,8 @@ def getconfigargspec(obj):
 					if (arg == 'self' or
 							(arg == 'segment_info' and
 								getattr(obj, 'powerline_requires_segment_info', None)) or
+							(arg == 'create_watcher' and
+								getattr(obj, 'powerline_requires_filesystem_watcher', None)) or
 							(arg == 'pl') or
 							(method.startswith('render') and (1 if argspec.args[0] == 'self' else 0) + i == len(argspec.args)) or
 							arg in args):
