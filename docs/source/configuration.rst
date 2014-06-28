@@ -128,6 +128,19 @@ Common configuration is a subdictionary that is a value of ``common`` key in
     letters, Cyrillic letters). Valid values: any positive integer; it is 
     suggested that you only set it to 1 (default) or 2.
 
+``watcher``
+    Select filesystem watcher. Variants are
+
+    =======  ===================================
+    Variant  Description
+    =======  ===================================
+    auto     Selects most performant watcher.
+    inotify  Select inotify watcher. Linux only.
+    stat     Select stat-based polling watcher.
+    =======  ===================================
+
+    Default is ``auto``.
+
 .. _config-common-additional_escapes:
 
 ``additional_escapes``

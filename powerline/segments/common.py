@@ -18,7 +18,7 @@ from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment, with_docs
 from powerline.lib.monotonic import monotonic
 from powerline.lib.humanize_bytes import humanize_bytes
 from powerline.lib.unicode import u
-from powerline.theme import requires_segment_info
+from powerline.theme import requires_segment_info, requires_filesystem_watcher
 from collections import namedtuple
 
 
@@ -51,8 +51,9 @@ def hostname(pl, segment_info, only_if_ssh=False, exclude_domain=False):
 	return socket.gethostname()
 
 
+@requires_filesystem_watcher
 @requires_segment_info
-def branch(pl, segment_info, status_colors=False):
+def branch(pl, segment_info, create_watcher, status_colors=False):
 	'''Return the current VCS branch.
 
 	:param bool status_colors:
@@ -61,7 +62,7 @@ def branch(pl, segment_info, status_colors=False):
 	Highlight groups used: ``branch_clean``, ``branch_dirty``, ``branch``.
 	'''
 	name = segment_info['getcwd']()
-	repo = guess(path=name)
+	repo = guess(path=name, create_watcher=create_watcher)
 	if repo is not None:
 		branch = repo.branch()
 		scol = ['branch']

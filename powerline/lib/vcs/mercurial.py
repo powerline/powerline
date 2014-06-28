@@ -18,15 +18,16 @@ def branch_name_from_config_file(directory, config_file):
 
 
 class Repository(object):
-	__slots__ = ('directory', 'ui')
+	__slots__ = ('directory', 'ui', 'create_watcher')
 
 	statuses = 'MARDUI'
 	repo_statuses = (1, 1, 1, 1, 2)
 	repo_statuses_str = (None, 'D ', ' U', 'DU')
 
-	def __init__(self, directory):
+	def __init__(self, directory, create_watcher):
 		self.directory = os.path.abspath(directory)
 		self.ui = ui.ui()
+		self.create_watcher = create_watcher
 
 	def _repo(self, directory):
 		# Cannot create this object once and use always: when repository updates
@@ -47,8 +48,14 @@ class Repository(object):
 		"U"nknown, "I"gnored, (None)Clean.
 		'''
 		if path:
-			return get_file_status(self.directory, os.path.join(self.directory, '.hg', 'dirstate'),
-					path, '.hgignore', self.do_status)
+			return get_file_status(
+				directory=self.directory,
+				dirstate_file=os.path.join(self.directory, '.hg', 'dirstate'),
+				file_path=path,
+				ignore_file_name='.hgignore',
+				get_func=self.do_status,
+				create_watcher=self.create_watcher,
+			)
 		return self.do_status(self.directory, path)
 
 	def do_status(self, directory, path):
@@ -69,4 +76,9 @@ class Repository(object):
 
 	def branch(self):
 		config_file = os.path.join(self.directory, '.hg', 'branch')
-		return get_branch_name(self.directory, config_file, branch_name_from_config_file)
+		return get_branch_name(
+			directory=self.directory,
+			config_file=config_file,
+			get_func=branch_name_from_config_file,
+			create_watcher=self.create_watcher,
+		)

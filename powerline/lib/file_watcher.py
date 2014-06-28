@@ -19,8 +19,6 @@ def realpath(path):
 
 
 class INotifyWatch(INotify):
-	is_stat_based = False
-
 	def __init__(self, expire_time=10):
 		super(INotifyWatch, self).__init__()
 		self.watches = {}
@@ -147,8 +145,6 @@ class INotifyWatch(INotify):
 
 
 class StatWatch(object):
-	is_stat_based = True
-
 	def __init__(self):
 		self.watches = {}
 		self.lock = RLock()
@@ -184,29 +180,51 @@ class StatWatch(object):
 			self.watches.clear()
 
 
-def create_file_watcher(use_stat=False, expire_time=10):
+def create_file_watcher(pl, watcher_type='auto', expire_time=10):
 	'''
-	Create an object that can watch for changes to specified files. To use:
+	Create an object that can watch for changes to specified files
 
-	watcher = create_file_watcher()
-	watcher(path1) # Will return True if path1 has changed since the last time this was called. Always returns True the first time.
-	watcher.unwatch(path1)
+	Use ``.__call__()`` method of the returned object to start watching the file 
+	or check whether file has changed since last call.
 
-	Uses inotify if available, otherwise tracks mtimes. expire_time is the
-	number of minutes after the last query for a given path for the inotify
-	watch for that path to be automatically removed. This conserves kernel
+	Use ``.unwatch()`` method of the returned object to stop watching the file.
+
+	Uses inotify if available, otherwise tracks mtimes. expire_time is the 
+	number of minutes after the last query for a given path for the inotify 
+	watch for that path to be automatically removed. This conserves kernel 
 	resources.
+
+	:param PowerlineLogger pl:
+		Logger.
+	:param str watcher_type:
+		One of ``inotify`` (linux only), ``stat``, ``auto``. Determines what 
+		watcher will be used. ``auto`` will use ``inotify`` if available.
+	:param int expire_time:
+		Number of minutes since last ``.__call__()`` before inotify watcher will 
+		stop watching given file.
 	'''
-	if use_stat:
+	if watcher_type == 'stat':
+		pl.debug('Using requested stat-based watcher', prefix='watcher')
 		return StatWatch()
-	try:
+	if watcher_type == 'inotify':
+		# Explicitly selected inotify watcher: do not catch INotifyError then.
+		pl.debug('Using requested inotify watcher', prefix='watcher')
 		return INotifyWatch(expire_time=expire_time)
-	except INotifyError:
-		pass
+
+	if sys.platform.startswith('linux'):
+		try:
+			pl.debug('Trying to use inotify watcher', prefix='watcher')
+			return INotifyWatch(expire_time=expire_time)
+		except INotifyError:
+			pl.info('Failed to create inotify watcher', prefix='watcher')
+
+	pl.debug('Using stat-based watcher')
 	return StatWatch()
 
+
 if __name__ == '__main__':
-	watcher = create_file_watcher()
+	from powerline import get_fallback_logger
+	watcher = create_file_watcher(get_fallback_logger())
 	print ('Using watcher: %s' % watcher.__class__.__name__)
 	print ('Watching %s, press Ctrl-C to quit' % sys.argv[-1])
 	watcher.watch(sys.argv[-1])

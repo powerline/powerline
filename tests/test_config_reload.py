@@ -23,6 +23,7 @@ config = {
 			},
 			'spaces': 0,
 			'interval': 0,
+			'watcher': 'test',
 		},
 		'ext': {
 			'test': {

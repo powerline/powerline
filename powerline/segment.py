@@ -1,6 +1,8 @@
 # vim:fileencoding=utf-8:noet
 
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals, division, print_function
+
+from powerline.lib.file_watcher import create_file_watcher
 import sys
 
 
@@ -52,15 +54,15 @@ def get_attr_func(contents_func, key, args):
 		return None
 	else:
 		if args is None:
-			return lambda : func()
+			return lambda: func()
 		else:
 			return lambda pl, shutdown_event: func(pl=pl, shutdown_event=shutdown_event, **args)
 
 
-def gen_segment_getter(pl, ext, path, theme_configs, default_module=None):
+def gen_segment_getter(pl, ext, common_config, theme_configs, default_module=None):
 	data = {
 		'default_module': default_module or 'powerline.segments.' + ext,
-		'path': path,
+		'path': common_config['paths'],
 	}
 
 	def get_key(segment, module, key, default=None):
@@ -89,6 +91,10 @@ def gen_segment_getter(pl, ext, path, theme_configs, default_module=None):
 			args = dict(((str(k), v) for k, v in get_key(segment, module, 'args', {}).items()))
 			startup_func = get_attr_func(_contents_func, 'startup', args)
 			shutdown_func = get_attr_func(_contents_func, 'shutdown', None)
+
+			if hasattr(_contents_func, 'powerline_requires_filesystem_watcher'):
+				create_watcher = lambda: create_file_watcher(pl, common_config['watcher'])
+				args['create_watcher'] = create_watcher
 
 			if hasattr(_contents_func, 'powerline_requires_segment_info'):
 				contents_func = lambda pl, segment_info: _contents_func(pl=pl, segment_info=segment_info, **args)

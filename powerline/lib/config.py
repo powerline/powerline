@@ -28,14 +28,41 @@ class DummyWatcher(object):
 		pass
 
 
+class DeferredWatcher(object):
+	def __init__(self, *args, **kwargs):
+		self.args = args
+		self.kwargs = kwargs
+		self.calls = []
+
+	def __call__(self, *args, **kwargs):
+		self.calls.append(('__call__', args, kwargs))
+
+	def watch(self, *args, **kwargs):
+		self.calls.append(('watch', args, kwargs))
+
+	def unwatch(self, *args, **kwargs):
+		self.calls.append(('unwatch', args, kwargs))
+
+	def transfer_calls(self, watcher):
+		for attr, args, kwargs in self.calls:
+			getattr(watcher, attr)(*args, **kwargs)
+
+
 class ConfigLoader(MultiRunnedThread):
-	def __init__(self, shutdown_event=None, watcher=None, load=load_json_config, run_once=False):
+	def __init__(self, shutdown_event=None, watcher=None, watcher_type=None, load=load_json_config, run_once=False):
 		super(ConfigLoader, self).__init__()
 		self.shutdown_event = shutdown_event or Event()
 		if run_once:
 			self.watcher = DummyWatcher()
+			self.watcher_type = 'dummy'
 		else:
-			self.watcher = watcher or create_file_watcher()
+			self.watcher = watcher or DeferredWatcher()
+			if watcher:
+				if not watcher_type:
+					raise ValueError('When specifying watcher you must also specify watcher type')
+				self.watcher_type = watcher_type
+			else:
+				self.watcher_type = 'deferred'
 		self._load = load
 
 		self.pl = None
@@ -46,6 +73,16 @@ class ConfigLoader(MultiRunnedThread):
 		self.watched = defaultdict(set)
 		self.missing = defaultdict(set)
 		self.loaded = {}
+
+	def set_watcher(self, watcher_type, force=False):
+		if watcher_type == self.watcher_type:
+			return
+		watcher = create_file_watcher(self.pl, watcher_type)
+		with self.lock:
+			if self.watcher_type == 'deferred':
+				self.watcher.transfer_calls(watcher)
+			self.watcher = watcher
+			self.watcher_type = watcher_type
 
 	def set_pl(self, pl):
 		self.pl = pl
