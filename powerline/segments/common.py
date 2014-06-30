@@ -9,6 +9,7 @@ import re
 from datetime import datetime
 import socket
 from multiprocessing import cpu_count as _cpu_count
+from functools import partial
 
 from powerline.lib import add_divider_highlight_group
 from powerline.lib.shell import asrun, run_cmd
@@ -1177,3 +1178,57 @@ def battery(pl, format='{capacity:3.0%}', steps=5, gamify=False, full_heart='♥
 			'gradient_level': capacity,
 		})
 	return ret
+
+do_find = object()
+_battery = do_find
+
+def _find_battery(pl):
+	try:
+		import dbus
+	except ImportError:
+		pl.warn('Cannot get battery stats as DBUS not available')
+		return
+	bus = dbus.SystemBus()
+	try:
+		up = bus.get_object('org.freedesktop.UPower', '/org/freedesktop/UPower')
+	except dbus.exceptions.DBusException as e:
+		if getattr(e, '_dbus_error_name', None) == 'org.freedesktop.DBus.Error.ServiceUnknown':
+			pl.warn('Cannot get batter stats as UPower service is not available')
+			return
+		raise
+	for devpath in up.EnumerateDevices(dbus_interface='org.freedesktop.UPower'):
+		dev = bus.get_object('org.freedesktop.UPower', devpath)
+		devtype = int(dev.Get('org.freedesktop.UPower.Device', 'Type', dbus_interface='org.freedesktop.DBus.Properties'))
+		if devtype != 2:
+			continue
+		if not bool(dev.Get('org.freedesktop.UPower.Device', 'IsPresent', dbus_interface='org.freedesktop.DBus.Properties')):
+			continue
+		if not bool(dev.Get('org.freedesktop.UPower.Device', 'PowerSupply', dbus_interface='org.freedesktop.DBus.Properties')):
+			continue
+		return partial(dbus.Interface(dev, dbus_interface='org.freedesktop.DBus.Properties').Get, 'org.freedesktop.UPower.Device')
+
+def find_battery(pl):
+	global _battery
+	if _battery is do_find:
+		_battery = _find_battery(pl)
+	return _battery
+
+def battery_time(pl):
+	dev = find_battery(pl)
+	if dev is None:
+		return None
+	state = int(dev('State'))
+	if state not in (1, 2):
+		return None
+	tleft = int(dev('TimeToFull' if state == 1 else 'TimeToEmpty'))
+	percentage = float(dev('Percentage'))
+	prefix = '+' if state == 1 else '-'
+	if tleft == 0:
+		return None
+	minutes = tleft // 60
+	hours, minutes = minutes // 60, minutes % 60
+	return [{
+		'contents': '%s %02d:%02d' % (prefix, hours, minutes),
+		'highlight_group': ['battery_gradient', 'battery'],
+		'gradient_level': percentage
+	}]
