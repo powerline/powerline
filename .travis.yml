@@ -5,6 +5,7 @@ python:
     - "3.2"
     - "3.3"
     - "3.4"
+    - "pypy"
 install: tests/install.sh
 script: tests/test.sh
 
