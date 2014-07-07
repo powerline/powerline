@@ -53,6 +53,7 @@ p.add_argument('-r', '--range', metavar='V1 V2', type=num2, help='Use this range
 p.add_argument('-s', '--show', action='store_true', help='If present output gradient sample')
 p.add_argument('-p', '--palette', choices=('16', '256'), help='Use this palette. Defaults to 240-color palette (256 colors without first 16)')
 p.add_argument('-w', '--weights', metavar='INT INT ...', type=nums, help='Adjust weights of colors. Number of weights must be equal to number of colors')
+p.add_argument('-C', '--omit-terminal', action='store_true', help='If present do not compute values for terminal')
 
 args = p.parse_args()
 
@@ -156,16 +157,19 @@ palettes = {
 	None: (cterm_to_lab[16:], lambda c: c + 16),
 }
 r = [get_rgb(lab) for lab in gradient]
-r2 = [find_color(lab, *palettes[args.palette])[0] for lab in gradient]
-r3 = [i[0] for i in groupby(r2)]
+if not args.omit_terminal:
+	r2 = [find_color(lab, *palettes[args.palette])[0] for lab in gradient]
+	r3 = [i[0] for i in groupby(r2)]
 print(json.dumps(r))
-print(json.dumps(r2))
-print(json.dumps(r3))
+if not args.omit_terminal:
+	print(json.dumps(r2))
+	print(json.dumps(r3))
 if args.show:
 	print_colors(args.gradient, args.num_output)
 	print_colors(gradient, args.num_output)
-	print_colors(r2, args.num_output)
-	print_colors(r3, args.num_output)
+	if not args.omit_terminal:
+		print_colors(r2, args.num_output)
+		print_colors(r3, args.num_output)
 	if not args.range and args.num_output >= 32 and (args.num_output - 1) // 10 >= 4 and (args.num_output - 1) % 10 == 0:
 		sys.stdout.write('0')
 		sys.stdout.write(''.join(('%*u' % (args.num_output // 10, i) for i in range(10, 101, 10))))
