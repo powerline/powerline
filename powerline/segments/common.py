@@ -1140,14 +1140,21 @@ def battery(pl, format='{capacity:3.0%}', steps=5, gamify=False, full_heart='♥
 		Number of discrete steps to show between 0% and 100% capacity if gamify
 		is True.
 	:param bool gamify:
-		Measure in hearts (♥) instead of percentages.
+		Measure in hearts (♥) instead of percentages. For full hearts 
+		``battery_full`` highlighting group is preferred, for empty hearts there 
+		is ``battery_empty``.
 	:param str full_heart:
 		Heart displayed for “full” part of battery.
 	:param str empty_heart:
 		Heart displayed for “used” part of battery. It is also displayed using
-		another gradient level, so it is OK for it to be the same as full_heart.
+		another gradient level and highlighting group, so it is OK for it to be 
+		the same as full_heart as long as necessary highlighting groups are 
+		defined.
 
-	Highlight groups used: ``battery_gradient`` (gradient), ``battery``.
+	``battery_gradient`` and ``battery`` groups are used in any case, first is 
+	preferred.
+
+	Highlight groups used: ``battery_full`` or ``battery_gradient`` (gradient) or ``battery``, ``battery_empty`` or ``battery_gradient`` (gradient) or ``battery``.
 	'''
 	try:
 		capacity = _get_capacity(pl)
@@ -1161,14 +1168,14 @@ def battery(pl, format='{capacity:3.0%}', steps=5, gamify=False, full_heart='♥
 		ret.append({
 			'contents': full_heart * numer,
 			'draw_inner_divider': False,
-			'highlight_group': ['battery_gradient', 'battery'],
+			'highlight_group': ['battery_full', 'battery_gradient', 'battery'],
 			# Using zero as “nothing to worry about”: it is least alert color.
 			'gradient_level': 0,
 		})
 		ret.append({
 			'contents': empty_heart * (denom - numer),
 			'draw_inner_divider': False,
-			'highlight_group': ['battery_gradient', 'battery'],
+			'highlight_group': ['battery_empty', 'battery_gradient', 'battery'],
 			# Using a hundred as it is most alert color.
 			'gradient_level': 100,
 		})

@@ -549,13 +549,13 @@ class TestCommon(TestCase):
 				{
 					'contents': '♥♥♥♥',
 					'draw_inner_divider': False,
-					'highlight_group': ['battery_gradient', 'battery'],
+					'highlight_group': ['battery_full', 'battery_gradient', 'battery'],
 					'gradient_level': 0
 				},
 				{
 					'contents': '♥',
 					'draw_inner_divider': False,
-					'highlight_group': ['battery_gradient', 'battery'],
+					'highlight_group': ['battery_empty', 'battery_gradient', 'battery'],
 					'gradient_level': 100
 				}
 			])
@@ -563,13 +563,13 @@ class TestCommon(TestCase):
 				{
 					'contents': '++++++++',
 					'draw_inner_divider': False,
-					'highlight_group': ['battery_gradient', 'battery'],
+					'highlight_group': ['battery_full', 'battery_gradient', 'battery'],
 					'gradient_level': 0
 				},
 				{
 					'contents': '--',
 					'draw_inner_divider': False,
-					'highlight_group': ['battery_gradient', 'battery'],
+					'highlight_group': ['battery_empty', 'battery_gradient', 'battery'],
 					'gradient_level': 100
 				}
 			])
