@@ -225,6 +225,12 @@ def fuzzy_time(pl, unicode_text=True):
 	return result
 
 
+def internal_ip(pl):
+	'''Returns the internal ip address based off the hostname'''
+	hostname = socket.gethostname()
+	return socket.gethostbyname(hostname)
+
+
 def _external_ip(query_url='http://ipv4.icanhazip.com/'):
 	return urllib_read(query_url).strip()
 

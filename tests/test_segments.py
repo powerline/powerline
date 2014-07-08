@@ -348,6 +348,11 @@ class TestCommon(TestCase):
 			time.minute = 60
 			self.assertEqual(common.fuzzy_time(pl=pl, unicode_text=False), 'twelve o\'clock')
 
+	def test_internal_ip(self):
+		pl = Pl()
+		with replace_module_module(common, 'socket', gethostname=lambda: 'localhost', gethostbyname=lambda x: '127.0.0.1'):
+			self.assertEqual(common.internal_ip(pl=pl), '127.0.0.1')
+
 	def test_external_ip(self):
 		pl = Pl()
 		with replace_attr(common, 'urllib_read', urllib_read):
