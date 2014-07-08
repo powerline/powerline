@@ -2,7 +2,7 @@
 # vim:fileencoding=utf-8:noet
 '''Gradients generator
 '''
-from __future__ import division
+from __future__ import division, unicode_literals
 import sys
 import json
 from powerline.colorscheme import cterm_to_hex
@@ -195,16 +195,16 @@ if __name__ == '__main__':
 		r2 = [find_color(lab, *palettes[args.palette])[0] for lab in gradient]
 		r3 = [i[0] for i in groupby(r2)]
 
-	print(json.dumps(r))
 	if not args.omit_terminal:
-		print(json.dumps(r2))
-		print(json.dumps(r3))
+		print(json.dumps(r3) + ',')
+		print(json.dumps(r2) + ',')
+	print(json.dumps(r))
 
 	if args.show:
 		print_colors(args.gradient, args.num_output)
-		print_colors(gradient, args.num_output)
 		if not args.omit_terminal:
-			print_colors(r2, args.num_output)
 			print_colors(r3, args.num_output)
+			print_colors(r2, args.num_output)
+		print_colors(gradient, args.num_output)
 
 		show_scale(args.range, args.num_output)
