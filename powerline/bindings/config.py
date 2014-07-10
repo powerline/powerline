@@ -34,7 +34,7 @@ def run_tmux_command(*args):
 
 def get_tmux_output(*args):
 	'''Run tmux command and return its output'''
-	return _run_tmux(subprocess.check_output, args)
+	return _run_tmux(subprocess.check_output, args).decode('utf-8')
 
 
 NON_DIGITS = re.compile('[^0-9]+')
