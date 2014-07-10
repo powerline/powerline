@@ -142,10 +142,13 @@ def _construct_result(r):
 	if sys.version_info < (3,):
 		return r
 	else:
-		if type(r) is str:
+		if isinstance(r, str):
 			return r.encode('utf-8')
-		elif type(r) is dict or type(r) is list:
-			raise NotImplementedError
+		elif isinstance(r, list):
+			return [_construct_result(i) for i in r]
+		elif isinstance(r, dict):
+			return dict(((_construct_result(k), _construct_result(v))
+						for k, v in r.items()))
 		return r
 
 
