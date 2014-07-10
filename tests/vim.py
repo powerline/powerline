@@ -44,6 +44,24 @@ def _vim(func):
 	return f
 
 
+def _unicode(func):
+	from functools import wraps
+	import sys
+
+	if sys.version_info < (3,):
+		return func
+
+	@wraps(func)
+	def f(*args, **kwargs):
+		from powerline.lib.unicode import u
+		ret = func(*args, **kwargs)
+		if isinstance(ret, bytes):
+			ret = u(ret)
+		return ret
+
+	return f
+
+
 class _Buffers(object):
 	@_vim
 	def __init__(self):
@@ -163,6 +181,7 @@ def command(cmd):
 
 
 @_vim
+@_unicode
 def eval(expr):
 	if expr.startswith('g:'):
 		return vars[expr[2:]]
