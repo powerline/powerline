@@ -103,15 +103,15 @@ class _Windows(object):
 		return not not self.l
 
 	@_vim
-	def pop(self, *args, **kwargs):
+	def _pop(self, *args, **kwargs):
 		return self.l.pop(*args, **kwargs)
 
 	@_vim
-	def append(self, *args, **kwargs):
+	def _append(self, *args, **kwargs):
 		return self.l.append(*args, **kwargs)
 
 	@_vim
-	def index(self, *args, **kwargs):
+	def _index(self, *args, **kwargs):
 		return self.l.index(*args, **kwargs)
 
 
@@ -367,14 +367,14 @@ class _Window(object):
 				self.buffer = _Buffer(**buffer)
 		else:
 			self.buffer = _Buffer()
-		windows.append(self)
+		windows._append(self)
 		_window_id += 1
 		_window_ids.append(_window_id)
 		self.options = {}
 		self.vars = {}
 
 	def __repr__(self):
-		return '<window ' + str(windows.index(self)) + '>'
+		return '<window ' + str(windows._index(self)) + '>'
 
 
 _buf_lines = {}
@@ -559,7 +559,7 @@ def _split():
 
 @_vim
 def _del_window(winnr):
-	win = windows.pop(winnr - 1)
+	win = windows._pop(winnr - 1)
 	_window_ids.pop(winnr)
 	return win
 
