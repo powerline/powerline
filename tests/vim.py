@@ -44,6 +44,24 @@ def _vim(func):
 	return f
 
 
+def _unicode(func):
+	from functools import wraps
+	import sys
+
+	if sys.version_info < (3,):
+		return func
+
+	@wraps(func)
+	def f(*args, **kwargs):
+		from powerline.lib.unicode import u
+		ret = func(*args, **kwargs)
+		if isinstance(ret, bytes):
+			ret = u(ret)
+		return ret
+
+	return f
+
+
 class _Buffers(object):
 	@_vim
 	def __init__(self):
@@ -103,16 +121,12 @@ class _Windows(object):
 		return not not self.l
 
 	@_vim
-	def pop(self, *args, **kwargs):
+	def _pop(self, *args, **kwargs):
 		return self.l.pop(*args, **kwargs)
 
 	@_vim
-	def append(self, *args, **kwargs):
+	def _append(self, *args, **kwargs):
 		return self.l.append(*args, **kwargs)
-
-	@_vim
-	def index(self, *args, **kwargs):
-		return self.l.index(*args, **kwargs)
 
 
 windows = _Windows()
@@ -128,10 +142,13 @@ def _construct_result(r):
 	if sys.version_info < (3,):
 		return r
 	else:
-		if type(r) is str:
+		if isinstance(r, str):
 			return r.encode('utf-8')
-		elif type(r) is dict or type(r) is list:
-			raise NotImplementedError
+		elif isinstance(r, list):
+			return [_construct_result(i) for i in r]
+		elif isinstance(r, dict):
+			return dict(((_construct_result(k), _construct_result(v))
+						for k, v in r.items()))
 		return r
 
 
@@ -167,6 +184,7 @@ def command(cmd):
 
 
 @_vim
+@_unicode
 def eval(expr):
 	if expr.startswith('g:'):
 		return vars[expr[2:]]
@@ -179,6 +197,22 @@ def eval(expr):
 		return '0'
 	elif expr.startswith('exists('):
 		return '0'
+	elif expr.startswith('getwinvar('):
+		import re
+		match = re.match(r'^getwinvar\((\d+), "(\w+)"\)$', expr)
+		if not match:
+			raise NotImplementedError
+		winnr = int(match.group(1))
+		varname = match.group(2)
+		return _emul_getwinvar(winnr, varname)
+	elif expr.startswith('has_key('):
+		import re
+		match = re.match(r'^has_key\(getwinvar\((\d+), ""\), "(\w+)"\)$', expr)
+		if not match:
+			raise NotImplementedError
+		winnr = int(match.group(1))
+		varname = match.group(2)
+		return 0 + (varname in windows[winnr - 1].vars)
 	elif expr == 'getbufvar("%", "NERDTreeRoot").path.str()':
 		import os
 		assert os.path.basename(buffers[_buffer()].name).startswith('NERD_tree_')
@@ -239,12 +273,12 @@ def _emul_getbufvar(bufnr, varname):
 @_vim
 @_str_func
 def _emul_getwinvar(winnr, varname):
-	return windows[winnr].vars[varname]
+	return windows[winnr - 1].vars.get(varname, '')
 
 
 @_vim
 def _emul_setwinvar(winnr, varname, value):
-	windows[winnr].vars[varname] = value
+	windows[winnr - 1].vars[varname] = value
 
 
 @_vim
@@ -351,14 +385,14 @@ class _Window(object):
 				self.buffer = _Buffer(**buffer)
 		else:
 			self.buffer = _Buffer()
-		windows.append(self)
+		windows._append(self)
 		_window_id += 1
 		_window_ids.append(_window_id)
 		self.options = {}
 		self.vars = {}
 
 	def __repr__(self):
-		return '<window ' + str(windows.index(self)) + '>'
+		return '<window ' + str(self.number - 1) + '>'
 
 
 _buf_lines = {}
@@ -483,6 +517,7 @@ def _get_segment_info():
 	mode = mode_translations.get(mode, mode)
 	return {
 		'window': windows[_window - 1],
+		'winnr': _window,
 		'buffer': buffers[_buffer()],
 		'bufnr': _buffer(),
 		'window_id': _window_ids[_window],
@@ -543,7 +578,7 @@ def _split():
 
 @_vim
 def _del_window(winnr):
-	win = windows.pop(winnr - 1)
+	win = windows._pop(winnr - 1)
 	_window_ids.pop(winnr)
 	return win
 
@@ -713,6 +748,8 @@ def _with(key, *args, **kwargs):
 		return _WithDict(options, **kwargs)
 	elif key == 'globals':
 		return _WithDict(vars, **kwargs)
+	elif key == 'wvars':
+		return _WithDict(windows[_window - 1].vars, **kwargs)
 	elif key == 'environ':
 		return _WithDict(_environ, **kwargs)
 	elif key == 'split':
