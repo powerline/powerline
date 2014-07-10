@@ -667,6 +667,13 @@ class TestVim(TestCase):
 			self.assertEqual(vim.file_type(pl=pl, segment_info=segment_info),
 					[{'divider_highlight_group': 'background:divider', 'contents': 'python'}])
 
+	def test_window_title(self):
+		pl = Pl()
+		segment_info = vim_module._get_segment_info()
+		self.assertEqual(vim.window_title(pl=pl, segment_info=segment_info), None)
+		with vim_module._with('wvars', quickfix_title='Abc'):
+			self.assertEqual(vim.window_title(pl=pl, segment_info=segment_info), 'Abc')
+
 	def test_line_percent(self):
 		pl = Pl()
 		segment_info = vim_module._get_segment_info()
