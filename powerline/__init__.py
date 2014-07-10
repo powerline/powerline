@@ -125,6 +125,36 @@ def generate_config_finder(get_config_paths=get_config_paths):
 	return lambda cfg_path: _find_config_file(config_paths, cfg_path)
 
 
+def load_config(cfg_path, find_config_file, config_loader, loader_callback=None):
+	'''Load configuration file and setup watches
+
+	Watches are only set up if loader_callback is not None.
+
+	:param str cfg_path:
+		Path for configuration file that should be loaded.
+	:param function find_config_file:
+		Function that finds configuration file. Check out the description of 
+		the return value of ``generate_config_finder`` function.
+	:param ConfigLoader config_loader:
+		Configuration file loader class instance.
+	:param function loader_callback:
+		Function that will be called by config_loader when change to 
+		configuration file is detected.
+
+	:return: Configuration file contents.
+	'''
+	try:
+		path = find_config_file(cfg_path)
+	except IOError:
+		if loader_callback:
+			config_loader.register_missing(find_config_file, loader_callback, cfg_path)
+		raise
+	else:
+		if loader_callback:
+			config_loader.register(loader_callback, path)
+		return config_loader.load(path)
+
+
 class Powerline(object):
 	'''Main powerline class, entrance point for all powerline uses. Sets 
 	powerline up and loads the configuration.
@@ -364,14 +394,12 @@ class Powerline(object):
 
 	def _load_config(self, cfg_path, type):
 		'''Load configuration and setup watches.'''
-		function = self.cr_callbacks[type]
-		try:
-			path = self.find_config_file(cfg_path)
-		except IOError:
-			self.config_loader.register_missing(self.find_config_file, function, cfg_path)
-			raise
-		self.config_loader.register(function, path)
-		return self.config_loader.load(path)
+		return load_config(
+			cfg_path,
+			self.find_config_file,
+			self.config_loader,
+			self.cr_callbacks[type]
+		)
 
 	def _purge_configs(self, type):
 		function = self.cr_callbacks[type]
