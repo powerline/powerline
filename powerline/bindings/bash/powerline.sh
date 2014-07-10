@@ -43,6 +43,7 @@ _powerline_prompt() {
 }
 
 _powerline_setup_prompt() {
+	VIRTUAL_ENV_DISABLE_PROMPT=1
 	if test -z "${POWERLINE_COMMAND}" ; then
 		if which powerline-client &>/dev/null ; then
 			export POWERLINE_COMMAND=powerline-client
