@@ -1,7 +1,7 @@
 # vim:fileencoding=utf-8:noet
 
 from powerline.lint.markedjson import load
-from powerline import find_config_file, Powerline
+from powerline import generate_config_finder, get_config_paths
 from powerline.lib.config import load_json_config
 from powerline.lint.markedjson.error import echoerr, MarkedError
 from powerline.segments.vim import vim_modes
@@ -1035,7 +1035,8 @@ theme_spec = (Spec(
 
 
 def check(path=None, debug=False):
-	search_paths = [path] if path else Powerline.get_config_paths()
+	search_paths = [path] if path else get_config_paths()
+	find_config_file = generate_config_finder(lambda: search_paths)
 
 	logger = logging.getLogger('powerline-lint')
 	logger.setLevel(logging.DEBUG if debug else logging.ERROR)
@@ -1092,7 +1093,7 @@ def check(path=None, debug=False):
 
 	hadproblem = False
 	try:
-		main_config = load_json_config(find_config_file(search_paths, 'config'), load=load_config, open_file=open_file)
+		main_config = load_json_config(find_config_file('config'), load=load_config, open_file=open_file)
 	except IOError:
 		main_config = {}
 		sys.stderr.write('\nConfiguration file not found: config.json\n')
@@ -1108,7 +1109,7 @@ def check(path=None, debug=False):
 	import_paths = [os.path.expanduser(path) for path in main_config.get('common', {}).get('paths', [])]
 
 	try:
-		colors_config = load_json_config(find_config_file(search_paths, 'colors'), load=load_config, open_file=open_file)
+		colors_config = load_json_config(find_config_file('colors'), load=load_config, open_file=open_file)
 	except IOError:
 		colors_config = {}
 		sys.stderr.write('\nConfiguration file not found: colors.json\n')

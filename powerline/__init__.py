@@ -13,7 +13,7 @@ from powerline.config import DEFAULT_SYSTEM_CONFIG_DIR
 from threading import Lock, Event
 
 
-def find_config_file(search_paths, config_file):
+def _find_config_file(search_paths, config_file):
 	config_file += '.json'
 	for path in search_paths:
 		config_file_path = os.path.join(path, config_file)
@@ -83,6 +83,143 @@ def get_fallback_logger():
 	return _fallback_logger
 
 
+def _generate_change_callback(lock, key, dictionary):
+	def on_file_change(path):
+		with lock:
+			dictionary[key] = True
+	return on_file_change
+
+
+def get_config_paths():
+	'''Get configuration paths from environment variables.
+
+	Uses $XDG_CONFIG_HOME and $XDG_CONFIG_DIRS according to the XDG specification.
+
+	:return: list of paths
+	'''
+	config_home = os.environ.get('XDG_CONFIG_HOME', os.path.join(os.path.expanduser('~'), '.config'))
+	config_path = os.path.join(config_home, 'powerline')
+	config_paths = [config_path]
+	config_dirs = os.environ.get('XDG_CONFIG_DIRS', DEFAULT_SYSTEM_CONFIG_DIR)
+	if config_dirs is not None:
+		config_paths.extend([os.path.join(d, 'powerline') for d in config_dirs.split(':')])
+	plugin_path = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'config_files')
+	config_paths.append(plugin_path)
+	return config_paths
+
+
+def generate_config_finder(get_config_paths=get_config_paths):
+	'''Generate find_config_file function
+
+	This function will find .json file given its path.
+
+	:param function get_config_paths:
+		Function that being called with no arguments will return a list of paths 
+		that should be searched for configuration files.
+
+	:return:
+		Function that being given configuration file name will return full path 
+		to it or raise IOError if it failed to find the file.
+	'''
+	config_paths = get_config_paths()
+	return lambda cfg_path: _find_config_file(config_paths, cfg_path)
+
+
+def load_config(cfg_path, find_config_file, config_loader, loader_callback=None):
+	'''Load configuration file and setup watches
+
+	Watches are only set up if loader_callback is not None.
+
+	:param str cfg_path:
+		Path for configuration file that should be loaded.
+	:param function find_config_file:
+		Function that finds configuration file. Check out the description of 
+		the return value of ``generate_config_finder`` function.
+	:param ConfigLoader config_loader:
+		Configuration file loader class instance.
+	:param function loader_callback:
+		Function that will be called by config_loader when change to 
+		configuration file is detected.
+
+	:return: Configuration file contents.
+	'''
+	try:
+		path = find_config_file(cfg_path)
+	except IOError:
+		if loader_callback:
+			config_loader.register_missing(find_config_file, loader_callback, cfg_path)
+		raise
+	else:
+		if loader_callback:
+			config_loader.register(loader_callback, path)
+		return config_loader.load(path)
+
+
+def _get_log_handler(common_config):
+	'''Get log handler.
+
+	:param dict common_config:
+		Configuration dictionary used to create handler.
+
+	:return: logging.Handler subclass.
+	'''
+	log_file = common_config['log_file']
+	if log_file:
+		log_file = os.path.expanduser(log_file)
+		log_dir = os.path.dirname(log_file)
+		if not os.path.isdir(log_dir):
+			os.mkdir(log_dir)
+		return logging.FileHandler(log_file)
+	else:
+		return logging.StreamHandler()
+
+
+def create_logger(common_config):
+	'''Create logger according to provided configuration
+	'''
+	log_format = common_config['log_format']
+	formatter = logging.Formatter(log_format)
+
+	level = getattr(logging, common_config['log_level'])
+	handler = _get_log_handler(common_config)
+	handler.setLevel(level)
+	handler.setFormatter(formatter)
+
+	logger = logging.getLogger('powerline')
+	logger.setLevel(level)
+	logger.addHandler(handler)
+	return logger
+
+
+def finish_common_config(common_config):
+	'''Add default values to common config and expand ~ in paths
+
+	:param dict common_config:
+		Common configuration, as it was just loaded.
+
+	:return:
+		Copy of common configuration with all configuration keys and expanded 
+		paths.
+	'''
+	common_config = common_config.copy()
+	common_config.setdefault('paths', [])
+	common_config.setdefault('watcher', 'auto')
+	common_config.setdefault('log_level', 'WARNING')
+	common_config.setdefault('log_format', '%(asctime)s:%(levelname)s:%(message)s')
+	common_config.setdefault('term_truecolor', False)
+	common_config.setdefault('ambiwidth', 1)
+	common_config.setdefault('additional_escapes', None)
+	common_config.setdefault('reload_config', True)
+	common_config.setdefault('interval', None)
+	common_config.setdefault('log_file', None)
+
+	common_config['paths'] = [
+		os.path.expanduser(path) for path in common_config['paths']
+	]
+
+	return common_config
+
+
 class Powerline(object):
 	'''Main powerline class, entrance point for all powerline uses. Sets 
 	powerline up and loads the configuration.
@@ -132,16 +269,19 @@ class Powerline(object):
 		elif self.renderer_module[-1] == '.':
 			self.renderer_module = self.renderer_module[:-1]
 
-		config_paths = self.get_config_paths()
-		self.find_config_file = lambda cfg_path: find_config_file(config_paths, cfg_path)
+		self.find_config_file = generate_config_finder(self.get_config_paths)
 
 		self.cr_kwargs_lock = Lock()
-		self.create_renderer_kwargs = {
-			'load_main': True,
-			'load_colors': True,
-			'load_colorscheme': True,
-			'load_theme': True,
-		}
+		self.cr_kwargs = {}
+		self.cr_callbacks = {}
+		for key in ('main', 'colors', 'colorscheme', 'theme'):
+			self.cr_kwargs['load_' + key] = True
+			self.cr_callbacks[key] = _generate_change_callback(
+				self.cr_kwargs_lock,
+				'load_' + key,
+				self.cr_kwargs
+			)
+
 		self.shutdown_event = shutdown_event or Event()
 		self.config_loader = config_loader or ConfigLoader(shutdown_event=self.shutdown_event, run_once=run_once)
 		self.run_loader_update = False
@@ -182,35 +322,12 @@ class Powerline(object):
 
 				self.prev_common_config = self.common_config
 
-				self.common_config.setdefault('paths', [])
-				self.common_config.setdefault('watcher', 'auto')
-				self.common_config.setdefault('log_level', 'WARNING')
-				self.common_config.setdefault('log_format', '%(asctime)s:%(levelname)s:%(message)s')
-				self.common_config.setdefault('term_truecolor', False)
-				self.common_config.setdefault('ambiwidth', 1)
-				self.common_config.setdefault('additional_escapes', None)
-				self.common_config.setdefault('reload_config', True)
-				self.common_config.setdefault('interval', None)
-				self.common_config.setdefault('log_file', None)
-
-				self.common_config['paths'] = [
-					os.path.expanduser(path) for path in self.common_config['paths']
-				]
+				self.common_config = finish_common_config(self.common_config)
 
 				self.import_paths = self.common_config['paths']
 
 				if not self.logger:
-					log_format = self.common_config['log_format']
-					formatter = logging.Formatter(log_format)
-
-					level = getattr(logging, self.common_config['log_level'])
-					handler = self.get_log_handler()
-					handler.setLevel(level)
-					handler.setFormatter(formatter)
-
-					self.logger = logging.getLogger('powerline')
-					self.logger.setLevel(level)
-					self.logger.addHandler(handler)
+					self.logger = create_logger(self.common_config)
 
 				if not self.pl:
 					self.pl = PowerlineLogger(self.use_daemon_threads, self.logger, self.ext)
@@ -288,53 +405,28 @@ class Powerline(object):
 			else:
 				self.renderer = renderer
 
-	def get_log_handler(self):
-		'''Get log handler.
-
-		:param dict common_config:
-			Common configuration.
-
-		:return: logging.Handler subclass.
-		'''
-		log_file = self.common_config['log_file']
-		if log_file:
-			log_file = os.path.expanduser(log_file)
-			log_dir = os.path.dirname(log_file)
-			if not os.path.isdir(log_dir):
-				os.mkdir(log_dir)
-			return logging.FileHandler(log_file)
-		else:
-			return logging.StreamHandler()
-
 	@staticmethod
 	def get_config_paths():
 		'''Get configuration paths.
 
+		Should be overridden in subclasses in order to provide a way to override 
+		used paths.
+
 		:return: list of paths
 		'''
-		config_home = os.environ.get('XDG_CONFIG_HOME', os.path.join(os.path.expanduser('~'), '.config'))
-		config_path = os.path.join(config_home, 'powerline')
-		config_paths = [config_path]
-		config_dirs = os.environ.get('XDG_CONFIG_DIRS', DEFAULT_SYSTEM_CONFIG_DIR)
-		if config_dirs is not None:
-			config_paths.extend([os.path.join(d, 'powerline') for d in config_dirs.split(':')])
-		plugin_path = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'config_files')
-		config_paths.append(plugin_path)
-		return config_paths
+		return get_config_paths()
 
 	def _load_config(self, cfg_path, type):
 		'''Load configuration and setup watches.'''
-		function = getattr(self, 'on_' + type + '_change')
-		try:
-			path = self.find_config_file(cfg_path)
-		except IOError:
-			self.config_loader.register_missing(self.find_config_file, function, cfg_path)
-			raise
-		self.config_loader.register(function, path)
-		return self.config_loader.load(path)
+		return load_config(
+			cfg_path,
+			self.find_config_file,
+			self.config_loader,
+			self.cr_callbacks[type]
+		)
 
 	def _purge_configs(self, type):
-		function = getattr(self, 'on_' + type + '_change')
+		function = self.cr_callbacks[type]
 		self.config_loader.unregister_functions(set((function,)))
 		self.config_loader.unregister_missing(set(((self.find_config_file, function),)))
 
@@ -392,23 +484,23 @@ class Powerline(object):
 		'''Updates/creates a renderer if needed.'''
 		if self.run_loader_update:
 			self.config_loader.update()
-		create_renderer_kwargs = None
+		cr_kwargs = None
 		with self.cr_kwargs_lock:
-			if self.create_renderer_kwargs:
-				create_renderer_kwargs = self.create_renderer_kwargs.copy()
-		if create_renderer_kwargs:
+			if self.cr_kwargs:
+				cr_kwargs = self.cr_kwargs.copy()
+		if cr_kwargs:
 			try:
-				self.create_renderer(**create_renderer_kwargs)
+				self.create_renderer(**cr_kwargs)
 			except Exception as e:
 				self.exception('Failed to create renderer: {0}', str(e))
 				if hasattr(self, 'renderer'):
 					with self.cr_kwargs_lock:
-						self.create_renderer_kwargs.clear()
+						self.cr_kwargs.clear()
 				else:
 					raise
 			else:
 				with self.cr_kwargs_lock:
-					self.create_renderer_kwargs.clear()
+					self.cr_kwargs.clear()
 
 	def render(self, *args, **kwargs):
 		'''Update/create renderer if needed and pass all arguments further to 
@@ -457,30 +549,9 @@ class Powerline(object):
 			self.renderer.shutdown()
 		except AttributeError:
 			pass
-		functions = (
-			self.on_main_change,
-			self.on_colors_change,
-			self.on_colorscheme_change,
-			self.on_theme_change,
-		)
+		functions = tuple(self.cr_callbacks.values())
 		self.config_loader.unregister_functions(set(functions))
-		self.config_loader.unregister_missing(set(((find_config_file, function) for function in functions)))
-
-	def on_main_change(self, path):
-		with self.cr_kwargs_lock:
-			self.create_renderer_kwargs['load_main'] = True
-
-	def on_colors_change(self, path):
-		with self.cr_kwargs_lock:
-			self.create_renderer_kwargs['load_colors'] = True
-
-	def on_colorscheme_change(self, path):
-		with self.cr_kwargs_lock:
-			self.create_renderer_kwargs['load_colorscheme'] = True
-
-	def on_theme_change(self, path):
-		with self.cr_kwargs_lock:
-			self.create_renderer_kwargs['load_theme'] = True
+		self.config_loader.unregister_missing(set(((self.find_config_file, function) for function in functions)))
 
 	def __enter__(self):
 		return self
