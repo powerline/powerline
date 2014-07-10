@@ -111,6 +111,7 @@ _powerline_setup_prompt() {
 		fi
 	done
 	precmd_functions+=( _powerline_set_jobnum )
+	VIRTUAL_ENV_DISABLE_PROMPT=1
 	if test -z "${POWERLINE_NO_ZSH_ZPYTHON}" && { zmodload libzpython || zmodload zsh/zpython } &>/dev/null ; then
 		precmd_functions+=( _powerline_update_counter )
 		zpython 'from powerline.bindings.zsh import setup as _powerline_setup'
