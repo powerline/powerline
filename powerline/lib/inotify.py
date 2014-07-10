@@ -46,17 +46,17 @@ def load_inotify():
 		# inotify_add_watch()
 		prototype = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_int, ctypes.c_char_p, ctypes.c_uint32, use_errno=True)
 		add_watch = prototype(('inotify_add_watch', libc), (
-			(1, "fd"), (1, "pathname"), (1, "mask")), use_errno=True)
+			(1, "fd"), (1, "pathname"), (1, "mask")))
 
 		# inotify_rm_watch()
 		prototype = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_int, ctypes.c_int, use_errno=True)
 		rm_watch = prototype(('inotify_rm_watch', libc), (
-			(1, "fd"), (1, "wd")), use_errno=True)
+			(1, "fd"), (1, "wd")))
 
 		# read()
 		prototype = ctypes.CFUNCTYPE(ctypes.c_ssize_t, ctypes.c_int, ctypes.c_void_p, ctypes.c_size_t, use_errno=True)
 		read = prototype(('read', libc), (
-			(1, "fd"), (1, "buf"), (1, "count")), use_errno=True)
+			(1, "fd"), (1, "buf"), (1, "count")))
 		_inotify = (init1, add_watch, rm_watch, read)
 	return _inotify
 
