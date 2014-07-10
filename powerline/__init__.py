@@ -90,6 +90,24 @@ def _generate_change_callback(lock, key, dictionary):
 	return on_file_change
 
 
+def get_config_paths():
+	'''Get configuration paths from environment variables.
+
+	Uses $XDG_CONFIG_HOME and $XDG_CONFIG_DIRS according to the XDG specification.
+
+	:return: list of paths
+	'''
+	config_home = os.environ.get('XDG_CONFIG_HOME', os.path.join(os.path.expanduser('~'), '.config'))
+	config_path = os.path.join(config_home, 'powerline')
+	config_paths = [config_path]
+	config_dirs = os.environ.get('XDG_CONFIG_DIRS', DEFAULT_SYSTEM_CONFIG_DIR)
+	if config_dirs is not None:
+		config_paths.extend([os.path.join(d, 'powerline') for d in config_dirs.split(':')])
+	plugin_path = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'config_files')
+	config_paths.append(plugin_path)
+	return config_paths
+
+
 class Powerline(object):
 	'''Main powerline class, entrance point for all powerline uses. Sets 
 	powerline up and loads the configuration.
@@ -321,17 +339,12 @@ class Powerline(object):
 	def get_config_paths():
 		'''Get configuration paths.
 
+		Should be overridden in subclasses in order to provide a way to override 
+		used paths.
+
 		:return: list of paths
 		'''
-		config_home = os.environ.get('XDG_CONFIG_HOME', os.path.join(os.path.expanduser('~'), '.config'))
-		config_path = os.path.join(config_home, 'powerline')
-		config_paths = [config_path]
-		config_dirs = os.environ.get('XDG_CONFIG_DIRS', DEFAULT_SYSTEM_CONFIG_DIR)
-		if config_dirs is not None:
-			config_paths.extend([os.path.join(d, 'powerline') for d in config_dirs.split(':')])
-		plugin_path = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'config_files')
-		config_paths.append(plugin_path)
-		return config_paths
+		return get_config_paths()
 
 	def _load_config(self, cfg_path, type):
 		'''Load configuration and setup watches.'''
