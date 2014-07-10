@@ -495,6 +495,7 @@ def _get_segment_info():
 	mode = mode_translations.get(mode, mode)
 	return {
 		'window': windows[_window - 1],
+		'winnr': _window,
 		'buffer': buffers[_buffer()],
 		'bufnr': _buffer(),
 		'window_id': _window_ids[_window],
