@@ -83,6 +83,13 @@ def get_fallback_logger():
 	return _fallback_logger
 
 
+def _generate_change_callback(lock, key, dictionary):
+	def on_file_change(path):
+		with lock:
+			dictionary[key] = True
+	return on_file_change
+
+
 class Powerline(object):
 	'''Main powerline class, entrance point for all powerline uses. Sets 
 	powerline up and loads the configuration.
@@ -136,12 +143,16 @@ class Powerline(object):
 		self.find_config_file = lambda cfg_path: find_config_file(config_paths, cfg_path)
 
 		self.cr_kwargs_lock = Lock()
-		self.create_renderer_kwargs = {
-			'load_main': True,
-			'load_colors': True,
-			'load_colorscheme': True,
-			'load_theme': True,
-		}
+		self.create_renderer_kwargs = {}
+		self.cr_callbacks = {}
+		for key in ('main', 'colors', 'colorscheme', 'theme'):
+			self.create_renderer_kwargs['load_' + key] = True
+			self.cr_callbacks[key] = _generate_change_callback(
+				self.cr_kwargs_lock,
+				'load_' + key,
+				self.create_renderer_kwargs
+			)
+
 		self.shutdown_event = shutdown_event or Event()
 		self.config_loader = config_loader or ConfigLoader(shutdown_event=self.shutdown_event, run_once=run_once)
 		self.run_loader_update = False
@@ -324,7 +335,7 @@ class Powerline(object):
 
 	def _load_config(self, cfg_path, type):
 		'''Load configuration and setup watches.'''
-		function = getattr(self, 'on_' + type + '_change')
+		function = self.cr_callbacks[type]
 		try:
 			path = self.find_config_file(cfg_path)
 		except IOError:
@@ -334,7 +345,7 @@ class Powerline(object):
 		return self.config_loader.load(path)
 
 	def _purge_configs(self, type):
-		function = getattr(self, 'on_' + type + '_change')
+		function = self.cr_callbacks[type]
 		self.config_loader.unregister_functions(set((function,)))
 		self.config_loader.unregister_missing(set(((self.find_config_file, function),)))
 
@@ -457,30 +468,9 @@ class Powerline(object):
 			self.renderer.shutdown()
 		except AttributeError:
 			pass
-		functions = (
-			self.on_main_change,
-			self.on_colors_change,
-			self.on_colorscheme_change,
-			self.on_theme_change,
-		)
+		functions = tuple(self.cr_callbacks.values())
 		self.config_loader.unregister_functions(set(functions))
 		self.config_loader.unregister_missing(set(((find_config_file, function) for function in functions)))
-
-	def on_main_change(self, path):
-		with self.cr_kwargs_lock:
-			self.create_renderer_kwargs['load_main'] = True
-
-	def on_colors_change(self, path):
-		with self.cr_kwargs_lock:
-			self.create_renderer_kwargs['load_colors'] = True
-
-	def on_colorscheme_change(self, path):
-		with self.cr_kwargs_lock:
-			self.create_renderer_kwargs['load_colorscheme'] = True
-
-	def on_theme_change(self, path):
-		with self.cr_kwargs_lock:
-			self.create_renderer_kwargs['load_theme'] = True
 
 	def __enter__(self):
 		return self
