@@ -729,6 +729,8 @@ def _with(key, *args, **kwargs):
 		return _WithDict(options, **kwargs)
 	elif key == 'globals':
 		return _WithDict(vars, **kwargs)
+	elif key == 'wvars':
+		return _WithDict(windows[_window - 1].vars, **kwargs)
 	elif key == 'environ':
 		return _WithDict(_environ, **kwargs)
 	elif key == 'split':
