@@ -191,6 +191,35 @@ def create_logger(common_config):
 	return logger
 
 
+def finish_common_config(common_config):
+	'''Add default values to common config and expand ~ in paths
+
+	:param dict common_config:
+		Common configuration, as it was just loaded.
+
+	:return:
+		Copy of common configuration with all configuration keys and expanded 
+		paths.
+	'''
+	common_config = common_config.copy()
+	common_config.setdefault('paths', [])
+	common_config.setdefault('watcher', 'auto')
+	common_config.setdefault('log_level', 'WARNING')
+	common_config.setdefault('log_format', '%(asctime)s:%(levelname)s:%(message)s')
+	common_config.setdefault('term_truecolor', False)
+	common_config.setdefault('ambiwidth', 1)
+	common_config.setdefault('additional_escapes', None)
+	common_config.setdefault('reload_config', True)
+	common_config.setdefault('interval', None)
+	common_config.setdefault('log_file', None)
+
+	common_config['paths'] = [
+		os.path.expanduser(path) for path in common_config['paths']
+	]
+
+	return common_config
+
+
 class Powerline(object):
 	'''Main powerline class, entrance point for all powerline uses. Sets 
 	powerline up and loads the configuration.
@@ -293,20 +322,7 @@ class Powerline(object):
 
 				self.prev_common_config = self.common_config
 
-				self.common_config.setdefault('paths', [])
-				self.common_config.setdefault('watcher', 'auto')
-				self.common_config.setdefault('log_level', 'WARNING')
-				self.common_config.setdefault('log_format', '%(asctime)s:%(levelname)s:%(message)s')
-				self.common_config.setdefault('term_truecolor', False)
-				self.common_config.setdefault('ambiwidth', 1)
-				self.common_config.setdefault('additional_escapes', None)
-				self.common_config.setdefault('reload_config', True)
-				self.common_config.setdefault('interval', None)
-				self.common_config.setdefault('log_file', None)
-
-				self.common_config['paths'] = [
-					os.path.expanduser(path) for path in self.common_config['paths']
-				]
+				self.common_config = finish_common_config(self.common_config)
 
 				self.import_paths = self.common_config['paths']
 
