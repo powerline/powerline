@@ -155,6 +155,42 @@ def load_config(cfg_path, find_config_file, config_loader, loader_callback=None)
 		return config_loader.load(path)
 
 
+def _get_log_handler(common_config):
+	'''Get log handler.
+
+	:param dict common_config:
+		Configuration dictionary used to create handler.
+
+	:return: logging.Handler subclass.
+	'''
+	log_file = common_config['log_file']
+	if log_file:
+		log_file = os.path.expanduser(log_file)
+		log_dir = os.path.dirname(log_file)
+		if not os.path.isdir(log_dir):
+			os.mkdir(log_dir)
+		return logging.FileHandler(log_file)
+	else:
+		return logging.StreamHandler()
+
+
+def create_logger(common_config):
+	'''Create logger according to provided configuration
+	'''
+	log_format = common_config['log_format']
+	formatter = logging.Formatter(log_format)
+
+	level = getattr(logging, common_config['log_level'])
+	handler = _get_log_handler(common_config)
+	handler.setLevel(level)
+	handler.setFormatter(formatter)
+
+	logger = logging.getLogger('powerline')
+	logger.setLevel(level)
+	logger.addHandler(handler)
+	return logger
+
+
 class Powerline(object):
 	'''Main powerline class, entrance point for all powerline uses. Sets 
 	powerline up and loads the configuration.
@@ -275,17 +311,7 @@ class Powerline(object):
 				self.import_paths = self.common_config['paths']
 
 				if not self.logger:
-					log_format = self.common_config['log_format']
-					formatter = logging.Formatter(log_format)
-
-					level = getattr(logging, self.common_config['log_level'])
-					handler = self.get_log_handler()
-					handler.setLevel(level)
-					handler.setFormatter(formatter)
-
-					self.logger = logging.getLogger('powerline')
-					self.logger.setLevel(level)
-					self.logger.addHandler(handler)
+					self.logger = create_logger(self.common_config)
 
 				if not self.pl:
 					self.pl = PowerlineLogger(self.use_daemon_threads, self.logger, self.ext)
@@ -362,24 +388,6 @@ class Powerline(object):
 					raise
 			else:
 				self.renderer = renderer
-
-	def get_log_handler(self):
-		'''Get log handler.
-
-		:param dict common_config:
-			Common configuration.
-
-		:return: logging.Handler subclass.
-		'''
-		log_file = self.common_config['log_file']
-		if log_file:
-			log_file = os.path.expanduser(log_file)
-			log_dir = os.path.dirname(log_file)
-			if not os.path.isdir(log_dir):
-				os.mkdir(log_dir)
-			return logging.FileHandler(log_file)
-		else:
-			return logging.StreamHandler()
 
 	@staticmethod
 	def get_config_paths():
