@@ -179,6 +179,22 @@ def eval(expr):
 		return '0'
 	elif expr.startswith('exists('):
 		return '0'
+	elif expr.startswith('getwinvar('):
+		import re
+		match = re.match(r'^getwinvar\((\d+), "(\w+)"\)$', expr)
+		if not match:
+			raise NotImplementedError
+		winnr = int(match.group(1))
+		varname = match.group(2)
+		return _emul_getwinvar(winnr, varname)
+	elif expr.startswith('has_key('):
+		import re
+		match = re.match(r'^has_key\(getwinvar\((\d+), ""\), "(\w+)"\)$', expr)
+		if not match:
+			raise NotImplementedError
+		winnr = int(match.group(1))
+		varname = match.group(2)
+		return 0 + (varname in windows[winnr - 1].vars)
 	elif expr == 'getbufvar("%", "NERDTreeRoot").path.str()':
 		import os
 		assert os.path.basename(buffers[_buffer()].name).startswith('NERD_tree_')
@@ -239,12 +255,12 @@ def _emul_getbufvar(bufnr, varname):
 @_vim
 @_str_func
 def _emul_getwinvar(winnr, varname):
-	return windows[winnr].vars[varname]
+	return windows[winnr - 1].vars.get(varname, '')
 
 
 @_vim
 def _emul_setwinvar(winnr, varname, value):
-	windows[winnr].vars[varname] = value
+	windows[winnr - 1].vars[varname] = value
 
 
 @_vim
