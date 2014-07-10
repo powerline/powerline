@@ -108,6 +108,23 @@ def get_config_paths():
 	return config_paths
 
 
+def generate_config_finder(get_config_paths=get_config_paths):
+	'''Generate find_config_file function
+
+	This function will find .json file given its path.
+
+	:param function get_config_paths:
+		Function that being called with no arguments will return a list of paths 
+		that should be searched for configuration files.
+
+	:return:
+		Function that being given configuration file name will return full path 
+		to it or raise IOError if it failed to find the file.
+	'''
+	config_paths = get_config_paths()
+	return lambda cfg_path: _find_config_file(config_paths, cfg_path)
+
+
 class Powerline(object):
 	'''Main powerline class, entrance point for all powerline uses. Sets 
 	powerline up and loads the configuration.
@@ -157,8 +174,7 @@ class Powerline(object):
 		elif self.renderer_module[-1] == '.':
 			self.renderer_module = self.renderer_module[:-1]
 
-		config_paths = self.get_config_paths()
-		self.find_config_file = lambda cfg_path: _find_config_file(config_paths, cfg_path)
+		self.find_config_file = generate_config_finder(self.get_config_paths)
 
 		self.cr_kwargs_lock = Lock()
 		self.create_renderer_kwargs = {}
