@@ -8,6 +8,9 @@ import subprocess
 import re
 
 from powerline.config import TMUX_CONFIG_DIRECTORY
+from powerline.lib.config import ConfigLoader
+from powerline import generate_config_finder, load_config, create_logger, PowerlineLogger, finish_common_config
+from powerline.lib.shell import run_cmd
 
 
 TmuxVersionInfo = namedtuple('TmuxVersionInfo', ('major', 'minor', 'suffix'))
@@ -32,9 +35,9 @@ def run_tmux_command(*args):
 	_run_tmux(subprocess.check_call, args)
 
 
-def get_tmux_output(*args):
+def get_tmux_output(pl, *args):
 	'''Run tmux command and return its output'''
-	return _run_tmux(subprocess.check_output, args)
+	return _run_tmux(lambda cmd: run_cmd(pl, cmd), args)
 
 
 NON_DIGITS = re.compile('[^0-9]+')
@@ -42,8 +45,8 @@ DIGITS = re.compile('[0-9]+')
 NON_LETTERS = re.compile('[^a-z]+')
 
 
-def get_tmux_version():
-	version_string = get_tmux_output('-V')
+def get_tmux_version(pl):
+	version_string = get_tmux_output(pl, '-V')
 	_, version_string = version_string.split(' ')
 	version_string = version_string.strip()
 	major, minor = version_string.split('.')
@@ -96,7 +99,7 @@ def get_tmux_configs(version):
 			yield (fname, priority + file_version.minor * 10 + file_version.major * 10000)
 
 
-def source_tmux_files():
+def source_tmux_files(pl, args):
 	'''Source relevant version-specific tmux configuration files
 
 	Files are sourced in the following order:
@@ -104,6 +107,15 @@ def source_tmux_files():
 	* If files for same versions are to be sourced then first _minus files are 
 	  sourced, then _plus files and then files without _minus or _plus suffixes.
 	'''
-	version = get_tmux_version()
+	version = get_tmux_version(pl)
 	for fname, priority in sorted(get_tmux_configs(version), key=(lambda v: v[1])):
 		run_tmux_command('source', fname)
+
+
+def create_powerline_logger(args):
+	find_config_file = generate_config_finder()
+	config_loader = ConfigLoader(run_once=True)
+	config = load_config('config', find_config_file, config_loader)
+	common_config = finish_common_config(config['common'])
+	logger = create_logger(common_config)
+	return PowerlineLogger(use_daemon_threads=True, logger=logger, ext='config')
