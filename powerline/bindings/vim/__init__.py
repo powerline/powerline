@@ -41,20 +41,28 @@ else:
 	vim_get_func = VimFunc
 
 
-# It may crash on some old vim versions and I do not remember in which patch 
-# I fixed this crash.
-if hasattr(vim, 'vvars') and vim.vvars['version'] > 703:
+if hasattr(vim, 'bindeval'):
 	_vim_to_python_types = {
-		vim.Dictionary: lambda value: dict(((key, _vim_to_python(value[key])) for key in value.keys())),
-		vim.List: lambda value: [_vim_to_python(item) for item in value],
-		vim.Function: lambda _: None,
+		getattr(vim, 'Dictionary', None) or type(vim.bindeval('{}')):
+			lambda value: dict(((key, _vim_to_python(value[key])) for key in value.keys())),
+		getattr(vim, 'List', None) or type(vim.bindeval('[]')):
+			lambda value: [_vim_to_python(item) for item in value],
+		getattr(vim, 'Function', None) or type(vim.bindeval('function("mode")')):
+			lambda _: None,
 	}
+
+	if sys.version_info >= (3,):
+		_vim_to_python_types[bytes] = lambda value: value.decode('utf-8')
 
 	_id = lambda value: value
 
 	def _vim_to_python(value):
 		return _vim_to_python_types.get(type(value), _id)(value)
 
+
+# It may crash on some old vim versions and I do not remember in which patch 
+# I fixed this crash.
+if hasattr(vim, 'vvars') and vim.vvars['version'] > 703:
 	def vim_getvar(varname):
 		return _vim_to_python(vim.vars[str(varname)])
 
@@ -102,10 +110,7 @@ else:
 	_getbufvar = vim_get_func('getbufvar')
 
 	def getbufvar(*args):
-		r = _getbufvar(*args)
-		if type(r) is bytes:
-			return r.decode('utf-8')
-		return r
+		return _vim_to_python(_getbufvar(*args))
 
 
 class VimEnviron(object):
