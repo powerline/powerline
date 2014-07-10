@@ -207,14 +207,14 @@ class Powerline(object):
 		self.find_config_file = generate_config_finder(self.get_config_paths)
 
 		self.cr_kwargs_lock = Lock()
-		self.create_renderer_kwargs = {}
+		self.cr_kwargs = {}
 		self.cr_callbacks = {}
 		for key in ('main', 'colors', 'colorscheme', 'theme'):
-			self.create_renderer_kwargs['load_' + key] = True
+			self.cr_kwargs['load_' + key] = True
 			self.cr_callbacks[key] = _generate_change_callback(
 				self.cr_kwargs_lock,
 				'load_' + key,
-				self.create_renderer_kwargs
+				self.cr_kwargs
 			)
 
 		self.shutdown_event = shutdown_event or Event()
@@ -460,23 +460,23 @@ class Powerline(object):
 		'''Updates/creates a renderer if needed.'''
 		if self.run_loader_update:
 			self.config_loader.update()
-		create_renderer_kwargs = None
+		cr_kwargs = None
 		with self.cr_kwargs_lock:
-			if self.create_renderer_kwargs:
-				create_renderer_kwargs = self.create_renderer_kwargs.copy()
-		if create_renderer_kwargs:
+			if self.cr_kwargs:
+				cr_kwargs = self.cr_kwargs.copy()
+		if cr_kwargs:
 			try:
-				self.create_renderer(**create_renderer_kwargs)
+				self.create_renderer(**cr_kwargs)
 			except Exception as e:
 				self.exception('Failed to create renderer: {0}', str(e))
 				if hasattr(self, 'renderer'):
 					with self.cr_kwargs_lock:
-						self.create_renderer_kwargs.clear()
+						self.cr_kwargs.clear()
 				else:
 					raise
 			else:
 				with self.cr_kwargs_lock:
-					self.create_renderer_kwargs.clear()
+					self.cr_kwargs.clear()
 
 	def render(self, *args, **kwargs):
 		'''Update/create renderer if needed and pass all arguments further to 

@@ -114,7 +114,7 @@ class TestPowerline(Powerline):
 		return local_themes
 
 	def _will_create_renderer(self):
-		return self.create_renderer_kwargs
+		return self.cr_kwargs
 
 
 renderer = SimpleRenderer
