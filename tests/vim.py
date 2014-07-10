@@ -110,10 +110,6 @@ class _Windows(object):
 	def _append(self, *args, **kwargs):
 		return self.l.append(*args, **kwargs)
 
-	@_vim
-	def _index(self, *args, **kwargs):
-		return self.l.index(*args, **kwargs)
-
 
 windows = _Windows()
 
@@ -374,7 +370,7 @@ class _Window(object):
 		self.vars = {}
 
 	def __repr__(self):
-		return '<window ' + str(windows._index(self)) + '>'
+		return '<window ' + str(self.number - 1) + '>'
 
 
 _buf_lines = {}
