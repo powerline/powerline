@@ -22,7 +22,7 @@ def load_json_config(config_file_path, *args, **kwargs):
 		raise IOError(config_file_path)
 
 
-def find_config_file(config, search_paths, config_file):
+def _find_config_file(config, search_paths, config_file):
 	if config_file.endswith('raise') and config_file not in config:
 		raise IOError('fcf:' + config_file)
 	return config_file
@@ -158,7 +158,7 @@ def swap_attributes(cfg_container, powerline_module, replaces):
 	config_container = cfg_container
 	if not replaces:
 		replaces = {
-			'find_config_file': lambda *args: find_config_file(config_container['config'], *args),
+			'_find_config_file': lambda *args: _find_config_file(config_container['config'], *args),
 		}
 	for attr, val in replaces.items():
 		old_val = getattr(powerline_module, attr)

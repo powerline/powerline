@@ -13,7 +13,7 @@ from powerline.config import DEFAULT_SYSTEM_CONFIG_DIR
 from threading import Lock, Event
 
 
-def find_config_file(search_paths, config_file):
+def _find_config_file(search_paths, config_file):
 	config_file += '.json'
 	for path in search_paths:
 		config_file_path = os.path.join(path, config_file)
@@ -158,7 +158,7 @@ class Powerline(object):
 			self.renderer_module = self.renderer_module[:-1]
 
 		config_paths = self.get_config_paths()
-		self.find_config_file = lambda cfg_path: find_config_file(config_paths, cfg_path)
+		self.find_config_file = lambda cfg_path: _find_config_file(config_paths, cfg_path)
 
 		self.cr_kwargs_lock = Lock()
 		self.create_renderer_kwargs = {}
@@ -483,7 +483,7 @@ class Powerline(object):
 			pass
 		functions = tuple(self.cr_callbacks.values())
 		self.config_loader.unregister_functions(set(functions))
-		self.config_loader.unregister_missing(set(((find_config_file, function) for function in functions)))
+		self.config_loader.unregister_missing(set(((self.find_config_file, function) for function in functions)))
 
 	def __enter__(self):
 		return self

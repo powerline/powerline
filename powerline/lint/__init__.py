@@ -1,7 +1,7 @@
 # vim:fileencoding=utf-8:noet
 
 from powerline.lint.markedjson import load
-from powerline import find_config_file, Powerline
+from powerline import _find_config_file as find_config_file, Powerline
 from powerline.lib.config import load_json_config
 from powerline.lint.markedjson.error import echoerr, MarkedError
 from powerline.segments.vim import vim_modes
