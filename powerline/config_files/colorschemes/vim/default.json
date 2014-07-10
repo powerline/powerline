@@ -25,7 +25,7 @@
 		"file_vcs_status_M":        { "fg": "brightyellow", "bg": "gray4" },
 		"file_vcs_status_A":        { "fg": "brightgreen", "bg": "gray4" },
 		"line_percent":             { "fg": "gray9", "bg": "gray4" },
-		"line_percent_gradient":    { "fg": "green_yellow_red", "bg": "gray4" },
+		"line_percent_gradient":    { "fg": "dark_green_gray", "bg": "gray4" },
 		"position":                 { "fg": "gray9", "bg": "gray4" },
 		"position_gradient":        { "fg": "green_yellow_red", "bg": "gray4" },
 		"line_current":             { "fg": "gray1", "bg": "gray10", "attr": ["bold"] },
@@ -55,7 +55,7 @@
 				"gray9": "gray4",
 				"gray10": "gray5",
 				"white": "gray6",
-				"green_yellow_red": "gray5"
+				"dark_green_gray": "gray5"
 			}
 		},
 		"i": {
@@ -71,7 +71,8 @@
 				"gray8": "mediumcyan",
 				"gray9": "mediumcyan",
 				"gray10": "mediumcyan",
-				"green_yellow_red": "gray5"
+				"green_yellow_red": "gray5",
+				"dark_green_gray": "light_green_gray"
 			},
 			"groups": {
 				"mode":               { "fg": "darkestcyan", "bg": "white", "attr": ["bold"] },
