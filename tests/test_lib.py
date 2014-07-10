@@ -13,6 +13,7 @@ import threading
 import os
 import sys
 import re
+import platform
 from time import sleep
 from subprocess import call, PIPE
 from functools import partial
@@ -466,7 +467,8 @@ class TestFilesystemWatchers(TestCase):
 		os.rename(f, f + '1')
 		changed()
 
-use_mercurial = use_bzr = sys.version_info < (3, 0)
+use_mercurial = use_bzr = (sys.version_info < (3, 0)
+							and platform.python_implementation() == 'CPython')
 
 
 class TestVCS(TestCase):
