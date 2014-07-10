@@ -240,6 +240,9 @@ Color definitions
     * A list of cterm color indicies.
     * A list of hex color strings.
 
+    It is expected that you define gradients from least alert color to most 
+    alert or use non-alert colors.
+
 .. _config-colorschemes:
 
 Colorschemes

@@ -25,6 +25,8 @@
 		"environment": { "fg": "gray8", "bg": "gray0" },
 		"battery": { "fg": "gray8", "bg": "gray0" },
 		"battery_gradient": { "fg": "white_red", "bg": "gray0" },
+		"battery_full": { "fg": "red", "bg": "gray0" },
+		"battery_empty": { "fg": "white", "bg": "gray0" },
 		"now_playing": { "fg": "gray10", "bg": "black" }
 	}
 }
