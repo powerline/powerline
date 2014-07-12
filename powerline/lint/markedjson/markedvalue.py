@@ -22,8 +22,15 @@ def gen_init(cls):
 	return __init__
 
 
+def gen_getnewargs(cls):
+	def __getnewargs__(self):
+		return (self.value, self.mark)
+	return __getnewargs__
+
+
 class MarkedUnicode(unicode):
 	__new__ = gen_new(unicode)
+	__getnewargs__ = gen_getnewargs(unicode)
 
 	def _proc_partition(self, part_result):
 		pointdiff = 1
@@ -47,15 +54,18 @@ class MarkedUnicode(unicode):
 
 class MarkedInt(int):
 	__new__ = gen_new(int)
+	__getnewargs__ = gen_getnewargs(int)
 
 
 class MarkedFloat(float):
 	__new__ = gen_new(float)
+	__getnewargs__ = gen_getnewargs(float)
 
 
 class MarkedDict(dict):
 	__new__ = gen_new(dict)
 	__init__ = gen_init(dict)
+	__getnewargs__ = gen_getnewargs(dict)
 
 	def copy(self):
 		return MarkedDict(super(MarkedDict, self).copy(), self.mark)
@@ -64,12 +74,15 @@ class MarkedDict(dict):
 class MarkedList(list):
 	__new__ = gen_new(list)
 	__init__ = gen_init(list)
+	__getnewargs__ = gen_getnewargs(list)
 
 
 class MarkedValue:
 	def __init__(self, value, mark):
 		self.mark = mark
 		self.value = value
+
+	__getinitargs__ = gen_getnewargs(None)
 
 
 specialclasses = {
