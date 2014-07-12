@@ -111,7 +111,7 @@ def add_p_arg(func):
 	return f
 
 
-class TestSingleLine(TestCase):
+class TestLines(TestCase):
 	def assertRenderEqual(self, p, output, **kwargs):
 		self.assertEqual(p.render(**kwargs).replace(' ', ' '), output)
 
