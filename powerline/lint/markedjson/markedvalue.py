@@ -16,6 +16,12 @@ def gen_new(cls):
 	return __new__
 
 
+def gen_init(cls):
+	def __init__(self, value, mark):
+		return cls.__init__(self, value)
+	return __init__
+
+
 class MarkedUnicode(unicode):
 	__new__ = gen_new(unicode)
 
@@ -49,12 +55,15 @@ class MarkedFloat(float):
 
 class MarkedDict(dict):
 	__new__ = gen_new(dict)
-
-	def __init__(self, value, mark):
-		super(MarkedDict, self).__init__(value)
+	__init__ = gen_init(dict)
 
 	def copy(self):
 		return MarkedDict(super(MarkedDict, self).copy(), self.mark)
+
+
+class MarkedList(list):
+	__new__ = gen_new(list)
+	__init__ = gen_init(list)
 
 
 class MarkedValue:
@@ -68,6 +77,7 @@ specialclasses = {
 	int: MarkedInt,
 	float: MarkedFloat,
 	dict: MarkedDict,
+	list: MarkedList,
 }
 
 classcache = {}
