@@ -1,6 +1,10 @@
 # vim:fileencoding=utf-8:noet
 
 from copy import copy
+try:
+	from __builtin__ import unicode
+except ImportError:
+	unicode = str
 
 
 DEFAULT_MODE_KEY = None
@@ -70,32 +74,41 @@ class Colorscheme(object):
 		else:
 			return self.colors[gradient]
 
-	def get_highlighting(self, groups, mode, gradient_level=None):
-		trans = self.translations.get(mode, {})
-		for group in hl_iter(groups):
-			if 'groups' in trans and group in trans['groups']:
+	def get_group_props(self, mode, trans, group, translate_colors=True):
+		if isinstance(group, (str, unicode)):
+			try:
+				group_props = trans['groups'][group]
+			except KeyError:
 				try:
-					group_props = trans['groups'][group]
+					group_props = self.groups[group]
 				except KeyError:
-					continue
-				break
-
+					return None
+				else:
+					return self.get_group_props(mode, trans, group_props, True)
 			else:
-				try:
-					group_props = copy(self.groups[group])
-				except KeyError:
-					continue
-
+				return self.get_group_props(mode, trans, group_props, False)
+		else:
+			if translate_colors:
+				group_props = copy(group)
 				try:
 					ctrans = trans['colors']
+				except KeyError:
+					pass
+				else:
 					for key in ('fg', 'bg'):
 						try:
 							group_props[key] = ctrans[group_props[key]]
 						except KeyError:
 							pass
-				except KeyError:
-					pass
+				return group_props
+			else:
+				return group
 
+	def get_highlighting(self, groups, mode, gradient_level=None):
+		trans = self.translations.get(mode, {})
+		for group in hl_iter(groups):
+			group_props = self.get_group_props(mode, trans, group)
+			if group_props:
 				break
 		else:
 			raise KeyError('Highlighting groups not found in colorscheme: ' + ', '.join(hl_iter(groups)))

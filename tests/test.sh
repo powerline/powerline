@@ -22,6 +22,8 @@ for script in tests/*.vim ; do
 done
 if ! sh tests/test_shells/test.sh ; then
 	echo "Failed shells"
-	FAILED=1
+	if ${PYTHON} -c 'import platform, sys; sys.exit(1 * (platform.python_implementation() == "PyPy"))' ; then
+		FAILED=1
+	fi
 fi
 exit $FAILED

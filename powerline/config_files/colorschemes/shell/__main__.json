@@ -1,0 +1,6 @@
+{
+	"groups": {
+		"continuation":         "cwd",
+		"continuation:current": "cwd:current_folder"
+	}
+}
