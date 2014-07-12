@@ -9,6 +9,7 @@ from powerline.colorscheme import Colorscheme
 from powerline.lib.config import ConfigLoader
 from powerline.lib.unicode import safe_unicode, FailedUnicode
 from powerline.config import DEFAULT_SYSTEM_CONFIG_DIR
+from powerline.lib import mergedicts
 
 from threading import Lock, Event
 
@@ -218,6 +219,22 @@ def finish_common_config(common_config):
 	]
 
 	return common_config
+
+
+if sys.version_info < (3,):
+	# `raise exception[0], None, exception[1]` is a SyntaxError in python-3*
+	# Not using ('''…''') because this syntax does not work in python-2.6
+	exec(('def reraise(exception):\n'
+			'	if type(exception) is tuple:\n'
+			'		raise exception[0], None, exception[1]\n'
+			'	else:\n'
+			'		raise exception\n'))
+else:
+	def reraise(exception):
+		if type(exception) is tuple:
+			raise exception[0].with_traceback(exception[1])
+		else:
+			raise exception
 
 
 class Powerline(object):
@@ -455,7 +472,40 @@ class Powerline(object):
 
 		:return: dictionary with :ref:`colorscheme configuration <config-colorschemes>`.
 		'''
-		return self._load_config(os.path.join('colorschemes', self.ext, name), 'colorscheme')
+		# TODO Make sure no colorscheme name ends with __ (do it in 
+		# powerline-lint)
+		levels = (
+			os.path.join('colorschemes', name),
+			os.path.join('colorschemes', self.ext, '__main__'),
+			os.path.join('colorschemes', self.ext, name),
+		)
+		config = {}
+		loaded = 0
+		exceptions = []
+		for cfg_path in levels:
+			try:
+				lvl_config = self._load_config(cfg_path, 'colorscheme')
+			except IOError as e:
+				if sys.version_info < (3,):
+					tb = sys.exc_info()[2]
+					exceptions.append((e, tb))
+				else:
+					exceptions.append(e)
+			else:
+				if not cfg_path.endswith('__'):
+					loaded += 1
+				# TODO Either make sure `attr` list is always present or make 
+				# mergedicts not merge group definitions.
+				mergedicts(config, lvl_config)
+		if not loaded:
+			for exception in exceptions:
+				if type(exception) is tuple:
+					e = exception[0]
+				else:
+					e = exception
+				self.exception('Failed to load colorscheme: {0}', e, exception=exception)
+			raise e
+		return config
 
 	def load_colors_config(self):
 		'''Get colorscheme.
@@ -562,5 +612,11 @@ class Powerline(object):
 	def exception(self, msg, *args, **kwargs):
 		if 'prefix' not in kwargs:
 			kwargs['prefix'] = 'powerline'
+		exception = kwargs.pop('exception', None)
 		pl = getattr(self, 'pl', None) or get_fallback_logger()
+		if exception:
+			try:
+				reraise(exception)
+			except Exception:
+				return pl.exception(msg, *args, **kwargs)
 		return pl.exception(msg, *args, **kwargs)

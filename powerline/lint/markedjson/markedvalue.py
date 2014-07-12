@@ -47,6 +47,16 @@ class MarkedFloat(float):
 	__new__ = gen_new(float)
 
 
+class MarkedDict(dict):
+	__new__ = gen_new(dict)
+
+	def __init__(self, value, mark):
+		super(MarkedDict, self).__init__(value)
+
+	def copy(self):
+		return MarkedDict(super(MarkedDict, self).copy(), self.mark)
+
+
 class MarkedValue:
 	def __init__(self, value, mark):
 		self.mark = mark
@@ -57,6 +67,7 @@ specialclasses = {
 	unicode: MarkedUnicode,
 	int: MarkedInt,
 	float: MarkedFloat,
+	dict: MarkedDict,
 }
 
 classcache = {}
@@ -70,7 +81,10 @@ def gen_marked_value(value, mark, use_special_classes=True):
 	else:
 		class Marked(MarkedValue):
 			for func in value.__class__.__dict__:
-				if func not in set(('__init__', '__new__', '__getattribute__')):
+				if func == 'copy':
+					def copy(self):
+						return self.__class__(self.value.copy(), self.mark)
+				elif func not in set(('__init__', '__new__', '__getattribute__')):
 					if func in set(('__eq__',)):
 						# HACK to make marked dictionaries always work
 						exec (('def {0}(self, *args):\n'

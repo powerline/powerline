@@ -16,7 +16,9 @@ Powerline provides default configurations in the following locations:
 `Main configuration`_
     :file:`powerline/config.json`
 `Colorschemes`_
-    :file:`powerline/colorschemes/{extension}/default.json`
+    :file:`powerline/colorschemes/{name}.json`, 
+    :file:`powerline/colorscheme/__main__.json`, 
+    :file:`powerline/colorschemes/{extension}/{name}.json`
 `Themes`_
     :file:`powerline/themes/{extension}/default.json`
 
@@ -248,7 +250,14 @@ Color definitions
 Colorschemes
 ============
 
-:Location: :file:`powerline/colorschemes/{extension}/{name}.json`
+:Location: :file:`powerline/colorschemes/{name}.json`, 
+           :file:`powerline/colorscheme/__main__.json`, 
+           :file:`powerline/colorschemes/{extension}/{name}.json`
+
+Colorscheme files are processed in order given: definitions from each next file 
+override those from each previous file. It is required that either 
+:file:`powerline/colorschemes/{name}.json`, or 
+:file:`powerline/colorschemes/{extension}/{name}.json` exists.
 
 ``name``
     Name of the colorscheme.
@@ -258,21 +267,27 @@ Colorschemes
 ``groups``
     Segment highlighting groups, consisting of a dict where the key is the 
     name of the highlighting group (usually the function name for function 
-    segments), and the value is a dict that defines the foreground color, 
-    background color and optional attributes:
+    segments), and the value is either
 
-    ``fg``
-        Foreground color. Must be defined in :ref:`colors 
-        <config-colors-colors>`.
+    #) a dict that defines the foreground color, background color and 
+       attributes:
 
-    ``bg``
-        Background color. Must be defined in :ref:`colors 
-        <config-colors-colors>`.
+       ``fg``
+           Foreground color. Must be defined in :ref:`colors 
+           <config-colors-colors>`.
 
-    ``attr``
-        Optional list of attributes. Valid values are one or more of 
-        ``bold``, ``italic`` and ``underline``. Note that some attributes 
-        may be unavailable in some applications or terminal emulators.
+       ``bg``
+           Background color. Must be defined in :ref:`colors 
+           <config-colors-colors>`.
+
+       ``attr``
+           List of attributes. Valid values are one or more of ``bold``, 
+           ``italic`` and ``underline``. Note that some attributes may be 
+           unavailable in some applications or terminal emulators. If you do not 
+           need any attributes leave this empty.
+
+    #) a string (an alias): a name of existing group. This group’s definition 
+       will be used when this color is requested.
 
 ``mode_translations``
     Mode-specific highlighting for extensions that support it (e.g. the vim 

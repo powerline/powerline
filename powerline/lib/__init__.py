@@ -18,12 +18,27 @@ def mergedicts(d1, d2):
 	'''Recursively merge two dictionaries. First dictionary is modified in-place.
 	'''
 	for k in d2:
-		if k in d1 and type(d1[k]) is dict and type(d2[k]) is dict:
+		if k in d1 and isinstance(d1[k], dict) and isinstance(d2[k], dict):
 			mergedicts(d1[k], d2[k])
 		elif d2[k] is REMOVE_THIS_KEY:
 			d1.pop(k, None)
 		else:
 			d1[k] = d2[k]
+
+
+def mergedicts_copy(d1, d2):
+	'''Recursively merge two dictionaries.
+
+	Dictionaries are not modified. Copying happens only if necessary. Assumes 
+	that first dictionary support .copy() method.
+	'''
+	ret = d1.copy()
+	for k in d2:
+		if k in d1 and isinstance(d1[k], dict) and isinstance(d2[k], dict):
+			ret[k] = mergedicts_copy(d1[k], d2[k])
+		else:
+			ret[k] = d2[k]
+	return ret
 
 
 def add_divider_highlight_group(highlight_group):

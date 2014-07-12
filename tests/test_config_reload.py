@@ -101,7 +101,7 @@ class TestConfigReload(TestCase):
 		with get_powerline(run_once=True) as p:
 			with replace_item(globals(), 'config', deepcopy(config)):
 				self.assertEqual(p.render(), '<1 2 1> s<2 4 False>>><3 4 4>g<4 False False>>><None None None>')
-				self.assertAccessEvents('config', 'colors', 'colorschemes/test/default', 'themes/test/default')
+				self.assertAccessEvents('config', 'colors', 'colorschemes/default', 'colorschemes/test/__main__', 'colorschemes/test/default', 'themes/test/default')
 				config['config']['common']['spaces'] = 1
 				add_watcher_events(p, 'config', wait=False, interval=0.05)
 				# When running once thread should not start
@@ -117,7 +117,7 @@ class TestConfigReload(TestCase):
 		with get_powerline(run_once=False) as p:
 			with replace_item(globals(), 'config', deepcopy(config)):
 				self.assertEqual(p.render(), '<1 2 1> s<2 4 False>>><3 4 4>g<4 False False>>><None None None>')
-				self.assertAccessEvents('config', 'colors', 'colorschemes/test/default', 'themes/test/default')
+				self.assertAccessEvents('config', 'colors', 'colorschemes/default', 'colorschemes/test/__main__', 'colorschemes/test/default', 'themes/test/default')
 
 				config['config']['common']['spaces'] = 1
 				add_watcher_events(p, 'config')
@@ -141,14 +141,19 @@ class TestConfigReload(TestCase):
 				config['config']['ext']['test']['colorscheme'] = 'nonexistent'
 				add_watcher_events(p, 'config')
 				self.assertEqual(p.render(), '<1 2 1> s <2 4 False>>><3 4 4>g <4 False False>>><None None None>')
-				self.assertAccessEvents('config', 'colorschemes/test/nonexistent')
+				self.assertAccessEvents('config', 'colorschemes/nonexistent', 'colorschemes/test/__main__', 'colorschemes/test/nonexistent')
 				# It should normally handle file missing error
-				self.assertEqual(p.logger._pop_msgs(), ['exception:test:powerline:Failed to create renderer: colorschemes/test/nonexistent'])
+				self.assertEqual(p.logger._pop_msgs(), [
+					'exception:test:powerline:Failed to load colorscheme: colorschemes/nonexistent',
+					'exception:test:powerline:Failed to load colorscheme: colorschemes/test/__main__',
+					'exception:test:powerline:Failed to load colorscheme: colorschemes/test/nonexistent',
+					'exception:test:powerline:Failed to create renderer: colorschemes/test/nonexistent'
+				])
 
 				config['config']['ext']['test']['colorscheme'] = '2'
 				add_watcher_events(p, 'config')
 				self.assertEqual(p.render(), '<2 3 1> s <3 4 False>>><1 4 4>g <4 False False>>><None None None>')
-				self.assertAccessEvents('config', 'colorschemes/test/2')
+				self.assertAccessEvents('config', 'colorschemes/2', 'colorschemes/test/__main__', 'colorschemes/test/2')
 				self.assertEqual(p.logger._pop_msgs(), [])
 
 				config['config']['ext']['test']['theme'] = '2'
@@ -170,7 +175,7 @@ class TestConfigReload(TestCase):
 		with get_powerline(run_once=False) as p:
 			with replace_item(globals(), 'config', deepcopy(config)):
 				self.assertEqual(p.render(), '<1 2 1> s<2 4 False>>><3 4 4>g<4 False False>>><None None None>')
-				self.assertAccessEvents('config', 'colors', 'colorschemes/test/default', 'themes/test/default')
+				self.assertAccessEvents('config', 'colors', 'colorschemes/default', 'colorschemes/test/__main__', 'colorschemes/test/default', 'themes/test/default')
 
 				config['config']['ext']['test']['colorscheme'] = 'nonexistentraise'
 				add_watcher_events(p, 'config')
@@ -182,9 +187,14 @@ class TestConfigReload(TestCase):
 				# fcf:colorschemes/test/nonexistentraise”).
 				# sleep(0.1)
 				self.assertEqual(p.render(), '<1 2 1> s<2 4 False>>><3 4 4>g<4 False False>>><None None None>')
-				self.assertAccessEvents('config')
+				# For colorschemes/{test/,}*raise find_config_file raises 
+				# IOError, but it does not do so for colorschemes/test/__main__, 
+				# so powerline is trying to load this, but not other 
+				# colorschemes/*
+				self.assertAccessEvents('config', 'colorschemes/test/__main__')
 				self.assertIn('exception:test:powerline:Failed to create renderer: fcf:colorschemes/test/nonexistentraise', p.logger._pop_msgs())
 
+				config['colorschemes/nonexistentraise'] = {}
 				config['colorschemes/test/nonexistentraise'] = {
 					'groups': {
 						"str1": {"fg": "col1", "bg": "col3", "attr": ["bold"]},
@@ -192,9 +202,10 @@ class TestConfigReload(TestCase):
 					},
 				}
 				while not p._will_create_renderer():
-					sleep(0.000001)
+					sleep(0.1)
 				self.assertEqual(p.render(), '<1 3 1> s<3 4 False>>><2 4 4>g<4 False False>>><None None None>')
-				self.assertAccessEvents('colorschemes/test/nonexistentraise')
+				# Same as above
+				self.assertAccessEvents('colorschemes/nonexistentraise', 'colorschemes/test/nonexistentraise', 'colorschemes/test/__main__')
 				self.assertEqual(p.logger._pop_msgs(), [])
 		pop_events()
 
@@ -202,7 +213,7 @@ class TestConfigReload(TestCase):
 		with get_powerline(run_once=False) as p:
 			with replace_item(globals(), 'config', deepcopy(config)):
 				self.assertEqual(p.render(), '<1 2 1> s<2 4 False>>><3 4 4>g<4 False False>>><None None None>')
-				self.assertAccessEvents('config', 'colors', 'colorschemes/test/default', 'themes/test/default')
+				self.assertAccessEvents('config', 'colors', 'colorschemes/default', 'colorschemes/test/__main__', 'colorschemes/test/default', 'themes/test/default')
 
 				config['colors']['colors']['col1'] = 5
 				add_watcher_events(p, 'colors')
@@ -215,12 +226,12 @@ class TestConfigReload(TestCase):
 		with get_powerline(run_once=False) as p:
 			with replace_item(globals(), 'config', deepcopy(config)):
 				self.assertEqual(p.render(), '<1 2 1> s<2 4 False>>><3 4 4>g<4 False False>>><None None None>')
-				self.assertAccessEvents('config', 'colors', 'colorschemes/test/default', 'themes/test/default')
+				self.assertAccessEvents('config', 'colors', 'colorschemes/default', 'colorschemes/test/__main__', 'colorschemes/test/default', 'themes/test/default')
 
 				config['colorschemes/test/default']['groups']['str1']['bg'] = 'col3'
 				add_watcher_events(p, 'colorschemes/test/default')
 				self.assertEqual(p.render(), '<1 3 1> s<3 4 False>>><3 4 4>g<4 False False>>><None None None>')
-				self.assertAccessEvents('colorschemes/test/default')
+				self.assertAccessEvents('colorschemes/default', 'colorschemes/test/__main__', 'colorschemes/test/default')
 				self.assertEqual(p.logger._pop_msgs(), [])
 		pop_events()
 
@@ -228,7 +239,7 @@ class TestConfigReload(TestCase):
 		with get_powerline(run_once=False) as p:
 			with replace_item(globals(), 'config', deepcopy(config)):
 				self.assertEqual(p.render(), '<1 2 1> s<2 4 False>>><3 4 4>g<4 False False>>><None None None>')
-				self.assertAccessEvents('config', 'colors', 'colorschemes/test/default', 'themes/test/default')
+				self.assertAccessEvents('config', 'colors', 'colorschemes/default', 'colorschemes/test/__main__', 'colorschemes/test/default', 'themes/test/default')
 
 				config['themes/test/default']['segments']['left'][0]['contents'] = 'col3'
 				add_watcher_events(p, 'themes/test/default')
@@ -242,7 +253,7 @@ class TestConfigReload(TestCase):
 			config['config']['common']['interval'] = None
 			with get_powerline(run_once=False) as p:
 				self.assertEqual(p.render(), '<1 2 1> s<2 4 False>>><3 4 4>g<4 False False>>><None None None>')
-				self.assertAccessEvents('config', 'colors', 'colorschemes/test/default', 'themes/test/default')
+				self.assertAccessEvents('config', 'colors', 'colorschemes/default', 'colorschemes/test/__main__', 'colorschemes/test/default', 'themes/test/default')
 
 				config['themes/test/default']['segments']['left'][0]['contents'] = 'col3'
 				add_watcher_events(p, 'themes/test/default', wait=False)
@@ -257,7 +268,7 @@ class TestConfigReload(TestCase):
 			config['config']['common']['interval'] = None
 			with get_powerline(run_once=True) as p:
 				self.assertEqual(p.render(), '<1 2 1> s<2 4 False>>><3 4 4>g<4 False False>>><None None None>')
-				self.assertAccessEvents('config', 'colors', 'colorschemes/test/default', 'themes/test/default')
+				self.assertAccessEvents('config', 'colors', 'colorschemes/default', 'colorschemes/test/__main__', 'colorschemes/test/default', 'themes/test/default')
 
 				config['themes/test/default']['segments']['left'][0]['contents'] = 'col3'
 				add_watcher_events(p, 'themes/test/default', wait=False)
