@@ -12,6 +12,16 @@ import sys
 import os
 
 
+def highlighted_string(s, group, **kwargs):
+	ret = {
+		'type': 'string',
+		'contents': s,
+		'highlight_group': [group],
+	}
+	ret.update(kwargs)
+	return ret
+
+
 config = {
 	'config': {
 		'common': {
@@ -64,26 +74,11 @@ config = {
 	'themes/test/default': {
 		'segments': {
 			'left': [
-				{
-					'type': 'string',
-					'contents': 's',
-					'width': 'auto',
-					'highlight_group': ['str1'],
-				},
-				{
-					'type': 'string',
-					'contents': 'g',
-					'highlight_group': ['str2'],
-				},
+				highlighted_string('s', 'str1', width='auto'),
+				highlighted_string('g', 'str2'),
 			],
 			'right': [
-				{
-					'type': 'string',
-					'contents': 'f',
-					'width': 'auto',
-					'align': 'right',
-					'highlight_group': ['str2'],
-				},
+				highlighted_string('f', 'str2', width='auto', align='right'),
 			],
 		},
 	},
