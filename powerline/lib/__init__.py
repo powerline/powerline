@@ -18,7 +18,7 @@ def mergedicts(d1, d2):
 	'''Recursively merge two dictionaries. First dictionary is modified in-place.
 	'''
 	for k in d2:
-		if k in d1 and type(d1[k]) is dict and type(d2[k]) is dict:
+		if k in d1 and isinstance(d1[k], dict) and isinstance(d2[k], dict):
 			mergedicts(d1[k], d2[k])
 		elif d2[k] is REMOVE_THIS_KEY:
 			d1.pop(k, None)
