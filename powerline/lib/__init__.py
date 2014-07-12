@@ -26,6 +26,21 @@ def mergedicts(d1, d2):
 			d1[k] = d2[k]
 
 
+def mergedicts_copy(d1, d2):
+	'''Recursively merge two dictionaries.
+
+	Dictionaries are not modified. Copying happens only if necessary. Assumes 
+	that first dictionary support .copy() method.
+	'''
+	ret = d1.copy()
+	for k in d2:
+		if k in d1 and isinstance(d1[k], dict) and isinstance(d2[k], dict):
+			ret[k] = mergedicts_copy(d1[k], d2[k])
+		else:
+			ret[k] = d2[k]
+	return ret
+
+
 def add_divider_highlight_group(highlight_group):
 	def dec(func):
 		@wraps_saveargs(func)
