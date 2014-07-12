@@ -82,6 +82,9 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module=Non
 			pl.exception('Failed to generate segment from {0!r}: {1}', segment, str(e), prefix='segment_generator')
 			return None
 
+		if not get_key(segment, module, 'display', True):
+			return None
+
 		if segment_type == 'function':
 			highlight_group = [module + '.' + segment['name'], segment['name']]
 		else:
