@@ -1,11 +1,11 @@
 {
 	"name": "Default color scheme for shell prompts",
 	"groups": {
-		"hostname":       { "fg": "brightyellow", "bg": "mediumorange" },
-		"jobnum":         { "fg": "brightyellow", "bg": "mediumorange" },
-		"exit_fail":      { "fg": "white", "bg": "darkestred" },
-		"exit_success":   { "fg": "white", "bg": "darkestgreen" },
-		"environment":    { "fg": "white", "bg": "darkestgreen" },
+		"hostname":       { "fg": "brightyellow", "bg": "mediumorange", "attr": [] },
+		"jobnum":         { "fg": "brightyellow", "bg": "mediumorange", "attr": [] },
+		"exit_fail":      { "fg": "white", "bg": "darkestred", "attr": [] },
+		"exit_success":   { "fg": "white", "bg": "darkestgreen", "attr": [] },
+		"environment":    { "fg": "white", "bg": "darkestgreen", "attr": [] },
 		"mode":           { "fg": "darkestgreen", "bg": "brightgreen", "attr": ["bold"] }
 	},
 	"mode_translations": {
