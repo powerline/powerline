@@ -7,6 +7,8 @@ from shutil import rmtree
 import os
 import json
 from powerline.lib import mergedicts_copy as mdc
+from subprocess import check_call
+from operator import add
 
 
 CONFIG_DIR = 'tests/config'
@@ -25,8 +27,8 @@ root_config = lambda: {
 			},
 		},
 		'spaces': 0,
-		'interval': 0,
-		'watcher': 'test',
+		'interval': None,
+		'watcher': 'auto',
 	},
 	'ext': {
 		'test': {
@@ -117,6 +119,14 @@ class WithConfigTree(object):
 			renderer_module='tests.lib.config_mock',
 			**self.p_kwargs
 		)
+		if os.environ.get('POWERLINE_RUN_LINT_DURING_TESTS'):
+			try:
+				check_call(['scripts/powerline-lint'] + reduce(add, (
+					['-p', d] for d in self.p.get_config_paths()
+				)))
+			except:
+				self.__exit__()
+				raise
 		return self.p.__enter__(*args)
 
 	def __exit__(self, *args):
@@ -172,7 +182,7 @@ class TestMerging(TestCase):
 		with WithConfigTree(mdc(main_tree(), {
 			'2/config': {
 				'common': {
-					'spaces': 3,
+					'spaces': 1,
 				}
 			},
 			'3/config': {
@@ -185,7 +195,7 @@ class TestMerging(TestCase):
 				}
 			},
 		})) as p:
-			self.assertRenderEqual(p, '{12} bt   {2-}>>{--}')
+			self.assertRenderEqual(p, '{12} bt {2-}>>{--}')
 
 	def test_colors_config_merging(self):
 		with WithConfigTree(mdc(main_tree(), {
