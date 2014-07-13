@@ -1,8 +1,8 @@
 # vim:fileencoding=utf-8:noet
 
 from powerline.lint.markedjson import load
-from powerline import generate_config_finder, get_config_paths
-from powerline.lib.config import load_json_config
+from powerline import generate_config_finder, get_config_paths, load_config
+from powerline.lib.config import ConfigLoader
 from powerline.lint.markedjson.error import echoerr, MarkedError
 from powerline.segments.vim import vim_modes
 from powerline.lint.inspect import getconfigargspec
@@ -1261,15 +1261,30 @@ theme_spec = (Spec(
 ).context_message('Error while loading theme'))
 
 
+def generate_json_config_loader(lhadproblem):
+	def load_json_config(config_file_path, load=load, open_file=open_file):
+		with open_file(config_file_path) as config_file_fp:
+			r, hadproblem = load(config_file_fp)
+			if hadproblem:
+				lhadproblem[0] = True
+			return r
+	return load_json_config
+
+
 def check(paths=None, debug=False):
 	search_paths = paths or get_config_paths()
-	find_config_file = generate_config_finder(lambda: search_paths)
+	find_config_files = generate_config_finder(lambda: search_paths)
 
 	logger = logging.getLogger('powerline-lint')
 	logger.setLevel(logging.DEBUG if debug else logging.ERROR)
 	logger.addHandler(logging.StreamHandler())
 
 	ee = EchoErr(echoerr, logger)
+
+	lhadproblem = [False]
+	load_json_config = generate_json_config_loader(lhadproblem)
+
+	config_loader = ConfigLoader(run_once=True, load=load_json_config)
 
 	paths = {
 		'themes': defaultdict(lambda: []),
@@ -1326,17 +1341,9 @@ def check(paths=None, debug=False):
 					typ,
 				))
 
-	lhadproblem = [False]
-
-	def load_config(stream):
-		r, hadproblem = load(stream)
-		if hadproblem:
-			lhadproblem[0] = True
-		return r
-
 	hadproblem = False
 	try:
-		main_config = load_json_config(find_config_file('config'), load=load_config, open_file=open_file)
+		main_config = load_config('config', find_config_files, config_loader)
 	except IOError:
 		main_config = {}
 		sys.stderr.write('\nConfiguration file not found: config.json\n')
@@ -1357,7 +1364,7 @@ def check(paths=None, debug=False):
 	import_paths = [os.path.expanduser(path) for path in main_config.get('common', {}).get('paths', [])]
 
 	try:
-		colors_config = load_json_config(find_config_file('colors'), load=load_config, open_file=open_file)
+		colors_config = load_config('colors', find_config_files, config_loader)
 	except IOError:
 		colors_config = {}
 		sys.stderr.write('\nConfiguration file not found: colors.json\n')

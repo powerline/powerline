@@ -117,7 +117,7 @@ class TestPowerline(Powerline):
 		return self.cr_kwargs
 
 
-renderer = SimpleRenderer
+renderer = EvenSimplerRenderer
 
 
 def get_powerline(**kwargs):
