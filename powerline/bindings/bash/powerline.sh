@@ -10,36 +10,33 @@ _powerline_columns_fallback() {
 	return 0
 }
 
+_powerline_tmux_setenv() {
+	TMUX="$_POWERLINE_TMUX" tmux setenv -g TMUX_"$1"_`tmux display -p "#D" | tr -d %` "$2"
+	TMUX="$_POWERLINE_TMUX" tmux refresh -S
+}
+
+_powerline_tmux_set_pwd() {
+	if test "x$_POWERLINE_SAVED_PWD" != "x$PWD" ; then
+		_POWERLINE_SAVED_PWD="$PWD"
+		_powerline_tmux_setenv PWD "$PWD"
+	fi
+}
+
+_powerline_tmux_set_columns() {
+	_powerline_tmux_setenv COLUMNS "${COLUMNS:-$(_powerline_columns_fallback)}"
+}
+
 _powerline_init_tmux_support() {
 	if test -n "$TMUX" && tmux refresh -S &>/dev/null ; then
 		# TMUX variable may be unset to create new tmux session inside this one
 		_POWERLINE_TMUX="$TMUX"
 
-		_powerline_tmux_setenv() {
-			TMUX="$_POWERLINE_TMUX" tmux setenv -g TMUX_"$1"_`tmux display -p "#D" | tr -d %` "$2"
-			TMUX="$_POWERLINE_TMUX" tmux refresh -S
-		}
-
-		_powerline_tmux_set_pwd() {
-			if test "x$_POWERLINE_SAVED_PWD" != "x$PWD" ; then
-				_POWERLINE_SAVED_PWD="$PWD"
-				_powerline_tmux_setenv PWD "$PWD"
-			fi
-		}
-
-		_powerline_tmux_set_columns() {
-			_powerline_tmux_setenv COLUMNS "${COLUMNS:-$(_powerline_columns_fallback)}"
-		}
-
-		trap "_powerline_tmux_set_columns" SIGWINCH
+		trap "_powerline_tmux_set_columns" WINCH
 		_powerline_tmux_set_columns
-	else
-		_powerline_tmux_set_pwd() {
-			return 0
-		}
+
+		test "x$PROMPT_COMMAND" != "x${PROMPT_COMMAND/_powerline_tmux_set_pwd}" ||
+			export PROMPT_COMMAND="${PROMPT_COMMAND}"$'\n_powerline_tmux_set_pwd'
 	fi
-	test "x$PROMPT_COMMAND" != "x${PROMPT_COMMAND/_powerline_tmux_set_pwd}" ||
-		export PROMPT_COMMAND="${PROMPT_COMMAND}"$'\n_powerline_tmux_set_pwd'
 }
 
 _powerline_prompt() {
