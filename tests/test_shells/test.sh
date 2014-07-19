@@ -41,6 +41,12 @@ run_test() {
 	sleep 1
 	screen -S "$SESNAME" -p 0 -X width 300 1
 	if test "x${SH}" = "xdash" ; then
+		# If I do not use this hack for dash then output will look like
+		#
+		#     command1
+		#     command2
+		#     …
+		#     prompt1> prompt2> …
 		while read -r line ; do
 			screen -S "$SESNAME" -p 0 -X stuff "$line"$'\n'
 			sleep 1
