@@ -8,6 +8,18 @@ if test -z "${POWERLINE_COMMAND}" ; then
 	fi
 fi
 
+_powerline_columns_fallback() {
+	if which stty &>/dev/null ; then
+		local cols="$(stty size 2>/dev/null)"
+		if ! test -z "$cols" ; then
+			echo "${cols#* }"
+			return 0
+		fi
+	fi
+	echo 0
+	return 0
+}
+
 integer _POWERLINE_JOBNUM
 
 _powerline_init_tmux_support() {
@@ -28,7 +40,7 @@ _powerline_init_tmux_support() {
 		}
 
 		function -g _powerline_tmux_set_columns() {
-			_powerline_tmux_setenv COLUMNS "$COLUMNS"
+			_powerline_tmux_setenv COLUMNS "${COLUMNS:-$(_powerline_columns_fallback)}"
 		}
 
 		chpwd_functions+=( _powerline_tmux_set_pwd )
@@ -126,7 +138,7 @@ _powerline_setup_prompt() {
 		new_args_2+=' -R local_theme=continuation'
 		local add_args_3=$add_args' -R local_theme=select'
 		local add_args_2=$add_args$new_args_2
-		add_args+=' --width=$(( COLUMNS - 1 ))'
+		add_args+=' --width=$(( ${COLUMNS:-$(_powerline_columns_fallback)} - 1 ))'
 		local add_args_r2=$add_args$new_args_2
 		PS1='$($POWERLINE_COMMAND shell aboveleft -r zsh_prompt '$add_args')'
 		RPS1='$($POWERLINE_COMMAND shell right -r zsh_prompt '$add_args')'
