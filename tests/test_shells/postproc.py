@@ -48,4 +48,9 @@ with codecs.open(fname, 'r', encoding='utf-8') as R:
 					line = line[start:end] + '\033[0m\n'
 				except ValueError:
 					line = ''
+			elif shell == 'mksh':
+				# Output is different in travis: on my machine I see full 
+				# command, in travis it is truncated just after `true`.
+				if line.startswith('[1] + Terminated'):
+					line = '[1] + Terminated bash -c ...\n'
 			W.write(line)
