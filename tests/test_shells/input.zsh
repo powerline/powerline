@@ -2,7 +2,7 @@ unsetopt promptsp transientrprompt
 POWERLINE_COMMAND=( $PWD/scripts/powerline -p $PWD/powerline/config_files )
 POWERLINE_COMMAND=( $POWERLINE_COMMAND -t default_leftonly.segment_data.hostname.args.only_if_ssh=false )
 POWERLINE_COMMAND=( $POWERLINE_COMMAND -c ext.shell.theme=default_leftonly )
-VIRTUAL_ENV=
+export VIRTUAL_ENV=
 source powerline/bindings/zsh/powerline.zsh ; cd tests/shell/3rd
 cd .git
 cd ..
