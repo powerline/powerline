@@ -42,15 +42,15 @@ _powerline_init_tmux_support() {
 		export PROMPT_COMMAND="${PROMPT_COMMAND}"$'\n_powerline_tmux_set_pwd'
 }
 
-_run_powerline() {
+_powerline_prompt() {
 	# Arguments: side, last_exit_code, jobnum
 	$POWERLINE_COMMAND shell $1 -w "${COLUMNS:-$(_powerline_columns_fallback)}" -r bash_prompt --last_exit_code=$2 --jobnum=$3
 }
 
-_powerline_prompt() {
+_powerline_set_prompt() {
 	local last_exit_code=$?
 	local jobnum="$(jobs -p|wc -l)"
-	PS1="$(_run_powerline aboveleft $last_exit_code $jobnum)"
+	PS1="$(_powerline_prompt aboveleft $last_exit_code $jobnum)"
 	return $last_exit_code
 }
 
@@ -66,8 +66,8 @@ _powerline_setup_prompt() {
 			export POWERLINE_COMMAND="$(dirname "$BASH_SOURCE")/../../../scripts/powerline"
 		fi
 	fi
-	test "x$PROMPT_COMMAND" != "x${PROMPT_COMMAND%_powerline_prompt*}" ||
-		export PROMPT_COMMAND=$'_powerline_prompt\n'"${PROMPT_COMMAND}"
+	test "x$PROMPT_COMMAND" != "x${PROMPT_COMMAND%_powerline_set_prompt*}" ||
+		export PROMPT_COMMAND=$'_powerline_set_prompt\n'"${PROMPT_COMMAND}"
 }
 
 if test -z "$POWERLINE_NO_BASH_PROMPT$POWERLINE_NO_SHELL_PROMPT" ; then
