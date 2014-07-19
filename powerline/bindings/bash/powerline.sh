@@ -1,3 +1,15 @@
+_powerline_columns_fallback() {
+	if which stty &>/dev/null ; then
+		local cols="$(stty size 2>/dev/null)"
+		if ! test -z "$cols" ; then
+			echo "${cols#* }"
+			return 0
+		fi
+	fi
+	echo 0
+	return 0
+}
+
 _powerline_init_tmux_support() {
 	if test -n "$TMUX" && tmux refresh -S &>/dev/null ; then
 		# TMUX variable may be unset to create new tmux session inside this one
@@ -16,7 +28,7 @@ _powerline_init_tmux_support() {
 		}
 
 		_powerline_tmux_set_columns() {
-			_powerline_tmux_setenv COLUMNS "$COLUMNS"
+			_powerline_tmux_setenv COLUMNS "${COLUMNS:-$(_powerline_columns_fallback)}"
 		}
 
 		trap "_powerline_tmux_set_columns" SIGWINCH
@@ -32,7 +44,7 @@ _powerline_init_tmux_support() {
 
 _run_powerline() {
 	# Arguments: side, last_exit_code, jobnum
-	$POWERLINE_COMMAND shell $1 -w $COLUMNS -r bash_prompt --last_exit_code=$2 --jobnum=$3
+	$POWERLINE_COMMAND shell $1 -w "${COLUMNS:-$(_powerline_columns_fallback)}" -r bash_prompt --last_exit_code=$2 --jobnum=$3
 }
 
 _powerline_prompt() {

@@ -1,4 +1,23 @@
 function powerline-setup
+	function _powerline_columns_fallback
+		if which stty ^/dev/null
+			if stty size ^/dev/null
+				stty size | cut -d' ' -f2
+				return 0
+			end
+		end
+		echo 0
+		return 0
+	end
+
+	function _powerline_columns
+		if test -z "$COLUMNS"
+			_powerline_columns_fallback
+		else
+			echo "$COLUMNS"
+		end
+	end
+
 	if test -z "$POWERLINE_NO_FISH_PROMPT$POWERLINE_NO_SHELL_PROMPT"
 		if test -z "$POWERLINE_COMMAND"
 			if which powerline-client >/dev/null
@@ -20,11 +39,11 @@ function powerline-setup
 			if test -z "$POWERLINE_NO_FISH_ABOVE$POWERLINE_NO_SHELL_ABOVE"
 				set promptside aboveleft
 				set rpromptpast 'echo -n " "'
-				set columnsexpr '(math $COLUMNS - 1)'
+				set columnsexpr '(math (_powerline_columns) - 1)'
 			else
 				set promptside left
 				set rpromptpast
-				set columnsexpr '$COLUMNS'
+				set columnsexpr '(_powerline_columns)'
 			end
 			eval "
 			function fish_prompt
@@ -53,7 +72,7 @@ function powerline-setup
 					_powerline_tmux_setenv PWD "$PWD"
 				end
 				function --on-signal WINCH _powerline_tmux_set_columns
-					_powerline_tmux_setenv COLUMNS "$COLUMNS"
+					_powerline_tmux_setenv COLUMNS (_powerline_columns)
 				end
 				_powerline_tmux_set_columns
 				_powerline_tmux_set_pwd
