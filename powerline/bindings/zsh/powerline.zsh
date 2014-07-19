@@ -1,13 +1,3 @@
-if test -z "${POWERLINE_COMMAND}" ; then
-	if which powerline-client &>/dev/null ; then
-		export POWERLINE_COMMAND=powerline-client
-	elif which powerline &>/dev/null ; then
-		export POWERLINE_COMMAND=powerline
-	else
-		export POWERLINE_COMMAND="$0:A:h:h:h:h/scripts/powerline"
-	fi
-fi
-
 _powerline_columns_fallback() {
 	if which stty &>/dev/null ; then
 		local cols="$(stty size 2>/dev/null)"
@@ -117,19 +107,32 @@ _powerline_update_counter() {
 
 _powerline_setup_prompt() {
 	emulate -L zsh
+
 	for f in "${precmd_functions[@]}"; do
 		if [[ "$f" = "_powerline_set_jobnum" ]]; then
 			return
 		fi
 	done
 	precmd_functions+=( _powerline_set_jobnum )
+
 	VIRTUAL_ENV_DISABLE_PROMPT=1
+
 	if test -z "${POWERLINE_NO_ZSH_ZPYTHON}" && { zmodload libzpython || zmodload zsh/zpython } &>/dev/null ; then
 		precmd_functions+=( _powerline_update_counter )
 		zpython 'from powerline.bindings.zsh import setup as _powerline_setup'
 		zpython '_powerline = _powerline_setup()'
 		zpython 'del _powerline_setup'
 	else
+		if test -z "${POWERLINE_COMMAND}" ; then
+			if which powerline-client &>/dev/null ; then
+				export POWERLINE_COMMAND=powerline-client
+			elif which powerline &>/dev/null ; then
+				export POWERLINE_COMMAND=powerline
+			else
+				export POWERLINE_COMMAND="$0:A:h:h:h:h/scripts/powerline"
+			fi
+		fi
+
 		local add_args='--last_exit_code=$?'
 		add_args+=' --last_pipe_status="$pipestatus"'
 		add_args+=' --renderer_arg="client_id=$$"'
