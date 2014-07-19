@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 FAILED=0
 ONLY_SHELL="$1"
 
@@ -16,20 +16,38 @@ check_screen_log() {
 run_test() {
 	SH="$1"
 	SESNAME="powerline-shell-test-${SH}-$$"
+	ARGS=( "$@" )
 
 	test "x$ONLY_SHELL" = "x" || test "x$ONLY_SHELL" = "x$SH" || return 0
 
-	which "${SH}" || return 0
+	if ! which "${SH}" ; then
+		if test "x${SH}" = "xbb" ; then
+			if ! which busybox ; then
+				return 0
+			fi
+			shift
+			ARGS=( busybox ash "$@" )
+		else
+			return 0
+		fi
+	fi
 
 	export SH
 
 	screen -L -c tests/test_shells/screenrc -d -m -S "$SESNAME" \
-		env LANG=en_US.UTF-8 BINDFILE="$BINDFILE" "$@"
+		env LANG=en_US.UTF-8 BINDFILE="$BINDFILE" "${ARGS[@]}"
 	screen -S "$SESNAME" -X readreg a tests/test_shells/input.$SH
 	# Wait for screen to initialize
-	sleep 1s
+	sleep 1
 	screen -S "$SESNAME" -p 0 -X width 300 1
-	screen -S "$SESNAME" -p 0 -X paste a
+	if test "x${SH}" = "xdash" ; then
+		while read -r line ; do
+			screen -S "$SESNAME" -p 0 -X stuff "$line"$'\n'
+			sleep 1
+		done < tests/test_shells/input.$SH
+	else
+		screen -S "$SESNAME" -p 0 -X paste a
+	fi
 	# Wait for screen to exit (sending command to non-existing screen session 
 	# fails; when launched instance exits corresponding session is deleted)
 	while screen -S "$SESNAME" -X blankerprg "" > /dev/null ; do
@@ -51,7 +69,23 @@ run_test() {
 		echo '============================================================'
 		cat -v tests/shell/${SH}.full.log
 		echo '____________________________________________________________'
-		${SH} --version
+		case ${SH} in
+			*ksh)
+				${SH} -c 'echo ${KSH_VERSION}'
+				;;
+			dash)
+				# ?
+				;;
+			bb)
+				bb --help
+				;;
+			*)
+				${SH} --version
+				;;
+		esac
+		if which dpkg >/dev/null ; then
+			dpkg -s ${SH}
+		fi
 		return 1
 	fi
 	return 0
@@ -87,6 +121,20 @@ if ! run_test fish -i ; then
 fi
 
 if ! run_test tcsh -f -i ; then
+	FAILED=1
+fi
+
+if ! run_test bb -i ; then
+	FAILED=1
+fi
+
+unset ENV
+
+if ! run_test mksh -i ; then
+	FAILED=1
+fi
+
+if ! run_test dash -i ; then
 	FAILED=1
 fi
 
