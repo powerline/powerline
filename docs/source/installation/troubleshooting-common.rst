@@ -132,3 +132,10 @@ To get rid of these lags there currently are two options:
   the future.
 * Compile and install ``libzpython`` module that lives in 
   https://bitbucket.org/ZyX_I/zpython. This variant is zsh-specific.
+
+Prompt is spoiled after completing files in ksh
+-----------------------------------------------
+
+This is exactly why powerline has official mksh support, but not official ksh 
+support. If you know the solution feel free to share it in `powerline bug 
+tracker <https://github.com/Lokaltog/powerline/issues/new>`_.
