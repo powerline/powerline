@@ -7,6 +7,8 @@ import argparse
 try:
 	import powerline.bindings.config as config
 except ImportError:
+	import sys
+	import os
 	sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(os.path.realpath(__file__)))))
 	import powerline.bindings.config as config  # NOQA
 
