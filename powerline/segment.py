@@ -94,7 +94,7 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module=Non
 
 			if hasattr(_contents_func, 'powerline_requires_filesystem_watcher'):
 				create_watcher = lambda: create_file_watcher(pl, common_config['watcher'])
-				args['create_watcher'] = create_watcher
+				args[str('create_watcher')] = create_watcher
 
 			if hasattr(_contents_func, 'powerline_requires_segment_info'):
 				contents_func = lambda pl, segment_info: _contents_func(pl=pl, segment_info=segment_info, **args)
