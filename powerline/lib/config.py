@@ -109,7 +109,8 @@ class ConfigLoader(MultiRunnedThread):
 
 		:param function condition_function:
 			Function which will be called each ``interval`` seconds. All 
-			exceptions from it will be ignored.
+			exceptions from it will be logged and ignored. IOError exception 
+			will be ignored without logging.
 		:param function function:
 			Function which will be called if condition_function returns 
 			something that is true. Accepts result of condition_function as an 
@@ -179,6 +180,8 @@ class ConfigLoader(MultiRunnedThread):
 				for condition_function, function in list(functions):
 					try:
 						path = condition_function(key)
+					except IOError:
+						pass
 					except Exception as e:
 						self.exception('Error while running condition function for key {0}: {1}', key, str(e))
 					else:
