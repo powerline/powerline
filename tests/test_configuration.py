@@ -190,6 +190,7 @@ class TestColorschemesHierarchy(TestRender):
 				'right': [],
 			}
 			self.assertRenderEqual(p, '{78} a{910}b{1112}c{56}A{910}B{1112}C{56}1{78}2{910}3{--}')
+			self.assertEqual(p.logger._pop_msgs(), [])
 
 	@add_p_arg
 	def test_group_redirects_no_main(self, p):
@@ -205,6 +206,7 @@ class TestColorschemesHierarchy(TestRender):
 				'right': [],
 			}
 			self.assertRenderEqual(p, '{78} a{56}1{78}2{910}3{--}')
+			self.assertEqual(p.logger._pop_msgs(), [])
 
 	@add_p_arg
 	def test_group_redirects_no_top_default(self, p):
@@ -218,6 +220,7 @@ class TestColorschemesHierarchy(TestRender):
 				'right': [],
 			}
 			self.assertRenderEqual(p, '{1112} c{1112}C{--}')
+			self.assertEqual(p.logger._pop_msgs(), [])
 
 	@add_p_arg
 	def test_group_redirects_no_test_default(self, p):
@@ -235,6 +238,7 @@ class TestColorschemesHierarchy(TestRender):
 				'right': [],
 			}
 			self.assertRenderEqual(p, '{56} A{910}B{1112}C{56}1{78}2{910}3{--}')
+			self.assertEqual(p.logger._pop_msgs(), [])
 
 	@add_p_arg
 	def test_group_redirects_only_main(self, p):
@@ -250,6 +254,12 @@ class TestColorschemesHierarchy(TestRender):
 			# Powerline is not able to work without default colorscheme 
 			# somewhere, thus it will output error string
 			self.assertRenderEqual(p, 'colorschemes/test/default')
+			self.assertEqual(p.logger._pop_msgs(), [
+				'exception:test:powerline:Failed to load colorscheme: colorschemes/default',
+				'exception:test:powerline:Failed to load colorscheme: colorschemes/test/default',
+				'exception:test:powerline:Failed to create renderer: colorschemes/test/default',
+				'exception:test:powerline:Failed to render: colorschemes/test/default',
+			])
 
 	@add_p_arg
 	def test_group_redirects_only_top_default(self, p):
@@ -265,6 +275,7 @@ class TestColorschemesHierarchy(TestRender):
 				'right': [],
 			}
 			self.assertRenderEqual(p, '{56} 1{78}2{910}3{--}')
+			self.assertEqual(p.logger._pop_msgs(), [])
 
 	@add_p_arg
 	def test_group_redirects_only_test_default(self, p):
@@ -278,6 +289,7 @@ class TestColorschemesHierarchy(TestRender):
 				'right': [],
 			}
 			self.assertRenderEqual(p, '{121} s{--}')
+			self.assertEqual(p.logger._pop_msgs(), [])
 
 
 class TestVim(TestCase):
