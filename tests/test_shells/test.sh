@@ -143,6 +143,7 @@ fi
 if ! run_test dash -i ; then
 	# dash tests are not stable, see #931
 	# FAILED=1
+	true
 fi
 
 test "x$ONLY_SHELL" = "x" && rm -r tests/shell
