@@ -46,15 +46,7 @@ run_test() {
 	test "x$ONLY_SHELL" = "x" || test "x$ONLY_SHELL" = "x$SH" || return 0
 
 	if ! which "${SH}" ; then
-		if test "x${SH}" = "xbb" ; then
-			if ! which busybox ; then
-				return 0
-			fi
-			shift
-			ARGS=( busybox ash "$@" )
-		else
-			return 0
-		fi
+		return 0
 	fi
 
 	export TEST_TYPE
@@ -108,8 +100,8 @@ run_test() {
 			dash)
 				# ?
 				;;
-			bb)
-				bb --help
+			busybox)
+				busybox --help
 				;;
 			*)
 				${SH} --version
@@ -205,7 +197,7 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 			FAILED=1
 		fi
 
-		if ! run_test $TEST_TYPE bb -i ; then
+		if ! run_test $TEST_TYPE busybox ash -i ; then
 			FAILED=1
 		fi
 
