@@ -3,7 +3,7 @@ unsetenv VIRTUAL_ENV
 source powerline/bindings/tcsh/powerline.tcsh ; cd tests/shell/3rd
 cd .git
 cd ..
-setenv VIRTUAL_ENV $HOME:q"/.virtenvs/some-virtual-environment"
+setenv VIRTUAL_ENV $HOME:q"/.virtenvs/venv"
 unsetenv VIRTUAL_ENV
 bash -c 'echo $$>pid ; while true ; do sleep 0.1s ; done' &
 false # Warning: currently tcsh bindings do not support job count

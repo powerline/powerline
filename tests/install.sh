@@ -1,6 +1,6 @@
 #!/bin/sh
 pip install .
-pip install psutil
+pip install psutil pexpect
 if python -c 'import sys; sys.exit(1 * (sys.version_info[0] != 2))' ; then
 	# Python 2
 	if python -c 'import platform, sys; sys.exit(1 - (platform.python_implementation() == "CPython"))' ; then
