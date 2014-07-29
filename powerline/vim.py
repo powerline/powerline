@@ -155,16 +155,17 @@ class VimPowerline(Powerline):
 													__main__.__dict__)))
 
 
-def setup(pyeval=None, pycmd=None):
+def setup(pyeval=None, pycmd=None, can_replace_pyeval=True):
 	import sys
 	import __main__
 	if not pyeval:
 		pyeval = 'pyeval' if sys.version_info < (3,) else 'py3eval'
+		can_replace_pyeval = True
 	if not pycmd:
 		pycmd = 'python' if sys.version_info < (3,) else 'python3'
 
 	# pyeval() and vim.bindeval were both introduced in one patch
-	if not hasattr(vim, 'bindeval'):
+	if not hasattr(vim, 'bindeval') and can_replace_pyeval:
 		vim.command(('''
 				function! PowerlinePyeval(e)
 					{pycmd} powerline.pyeval()
