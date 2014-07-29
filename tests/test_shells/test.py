@@ -180,13 +180,22 @@ def run_test(debug, shell, args):
 	)
 
 
+NO_SEQ_RE = re.compile('\033\\[\\d+[DC]')
+
+
 def postproc(lines, pid_fname):
 	hostname = socket.gethostname()
 	user = os.environ['USER']
 	with open(pid_fname, 'r') as PF:
 		pid = PF.read().strip()
 	return [
-		line.replace(hostname, 'HOST').replace(user, 'USER').replace(pid, 'PID')
+		NO_SEQ_RE.subn(
+			'',
+			line
+			.replace(hostname, 'HOST')
+			.replace(user, 'USER')
+			.replace(pid, 'PID')
+		)[0]
 		for line in lines
 	]
 
