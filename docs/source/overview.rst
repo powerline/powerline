@@ -127,6 +127,25 @@ hand: ``powerline`` is installed and run just like any other plugin using
 
     call vam#ActivateAddons(['powerline'])
 
+.. note::
+    If you use supplied :file:`powerline.vim` file to load powerline there are 
+    additional configuration variables available: ``g:powerline_pycmd`` and 
+    ``g:powerline_pyeval``. First sets command used to load powerline: expected 
+    values are ``"py"`` and ``"py3"``. Second sets function used in statusline, 
+    expected values are ``"pyeval"`` and ``"py3eval"``.
+
+    If ``g:powerline_pycmd`` is set to the one of the expected values then 
+    ``g:powerline_pyeval`` will be set accordingly. If it is set to some other 
+    value then you must also set ``g:powerline_pyeval``. Powerline will not 
+    check that Vim is compiled with Python support if you set 
+    ``g:powerline_pycmd`` to an unexpected value.
+
+    These values are to be used to specify the only Python that is to be loaded 
+    if you have both versions: Vim may disable loading one python version if 
+    other was already loaded. They should also be used if you have two python 
+    versions able to load simultaneously, but with powerline installed only for 
+    python-3 version.
+
 Shell prompts
 -------------
 

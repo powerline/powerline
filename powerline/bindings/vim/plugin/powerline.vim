@@ -3,7 +3,41 @@ if exists('g:powerline_loaded')
 endif
 let g:powerline_loaded = 1
 
-if !has('python') && !has('python3')
+if exists('g:powerline_pycmd')
+	let s:pycmd = substitute(g:powerline_pycmd, '\v\C^(py)%[thon](3?)$', '\1\2', '')
+	if s:pycmd is# 'py'
+		let s:has_python = has('python')
+		let s:pyeval = get(g:, 'powerline_pyeval', 'pyeval')
+	elseif s:pycmd is# 'py3'
+		let s:has_python = has('python3')
+		let s:pyeval = 'py3eval'
+		let s:pyeval = get(g:, 'powerline_pyeval', 'py3eval')
+	else
+		if !exists('g:powerline_pyeval')
+			echohl ErrorMsg
+				echomsg 'g:powerline_pycmd was set to an unknown values, but g:powerline_pyeval'
+				echomsg 'was not set. You should either set g:powerline_pycmd to "py3" or "py",'
+				echomsg 'specify g:powerline_pyeval explicitly or unset both and let powerline'
+				echomsg 'figure them out.'
+			echohl None
+			finish
+		endif
+		let s:pyeval = g:powerline_pyeval
+		let s:has_python = 1
+	endif
+elseif has('python')
+	let s:has_python = 1
+	let s:pycmd = 'py'
+	let s:pyeval = get(g:, 'powerline_pyeval', 'pyeval')
+elseif has('python3')
+	let s:has_python = 1
+	let s:pycmd = 'py3'
+	let s:pyeval = get(g:, 'powerline_pyeval', 'py3eval')
+else
+	let s:has_python = 0
+endif
+
+if !s:has_python
 	if !exists('g:powerline_no_python_error')
 		echohl ErrorMsg
 			echomsg 'You need vim compiled with Python 2.6, 2.7 or 3.2 and later support'
@@ -13,9 +47,7 @@ if !has('python') && !has('python3')
 	endif
 	finish
 endif
-
-let s:pycmd = substitute(get(g:, 'powerline_pycmd', has('python') ? 'py' : 'py3'), '\v^(py)%[thon](3?)$', '\1\2', '')
-let s:pyeval = get(g:, 'powerline_pyeval', s:pycmd.'eval')
+unlet s:has_python
 
 let s:import_cmd = 'from powerline.vim import setup as powerline_setup'
 try
@@ -81,9 +113,12 @@ finally
 	endif
 endtry
 
+let s:can_replace_pyeval = !exists('g:powerline_pyeval')
+
 execute s:pycmd 'import vim'
-execute s:pycmd 'powerline_setup(pyeval=vim.eval("s:pyeval"), pycmd=vim.eval("s:pycmd"))'
+execute s:pycmd 'powerline_setup(pyeval=vim.eval("s:pyeval"), pycmd=vim.eval("s:pycmd"), can_replace_pyeval=int(vim.eval("s:can_replace_pyeval")))'
 execute s:pycmd 'del powerline_setup'
 
+unlet s:can_replace_pyeval
 unlet s:pycmd
 unlet s:pyeval
