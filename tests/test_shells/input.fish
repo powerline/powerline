@@ -6,7 +6,7 @@ set fish_function_path $fish_function_path "$PWD/powerline/bindings/fish"
 powerline-setup ; cd tests/shell/3rd
 cd .git
 cd ..
-setenv VIRTUAL_ENV "$HOME/.virtenvs/some-virtual-environment"
+setenv VIRTUAL_ENV "$HOME/.virtenvs/venv"
 setenv VIRTUAL_ENV
 bash -c 'echo $$>pid ; while true ; do sleep 0.1s ; done' &
 false

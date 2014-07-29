@@ -5,7 +5,7 @@ export VIRTUAL_ENV=
 . powerline/bindings/shell/powerline.sh ; cd tests/shell/3rd
 cd .git
 cd ..
-VIRTUAL_ENV="$HOME/.virtenvs/some-virtual-environment"
+VIRTUAL_ENV="$HOME/.virtenvs/venv"
 VIRTUAL_ENV=
 bash -c 'echo $$>pid ; while true ; do sleep 0.1s ; done' &
 false
