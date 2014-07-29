@@ -127,9 +127,6 @@ hand: ``powerline`` is installed and run just like any other plugin using
 
     call vam#ActivateAddons(['powerline'])
 
-Note: when using Gentoo ebuild you need to specify ``USE=vim`` to enable 
-powerline.
-
 Shell prompts
 -------------
 
