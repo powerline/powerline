@@ -70,6 +70,10 @@ finally
 			echomsg 'Python 2.6, 2.7 or 3.2 and later to work). Please consult'
 			echomsg 'the troubleshooting section in the documentation for'
 			echomsg 'possible solutions.'
+			if s:pycmd is# 'py' && has('python3')
+				echomsg 'If powerline on your system is installed for python 3 only you'
+				echomsg 'should set g:powerline_pycmd to "py3" to make it load correctly.'
+			endif
 		echohl None
 		let s:pystr  =     "def powerline_troubleshoot():\n"
 		let s:pystr .=     "	import sys\n"
