@@ -16,6 +16,7 @@ from time import sleep
 from io import StringIO
 from shutil import rmtree
 from subprocess import check_call
+from itertools import chain
 
 from powerline.lib.unicode import u, unicode
 from powerline.renderer import NBSP, Renderer
@@ -124,7 +125,8 @@ def run_test(debug, shell, args):
 	try:
 		child = pexpect.spawnu(shell, args, encoding='utf-8', env=env, cwd=POWERLINE_ROOT)
 	# There is no more specific exception for not found command
-	except pexpect.ExceptionPexpect:
+	except pexpect.ExceptionPexpect as e:
+		print ('Unable to run {0} test: {1}'.format(shell, e))
 		# Skip test when shell failed to launch
 		return False
 
@@ -135,7 +137,7 @@ def run_test(debug, shell, args):
 	full_output = StringIO()
 
 	with open(os.path.join(SHELL_TESTS_ROOT, 'input.' + shell)) as IF:
-		for line in IF:
+		for line in chain(('stty size\n',), IF):
 			if not started_test and 'cd tests/shell/3rd' in line:
 				started_test = True
 			elif started_test and 'true is the last line' in line:
