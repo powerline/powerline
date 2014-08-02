@@ -300,7 +300,7 @@ def check_existing():
 	return sock
 
 
-def test_connect():
+def kill_daemon():
 	sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 	try:
 		try:
@@ -351,6 +351,7 @@ def lockpidfile():
 def main():
 	p = ArgumentParser(description=
 		'Daemon to improve the performance of powerline')
+	p.add_argument('--quiet', '-q', action='store_true', help='Without other options: do not complain about already running powerline-daemon instance. Will still exit with 1. With `--kill\' and `--replace\': do not show any messages. With `--foreground\': ignored. Does not silence exceptions in any case.')
 	a = p.add_mutually_exclusive_group().add_argument
 	a('--kill', '-k', action='store_true', help='Kill an already running instance')
 	a('--foreground', '-f', action='store_true', help='Run in the foreground (dont daemonize)')
@@ -358,15 +359,19 @@ def main():
 	args = p.parse_args()
 
 	if args.kill:
-		if test_connect():
-			print ('Kill command sent to daemon, if it does not die in a couple of seconds use kill to kill it')
+		if kill_daemon():
+			if not args.quiet:
+				print ('Kill command sent to daemon, if it does not die in a couple of seconds use kill to kill it')
+			raise SystemExit(0)
 		else:
-			print ('No running daemon found')
-		return
+			if not args.quiet:
+				print ('No running daemon found')
+			raise SystemExit(1)
 
 	if args.replace:
-		while test_connect():
-			print ('Kill command sent to daemon, waiting for daemon to exit, press Ctrl-C to terminate wait and exit')
+		while kill_daemon():
+			if not args.quiet:
+				print ('Kill command sent to daemon, waiting for daemon to exit, press Ctrl-C to terminate wait and exit')
 			sleep(2)
 
 	if use_filesystem and not args.foreground:
@@ -377,15 +382,17 @@ def main():
 	if use_filesystem:
 		# Create a locked pid file containing the daemon's PID
 		if lockpidfile() is None:
-			print ('The daemon is already running. Use %s -k to kill it.' % os.path.basename(sys.argv[0]),
-					file=sys.stderr)
+			if not args.quiet:
+				print ('The daemon is already running. Use %s -k to kill it.' % os.path.basename(sys.argv[0]),
+						file=sys.stderr)
 			raise SystemExit(1)
 
 	# Bind to address or bail if we cannot bind
 	sock = check_existing()
 	if sock is None:
-		print ('The daemon is already running. Use %s -k to kill it.' % os.path.basename(sys.argv[0]),
-				file=sys.stderr)
+		if not args.quiet:
+			print ('The daemon is already running. Use %s -k to kill it.' % os.path.basename(sys.argv[0]),
+					file=sys.stderr)
 		raise SystemExit(1)
 
 	if args.foreground:
