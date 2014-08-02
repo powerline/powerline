@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import os
 import sys
 import subprocess
+import logging
 
 from setuptools import setup, find_packages
 
@@ -28,11 +29,26 @@ def compile_client():
 
 try:
 	compile_client()
-except Exception:
+except Exception as e:
+	print('Compiling C version of powerline-client failed')
+	logging.exception(e)
 	# FIXME Catch more specific exceptions
 	import shutil
-	print('Compiling C version of powerline-client failed, using Python version instead')
-	shutil.copyfile('client/powerline.py', 'scripts/powerline')
+	if hasattr(shutil, 'which'):
+		which = shutil.which
+	else:
+		sys.path.append(CURRENT_DIR)
+		from powerline.lib import which
+	if which('socat') and which('sed') and which('sh'):
+		print('Using powerline.sh script instead of C version (requires socat, sed and sh)')
+		shutil.copyfile('client/powerline.sh', 'scripts/powerline')
+		can_use_scripts = True
+	else:
+		print('Using powerline.py script instead of C version')
+		shutil.copyfile('client/powerline.py', 'scripts/powerline')
+		can_use_scripts = True
+else:
+	can_use_scripts = False
 
 setup(
 	name='Powerline',
@@ -66,8 +82,8 @@ setup(
 		'scripts/powerline-daemon',
 		'scripts/powerline-render',
 		'scripts/powerline-config',
-	],
-	data_files=[('bin', ['scripts/powerline'])],
+	] + (['scripts/powerline'] if can_use_scripts else []),
+	data_files=(None if can_use_scripts else (('bin', ['scripts/powerline']),)),
 	keywords='',
 	packages=find_packages(exclude=('tests', 'tests.*')),
 	include_package_data=True,
