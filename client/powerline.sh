@@ -10,4 +10,8 @@ ADDRESS="powerline-ipc-${UID:-`id -u`}"
 	done
 	env -0 | sed 's/\(\x00\)\([^\x00]\)\|^/\1--env=\2/g'
 	printf -- '--cwd=%s\0' "$PWD"
-) | socat -t 10 - abstract-client:"$ADDRESS"
+) | socat -lf/dev/null -t 10 - abstract-client:"$ADDRESS"
+
+if test $? -ne 0 ; then
+	powerline-render "$@"
+fi
