@@ -5,10 +5,11 @@ import sys
 import os
 
 try:
-	from powerline.shell import ShellPowerline, get_argparser, finish_args
+	from powerline.shell import ShellPowerline, get_argparser, finish_args, write_output
 except ImportError:
 	sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(os.path.realpath(__file__)))))
-	from powerline.shell import ShellPowerline, get_argparser, finish_args  # NOQA
+	from powerline.shell import ShellPowerline, get_argparser, finish_args, write_output  # NOQA
+
 
 def write(output):
 	try:
@@ -16,28 +17,10 @@ def write(output):
 	except UnicodeEncodeError:
 		sys.stdout.write(output.encode('utf-8'))
 
+
 if __name__ == '__main__':
 	args = get_argparser(description=__doc__).parse_args()
 	finish_args(args)
 	powerline = ShellPowerline(args, run_once=True)
 	segment_info = {'args': args, 'environ': os.environ}
-	if args.renderer_arg:
-		segment_info.update(args.renderer_arg)
-	if args.side.startswith('above'):
-		for line in powerline.render_above_lines(
-			width=args.width,
-			segment_info=segment_info,
-			mode=os.environ.get('_POWERLINE_MODE'),
-		):
-			write(line)
-			sys.stdout.write('\n')
-		args.side = args.side[len('above'):]
-
-	if args.side:
-		rendered = powerline.render(
-			width=args.width,
-			side=args.side,
-			segment_info=segment_info,
-			mode=os.environ.get('_POWERLINE_MODE'),
-		)
-		write(rendered)
+	write_output(args, powerline, segment_info, write)

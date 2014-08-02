@@ -12,8 +12,9 @@ from signal import signal, SIGTERM
 from time import sleep
 from functools import partial
 from locale import getpreferredencoding
+from io import StringIO
 
-from powerline.shell import get_argparser, finish_args, ShellPowerline
+from powerline.shell import get_argparser, finish_args, ShellPowerline, write_output
 from powerline.lib.monotonic import monotonic
 
 is_daemon = False
@@ -77,35 +78,41 @@ def render(args):
 		'environ': environ,
 		'args': args,
 	}
-	key = (args.ext[0], args.renderer_module,
-			tuple(args.config) if args.config else None,
-			tuple(args.theme_option) if args.theme_option else None,)
-	if args.renderer_arg:
-		segment_info.update(args.renderer_arg)
+	key = (
+		args.ext[0],
+		args.renderer_module,
+		tuple(args.config) if args.config else None,
+		tuple(args.theme_option) if args.theme_option else None,
+		tuple(args.renderer_arg) if args.renderer_arg else None,
+	)
 	finish_args(args)
-	pl = None
+	powerline = None
 	try:
-		pl = powerlines[key]
+		powerline = powerlines[key]
 	except KeyError:
 		try:
-			pl = powerlines[key] = PowerlineDaemon(
+			powerline = powerlines[key] = PowerlineDaemon(
 				args,
 				logger=logger,
-				config_loader=config_loader
+				config_loader=config_loader,
+				run_once=False,
 			)
+			if logger is None:
+				logger = powerline.logger
+			if config_loader is None:
+				config_loader = powerline.config_loader
 		except SystemExit:
 			# Somebody thought raising system exit was a good idea,
 			return ''
 		except Exception as e:
-			if pl:
-				pl.pl.exception('Failed to render {0}: {1}', str(key), str(e))
+			if powerline:
+				powerline.pl.exception('Failed to render {0}: {1}', str(key), str(e))
 			else:
 				return 'Failed to render {0}: {1}'.format(str(key), str(e))
-	if logger is None:
-		logger = pl.logger
-	if config_loader is None:
-		config_loader = pl.config_loader
-	return pl.render(width=args.width, side=args.side, segment_info=segment_info)
+	s = StringIO()
+	write_output(args, powerline, segment_info, s.write)
+	s.seek(0)
+	return s.read()
 
 
 def eintr_retry_call(func, *args, **kwargs):
