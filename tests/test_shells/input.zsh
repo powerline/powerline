@@ -1,4 +1,4 @@
-unsetopt promptsp transientrprompt
+unsetopt promptsp notransientrprompt
 setopt interactivecomments
 # POWERLINE_CONFIG_PATH=$PWD/powerline/config_files
 # POWERLINE_THEME_CONFIG=( default_leftonly.segment_data.hostname.args.only_if_ssh=false )
@@ -16,12 +16,6 @@ VIRTUAL_ENV="$HOME/.virtenvs/some-virtual-environment"
 VIRTUAL_ENV=
 bash -c 'echo $$>pid ; while true ; do sleep 0.1s ; done' &
 false
-select abc in def ghi jkl
-do
-	echo $abc
-	break
-done
-1
 kill `cat pid` ; sleep 1s
 cd "$DIR1"
 cd ../"$DIR2"
@@ -37,5 +31,13 @@ POWERLINE_COMMAND=( $POWERLINE_COMMAND[1,4] ${${POWERLINE_COMMAND[5]}/_leftonly}
 
 echo abc
 false
+POWERLINE_COMMAND=( $POWERLINE_COMMAND -t default.segment_data.hostname.display=false )
+POWERLINE_COMMAND=( $POWERLINE_COMMAND -t default.segment_data.user.display=false )
+select abc in def ghi jkl
+do
+	echo $abc
+	break
+done
+1
 true is the last line
 exit
