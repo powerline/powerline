@@ -20,10 +20,11 @@ I'm using tmux and Powerline looks like crap, what's wrong?
   :file:`.tmux.conf` to solve this issue::
 
     set -g default-terminal "screen-256color"
-
 * If you're using iTerm2, make sure that you have enabled the setting 
-  :guilabel:`Set locale variables automatically` in :menuselection:`Profiles 
-  --> Terminal --> Environment`.
+  :guilabel:`Set locale variables automatically` in :menuselection:`Profiles --> 
+  Terminal --> Environment`.
+* Make sure tmux knows that terminal it is running in support 256 colors. You 
+  may tell it tmux by using ``-2`` option when launching it.
 
 I’m using tmux/screen and Powerline is colorless
 ------------------------------------------------
