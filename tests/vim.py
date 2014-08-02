@@ -167,8 +167,14 @@ def _log_print():
 		sys.stdout.write(repr(entry) + '\n')
 
 
+_current_group = None
+_on_wipeout = []
+
+
 @_vim
 def command(cmd):
+	global _current_group
+	cmd = cmd.lstrip()
 	if cmd.startswith('let g:'):
 		import re
 		varname, value = re.compile(r'^let g:(\w+)\s*=\s*(.*)').match(cmd).groups()
@@ -179,6 +185,26 @@ def command(cmd):
 	elif cmd.startswith('function! Powerline_plugin_ctrlp'):
 		# Ignore CtrlP updating functions
 		pass
+	elif cmd.startswith('augroup'):
+		augroup = cmd.partition(' ')[2]
+		if augroup.upper() == 'END':
+			_current_group = None
+		else:
+			_current_group = augroup
+	elif cmd.startswith('autocmd'):
+		rest = cmd.partition(' ')[2]
+		auevent, rest = rest.partition(' ')[::2]
+		pattern, aucmd = rest.partition(' ')[::2]
+		if auevent != 'BufWipeout' or pattern != '*':
+			raise NotImplementedError
+		import sys
+		if sys.version_info < (3,):
+			if not aucmd.startswith(':python '):
+				raise NotImplementedError
+		else:
+			if not aucmd.startswith(':python3 '):
+				raise NotImplementedError
+		_on_wipeout.append(aucmd.partition(' ')[2])
 	else:
 		raise NotImplementedError
 
@@ -314,8 +340,9 @@ def _emul_fnamemodify(path, modstring):
 @_vim
 @_str_func
 def _emul_expand(expr):
+	global _abuf
 	if expr == '<abuf>':
-		return _buffer()
+		return _abuf or _buffer()
 	raise NotImplementedError
 
 
@@ -398,6 +425,7 @@ class _Window(object):
 _buf_lines = {}
 _undostate = {}
 _undo_written = {}
+_abuf = None
 
 
 class _Buffer(object):
@@ -408,7 +436,7 @@ class _Buffer(object):
 		self.number = bufnr
 		# FIXME Use unicode() for python-3
 		self.name = name
-		self.vars = {}
+		self.vars = {'changedtick': 1}
 		self.options = {
 			'modified': 0,
 			'readonly': 0,
@@ -447,12 +475,14 @@ class _Buffer(object):
 
 	def __setitem__(self, line, value):
 		self.options['modified'] = 1
+		self.vars['changedtick'] += 1
 		_buf_lines[self.number][line] = value
 		from copy import copy
 		_undostate[self.number].append(copy(_buf_lines[self.number]))
 
 	def __setslice__(self, *args):
 		self.options['modified'] = 1
+		self.vars['changedtick'] += 1
 		_buf_lines[self.number].__setslice__(*args)
 		from copy import copy
 		_undostate[self.number].append(copy(_buf_lines[self.number]))
@@ -467,7 +497,23 @@ class _Buffer(object):
 		return '<buffer ' + str(self.name) + '>'
 
 	def __del__(self):
+		global _abuf
 		bufnr = self.number
+		try:
+			import __main__
+		except ImportError:
+			pass
+		except RuntimeError:
+			# Module may have already been garbage-collected
+			pass
+		else:
+			if _on_wipeout:
+				_abuf = bufnr
+				try:
+					for event in _on_wipeout:
+						exec(event, __main__.__dict__)
+				finally:
+					_abuf = None
 		if _buf_lines:
 			_buf_lines.pop(bufnr)
 		if _undostate:

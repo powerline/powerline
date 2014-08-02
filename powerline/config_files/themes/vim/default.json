@@ -59,6 +59,12 @@
 				"before": " "
 			},
 			{
+				"exclude_modes": ["i", "R", "Rv"],
+				"name": "trailing_whitespace",
+				"display": false,
+				"priority": 60
+			},
+			{
 				"exclude_modes": ["nc"],
 				"module": "powerline.segments.plugin.syntastic",
 				"name": "syntastic",

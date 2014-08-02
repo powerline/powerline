@@ -159,4 +159,31 @@ def powerline_vim_strtrans_error(e):
 codecs.register_error('powerline_vim_strtrans_error', powerline_vim_strtrans_error)
 
 
+did_autocmd = False
+buffer_caches = []
+
+
+def register_buffer_cache(cachedict):
+	global did_autocmd
+	global buffer_caches
+	from powerline.vim import get_default_pycmd, pycmd
+	if not did_autocmd:
+		import __main__
+		__main__.powerline_on_bwipe = on_bwipe
+		vim.command('augroup Powerline')
+		vim.command('	autocmd! BufWipeout * :{pycmd} powerline_on_bwipe()'.format(
+			pycmd=(pycmd or get_default_pycmd())))
+		vim.command('augroup END')
+		did_autocmd = True
+	buffer_caches.append(cachedict)
+	return cachedict
+
+
+def on_bwipe():
+	global buffer_caches
+	bufnr = int(vim.eval('expand("<abuf>")'))
+	for cachedict in buffer_caches:
+		cachedict.pop(bufnr, None)
+
+
 environ = VimEnviron()

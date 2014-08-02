@@ -8,14 +8,21 @@ try:
 except ImportError:
 	vim = {}  # NOQA
 
+try:
+	from __builtin__ import xrange as range
+except ImportError:
+	pass
+
 from powerline.bindings.vim import (vim_get_func, getbufvar, vim_getbufoption,
-									buffer_name, vim_getwinvar)
+									buffer_name, vim_getwinvar,
+									register_buffer_cache)
 from powerline.theme import requires_segment_info, requires_filesystem_watcher
 from powerline.lib import add_divider_highlight_group
 from powerline.lib.vcs import guess, tree_status
 from powerline.lib.humanize_bytes import humanize_bytes
 from powerline.lib import wraps_saveargs as wraps
 from collections import defaultdict
+
 
 vim_funcs = {
 	'virtcol': vim_get_func('virtcol', rettype=int),
@@ -420,3 +427,55 @@ def file_vcs_status(pl, segment_info, create_watcher):
 					'highlight_group': ['file_vcs_status_' + status, 'file_vcs_status'],
 					})
 			return ret
+
+
+trailing_whitespace_cache = None
+
+
+@requires_segment_info
+def trailing_whitespace(pl, segment_info):
+	'''Return the line number for trailing whitespaces
+
+	It is advised not to use this segment in insert mode: in Insert mode it will 
+	iterate over all lines in buffer each time you happen to type a character 
+	which may cause lags. It will also show you whitespace warning each time you 
+	happen to type space.
+
+	Highlight groups used: ``trailing_whitespace`` or ``warning``.
+	'''
+	global trailing_whitespace_cache
+	if trailing_whitespace_cache is None:
+		trailing_whitespace_cache = register_buffer_cache(defaultdict(lambda: (0, None)))
+	bufnr = segment_info['bufnr']
+	changedtick = getbufvar(bufnr, 'changedtick')
+	if trailing_whitespace_cache[bufnr][0] == changedtick:
+		return trailing_whitespace_cache[bufnr][1]
+	else:
+		buf = segment_info['buffer']
+		bws = b' \t'
+		sws = str(bws)
+		for i in range(len(buf)):
+			try:
+				line = buf[i]
+			except UnicodeDecodeError:  # May happen in Python 3
+				if hasattr(vim, 'bindeval'):
+					line = vim.bindeval('getbufline({0}, {1})'.format(
+						bufnr, i + 1))
+					has_trailing_ws = (line[-1] in bws)
+				else:
+					line = vim.eval('strtrans(getbufline({0}, {1}))'.format(
+						bufnr, i + 1))
+					has_trailing_ws = (line[-1] in bws)
+			else:
+				has_trailing_ws = (line and line[-1] in sws)
+			if has_trailing_ws:
+				break
+		if has_trailing_ws:
+			ret = [{
+				'contents': str(i + 1),
+				'highlight_group': ['trailing_whitespace', 'warning'],
+			}]
+		else:
+			ret = None
+		trailing_whitespace_cache[bufnr] = (changedtick, ret)
+		return ret
