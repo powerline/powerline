@@ -668,17 +668,25 @@ shell_colorscheme_spec = (Spec(
 ).context_message('Error while loading shell colorscheme'))
 
 
-generic_keys = set(('exclude_modes', 'include_modes', 'width', 'align', 'name', 'draw_soft_divider', 'draw_hard_divider', 'priority', 'after', 'before'))
+generic_keys = set((
+	'exclude_modes', 'include_modes',
+	'width', 'align',
+	'name',
+	'draw_soft_divider', 'draw_hard_divider',
+	'priority',
+	'after', 'before',
+	'display'
+))
 type_keys = {
-		'function': set(('args', 'module', 'draw_inner_divider')),
-		'string': set(('contents', 'type', 'highlight_group', 'divider_highlight_group')),
-		'filler': set(('type', 'highlight_group', 'divider_highlight_group')),
-		}
+	'function': set(('args', 'module', 'draw_inner_divider')),
+	'string': set(('contents', 'type', 'highlight_group', 'divider_highlight_group')),
+	'filler': set(('type', 'highlight_group', 'divider_highlight_group')),
+}
 required_keys = {
-		'function': set(),
-		'string': set(('contents',)),
-		'filler': set(),
-		}
+	'function': set(),
+	'string': set(('contents',)),
+	'filler': set(),
+}
 function_keys = set(('args', 'module'))
 highlight_keys = set(('highlight_group', 'name'))
 
@@ -1071,6 +1079,7 @@ segments_spec = Spec().optional().list(
 		draw_hard_divider=Spec().type(bool).optional(),
 		draw_soft_divider=Spec().type(bool).optional(),
 		draw_inner_divider=Spec().type(bool).optional(),
+		display=Spec().type(bool).optional(),
 		module=segment_module_spec(),
 		priority=Spec().type(int, float, type(None)).optional(),
 		after=Spec().type(unicode).optional(),
@@ -1101,6 +1110,7 @@ theme_spec = (Spec(
 		Spec(
 			after=Spec().type(unicode).optional(),
 			before=Spec().type(unicode).optional(),
+			display=Spec().type(bool).optional(),
 			args=args_spec().func(lambda *args, **kwargs: check_args(get_all_possible_segments, *args, **kwargs)),
 			contents=Spec().type(unicode).optional(),
 		),

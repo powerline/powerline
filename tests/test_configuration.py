@@ -171,6 +171,16 @@ class TestLines(TestRender):
 				], width=10)
 
 
+class TestSegments(TestRender):
+	@add_p_arg
+	def test_display(self, p):
+		with replace_item(globals(), 'config', deepcopy(config)):
+			config['themes/test/default']['segments']['left'][0]['display'] = False
+			config['themes/test/default']['segments']['left'][1]['display'] = True
+			config['themes/test/default']['segments']['right'][0]['display'] = False
+			self.assertRenderEqual(p, '{344} g{4-}>>{--}')
+
+
 class TestColorschemesHierarchy(TestRender):
 	@add_p_arg
 	def test_group_redirects(self, p):

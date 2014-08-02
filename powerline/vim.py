@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import
 
+import sys
 from powerline.bindings.vim import vim_get_func, vim_getvar
 from powerline import Powerline
 from powerline.lib import mergedicts
@@ -155,14 +156,27 @@ class VimPowerline(Powerline):
 													__main__.__dict__)))
 
 
+pycmd = None
+
+
+def set_pycmd(new_pycmd):
+	global pycmd
+	pycmd = new_pycmd
+
+
+def get_default_pycmd():
+	return 'python' if sys.version_info < (3,) else 'python3'
+
+
 def setup(pyeval=None, pycmd=None, can_replace_pyeval=True):
-	import sys
 	import __main__
 	if not pyeval:
 		pyeval = 'pyeval' if sys.version_info < (3,) else 'py3eval'
 		can_replace_pyeval = True
 	if not pycmd:
-		pycmd = 'python' if sys.version_info < (3,) else 'python3'
+		pycmd = get_default_pycmd()
+
+	set_pycmd(pycmd)
 
 	# pyeval() and vim.bindeval were both introduced in one patch
 	if not hasattr(vim, 'bindeval') and can_replace_pyeval:

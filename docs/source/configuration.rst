@@ -325,13 +325,14 @@ Themes
     A dict where keys are segment names or strings ``{module}.{name}``. Used to 
     specify default values for various keys:
     :ref:`after <config-theme-seg-after>`,
+    :ref:`args <config-themes-seg-args>` (only for function segments),
     :ref:`before <config-theme-seg-before>`,
     :ref:`contents <config-theme-seg-contents>` (only for string segments
     if :ref:`name <config-themes-seg-name>` is defined),
-    :ref:`args <config-themes-seg-args>` (only for function segments). When 
-    using :ref:`local themes <config-ext-local_themes>` values of these keys are 
-    first searched in the segment description, then in ``segment_data`` key of 
-    a local theme, then in ``segment_data`` key of a :ref:`default theme 
+    :ref:`display <config-theme-seg-display`.
+    When using :ref:`local themes <config-ext-local_themes>` values of these 
+    keys are first searched in the segment description, then in ``segment_data`` 
+    key of a local theme, then in ``segment_data`` key of a :ref:`default theme 
     <config-ext-theme>`. For the :ref:`default theme <config-ext-theme>` itself 
     step 2 is obviously avoided.
 
@@ -454,6 +455,12 @@ Themes
     ``include_modes``
         A list of modes where this segment will be included: The segment is 
         *not* included in any modes, *except* for the modes in this list.
+
+    ``display``
+        .. _config-themes-seg-display:
+
+        Boolean. If false disables displaying of the segment.
+        Defaults to ``True``.
 
 Segments
 ========

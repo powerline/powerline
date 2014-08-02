@@ -49,14 +49,15 @@ class Theme(object):
 			for side in ['left', 'right']:
 				for segment in segdict.get(side, []):
 					segment = get_segment(segment, side)
-					if not run_once:
-						if segment['startup']:
-							try:
-								segment['startup'](pl, shutdown_event)
-							except Exception as e:
-								pl.error('Exception during {0} startup: {1}', segment['name'], str(e))
-								continue
-					self.segments[-1][side].append(segment)
+					if segment:
+						if not run_once:
+							if segment['startup']:
+								try:
+									segment['startup'](pl, shutdown_event)
+								except Exception as e:
+									pl.error('Exception during {0} startup: {1}', segment['name'], str(e))
+									continue
+						self.segments[-1][side].append(segment)
 
 	def shutdown(self):
 		for line in self.segments:
