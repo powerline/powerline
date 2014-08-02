@@ -92,6 +92,7 @@ setup(
 	extras_require={
 		'docs': [
 			'Sphinx',
+			'sphinx_rtd_theme',
 		],
 	},
 	test_suite='tests' if not OLD_PYTHON else None,

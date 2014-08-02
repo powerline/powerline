@@ -1,3 +1,18 @@
+***************
+Troubleshooting
+***************
+
+System-specific issues
+======================
+
+.. toctree::
+
+   Linux <troubleshooting/linux>
+   OS X <troubleshooting/osx>
+
+Common issues
+=============
+
 I'm using tmux and Powerline looks like crap, what's wrong?
 -----------------------------------------------------------
 
@@ -5,10 +20,11 @@ I'm using tmux and Powerline looks like crap, what's wrong?
   :file:`.tmux.conf` to solve this issue::
 
     set -g default-terminal "screen-256color"
-
 * If you're using iTerm2, make sure that you have enabled the setting 
-  :guilabel:`Set locale variables automatically` in :menuselection:`Profiles 
-  --> Terminal --> Environment`.
+  :guilabel:`Set locale variables automatically` in :menuselection:`Profiles --> 
+  Terminal --> Environment`.
+* Make sure tmux knows that terminal it is running in support 256 colors. You 
+  may tell it tmux by using ``-2`` option when launching it.
 
 I’m using tmux/screen and Powerline is colorless
 ------------------------------------------------
@@ -38,7 +54,7 @@ diagnose this problem you may do the following:
 
 #) If this problem is observed within the shell make sure that
 
-   .. code-block:: shell
+   .. code-block:: sh
 
       python -c 'import powerline; print (powerline.__file__)'
 
@@ -75,7 +91,7 @@ diagnose this problem you may do the following:
 There is a hint if you want to place powerline repository somewhere, but still 
 make powerline package importable anywhere: use
 
-  .. code-block:: shell
+  .. code-block:: sh
 
      pip install --user --editable path/to/powerline
 
@@ -133,4 +149,57 @@ Prompt is spoiled after completing files in ksh
 
 This is exactly why powerline has official mksh support, but not official ksh 
 support. If you know the solution feel free to share it in `powerline bug 
-tracker <https://github.com/Lokaltog/powerline/issues/new>`_.
+tracker`_.
+
+Powerline loses color after editing vimrc
+-----------------------------------------
+
+If your vimrc has something like
+
+.. code-block:: vim
+
+    autocmd! BufWritePost vimrc :source ~/.vimrc
+
+to automatically source vimrc after saving it you must then add ``nested`` after 
+pattern (``vimrc`` in this case):
+
+.. code-block:: vim
+
+    autocmd! BufWritePost vimrc nested :source ~/.vimrc
+
+. Alternatively move ``:colorscheme`` command out of the vimrc to the file which 
+will not be automatically resourced. Observed problem is that when you use 
+``:colorscheme`` command existing highlighting groups are usually cleared, 
+including those defined by powerline. To workaround this issue powerline hooks 
+``Colorscheme`` event, but when you source vimrc with ``BufWritePost`` event, 
+but without ``nested`` this event is not launched. See also `autocmd-nested 
+<http://vimpluginloader.sourceforge.net/doc/autocmd.txt.html#autocmd-nested>`_ 
+Vim documentation.
+
+Powerline loses color after saving any file
+-------------------------------------------
+
+It may be one of the incarnations of the above issue: specifically minibufexpl 
+is known to trigger it. If you are using minibufexplorer you should set
+
+.. code-block:: vim
+
+    let g:miniBufExplForceSyntaxEnable = 1
+
+variable so that this issue is not triggered. Complete explanation:
+
+#. When MBE autocommand is executed it launches ``:syntax enable`` Vim command…
+#. … which makes Vim source :file:`syntax/syntax.vim` file …
+#. … which in turn sources :file:`syntax/synload.vim` …
+#. … which executes ``:colorscheme`` command. Normally this command triggers 
+   ``Colorscheme`` event, but in the first point minibufexplorer did set up 
+   autocommands that miss ``nested`` attribute meaning that no events will be 
+   triggered when processing MBE events.
+
+.. note::
+    This setting was introduced in version 6.3.1 of `minibufexpl 
+    <http://www.vim.org/scripts/script.php?script_id=159>`_ and removed in 
+    version 6.5.0 of its successor `minibufexplorer 
+    <http://www.vim.org/scripts/script.php?script_id=3239>`_. It is highly 
+    advised to use the latter because `minibufexpl`_ was last updated late in 
+    2004.
