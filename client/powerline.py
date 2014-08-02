@@ -17,7 +17,7 @@ use_filesystem = 'darwin' in platform
 # use_filesystem = True
 del platform
 
-address = ('/tmp/powerline-ipc-%d' if use_filesystem else '\0powerline-ipc-%d')%os.getuid()
+address = ('/tmp/powerline-ipc-%d' if use_filesystem else '\0powerline-ipc-%d') % os.getuid()
 
 sock = socket.socket(family=socket.AF_UNIX)
 

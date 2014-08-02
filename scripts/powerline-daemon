@@ -324,8 +324,8 @@ def lockpidfile():
 	import fcntl
 	import atexit
 	import stat
-	fd = os.open(pidfile, os.O_WRONLY|os.O_CREAT,
-					stat.S_IRUSR|stat.S_IWUSR|stat.S_IRGRP|stat.S_IROTH)
+	fd = os.open(pidfile, os.O_WRONLY | os.O_CREAT,
+					stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
 	try:
 		fcntl.lockf(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
 	except EnvironmentError:
