@@ -149,6 +149,19 @@ hand: ``powerline`` is installed and run just like any other plugin using
 Shell prompts
 -------------
 
+.. note::
+    It is advised that you run ``powerline-daemon`` before using any of the 
+    below solutions. To do this add
+
+    .. code-block:: bash
+
+        powerline-daemon -q
+
+    just before sourcing powerline bindings script or running 
+    ``powerline-setup``. Use ``|| true`` or equivalent if you run your 
+    configuration with ``set -e`` because ``powerline-daemon`` will exit with 
+    ``1`` if daemon is already running.
+
 Bash prompt
 ^^^^^^^^^^^
 
@@ -226,6 +239,14 @@ is the absolute path to your Powerline installation directory::
     The availability of the ``powerline-config`` command is required for 
     powerline support. You may specify location of this script via 
     ``$POWERLINE_CONFIG_COMMAND`` environment variable.
+
+.. note::
+    It is advised that you run ``powerline-daemon`` before adding the above line 
+    to tmux.conf. To do so add::
+
+        run-shell "powerline-daemon -q"
+
+    to :file:`.tmux.conf`.
 
 IPython prompt
 --------------
