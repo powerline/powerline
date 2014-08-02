@@ -757,6 +757,26 @@ class TestVim(TestCase):
 				with replace_attr(vim, 'guess', get_dummy_guess(status=lambda file: 'M')):
 					self.assertEqual(file_vcs_status(segment_info=segment_info), None)
 
+	def test_trailing_whitespace(self):
+		pl = Pl()
+		with vim_module._with('buffer', 'tws') as segment_info:
+			trailing_whitespace = partial(vim.trailing_whitespace, pl=pl, segment_info=segment_info)
+			self.assertEqual(trailing_whitespace(), None)
+			self.assertEqual(trailing_whitespace(), None)
+			vim_module.current.buffer[0] = ' '
+			self.assertEqual(trailing_whitespace(), [{
+				'highlight_group': ['trailing_whitespace', 'warning'],
+				'contents': '1',
+			}])
+			self.assertEqual(trailing_whitespace(), [{
+				'highlight_group': ['trailing_whitespace', 'warning'],
+				'contents': '1',
+			}])
+			vim_module.current.buffer[0] = ''
+			self.assertEqual(trailing_whitespace(), None)
+			self.assertEqual(trailing_whitespace(), None)
+
+
 old_cwd = None
 
 
