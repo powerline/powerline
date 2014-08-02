@@ -25,16 +25,37 @@ directory:
 
    set rtp+={repository_root}/powerline/bindings/vim
 
-If you're using Vundle or Pathogen and don't want Powerline functionality in 
-any other applications, simply add Powerline as a bundle and point the path 
-above to the Powerline bundle directory, e.g. 
-``~/.vim/bundle/powerline/powerline/bindings/vim``. For vim-addon-manager it is 
-even easier since you don’t need to write this big path or install anything by 
-hand: ``powerline`` is installed and run just like any other plugin using
+If you're using pathogen and don't want Powerline functionality in any other 
+applications, simply add Powerline as a bundle and point the path above to the 
+Powerline bundle directory, e.g. 
+``~/.vim/bundle/powerline/powerline/bindings/vim``.
+
+With Vundle you may instead use
+
+.. code-block:: vim
+
+    Bundle 'Lokaltog/powerline', {'rtp': 'powerline/bindings/vim/'}
+
+(replace ``Bundle`` with ``NeoBundle`` for NeoBundle).
+
+For vim-addon-manager it is even easier since you don’t need to write this big 
+path or install anything by hand: ``powerline`` is installed and run just like 
+any other plugin using
 
 .. code-block:: vim
 
     call vam#ActivateAddons(['powerline'])
+
+.. warning::
+    *Never* install powerline with pathogen/VAM/Vundle/NeoBundle *and* with pip. 
+    If you want powerline functionality in vim and other applications use 
+    system-wide installation if your system has powerline package, pip-only or 
+    ``pip install --editable`` kind of installation performed on the repository 
+    installed by Vim plugin manager.
+
+    If you have installed powerline with pip and with some of Vim package 
+    managers do never report any errors to powerline bug tracker, especially 
+    errors occurring after updates.
 
 .. note::
     If you use supplied :file:`powerline.vim` file to load powerline there are 
