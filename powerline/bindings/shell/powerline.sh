@@ -1,3 +1,4 @@
+_POWERLINE_SOURCED="$_"
 _powerline_columns_fallback() {
 	if which stty >/dev/null ; then
 		# Ksh does not have “local” built-in
@@ -97,13 +98,11 @@ _powerline_set_set_jobs() {
 
 _powerline_set_command() {
 	if test -z "${POWERLINE_COMMAND}" ; then
-		if which powerline-client >/dev/null ; then
-			export POWERLINE_COMMAND=powerline-client
-		elif which powerline >/dev/null ; then
-			export POWERLINE_COMMAND=powerline
+		if which powerline-config &>/dev/null ; then
+			export POWERLINE_COMMAND="$(powerline-config shell command)"
 		else
-			# `$0` is set to `-bash` when using SSH so that won't work
-			export POWERLINE_COMMAND="$(dirname "$BASH_SOURCE")/../../../scripts/powerline"
+			local powerline_dir="$(dirname "$POWERLINE_SOURCED")/../../.."
+			export POWERLINE_COMMAND="$($powerline_dir/scripts/powerline-config shell command)"
 		fi
 	fi
 }

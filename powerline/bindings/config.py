@@ -6,11 +6,12 @@ from collections import namedtuple
 import os
 import subprocess
 import re
+import sys
 
-from powerline.config import TMUX_CONFIG_DIRECTORY
+from powerline.config import POWERLINE_ROOT, TMUX_CONFIG_DIRECTORY
 from powerline.lib.config import ConfigLoader
 from powerline import generate_config_finder, load_config, create_logger, PowerlineLogger, finish_common_config
-from powerline.lib.shell import run_cmd
+from powerline.lib.shell import run_cmd, which
 
 
 TmuxVersionInfo = namedtuple('TmuxVersionInfo', ('major', 'minor', 'suffix'))
@@ -119,3 +120,35 @@ def create_powerline_logger(args):
 	common_config = finish_common_config(config['common'])
 	logger = create_logger(common_config)
 	return PowerlineLogger(use_daemon_threads=True, logger=logger, ext='config')
+
+
+def check_command(cmd):
+	if which(cmd):
+		print(cmd)
+		sys.exit(0)
+
+
+def shell_command(pl, args):
+	'''Deduce which command to use for ``powerline``
+
+	Candidates:
+
+	* ``powerline``. Present only when installed system-wide.
+	* ``{powerline_root}/scripts/powerline``. Present after ``pip install -e`` 
+	  was run and C client was compiled (in this case ``pip`` does not install 
+	  binary file).
+	* ``{powerline_root}/client/powerline.sh``. Useful when ``sh``, ``sed`` and 
+	  ``socat`` are present, but ``pip`` or ``setup.py`` was not run.
+	* ``{powerline_root}/client/powerline.py``. Like above, but when one of 
+	  ``sh``, ``sed`` and ``socat`` was not present.
+	* ``powerline-render``. Should not really ever be used.
+	* ``{powerline_root}/scripts/powerline-render``. Same.
+	'''
+	check_command('powerline')
+	check_command(os.path.join(POWERLINE_ROOT, 'scripts', 'powerline'))
+	if which('sh') and which('sed') and which('socat'):
+		check_command(os.path.join(POWERLINE_ROOT, 'client', 'powerline.sh'))
+	check_command(os.path.join(POWERLINE_ROOT, 'client', 'powerline.py'))
+	check_command('powerline-render')
+	check_command(os.path.join(POWERLINE_ROOT, 'scripts', 'powerline-render'))
+	sys.exit(1)
