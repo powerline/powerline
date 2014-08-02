@@ -165,6 +165,13 @@ for TEST_TYPE in "daemon" "nodaemon" ; do
 	if test $TEST_TYPE == daemon ; then
 		./scripts/powerline-daemon -k
 		wait $(cat tests/shell/daemon_pid)
+		if ! test -z "$(cat tests/shell/daemon_log)" ; then
+			echo '____________________________________________________________'
+			echo "Daemon log:"
+			echo '============================================================'
+			cat tests/shell/daemon_log
+			FAILED=1
+		fi
 	fi
 done
 
