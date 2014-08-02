@@ -1,8 +1,9 @@
-POWERLINE_COMMAND="$PWD/scripts/powerline -p $PWD/powerline/config_files"
+. powerline/bindings/shell/powerline.sh
+POWERLINE_COMMAND="$POWERLINE_COMMAND -p $PWD/powerline/config_files"
 POWERLINE_COMMAND="$POWERLINE_COMMAND -t default_leftonly.segment_data.hostname.args.only_if_ssh=false"
 POWERLINE_COMMAND="$POWERLINE_COMMAND -c ext.shell.theme=default_leftonly"
 export VIRTUAL_ENV=
-. powerline/bindings/shell/powerline.sh ; cd tests/shell/3rd
+cd tests/shell/3rd
 cd .git
 cd ..
 VIRTUAL_ENV="$HOME/.virtenvs/some-virtual-environment"

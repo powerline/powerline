@@ -127,6 +127,8 @@ unset ENV
 powerline-daemon -k || true
 sleep 1s
 
+scripts/powerline-config shell command
+
 for TEST_TYPE in "daemon" "nodaemon" ; do
 	if test $TEST_TYPE == daemon ; then
 		sh -c 'echo $$ > tests/shell/daemon_pid; ./scripts/powerline-daemon -f &>tests/shell/daemon_log' &
