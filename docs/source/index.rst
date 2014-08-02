@@ -9,7 +9,7 @@ Powerline
    overview
    installation
    usage
-   configuration-and-customization
+   configuration
    troubleshooting
    tips-and-tricks
    license-and-credits
