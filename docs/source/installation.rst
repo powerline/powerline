@@ -46,6 +46,12 @@ and you will have to do something like::
 
 (:file:`~/.local/bin` should be replaced with some path present in ``$PATH``).
 
+.. note::
+    If your ISP blocks git protocol for some reason github also provides ``ssh`` 
+    (``git+ssh://git@github.com/Lokaltog/powerline``) and ``https`` 
+    (``git+https://github.com/Lokaltog/powerline``) protocols. ``git`` protocol 
+    should be the fastest, but least secure one though.
+
 Installation on various platforms
 =================================
 
