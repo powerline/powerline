@@ -111,10 +111,11 @@ def source_tmux_files(pl, args):
 	version = get_tmux_version(pl)
 	for fname, priority in sorted(get_tmux_configs(version), key=(lambda v: v[1])):
 		run_tmux_command('source', fname)
-	cmd = deduce_command()
-	if cmd:
-		run_tmux_command('set-environment', '-g', 'POWERLINE_COMMAND', deduce_command())
-	run_tmux_command('refresh-client')
+	if not os.environ.get('POWERLINE_COMMAND'):
+		cmd = deduce_command()
+		if cmd:
+			run_tmux_command('set-environment', '-g', 'POWERLINE_COMMAND', deduce_command())
+		run_tmux_command('refresh-client')
 
 
 def create_powerline_logger(args):
