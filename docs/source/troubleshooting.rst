@@ -175,3 +175,31 @@ including those defined by powerline. To workaround this issue powerline hooks
 but without ``nested`` this event is not launched. See also `autocmd-nested 
 <http://vimpluginloader.sourceforge.net/doc/autocmd.txt.html#autocmd-nested>`_ 
 Vim documentation.
+
+Powerline loses color after saving any file
+-------------------------------------------
+
+It may be one of the incarnations of the above issue: specifically minibufexpl 
+is known to trigger it. If you are using minibufexplorer you should set
+
+.. code-block:: vim
+
+    let g:miniBufExplForceSyntaxEnable = 1
+
+variable so that this issue is not triggered. Complete explanation:
+
+#. When MBE autocommand is executed it launches ``:syntax enable`` Vim command…
+#. … which makes Vim source :file:`syntax/syntax.vim` file …
+#. … which in turn sources :file:`syntax/synload.vim` …
+#. … which executes ``:colorscheme`` command. Normally this command triggers 
+   ``Colorscheme`` event, but in the first point minibufexplorer did set up 
+   autocommands that miss ``nested`` attribute meaning that no events will be 
+   triggered when processing MBE events.
+
+.. note::
+    This setting was introduced in version 6.3.1 of `minibufexpl 
+    <http://www.vim.org/scripts/script.php?script_id=159>`_ and removed in 
+    version 6.5.0 of its successor `minibufexplorer 
+    <http://www.vim.org/scripts/script.php?script_id=3239>`_. It is highly 
+    advised to use the latter because `minibufexpl`_ was last updated late in 
+    2004.
