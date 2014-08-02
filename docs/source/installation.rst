@@ -52,6 +52,38 @@ and you will have to do something like::
     (``git+https://github.com/Lokaltog/powerline``) protocols. ``git`` protocol 
     should be the fastest, but least secure one though.
 
+Fonts installation
+==================
+
+Powerline uses several special glyphs to get the arrow effect and some custom 
+symbols for developers. This requires that you either have a symbol font or 
+a patched font on your system. Your terminal emulator must also support either 
+patched fonts or fontconfig for Powerline to work properly.
+
+You can also enable :ref:`24-bit color support <config-common-term_truecolor>` 
+if your terminal emulator supports it (see :ref:`the terminal emulator support 
+matrix <usage-terminal-emulators>`).
+
+There are basically two ways to get powerline glyphs displayed: use 
+:file:`PowerlineSymbols.otf` font as a fallback for one of the existing fonts or 
+install a patched font.
+
+.. _installation-patched-fonts:
+
+Patched fonts
+-------------
+
+This method is the fallback method and works for every terminal, with the 
+exception of :ref:`rxvt-unicode <tips-and-tricks-urxvt>`.
+
+Download the font of your choice from `powerline-fonts`_. If you can't find 
+your preferred font in the `powerline-fonts`_ repo, you'll have to patch your 
+own font instead.
+
+.. _powerline-fonts: https://github.com/Lokaltog/powerline-fonts
+
+After downloading this font refer to platform-specific instructions.
+
 Installation on various platforms
 =================================
 

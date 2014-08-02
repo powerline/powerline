@@ -21,6 +21,8 @@ packages.
 
 Vim version 7.3.661 or newer is recommended for performance reasons.
 
+.. _usage-terminal-emulators:
+
 Terminal emulator requirements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
