@@ -1,3 +1,5 @@
+_POWERLINE_SOURCED="$0:A"
+
 _powerline_columns_fallback() {
 	if which stty &>/dev/null ; then
 		local cols="$(stty size 2>/dev/null)"
@@ -124,12 +126,11 @@ _powerline_setup_prompt() {
 		zpython 'del _powerline_setup'
 	else
 		if test -z "${POWERLINE_COMMAND}" ; then
-			if which powerline-client &>/dev/null ; then
-				export POWERLINE_COMMAND=powerline-client
-			elif which powerline &>/dev/null ; then
-				export POWERLINE_COMMAND=powerline
+			if which powerline-config &>/dev/null ; then
+				export POWERLINE_COMMAND="$(powerline-config shell command)"
 			else
-				export POWERLINE_COMMAND="$0:A:h:h:h:h/scripts/powerline"
+				local powerline_dir="$POWERLINE_SOURCED:h:h:h:h"
+				export POWERLINE_COMMAND="$($powerline_dir/scripts/powerline-config shell command)"
 			fi
 		fi
 

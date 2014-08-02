@@ -1,6 +1,7 @@
-setenv POWERLINE_COMMAND $PWD:q/scripts/powerline" -p "$PWD:q/powerline/config_files" -t default_leftonly.segment_data.hostname.args.only_if_ssh=false -c ext.shell.theme=default_leftonly"
+source powerline/bindings/tcsh/powerline.tcsh
+setenv POWERLINE_COMMAND "$POWERLINE_COMMAND -p "$PWD:q/powerline/config_files" -t default_leftonly.segment_data.hostname.args.only_if_ssh=false -c ext.shell.theme=default_leftonly"
 unsetenv VIRTUAL_ENV
-source powerline/bindings/tcsh/powerline.tcsh ; cd tests/shell/3rd
+cd tests/shell/3rd
 cd .git
 cd ..
 setenv VIRTUAL_ENV $HOME:q"/.virtenvs/some-virtual-environment"

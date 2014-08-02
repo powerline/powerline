@@ -6,11 +6,12 @@ from collections import namedtuple
 import os
 import subprocess
 import re
+import sys
 
-from powerline.config import TMUX_CONFIG_DIRECTORY
+from powerline.config import POWERLINE_ROOT, TMUX_CONFIG_DIRECTORY
 from powerline.lib.config import ConfigLoader
 from powerline import generate_config_finder, load_config, create_logger, PowerlineLogger, finish_common_config
-from powerline.lib.shell import run_cmd
+from powerline.lib.shell import run_cmd, which
 
 
 TmuxVersionInfo = namedtuple('TmuxVersionInfo', ('major', 'minor', 'suffix'))
@@ -110,6 +111,11 @@ def source_tmux_files(pl, args):
 	version = get_tmux_version(pl)
 	for fname, priority in sorted(get_tmux_configs(version), key=(lambda v: v[1])):
 		run_tmux_command('source', fname)
+	if not os.environ.get('POWERLINE_COMMAND'):
+		cmd = deduce_command()
+		if cmd:
+			run_tmux_command('set-environment', '-g', 'POWERLINE_COMMAND', deduce_command())
+		run_tmux_command('refresh-client')
 
 
 def create_powerline_logger(args):
@@ -119,3 +125,44 @@ def create_powerline_logger(args):
 	common_config = finish_common_config(config['common'])
 	logger = create_logger(common_config)
 	return PowerlineLogger(use_daemon_threads=True, logger=logger, ext='config')
+
+
+def check_command(cmd):
+	if which(cmd):
+		return cmd
+
+
+def deduce_command():
+	'''Deduce which command to use for ``powerline``
+
+	Candidates:
+
+	* ``powerline``. Present only when installed system-wide.
+	* ``{powerline_root}/scripts/powerline``. Present after ``pip install -e`` 
+	  was run and C client was compiled (in this case ``pip`` does not install 
+	  binary file).
+	* ``{powerline_root}/client/powerline.sh``. Useful when ``sh``, ``sed`` and 
+	  ``socat`` are present, but ``pip`` or ``setup.py`` was not run.
+	* ``{powerline_root}/client/powerline.py``. Like above, but when one of 
+	  ``sh``, ``sed`` and ``socat`` was not present.
+	* ``powerline-render``. Should not really ever be used.
+	* ``{powerline_root}/scripts/powerline-render``. Same.
+	'''
+	return (
+		None
+		or check_command('powerline')
+		or check_command(os.path.join(POWERLINE_ROOT, 'scripts', 'powerline'))
+		or ((which('sh') and which('sed') and which('socat'))
+			and check_command(os.path.join(POWERLINE_ROOT, 'client', 'powerline.sh')))
+		or check_command(os.path.join(POWERLINE_ROOT, 'client', 'powerline.py'))
+		or check_command('powerline-render')
+		or check_command(os.path.join(POWERLINE_ROOT, 'scripts', 'powerline-render'))
+	)
+
+
+def shell_command(pl, args):
+	cmd = deduce_command()
+	if cmd:
+		print(cmd)
+	else:
+		sys.exit(1)

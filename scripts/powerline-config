@@ -18,6 +18,11 @@ TMUX_ACTIONS = {
 }
 
 
+SHELL_ACTIONS = {
+	'command': config.shell_command,
+}
+
+
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description=__doc__)
 	subparsers = parser.add_subparsers()
@@ -28,6 +33,14 @@ if __name__ == '__main__':
 		metavar='action',
 		type=(lambda v: TMUX_ACTIONS.get(v)),
 		help='If action is "source" then version-specific tmux configuration files are sourced.'
+	)
+
+	shell_parser = subparsers.add_parser('shell', help='Shell-specific commands')
+	shell_parser.add_argument(
+		'function',
+		choices=tuple(SHELL_ACTIONS.values()),
+		type=(lambda v: SHELL_ACTIONS.get(v)),
+		help='If action is "command" then preferred powerline command is output',
 	)
 
 	args = parser.parse_args()

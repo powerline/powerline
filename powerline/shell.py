@@ -1,5 +1,7 @@
 # vim:fileencoding=utf-8:noet
 
+import os
+
 from powerline import Powerline
 from powerline.lib import mergedicts, parsedotval
 
@@ -73,3 +75,26 @@ def finish_args(args):
 		args.theme_option = {}
 	if args.renderer_arg:
 		args.renderer_arg = mergeargs((parsedotval(v) for v in args.renderer_arg))
+
+
+def write_output(args, powerline, segment_info, write):
+	if args.renderer_arg:
+		segment_info.update(args.renderer_arg)
+	if args.side.startswith('above'):
+		for line in powerline.render_above_lines(
+			width=args.width,
+			segment_info=segment_info,
+			mode=os.environ.get('_POWERLINE_MODE'),
+		):
+			write(line)
+			write('\n')
+		args.side = args.side[len('above'):]
+
+	if args.side:
+		rendered = powerline.render(
+			width=args.width,
+			side=args.side,
+			segment_info=segment_info,
+			mode=os.environ.get('_POWERLINE_MODE'),
+		)
+		write(rendered)

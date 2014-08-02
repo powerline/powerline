@@ -54,13 +54,12 @@ _powerline_set_prompt() {
 _powerline_setup_prompt() {
 	VIRTUAL_ENV_DISABLE_PROMPT=1
 	if test -z "${POWERLINE_COMMAND}" ; then
-		if which powerline-client &>/dev/null ; then
-			export POWERLINE_COMMAND=powerline-client
-		elif which powerline &>/dev/null ; then
-			export POWERLINE_COMMAND=powerline
+		if which powerline-config &>/dev/null ; then
+			export POWERLINE_COMMAND="$(powerline-config shell command)"
 		else
 			# `$0` is set to `-bash` when using SSH so that won't work
-			export POWERLINE_COMMAND="$(dirname "$BASH_SOURCE")/../../../scripts/powerline"
+			local powerline_dir="$(dirname "$BASH_SOURCE")/../../.."
+			export POWERLINE_COMMAND="$($powerline_dir/scripts/powerline-config shell command)"
 		fi
 	fi
 	test "x$PROMPT_COMMAND" != "x${PROMPT_COMMAND%_powerline_set_prompt*}" ||

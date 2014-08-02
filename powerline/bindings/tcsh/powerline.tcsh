@@ -11,12 +11,10 @@ if ! ( $?POWERLINE_NO_TCSH_TMUX_SUPPORT || $?POWERLINE_NO_SHELL_TMUX_SUPPORT ) t
 endif
 if ! ( $?POWERLINE_NO_TCSH_PROMPT || $?POWERLINE_NO_SHELL_PROMPT ) then
 	if ! $?POWERLINE_COMMAND then
-		if ( { which powerline-client > /dev/null } ) then
-			setenv POWERLINE_COMMAND powerline-client
-		else if ( { which powerline > /dev/null } ) then
-			setenv POWERLINE_COMMAND powerline
+		if ( { which powerline-config > /dev/null } ) then
+			setenv POWERLINE_COMMAND "`powerline-config shell command`"
 		else
-			setenv POWERLINE_COMMAND $POWERLINE_SOURCED:h:h:h:h:q/scripts/powerline
+			setenv POWERLINE_COMMAND "`$POWERLINE_SOURCED[2]:h:h:h:h:q/scripts/powerline-config shell command`"
 		endif
 	endif
 

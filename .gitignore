@@ -9,3 +9,5 @@ dist
 build
 
 message.fail
+
+client/powerline
