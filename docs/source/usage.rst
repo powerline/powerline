@@ -38,16 +38,15 @@ if your terminal emulator supports it.
    ===================== ======= ===================== ===================== =====================
    Name                  OS      Patched font support  Fontconfig support    24-bit color support 
    ===================== ======= ===================== ===================== =====================
-   Gnome Terminal        Linux   |i_yes|               |i_yes|               |i_no|
    Gvim                  Linux   |i_yes|               |i_no|                |i_yes|
    iTerm2                OS X    |i_yes|               |i_no|                |i_no|
    Konsole               Linux   |i_yes|               |i_yes|               |i_yes|
    lxterminal            Linux   |i_yes|               |i_yes|               |i_no|
    MacVim                OS X    |i_yes|               |i_no|                |i_yes|
    rxvt-unicode          Linux   |i_partial| [#]_      |i_no|                |i_no|
-   st                    Linux   |i_yes|               |i_yes|               |i_no|
+   st                    Linux   |i_yes|               |i_yes|               |i_yes| [#]_
    Terminal.app          OS X    |i_yes|               |i_no|                |i_no|
-   Xfce Terminal         Linux   |i_yes|               |i_yes|               |i_no|
+   libvte-based [#]_     Linux   |i_yes|               |i_yes|               |i_yes| [#]_
    xterm                 Linux   |i_yes|               |i_no|                |i_partial| [#]_
    ===================== ======= ===================== ===================== =====================
 
@@ -55,8 +54,10 @@ if your terminal emulator supports it.
 .. |i_no| image:: _static/img/icons/cross.png
 .. |i_partial| image:: _static/img/icons/error.png
 
-.. [#] Must be compiled with ``--enable-unicode3`` for the 
-   patched font to work.
+.. [#] Must be compiled with ``--enable-unicode3`` for the patched font to work.
+.. [#] Since version 0.5.
+.. [#] Including XFCE terminal and GNOME terminal.
+.. [#] Since version 0.36.
 .. [#] Uses nearest color from 8-bit palette.
 
 Plugins
