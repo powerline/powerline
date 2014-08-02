@@ -150,3 +150,28 @@ Prompt is spoiled after completing files in ksh
 This is exactly why powerline has official mksh support, but not official ksh 
 support. If you know the solution feel free to share it in `powerline bug 
 tracker`_.
+
+Powerline loses color after editing vimrc
+-----------------------------------------
+
+If your vimrc has something like
+
+.. code-block:: vim
+
+    autocmd! BufWritePost vimrc :source ~/.vimrc
+
+to automatically source vimrc after saving it you must then add ``nested`` after 
+pattern (``vimrc`` in this case):
+
+.. code-block:: vim
+
+    autocmd! BufWritePost vimrc nested :source ~/.vimrc
+
+. Alternatively move ``:colorscheme`` command out of the vimrc to the file which 
+will not be automatically resourced. Observed problem is that when you use 
+``:colorscheme`` command existing highlighting groups are usually cleared, 
+including those defined by powerline. To workaround this issue powerline hooks 
+``Colorscheme`` event, but when you source vimrc with ``BufWritePost`` event, 
+but without ``nested`` this event is not launched. See also `autocmd-nested 
+<http://vimpluginloader.sourceforge.net/doc/autocmd.txt.html#autocmd-nested>`_ 
+Vim documentation.
