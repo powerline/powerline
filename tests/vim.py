@@ -230,18 +230,25 @@ def eval(expr):
 		import re
 		match = re.match(r'^getwinvar\((\d+), "(\w+)"\)$', expr)
 		if not match:
-			raise NotImplementedError
+			raise NotImplementedError(expr)
 		winnr = int(match.group(1))
 		varname = match.group(2)
 		return _emul_getwinvar(winnr, varname)
 	elif expr.startswith('has_key('):
 		import re
 		match = re.match(r'^has_key\(getwinvar\((\d+), ""\), "(\w+)"\)$', expr)
-		if not match:
-			raise NotImplementedError
-		winnr = int(match.group(1))
-		varname = match.group(2)
-		return 0 + (varname in current.tabpage.windows[winnr].vars)
+		if match:
+			winnr = int(match.group(1))
+			varname = match.group(2)
+			return 0 + (varname in current.tabpage.windows[winnr].vars)
+		else:
+			match = re.match(r'^has_key\(gettabwinvar\((\d+), (\d+), ""\), "(\w+)"\)$', expr)
+			if not match:
+				raise NotImplementedError(expr)
+			tabnr = int(match.group(1))
+			winnr = int(match.group(2))
+			varname = match.group(3)
+			return 0 + (varname in tabpages[tabnr].windows[winnr].vars)
 	elif expr == 'getbufvar("%", "NERDTreeRoot").path.str()':
 		import os
 		assert os.path.basename(current.buffer.name).startswith('NERD_tree_')
