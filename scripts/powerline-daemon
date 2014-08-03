@@ -83,7 +83,6 @@ def render(args):
 		args.renderer_module,
 		tuple(args.config) if args.config else None,
 		tuple(args.theme_option) if args.theme_option else None,
-		tuple(args.renderer_arg) if args.renderer_arg else None,
 	)
 	finish_args(args)
 	powerline = None
