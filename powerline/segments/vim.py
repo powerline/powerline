@@ -504,6 +504,32 @@ def tabnr(pl, segment_info, show_current=False):
 		return str(tabnr)
 
 
+def single_tab(pl, single_text='Bufs', multiple_text='Tabs'):
+	'''Show one text if there is only one tab and another if there are many
+
+	Mostly useful for tabline to indicate what kind of data is shown there.
+
+	:param str single_text:
+		Text displayed when there is only one tabpage. May be None if you do not 
+		want to display anything.
+	:param str multiple_text:
+		Text displayed when there is more then one tabpage. May be None if you 
+		do not want to display anything.
+
+	Highlight groups used: ``single_tab``, ``many_tabs``.
+	'''
+	if len(list_tabpages()) == 1:
+		return single_text and [{
+			'contents': single_text,
+			'highlight_group': ['single_tab'],
+		}]
+	else:
+		return multiple_text and [{
+			'contents': multiple_text,
+			'highlight_group': ['many_tabs'],
+		}]
+
+
 def tabpage_updated_segment_info(segment_info, tabpage):
 	segment_info = segment_info.copy()
 	window = tabpage.window

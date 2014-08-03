@@ -793,6 +793,19 @@ class TestVim(TestCase):
 		self.assertEqual(vim.tabnr(pl=pl, segment_info=segment_info, show_current=True), '1')
 		self.assertEqual(vim.tabnr(pl=pl, segment_info=segment_info, show_current=False), None)
 
+	def test_single_tab(self):
+		pl = Pl()
+		single_tab = partial(vim.single_tab, pl=pl)
+		with vim_module._with('tabpage'):
+			self.assertEqual(single_tab(), [{'highlight_group': ['many_tabs'], 'contents': 'Tabs'}])
+			self.assertEqual(single_tab(single_text='s', multiple_text='m'), [{'highlight_group': ['many_tabs'], 'contents': 'm'}])
+			self.assertEqual(single_tab(multiple_text='m'), [{'highlight_group': ['many_tabs'], 'contents': 'm'}])
+			self.assertEqual(single_tab(single_text='s'), [{'highlight_group': ['many_tabs'], 'contents': 'Tabs'}])
+		self.assertEqual(single_tab(), [{'highlight_group': ['single_tab'], 'contents': 'Bufs'}])
+		self.assertEqual(single_tab(single_text='s', multiple_text='m'), [{'highlight_group': ['single_tab'], 'contents': 's'}])
+		self.assertEqual(single_tab(multiple_text='m'), [{'highlight_group': ['single_tab'], 'contents': 'Bufs'}])
+		self.assertEqual(single_tab(single_text='s'), [{'highlight_group': ['single_tab'], 'contents': 's'}])
+
 
 old_cwd = None
 

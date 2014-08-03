@@ -125,8 +125,11 @@ class _ObjList(object):
 		return iter(self.l)
 
 	@_vim
-	def _pop(self, *args, **kwargs):
-		return self.l.pop(*args, **kwargs)
+	def _pop(self, idx):
+		obj = self.l.pop(idx - 1)
+		for moved_obj in self.l[idx - 1:]:
+			moved_obj.number -= 1
+		return obj
 
 	@_vim
 	def _append(self, *args, **kwargs):
@@ -461,14 +464,20 @@ class _Tabpage(object):
 		self.window = self.windows._new(**kwargs)
 		return self.window
 
-	def _close_window(self, winnr):
+	def _close_window(self, winnr, open_window=True):
 		curwinnr = self.window.number
-		win = self.windows._pop(winnr - 1)
+		win = self.windows._pop(winnr)
 		if self.windows and winnr == curwinnr:
 			self.window = self.windows[-1]
-		else:
+		elif open_window:
 			current.tabpage._new_window()
 		return win
+
+	def _close(self):
+		while self.windows:
+			self._close_window(1, False)
+		tabpages._pop(self.number)
+		_tabpage = len(tabpages)
 
 
 tabpages = _ObjList(_Tabpage)
@@ -665,6 +674,7 @@ def _tabnew(name=None):
 	windows = tabpage.windows
 	_tabpage = len(tabpages)
 	_new(name)
+	return tabpage
 
 
 @_vim
@@ -823,6 +833,18 @@ class _WithBufName(object):
 		self.buffer.name = self.old
 
 
+class _WithNewTabPage(object):
+	def __init__(self, *args, **kwargs):
+		self.args = args
+		self.kwargs = kwargs
+
+	def __enter__(self):
+		self.tab = _tabnew(*self.args, **self.kwargs)
+
+	def __exit__(self, *args):
+		self.tab._close()
+
+
 @_vim
 def _with(key, *args, **kwargs):
 	if key == 'buffer':
@@ -843,6 +865,8 @@ def _with(key, *args, **kwargs):
 		return _WithDict(_environ, **kwargs)
 	elif key == 'split':
 		return _WithSplit()
+	elif key == 'tabpage':
+		return _WithNewTabPage(*args, **kwargs)
 
 
 class error(Exception):
