@@ -222,20 +222,44 @@ class Renderer(object):
 		segments = theme.get_segments(side, line, self.get_segment_info(segment_info, mode))
 
 		# Handle excluded/included segments for the current mode
-		segments = [self._get_highlighting(segment, segment['mode'] or mode) for segment in segments
-			if mode not in segment['exclude_modes'] and (not segment['include_modes'] or mode in segment['include_modes'])]
-
-		segments = [segment for segment in self._render_segments(theme, segments)]
+		segments = [
+			self._get_highlighting(segment, segment['mode'] or mode)
+			for segment in segments
+			if (
+				mode not in segment['exclude_modes']
+				and (
+					not segment['include_modes']
+					or mode in segment['include_modes']
+				)
+			)
+		]
 
 		if not width:
 			# No width specified, so we don't need to crop or pad anything
-			return construct_returned_value(''.join([segment['_rendered_hl'] for segment in segments]) + self.hlstyle(), segments, output_raw)
+			return construct_returned_value(''.join([
+				segment['_rendered_hl']
+				for segment in self._render_segments(theme, segments)
+			]) + self.hlstyle(), segments, output_raw)
+
+		divider_lengths = {
+			'left': {
+				'hard': self.strwidth(theme.get_divider('left', 'hard')),
+				'soft': self.strwidth(theme.get_divider('left', 'soft')),
+			},
+			'right': {
+				'hard': self.strwidth(theme.get_divider('right', 'hard')),
+				'soft': self.strwidth(theme.get_divider('right', 'soft')),
+			},
+		}
+
+		length = self._render_length(theme, segments, divider_lengths)
 
 		# Create an ordered list of segments that can be dropped
 		segments_priority = sorted((segment for segment in segments if segment['priority'] is not None), key=lambda segment: segment['priority'], reverse=True)
-		while sum([segment['_len'] for segment in segments]) > width and len(segments_priority):
-			segments.remove(segments_priority[0])
-			segments_priority.pop(0)
+		for segment in segments_priority:
+			if self._render_length(theme, segments, divider_lengths) <= width:
+				break
+			segments.remove(segment)
 
 		# Distribute the remaining space on spacer segments
 		segments_spacers = [segment for segment in segments if segment['width'] == 'auto']
@@ -256,6 +280,38 @@ class Renderer(object):
 
 		return construct_returned_value(rendered_highlighted, segments, output_raw)
 
+	def _render_length(self, theme, segments, divider_lengths):
+		'''Update segments lengths and return them
+		'''
+		segments_len = len(segments)
+		ret = 0
+		divider_spaces = theme.get_spaces()
+		for index, segment in enumerate(segments):
+			side = segment['side']
+			if segment['_contents_len'] is None:
+				segment_len = segment['_contents_len'] = self.strwidth(segment['contents'])
+			else:
+				segment_len = segment['_contents_len']
+
+			prev_segment = segments[index - 1] if index > 0 else theme.EMPTY_SEGMENT
+			next_segment = segments[index + 1] if index < segments_len - 1 else theme.EMPTY_SEGMENT
+			compare_segment = next_segment if side == 'left' else prev_segment
+			divider_type = 'soft' if compare_segment['highlight']['bg'] == segment['highlight']['bg'] else 'hard'
+
+			outer_padding = int(bool(
+				(index == 0 and side == 'left') or
+				(index == segments_len - 1 and side == 'right')
+			))
+
+			draw_divider = segment['draw_' + divider_type + '_divider']
+			segment_len += segment['_space_left'] + segment['_space_right'] + outer_padding
+			if draw_divider:
+				segment_len += divider_lengths[side][divider_type] + divider_spaces
+
+			segment['_len'] = segment_len
+			ret += segment_len
+		return ret
+
 	def _render_segments(self, theme, segments, render_highlighted=True):
 		'''Internal segment rendering method.
 
@@ -268,19 +324,19 @@ class Renderer(object):
 		statusline if render_highlighted is True.
 		'''
 		segments_len = len(segments)
+		divider_spaces = theme.get_spaces()
 
 		for index, segment in enumerate(segments):
-			segment['_rendered_raw'] = ''
-			segment['_rendered_hl'] = ''
-
+			side = segment['side']
 			prev_segment = segments[index - 1] if index > 0 else theme.EMPTY_SEGMENT
 			next_segment = segments[index + 1] if index < segments_len - 1 else theme.EMPTY_SEGMENT
-			compare_segment = next_segment if segment['side'] == 'left' else prev_segment
-			outer_padding = ' ' if (index == 0 and segment['side'] == 'left') or (index == segments_len - 1 and segment['side'] == 'right') else ''
+			compare_segment = next_segment if side == 'left' else prev_segment
+			outer_padding = int(bool(
+				(index == 0 and side == 'left') or
+				(index == segments_len - 1 and side == 'right')
+			)) * ' '
 			divider_type = 'soft' if compare_segment['highlight']['bg'] == segment['highlight']['bg'] else 'hard'
 
-			divider_raw = theme.get_divider(segment['side'], divider_type)
-			divider_spaces = theme.get_spaces()
 			divider_highlighted = ''
 			contents_raw = segment['contents']
 			contents_highlighted = ''
@@ -288,48 +344,64 @@ class Renderer(object):
 
 			# Pad segments first
 			if draw_divider:
-				if segment['side'] == 'left':
-					contents_raw = outer_padding + (segment['_space_left'] * ' ') + contents_raw + ((divider_spaces + segment['_space_right']) * ' ')
+				divider_raw = theme.get_divider(side, divider_type).replace(' ', NBSP)
+				if side == 'left':
+					contents_raw = (
+						outer_padding + (segment['_space_left'] * ' ')
+						+ contents_raw
+						+ ((divider_spaces + segment['_space_right']) * ' ')
+					)
 				else:
-					contents_raw = ((divider_spaces + segment['_space_left']) * ' ') + contents_raw + (segment['_space_right'] * ' ') + outer_padding
+					contents_raw = (
+						((divider_spaces + segment['_space_left']) * ' ')
+						+ contents_raw
+						+ (segment['_space_right'] * ' ') + outer_padding
+					)
 			else:
-				if segment['side'] == 'left':
-					contents_raw = outer_padding + (segment['_space_left'] * ' ') + contents_raw + (segment['_space_right'] * ' ')
+				if side == 'left':
+					contents_raw = (
+						outer_padding + (segment['_space_left'] * ' ')
+						+ contents_raw
+						+ (segment['_space_right'] * ' ')
+					)
 				else:
-					contents_raw = (segment['_space_left'] * ' ') + contents_raw + (segment['_space_right'] * ' ') + outer_padding
+					contents_raw = (
+						(segment['_space_left'] * ' ')
+						+ contents_raw
+						+ (segment['_space_right'] * ' ') + outer_padding
+					)
 
 			# Replace spaces with no-break spaces
-			divider_raw = divider_raw.replace(' ', NBSP)
 			contents_raw = contents_raw.translate(self.np_character_translations)
 
 			# Apply highlighting to padded dividers and contents
 			if render_highlighted:
-				if divider_type == 'soft':
-					divider_highlight_group_key = 'highlight' if segment['divider_highlight_group'] is None else 'divider_highlight'
-					divider_fg = segment[divider_highlight_group_key]['fg']
-					divider_bg = segment[divider_highlight_group_key]['bg']
-				else:
-					divider_fg = segment['highlight']['bg']
-					divider_bg = compare_segment['highlight']['bg']
-				divider_highlighted = self.hl(divider_raw, divider_fg, divider_bg, False)
+				if draw_divider:
+					if divider_type == 'soft':
+						divider_highlight_group_key = 'highlight' if segment['divider_highlight_group'] is None else 'divider_highlight'
+						divider_fg = segment[divider_highlight_group_key]['fg']
+						divider_bg = segment[divider_highlight_group_key]['bg']
+					else:
+						divider_fg = segment['highlight']['bg']
+						divider_bg = compare_segment['highlight']['bg']
+					divider_highlighted = self.hl(divider_raw, divider_fg, divider_bg, False)
 				contents_highlighted = self.hl(self.escape(contents_raw), **segment['highlight'])
 
 			# Append padded raw and highlighted segments to the rendered segment variables
 			if draw_divider:
-				if segment['side'] == 'left':
-					segment['_rendered_raw'] += contents_raw + divider_raw
-					segment['_rendered_hl'] += contents_highlighted + divider_highlighted
+				if side == 'left':
+					segment['_rendered_raw'] = contents_raw + divider_raw
+					segment['_rendered_hl'] = contents_highlighted + divider_highlighted
 				else:
-					segment['_rendered_raw'] += divider_raw + contents_raw
-					segment['_rendered_hl'] += divider_highlighted + contents_highlighted
+					segment['_rendered_raw'] = divider_raw + contents_raw
+					segment['_rendered_hl'] = divider_highlighted + contents_highlighted
 			else:
-				if segment['side'] == 'left':
-					segment['_rendered_raw'] += contents_raw
-					segment['_rendered_hl'] += contents_highlighted
+				if side == 'left':
+					segment['_rendered_raw'] = contents_raw
+					segment['_rendered_hl'] = contents_highlighted
 				else:
-					segment['_rendered_raw'] += contents_raw
-					segment['_rendered_hl'] += contents_highlighted
-			segment['_len'] = self.strwidth(segment['_rendered_raw'])
+					segment['_rendered_raw'] = contents_raw
+					segment['_rendered_hl'] = contents_highlighted
 			yield segment
 
 	@classmethod
