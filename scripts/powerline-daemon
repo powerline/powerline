@@ -48,8 +48,6 @@ class NonInteractiveArgParser(ArgumentParser):
 
 
 parser = get_argparser(parser=NonInteractiveArgParser, description='powerline daemon')
-parser.add_argument('--cwd', metavar='PATH')
-parser.add_argument('--env', action='append')
 
 EOF = b'EOF\0\0'
 
@@ -67,11 +65,10 @@ class PowerlineDaemon(ShellPowerline):
 		return super(PowerlineDaemon, self).get_log_handler()
 
 
-def render(args):
+def render(args, environ, cwd):
 	global logger
 	global config_loader
-	environ = dict(((k, v) for k, v in (x.partition('=')[0::2] for x in args.env)))
-	cwd = environ.get('PWD', args.cwd or '/')
+	cwd = cwd or environ.get('PWD', '/')
 	segment_info = {
 		'getcwd': lambda: cwd,
 		'home': environ.get('HOME', home),
@@ -175,11 +172,18 @@ def safe_bytes(o, encoding=encoding):
 		return safe_bytes(str(e), encoding)
 
 
+def parse_args(req):
+	args = [x.decode(encoding) for x in req.split(b'\0') if x]
+	numargs = int(args[0], 16)
+	shell_args = parser.parse_args(args[1:numargs + 1])
+	cwd = args[numargs + 1]
+	environ = dict(((k, v) for k, v in (x.partition('=')[0::2] for x in args[numargs + 2:])))
+	return shell_args, environ, cwd
+
+
 def do_render(req):
 	try:
-		args = [x.decode(encoding) for x in req.split(b'\0') if x]
-		args = parser.parse_args(args)
-		return safe_bytes(render(args))
+		return safe_bytes(render(*parse_args(req)))
 	except Exception as e:
 		return safe_bytes(str(e))
 

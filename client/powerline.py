@@ -42,7 +42,8 @@ fenc = sys.getfilesystemencoding() or 'utf-8'
 if fenc == 'ascii':
 	fenc = 'utf-8'
 
-args = [x.encode(fenc) if isinstance(x, type('')) else x for x in sys.argv[1:]]
+args = [bytes('%x' % (len(sys.argv) - 1))]
+args.extend((x.encode(fenc) if isinstance(x, type('')) else x for x in sys.argv[1:]))
 
 try:
 	cwd = os.getcwd()
@@ -51,17 +52,17 @@ except EnvironmentError:
 else:
 	if isinstance(cwd, type('')):
 		cwd = cwd.encode(fenc)
-	args.append(b'--cwd=' + cwd)
+	args.append(cwd)
 
 
 env = (k + b'=' + v for k, v in os.environ.items())
 env = (x if isinstance(x, bytes) else x.encode(fenc, 'replace') for x in env)
-args.extend((b'--env=' + x for x in env))
+args.extend(env)
 
 EOF = b'\0\0'
 
 for a in args:
-	eintr_retry_call(sock.sendall, a + EOF[0])
+	eintr_retry_call(sock.sendall, a + b'\0')
 
 eintr_retry_call(sock.sendall, EOF)
 
@@ -74,4 +75,4 @@ while True:
 
 sock.close()
 
-print (b''.join(received))
+sys.stdout.write(b''.join(received))
