@@ -504,6 +504,18 @@ def tabnr(pl, segment_info, show_current=False):
 		return str(tabnr)
 
 
+@requires_segment_info
+def bufnr(pl, segment_info, show_current=False):
+	'''Show buffer number
+
+	:param bool show_current:
+		If False do not show current window number.
+	'''
+	bufnr = segment_info['bufnr']
+	if show_current or bufnr != vim.current.buffer.number:
+		return str(bufnr)
+
+
 def single_tab(pl, single_text='Bufs', multiple_text='Tabs'):
 	'''Show one text if there is only one tab and another if there are many
 
