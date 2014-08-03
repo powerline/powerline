@@ -15,7 +15,8 @@ except ImportError:
 
 from powerline.bindings.vim import (vim_get_func, getbufvar, vim_getbufoption,
 									buffer_name, vim_getwinvar,
-									register_buffer_cache)
+									register_buffer_cache, current_tabpage,
+									list_tabpages)
 from powerline.theme import requires_segment_info, requires_filesystem_watcher
 from powerline.lib import add_divider_highlight_group
 from powerline.lib.vcs import guess, tree_status
@@ -485,3 +486,138 @@ def trailing_whitespace(pl, segment_info):
 			ret = None
 		trailing_whitespace_cache[bufnr] = (changedtick, ret)
 		return ret
+
+
+@requires_segment_info
+def tabnr(pl, segment_info, show_current=False):
+	'''Show tabpage number
+
+	:param bool show_current:
+		If False do not show current tabpage number. This is default because 
+		tabnr is by default only present in tabline.
+	'''
+	try:
+		tabnr = segment_info['tabnr']
+	except KeyError:
+		return None
+	if show_current or tabnr != current_tabpage().number:
+		return str(tabnr)
+
+
+def single_tab(pl, single_text='Bufs', multiple_text='Tabs'):
+	'''Show one text if there is only one tab and another if there are many
+
+	Mostly useful for tabline to indicate what kind of data is shown there.
+
+	:param str single_text:
+		Text displayed when there is only one tabpage. May be None if you do not 
+		want to display anything.
+	:param str multiple_text:
+		Text displayed when there is more then one tabpage. May be None if you 
+		do not want to display anything.
+
+	Highlight groups used: ``single_tab``, ``many_tabs``.
+	'''
+	if len(list_tabpages()) == 1:
+		return single_text and [{
+			'contents': single_text,
+			'highlight_group': ['single_tab'],
+		}]
+	else:
+		return multiple_text and [{
+			'contents': multiple_text,
+			'highlight_group': ['many_tabs'],
+		}]
+
+
+def tabpage_updated_segment_info(segment_info, tabpage):
+	segment_info = segment_info.copy()
+	window = tabpage.window
+	buffer = window.buffer
+	segment_info.update(
+		tabpage=tabpage,
+		tabnr=tabpage.number,
+		window=window,
+		winnr=window.number,
+		window_id=int(window.vars.get('powerline_window_id', -1)),
+		buffer=buffer,
+		bufnr=buffer.number,
+	)
+	return segment_info
+
+
+@requires_segment_info
+def tablister(pl, segment_info):
+	'''List all tab pages in segment_info format
+
+	Specifically generates a list of segment info dictionaries with ``window``, 
+	``winnr``, ``window_id``, ``buffer`` and ``bufnr`` keys set to tab-local 
+	ones and additional ``tabpage`` and ``tabnr`` keys.
+
+	Sets segment ``mode`` to either ``tab`` (for current tab page) or ``nc`` 
+	(for all other tab pages).
+
+	Works best with vim-7.4 or later: earlier versions miss tabpage object and 
+	thus window objects are not available as well.
+	'''
+	cur_tabpage = current_tabpage()
+	cur_tabnr = cur_tabpage.number
+
+	def add_multiplier(tabpage, dct):
+		dct['priority_multiplier'] = 1 + (0.001 * abs(tabpage.number - cur_tabnr))
+		return dct
+
+	return [
+		(
+			tabpage_updated_segment_info(segment_info, tabpage),
+			add_multiplier(tabpage, {'mode': ('tab' if tabpage == cur_tabpage else 'nc')})
+		)
+		for tabpage in list_tabpages()
+	]
+
+
+def buffer_updated_segment_info(segment_info, buffer):
+	segment_info = segment_info.copy()
+	segment_info.update(
+		window=None,
+		winnr=None,
+		window_id=None,
+		buffer=buffer,
+		bufnr=buffer.number,
+	)
+	return segment_info
+
+
+@requires_segment_info
+def bufferlister(pl, segment_info):
+	'''List all buffers in segment_info format
+
+	Specifically generates a list of segment info dictionaries with ``buffer`` 
+	and ``bufnr`` keys set to buffer-specific ones, ``window``, ``winnr`` and 
+	``window_id`` keys unset.
+
+	Sets segment ``mode`` to either ``buf`` (for current buffer) or ``nc`` 
+	(for all other buffers).
+	'''
+	cur_buffer = vim.current.buffer
+	cur_bufnr = cur_buffer.number
+
+	def add_multiplier(buffer, dct):
+		dct['priority_multiplier'] = 1 + (0.001 * abs(buffer.number - cur_bufnr))
+		return dct
+
+	return [
+		(
+			buffer_updated_segment_info(segment_info, buffer),
+			add_multiplier(buffer, {'mode': ('tab' if buffer == cur_buffer else 'nc')})
+		)
+		for buffer in vim.buffers
+	]
+
+
+@requires_segment_info
+def tabbuflister(*args, **kwargs):
+	if len(list_tabpages()) == 1:
+		return bufferlister(*args, **kwargs)
+	else:
+		return tablister(*args, **kwargs)

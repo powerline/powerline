@@ -1,6 +1,6 @@
 # vim:fileencoding=utf-8:noet
 
-from powerline.segment import gen_segment_getter
+from powerline.segment import gen_segment_getter, process_segment
 from powerline.lib.unicode import u
 import itertools
 
@@ -32,6 +32,11 @@ class Theme(object):
 				run_once=False,
 				shutdown_event=None):
 		self.dividers = theme_config.get('dividers', common_config['dividers'])
+		self.dividers = dict((
+			(key, dict((k, u(v))
+			for k, v in val.items()))
+			for key, val in self.dividers.items()
+		))
 		self.spaces = theme_config.get('spaces', common_config['spaces'])
 		self.segments = []
 		self.EMPTY_SEGMENT = {
@@ -91,53 +96,7 @@ class Theme(object):
 		for side in [side] if side else ['left', 'right']:
 			parsed_segments = []
 			for segment in self.segments[line][side]:
-				if segment['type'] == 'function':
-					self.pl.prefix = segment['name']
-					try:
-						contents = segment['contents_func'](self.pl, segment_info)
-					except Exception as e:
-						self.pl.exception('Exception while computing segment: {0}', str(e))
-						continue
-
-					if contents is None:
-						continue
-					if isinstance(contents, list):
-						segment_base = segment.copy()
-						if contents:
-							draw_divider_position = -1 if side == 'left' else 0
-							for key, i, newval in (
-								('before', 0, ''),
-								('after', -1, ''),
-								('draw_soft_divider', draw_divider_position, True),
-								('draw_hard_divider', draw_divider_position, True),
-							):
-								try:
-									contents[i][key] = segment_base.pop(key)
-									segment_base[key] = newval
-								except KeyError:
-									pass
-
-						draw_inner_divider = None
-						if side == 'right':
-							append = parsed_segments.append
-						else:
-							pslen = len(parsed_segments)
-							append = lambda item: parsed_segments.insert(pslen, item)
-
-						for subsegment in (contents if side == 'right' else reversed(contents)):
-							segment_copy = segment_base.copy()
-							segment_copy.update(subsegment)
-							if draw_inner_divider is not None:
-								segment_copy['draw_soft_divider'] = draw_inner_divider
-							draw_inner_divider = segment_copy.pop('draw_inner_divider', None)
-							append(segment_copy)
-					else:
-						segment['contents'] = contents
-						parsed_segments.append(segment)
-				elif segment['width'] == 'auto' or (segment['type'] == 'string' and segment['contents'] is not None):
-					parsed_segments.append(segment)
-				else:
-					continue
+				process_segment(self.pl, side, segment_info, parsed_segments, segment)
 			for segment in parsed_segments:
 				segment['contents'] = segment['before'] + u(segment['contents'] if segment['contents'] is not None else '') + segment['after']
 				# Align segment contents

@@ -272,6 +272,12 @@ Themes
             highlighting group is defined in the :ref:`highlight_group 
             option <config-themes-seg-highlight_group>`.
 
+        ``segments_list``
+            Sub-list of segments. This list only allows :ref:`name 
+            <config-themes-seg-name>`, :ref:`segments 
+            <config-themes-seg-segments>` and :ref:`args 
+            <config-themes-seg-args>` options.
+
     ``module``
         .. _config-themes-seg-module:
 
@@ -282,7 +288,7 @@ Themes
     ``name``
         .. _config-themes-seg-name:
 
-        Function name, only required for function segments.
+        Function name, only required for function and list segments.
 
     ``highlight_group``
         .. _config-themes-seg-highlight_group:
@@ -366,3 +372,6 @@ Themes
 
         Boolean. If false disables displaying of the segment.
         Defaults to ``True``.
+
+    ``segments``
+        A list of subsegments.

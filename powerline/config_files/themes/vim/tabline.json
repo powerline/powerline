@@ -1,0 +1,44 @@
+{
+	"default_module": "powerline.segments.vim",
+	"segments": {
+		"left": [
+			{
+				"type": "segment_list",
+				"name": "tabbuflister",
+				"segments": [
+					{
+						"name": "tabnr",
+						"after": " ",
+						"draw_soft_divider": false,
+						"exclude_modes": ["tab", "buf"],
+						"priority": 5
+					},
+					{
+						"name": "file_directory",
+						"draw_soft_divider": false,
+						"priority": 40
+					},
+					{
+						"name": "file_name",
+						"args": {
+							"display_no_file": true
+						},
+						"priority": 10
+					}
+				]
+			},
+			{
+				"type": "string",
+				"highlight_group": ["background"],
+				"draw_soft_divider": false,
+				"draw_hard_divider": false,
+				"width": "auto"
+			}
+		],
+		"right": [
+			{
+				"name": "single_tab"
+			}
+		]
+	}
+}
