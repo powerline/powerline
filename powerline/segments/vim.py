@@ -3,6 +3,7 @@
 from __future__ import unicode_literals, absolute_import, division
 
 import os
+import re
 try:
 	import vim
 except ImportError:
@@ -153,28 +154,71 @@ def readonly_indicator(pl, segment_info, text=''):
 	return text if int(vim_getbufoption(segment_info, 'readonly')) else None
 
 
+SCHEME_RE = re.compile(b'^\\w[\\w\\d+\\-.]*(?=:)')
+
+
 @requires_segment_info
-def file_directory(pl, segment_info, shorten_user=True, shorten_cwd=True, shorten_home=False):
-	'''Return file directory (head component of the file path).
+def file_scheme(pl, segment_info):
+	'''Return the protocol part of the file.
 
-	:param bool shorten_user:
-		shorten ``$HOME`` directory to :file:`~/`
+	Protocol is the part of the full filename just before the colon which 
+	starts with a latin letter and contains only latin letters, digits, plus, 
+	period or hyphen (refer to `RFC3986 
+	<http://tools.ietf.org/html/rfc3986#section-3.1>`_ for the description of 
+	URI scheme). If there is no such a thing ``None`` is returned, effectively 
+	removing segment.
 
-	:param bool shorten_cwd:
-		shorten current directory to :file:`./`
-
-	:param bool shorten_home:
-		shorten all directories in :file:`/home/` to :file:`~user/` instead of :file:`/home/user/`.
+	.. note::
+		Segment will not check  whether there is ``//`` just after the 
+		colon or if there is at least one slash after the scheme. Reason: it is 
+		not always present. E.g. when opening file inside a zip archive file 
+		name will look like :file:`zipfile:/path/to/archive.zip::file.txt`. 
+		``file_scheme`` segment will catch ``zipfile`` part here.
 	'''
 	name = buffer_name(segment_info['buffer'])
 	if not name:
 		return None
-	file_directory = vim_funcs['fnamemodify'](name, (':~' if shorten_user else '')
-												+ (':.' if shorten_cwd else '') + ':h')
-	if not file_directory:
+	match = SCHEME_RE.match(name)
+	if match:
+		return unicode(match.group(0))
+
+
+@requires_segment_info
+def file_directory(pl, segment_info, remove_scheme=True, shorten_user=True, shorten_cwd=True, shorten_home=False):
+	'''Return file directory (head component of the file path).
+
+	:param bool remove_scheme:
+		Remove scheme part from the segment name, if present. See documentation 
+		of file_scheme segment for the description of what scheme is. Also 
+		removes the colon.
+
+	:param bool shorten_user:
+		Shorten ``$HOME`` directory to :file:`~/`. Does not work for files with 
+		scheme.
+
+	:param bool shorten_cwd:
+		Shorten current directory to :file:`./`. Does not work for files with 
+		scheme present.
+
+	:param bool shorten_home:
+		Shorten all directories in :file:`/home/` to :file:`~user/` instead of 
+		:file:`/home/user/`. Does not work for files with scheme present.
+	'''
+	name = buffer_name(segment_info['buffer'])
+	if not name:
 		return None
-	if shorten_home and file_directory.startswith('/home/'):
-		file_directory = b'~' + file_directory[6:]
+	match = SCHEME_RE.match(name)
+	if match:
+		if remove_scheme:
+			name = name[len(match.group(0)) + 1:]  # Remove scheme and colon
+		file_directory = vim_funcs['fnamemodify'](name, ':h')
+	else:
+		file_directory = vim_funcs['fnamemodify'](name, (':~' if shorten_user else '')
+													+ (':.' if shorten_cwd else '') + ':h')
+		if not file_directory:
+			return None
+		if shorten_home and file_directory.startswith('/home/'):
+			file_directory = b'~' + file_directory[6:]
 	file_directory = file_directory.decode('utf-8', 'powerline_vim_strtrans_error')
 	return file_directory + os.sep
 
