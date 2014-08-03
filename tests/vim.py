@@ -95,10 +95,6 @@ class _Buffers(object):
 		return item in self.d
 
 	@_vim
-	def __nonzero__(self):
-		return bool(self.d)
-
-	@_vim
 	def _keys(self):
 		return self.d.keys()
 
@@ -127,10 +123,6 @@ class _ObjList(object):
 	@_vim
 	def __iter__(self):
 		return iter(self.l)
-
-	@_vim
-	def __nonzero__(self):
-		return not not self.l
 
 	@_vim
 	def _pop(self, *args, **kwargs):
