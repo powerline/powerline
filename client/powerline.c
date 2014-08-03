@@ -8,72 +8,82 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <errno.h>
+#include <string.h>
 
-#define handle_error(msg) \
-	do { perror(msg); exit(EXIT_FAILURE); } while (0)
+#define HANDLE_ERROR(msg) \
+	do { \
+		perror(msg); exit(EXIT_FAILURE); \
+	} while (0)
 
-#ifndef TEMP_FAILURE_RETRY
-#define TEMP_FAILURE_RETRY(expression) \
-  (                                                                           \
-	({ long int __result;                                                     \
-	   do __result = (long int) (expression);                                 \
-	   while (__result == -1L && errno == EINTR);                             \
-	   __result; }))
-#endif
+#define TEMP_FAILURE_RETRY(var, expression) \
+	do { \
+		long int __result; \
+		do { \
+			__result = (long int) (expression); \
+		} while (__result == -1L && errno == EINTR); \
+		var = __result; \
+	} while (0)
 
 extern char **environ;
 
 void do_write(int sd, const char *raw, int len) {
-	int written = 0, n = -1;
+	int written = 0;
+	int n = -1;
 
 	while (written < len) {
-		n = TEMP_FAILURE_RETRY(write(sd, raw+written, len-written));
+		TEMP_FAILURE_RETRY(n, write(sd, raw + written, len - written));
 		if (n == -1) {
 			close(sd);
-			handle_error("write() failed");
+			HANDLE_ERROR("write() failed");
 		}
 		written += n;
 	}
 }
 
+#ifdef __APPLE__
+# define ADDRESS_TEMPLATE "/tmp/powerline-ipc-%d"
+# define A
+#else
+# define ADDRESS_TEMPLATE "powerline-ipc-%d"
+# define A +1
+#endif
+
+#define ADDRESS_SIZE sizeof(ADDRESS_TEMPLATE) + (sizeof(uid_t) * 4)
+#define NUM_ARGS_SIZE (sizeof(int) * 2)
+#define BUF_SIZE 4096
+#define NEW_ARGV_SIZE 200
+
 int main(int argc, char *argv[]) {
-	int sd = -1, i;
+	int sd = -1;
+	int i;
 	struct sockaddr_un server;
-	char address[50] = {};
+	char address[ADDRESS_SIZE];
 	const char eof[2] = "\0\0";
-	char buf[4096] = {};
-	char *newargv[200] = {};
+	char buf[BUF_SIZE];
+	char *newargv[NEW_ARGV_SIZE];
 	char *wd = NULL;
 	char **envp;
 
-	if (argc < 2) { printf("Must provide at least one argument.\n"); return EXIT_FAILURE; }
+	if (argc < 2) {
+		printf("Must provide at least one argument.\n"); return EXIT_FAILURE;
+	}
 
-#ifdef __APPLE__
-	snprintf(address, 50, "/tmp/powerline-ipc-%d", getuid());
-#else
-	snprintf(address, 50, "powerline-ipc-%d", getuid());
-#endif
+	snprintf(address, ADDRESS_SIZE, ADDRESS_TEMPLATE, getuid());
 
 	sd = socket(AF_UNIX, SOCK_STREAM, 0);
-	if (sd == -1) handle_error("socket() failed");
+	if (sd == -1)
+		HANDLE_ERROR("socket() failed");
 
-	memset(&server, 0, sizeof(struct sockaddr_un)); // Clear 
+	memset(&server, 0, sizeof(struct sockaddr_un));
 	server.sun_family = AF_UNIX;
-#ifdef __APPLE__
-	strncpy(server.sun_path, address, strlen(address));
-#else
-	strncpy(server.sun_path+1, address, strlen(address));
-#endif
+	strncpy(server.sun_path A, address, strlen(address));
 
-#ifdef __APPLE__
-	if (connect(sd, (struct sockaddr *) &server, sizeof(server.sun_family) + strlen(address)) < 0) {
-#else
-	if (connect(sd, (struct sockaddr *) &server, sizeof(server.sun_family) + strlen(address)+1) < 0) {
-#endif
+	if (connect(sd, (struct sockaddr *) &server, sizeof(server.sun_family) + strlen(address) A) < 0) {
 		close(sd);
-		// We failed to connect to the daemon, execute powerline instead
-		argc = (argc < 199) ? argc : 199;
-		for (i=1; i < argc; i++) newargv[i] = argv[i];
+		/* We failed to connect to the daemon, execute powerline instead */
+		argc = (argc < NEW_ARGV_SIZE - 1) ? argc : NEW_ARGV_SIZE - 1;
+		for (i = 1; i < argc; i++)
+			newargv[i] = argv[i];
 		newargv[0] = "powerline-render";
 		newargv[argc] = NULL;
 		execvp("powerline-render", newargv);
@@ -101,13 +111,13 @@ int main(int argc, char *argv[]) {
 
 	i = -1;
 	while (i != 0) {
-		i = TEMP_FAILURE_RETRY(read(sd, buf, 4096));
+		TEMP_FAILURE_RETRY(i, read(sd, buf, BUF_SIZE));
 		if (i == -1) {
 			close(sd);
-			handle_error("read() failed");
+			HANDLE_ERROR("read() failed");
+		} else if (i > 0) {
+			(void) write(STDOUT_FILENO, buf, i);
 		}
-		if (i > 0) 
-			write(STDOUT_FILENO, buf, i) || 0;
 	}
 
 	close(sd);
