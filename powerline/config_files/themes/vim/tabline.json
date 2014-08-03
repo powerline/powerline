@@ -4,12 +4,13 @@
 		"left": [
 			{
 				"type": "segment_list",
-				"name": "tablister",
+				"name": "tabbuflister",
 				"segments": [
 					{
 						"name": "tabnr",
 						"after": " ",
 						"draw_soft_divider": false,
+						"exclude_modes": ["tab", "buf"],
 						"priority": 5
 					},
 					{
