@@ -683,11 +683,10 @@ type_keys = {
 	'filler': set(('type', 'highlight_group', 'divider_highlight_group')),
 }
 required_keys = {
-	'function': set(),
+	'function': set(('name',)),
 	'string': set(('contents',)),
 	'filler': set(),
 }
-function_keys = set(('args', 'module'))
 highlight_keys = set(('highlight_group', 'name'))
 
 
@@ -712,7 +711,7 @@ def check_key_compatibility(segment, data, context, echoerr):
 				problem_mark=list(unknown_keys)[0].mark)
 		hadproblem = True
 
-	if not (keys > required_keys[segment_type]):
+	if not (keys >= required_keys[segment_type]):
 		missing_keys = required_keys[segment_type] - keys
 		echoerr(context='Error while checking segments (key {key})'.format(key=context_key(context)),
 				context_mark=context[-1][1].mark,
