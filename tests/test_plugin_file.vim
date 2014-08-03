@@ -1,5 +1,7 @@
 #!/usr/bin/vim -S
 set nocompatible
+tabedit abc
+tabedit def
 try
 	source powerline/bindings/vim/plugin/powerline.vim
 catch
@@ -16,4 +18,4 @@ if len(mess)>1
 	call writefile(mess, 'message.fail')
 	cquit
 endif
-quit!
+qall!
