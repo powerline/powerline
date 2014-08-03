@@ -10,6 +10,7 @@
 		"file_directory":   "information:additional",
 		"file_name_empty":  "file_directory",
 		"line_percent":     "information:additional",
+		"line_count":       "line_current",
 		"position":         "information:additional"
 	}
 }
