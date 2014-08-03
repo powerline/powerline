@@ -385,6 +385,9 @@ class WithPath(object):
 def check_matcher_func(ext, match_name, data, context, echoerr):
 	import_paths = [os.path.expanduser(path) for path in context[0][1].get('common', {}).get('paths', [])]
 
+	if match_name == '__tabline__':
+		return True, False
+
 	match_module, separator, match_function = match_name.rpartition('.')
 	if not separator:
 		match_module = 'powerline.matchers.{0}'.format(ext)
@@ -687,11 +690,13 @@ type_keys = {
 	'function': set(('args', 'module', 'draw_inner_divider')),
 	'string': set(('contents', 'type', 'highlight_group', 'divider_highlight_group')),
 	'filler': set(('type', 'highlight_group', 'divider_highlight_group')),
+	'segment_list': set(('segments', 'module', 'args', 'type')),
 }
 required_keys = {
 	'function': set(('name',)),
 	'string': set(('contents',)),
 	'filler': set(),
+	'segment_list': set(('name', 'segments',)),
 }
 highlight_keys = set(('highlight_group', 'name'))
 
@@ -867,7 +872,7 @@ def check_segment_name(name, data, context, echoerr):
 				hadproblem = True
 
 		return True, False, hadproblem
-	else:
+	elif context[-2][1].get('type') != 'segment_list':
 		if name not in context[0][1].get('segment_data', {}):
 			top_theme_name = data['main_config'].get('ext', {}).get(ext, {}).get('theme', None)
 			if data['theme'] == top_theme_name:
@@ -1075,32 +1080,34 @@ args_spec = Spec(
 ).unknown_spec(Spec(), Spec()).optional().copy
 highlight_group_spec = Spec().type(unicode).copy
 segment_module_spec = Spec().type(unicode).func(check_segment_module).optional().copy
-segments_spec = Spec().optional().list(
-	Spec(
-		type=Spec().oneof(type_keys).optional(),
-		name=Spec().re('^[a-zA-Z_]\w+$').func(check_segment_name).optional(),
-		exclude_modes=Spec().list(vim_mode_spec()).optional(),
-		include_modes=Spec().list(vim_mode_spec()).optional(),
-		draw_hard_divider=Spec().type(bool).optional(),
-		draw_soft_divider=Spec().type(bool).optional(),
-		draw_inner_divider=Spec().type(bool).optional(),
-		display=Spec().type(bool).optional(),
-		module=segment_module_spec(),
-		priority=Spec().type(int, float, type(None)).optional(),
-		after=Spec().type(unicode).optional(),
-		before=Spec().type(unicode).optional(),
-		width=Spec().either(Spec().unsigned(), Spec().cmp('eq', 'auto')).optional(),
-		align=Spec().oneof(set('lr')).optional(),
-		args=args_spec().func(lambda *args, **kwargs: check_args(get_one_segment_variant, *args, **kwargs)),
-		contents=Spec().type(unicode).optional(),
-		highlight_group=Spec().list(
-			highlight_group_spec().re('^(?:(?!:divider$).)+$',
-						lambda value: 'it is recommended that only divider highlight group names end with ":divider"')
-		).func(check_highlight_groups).optional(),
-		divider_highlight_group=highlight_group_spec().func(check_highlight_group).re(':divider$',
-			lambda value: 'it is recommended that divider highlight group names end with ":divider"').optional(),
-	).func(check_full_segment_data),
-).copy
+sub_segments_spec = Spec()
+segment_spec = Spec(
+	type=Spec().oneof(type_keys).optional(),
+	name=Spec().re('^[a-zA-Z_]\w+$').func(check_segment_name).optional(),
+	exclude_modes=Spec().list(vim_mode_spec()).optional(),
+	include_modes=Spec().list(vim_mode_spec()).optional(),
+	draw_hard_divider=Spec().type(bool).optional(),
+	draw_soft_divider=Spec().type(bool).optional(),
+	draw_inner_divider=Spec().type(bool).optional(),
+	display=Spec().type(bool).optional(),
+	module=segment_module_spec(),
+	priority=Spec().type(int, float, type(None)).optional(),
+	after=Spec().type(unicode).optional(),
+	before=Spec().type(unicode).optional(),
+	width=Spec().either(Spec().unsigned(), Spec().cmp('eq', 'auto')).optional(),
+	align=Spec().oneof(set('lr')).optional(),
+	args=args_spec().func(lambda *args, **kwargs: check_args(get_one_segment_variant, *args, **kwargs)),
+	contents=Spec().type(unicode).optional(),
+	highlight_group=Spec().list(
+		highlight_group_spec().re('^(?:(?!:divider$).)+$',
+					lambda value: 'it is recommended that only divider highlight group names end with ":divider"')
+	).func(check_highlight_groups).optional(),
+	divider_highlight_group=highlight_group_spec().func(check_highlight_group).re(':divider$',
+		lambda value: 'it is recommended that divider highlight group names end with ":divider"').optional(),
+	segments=sub_segments_spec,
+).func(check_full_segment_data)
+sub_segments_spec.optional().list(segment_spec)
+segments_spec = Spec().optional().list(segment_spec).copy
 segdict_spec=Spec(
 	left=segments_spec().context_message('Error while loading segments from left side (key {key})'),
 	right=segments_spec().context_message('Error while loading segments from right side (key {key})'),

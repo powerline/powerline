@@ -222,7 +222,7 @@ class Renderer(object):
 		segments = theme.get_segments(side, line, self.get_segment_info(segment_info, mode))
 
 		# Handle excluded/included segments for the current mode
-		segments = [self._get_highlighting(segment, mode) for segment in segments
+		segments = [self._get_highlighting(segment, segment['mode'] or mode) for segment in segments
 			if mode not in segment['exclude_modes'] and (not segment['include_modes'] or mode in segment['include_modes'])]
 
 		segments = [segment for segment in self._render_segments(theme, segments)]

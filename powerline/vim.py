@@ -72,7 +72,8 @@ class VimPowerline(Powerline):
 			return {}
 
 		self.get_matcher = gen_matcher_getter(self.ext, self.import_paths)
-		return dict(((self.get_matcher(key), {'config': self.load_theme_config(val)})
+		return dict(((None if key == '__tabline__' else self.get_matcher(key),
+						{'config': self.load_theme_config(val)})
 					for key, val in local_themes.items()))
 
 	def get_config_paths(self):
@@ -141,6 +142,9 @@ class VimPowerline(Powerline):
 			return 'No window {0}'.format(window_id)
 		return self.render(window, window_id, winnr)
 
+	def tabline(self):
+		return self.render()
+
 	def new_window(self):
 		window, window_id, winnr = self.win_idx(None)
 		return self.render(window, window_id, winnr)
@@ -202,3 +206,4 @@ def setup(pyeval=None, pycmd=None, can_replace_pyeval=True):
 	# Is immediately changed after new_window function is run. Good for global 
 	# value.
 	vim.command('set statusline=%!{pyeval}(\'powerline.new_window()\')'.format(pyeval=pyeval))
+	vim.command('set tabline=%!{pyeval}(\'powerline.tabline()\')'.format(pyeval=pyeval))

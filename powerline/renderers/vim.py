@@ -53,15 +53,19 @@ class VimRenderer(Renderer):
 			raise KeyError('There is already a local theme with given matcher')
 		self.local_themes[matcher] = theme
 
+	def get_matched_theme(self, match):
+		try:
+			return match['theme']
+		except KeyError:
+			match['theme'] = Theme(theme_config=match['config'], top_theme_config=self.theme_config, **self.theme_kwargs)
+			return match['theme']
+
 	def get_theme(self, matcher_info):
+		if matcher_info is None:
+			return self.get_matched_theme(self.local_themes[None])
 		for matcher in self.local_themes.keys():
-			if matcher(matcher_info):
-				match = self.local_themes[matcher]
-				try:
-					return match['theme']
-				except KeyError:
-					match['theme'] = Theme(theme_config=match['config'], top_theme_config=self.theme_config, **self.theme_kwargs)
-					return match['theme']
+			if matcher and matcher(matcher_info):
+				return self.get_matched_theme(self.local_themes[matcher])
 		else:
 			return self.theme
 
@@ -80,28 +84,34 @@ class VimRenderer(Renderer):
 	def get_segment_info(self, segment_info, mode):
 		return segment_info or self.segment_info
 
-	def render(self, window, window_id, winnr):
+	def render(self, window=None, window_id=None, winnr=None):
 		'''Render all segments.'''
-		if window is vim.current.window:
-			mode = vim_mode(1)
-			mode = mode_translations.get(mode, mode)
-		else:
-			mode = 'nc'
 		segment_info = self.segment_info.copy()
-		segment_info.update({
-			'window': window,
-			'mode': mode,
-			'window_id': window_id,
-			'winnr': winnr,
-		})
-		segment_info['buffer'] = segment_info['window'].buffer
-		segment_info['bufnr'] = segment_info['buffer'].number
-		winwidth = segment_info['window'].width
+		if window is not None:
+			if window is vim.current.window:
+				mode = vim_mode(1)
+				mode = mode_translations.get(mode, mode)
+			else:
+				mode = 'nc'
+			segment_info.update(
+				window=window,
+				mode=mode,
+				window_id=window_id,
+				winnr=winnr,
+				buffer=window.buffer,
+			)
+			segment_info['bufnr'] = segment_info['buffer'].number
+			winwidth = segment_info['window'].width
+			matcher_info = segment_info
+		else:
+			mode = None
+			winwidth = int(vim.eval('&columns'))
+			matcher_info = None
 		statusline = super(VimRenderer, self).render(
 			mode=mode,
 			width=winwidth,
 			segment_info=segment_info,
-			matcher_info=segment_info,
+			matcher_info=matcher_info,
 		)
 		return statusline
 
