@@ -11,6 +11,7 @@
 		"file_name_empty":  "file_directory",
 		"line_percent":     "information:additional",
 		"line_count":       "line_current",
-		"position":         "information:additional"
+		"position":         "information:additional",
+		"tabnr":            "file_directory"
 	}
 }

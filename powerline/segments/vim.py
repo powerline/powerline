@@ -488,6 +488,22 @@ def trailing_whitespace(pl, segment_info):
 		return ret
 
 
+@requires_segment_info
+def tabnr(pl, segment_info, show_current=False):
+	'''Show tabpage number
+
+	:param bool show_current:
+		If False do not show current tabpage number. This is default because 
+		tabnr is by default only present in tabline.
+	'''
+	try:
+		tabnr = segment_info['tabnr']
+	except KeyError:
+		return None
+	if show_current or tabnr != current_tabpage().number:
+		return str(tabnr)
+
+
 def tabpage_updated_segment_info(segment_info, tabpage):
 	segment_info = segment_info.copy()
 	window = tabpage.window

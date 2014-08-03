@@ -787,6 +787,12 @@ class TestVim(TestCase):
 			self.assertEqual(trailing_whitespace(), None)
 			self.assertEqual(trailing_whitespace(), None)
 
+	def test_tabnr(self):
+		pl = Pl()
+		segment_info = vim_module._get_segment_info()
+		self.assertEqual(vim.tabnr(pl=pl, segment_info=segment_info, show_current=True), '1')
+		self.assertEqual(vim.tabnr(pl=pl, segment_info=segment_info, show_current=False), None)
+
 
 old_cwd = None
 

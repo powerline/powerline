@@ -609,11 +609,14 @@ def _get_segment_info():
 	mode = mode_translations.get(mode, mode)
 	window = current.window
 	buffer = current.buffer
+	tabpage = current.tabpage
 	return {
 		'window': window,
 		'winnr': window.number,
 		'buffer': buffer,
 		'bufnr': buffer.number,
+		'tabpage': tabpage,
+		'tabnr': tabpage.number,
 		'window_id': window._window_id,
 		'mode': mode,
 	}

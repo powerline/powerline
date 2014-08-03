@@ -7,6 +7,12 @@
 				"name": "tablister",
 				"segments": [
 					{
+						"name": "tabnr",
+						"after": " ",
+						"draw_soft_divider": false,
+						"priority": 5
+					},
+					{
 						"name": "file_directory",
 						"draw_soft_divider": false,
 						"priority": 40
