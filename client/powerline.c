@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stddef.h>
 #include <sys/un.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -26,9 +27,9 @@
 
 extern char **environ;
 
-void do_write(int sd, const char *raw, int len) {
-	int written = 0;
-	int n = -1;
+void do_write(int sd, const char *raw, size_t len) {
+	size_t written = 0;
+	ptrdiff_t n = -1;
 
 	while (written < len) {
 		TEMP_FAILURE_RETRY(n, write(sd, raw + written, len - written));
@@ -36,7 +37,7 @@ void do_write(int sd, const char *raw, int len) {
 			close(sd);
 			HANDLE_ERROR("write() failed");
 		}
-		written += n;
+		written += (size_t) n;
 	}
 }
 
@@ -55,7 +56,7 @@ void do_write(int sd, const char *raw, int len) {
 
 int main(int argc, char *argv[]) {
 	int sd = -1;
-	int i;
+	ptrdiff_t i;
 	struct sockaddr_un server;
 	char address[ADDRESS_SIZE];
 	const char eof[2] = "\0\0";
@@ -78,7 +79,7 @@ int main(int argc, char *argv[]) {
 	server.sun_family = AF_UNIX;
 	strncpy(server.sun_path A, address, strlen(address));
 
-	if (connect(sd, (struct sockaddr *) &server, sizeof(server.sun_family) + strlen(address) A) < 0) {
+	if (connect(sd, (struct sockaddr *) &server, (socklen_t) (sizeof(server.sun_family) + strlen(address) A)) < 0) {
 		close(sd);
 		/* We failed to connect to the daemon, execute powerline instead */
 		argc = (argc < NEW_ARGV_SIZE - 1) ? argc : NEW_ARGV_SIZE - 1;
@@ -116,7 +117,7 @@ int main(int argc, char *argv[]) {
 			close(sd);
 			HANDLE_ERROR("read() failed");
 		} else if (i > 0) {
-			(void) write(STDOUT_FILENO, buf, i);
+			(void) write(STDOUT_FILENO, buf, (size_t) i);
 		}
 	}
 
