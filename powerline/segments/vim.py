@@ -516,6 +516,18 @@ def bufnr(pl, segment_info, show_current=False):
 		return str(bufnr)
 
 
+@requires_segment_info
+def winnr(pl, segment_info, show_current=False):
+	'''Show window number
+
+	:param bool show_current:
+		If False do not show current window number.
+	'''
+	winnr = segment_info['winnr']
+	if show_current or winnr != vim.current.window.number:
+		return str(winnr)
+
+
 def single_tab(pl, single_text='Bufs', multiple_text='Tabs'):
 	'''Show one text if there is only one tab and another if there are many
 
