@@ -7,6 +7,7 @@
 		"file_encoding":    "file_format",
 		"file_type":        "file_format",
 		"branch":           "information:additional",
+		"file_scheme":      "file_name",
 		"file_directory":   "information:additional",
 		"file_name_empty":  "file_directory",
 		"line_percent":     "information:additional",

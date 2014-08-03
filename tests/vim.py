@@ -525,7 +525,10 @@ class _Buffer(object):
 			import os
 			if type(name) is not bytes:
 				name = name.encode('utf-8')
-			self._name = os.path.abspath(name)
+			if b':/' in  name:
+				self._name = name
+			else:
+				self._name = os.path.abspath(name)
 
 	def __getitem__(self, line):
 		return self._buf_lines[line]

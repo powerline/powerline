@@ -41,6 +41,10 @@
 				"after": " "
 			},
 			{
+				"name": "file_scheme",
+				"priority": 20
+			},
+			{
 				"name": "file_directory",
 				"priority": 40,
 				"draw_soft_divider": false

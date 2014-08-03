@@ -619,6 +619,15 @@ class TestVim(TestCase):
 			self.assertEqual(vim.readonly_indicator(pl=pl, segment_info=segment_info), '')
 			self.assertEqual(vim.readonly_indicator(pl=pl, segment_info=segment_info, text='L'), 'L')
 
+	def test_file_scheme(self):
+		pl = Pl()
+		segment_info = vim_module._get_segment_info()
+		self.assertEqual(vim.file_scheme(pl=pl, segment_info=segment_info), None)
+		with vim_module._with('buffer', '/tmp/’’/abc') as segment_info:
+			self.assertEqual(vim.file_scheme(pl=pl, segment_info=segment_info), None)
+		with vim_module._with('buffer', 'zipfile:/tmp/abc.zip::abc/abc.vim') as segment_info:
+			self.assertEqual(vim.file_scheme(pl=pl, segment_info=segment_info), 'zipfile')
+
 	def test_file_directory(self):
 		pl = Pl()
 		segment_info = vim_module._get_segment_info()
@@ -632,6 +641,14 @@ class TestVim(TestCase):
 				self.assertEqual(vim.file_directory(pl=pl, segment_info=segment_info), '/tmp/')
 				os.environ['HOME'] = '/tmp'
 				self.assertEqual(vim.file_directory(pl=pl, segment_info=segment_info), '~/')
+			with vim_module._with('buffer', 'zipfile:/tmp/abc.zip::abc/abc.vim') as segment_info:
+				self.assertEqual(vim.file_directory(pl=pl, segment_info=segment_info, remove_scheme=False), 'zipfile:/tmp/abc.zip::abc/')
+				self.assertEqual(vim.file_directory(pl=pl, segment_info=segment_info, remove_scheme=True), '/tmp/abc.zip::abc/')
+				self.assertEqual(vim.file_directory(pl=pl, segment_info=segment_info), '/tmp/abc.zip::abc/')
+				os.environ['HOME'] = '/tmp'
+				self.assertEqual(vim.file_directory(pl=pl, segment_info=segment_info, remove_scheme=False), 'zipfile:/tmp/abc.zip::abc/')
+				self.assertEqual(vim.file_directory(pl=pl, segment_info=segment_info, remove_scheme=True), '/tmp/abc.zip::abc/')
+				self.assertEqual(vim.file_directory(pl=pl, segment_info=segment_info), '/tmp/abc.zip::abc/')
 
 	def test_file_name(self):
 		pl = Pl()
