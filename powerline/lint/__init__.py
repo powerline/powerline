@@ -71,6 +71,8 @@ class DelayedEchoErr(EchoErr):
 	def __nonzero__(self):
 		return not not self.errs
 
+	__bool__ = __nonzero__
+
 
 class Spec(object):
 	def __init__(self, **keys):
