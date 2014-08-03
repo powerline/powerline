@@ -60,6 +60,7 @@ int main(int argc, char *argv[]) {
 	struct sockaddr_un server;
 	char address[ADDRESS_SIZE];
 	const char eof[2] = "\0\0";
+	char num_args[NUM_ARGS_SIZE];
 	char buf[BUF_SIZE];
 	char *newargv[NEW_ARGV_SIZE];
 	char *wd = NULL;
@@ -90,22 +91,24 @@ int main(int argc, char *argv[]) {
 		execvp("powerline-render", newargv);
 	}
 
+	snprintf(num_args, NUM_ARGS_SIZE, "%x", argc - 1);
+	do_write(sd, num_args, strlen(num_args));
+	do_write(sd, eof, 1);
+
 	for (i = 1; i < argc; i++) {
 		do_write(sd, argv[i], strlen(argv[i]));
 		do_write(sd, eof, 1);
 	}
 
-	for(envp=environ; *envp; envp++) {
-		do_write(sd, "--env=", 6);
-		do_write(sd, *envp, strlen(*envp));
-		do_write(sd, eof, 1);
-	}
-
 	wd = getcwd(NULL, 0);
 	if (wd != NULL) {
-		do_write(sd, "--cwd=", 6);
 		do_write(sd, wd, strlen(wd));
 		free(wd); wd = NULL;
+	}
+
+	for(envp=environ; *envp; envp++) {
+		do_write(sd, *envp, strlen(*envp));
+		do_write(sd, eof, 1);
 	}
 
 	do_write(sd, eof, 2);
