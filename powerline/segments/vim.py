@@ -15,7 +15,8 @@ except ImportError:
 
 from powerline.bindings.vim import (vim_get_func, getbufvar, vim_getbufoption,
 									buffer_name, vim_getwinvar,
-									register_buffer_cache)
+									register_buffer_cache, current_tabpage,
+									list_tabpages)
 from powerline.theme import requires_segment_info, requires_filesystem_watcher
 from powerline.lib import add_divider_highlight_group
 from powerline.lib.vcs import guess, tree_status
@@ -487,50 +488,20 @@ def trailing_whitespace(pl, segment_info):
 		return ret
 
 
-if hasattr(vim, 'vvars') and vim.vvars['version'] >= 704:
-	def updated_segment_info(segment_info, tabpage):
-		segment_info = segment_info.copy()
-		window = tabpage.window
-		buffer = window.buffer
-		segment_info.update(
-			tabpage=tabpage,
-			tabnr=tabpage.number,
-			window=window,
-			winnr=window.number,
-			window_id=window.vars.get('powerline_window_id'),
-			buffer=buffer,
-			bufnr=buffer.number,
-		)
-		return segment_info
-
-	list_tabpages = lambda: vim.tabpages
-	current_tabpage = lambda: vim.current.tabpage
-	tabpage_nr = lambda tabpage: tabpage.number
-else:
-	def updated_segment_info(segment_info, tabnr):  # NOQA
-		segment_info = segment_info.copy()
-		winnr = int(vim.eval('tabpagewinnr({0})'.format(tabnr)))
-		bufnr = int(vim.eval('tabpagebuflist({0})[{1}]'.format(tabnr, winnr - 1)))
-		buffer = None
-		for buffer in vim.buffers:
-			if buffer.number == bufnr:
-				break
-		window_id = vim.eval('gettabwinvar({0}, {1}, "powerline_window_id")'.format(tabnr, winnr))
-		window_id = int(window_id) if window_id else None
-		segment_info.update(
-			tabpage=None,
-			tabnr=tabnr,
-			window=None,
-			winnr=winnr,
-			window_id=window_id,
-			buffer=buffer,
-			bufnr=bufnr,
-		)
-		return segment_info
-
-	list_tabpages = lambda: range(1, int(vim.eval('tabpagenr("$")')) + 1)  # NOQA
-	current_tabpage = lambda: int(vim.eval('tabpagenr()'))  # NOQA
-	tabpage_nr = lambda tabnr: tabnr  # NOQA
+def tabpage_updated_segment_info(segment_info, tabpage):
+	segment_info = segment_info.copy()
+	window = tabpage.window
+	buffer = window.buffer
+	segment_info.update(
+		tabpage=tabpage,
+		tabnr=tabpage.number,
+		window=window,
+		winnr=window.number,
+		window_id=int(window.vars.get('powerline_window_id', -1)),
+		buffer=buffer,
+		bufnr=buffer.number,
+	)
+	return segment_info
 
 
 @requires_segment_info
@@ -548,15 +519,15 @@ def tablister(pl, segment_info):
 	thus window objects are not available as well.
 	'''
 	cur_tabpage = current_tabpage()
-	cur_tabnr = tabpage_nr(cur_tabpage)
+	cur_tabnr = cur_tabpage.number
 
 	def add_multiplier(tabpage, dct):
-		dct['priority_multiplier'] = 1 + (0.001 * abs(tabpage_nr(tabpage) - cur_tabnr))
+		dct['priority_multiplier'] = 1 + (0.001 * abs(tabpage.number - cur_tabnr))
 		return dct
 
 	return [
 		(
-			updated_segment_info(segment_info, tabpage),
+			tabpage_updated_segment_info(segment_info, tabpage),
 			add_multiplier(tabpage, {'mode': ('tab' if tabpage == cur_tabpage else 'nc')})
 		)
 		for tabpage in list_tabpages()

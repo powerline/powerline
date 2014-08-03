@@ -180,6 +180,7 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module=Non
 				'priority': None,
 				'draw_soft_divider': None,
 				'draw_hard_divider': None,
+				'draw_inner_divider': None,
 				'side': side,
 				'exclude_modes': segment.get('exclude_modes', []),
 				'include_modes': segment.get('include_modes', []),
@@ -190,7 +191,8 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module=Non
 				'mode': None,
 				'_rendered_raw': '',
 				'_rendered_hl': '',
-				'_len': 0,
+				'_len': None,
+				'_contents_len': None,
 				'_space_left': 0,
 				'_space_right': 0,
 			}
@@ -235,7 +237,8 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module=Non
 			'mode': None,
 			'_rendered_raw': '',
 			'_rendered_hl': '',
-			'_len': 0,
+			'_len': None,
+			'_contents_len': None,
 			'_space_left': 0,
 			'_space_right': 0,
 		}

@@ -84,10 +84,10 @@ else:
 
 	def bufvar_exists(buffer, varname):  # NOQA
 		if not buffer or buffer.number == vim.current.buffer.number:
-			return vim.eval('exists("b:{0}")'.format(varname))
+			return int(vim.eval('exists("b:{0}")'.format(varname)))
 		else:
-			return vim.eval('has_key(getbufvar({0}, ""), {1})'
-							.format(buffer.number, varname))
+			return int(vim.eval('has_key(getbufvar({0}, ""), {1})'
+							.format(buffer.number, varname)))
 
 	def vim_getwinvar(segment_info, varname):  # NOQA
 		result = vim.eval('getwinvar({0}, "{1}")'.format(segment_info['winnr'], varname))
@@ -102,6 +102,79 @@ if hasattr(vim, 'options'):
 else:
 	def vim_getbufoption(info, option):  # NOQA
 		return getbufvar(info['bufnr'], '&' + option)
+
+
+if hasattr(vim, 'tabpages'):
+	current_tabpage = lambda: vim.current.tabpage
+	list_tabpages = lambda: vim.tabpages
+else:
+	class FalseObject(object):
+		@staticmethod
+		def __nonzero__():
+			return False
+
+		__bool__ = __nonzero__
+
+	def get_buffer(number):
+		for buffer in vim.buffers:
+			if buffer.number == number:
+				return buffer
+		raise KeyError(number)
+
+	class WindowVars(object):
+		__slots__ = ('tabnr', 'winnr')
+
+		def __init__(self, window):
+			self.tabnr = window.tabnr
+			self.winnr = window.number
+
+		def __getitem__(self, key):
+			has_key = vim.eval('has_key(gettabwinvar({0}, {1}, ""), "{2}")'.format(self.tabnr, self.winnr, key))
+			if has_key == '0':
+				raise KeyError
+			return vim.eval('gettabwinvar({0}, {1}, "{2}")'.format(self.tabnr, self.winnr, key))
+
+		def get(self, key, default=None):
+			try:
+				return self[key]
+			except KeyError:
+				return default
+
+	class Window(FalseObject):
+		__slots__ = ('tabnr', 'number', '_vars')
+
+		def __init__(self, tabnr, number):
+			self.tabnr = tabnr
+			self.number = number
+			self.vars = WindowVars(self)
+
+		@property
+		def buffer(self):
+			return get_buffer(int(vim.eval('tabpagebuflist({0})[{1}]'.format(self.tabnr, self.number - 1))))
+
+	class Tabpage(FalseObject):
+		__slots__ = ('number',)
+
+		def __init__(self, number):
+			self.number = number
+
+		def __eq__(self, tabpage):
+			if not isinstance(tabpage, Tabpage):
+				raise NotImplementedError
+			return self.number == tabpage.number
+
+		@property
+		def window(self):
+			return Window(self.number, int(vim.eval('tabpagewinnr({0})'.format(self.number))))
+
+	def _last_tab_nr():
+		return int(vim.eval('tabpagenr("$")'))
+
+	def current_tabpage():  # NOQA
+		return Tabpage(int(vim.eval('tabpagenr()')))
+
+	def list_tabpages():  # NOQA
+		return [Tabpage(nr) for nr in range(1, _last_tab_nr() + 1)]
 
 
 if sys.version_info < (3,) or not hasattr(vim, 'bindeval'):
