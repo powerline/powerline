@@ -66,6 +66,7 @@ _powerline_setup_prompt() {
 		export PROMPT_COMMAND=$'_powerline_set_prompt\n'"${PROMPT_COMMAND}"
 }
 
+unset PROMPT_COMMAND
 if test -z "$POWERLINE_NO_BASH_PROMPT$POWERLINE_NO_SHELL_PROMPT" ; then
 	_powerline_setup_prompt
 fi
