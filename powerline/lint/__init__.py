@@ -93,15 +93,21 @@ class Spec(object):
 			self.did_type = True
 		return self
 
-	def copy(self):
-		return self.__class__()._update(self.__dict__)
+	def copy(self, copied=None):
+		copied = copied or {}
+		try:
+			return copied[id(self)]
+		except KeyError:
+			instance = self.__class__()
+			copied[id(self)] = instance
+			return self.__class__()._update(self.__dict__, copied)
 
-	def _update(self, d):
+	def _update(self, d, copied):
 		self.__dict__.update(d)
 		self.keys = copy(self.keys)
 		self.checks = copy(self.checks)
 		self.uspecs = copy(self.uspecs)
-		self.specs = [spec.copy() for spec in self.specs]
+		self.specs = [spec.copy(copied) for spec in self.specs]
 		return self
 
 	def unknown_spec(self, keyfunc, spec):
