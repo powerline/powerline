@@ -90,7 +90,7 @@ class TestParser(TestCase):
 							}
 						}
 					},
-					'config_path': '.',
+					'config_path': ['.'],
 					'renderer_arg': {'smth': {'abc': 'def'}},
 				}),
 				(['shell', '-R', 'arg=true'], {'ext': ['shell'], 'renderer_arg': {'arg': True}}),

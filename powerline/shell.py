@@ -34,10 +34,7 @@ class ShellPowerline(Powerline):
 		return r
 
 	def get_config_paths(self):
-		if self.args.config_path:
-			return [self.args.config_path]
-		else:
-			return super(ShellPowerline, self).get_config_paths()
+		return self.args.config_path or super(ShellPowerline, self).get_config_paths()
 
 	def get_local_themes(self, local_themes):
 		if not local_themes:
@@ -63,7 +60,7 @@ def get_argparser(parser=None, *args, **kwargs):
 	p.add_argument('-c', '--config', metavar='KEY.KEY=VALUE', action='append', help='Configuration overrides for `config.json\'. Is translated to a dictionary and merged with the dictionary obtained from actual JSON configuration: KEY.KEY=VALUE is translated to `{"KEY": {"KEY": VALUE}}\' and then merged recursively. VALUE may be any JSON value, values that are not `null\', `true\', `false\', start with digit, `{\', `[\' are treated like strings. If VALUE is omitted then corresponding key is removed.')
 	p.add_argument('-t', '--theme_option', metavar='THEME.KEY.KEY=VALUE', action='append', help='Like above, but theme-specific. THEME should point to an existing and used theme to have any effect, but it is fine to use any theme here.')
 	p.add_argument('-R', '--renderer_arg', metavar='KEY=VAL', action='append', help='Like above, but provides argument for renderer. Is supposed to be used only by shell bindings to provide various data like last_exit_code or last_pipe_status (they are not using --renderer_arg for historical resons: renderer_arg was added later).')
-	p.add_argument('-p', '--config_path', metavar='PATH', help='Path to configuration directory. If it is present then configuration files will only be seeked in the provided path.')
+	p.add_argument('-p', '--config_path', action='append', metavar='PATH', help='Path to configuration directory. If it is present then configuration files will only be seeked in the provided path. May be provided multiple times to search in a list of directories.')
 	return p
 
 

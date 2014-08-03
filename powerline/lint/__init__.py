@@ -1133,8 +1133,8 @@ theme_spec = (Spec(
 ).context_message('Error while loading theme'))
 
 
-def check(path=None, debug=False):
-	search_paths = [path] if path else get_config_paths()
+def check(paths=None, debug=False):
+	search_paths = paths or get_config_paths()
 	find_config_file = generate_config_finder(lambda: search_paths)
 
 	logger = logging.getLogger('powerline-lint')
