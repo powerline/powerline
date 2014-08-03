@@ -180,7 +180,7 @@ def file_scheme(pl, segment_info):
 		return None
 	match = SCHEME_RE.match(name)
 	if match:
-		return unicode(match.group(0))
+		return match.group(0).decode('ascii')
 
 
 @requires_segment_info

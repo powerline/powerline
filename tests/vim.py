@@ -525,7 +525,7 @@ class _Buffer(object):
 			import os
 			if type(name) is not bytes:
 				name = name.encode('utf-8')
-			if ':/' in  name:
+			if b':/' in  name:
 				self._name = name
 			else:
 				self._name = os.path.abspath(name)
