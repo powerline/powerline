@@ -335,6 +335,12 @@ def line_current(pl, segment_info):
 
 
 @requires_segment_info
+def line_count(pl, segment_info):
+	'''Return the line count of the current buffer.'''
+	return str(len(segment_info['buffer']))
+
+
+@requires_segment_info
 def col_current(pl, segment_info):
 	'''Return the current cursor column.
 	'''

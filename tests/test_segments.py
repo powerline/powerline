@@ -687,6 +687,17 @@ class TestVim(TestCase):
 		finally:
 			vim_module._bw(segment_info['bufnr'])
 
+	def test_line_count(self):
+		pl = Pl()
+		segment_info = vim_module._get_segment_info()
+		segment_info['buffer'][0:-1] = [str(i) for i in range(99)]
+		try:
+			self.assertEqual(vim.line_count(pl=pl, segment_info=segment_info), '100')
+			vim_module._set_cursor(50, 0)
+			self.assertEqual(vim.line_count(pl=pl, segment_info=segment_info), '100')
+		finally:
+			vim_module._bw(segment_info['bufnr'])
+
 	def test_position(self):
 		pl = Pl()
 		segment_info = vim_module._get_segment_info()
