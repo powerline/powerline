@@ -32,7 +32,7 @@ class TestConfig(TestCase):
 			local_themes_raw = json.load(f)['ext']['vim']['local_themes']
 			# Don't run tests on external/plugin segments
 			local_themes = dict((k, v) for (k, v) in local_themes_raw.items())
-			self.assertEqual(len(buffers), len(local_themes))
+			self.assertEqual(len(buffers), len(local_themes) - 1)
 		outputs = {}
 		i = 0
 
@@ -53,6 +53,8 @@ class TestConfig(TestCase):
 					outputs[out] = (i, (args, kwargs), mode)
 
 				with vim_module._with('bufname', '/tmp/foo.txt'):
+					out = powerline.render()
+					outputs[out] = (-1, (None, None), 'tab')
 					with vim_module._with('globals', powerline_config_path=cfg_path):
 						exclude = set(('no', 'v', 'V', VBLOCK, 's', 'S', SBLOCK, 'R', 'Rv', 'c', 'cv', 'ce', 'r', 'rm', 'r?', '!'))
 						try:

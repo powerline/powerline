@@ -526,6 +526,7 @@ else:
 			buffer=buffer,
 			bufnr=bufnr,
 		)
+		return segment_info
 
 	list_tabpages = lambda: range(1, int(vim.eval('tabpagenr("$")')) + 1)  # NOQA
 	current_tabpage = lambda: int(vim.eval('tabpagenr()'))  # NOQA

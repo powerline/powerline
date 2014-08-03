@@ -2,12 +2,13 @@
 _log = []
 vars = {}
 vvars = {'version': 703}
-_window = 0
+_tabpage = 0
 _mode = 'n'
 _buf_purge_events = set()
 options = {
 	'paste': 0,
 	'ambiwidth': 'single',
+	'columns': 80,
 }
 _last_bufnr = 0
 _highlights = {}
@@ -27,6 +28,12 @@ def _set_thread_id():
 
 # Assuming import is done from the main thread
 _set_thread_id()
+
+
+def _print_log():
+	for item in _log:
+		print (item)
+	_log[:] = ()
 
 
 def _vim(func):
@@ -68,12 +75,20 @@ class _Buffers(object):
 		self.d = {}
 
 	@_vim
+	def __len__(self):
+		return len(self.d)
+
+	@_vim
 	def __getitem__(self, item):
 		return self.d[item]
 
 	@_vim
 	def __setitem__(self, item, value):
 		self.d[item] = value
+
+	@_vim
+	def __iter__(self):
+		return iter(self.d.values())
 
 	@_vim
 	def __contains__(self, item):
@@ -84,29 +99,26 @@ class _Buffers(object):
 		return bool(self.d)
 
 	@_vim
-	def keys(self):
+	def _keys(self):
 		return self.d.keys()
 
 	@_vim
-	def pop(self, *args, **kwargs):
+	def _pop(self, *args, **kwargs):
 		return self.d.pop(*args, **kwargs)
 
 
 buffers = _Buffers()
 
 
-class _Windows(object):
+class _ObjList(object):
 	@_vim
-	def __init__(self):
+	def __init__(self, objtype):
 		self.l = []
+		self.objtype = objtype
 
 	@_vim
 	def __getitem__(self, item):
-		return self.l[item]
-
-	@_vim
-	def __setitem__(self, item, value):
-		self.l[item] = value
+		return self.l[item - int(item > 0)]
 
 	@_vim
 	def __len__(self):
@@ -128,13 +140,12 @@ class _Windows(object):
 	def _append(self, *args, **kwargs):
 		return self.l.append(*args, **kwargs)
 
-
-windows = _Windows()
-
-
-@_vim
-def _buffer():
-	return windows[_window - 1].buffer.number
+	@_vim
+	def _new(self, *args, **kwargs):
+		number = len(self) + 1
+		new_obj = self.objtype(number, *args, **kwargs)
+		self._append(new_obj)
+		return new_obj
 
 
 def _construct_result(r):
@@ -238,12 +249,32 @@ def eval(expr):
 			raise NotImplementedError
 		winnr = int(match.group(1))
 		varname = match.group(2)
-		return 0 + (varname in windows[winnr - 1].vars)
+		return 0 + (varname in current.tabpage.windows[winnr].vars)
 	elif expr == 'getbufvar("%", "NERDTreeRoot").path.str()':
 		import os
-		assert os.path.basename(buffers[_buffer()].name).startswith('NERD_tree_')
+		assert os.path.basename(current.buffer.name).startswith('NERD_tree_')
 		return '/usr/include'
-	raise NotImplementedError
+	elif expr == 'tabpagenr()':
+		return current.tabpage.number
+	elif expr == 'tabpagenr("$")':
+		return len(tabpages)
+	elif expr.startswith('tabpagewinnr('):
+		tabnr = int(expr[len('tabpagewinnr('):-1])
+		return tabpages[tabnr].window.number
+	elif expr.startswith('tabpagebuflist('):
+		import re
+		match = re.match(r'tabpagebuflist\((\d+)\)\[(\d+)\]', expr)
+		tabnr = int(match.group(1))
+		winnr = int(match.group(2)) + 1
+		return tabpages[tabnr].windows[winnr].buffer.number
+	elif expr.startswith('gettabwinvar('):
+		import re
+		match = re.match(r'gettabwinvar\((\d+), (\d+), "(\w+)"\)', expr)
+		tabnr = int(match.group(1))
+		winnr = int(match.group(2))
+		varname = match.group(3)
+		return tabpages[tabnr].windows[winnr].vars[varname]
+	raise NotImplementedError(expr)
 
 
 @_vim
@@ -277,7 +308,7 @@ def _emul_getbufvar(bufnr, varname):
 	import re
 	if varname[0] == '&':
 		if bufnr == '%':
-			bufnr = buffers[_buffer()].number
+			bufnr = current.buffer.number
 		if bufnr not in buffers:
 			return ''
 		try:
@@ -289,7 +320,7 @@ def _emul_getbufvar(bufnr, varname):
 				return ''
 	elif re.match('^[a-zA-Z_]+$', varname):
 		if bufnr == '%':
-			bufnr = buffers[_buffer()].number
+			bufnr = current.buffer.number
 		if bufnr not in buffers:
 			return ''
 		return buffers[bufnr].vars[varname]
@@ -299,25 +330,25 @@ def _emul_getbufvar(bufnr, varname):
 @_vim
 @_str_func
 def _emul_getwinvar(winnr, varname):
-	return windows[winnr - 1].vars.get(varname, '')
+	return current.tabpage.windows[winnr].vars.get(varname, '')
 
 
 @_vim
 def _emul_setwinvar(winnr, varname, value):
-	windows[winnr - 1].vars[varname] = value
+	current.tabpage.windows[winnr].vars[varname] = value
 
 
 @_vim
 def _emul_virtcol(expr):
 	if expr == '.' or isinstance(expr, list):
-		return windows[_window - 1].cursor[1] + 1
+		return current.window.cursor[1] + 1
 	raise NotImplementedError
 
 
 @_vim
 def _emul_getpos(expr):
 	if expr == '.' or expr == 'v':
-		return [0, windows[_window - 1].cursor[0] + 1, windows[_window - 1].cursor[1] + 1, 0]
+		return [0, current.window.cursor[0] + 1, current.window.cursor[1] + 1, 0]
 	raise NotImplementedError
 
 
@@ -342,7 +373,7 @@ def _emul_fnamemodify(path, modstring):
 def _emul_expand(expr):
 	global _abuf
 	if expr == '<abuf>':
-		return _abuf or _buffer()
+		return _abuf or current.buffer.number
 	raise NotImplementedError
 
 
@@ -362,7 +393,7 @@ def _emul_exists(varname):
 
 @_vim
 def _emul_line2byte(line):
-	buflines = _buf_lines[_buffer()]
+	buflines = current.buffer._buf_lines
 	if line == len(buflines) + 1:
 		return sum((len(s) for s in buflines)) + 1
 	raise NotImplementedError
@@ -370,8 +401,8 @@ def _emul_line2byte(line):
 
 @_vim
 def _emul_line(expr):
-	cursorline = windows[_window - 1].cursor[0] + 1
-	numlines = len(_buf_lines[_buffer()])
+	cursorline = current.window.cursor[0] + 1
+	numlines = len(current.buffer._buf_lines)
 	if expr == 'w0':
 		return max(cursorline - 5, 1)
 	if expr == 'w$':
@@ -395,16 +426,15 @@ def _emul_bufname(bufnr):
 		return b''
 
 
-_window_ids = [None]
 _window_id = 0
 
 
 class _Window(object):
-	def __init__(self, buffer=None, cursor=(1, 0), width=80):
+	def __init__(self, number, buffer=None, cursor=(1, 0), width=80):
 		global _window_id
 		self.cursor = cursor
 		self.width = width
-		self.number = len(windows) + 1
+		self.number = number
 		if buffer:
 			if type(buffer) is _Buffer:
 				self.buffer = buffer
@@ -412,19 +442,39 @@ class _Window(object):
 				self.buffer = _Buffer(**buffer)
 		else:
 			self.buffer = _Buffer()
-		windows._append(self)
 		_window_id += 1
-		_window_ids.append(_window_id)
+		self._window_id = _window_id
 		self.options = {}
-		self.vars = {}
+		self.vars = {
+			'powerline_window_id': self._window_id,
+		}
 
 	def __repr__(self):
 		return '<window ' + str(self.number - 1) + '>'
 
 
-_buf_lines = {}
-_undostate = {}
-_undo_written = {}
+class _Tabpage(object):
+	def __init__(self, number):
+		self.windows = _ObjList(_Window)
+		self.number = number
+
+	def _new_window(self, **kwargs):
+		self.window = self.windows._new(**kwargs)
+		return self.window
+
+	def _close_window(self, winnr):
+		curwinnr = self.window.number
+		win = self.windows._pop(winnr - 1)
+		if self.windows and winnr == curwinnr:
+			self.window = self.windows[-1]
+		else:
+			current.tabpage._new_window()
+		return win
+
+
+tabpages = _ObjList(_Tabpage)
+
+
 _abuf = None
 
 
@@ -446,10 +496,9 @@ class _Buffer(object):
 			'fileencoding': 'utf-8',
 			'textwidth': 80,
 		}
-		_buf_lines[bufnr] = ['']
-		from copy import copy
-		_undostate[bufnr] = [copy(_buf_lines[bufnr])]
-		_undo_written[bufnr] = len(_undostate[bufnr])
+		self._buf_lines = ['']
+		self._undostate = [self._buf_lines[:]]
+		self._undo_written = len(self._undostate)
 		buffers[bufnr] = self
 
 	@property
@@ -471,27 +520,27 @@ class _Buffer(object):
 			self._name = os.path.abspath(name)
 
 	def __getitem__(self, line):
-		return _buf_lines[self.number][line]
+		return self._buf_lines[line]
 
 	def __setitem__(self, line, value):
 		self.options['modified'] = 1
 		self.vars['changedtick'] += 1
-		_buf_lines[self.number][line] = value
+		self._buf_lines[line] = value
 		from copy import copy
-		_undostate[self.number].append(copy(_buf_lines[self.number]))
+		self._undostate.append(copy(self._buf_lines))
 
 	def __setslice__(self, *args):
 		self.options['modified'] = 1
 		self.vars['changedtick'] += 1
-		_buf_lines[self.number].__setslice__(*args)
+		self._buf_lines.__setslice__(*args)
 		from copy import copy
-		_undostate[self.number].append(copy(_buf_lines[self.number]))
+		self._undostate.append(copy(self._buf_lines))
 
 	def __getslice__(self, *args):
-		return _buf_lines[self.number].__getslice__(*args)
+		return self._buf_lines.__getslice__(*args)
 
 	def __len__(self):
-		return len(_buf_lines[self.number])
+		return len(self._buf_lines)
 
 	def __repr__(self):
 		return '<buffer ' + str(self.name) + '>'
@@ -514,22 +563,20 @@ class _Buffer(object):
 						exec(event, __main__.__dict__)
 				finally:
 					_abuf = None
-		if _buf_lines:
-			_buf_lines.pop(bufnr)
-		if _undostate:
-			_undostate.pop(bufnr)
-		if _undo_written:
-			_undo_written.pop(bufnr)
 
 
 class _Current(object):
 	@property
 	def buffer(self):
-		return buffers[_buffer()]
+		return self.window.buffer
 
 	@property
 	def window(self):
-		return windows[_window - 1]
+		return self.tabpage.window
+
+	@property
+	def tabpage(self):
+		return tabpages[_tabpage - 1]
 
 
 current = _Current()
@@ -549,7 +596,7 @@ def _init():
 	for varname, value in globals().items():
 		if varname[0] != '_':
 			_dict[varname] = value
-	_new()
+	_tabnew()
 	return _dict
 
 
@@ -561,12 +608,14 @@ def _get_segment_info():
 	}
 	mode = _mode
 	mode = mode_translations.get(mode, mode)
+	window = current.window
+	buffer = current.buffer
 	return {
-		'window': windows[_window - 1],
-		'winnr': _window,
-		'buffer': buffers[_buffer()],
-		'bufnr': _buffer(),
-		'window_id': _window_ids[_window],
+		'window': window,
+		'winnr': window.number,
+		'buffer': buffer,
+		'bufnr': buffer.number,
+		'window_id': window._window_id,
 		'mode': mode,
 	}
 
@@ -588,85 +637,77 @@ def _start_mode(mode):
 
 @_vim
 def _undo():
-	if len(_undostate[_buffer()]) == 1:
+	if len(current.buffer._undostate) == 1:
 		return
-	_undostate[_buffer()].pop(-1)
-	_buf_lines[_buffer()] = _undostate[_buffer()][-1]
-	buf = current.buffer
-	if _undo_written[_buffer()] == len(_undostate[_buffer()]):
-		buf.options['modified'] = 0
+	buffer = current.buffer
+	buffer._undostate.pop(-1)
+	buffer._buf_lines = buffer._undostate[-1]
+	if buffer._undo_written == len(buffer._undostate):
+		buffer.options['modified'] = 0
 
 
 @_vim
 def _edit(name=None):
-	global _last_bufnr
-	if _buffer() and buffers[_buffer()].name is None:
-		buf = buffers[_buffer()]
-		buf.name = name
+	if current.buffer.name is None:
+		buffer = current.buffer
+		buffer.name = name
 	else:
-		buf = _Buffer(name)
-		windows[_window - 1].buffer = buf
+		buffer = _Buffer(name)
+		current.window.buffer = buffer
+
+
+@_vim
+def _tabnew(name=None):
+	global windows
+	tabpage = tabpages._new()
+	windows = tabpage.windows
+	_tabpage = len(tabpages)
+	_new(name)
 
 
 @_vim
 def _new(name=None):
-	global _window
-	_Window(buffer={'name': name})
-	_window = len(windows)
+	current.tabpage._new_window(buffer={'name': name})
 
 
 @_vim
 def _split():
-	global _window
-	_Window(buffer=buffers[_buffer()])
-	_window = len(windows)
-
-
-@_vim
-def _del_window(winnr):
-	win = windows._pop(winnr - 1)
-	_window_ids.pop(winnr)
-	return win
+	current.tabpage._new_window(buffer=current.buffer)
 
 
 @_vim
 def _close(winnr, wipe=True):
-	global _window
-	win = _del_window(winnr)
-	if _window == winnr:
-		_window = len(windows)
+	win = current.tabpage._close_window(winnr)
 	if wipe:
-		for w in windows:
+		for w in current.tabpage.windows:
 			if w.buffer.number == win.buffer.number:
 				break
 		else:
 			_bw(win.buffer.number)
-	if not windows:
-		_Window()
 
 
 @_vim
 def _bw(bufnr=None):
-	bufnr = bufnr or _buffer()
+	bufnr = bufnr or current.buffer.number
 	winnr = 1
-	for win in windows:
+	for win in current.tabpage.windows:
 		if win.buffer.number == bufnr:
 			_close(winnr, wipe=False)
 		winnr += 1
-	buffers.pop(bufnr)
+	buffers._pop(bufnr)
 	if not buffers:
 		_Buffer()
-	_b(max(buffers.keys()))
+	_b(max(buffers._keys()))
 
 
 @_vim
 def _b(bufnr):
-	windows[_window - 1].buffer = buffers[bufnr]
+	current.window.buffer = buffers[bufnr]
 
 
 @_vim
 def _set_cursor(line, col):
-	windows[_window - 1].cursor = (line, col)
+	current.window.cursor = (line, col)
 	if _mode == 'n':
 		_launch_event('CursorMoved')
 	elif _mode == 'i':
@@ -675,12 +716,12 @@ def _set_cursor(line, col):
 
 @_vim
 def _get_buffer():
-	return buffers[_buffer()]
+	return current.buffer
 
 
 @_vim
 def _set_bufoption(option, value, bufnr=None):
-	buffers[bufnr or _buffer()].options[option] = value
+	buffers[bufnr or current.buffer.number].options[option] = value
 	if option == 'filetype':
 		_launch_event('FileType')
 
@@ -691,7 +732,7 @@ class _WithNewBuffer(object):
 
 	def __enter__(self):
 		self.call()
-		self.bufnr = _buffer()
+		self.bufnr = current.buffer.number
 		return _get_segment_info()
 
 	def __exit__(self, *args):
@@ -720,7 +761,7 @@ class _WithBufOption(object):
 		self.new = new
 
 	def __enter__(self):
-		self.buffer = buffers[_buffer()]
+		self.buffer = current.buffer
 		self.old = _set_dict(self.buffer.options, self.new, _set_bufoption)[0]
 
 	def __exit__(self, *args):
@@ -768,7 +809,7 @@ class _WithBufName(object):
 
 	def __enter__(self):
 		import os
-		buffer = buffers[_buffer()]
+		buffer = current.buffer
 		self.buffer = buffer
 		self.old = buffer.name
 		buffer.name = self.new
@@ -795,7 +836,7 @@ def _with(key, *args, **kwargs):
 	elif key == 'globals':
 		return _WithDict(vars, **kwargs)
 	elif key == 'wvars':
-		return _WithDict(windows[_window - 1].vars, **kwargs)
+		return _WithDict(current.window.vars, **kwargs)
 	elif key == 'environ':
 		return _WithDict(_environ, **kwargs)
 	elif key == 'split':
