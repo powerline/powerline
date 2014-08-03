@@ -71,6 +71,31 @@ diagnose this problem you may do the following:
    it may be a powerline bug, but if locations do not match you should not 
    report the bug until you observe it on configuration where locations do 
    match.
+#) If this problem is observed specifically within bash make sure that you clean 
+   ``$POWERLINE_COMMAND`` and ``$PROMPT_COMMAND`` environment variables on 
+   startup or, at least, that it was cleaned after update. While different 
+   ``$POWERLINE_COMMAND`` variable should not cause any troubles most of time 
+   (and when it will cause troubles are rather trivial) spoiled 
+   ``$PROMPT_COMMAND`` may lead to strange error messages or absense of exit 
+   code reporting.
+
+   These are the sources which may keep outdated environment variables:
+
+   * Any command launched from any application inherits its environment unless 
+     callee explicitly requests to use specific environment. So if you did 
+     ``exec bash`` after update it is rather unlikely to fix the problem.
+   * More interesting: `tmux` is a client-server application, it keeps one 
+     server instance per one user. You probably already knew that, but there is 
+     an interesting consequence: once `tmux` server was started it inherits its 
+     environment from the callee and keeps it *forever* (i.e. until server is 
+     killed). This environment is then inherited by applications you start with 
+     ``tmux new-session``. Easiest solution is to kill tmux with ``tmux 
+     kill-server``, but you may also use ``tmux set-environment -u`` to unset 
+     offending variables.
+   * Also check `When using z powerline shows wrong number of jobs`_: though 
+     this problem should not be seen after update only, it contains another 
+     example of ``$PROMPT_COMMAND`` spoiling results.
+
 #) If this problem is observed within the vim instance you should check out the 
    output of the following Ex mode commands
 
