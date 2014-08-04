@@ -115,7 +115,7 @@ def source_tmux_files(pl, args):
 		cmd = deduce_command()
 		if cmd:
 			run_tmux_command('set-environment', '-g', 'POWERLINE_COMMAND', deduce_command())
-		run_tmux_command('refresh-client')
+	run_tmux_command('refresh-client')
 
 
 def create_powerline_logger(args):
