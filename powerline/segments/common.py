@@ -896,29 +896,30 @@ Highlight groups used: ``email_alert_gradient`` (gradient), ``email_alert``.
 ''')
 
 
-class NowPlayingSegment(object):
-	STATE_SYMBOLS = {
-		'fallback': '♫',
-		'play': '▶',
-		'pause': '▮▮',
-		'stop': '■',
-	}
+STATE_SYMBOLS = {
+	'fallback': '♫',
+	'play': '▶',
+	'pause': '▮▮',
+	'stop': '■',
+}
 
-	def __call__(self, player='mpd', format='{state_symbol} {artist} - {title} ({total})', **kwargs):
+
+class NowPlayingSegment(object):
+	def __call__(self, player='mpd', format='{state_symbol} {artist} - {title} ({total})', state_symbols=STATE_SYMBOLS, **kwargs):
 		player_func = getattr(self, 'player_{0}'.format(player))
 		stats = {
-			'state': None,
-			'state_symbol': self.STATE_SYMBOLS['fallback'],
+			'state': 'fallback',
 			'album': None,
 			'artist': None,
 			'title': None,
 			'elapsed': None,
 			'total': None,
 		}
-		func_stats = player_func(**kwargs)
+		func_stats = player_func(state_symbol=state_symbols, **kwargs)
 		if not func_stats:
 			return None
 		stats.update(func_stats)
+		stats['state_symbol'] = state_symbols.get(stats['state'])
 		return format.format(**stats)
 
 	@staticmethod
@@ -965,7 +966,6 @@ class NowPlayingSegment(object):
 		state = self._convert_state(now_playing.get('status'))
 		return {
 			'state': state,
-			'state_symbol': self.STATE_SYMBOLS.get(state),
 			'album': now_playing.get('album'),
 			'artist': now_playing.get('artist'),
 			'title': now_playing.get('title'),
@@ -998,7 +998,6 @@ class NowPlayingSegment(object):
 			client.disconnect()
 			return {
 				'state': status.get('state'),
-				'state_symbol': self.STATE_SYMBOLS.get(status.get('state')),
 				'album': now_playing.get('album'),
 				'artist': now_playing.get('artist'),
 				'title': now_playing.get('title'),
@@ -1027,7 +1026,6 @@ class NowPlayingSegment(object):
 		state = self._convert_state(status)
 		return {
 			'state': state,
-			'state_symbol': self.STATE_SYMBOLS.get(state),
 			'album': info.get('xesam:album'),
 			'artist': info.get('xesam:artist')[0],
 			'title': info.get('xesam:title'),
@@ -1074,7 +1072,6 @@ class NowPlayingSegment(object):
 			return None
 		return {
 			'state': state,
-			'state_symbol': self.STATE_SYMBOLS.get(state),
 			'album': spotify_status[1],
 			'artist': spotify_status[2],
 			'title': spotify_status[3],
