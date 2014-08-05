@@ -1329,7 +1329,7 @@ def check(paths=None, debug=False):
 			name = os.path.basename(path)[:-5]
 			configs['top_' + typ][name] = path
 
-	diff = set(configs['themes']) ^ set(configs['colorschemes'])
+	diff = set(configs['colorschemes']) - set(configs['themes'])
 	if diff:
 		hadproblem = True
 		for ext in diff:
