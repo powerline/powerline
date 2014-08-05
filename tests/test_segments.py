@@ -589,8 +589,50 @@ class TestVim(TestCase):
 			self.assertEqual(vim.mode(pl=pl, segment_info=segment_info, override={'^V': 'VBLK'}), 'VBLK')
 
 	def test_visual_range(self):
-		# TODO
-		pass
+		pl = Pl()
+		vr = partial(vim.visual_range, pl=pl)
+		vim_module.current.window.cursor = [0, 0]
+		try:
+			with vim_module._with('mode', 'i') as segment_info:
+				self.assertEqual(vr(segment_info=segment_info), '')
+			with vim_module._with('mode', '^V') as segment_info:
+				self.assertEqual(vr(segment_info=segment_info), '1 × 1')
+				with vim_module._with('vpos', line=5, col=5, off=0):
+					self.assertEqual(vr(segment_info=segment_info), '5 × 5')
+				with vim_module._with('vpos', line=5, col=4, off=0):
+					self.assertEqual(vr(segment_info=segment_info), '5 × 4')
+			with vim_module._with('mode', '^S') as segment_info:
+				self.assertEqual(vr(segment_info=segment_info), '1 × 1')
+				with vim_module._with('vpos', line=5, col=5, off=0):
+					self.assertEqual(vr(segment_info=segment_info), '5 × 5')
+				with vim_module._with('vpos', line=5, col=4, off=0):
+					self.assertEqual(vr(segment_info=segment_info), '5 × 4')
+			with vim_module._with('mode', 'V') as segment_info:
+				self.assertEqual(vr(segment_info=segment_info), 'L:1')
+				with vim_module._with('vpos', line=5, col=5, off=0):
+					self.assertEqual(vr(segment_info=segment_info), 'L:5')
+				with vim_module._with('vpos', line=5, col=4, off=0):
+					self.assertEqual(vr(segment_info=segment_info), 'L:5')
+			with vim_module._with('mode', 'S') as segment_info:
+				self.assertEqual(vr(segment_info=segment_info), 'L:1')
+				with vim_module._with('vpos', line=5, col=5, off=0):
+					self.assertEqual(vr(segment_info=segment_info), 'L:5')
+				with vim_module._with('vpos', line=5, col=4, off=0):
+					self.assertEqual(vr(segment_info=segment_info), 'L:5')
+			with vim_module._with('mode', 'v') as segment_info:
+				self.assertEqual(vr(segment_info=segment_info), 'C:1')
+				with vim_module._with('vpos', line=5, col=5, off=0):
+					self.assertEqual(vr(segment_info=segment_info), 'L:5')
+				with vim_module._with('vpos', line=5, col=4, off=0):
+					self.assertEqual(vr(segment_info=segment_info), 'L:5')
+			with vim_module._with('mode', 's') as segment_info:
+				self.assertEqual(vr(segment_info=segment_info), 'C:1')
+				with vim_module._with('vpos', line=5, col=5, off=0):
+					self.assertEqual(vr(segment_info=segment_info), 'L:5')
+				with vim_module._with('vpos', line=5, col=4, off=0):
+					self.assertEqual(vr(segment_info=segment_info), 'L:5')
+		finally:
+			vim_module._close(1)
 
 	def test_modified_indicator(self):
 		pl = Pl()
