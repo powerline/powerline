@@ -104,7 +104,7 @@ def mode(pl, segment_info, override=None):
 
 @window_cached
 @requires_segment_info
-def visual_range(pl, segment_info, CTRL_V_text='{rows} × {vcols}', v_text_oneline='{vcols} cols', v_text_multiline='{rows} rows', V_text='{rows} rows'):
+def visual_range(pl, segment_info, CTRL_V_text='{rows} × {vcols}', v_text_oneline='C:{vcols}', v_text_multiline='L:{rows}', V_text='L:{rows}'):
 	'''Return the current visual selection range.
 
 	:param str CTRL_V_text:
