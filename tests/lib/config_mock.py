@@ -3,37 +3,53 @@ from threading import Lock
 from powerline.renderer import Renderer
 from powerline.lib.config import ConfigLoader
 from powerline import Powerline
+from tests.lib import Args, replace_attr
 from copy import deepcopy
 from time import sleep
 from functools import wraps
+import os
 
 
-access_log = []
-access_lock = Lock()
+class TestHelpers(object):
+	def __init__(self, config):
+		self.config = config
+		self.access_log = []
+		self.access_lock = Lock()
 
+	def loader_condition(self, path):
+		return (path in self.config) and path
 
-def load_json_config(config_file_path, *args, **kwargs):
-	global access_log
-	with access_lock:
-		access_log.append(config_file_path)
-	try:
-		return deepcopy(config_container['config'][config_file_path])
-	except KeyError:
-		raise IOError(config_file_path)
+	def find_config_files(self, cfg_path, config_loader, loader_callback):
+		if cfg_path.endswith('.json'):
+			cfg_path = cfg_path[:-5]
+		if cfg_path.startswith('/'):
+			cfg_path = cfg_path.lstrip('/')
+		with self.access_lock:
+			self.access_log.append('check:' + cfg_path)
+		if cfg_path in self.config:
+			yield cfg_path
+		else:
+			if config_loader:
+				config_loader.register_missing(self.loader_condition, loader_callback, cfg_path)
+			raise IOError(('fcf:' if cfg_path.endswith('raise') else '') + cfg_path)
 
+	def load_json_config(self, config_file_path, *args, **kwargs):
+		if config_file_path.endswith('.json'):
+			config_file_path = config_file_path[:-5]
+		if config_file_path.startswith('/'):
+			config_file_path = config_file_path.lstrip('/')
+		with self.access_lock:
+			self.access_log.append('load:' + config_file_path)
+		try:
+			return deepcopy(self.config[config_file_path])
+		except KeyError:
+			raise IOError(config_file_path)
 
-def _find_config_file(config, search_paths, config_file):
-	if config_file.endswith('raise') and config_file not in config:
-		raise IOError('fcf:' + config_file)
-	return config_file
-
-
-def pop_events():
-	global access_log
-	with access_lock:
-		r = access_log[:]
-		access_log = []
-	return r
+	def pop_events(self):
+		with self.access_lock:
+			r = self.access_log[:]
+			self.access_log = []
+		return r
 
 
 def log_call(func):
@@ -44,7 +60,7 @@ def log_call(func):
 	return ret
 
 
-class Watcher(object):
+class TestWatcher(object):
 	events = set()
 	lock = Lock()
 
@@ -109,20 +125,46 @@ class EvenSimplerRenderer(Renderer):
 class TestPowerline(Powerline):
 	_created = False
 
+	def __init__(self, _helpers, **kwargs):
+		super(TestPowerline, self).__init__(**kwargs)
+		self._helpers = _helpers
+		self.find_config_files = _helpers.find_config_files
+
 	@staticmethod
 	def get_local_themes(local_themes):
 		return local_themes
 
+	@staticmethod
+	def get_config_paths():
+		return ['']
+
 	def _will_create_renderer(self):
 		return self.cr_kwargs
+
+	def _pop_events(self):
+		return self._helpers.pop_events()
 
 
 renderer = EvenSimplerRenderer
 
 
-def get_powerline(**kwargs):
+class TestConfigLoader(ConfigLoader):
+	def __init__(self, _helpers, **kwargs):
+		watcher = TestWatcher()
+		super(TestConfigLoader, self).__init__(
+			load=_helpers.load_json_config,
+			watcher=watcher,
+			watcher_type='test',
+			**kwargs
+		)
+
+
+def get_powerline(config, **kwargs):
+	helpers = TestHelpers(config)
 	return get_powerline_raw(
+		helpers,
 		TestPowerline,
+		_helpers=helpers,
 		ext='test',
 		renderer_module='tests.lib.config_mock',
 		logger=Logger(),
@@ -130,45 +172,42 @@ def get_powerline(**kwargs):
 	)
 
 
-def get_powerline_raw(PowerlineClass, **kwargs):
+def select_renderer(simpler_renderer=False):
 	global renderer
-	watcher = Watcher()
-	if kwargs.pop('simpler_renderer', False):
-		renderer = EvenSimplerRenderer
-	else:
-		renderer = SimpleRenderer
+	renderer = EvenSimplerRenderer if simpler_renderer else SimpleRenderer
+
+
+def get_powerline_raw(helpers, PowerlineClass, **kwargs):
+	if not isinstance(helpers, TestHelpers):
+		helpers = TestHelpers(helpers)
+	select_renderer(kwargs.pop('simpler_renderer', False))
 	pl = PowerlineClass(
-		config_loader=ConfigLoader(
-			load=load_json_config,
-			watcher=watcher,
-			watcher_type='test',
+		config_loader=TestConfigLoader(
+			_helpers=helpers,
 			run_once=kwargs.get('run_once')
 		),
 		**kwargs
 	)
-	pl._watcher = watcher
+	pl._watcher = pl.config_loader.watcher
 	return pl
 
 
-config_container = None
-
-
-def swap_attributes(cfg_container, powerline_module, replaces):
-	global config_container
-	config_container = cfg_container
-	if not replaces:
-		replaces = {
-			'_find_config_file': lambda *args: _find_config_file(config_container['config'], *args),
-		}
-	for attr, val in replaces.items():
-		old_val = getattr(powerline_module, attr)
-		setattr(powerline_module, attr, val)
-		replaces[attr] = old_val
-	return replaces
+def swap_attributes(config, powerline_module):
+	return replace_attr(powerline_module, 'os', Args(
+		path=Args(
+			isfile=lambda path: path.lstrip('/').replace('.json', '') in config,
+			join=os.path.join,
+			expanduser=lambda path: path,
+			realpath=lambda path: path,
+			dirname=os.path.dirname,
+		),
+		environ={},
+	))
 
 
 def add_watcher_events(p, *args, **kwargs):
-	p._watcher._reset(args)
+	if isinstance(p._watcher, TestWatcher):
+		p._watcher._reset(args)
 	while not p._will_create_renderer():
 		sleep(kwargs.get('interval', 0.1))
 		if not kwargs.get('wait', True):

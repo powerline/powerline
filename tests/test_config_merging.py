@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from powerline import Powerline
 from tests import TestCase
+from tests.lib.config_mock import select_renderer
 from shutil import rmtree
 import os
 import json
@@ -114,6 +115,7 @@ class WithConfigTree(object):
 			mkdir_recursive(os.path.dirname(fname))
 			with open(fname, 'w') as F:
 				json.dump(v, F)
+		select_renderer(simpler_renderer=True)
 		self.p = TestPowerline(
 			ext='test',
 			renderer_module='tests.lib.config_mock',
