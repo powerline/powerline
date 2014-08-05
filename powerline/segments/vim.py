@@ -134,8 +134,8 @@ def visual_range(pl, segment_info, CTRL_V_text='{rows} × {vcols}', v_text_oneli
 	vcols      Number of virtual columns in the selection
 	=========  =============================================================
 	'''
-	sline, scol, soff = vim_funcs['getpos']("v")[1:]
-	eline, ecol, eoff = vim_funcs['getpos'](".")[1:]
+	sline, scol, soff = [int(v) for v in vim_funcs['getpos']("v")[1:]]
+	eline, ecol, eoff = [int(v) for v in vim_funcs['getpos'](".")[1:]]
 	svcol = vim_funcs['virtcol']([sline, scol, soff])
 	evcol = vim_funcs['virtcol']([eline, ecol, eoff])
 	rows = abs(eline - sline) + 1
