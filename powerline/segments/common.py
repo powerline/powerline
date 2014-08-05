@@ -371,7 +371,7 @@ class WeatherSegment(ThreadedSegment):
 											location_data['country_code']])
 			query_data = {
 				'q':
-				'use "http://github.com/yql/yql-tables/raw/master/weather/weather.bylocation.xml" as we;'
+				'use "https://raw.githubusercontent.com/yql/yql-tables/master/weather/weather.bylocation.xml" as we;'
 				'select * from we where location="{0}" and unit="c"'.format(self.location).encode('utf-8'),
 				'format': 'json',
 			}
