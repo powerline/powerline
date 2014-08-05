@@ -14,13 +14,25 @@ from powerline.lib import mergedicts
 from threading import Lock, Event
 
 
-def _find_config_file(search_paths, config_file):
+def _config_loader_condition(path):
+	return path and os.path.isfile(path)
+
+
+def _find_config_files(search_paths, config_file, config_loader=None, loader_callback=None):
 	config_file += '.json'
+	found = False
 	for path in search_paths:
 		config_file_path = os.path.join(path, config_file)
 		if os.path.isfile(config_file_path):
-			return config_file_path
-	raise IOError('Config file not found in search path: {0}'.format(config_file))
+			yield config_file_path
+			found = True
+		elif config_loader:
+			config_loader.register_missing(_config_loader_condition, loader_callback, config_file_path)
+	if not found:
+		raise IOError('Config file not found in search paths ({0}): {1}'.format(
+			', '.join(search_paths),
+			config_file
+		))
 
 
 class PowerlineLogger(object):
@@ -103,14 +115,14 @@ def get_config_paths():
 	config_paths = [config_path]
 	config_dirs = os.environ.get('XDG_CONFIG_DIRS', DEFAULT_SYSTEM_CONFIG_DIR)
 	if config_dirs is not None:
-		config_paths.extend([os.path.join(d, 'powerline') for d in config_dirs.split(':')])
+		config_paths[:0] = reversed([os.path.join(d, 'powerline') for d in config_dirs.split(':')])
 	plugin_path = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'config_files')
-	config_paths.append(plugin_path)
+	config_paths.insert(0, plugin_path)
 	return config_paths
 
 
 def generate_config_finder(get_config_paths=get_config_paths):
-	'''Generate find_config_file function
+	'''Generate find_config_files function
 
 	This function will find .json file given its path.
 
@@ -123,17 +135,17 @@ def generate_config_finder(get_config_paths=get_config_paths):
 		to it or raise IOError if it failed to find the file.
 	'''
 	config_paths = get_config_paths()
-	return lambda cfg_path: _find_config_file(config_paths, cfg_path)
+	return lambda *args: _find_config_files(config_paths, *args)
 
 
-def load_config(cfg_path, find_config_file, config_loader, loader_callback=None):
+def load_config(cfg_path, find_config_files, config_loader, loader_callback=None):
 	'''Load configuration file and setup watches
 
 	Watches are only set up if loader_callback is not None.
 
 	:param str cfg_path:
 		Path for configuration file that should be loaded.
-	:param function find_config_file:
+	:param function find_config_files:
 		Function that finds configuration file. Check out the description of 
 		the return value of ``generate_config_finder`` function.
 	:param ConfigLoader config_loader:
@@ -144,16 +156,16 @@ def load_config(cfg_path, find_config_file, config_loader, loader_callback=None)
 
 	:return: Configuration file contents.
 	'''
-	try:
-		path = find_config_file(cfg_path)
-	except IOError:
-		if loader_callback:
-			config_loader.register_missing(find_config_file, loader_callback, cfg_path)
-		raise
-	else:
+	found_files = find_config_files(cfg_path, config_loader, loader_callback)
+	ret = None
+	for path in found_files:
 		if loader_callback:
 			config_loader.register(loader_callback, path)
-		return config_loader.load(path)
+		if ret is None:
+			ret = config_loader.load(path)
+		else:
+			mergedicts(ret, config_loader.load(path))
+	return ret
 
 
 def _get_log_handler(common_config):
@@ -286,7 +298,7 @@ class Powerline(object):
 		elif self.renderer_module[-1] == '.':
 			self.renderer_module = self.renderer_module[:-1]
 
-		self.find_config_file = generate_config_finder(self.get_config_paths)
+		self.find_config_files = generate_config_finder(self.get_config_paths)
 
 		self.cr_kwargs_lock = Lock()
 		self.cr_kwargs = {}
@@ -437,7 +449,7 @@ class Powerline(object):
 		'''Load configuration and setup watches.'''
 		return load_config(
 			cfg_path,
-			self.find_config_file,
+			self.find_config_files,
 			self.config_loader,
 			self.cr_callbacks[type]
 		)
@@ -445,7 +457,7 @@ class Powerline(object):
 	def _purge_configs(self, type):
 		function = self.cr_callbacks[type]
 		self.config_loader.unregister_functions(set((function,)))
-		self.config_loader.unregister_missing(set(((self.find_config_file, function),)))
+		self.config_loader.unregister_missing(set(((self.find_config_files, function),)))
 
 	def load_theme_config(self, name):
 		'''Get theme configuration.
@@ -601,7 +613,7 @@ class Powerline(object):
 			pass
 		functions = tuple(self.cr_callbacks.values())
 		self.config_loader.unregister_functions(set(functions))
-		self.config_loader.unregister_missing(set(((self.find_config_file, function) for function in functions)))
+		self.config_loader.unregister_missing(set(((self.find_config_files, function) for function in functions)))
 
 	def __enter__(self):
 		return self

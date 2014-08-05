@@ -30,6 +30,24 @@ corresponds to :file:`~/.config/powerline` on both platforms.
 If you need per-instance configuration please refer to :ref:`Local configuration 
 overrides <local-configuration-overrides>`.
 
+.. note:: If you have multiple configuration files with the same name in
+    different directories then these files will be merged. Merging happens in 
+    the following order:
+
+    * :file:`{powerline_root}/powerline/config_files` is checked for 
+      configuration first. Configuration from this source has least priority.
+    * :file:`$XDG_CONFIG_DIRS/powerline` directories are the next ones to check. 
+      Checking happens in the reversed order: directories mentioned last are 
+      checked before directories mentioned first. Each new found file is merged 
+      with the result of previous merge.
+    * :file:`$XDG_CONFIG_HOME/powerline` directory is the last to check. 
+      Configuration from there has top priority.
+
+    When merging configuration only dictionaries are merged and they are merged 
+    recursively: keys from next file overrule those from the previous unless 
+    corresponding values are both dictionaries in which case these dictionaries 
+    are merged and key is assigned the result of the merge.
+
 .. _quick-guide:
 
 Quick setup guide

@@ -1,8 +1,8 @@
 # vim:fileencoding=utf-8:noet
 
 from powerline.lint.markedjson import load
-from powerline import generate_config_finder, get_config_paths
-from powerline.lib.config import load_json_config
+from powerline import generate_config_finder, get_config_paths, load_config
+from powerline.lib.config import ConfigLoader
 from powerline.lint.markedjson.error import echoerr, MarkedError
 from powerline.segments.vim import vim_modes
 from powerline.lint.inspect import getconfigargspec
@@ -159,7 +159,13 @@ class Spec(object):
 		for item in value:
 			if isinstance(item_func, int):
 				spec = self.specs[item_func]
-				proceed, fhadproblem = spec.match(item, value.mark, data, context + (('list item ' + unicode(i), item),), echoerr)
+				proceed, fhadproblem = spec.match(
+					item,
+					value.mark,
+					data,
+					context + (('list item ' + unicode(i), item),),
+					echoerr
+				)
 			else:
 				proceed, echo, fhadproblem = item_func(item, data, context, echoerr)
 				if echo and fhadproblem:
@@ -192,7 +198,13 @@ class Spec(object):
 	def check_tuple(self, value, context_mark, data, context, echoerr, start, end):
 		hadproblem = False
 		for (i, item, spec) in zip(itertools.count(), value, self.specs[start:end]):
-			proceed, ihadproblem = spec.match(item, value.mark, data, context + (('tuple item ' + unicode(i), item),), echoerr)
+			proceed, ihadproblem = spec.match(
+				item,
+				value.mark,
+				data,
+				context + (('tuple item ' + unicode(i), item),),
+				echoerr
+			)
 			if ihadproblem:
 				hadproblem = True
 			if not proceed:
@@ -221,10 +233,16 @@ class Spec(object):
 
 	def len(self, comparison, cint, msg_func=None):
 		cmp_func = self.cmp_funcs[comparison]
-		msg_func = msg_func or (lambda value: 'length of {0!r} is not {1} {2}'.format(value, self.cmp_msgs[comparison], cint))
-		self.checks.append(('check_func',
-					(lambda value, *args: (True, True, not cmp_func(len(value), cint))),
-					msg_func))
+		msg_func = (
+			msg_func
+			or (lambda value: 'length of {0!r} is not {1} {2}'.format(
+				value, self.cmp_msgs[comparison], cint))
+		)
+		self.checks.append((
+			'check_func',
+			(lambda value, *args: (True, True, not cmp_func(len(value), cint))),
+			msg_func
+		))
 		return self
 
 	def cmp(self, comparison, cint, msg_func=None):
@@ -236,16 +254,20 @@ class Spec(object):
 			self.type(type(cint))
 		cmp_func = self.cmp_funcs[comparison]
 		msg_func = msg_func or (lambda value: '{0} is not {1} {2}'.format(value, self.cmp_msgs[comparison], cint))
-		self.checks.append(('check_func',
-					(lambda value, *args: (True, True, not cmp_func(value.value, cint))),
-					msg_func))
+		self.checks.append((
+			'check_func',
+			(lambda value, *args: (True, True, not cmp_func(value.value, cint))),
+			msg_func
+		))
 		return self
 
 	def unsigned(self, msg_func=None):
 		self.type(int)
-		self.checks.append(('check_func',
-					(lambda value, *args: (True, True, value < 0)),
-					lambda value: '{0} must be greater then zero'.format(value)))
+		self.checks.append((
+			'check_func',
+			(lambda value, *args: (True, True, value < 0)),
+			(lambda value: '{0} must be greater then zero'.format(value))
+		))
 		return self
 
 	def list(self, item_func, msg_func=None):
@@ -286,25 +308,35 @@ class Spec(object):
 		self.type(unicode)
 		compiled = re.compile(regex)
 		msg_func = msg_func or (lambda value: 'String "{0}" does not match "{1}"'.format(value, regex))
-		self.checks.append(('check_func',
-					(lambda value, *args: (True, True, not compiled.match(value.value))),
-					msg_func))
+		self.checks.append((
+			'check_func',
+			(lambda value, *args: (True, True, not compiled.match(value.value))),
+			msg_func
+		))
 		return self
 
 	def ident(self, msg_func=None):
-		msg_func = msg_func or (lambda value: 'String "{0}" is not an alphanumeric/underscore identifier'.format(value))
+		msg_func = (
+			msg_func
+			or (lambda value: 'String "{0}" is not an alphanumeric/underscore identifier'.format(value))
+		)
 		return self.re('^\w+$', msg_func)
 
 	def oneof(self, collection, msg_func=None):
 		msg_func = msg_func or (lambda value: '"{0}" must be one of {1!r}'.format(value, list(collection)))
-		self.checks.append(('check_func',
-						lambda value, *args: (True, True, value not in collection),
-						msg_func))
+		self.checks.append((
+			'check_func',
+			(lambda value, *args: (True, True, value not in collection)),
+			msg_func
+		))
 		return self
 
 	def error(self, msg):
-		self.checks.append(('check_func', lambda *args: (True, True, True),
-							lambda value: msg.format(value)))
+		self.checks.append((
+			'check_func',
+			(lambda *args: (True, True, True)),
+			(lambda value: msg.format(value))
+		))
 		return self
 
 	def either(self, *specs):
@@ -334,7 +366,13 @@ class Spec(object):
 				for key, vali in self.keys.items():
 					valspec = self.specs[vali]
 					if key in value:
-						proceed, mhadproblem = valspec.match(value[key], value.mark, data, context + ((key, value[key]),), echoerr)
+						proceed, mhadproblem = valspec.match(
+							value[key],
+							value.mark,
+							data,
+							context + ((key, value[key]),),
+							echoerr
+						)
 						if mhadproblem:
 							hadproblem = True
 						if not proceed:
@@ -358,7 +396,13 @@ class Spec(object):
 							if khadproblem:
 								hadproblem = True
 							if proceed:
-								proceed, vhadproblem = valspec.match(value[key], value.mark, data, context + ((key, value[key]),), echoerr)
+								proceed, vhadproblem = valspec.match(
+									value[key],
+									value.mark,
+									data,
+									context + ((key, value[key]),),
+									echoerr
+								)
 								if vhadproblem:
 									hadproblem = True
 								break
@@ -416,9 +460,14 @@ def check_matcher_func(ext, match_name, data, context, echoerr):
 
 	if hasattr(func, 'func_code') and hasattr(func.func_code, 'co_argcount'):
 		if func.func_code.co_argcount != 1:
-			echoerr(context='Error while loading matcher functions',
-					problem='function {0} accepts {1} arguments instead of 1. Are you sure it is the proper function?'.format(match_function, func.func_code.co_argcount),
-					problem_mark=match_name.mark)
+			echoerr(
+				context='Error while loading matcher functions',
+				problem=(
+					'function {0} accepts {1} arguments instead of 1. '
+					'Are you sure it is the proper function?'
+				).format(match_function, func.func_code.co_argcount),
+				problem_mark=match_name.mark
+			)
 
 	return True, False
 
@@ -477,17 +526,30 @@ main_spec = (Spec(
 			left=divside_spec(),
 			right=divside_spec(),
 		),
-		spaces=Spec().unsigned().cmp('le', 2,
-							lambda value: 'Are you sure you need such a big ({0}) number of spaces?'.format(value)),
+		spaces=Spec().unsigned().cmp(
+			'le', 2, lambda value: 'Are you sure you need such a big ({0}) number of spaces?'.format(value)
+		),
 		term_truecolor=Spec().type(bool).optional(),
 		# Python is capable of loading from zip archives. Thus checking path 
 		# only for existence of the path, not for it being a directory
-		paths=Spec().list((lambda value, *args: (True, True, not os.path.exists(os.path.expanduser(value.value)))),
-					lambda value: 'path does not exist: {0}'.format(value)).optional(),
-		log_file=Spec().type(unicode).func(lambda value, *args: (True, True, not os.path.isdir(os.path.dirname(os.path.expanduser(value)))),
-						lambda value: 'directory does not exist: {0}'.format(os.path.dirname(value))).optional(),
-		log_level=Spec().re('^[A-Z]+$').func(lambda value, *args: (True, True, not hasattr(logging, value)),
-										lambda value: 'unknown debugging level {0}'.format(value)).optional(),
+		paths=Spec().list(
+			(lambda value, *args: (True, True, not os.path.exists(os.path.expanduser(value.value)))),
+			(lambda value: 'path does not exist: {0}'.format(value))
+		).optional(),
+		log_file=Spec().type(unicode).func(
+			(
+				lambda value, *args: (
+					True,
+					True,
+					not os.path.isdir(os.path.dirname(os.path.expanduser(value)))
+				)
+			),
+			(lambda value: 'directory does not exist: {0}'.format(os.path.dirname(value)))
+		).optional(),
+		log_level=Spec().re('^[A-Z]+$').func(
+			(lambda value, *args: (True, True, not hasattr(logging, value))),
+			(lambda value: 'unknown debugging level {0}'.format(value))
+		).optional(),
 		log_format=Spec().type(unicode).optional(),
 		interval=Spec().either(Spec().cmp('gt', 0.0), Spec().type(type(None))).optional(),
 		reload_config=Spec().type(bool).optional(),
@@ -497,8 +559,9 @@ main_spec = (Spec(
 		vim=Spec(
 			colorscheme=colorscheme_spec(),
 			theme=theme_spec(),
-			local_themes=Spec()
-				.unknown_spec(lambda *args: check_matcher_func('vim', *args), theme_spec())
+			local_themes=Spec().unknown_spec(
+				lambda *args: check_matcher_func('vim', *args), theme_spec()
+			),
 		).optional(),
 		ipython=Spec(
 			colorscheme=colorscheme_spec(),
@@ -517,24 +580,28 @@ main_spec = (Spec(
 				select=theme_spec(),
 			),
 		).optional(),
-	).unknown_spec(check_ext,
-				Spec(
-					colorscheme=colorscheme_spec(),
-					theme=theme_spec(),
-				))
-	.context_message('Error while loading extensions configuration (key {key})'),
+	).unknown_spec(
+		check_ext,
+		Spec(
+			colorscheme=colorscheme_spec(),
+			theme=theme_spec(),
+		)
+	).context_message('Error while loading extensions configuration (key {key})'),
 ).context_message('Error while loading main configuration'))
 
 term_color_spec = Spec().unsigned().cmp('le', 255).copy
-true_color_spec = Spec().re('^[0-9a-fA-F]{6}$',
-						lambda value: '"{0}" is not a six-digit hexadecimal unsigned integer written as a string'.format(value)).copy
+true_color_spec = Spec().re(
+	'^[0-9a-fA-F]{6}$',
+	(lambda value: '"{0}" is not a six-digit hexadecimal unsigned integer written as a string'.format(value))
+).copy
 colors_spec = (Spec(
 	colors=Spec().unknown_spec(
 		Spec().ident(),
 		Spec().either(
 			Spec().tuple(term_color_spec(), true_color_spec()),
-			term_color_spec()))
-	.context_message('Error while checking colors (key {key})'),
+			term_color_spec()
+		)
+	).context_message('Error while checking colors (key {key})'),
 	gradients=Spec().unknown_spec(
 		Spec().ident(),
 		Spec().tuple(
@@ -546,10 +613,14 @@ colors_spec = (Spec(
 
 
 def check_color(color, data, context, echoerr):
-	if color not in data['colors_config'].get('colors', {}) and color not in data['colors_config'].get('gradients', {}):
-		echoerr(context='Error while checking highlight group in colorscheme (key {key})'.format(key=context_key(context)),
-				problem='found unexistent color or gradient {0}'.format(color),
-				problem_mark=color.mark)
+	if (color not in data['colors_config'].get('colors', {})
+		and color not in data['colors_config'].get('gradients', {})):
+		echoerr(
+			context='Error while checking highlight group in colorscheme (key {key})'.format(
+				key=context_key(context)),
+			problem='found unexistent color or gradient {0}'.format(color),
+			problem_mark=color.mark
+		)
 		return True, False, True
 	return True, False, False
 
@@ -618,9 +689,13 @@ def check_group(group, data, context, echoerr):
 				if not proceed:
 					break
 		if not_found:
-			new_echoerr(context='Error while checking group definition in colorscheme (key {key})'.format(key=context_key(context)),
-						problem='name {0} is not present in {1} {2} colorschemes: {3}'.format(group, tofind, ext, ', '.join(not_found)),
-						problem_mark=group.mark)
+			new_echoerr(
+				context='Error while checking group definition in colorscheme (key {key})'.format(
+					key=context_key(context)),
+				problem='name {0} is not present in {1} {2} colorschemes: {3}'.format(
+					group, tofind, ext, ', '.join(not_found)),
+				problem_mark=group.mark
+			)
 	new_echoerr.echo_all()
 	return True, False, hadproblem
 
@@ -717,25 +792,34 @@ def check_key_compatibility(segment, data, context, echoerr):
 	keys = set(segment)
 	if not ((keys - generic_keys) < type_keys[segment_type]):
 		unknown_keys = keys - generic_keys - type_keys[segment_type]
-		echoerr(context='Error while checking segments (key {key})'.format(key=context_key(context)),
-				context_mark=context[-1][1].mark,
-				problem='found keys not used with the current segment type: {0}'.format(
-					list_sep.join(unknown_keys)),
-				problem_mark=list(unknown_keys)[0].mark)
+		echoerr(
+			context='Error while checking segments (key {key})'.format(key=context_key(context)),
+			context_mark=context[-1][1].mark,
+			problem='found keys not used with the current segment type: {0}'.format(
+				list_sep.join(unknown_keys)),
+			problem_mark=list(unknown_keys)[0].mark
+		)
 		hadproblem = True
 
 	if not (keys >= required_keys[segment_type]):
 		missing_keys = required_keys[segment_type] - keys
-		echoerr(context='Error while checking segments (key {key})'.format(key=context_key(context)),
-				context_mark=context[-1][1].mark,
-				problem='found missing required keys: {0}'.format(
-					list_sep.join(missing_keys)))
+		echoerr(
+			context='Error while checking segments (key {key})'.format(key=context_key(context)),
+			context_mark=context[-1][1].mark,
+			problem='found missing required keys: {0}'.format(
+				list_sep.join(missing_keys))
+		)
 		hadproblem = True
 
 	if not (segment_type == 'function' or (keys & highlight_keys)):
-		echoerr(context='Error while checking segments (key {key})'.format(key=context_key(context)),
-				context_mark=context[-1][1].mark,
-				problem='found missing keys required to determine highlight group. Either highlight_group or name key must be present')
+		echoerr(
+			context='Error while checking segments (key {key})'.format(key=context_key(context)),
+			context_mark=context[-1][1].mark,
+			problem=(
+				'found missing keys required to determine highlight group. '
+				'Either highlight_group or name key must be present'
+			)
+		)
 		hadproblem = True
 
 	return True, False, hadproblem
@@ -842,35 +926,52 @@ def check_segment_name(name, data, context, echoerr):
 		if divider_hl_group:
 			r = hl_exists(divider_hl_group, data, context, echoerr, allow_gradients=True)
 			if r:
-				echoerr(context='Error while checking theme (key {key})'.format(key=context_key(context)),
-						problem='found highlight group {0} not defined in the following colorschemes: {1}\n(Group name was obtained from function documentation.)'.format(
-							divider_hl_group, list_sep.join(r)),
-						problem_mark=name.mark)
+				echoerr(
+					context='Error while checking theme (key {key})'.format(key=context_key(context)),
+					problem=(
+						'found highlight group {0} not defined in the following colorschemes: {1}\n'
+						'(Group name was obtained from function documentation.)'
+					).format(divider_hl_group, list_sep.join(r)),
+					problem_mark=name.mark
+				)
 				hadproblem = True
 
 		if hl_groups:
 			greg = re.compile(r'``([^`]+)``( \(gradient\))?')
-			hl_groups = [[greg.match(subs).groups() for subs in s.split(' or ')] for s in (list_sep.join(hl_groups)).split(', ')]
+			hl_groups = [[greg.match(subs).groups() for subs in s.split(' or ')]
+						for s in (list_sep.join(hl_groups)).split(', ')]
 			for required_pack in hl_groups:
 				rs = [hl_exists(hl_group, data, context, echoerr, allow_gradients=('force' if gradient else False))
 						for hl_group, gradient in required_pack]
 				if all(rs):
-					echoerr(context='Error while checking theme (key {key})'.format(key=context_key(context)),
-							problem='found highlight groups list ({0}) with all groups not defined in some colorschemes\n(Group names were taken from function documentation.)'.format(
-								list_sep.join((h[0] for h in required_pack))),
-							problem_mark=name.mark)
+					echoerr(
+						context='Error while checking theme (key {key})'.format(key=context_key(context)),
+						problem=(
+							'found highlight groups list ({0}) with all groups not defined in some colorschemes\n'
+							'(Group names were taken from function documentation.)'
+						).format(list_sep.join((h[0] for h in required_pack))),
+						problem_mark=name.mark
+					)
 					for r, h in zip(rs, required_pack):
-						echoerr(context='Error while checking theme (key {key})'.format(key=context_key(context)),
-								problem='found highlight group {0} not defined in the following colorschemes: {1}'.format(
-								h[0], list_sep.join(r)))
+						echoerr(
+							context='Error while checking theme (key {key})'.format(key=context_key(context)),
+							problem='found highlight group {0} not defined in the following colorschemes: {1}'.format(
+								h[0], list_sep.join(r))
+						)
 					hadproblem = True
 		else:
 			r = hl_exists(name, data, context, echoerr, allow_gradients=True)
 			if r:
-				echoerr(context='Error while checking theme (key {key})'.format(key=context_key(context)),
-						problem='found highlight group {0} not defined in the following colorschemes: {1}\n(If not specified otherwise in documentation, highlight group for function segments\nis the same as the function name.)'.format(
-							name, list_sep.join(r)),
-						problem_mark=name.mark)
+				echoerr(
+					context='Error while checking theme (key {key})'.format(key=context_key(context)),
+					problem=(
+						'found highlight group {0} not defined in the following colorschemes: {1}\n'
+						'(If not specified otherwise in documentation, '
+						'highlight group for function segments\n'
+						'is the same as the function name.)'
+					).format(name, list_sep.join(r)),
+					problem_mark=name.mark
+				)
 				hadproblem = True
 
 		return True, False, hadproblem
@@ -915,17 +1016,23 @@ def hl_exists(hl_group, data, context, echoerr, allow_gradients=False):
 				if hasgradient:
 					hadgradient = True
 				if allow_gradients is False and not hascolor and hasgradient:
-					echoerr(context='Error while checking highlight group in theme (key {key})'.format(key=context_key(context)),
-							context_mark=getattr(hl_group, 'mark', None),
-							problem='group {0} is using gradient {1} instead of a color'.format(hl_group, color),
-							problem_mark=color.mark)
+					echoerr(
+						context='Error while checking highlight group in theme (key {key})'.format(
+							key=context_key(context)),
+						context_mark=getattr(hl_group, 'mark', None),
+						problem='group {0} is using gradient {1} instead of a color'.format(hl_group, color),
+						problem_mark=color.mark
+					)
 					r.append(colorscheme)
 					continue
 			if allow_gradients == 'force' and not hadgradient:
-					echoerr(context='Error while checking highlight group in theme (key {key})'.format(key=context_key(context)),
-							context_mark=getattr(hl_group, 'mark', None),
-							problem='group {0} should have at least one gradient color, but it has no'.format(hl_group),
-							problem_mark=group_config.mark)
+					echoerr(
+						context='Error while checking highlight group in theme (key {key})'.format(
+							key=context_key(context)),
+						context_mark=getattr(hl_group, 'mark', None),
+						problem='group {0} should have at least one gradient color, but it has no'.format(hl_group),
+						problem_mark=group_config.mark
+					)
 					r.append(colorscheme)
 	return r
 
@@ -933,10 +1040,12 @@ def hl_exists(hl_group, data, context, echoerr, allow_gradients=False):
 def check_highlight_group(hl_group, data, context, echoerr):
 	r = hl_exists(hl_group, data, context, echoerr)
 	if r:
-		echoerr(context='Error while checking theme (key {key})'.format(key=context_key(context)),
-				problem='found highlight group {0} not defined in the following colorschemes: {1}'.format(
-					hl_group, list_sep.join(r)),
-				problem_mark=hl_group.mark)
+		echoerr(
+			context='Error while checking theme (key {key})'.format(key=context_key(context)),
+			problem='found highlight group {0} not defined in the following colorschemes: {1}'.format(
+				hl_group, list_sep.join(r)),
+			problem_mark=hl_group.mark
+		)
 		return True, False, True
 	return True, False, False
 
@@ -944,15 +1053,19 @@ def check_highlight_group(hl_group, data, context, echoerr):
 def check_highlight_groups(hl_groups, data, context, echoerr):
 	rs = [hl_exists(hl_group, data, context, echoerr) for hl_group in hl_groups]
 	if all(rs):
-		echoerr(context='Error while checking theme (key {key})'.format(key=context_key(context)),
-				problem='found highlight groups list ({0}) with all groups not defined in some colorschemes'.format(
-					list_sep.join((unicode(h) for h in hl_groups))),
-				problem_mark=hl_groups.mark)
+		echoerr(
+			context='Error while checking theme (key {key})'.format(key=context_key(context)),
+			problem='found highlight groups list ({0}) with all groups not defined in some colorschemes'.format(
+				list_sep.join((unicode(h) for h in hl_groups))),
+			problem_mark=hl_groups.mark
+		)
 		for r, hl_group in zip(rs, hl_groups):
-			echoerr(context='Error while checking theme (key {key})'.format(key=context_key(context)),
-					problem='found highlight group {0} not defined in the following colorschemes: {1}'.format(
+			echoerr(
+				context='Error while checking theme (key {key})'.format(key=context_key(context)),
+				problem='found highlight group {0} not defined in the following colorschemes: {1}'.format(
 					hl_group, list_sep.join(r)),
-					problem_mark=hl_group.mark)
+				problem_mark=hl_group.mark
+			)
 		return True, False, True
 	return True, False, False
 
@@ -1005,9 +1118,11 @@ def check_args_variant(segment, args, data, context, echoerr):
 	hadproblem = False
 
 	if required_args - present_args:
-		echoerr(context='Error while checking segment arguments (key {key})'.format(key=context_key(context)),
-				context_mark=args.mark,
-				problem='some of the required keys are missing: {0}'.format(list_sep.join(required_args - present_args)))
+		echoerr(
+			context='Error while checking segment arguments (key {key})'.format(key=context_key(context)),
+			context_mark=args.mark,
+			problem='some of the required keys are missing: {0}'.format(list_sep.join(required_args - present_args))
+		)
 		hadproblem = True
 
 	if not all_args >= present_args:
@@ -1019,7 +1134,13 @@ def check_args_variant(segment, args, data, context, echoerr):
 
 	if isinstance(segment, ThreadedSegment):
 		for key in set(threaded_args_specs) & present_args:
-			proceed, khadproblem = threaded_args_specs[key].match(args[key], args.mark, data, context + ((key, args[key]),), echoerr)
+			proceed, khadproblem = threaded_args_specs[key].match(
+				args[key],
+				args.mark,
+				data,
+				context + ((key, args[key]),),
+				echoerr
+			)
 			if khadproblem:
 				hadproblem = True
 			if not proceed:
@@ -1070,7 +1191,10 @@ def get_all_possible_segments(data, context, echoerr):
 			for segments in theme_config.get('segments', {}).values():
 				for segment in segments:
 					if segment.get('type', 'function') == 'function':
-						module = segment.get('module', context[0][1].get('default_module', 'powerline.segments.' + data['ext']))
+						module = segment.get(
+							'module',
+							context[0][1].get('default_module', 'powerline.segments.' + data['ext'])
+						)
 						func = import_segment(name, data, context, echoerr, module=module)
 						if func:
 							yield func
@@ -1085,7 +1209,7 @@ segment_module_spec = Spec().type(unicode).func(check_segment_module).optional()
 sub_segments_spec = Spec()
 segment_spec = Spec(
 	type=Spec().oneof(type_keys).optional(),
-	name=Spec().re('^[a-zA-Z_]\w+$').func(check_segment_name).optional(),
+	name=Spec().re('^[a-zA-Z_]\w*$').func(check_segment_name).optional(),
 	exclude_modes=Spec().list(vim_mode_spec()).optional(),
 	include_modes=Spec().list(vim_mode_spec()).optional(),
 	draw_hard_divider=Spec().type(bool).optional(),
@@ -1101,11 +1225,15 @@ segment_spec = Spec(
 	args=args_spec().func(lambda *args, **kwargs: check_args(get_one_segment_variant, *args, **kwargs)),
 	contents=Spec().type(unicode).optional(),
 	highlight_group=Spec().list(
-		highlight_group_spec().re('^(?:(?!:divider$).)+$',
-					lambda value: 'it is recommended that only divider highlight group names end with ":divider"')
+		highlight_group_spec().re(
+			'^(?:(?!:divider$).)+$',
+			(lambda value: 'it is recommended that only divider highlight group names end with ":divider"')
+		)
 	).func(check_highlight_groups).optional(),
-	divider_highlight_group=highlight_group_spec().func(check_highlight_group).re(':divider$',
-		lambda value: 'it is recommended that divider highlight group names end with ":divider"').optional(),
+	divider_highlight_group=highlight_group_spec().func(check_highlight_group).re(
+		':divider$',
+		(lambda value: 'it is recommended that divider highlight group names end with ":divider"')
+	).optional(),
 	segments=sub_segments_spec,
 ).func(check_full_segment_data)
 sub_segments_spec.optional().list(segment_spec)
@@ -1114,8 +1242,8 @@ segdict_spec=Spec(
 	left=segments_spec().context_message('Error while loading segments from left side (key {key})'),
 	right=segments_spec().context_message('Error while loading segments from right side (key {key})'),
 ).func(
-	lambda value, *args: (True, True, not (('left' in value) or ('right' in value))),
-	lambda value: 'segments dictionary must contain either left, right or both keys'
+	(lambda value, *args: (True, True, not (('left' in value) or ('right' in value)))),
+	(lambda value: 'segments dictionary must contain either left, right or both keys')
 ).context_message('Error while loading segments (key {key})').copy
 theme_spec = (Spec(
 	default_module=segment_module_spec(),
@@ -1133,15 +1261,30 @@ theme_spec = (Spec(
 ).context_message('Error while loading theme'))
 
 
+def generate_json_config_loader(lhadproblem):
+	def load_json_config(config_file_path, load=load, open_file=open_file):
+		with open_file(config_file_path) as config_file_fp:
+			r, hadproblem = load(config_file_fp)
+			if hadproblem:
+				lhadproblem[0] = True
+			return r
+	return load_json_config
+
+
 def check(paths=None, debug=False):
 	search_paths = paths or get_config_paths()
-	find_config_file = generate_config_finder(lambda: search_paths)
+	find_config_files = generate_config_finder(lambda: search_paths)
 
 	logger = logging.getLogger('powerline-lint')
 	logger.setLevel(logging.DEBUG if debug else logging.ERROR)
 	logger.addHandler(logging.StreamHandler())
 
 	ee = EchoErr(echoerr, logger)
+
+	lhadproblem = [False]
+	load_json_config = generate_json_config_loader(lhadproblem)
+
+	config_loader = ConfigLoader(run_once=True, load=load_json_config)
 
 	paths = {
 		'themes': defaultdict(lambda: []),
@@ -1198,17 +1341,9 @@ def check(paths=None, debug=False):
 					typ,
 				))
 
-	lhadproblem = [False]
-
-	def load_config(stream):
-		r, hadproblem = load(stream)
-		if hadproblem:
-			lhadproblem[0] = True
-		return r
-
 	hadproblem = False
 	try:
-		main_config = load_json_config(find_config_file('config'), load=load_config, open_file=open_file)
+		main_config = load_config('config', find_config_files, config_loader)
 	except IOError:
 		main_config = {}
 		sys.stderr.write('\nConfiguration file not found: config.json\n')
@@ -1218,13 +1353,18 @@ def check(paths=None, debug=False):
 		sys.stderr.write(str(e) + '\n')
 		hadproblem = True
 	else:
-		if main_spec.match(main_config, data={'configs': configs, 'lists': lists}, context=(('', main_config),), echoerr=ee)[1]:
+		if main_spec.match(
+			main_config,
+			data={'configs': configs, 'lists': lists},
+			context=(('', main_config),),
+			echoerr=ee
+		)[1]:
 			hadproblem = True
 
 	import_paths = [os.path.expanduser(path) for path in main_config.get('common', {}).get('paths', [])]
 
 	try:
-		colors_config = load_json_config(find_config_file('colors'), load=load_config, open_file=open_file)
+		colors_config = load_config('colors', find_config_files, config_loader)
 	except IOError:
 		colors_config = {}
 		sys.stderr.write('\nConfiguration file not found: colors.json\n')
@@ -1330,8 +1470,14 @@ def check(paths=None, debug=False):
 			theme_configs[ext][theme] = config
 
 	for ext, configs in theme_configs.items():
-		data = {'ext': ext, 'colorscheme_configs': colorscheme_configs, 'import_paths': import_paths,
-				'main_config': main_config, 'ext_theme_configs': configs, 'colors_config': colors_config}
+		data = {
+			'ext': ext,
+			'colorscheme_configs': colorscheme_configs,
+			'import_paths': import_paths,
+			'main_config': main_config,
+			'ext_theme_configs': configs,
+			'colors_config': colors_config
+		}
 		for theme, config in configs.items():
 			data['theme'] = theme
 			if theme_spec.match(config, context=(('', config),), data=data, echoerr=ee)[1]:
