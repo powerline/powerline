@@ -9,5 +9,36 @@
 			"soft": " "
 		}
 	},
-	"spaces": 1
+	"spaces": 1,
+	"segment_data": {
+		"branch": {
+			"before": " "
+		},
+
+		"line_current_symbol": {
+			"contents": " "
+		},
+
+		"powerline.segments.common.uptime": {
+			"before": "⇑  "
+		},
+		"powerline.segments.common.date": {
+			"before": "⌚ "
+		},
+		"powerline.segments.common.email_imap_alert": {
+			"before": "✉ "
+		},
+		"powerline.segments.common.virtualenv": {
+			"before": "ⓔ  "
+		},
+		"powerline.segments.common.hostname": {
+			"before": " "
+		},
+
+		"powerline.segments.vim.modified_indicator": {
+			"args": {
+				"text": "+"
+			}
+		}
+	}
 }
