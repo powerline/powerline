@@ -6,20 +6,52 @@ from powerline.lib.file_watcher import create_file_watcher
 import sys
 
 
-def get_segment_key(segment, theme_configs, key, module=None, default=None):
+def list_segment_key_values(segment, theme_configs, key, module=None, default=None):
 	try:
-		return segment[key]
+		yield segment[key]
 	except KeyError:
-		if 'name' in segment:
-			name = segment['name']
-			for theme_config in theme_configs:
-				if 'segment_data' in theme_config:
-					for segment_key in ((module + '.' + name, name) if module else (name,)):
-						try:
-							return theme_config['segment_data'][segment_key][key]
-						except KeyError:
-							pass
-	return default
+		pass
+	try:
+		name = segment['name']
+	except KeyError:
+		pass
+	else:
+		found_module_key = False
+		for theme_config in theme_configs:
+			try:
+				segment_data = theme_config['segment_data']
+			except KeyError:
+				pass
+			else:
+				if module:
+					try:
+						yield segment_data[module + '.' + name][key]
+						found_module_key = True
+					except KeyError:
+						pass
+				if not found_module_key:
+					try:
+						yield segment_data[name][key]
+					except KeyError:
+						pass
+	yield default
+
+
+def get_segment_key(merge, *args, **kwargs):
+	if merge:
+		ret = None
+		for value in list_segment_key_values(*args, **kwargs):
+			if ret is None:
+				ret = value
+			elif isinstance(ret, dict) and isinstance(value, dict):
+				old_ret = ret
+				ret = value.copy()
+				ret.update(old_ret)
+			else:
+				return ret
+		return ret
+	else:
+		return next(list_segment_key_values(*args, **kwargs))
 
 
 def get_function(data, segment):
@@ -33,7 +65,7 @@ def get_function(data, segment):
 
 
 def get_string(data, segment):
-	return data['get_key'](segment, None, 'contents'), None, None
+	return data['get_key'](False, segment, None, 'contents'), None, None
 
 
 def get_filler(data, segment):
@@ -129,8 +161,8 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module=Non
 		'path': common_config['paths'],
 	}
 
-	def get_key(segment, module, key, default=None):
-		return get_segment_key(segment, theme_configs, key, module, default)
+	def get_key(merge, segment, module, key, default=None):
+		return get_segment_key(merge, segment, theme_configs, key, module, default)
 	data['get_key'] = get_key
 
 	def get(segment, side):
@@ -146,7 +178,7 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module=Non
 			pl.exception('Failed to generate segment from {0!r}: {1}', segment, str(e), prefix='segment_generator')
 			return None
 
-		if not get_key(segment, module, 'display', True):
+		if not get_key(False, segment, module, 'display', True):
 			return None
 
 		if segment_type == 'function':
@@ -155,7 +187,7 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module=Non
 			highlight_group = segment.get('highlight_group') or segment.get('name')
 
 		if segment_type in ('function', 'segment_list'):
-			args = dict(((str(k), v) for k, v in get_key(segment, module, 'args', {}).items()))
+			args = dict(((str(k), v) for k, v in get_key(True, segment, module, 'args', {}).items()))
 
 		if segment_type == 'segment_list':
 			# Handle startup and shutdown of _contents_func?
@@ -219,8 +251,8 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module=Non
 			'type': segment_type,
 			'highlight_group': highlight_group,
 			'divider_highlight_group': None,
-			'before': get_key(segment, module, 'before', ''),
-			'after': get_key(segment, module, 'after', ''),
+			'before': get_key(False, segment, module, 'before', ''),
+			'after': get_key(False, segment, module, 'after', ''),
 			'contents_func': contents_func,
 			'contents': contents,
 			'priority': segment.get('priority', None),

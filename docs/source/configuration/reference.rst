@@ -256,11 +256,16 @@ common configuration key <config-common-default_top_theme>`.
     A dict where keys are segment names or strings ``{module}.{name}``. Used to 
     specify default values for various keys:
     :ref:`after <config-themes-seg-after>`,
-    :ref:`args <config-themes-seg-args>` (only for function segments),
     :ref:`before <config-themes-seg-before>`,
     :ref:`contents <config-themes-seg-contents>` (only for string segments
     if :ref:`name <config-themes-seg-name>` is defined),
     :ref:`display <config-themes-seg-display>`.
+
+    Key :ref:`args <config-themes-seg-args>` (only for function and 
+    segments_list segments) is handled specially: unlike other values it is 
+    merged with all other values, except that a single ``{module}.{name}`` key 
+    if found prevents merging all ``{name}`` values.
+
     When using :ref:`local themes <config-ext-local_themes>` values of these 
     keys are first searched in the segment description, then in ``segment_data`` 
     key of a local theme, then in ``segment_data`` key of a :ref:`default theme 
@@ -289,8 +294,8 @@ common configuration key <config-common-default_top_theme>`.
     Each segment dictionary has the following options:
 
     ``type``
-        The segment type. Can be one of ``function`` (default), ``string`` 
-        or ``filler``:
+        The segment type. Can be one of ``function`` (default), ``string``, 
+        ``filler`` or ``segments_list``:
 
         ``function``
             The segment contents is the return value of the function defined 
