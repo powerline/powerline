@@ -342,15 +342,22 @@ def _emul_setwinvar(winnr, varname, value):
 
 @_vim
 def _emul_virtcol(expr):
-	if expr == '.' or isinstance(expr, list):
+	if expr == '.':
 		return current.window.cursor[1] + 1
+	if isinstance(expr, list) and len(expr) == 3:
+		return expr[-2] + expr[-1]
 	raise NotImplementedError
+
+
+_v_pos = None
 
 
 @_vim
 def _emul_getpos(expr):
-	if expr == '.' or expr == 'v':
+	if expr == '.':
 		return [0, current.window.cursor[0] + 1, current.window.cursor[1] + 1, 0]
+	if expr == 'v':
+		return _v_pos or [0, current.window.cursor[0] + 1, current.window.cursor[1] + 1, 0]
 	raise NotImplementedError
 
 
@@ -848,6 +855,23 @@ class _WithNewTabPage(object):
 		self.tab._close()
 
 
+class _WithGlobal(object):
+	def __init__(self, **kwargs):
+		self.kwargs = kwargs
+
+	def __enter__(self):
+		self.empty = object()
+		self.old = dict(((key, globals().get(key, self.empty)) for key in self.kwargs))
+		globals().update(self.kwargs)
+
+	def __exit__(self, *args):
+		for k, v in self.old.items():
+			if v is self.empty:
+				globals().pop(k, None)
+			else:
+				globals()[k] = v
+
+
 @_vim
 def _with(key, *args, **kwargs):
 	if key == 'buffer':
@@ -870,6 +894,8 @@ def _with(key, *args, **kwargs):
 		return _WithSplit()
 	elif key == 'tabpage':
 		return _WithNewTabPage(*args, **kwargs)
+	elif key == 'vpos':
+		return _WithGlobal(_v_pos=[0, kwargs['line'], kwargs['col'], kwargs['off']])
 
 
 class error(Exception):

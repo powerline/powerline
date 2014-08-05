@@ -74,7 +74,10 @@ def window_cached(func):
 		if segment_info['mode'] == 'nc':
 			return cache.get(window_id)
 		else:
-			r = func(**kwargs)
+			if getattr(func, 'powerline_requires_segment_info', False):
+				r = func(segment_info=segment_info, **kwargs)
+			else:
+				r = func(**kwargs)
 			cache[window_id] = r
 			return r
 
@@ -99,29 +102,57 @@ def mode(pl, segment_info, override=None):
 		return vim_modes[mode]
 
 
+@window_cached
 @requires_segment_info
-def visual_range(pl, segment_info):
+def visual_range(pl, segment_info, CTRL_V_text='{rows} × {vcols}', v_text_oneline='C:{vcols}', v_text_multiline='L:{rows}', V_text='L:{rows}'):
 	'''Return the current visual selection range.
 
-	Returns a value similar to `showcmd`.
+	:param str CTRL_V_text:
+		Text to display when in block visual or select mode.
+	:param str v_text_oneline:
+		Text to display when in charaterwise visual or select mode, assuming 
+		selection occupies only one line.
+	:param str v_text_multiline:
+		Text to display when in charaterwise visual or select mode, assuming 
+		selection occupies more then one line.
+	:param str V_text:
+		Text to display when in linewise visual or select mode.
+
+	All texts are format strings which are passed the following parameters:
+
+	=========  =============================================================
+	Parameter  Description
+	=========  =============================================================
+	sline      Line number of the first line of the selection
+	eline      Line number of the last line of the selection
+	scol       Column number of the first character of the selection
+	ecol       Column number of the last character of the selection
+	svcol      Virtual column number of the first character of the selection
+	secol      Virtual column number of the last character of the selection
+	rows       Number of lines in the selection
+	cols       Number of columns in the selection
+	vcols      Number of virtual columns in the selection
+	=========  =============================================================
 	'''
-	if segment_info['mode'] not in ('v', 'V', '^V'):
-		return None
-	pos_start = vim_funcs['getpos']('v')
-	pos_end = vim_funcs['getpos']('.')
-	# Workaround for vim's "excellent" handling of multibyte characters and display widths
-	pos_start[2] = vim_funcs['virtcol']([pos_start[1], pos_start[2], pos_start[3]])
-	pos_end[2] = vim_funcs['virtcol']([pos_end[1], pos_end[2], pos_end[3]])
-	visual_start = (int(pos_start[1]), int(pos_start[2]))
-	visual_end = (int(pos_end[1]), int(pos_end[2]))
-	diff_rows = abs(visual_end[0] - visual_start[0]) + 1
-	diff_cols = abs(visual_end[1] - visual_start[1]) + 1
-	if segment_info['mode'] == '^V':
-		return '{0} × {1}'.format(diff_rows, diff_cols)
-	elif segment_info['mode'] == 'V' or diff_rows > 1:
-		return '{0} rows'.format(diff_rows)
-	else:
-		return '{0} cols'.format(diff_cols)
+	sline, scol, soff = [int(v) for v in vim_funcs['getpos']("v")[1:]]
+	eline, ecol, eoff = [int(v) for v in vim_funcs['getpos'](".")[1:]]
+	svcol = vim_funcs['virtcol']([sline, scol, soff])
+	evcol = vim_funcs['virtcol']([eline, ecol, eoff])
+	rows = abs(eline - sline) + 1
+	cols = abs(ecol - scol) + 1
+	vcols = abs(evcol - svcol) + 1
+	return {
+		'^': CTRL_V_text,
+		's': v_text_oneline if rows == 1 else v_text_multiline,
+		'S': V_text,
+		'v': v_text_oneline if rows == 1 else v_text_multiline,
+		'V': V_text,
+	}.get(segment_info['mode'][0], '').format(
+		sline=sline, eline=eline,
+		scol=scol, ecol=ecol,
+		svcol=svcol, evcol=evcol,
+		rows=rows, cols=cols, vcols=vcols,
+	)
 
 
 @requires_segment_info
