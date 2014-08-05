@@ -215,6 +215,7 @@ def finish_common_config(common_config):
 		paths.
 	'''
 	common_config = common_config.copy()
+	common_config.setdefault('default_top_theme', 'powerline')
 	common_config.setdefault('paths', [])
 	common_config.setdefault('watcher', 'auto')
 	common_config.setdefault('log_level', 'WARNING')
@@ -345,13 +346,15 @@ class Powerline(object):
 		if load_main:
 			self._purge_configs('main')
 			config = self.load_main_config()
-			self.common_config = config['common']
+			self.common_config = finish_common_config(config['common'])
 			if self.common_config != self.prev_common_config:
 				common_config_differs = True
 
-				self.prev_common_config = self.common_config
+				load_theme = (load_theme
+					or not self.prev_common_config
+					or self.prev_common_config['default_top_theme'] != self.common_config['default_top_theme'])
 
-				self.common_config = finish_common_config(self.common_config)
+				self.prev_common_config = self.common_config
 
 				self.import_paths = self.common_config['paths']
 
@@ -385,6 +388,8 @@ class Powerline(object):
 					self.run_loader_update = (interval is None)
 					if interval is not None and not self.config_loader.is_alive():
 						self.config_loader.start()
+
+				self.default_top_theme = self.common_config['default_top_theme']
 
 			self.ext_config = config['ext'][self.ext]
 			if self.ext_config != self.prev_ext_config:
@@ -445,29 +450,19 @@ class Powerline(object):
 		'''
 		return get_config_paths()
 
-	def _load_config(self, cfg_path, type):
+	def _load_config(self, cfg_path, cfg_type):
 		'''Load configuration and setup watches.'''
 		return load_config(
 			cfg_path,
 			self.find_config_files,
 			self.config_loader,
-			self.cr_callbacks[type]
+			self.cr_callbacks[cfg_type]
 		)
 
-	def _purge_configs(self, type):
-		function = self.cr_callbacks[type]
+	def _purge_configs(self, cfg_type):
+		function = self.cr_callbacks[cfg_type]
 		self.config_loader.unregister_functions(set((function,)))
 		self.config_loader.unregister_missing(set(((self.find_config_files, function),)))
-
-	def load_theme_config(self, name):
-		'''Get theme configuration.
-
-		:param str name:
-			Name of the theme to load.
-
-		:return: dictionary with :ref:`theme configuration <config-themes>`
-		'''
-		return self._load_config(os.path.join('themes', self.ext, name), 'theme')
 
 	def load_main_config(self):
 		'''Get top-level configuration.
@@ -475,6 +470,47 @@ class Powerline(object):
 		:return: dictionary with :ref:`top-level configuration <config-main>`.
 		'''
 		return self._load_config('config', 'main')
+
+	def _load_hierarhical_config(self, cfg_type, levels, ignore_levels):
+		'''Load and merge multiple configuration files
+
+		:param str cfg_type:
+			Type of the loaded configuration files (e.g. ``colorscheme``, 
+			``theme``).
+		:param list levels:
+			Configuration names resembling levels in hierarchy, sorted by 
+			priority. Configuration file names with higher priority should go 
+			last.
+		:param set ignore_levels:
+			If only files listed in this variable are present then configuration 
+			file is considered not loaded: at least one file on the level not 
+			listed in this variable must be present.
+		'''
+		config = {}
+		loaded = 0
+		exceptions = []
+		for i, cfg_path in enumerate(levels):
+			try:
+				lvl_config = self._load_config(cfg_path, cfg_type)
+			except IOError as e:
+				if sys.version_info < (3,):
+					tb = sys.exc_info()[2]
+					exceptions.append((e, tb))
+				else:
+					exceptions.append(e)
+			else:
+				if i not in ignore_levels:
+					loaded += 1
+				mergedicts(config, lvl_config)
+		if not loaded:
+			for exception in exceptions:
+				if type(exception) is tuple:
+					e = exception[0]
+				else:
+					e = exception
+				self.exception('Failed to load %s: {0}' % cfg_type, e, exception=exception)
+			raise e
+		return config
 
 	def load_colorscheme_config(self, name):
 		'''Get colorscheme.
@@ -484,40 +520,27 @@ class Powerline(object):
 
 		:return: dictionary with :ref:`colorscheme configuration <config-colorschemes>`.
 		'''
-		# TODO Make sure no colorscheme name ends with __ (do it in 
-		# powerline-lint)
 		levels = (
 			os.path.join('colorschemes', name),
 			os.path.join('colorschemes', self.ext, '__main__'),
 			os.path.join('colorschemes', self.ext, name),
 		)
-		config = {}
-		loaded = 0
-		exceptions = []
-		for cfg_path in levels:
-			try:
-				lvl_config = self._load_config(cfg_path, 'colorscheme')
-			except IOError as e:
-				if sys.version_info < (3,):
-					tb = sys.exc_info()[2]
-					exceptions.append((e, tb))
-				else:
-					exceptions.append(e)
-			else:
-				if not cfg_path.endswith('__'):
-					loaded += 1
-				# TODO Either make sure `attr` list is always present or make 
-				# mergedicts not merge group definitions.
-				mergedicts(config, lvl_config)
-		if not loaded:
-			for exception in exceptions:
-				if type(exception) is tuple:
-					e = exception[0]
-				else:
-					e = exception
-				self.exception('Failed to load colorscheme: {0}', e, exception=exception)
-			raise e
-		return config
+		return self._load_hierarhical_config('colorscheme', levels, (1,))
+
+	def load_theme_config(self, name):
+		'''Get theme configuration.
+
+		:param str name:
+			Name of the theme to load.
+
+		:return: dictionary with :ref:`theme configuration <config-themes>`
+		'''
+		levels = (
+			os.path.join('themes', self.ext_config.get('top_theme') or self.default_top_theme),
+			os.path.join('themes', self.ext, '__main__'),
+			os.path.join('themes', self.ext, name),
+		)
+		return self._load_hierarhical_config('theme', levels, (0, 1,))
 
 	def load_colors_config(self):
 		'''Get colorscheme.

@@ -58,15 +58,6 @@ Common configuration is a subdictionary that is a value of ``common`` key in
     codes thus rendering powerline prompt colorless. Valid values: ``"tmux"``, 
     ``"screen"``, ``null`` (default).
 
-``dividers``
-    Defines the dividers used in all Powerline extensions. This option 
-    should usually only be changed if you don't have a patched font, or if 
-    you use a font patched with the legacy font patcher.
-
-    The ``hard`` dividers are used to divide segments with different 
-    background colors, while the ``soft`` dividers are used to divide 
-    segments with the same background color.
-
 .. _config-common-paths:
 
 ``paths``
@@ -95,6 +86,12 @@ Common configuration is a subdictionary that is a value of ``common`` key in
     Boolean, determines whether configuration should be reloaded at all. 
     Defaults to ``True``.
 
+.. _config-common-default_top_theme:
+
+``default_top_theme``
+    String, determines which top-level theme will be used as the default. 
+    Defaults to ``powerline``. See `Themes`_ section for more details.
+
 Extension-specific configuration
 --------------------------------
 
@@ -108,6 +105,12 @@ Common configuration is a subdictionary that is a value of ``ext`` key in
     .. _config-ext-theme:
 
     Defines the theme used for this extension.
+
+``top_theme``
+    .. _config-ext-top_theme:
+
+    Defines the top-level theme used for this extension. See `Themes`_ section 
+    for more details.
 
 ``local_themes``
     .. _config-ext-local_themes:
@@ -155,7 +158,7 @@ Colorschemes
 ============
 
 :Location: :file:`powerline/colorschemes/{name}.json`, 
-           :file:`powerline/colorscheme/__main__.json`, 
+           :file:`powerline/colorschemes/__main__.json`, 
            :file:`powerline/colorschemes/{extension}/{name}.json`
 
 Colorscheme files are processed in order given: definitions from each next file 
@@ -213,7 +216,17 @@ override those from each previous file. It is required that either
 Themes
 ======
 
-:Location: :file:`powerline/themes/{extension}/{name}.json`
+:Location: :file:`powerline/themes/{top_theme}.json`, 
+           :file:`powerline/themes/__main__.json`, 
+           :file:`powerline/themes/{extension}/{name}.json`
+
+Theme files are processed in order given: definitions from each next file 
+override those from each previous file. It is required that file 
+:file:`powerline/themes/{extension}/{name}.json` exists.
+
+`{top_theme}` component of the file name is obtained either from :ref:`top_theme 
+extension-specific key <config-ext-top_theme>` or from :ref:`default_top_theme 
+common configuration key <config-common-default_top_theme>`.
 
 ``name``
     Name of the theme.
@@ -222,6 +235,20 @@ Themes
 
 ``default_module``
     Python module where segments will be looked by default.
+
+``spaces``
+    Defines number of spaces just before the divider (on the right side) or just 
+    after it (on the left side). These spaces will not be added if divider is 
+    not drawn.
+
+``dividers``
+    Defines the dividers used in all Powerline extensions. This option 
+    should usually only be changed if you don't have a patched font, or if 
+    you use a font patched with the legacy font patcher.
+
+    The ``hard`` dividers are used to divide segments with different 
+    background colors, while the ``soft`` dividers are used to divide 
+    segments with the same background color.
 
 .. _config-themes-segment_data:
 
@@ -239,6 +266,9 @@ Themes
     key of a local theme, then in ``segment_data`` key of a :ref:`default theme 
     <config-ext-theme>`. For the :ref:`default theme <config-ext-theme>` itself 
     step 2 is obviously avoided.
+
+    .. note:: Top-level themes are out of equation here: they are merged
+        before the above merging process happens.
 
 ``segments``
     A dict with a ``left`` and a ``right`` lists, consisting of segment 
