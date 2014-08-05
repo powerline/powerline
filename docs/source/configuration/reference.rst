@@ -226,7 +226,18 @@ override those from each previous file. It is required that file
 
 `{top_theme}` component of the file name is obtained either from :ref:`top_theme 
 extension-specific key <config-ext-top_theme>` or from :ref:`default_top_theme 
-common configuration key <config-common-default_top_theme>`.
+common configuration key <config-common-default_top_theme>`. Powerline ships 
+with the following top themes:
+
+==========================  ====================================================
+Theme                       Description
+==========================  ====================================================
+powerline                   Default powerline theme with fancy powerline symbols
+unicode                     Theme without any symbols from private use area
+unicode_terminus            Theme containing only symbols from terminus PCF font
+unicode_terminus_condensed  Like above, but occupies as less space as possible
+ascii                       Theme without any unicode characters at all
+==========================  ====================================================
 
 ``name``
     Name of the theme.
