@@ -44,12 +44,22 @@ def getconfigargspec(obj):
 		else:
 			obj = obj
 
-		argspec = getargspec(obj)
+		remove_self = False
+		try:
+			argspec = getargspec(obj)
+		except TypeError:  # Workaround for now_playing segment
+			# TODO For NowPlayingSegment for linter: merge in information about 
+			# player-specific arguments
+			argspec = getargspec(obj.__call__)
+			remove_self = True
 		args = []
 		defaults = []
 		for i, arg in zip(count(1), reversed(argspec.args)):
-			if ((arg == 'segment_info' and getattr(obj, 'powerline_requires_segment_info', None)) or
-				arg == 'pl'):
+			if (
+				(arg == 'segment_info' and getattr(obj, 'powerline_requires_segment_info', None))
+				or arg == 'pl'
+				or (arg == 'self' and remove_self)
+			):
 				continue
 			if argspec.defaults and len(argspec.defaults) >= i:
 				default = argspec.defaults[-i]
