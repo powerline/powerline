@@ -15,8 +15,11 @@ new_fname = os.path.join('tests', 'shell', shell + '.' + test_type + '.log')
 pid_fname = os.path.join('tests', 'shell', '3rd', 'pid')
 
 
-with open(pid_fname, 'r') as P:
-	pid = P.read().strip()
+try:
+	with open(pid_fname, 'r') as P:
+		pid = P.read().strip()
+except IOError:
+	pid = None
 hostname = socket.gethostname()
 user = os.environ['USER']
 
@@ -34,7 +37,8 @@ with codecs.open(fname, 'r', encoding='utf-8') as R:
 			})
 			line = line.replace(hostname, 'HOSTNAME')
 			line = line.replace(user, 'USER')
-			line = line.replace(pid, 'PID')
+			if pid is not None:
+				line = line.replace(pid, 'PID')
 			if shell == 'fish':
 				try:
 					start = line.index('\033[0;')
