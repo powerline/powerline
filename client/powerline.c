@@ -120,7 +120,7 @@ int main(int argc, char *argv[]) {
 			close(sd);
 			HANDLE_ERROR("read() failed");
 		} else if (i > 0) {
-			(void) write(STDOUT_FILENO, buf, (size_t) i);
+			int _ignored = write(STDOUT_FILENO, buf, (size_t) i);
 		}
 	}
 
