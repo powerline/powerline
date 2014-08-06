@@ -1,6 +1,6 @@
 #!/usr/bin/vim -S
 let g:powerline_config_path = expand('<sfile>:p:h:h') . '/powerline/config_files'
-let g:powerline_config_overrides = {'common': {'dividers': {'left': {'hard': ' ', 'soft': ' > '}, 'right': {'hard': ' ', 'soft': ' < '}}}}
+let g:powerline_config_overrides = {'common': {'default_top_theme': 'ascii'}}
 let g:powerline_theme_overrides__default = {'segment_data': {'line_current_symbol': {'contents': 'LN '}, 'branch': {'before': 'B '}}}
 try
 	python import powerline.vim

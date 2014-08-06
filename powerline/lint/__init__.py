@@ -431,9 +431,6 @@ class WithPath(object):
 def check_matcher_func(ext, match_name, data, context, echoerr):
 	import_paths = [os.path.expanduser(path) for path in context[0][1].get('common', {}).get('paths', [])]
 
-	if match_name == '__tabline__':
-		return True, False
-
 	match_module, separator, match_function = match_name.rpartition('.')
 	if not separator:
 		match_module = 'powerline.matchers.{0}'.format(ext)
@@ -512,23 +509,30 @@ def check_config(d, theme, data, context, echoerr):
 	return True, False, False
 
 
+def check_top_theme(theme, data, context, echoerr):
+	if theme not in data['configs']['top_themes']:
+		echoerr(context='Error while checking extension configuration (key {key})'.format(key=context_key(context)),
+				context_mark=context[-2][0].mark,
+				problem='failed to find top theme {0}'.format(theme),
+				problem_mark=theme.mark)
+		return True, False, True
+	return True, False, False
+
+
 divider_spec = Spec().type(unicode).len('le', 3,
 					lambda value: 'Divider {0!r} is too large!'.format(value)).copy
-divside_spec = Spec(
-	hard=divider_spec(),
-	soft=divider_spec(),
+ext_theme_spec = Spec().type(unicode).func(lambda *args: check_config('themes', *args)).copy
+top_theme_spec = Spec().type(unicode).func(check_top_theme).copy
+ext_spec = Spec(
+	colorscheme=Spec().type(unicode).func(
+		(lambda *args: check_config('colorschemes', *args))
+	),
+	theme=ext_theme_spec(),
+	top_theme=top_theme_spec().optional(),
 ).copy
-colorscheme_spec = Spec().type(unicode).func(lambda *args: check_config('colorschemes', *args)).copy
-theme_spec = Spec().type(unicode).func(lambda *args: check_config('themes', *args)).copy
 main_spec = (Spec(
 	common=Spec(
-		dividers=Spec(
-			left=divside_spec(),
-			right=divside_spec(),
-		),
-		spaces=Spec().unsigned().cmp(
-			'le', 2, lambda value: 'Are you sure you need such a big ({0}) number of spaces?'.format(value)
-		),
+		default_top_theme=top_theme_spec().optional(),
 		term_truecolor=Spec().type(bool).optional(),
 		# Python is capable of loading from zip archives. Thus checking path 
 		# only for existence of the path, not for it being a directory
@@ -556,36 +560,29 @@ main_spec = (Spec(
 		watcher=Spec().type(unicode).oneof(set(('auto', 'inotify', 'stat'))).optional(),
 	).context_message('Error while loading common configuration (key {key})'),
 	ext=Spec(
-		vim=Spec(
-			colorscheme=colorscheme_spec(),
-			theme=theme_spec(),
-			local_themes=Spec().unknown_spec(
-				lambda *args: check_matcher_func('vim', *args), theme_spec()
+		vim=ext_spec().update(
+			local_themes=Spec(
+				__tabline__=ext_theme_spec(),
+			).unknown_spec(
+				lambda *args: check_matcher_func('vim', *args), ext_theme_spec()
 			),
 		).optional(),
-		ipython=Spec(
-			colorscheme=colorscheme_spec(),
-			theme=theme_spec(),
+		ipython=ext_spec().update(
 			local_themes=Spec(
-				in2=theme_spec(),
-				out=theme_spec(),
-				rewrite=theme_spec(),
+				in2=ext_theme_spec(),
+				out=ext_theme_spec(),
+				rewrite=ext_theme_spec(),
 			),
 		).optional(),
-		shell=Spec(
-			colorscheme=colorscheme_spec(),
-			theme=theme_spec(),
+		shell=ext_spec().update(
 			local_themes=Spec(
-				continuation=theme_spec(),
-				select=theme_spec(),
+				continuation=ext_theme_spec(),
+				select=ext_theme_spec(),
 			),
 		).optional(),
 	).unknown_spec(
 		check_ext,
-		Spec(
-			colorscheme=colorscheme_spec(),
-			theme=theme_spec(),
-		)
+		ext_spec(),
 	).context_message('Error while loading extensions configuration (key {key})'),
 ).context_message('Error while loading main configuration'))
 
@@ -771,7 +768,7 @@ type_keys = {
 }
 required_keys = {
 	'function': set(('name',)),
-	'string': set(('contents',)),
+	'string': set(()),
 	'filler': set(),
 	'segment_list': set(('name', 'segments',)),
 }
@@ -845,11 +842,11 @@ def check_full_segment_data(segment, data, context, echoerr):
 
 	ext = data['ext']
 	theme_segment_data = context[0][1].get('segment_data', {})
-	top_theme_name = data['main_config'].get('ext', {}).get(ext, {}).get('theme', None)
-	if not top_theme_name or data['theme'] == top_theme_name:
+	main_theme_name = data['main_config'].get('ext', {}).get(ext, {}).get('theme', None)
+	if not main_theme_name or data['theme'] == main_theme_name:
 		top_segment_data = {}
 	else:
-		top_segment_data = data['ext_theme_configs'].get(top_theme_name, {}).get('segment_data', {})
+		top_segment_data = data['ext_theme_configs'].get(main_theme_name, {}).get('segment_data', {})
 
 	names = [segment['name']]
 	if segment.get('type', 'function') == 'function':
@@ -977,12 +974,16 @@ def check_segment_name(name, data, context, echoerr):
 		return True, False, hadproblem
 	elif context[-2][1].get('type') != 'segment_list':
 		if name not in context[0][1].get('segment_data', {}):
-			top_theme_name = data['main_config'].get('ext', {}).get(ext, {}).get('theme', None)
-			if data['theme'] == top_theme_name:
-				top_theme = {}
+			main_theme_name = data['main_config'].get('ext', {}).get(ext, {}).get('theme', None)
+			if data['theme'] == main_theme_name:
+				main_theme = {}
 			else:
-				top_theme = data['ext_theme_configs'].get(top_theme_name, {})
-			if name not in top_theme.get('segment_data', {}):
+				main_theme = data['ext_theme_configs'].get(main_theme_name, {})
+			if (
+				name not in main_theme.get('segment_data', {})
+				and name not in data['ext_theme_configs'].get('__main__', {}).get('segment_data', {})
+				and not any(((name in theme.get('segment_data', {})) for theme in data['top_themes'].values()))
+			):
 				echoerr(context='Error while checking segments (key {key})'.format(key=context_key(context)),
 						problem='found useless use of name key (such name is not present in theme/segment_data)',
 						problem_mark=name.mark)
@@ -1070,34 +1071,49 @@ def check_highlight_groups(hl_groups, data, context, echoerr):
 	return True, False, False
 
 
-def check_segment_data_key(key, data, context, echoerr):
+def list_themes(data, context):
+	theme_type = data['theme_type']
 	ext = data['ext']
-	top_theme_name = data['main_config'].get('ext', {}).get(ext, {}).get('theme', None)
-	is_top_theme = (data['theme'] == top_theme_name)
-	if is_top_theme:
-		themes = data['ext_theme_configs'].values()
+	main_theme_name = data['main_config'].get('ext', {}).get(ext, {}).get('theme', None)
+	is_main_theme = (data['theme'] == main_theme_name)
+	if theme_type == 'top':
+		return list(itertools.chain(*[
+			[(ext, theme) for theme in theme_configs.values()]
+			for ext, theme_configs in data['theme_configs'].items()
+		]))
+	elif theme_type == 'main' or is_main_theme:
+		return [(ext, theme) for theme in data['ext_theme_configs'].values()]
 	else:
-		themes = [context[0][1]]
+		return [(ext, context[0][1])]
 
-	for theme in themes:
+
+def check_segment_data_key(key, data, context, echoerr):
+	has_module_name = '.' in key
+	found = False
+	for ext, theme in list_themes(data, context):
 		for segments in theme.get('segments', {}).values():
-			found = False
 			for segment in segments:
 				if 'name' in segment:
-					if key == segment['name']:
-						found = True
-					module = segment.get('module', theme.get('default_module', 'powerline.segments.' + ext))
-					if key == unicode(module) + '.' + unicode(segment['name']):
-						found = True
+					if has_module_name:
+						module = segment.get('module', theme.get('default_module', 'powerline.segments.' + ext))
+						full_name = unicode(module) + '.' + unicode(segment['name'])
+						if key == full_name:
+							found = True
+							break
+					else:
+						if key == segment['name']:
+							found = True
+							break
 			if found:
 				break
 		if found:
 			break
 	else:
-		echoerr(context='Error while checking segment data',
-				problem='found key {0} that cannot be associated with any segment'.format(key),
-				problem_mark=key.mark)
-		return True, False, True
+		if data['theme_type'] != 'top':
+			echoerr(context='Error while checking segment data',
+					problem='found key {0} that cannot be associated with any segment'.format(key),
+					problem_mark=key.mark)
+			return True, False, True
 
 	return True, False, False
 
@@ -1109,8 +1125,8 @@ threaded_args_specs = {
 }
 
 
-def check_args_variant(segment, args, data, context, echoerr):
-	argspec = getconfigargspec(segment)
+def check_args_variant(func, args, data, context, echoerr):
+	argspec = getconfigargspec(func)
 	present_args = set(args)
 	all_args = set(argspec.args)
 	required_args = set(argspec.args[:-len(argspec.defaults)])
@@ -1132,7 +1148,7 @@ def check_args_variant(segment, args, data, context, echoerr):
 				problem_mark=next(iter(present_args - all_args)).mark)
 		hadproblem = True
 
-	if isinstance(segment, ThreadedSegment):
+	if isinstance(func, ThreadedSegment):
 		for key in set(threaded_args_specs) & present_args:
 			proceed, khadproblem = threaded_args_specs[key].match(
 				args[key],
@@ -1149,13 +1165,13 @@ def check_args_variant(segment, args, data, context, echoerr):
 	return hadproblem
 
 
-def check_args(get_segment_variants, args, data, context, echoerr):
+def check_args(get_functions, args, data, context, echoerr):
 	new_echoerr = DelayedEchoErr(echoerr)
 	count = 0
 	hadproblem = False
-	for segment in get_segment_variants(data, context, new_echoerr):
+	for func in get_functions(data, context, new_echoerr):
 		count += 1
-		shadproblem = check_args_variant(segment, args, data, context, echoerr)
+		shadproblem = check_args_variant(func, args, data, context, echoerr)
 		if shadproblem:
 			hadproblem = True
 
@@ -1171,7 +1187,7 @@ def check_args(get_segment_variants, args, data, context, echoerr):
 	return True, False, hadproblem
 
 
-def get_one_segment_variant(data, context, echoerr):
+def get_one_segment_function(data, context, echoerr):
 	name = context[-2][1].get('name')
 	if name:
 		func = import_segment(name, data, context, echoerr)
@@ -1179,7 +1195,7 @@ def get_one_segment_variant(data, context, echoerr):
 			yield func
 
 
-def get_all_possible_segments(data, context, echoerr):
+def get_all_possible_functions(data, context, echoerr):
 	name = context[-2][0]
 	module, name = name.rpartition('.')[::2]
 	if module:
@@ -1187,13 +1203,13 @@ def get_all_possible_segments(data, context, echoerr):
 		if func:
 			yield func
 	else:
-		for theme_config in data['ext_theme_configs'].values():
+		for ext, theme_config in list_themes(data, context):
 			for segments in theme_config.get('segments', {}).values():
 				for segment in segments:
 					if segment.get('type', 'function') == 'function':
 						module = segment.get(
 							'module',
-							context[0][1].get('default_module', 'powerline.segments.' + data['ext'])
+							theme_config.get('default_module', 'powerline.segments.' + data['ext'])
 						)
 						func = import_segment(name, data, context, echoerr, module=module)
 						if func:
@@ -1222,7 +1238,7 @@ segment_spec = Spec(
 	before=Spec().type(unicode).optional(),
 	width=Spec().either(Spec().unsigned(), Spec().cmp('eq', 'auto')).optional(),
 	align=Spec().oneof(set('lr')).optional(),
-	args=args_spec().func(lambda *args, **kwargs: check_args(get_one_segment_variant, *args, **kwargs)),
+	args=args_spec().func(lambda *args, **kwargs: check_args(get_one_segment_function, *args, **kwargs)),
 	contents=Spec().type(unicode).optional(),
 	highlight_group=Spec().list(
 		highlight_group_spec().re(
@@ -1245,20 +1261,52 @@ segdict_spec=Spec(
 	(lambda value, *args: (True, True, not (('left' in value) or ('right' in value)))),
 	(lambda value: 'segments dictionary must contain either left, right or both keys')
 ).context_message('Error while loading segments (key {key})').copy
-theme_spec = (Spec(
-	default_module=segment_module_spec(),
+divside_spec = Spec(
+	hard=divider_spec(),
+	soft=divider_spec(),
+).copy
+segment_data_value_spec = Spec(
+	after=Spec().type(unicode).optional(),
+	before=Spec().type(unicode).optional(),
+	display=Spec().type(bool).optional(),
+	args=args_spec().func(lambda *args, **kwargs: check_args(get_all_possible_functions, *args, **kwargs)),
+	contents=Spec().type(unicode).optional(),
+).copy
+dividers_spec = Spec(
+	left=divside_spec(),
+	right=divside_spec(),
+).copy
+spaces_spec = Spec().unsigned().cmp(
+	'le', 2, (lambda value: 'Are you sure you need such a big ({0}) number of spaces?'.format(value))
+).copy
+common_theme_spec = Spec(
+	default_module=segment_module_spec().optional(),
+).context_message('Error while loading theme').copy
+top_theme_spec = common_theme_spec().update(
+	dividers=dividers_spec(),
+	spaces=spaces_spec(),
 	segment_data=Spec().unknown_spec(
 		Spec().func(check_segment_data_key),
-		Spec(
-			after=Spec().type(unicode).optional(),
-			before=Spec().type(unicode).optional(),
-			display=Spec().type(bool).optional(),
-			args=args_spec().func(lambda *args, **kwargs: check_args(get_all_possible_segments, *args, **kwargs)),
-			contents=Spec().type(unicode).optional(),
-		),
+		segment_data_value_spec(),
+	).optional().context_message('Error while loading segment data (key {key})'),
+)
+main_theme_spec = common_theme_spec().update(
+	dividers=dividers_spec().optional(),
+	spaces=spaces_spec().optional(),
+	segment_data=Spec().unknown_spec(
+		Spec().func(check_segment_data_key),
+		segment_data_value_spec(),
+	).optional().context_message('Error while loading segment data (key {key})'),
+)
+theme_spec = common_theme_spec().update(
+	dividers=dividers_spec().optional(),
+	spaces=spaces_spec().optional(),
+	segment_data=Spec().unknown_spec(
+		Spec().func(check_segment_data_key),
+		segment_data_value_spec(),
 	).optional().context_message('Error while loading segment data (key {key})'),
 	segments=segdict_spec().update(above=Spec().list(segdict_spec()).optional()),
-).context_message('Error while loading theme'))
+)
 
 
 def generate_json_config_loader(lhadproblem):
@@ -1315,6 +1363,8 @@ def check(paths=None, debug=False):
 				hadproblem = True
 				sys.stderr.write('Path {0} is supposed to be a directory, but it is not\n'.format(d))
 
+	hadproblem = False
+
 	configs = defaultdict(lambda: defaultdict(lambda: {}))
 	for typ in ('themes', 'colorschemes'):
 		for ext in paths[typ]:
@@ -1324,12 +1374,17 @@ def check(paths=None, debug=False):
 						name = subp[:-5]
 						if name != '__main__':
 							lists[typ].add(name)
+							if name.startswith('__') or name.endswith('__'):
+								hadproblem = True
+								sys.stderr.write('File name is not supposed to start or end with “__”: {0}'.format(
+									os.path.join(d, subp)
+								))
 						configs[typ][ext][name] = os.path.join(d, subp)
 		for path in paths['top_' + typ]:
 			name = os.path.basename(path)[:-5]
 			configs['top_' + typ][name] = path
 
-	diff = set(configs['themes']) ^ set(configs['colorschemes'])
+	diff = set(configs['colorschemes']) - set(configs['themes'])
 	if diff:
 		hadproblem = True
 		for ext in diff:
@@ -1341,7 +1396,6 @@ def check(paths=None, debug=False):
 					typ,
 				))
 
-	hadproblem = False
 	try:
 		main_config = load_config('config', find_config_files, config_loader)
 	except IOError:
@@ -1469,17 +1523,53 @@ def check(paths=None, debug=False):
 				hadproblem = True
 			theme_configs[ext][theme] = config
 
+	top_theme_configs = {}
+	for top_theme, top_theme_file in configs['top_themes'].items():
+		with open_file(top_theme_file) as config_file_fp:
+			try:
+				config, lhadproblem = load(config_file_fp)
+			except MarkedError as e:
+				sys.stderr.write(str(e) + '\n')
+				hadproblem = True
+				continue
+			if lhadproblem:
+				hadproblem = True
+			top_theme_configs[top_theme] = config
+
 	for ext, configs in theme_configs.items():
 		data = {
 			'ext': ext,
 			'colorscheme_configs': colorscheme_configs,
 			'import_paths': import_paths,
 			'main_config': main_config,
+			'top_themes': top_theme_configs,
 			'ext_theme_configs': configs,
 			'colors_config': colors_config
 		}
 		for theme, config in configs.items():
 			data['theme'] = theme
-			if theme_spec.match(config, context=(('', config),), data=data, echoerr=ee)[1]:
+			if theme == '__main__':
+				data['theme_type'] = 'main'
+				spec = main_theme_spec
+			else:
+				data['theme_type'] = 'regular'
+				spec = theme_spec
+			if spec.match(config, context=(('', config),), data=data, echoerr=ee)[1]:
 				hadproblem = True
+
+	for top_theme, config in top_theme_configs.items():
+		data = {
+			'ext': ext,
+			'colorscheme_configs': colorscheme_configs,
+			'import_paths': import_paths,
+			'main_config': main_config,
+			'theme_configs': theme_configs,
+			'ext_theme_configs': configs,
+			'colors_config': colors_config
+		}
+		data['theme_type'] = 'top'
+		data['theme'] = top_theme
+		if top_theme_spec.match(config, context=(('', config),), data=data, echoerr=ee)[1]:
+			hadproblem = True
+
 	return hadproblem

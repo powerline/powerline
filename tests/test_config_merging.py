@@ -17,17 +17,6 @@ CONFIG_DIR = 'tests/config'
 
 root_config = lambda: {
 	'common': {
-		'dividers': {
-			'left': {
-				'hard': '#>',
-				'soft': '|>',
-			},
-			'right': {
-				'hard': '<#',
-				'soft': '<|',
-			},
-		},
-		'spaces': 0,
 		'interval': None,
 		'watcher': 'auto',
 	},
@@ -76,12 +65,41 @@ theme_config = lambda: {
 	}
 }
 
+top_theme_config = lambda: {
+	'dividers': {
+		'left': {
+			'hard': '#>',
+			'soft': '|>',
+		},
+		'right': {
+			'hard': '<#',
+			'soft': '<|',
+		},
+	},
+	'spaces': 0,
+}
+
 
 main_tree = lambda: {
 	'1/config': root_config(),
 	'1/colors': colors_config(),
 	'1/colorschemes/default': colorscheme_config(),
 	'1/themes/test/default': theme_config(),
+	'1/themes/powerline': top_theme_config(),
+	'1/themes/other1': mdc(top_theme_config(), {
+		'dividers': {
+			'left': {
+				'hard': '!>',
+			}
+		}
+	}),
+	'1/themes/other2': mdc(top_theme_config(), {
+		'dividers': {
+			'left': {
+				'hard': '>>',
+			}
+		}
+	}),
 }
 
 
@@ -151,11 +169,7 @@ class TestMerging(TestCase):
 		with WithConfigTree(mdc(main_tree(), {
 			'2/config': {
 				'common': {
-					'dividers': {
-						'left': {
-							'hard': '!>',
-						}
-					}
+					'default_top_theme': 'other1',
 				}
 			},
 		})) as p:
@@ -163,36 +177,26 @@ class TestMerging(TestCase):
 		with WithConfigTree(mdc(main_tree(), {
 			'2/config': {
 				'common': {
-					'dividers': {
-						'left': {
-							'hard': '!>',
-						}
-					}
+					'default_top_theme': 'other1',
 				}
 			},
 			'3/config': {
 				'common': {
-					'dividers': {
-						'left': {
-							'hard': '>>',
-						}
-					}
+					'default_top_theme': 'other2',
 				}
 			},
 		})) as p:
 			self.assertRenderEqual(p, '{12} bt{2-}>>{--}')
+
+	def test_top_theme_merging(self):
 		with WithConfigTree(mdc(main_tree(), {
-			'2/config': {
-				'common': {
-					'spaces': 1,
-				}
+			'2/themes/powerline': {
+				'spaces': 1,
 			},
-			'3/config': {
-				'common': {
-					'dividers': {
-						'left': {
-							'hard': '>>',
-						}
+			'3/themes/powerline': {
+				'dividers': {
+					'left': {
+						'hard': '>>',
 					}
 				}
 			},

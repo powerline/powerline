@@ -17,9 +17,11 @@ Powerline provides default configurations in the following locations:
     :file:`powerline/config.json`
 :ref:`Colorschemes <config-colors>`
     :file:`powerline/colorschemes/{name}.json`, 
-    :file:`powerline/colorscheme/__main__.json`, 
+    :file:`powerline/colorscheme/{extension}/__main__.json`, 
     :file:`powerline/colorschemes/{extension}/{name}.json`
 :ref:`Themes <config-themes>`
+    :file:`powerline/themes/{top_theme}.json`, 
+    :file:`powerline/themes/{extension}/__main__.json`, 
     :file:`powerline/themes/{extension}/default.json`
 
 The default configuration files are stored in the main package. User 
@@ -47,6 +49,10 @@ overrides <local-configuration-overrides>`.
     recursively: keys from next file overrule those from the previous unless 
     corresponding values are both dictionaries in which case these dictionaries 
     are merged and key is assigned the result of the merge.
+
+.. note:: Some configuration files (i.e. themes and colorschemes) have two level
+    of merging: first happens merging described above, second theme- or 
+    colorscheme-specific merging happens.
 
 .. _quick-guide:
 

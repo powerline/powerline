@@ -7,19 +7,18 @@
 				"priority": 50
 			},
 			{
-				"name": "date"
+				"name": "date",
+				"before": ""
 			},
 			{
 				"name": "date",
 				"args": {
 					"format": "%H:%M",
 					"istime": true
-				},
-				"before": "⌚ "
+				}
 			},
 			{
 				"name": "email_imap_alert",
-				"before": "✉ ",
 				"priority": 10,
 				"args": {
 					"username": "",

@@ -1,17 +1,6 @@
 {
 	"common": {
-		"term_truecolor": false,
-		"dividers": {
-			"left": {
-				"hard": " ",
-				"soft": " "
-			},
-			"right": {
-				"hard": " ",
-				"soft": " "
-			}
-		},
-		"spaces": 1
+		"term_truecolor": false
 	},
 	"ext": {
 		"ipython": {

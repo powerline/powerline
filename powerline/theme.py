@@ -31,13 +31,13 @@ class Theme(object):
 				top_theme_config=None,
 				run_once=False,
 				shutdown_event=None):
-		self.dividers = theme_config.get('dividers', common_config['dividers'])
+		self.dividers = theme_config['dividers']
 		self.dividers = dict((
 			(key, dict((k, u(v))
 			for k, v in val.items()))
 			for key, val in self.dividers.items()
 		))
-		self.spaces = theme_config.get('spaces', common_config['spaces'])
+		self.spaces = theme_config['spaces']
 		self.segments = []
 		self.EMPTY_SEGMENT = {
 			'contents': None,

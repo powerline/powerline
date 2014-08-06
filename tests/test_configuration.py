@@ -22,17 +22,6 @@ def highlighted_string(s, group, **kwargs):
 config = {
 	'config': {
 		'common': {
-			'dividers': {
-				'left': {
-					'hard': '>>',
-					'soft': '>',
-				},
-				'right': {
-					'hard': '<<',
-					'soft': '<',
-				},
-			},
-			'spaces': 0,
 			'interval': 0,
 			'watcher': 'test',
 		},
@@ -104,6 +93,26 @@ config = {
 			],
 		},
 	},
+	'themes/powerline': {
+		'dividers': {
+			'left': {
+				'hard': '>>',
+				'soft': '>',
+			},
+			'right': {
+				'hard': '<<',
+				'soft': '<',
+			},
+		},
+		'spaces': 0,
+	},
+	'themes/test/__main__': {
+		'dividers': {
+			'right': {
+				'soft': '|',
+			},
+		},
+	},
 	'themes/vim/default': {
 		'default_module': 'powerline.segments.common',
 		'segments': {
@@ -147,9 +156,9 @@ class TestRender(TestCase):
 class TestLines(TestRender):
 	@add_args
 	def test_without_above(self, p, config):
-		self.assertRenderEqual(p, '{121} s{24}>>{344}g{34}>{34}<{344}f {--}')
-		self.assertRenderEqual(p, '{121} s {24}>>{344}g{34}>{34}<{344}f {--}', width=10)
-		# self.assertRenderEqual(p, '{121} s {24}>>{344}g{34}>{34}<{344} f {--}', width=11)
+		self.assertRenderEqual(p, '{121} s{24}>>{344}g{34}>{34}|{344}f {--}')
+		self.assertRenderEqual(p, '{121} s {24}>>{344}g{34}>{34}|{344}f {--}', width=10)
+		# self.assertRenderEqual(p, '{121} s {24}>>{344}g{34}>{34}|{344} f {--}', width=11)
 		self.assertEqual(list(p.render_above_lines()), [])
 
 	@with_new_config
@@ -158,21 +167,21 @@ class TestLines(TestRender):
 		config['themes/test/default']['segments']['above'] = [old_segments]
 		with get_powerline(config, run_once=True, simpler_renderer=True) as p:
 			self.assertRenderLinesEqual(p, [
-				'{121} s{24}>>{344}g{34}>{34}<{344}f {--}',
+				'{121} s{24}>>{344}g{34}>{34}|{344}f {--}',
 			])
 			self.assertRenderLinesEqual(p, [
-				'{121} s {24}>>{344}g{34}>{34}<{344}f {--}',
+				'{121} s {24}>>{344}g{34}>{34}|{344}f {--}',
 			], width=10)
 
 		config['themes/test/default']['segments']['above'] = [old_segments] * 2
 		with get_powerline(config, run_once=True, simpler_renderer=True) as p:
 			self.assertRenderLinesEqual(p, [
-				'{121} s{24}>>{344}g{34}>{34}<{344}f {--}',
-				'{121} s{24}>>{344}g{34}>{34}<{344}f {--}',
+				'{121} s{24}>>{344}g{34}>{34}|{344}f {--}',
+				'{121} s{24}>>{344}g{34}>{34}|{344}f {--}',
 			])
 			self.assertRenderLinesEqual(p, [
-				'{121} s {24}>>{344}g{34}>{34}<{344}f {--}',
-				'{121} s {24}>>{344}g{34}>{34}<{344}f {--}',
+				'{121} s {24}>>{344}g{34}>{34}|{344}f {--}',
+				'{121} s {24}>>{344}g{34}>{34}|{344}f {--}',
 			], width=10)
 
 
@@ -297,6 +306,82 @@ class TestColorschemesHierarchy(TestRender):
 		}
 		self.assertRenderEqual(p, '{121} s{--}')
 		self.assertEqual(p.logger._pop_msgs(), [])
+
+
+class TestThemeHierarchy(TestRender):
+	@add_args
+	def test_hierarchy(self, p, config):
+		self.assertRenderEqual(p, '{121} s{24}>>{344}g{34}>{34}|{344}f {--}')
+
+	@add_args
+	def test_no_main(self, p, config):
+		del config['themes/test/__main__']
+		self.assertRenderEqual(p, '{121} s{24}>>{344}g{34}>{34}<{344}f {--}')
+		self.assertEqual(p.logger._pop_msgs(), [])
+
+	@add_args
+	def test_no_powerline(self, p, config):
+		config['themes/test/__main__']['dividers'] = config['themes/powerline']['dividers']
+		config['themes/test/__main__']['spaces'] = 1
+		del config['themes/powerline']
+		self.assertRenderEqual(p, '{121} s {24}>>{344}g {34}>{34}<{344} f {--}')
+		self.assertEqual(p.logger._pop_msgs(), [])
+
+	@add_args
+	def test_no_default(self, p, config):
+		del config['themes/test/default']
+		self.assertRenderEqual(p, 'themes/test/default')
+		self.assertEqual(p.logger._pop_msgs(), [
+			'exception:test:powerline:Failed to load theme: themes/test/default',
+			'exception:test:powerline:Failed to create renderer: themes/test/default',
+			'exception:test:powerline:Failed to render: themes/test/default',
+		])
+
+	@add_args
+	def test_only_default(self, p, config):
+		config['themes/test/default']['dividers'] = config['themes/powerline']['dividers']
+		config['themes/test/default']['spaces'] = 1
+		del config['themes/test/__main__']
+		del config['themes/powerline']
+		self.assertRenderEqual(p, '{121} s {24}>>{344}g {34}>{34}<{344} f {--}')
+
+	@add_args
+	def test_only_main(self, p, config):
+		del config['themes/test/default']
+		del config['themes/powerline']
+		self.assertRenderEqual(p, 'themes/test/default')
+		self.assertEqual(p.logger._pop_msgs(), [
+			'exception:test:powerline:Failed to load theme: themes/powerline',
+			'exception:test:powerline:Failed to load theme: themes/test/default',
+			'exception:test:powerline:Failed to create renderer: themes/test/default',
+			'exception:test:powerline:Failed to render: themes/test/default',
+		])
+
+	@add_args
+	def test_only_powerline(self, p, config):
+		del config['themes/test/default']
+		del config['themes/test/__main__']
+		self.assertRenderEqual(p, 'themes/test/default')
+		self.assertEqual(p.logger._pop_msgs(), [
+			'exception:test:powerline:Failed to load theme: themes/test/__main__',
+			'exception:test:powerline:Failed to load theme: themes/test/default',
+			'exception:test:powerline:Failed to create renderer: themes/test/default',
+			'exception:test:powerline:Failed to render: themes/test/default',
+		])
+
+	@add_args
+	def test_nothing(self, p, config):
+		del config['themes/test/default']
+		del config['themes/powerline']
+		del config['themes/test/__main__']
+		self.assertRenderEqual(p, 'themes/test/default')
+		self.assertEqual(p.logger._pop_msgs(), [
+			'exception:test:powerline:Failed to load theme: themes/powerline',
+			'exception:test:powerline:Failed to load theme: themes/test/__main__',
+			'exception:test:powerline:Failed to load theme: themes/test/default',
+			'exception:test:powerline:Failed to create renderer: themes/test/default',
+			'exception:test:powerline:Failed to render: themes/test/default',
+		])
 
 
 class TestVim(TestCase):
