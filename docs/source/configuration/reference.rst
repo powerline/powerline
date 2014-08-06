@@ -413,11 +413,12 @@ ascii                       Theme without any unicode characters at all
         *not* included in any modes, *except* for the modes in this list.
 
     ``display``
-
         .. _config-themes-seg-display:
 
         Boolean. If false disables displaying of the segment.
         Defaults to ``True``.
 
     ``segments``
+        .. _config-themes-seg-segments:
+
         A list of subsegments.
