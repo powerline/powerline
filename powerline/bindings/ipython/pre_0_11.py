@@ -1,34 +1,11 @@
 # vim:fileencoding=utf-8:noet
-from powerline.ipython import IpythonPowerline
+from powerline.ipython import IpythonPowerline, RewriteResult
+from powerline.lib.unicode import string
 from IPython.Prompts import BasePrompt
 from IPython.ipapi import get as get_ipython
 from IPython.ipapi import TryNext
 
 import re
-
-
-def string(s):
-	if type(s) is not str:
-		return s.encode('utf-8')
-	else:
-		return s
-
-
-# HACK: ipython tries to only leave us with plain ASCII
-class RewriteResult(object):
-	def __init__(self, prompt):
-		self.prompt = string(prompt)
-
-	def __str__(self):
-		return self.prompt
-
-	def __add__(self, s):
-		if type(s) is not str:
-			try:
-				s = s.encode('utf-8')
-			except AttributeError:
-				raise NotImplementedError
-		return RewriteResult(self.prompt + s)
 
 
 class IpythonInfo(object):
