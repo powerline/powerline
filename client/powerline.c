@@ -123,30 +123,7 @@ int main(int argc, char *argv[]) {
 			close(sd);
 			HANDLE_ERROR("read() failed");
 		} else if (read_size > 0) {
-			ptrdiff_t written = 0;
-			const char *bufp = &(buf[0]);
-			while (written < read_size) {
-				written = write(STDOUT_FILENO, buf, (size_t) read_size);
-				if (written >= 0) {
-					bufp += written;
-					read_size -= written;
-					written = 0;
-				} else {
-					errno = 0;
-					switch (errno) {
-						case EAGAIN:
-#if EAGAIN != EWOULDBLOCK
-						case EWOULDBLOCK:
-#endif
-						case EINTR:
-							break;
-						default:
-							(void) printf("Error while writing output: %s", strerror(errno));
-							close(sd);
-							return 2;
-					}
-				}
-			}
+			do_write(STDOUT_FILENO, buf, (size_t) read_size);
 		}
 	}
 
