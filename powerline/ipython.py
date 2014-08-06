@@ -5,8 +5,12 @@ from powerline.lib import mergedicts
 
 
 class IpythonPowerline(Powerline):
-	def __init__(self):
-		super(IpythonPowerline, self).__init__('ipython', use_daemon_threads=True)
+	def __init__(self, is_prompt):
+		super(IpythonPowerline, self).__init__(
+			'ipython',
+			renderer_module=('ipython_prompt' if is_prompt else 'ipython'),
+			use_daemon_threads=True
+		)
 
 	def get_config_paths(self):
 		if self.path:

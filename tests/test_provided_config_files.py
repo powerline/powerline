@@ -116,9 +116,14 @@ class TestConfig(TestCase):
 			config_overrides = None
 			theme_overrides = {}
 
-		with IpyPowerline() as powerline:
-			segment_info = Args(prompt_count=1)
-			for prompt_type in ['in', 'in2', 'out', 'rewrite']:
+		segment_info = Args(prompt_count=1)
+
+		with IpyPowerline(True) as powerline:
+			for prompt_type in ['in', 'in2']:
+				powerline.render(matcher_info=prompt_type, segment_info=segment_info)
+				powerline.render(matcher_info=prompt_type, segment_info=segment_info)
+		with IpyPowerline(False) as powerline:
+			for prompt_type in ['out', 'rewrite']:
 				powerline.render(matcher_info=prompt_type, segment_info=segment_info)
 				powerline.render(matcher_info=prompt_type, segment_info=segment_info)
 
