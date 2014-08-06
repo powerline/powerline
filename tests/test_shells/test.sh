@@ -120,60 +120,68 @@ mkdir tests/shell/3rd/'$(echo)'
 mkdir tests/shell/3rd/'`echo`'
 
 mkdir tests/shell/fish_home
+cp -r tests/test_shells/ipython_home tests/shell
 export XDG_CONFIG_HOME="$PWD/tests/shell/fish_home"
+export IPYTHONDIR="$PWD/tests/shell/ipython_home"
 
 unset ENV
 
-powerline-daemon -k || true
-sleep 1s
+if test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || test "x${ONLY_SHELL}" = xbb ; then
+	powerline-daemon -k || true
+	sleep 1s
 
-scripts/powerline-config shell command
+	scripts/powerline-config shell command
 
-for TEST_TYPE in "daemon" "nodaemon" ; do
-	if test $TEST_TYPE == daemon ; then
-		sh -c 'echo $$ > tests/shell/daemon_pid; ./scripts/powerline-daemon -f &>tests/shell/daemon_log' &
-	fi
-	if ! run_test $TEST_TYPE bash --norc --noprofile -i ; then
-		FAILED=1
-	fi
-
-	if ! run_test $TEST_TYPE zsh -f -i ; then
-		FAILED=1
-	fi
-
-	if ! run_test $TEST_TYPE fish -i ; then
-		FAILED=1
-	fi
-
-	if ! run_test $TEST_TYPE tcsh -f -i ; then
-		FAILED=1
-	fi
-
-	if ! run_test $TEST_TYPE bb -i ; then
-		FAILED=1
-	fi
-
-	if ! run_test $TEST_TYPE mksh -i ; then
-		FAILED=1
-	fi
-
-	if ! run_test $TEST_TYPE dash -i ; then
-		# dash tests are not stable, see #931
-		# FAILED=1
-		true
-	fi
-	if test $TEST_TYPE == daemon ; then
-		./scripts/powerline-daemon -k
-		wait $(cat tests/shell/daemon_pid)
-		if ! test -z "$(cat tests/shell/daemon_log)" ; then
-			echo '____________________________________________________________'
-			echo "Daemon log:"
-			echo '============================================================'
-			cat tests/shell/daemon_log
+	for TEST_TYPE in "daemon" "nodaemon" ; do
+		if test $TEST_TYPE == daemon ; then
+			sh -c 'echo $$ > tests/shell/daemon_pid; ./scripts/powerline-daemon -f &>tests/shell/daemon_log' &
+		fi
+		if ! run_test $TEST_TYPE bash --norc --noprofile -i ; then
 			FAILED=1
 		fi
-	fi
-done
+
+		if ! run_test $TEST_TYPE zsh -f -i ; then
+			FAILED=1
+		fi
+
+		if ! run_test $TEST_TYPE fish -i ; then
+			FAILED=1
+		fi
+
+		if ! run_test $TEST_TYPE tcsh -f -i ; then
+			FAILED=1
+		fi
+
+		if ! run_test $TEST_TYPE bb -i ; then
+			FAILED=1
+		fi
+
+		if ! run_test $TEST_TYPE mksh -i ; then
+			FAILED=1
+		fi
+
+		if ! run_test $TEST_TYPE dash -i ; then
+			# dash tests are not stable, see #931
+			# FAILED=1
+			true
+		fi
+		if test $TEST_TYPE == daemon ; then
+			./scripts/powerline-daemon -k
+			wait $(cat tests/shell/daemon_pid)
+			if ! test -z "$(cat tests/shell/daemon_log)" ; then
+				echo '____________________________________________________________'
+				echo "Daemon log:"
+				echo '============================================================'
+				cat tests/shell/daemon_log
+				FAILED=1
+			fi
+		fi
+	done
+fi
+
+if ! run_test ipython ipython ; then
+	FAILED=1
+fi
 
 test "x$ONLY_SHELL" = "x" && rm -r tests/shell
 exit $FAILED
