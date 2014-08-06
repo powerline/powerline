@@ -15,6 +15,12 @@ if python -c 'import sys; sys.exit(1 * (sys.version_info[0] != 2))' ; then
 		# Python 2.7
 		pip install ipython
 	fi
+else
+	# Python 3
+	if python -c 'import sys; sys.exit(1 * (sys.version_info < (3, 3)))' ; then
+		# Python 3.3+
+		pip install ipython
+	fi
 fi
 sudo apt-get install -qq screen zsh tcsh mksh busybox
 # Travis has too outdated fish. It cannot be used for tests.
