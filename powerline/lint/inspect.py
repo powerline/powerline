@@ -1,72 +1,63 @@
 # vim:fileencoding=utf-8:noet
 from __future__ import absolute_import
+
 from inspect import ArgSpec, getargspec
-from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment
 from itertools import count
+
+from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment
+from powerline.segments import Segment
 
 
 def getconfigargspec(obj):
-	if isinstance(obj, ThreadedSegment):
-		args = ['interval']
-		defaults = [getattr(obj, 'interval', 1)]
-		if obj.update_first:
-			args.append('update_first')
-			defaults.append(True)
-		methods = ['render', 'set_state']
-		if isinstance(obj, KwThreadedSegment):
-			methods += ['key', 'render_one']
-
-		for method in methods:
-			if hasattr(obj, method):
-				# Note: on <python-2.6 it may return simple tuple, not 
-				# ArgSpec instance.
-				argspec = getargspec(getattr(obj, method))
-				for i, arg in zip(count(1), reversed(argspec.args)):
-					if (arg == 'self' or
-							(arg == 'segment_info' and
-								getattr(obj, 'powerline_requires_segment_info', None)) or
-							(arg == 'create_watcher' and
-								getattr(obj, 'powerline_requires_filesystem_watcher', None)) or
-							(arg == 'pl') or
-							(method.startswith('render') and (1 if argspec.args[0] == 'self' else 0) + i == len(argspec.args)) or
-							arg in args):
-						continue
-					if argspec.defaults and len(argspec.defaults) >= i:
-						default = argspec.defaults[-i]
-						defaults.append(default)
-						args.append(arg)
-					else:
-						args.insert(0, arg)
-		argspec = ArgSpec(args=args, varargs=None, keywords=None, defaults=tuple(defaults))
+	if hasattr(obj, 'powerline_origin'):
+		obj = obj.powerline_origin
 	else:
-		if hasattr(obj, 'powerline_origin'):
-			obj = obj.powerline_origin
-		else:
-			obj = obj
+		obj = obj
 
-		remove_self = False
-		try:
-			argspec = getargspec(obj)
-		except TypeError:  # Workaround for now_playing segment
-			# TODO For NowPlayingSegment for linter: merge in information about 
-			# player-specific arguments
-			argspec = getargspec(obj.__call__)
-			remove_self = True
-		args = []
-		defaults = []
-		for i, arg in zip(count(1), reversed(argspec.args)):
+	args = []
+	defaults = []
+
+	if isinstance(obj, Segment):
+		additional_args = obj.additional_args()
+		argspecobjs = obj.argspecobjs()
+		get_omitted_args = obj.omitted_args
+	else:
+		additional_args = ()
+		argspecobjs = ((None, obj),)
+		get_omitted_args = lambda *args: ()
+
+	for arg in additional_args:
+		args.append(arg[0])
+		if len(arg) > 1:
+			defaults.append(arg[1])
+
+	requires_segment_info = getattr(obj, 'powerline_requires_segment_info', False)
+	requires_filesystem_watcher = getattr(obj, 'powerline_requires_filesystem_watcher', False)
+
+	for name, method in argspecobjs:
+		argspec = getargspec(method)
+		omitted_args = get_omitted_args(name, method)
+		largs = len(argspec.args)
+		for i, arg in enumerate(reversed(argspec.args)):
 			if (
-				(arg == 'segment_info' and getattr(obj, 'powerline_requires_segment_info', None))
+				largs - (i + 1) in omitted_args
 				or arg == 'pl'
-				or (arg == 'self' and remove_self)
+				or (arg == 'create_watcher' and requires_filesystem_watcher)
+				or (arg == 'segment_info' and requires_segment_info)
 			):
 				continue
-			if argspec.defaults and len(argspec.defaults) >= i:
-				default = argspec.defaults[-i]
+			if argspec.defaults and len(argspec.defaults) > i:
+				if arg in args:
+					idx = args.index(arg)
+					if len(args) - idx > len(defaults):
+						args.pop(idx)
+					else:
+						continue
+				default = argspec.defaults[-(i + 1)]
 				defaults.append(default)
 				args.append(arg)
 			else:
-				args.insert(0, arg)
-		argspec = ArgSpec(args=args, varargs=argspec.varargs, keywords=argspec.keywords, defaults=tuple(defaults))
+				if arg not in args:
+					args.insert(0, arg)
 
-	return argspec
+	return ArgSpec(args=args, varargs=None, keywords=None, defaults=tuple(defaults))

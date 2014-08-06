@@ -2,9 +2,11 @@
 
 from __future__ import absolute_import
 
-from powerline.lib.monotonic import monotonic
-
 from threading import Thread, Lock, Event
+from types import MethodType
+
+from powerline.lib.monotonic import monotonic
+from powerline.segments import Segment
 
 
 class MultiRunnedThread(object):
@@ -28,11 +30,13 @@ class MultiRunnedThread(object):
 		return None
 
 
-class ThreadedSegment(MultiRunnedThread):
+class ThreadedSegment(Segment, MultiRunnedThread):
 	min_sleep_time = 0.1
 	update_first = True
 	interval = 1
 	daemon = False
+
+	argmethods = ('render', 'set_state')
 
 	def __init__(self):
 		super(ThreadedSegment, self).__init__()
@@ -145,9 +149,33 @@ class ThreadedSegment(MultiRunnedThread):
 	def debug(self, *args, **kwargs):
 		self.pl.debug(prefix=self.__class__.__name__, *args, **kwargs)
 
+	def argspecobjs(self):
+		for name in self.argmethods:
+			try:
+				yield name, getattr(self, name)
+			except AttributeError:
+				pass
+
+	def additional_args(self):
+		return (('interval', self.interval),)
+
+	def omitted_args(self, name, method):
+		if isinstance(getattr(self, name, None), MethodType):
+			omitted_indexes = (0,)
+		else:
+			omitted_indexes = ()
+		if name.startswith('render'):
+			if omitted_indexes:
+				omitted_indexes += (1,)
+			else:
+				omitted_indexes = (0,)
+		return omitted_indexes
+
 
 class KwThreadedSegment(ThreadedSegment):
 	update_first = True
+
+	argmethods = ('render', 'set_state', 'key', 'render_one')
 
 	def __init__(self):
 		super(KwThreadedSegment, self).__init__()

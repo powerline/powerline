@@ -1,9 +1,9 @@
 # vim:fileencoding=utf-8:noet
-
 from __future__ import absolute_import, unicode_literals, division, print_function
 
-from powerline.lib.file_watcher import create_file_watcher
 import sys
+
+from powerline.lib.file_watcher import create_file_watcher
 
 
 def list_segment_key_values(segment, theme_configs, key, module=None, default=None):

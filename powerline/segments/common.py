@@ -19,6 +19,7 @@ from powerline.lib.monotonic import monotonic
 from powerline.lib.humanize_bytes import humanize_bytes
 from powerline.lib.unicode import u
 from powerline.theme import requires_segment_info, requires_filesystem_watcher
+from powerline.segments import Segment
 from collections import namedtuple
 
 
@@ -904,7 +905,7 @@ STATE_SYMBOLS = {
 }
 
 
-class NowPlayingSegment(object):
+class NowPlayingSegment(Segment):
 	def __call__(self, player='mpd', format='{state_symbol} {artist} - {title} ({total})', state_symbols=STATE_SYMBOLS, **kwargs):
 		player_func = getattr(self, 'player_{0}'.format(player))
 		stats = {
