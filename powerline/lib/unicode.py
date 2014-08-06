@@ -56,3 +56,10 @@ class FailedUnicode(unicode):
 	FailedUnicode.
 	'''
 	pass
+
+
+def string(s):
+	if type(s) is not str:
+		return s.encode('utf-8')
+	else:
+		return s

@@ -1,5 +1,5 @@
 # vim:fileencoding=utf-8:noet
-from powerline.ipython import IpythonPowerline
+from powerline.ipython import IpythonPowerline, RewriteResult
 
 from IPython.core.prompts import PromptManager
 from IPython.core.hooks import TryNext
@@ -35,7 +35,11 @@ class PowerlinePromptManager(PromptManager):
 		)
 		self.txtwidth = len(res_nocolor)
 		self.width = self.txtwidth
-		return res if color else res_nocolor
+		ret = res if color else res_nocolor
+		if name == 'rewrite':
+			return RewriteResult(ret)
+		else:
+			return ret
 
 
 class ConfigurableIpythonPowerline(IpythonPowerline):

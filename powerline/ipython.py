@@ -2,6 +2,24 @@
 
 from powerline import Powerline
 from powerline.lib import mergedicts
+from powerline.lib.unicode import string
+
+
+# HACK: ipython tries to only leave us with plain ASCII
+class RewriteResult(object):
+	def __init__(self, prompt):
+		self.prompt = string(prompt)
+
+	def __str__(self):
+		return self.prompt
+
+	def __add__(self, s):
+		if type(s) is not str:
+			try:
+				s = s.encode('utf-8')
+			except AttributeError:
+				raise NotImplementedError
+		return RewriteResult(self.prompt + s)
 
 
 class IpythonPowerline(Powerline):
