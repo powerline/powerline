@@ -6,9 +6,6 @@ from powerline.theme import Theme
 
 class IpythonRenderer(ShellRenderer):
 	'''Powerline ipython segment renderer.'''
-	escape_hl_start = '\x01'
-	escape_hl_end = '\x02'
-
 	def get_segment_info(self, segment_info, mode):
 		r = self.segment_info.copy()
 		r['ipython'] = segment_info
