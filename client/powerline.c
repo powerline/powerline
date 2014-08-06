@@ -13,14 +13,15 @@
 
 #define HANDLE_ERROR(msg) \
 	do { \
-		perror(msg); exit(EXIT_FAILURE); \
+		perror(msg); \
+		exit(EXIT_FAILURE); \
 	} while (0)
 
 #define TEMP_FAILURE_RETRY(var, expression) \
 	do { \
-		long int __result; \
+		ptrdiff_t __result; \
 		do { \
-			__result = (long int) (expression); \
+			__result = (expression); \
 		} while (__result == -1L && errno == EINTR); \
 		var = __result; \
 	} while (0)
@@ -56,7 +57,8 @@ void do_write(int sd, const char *raw, size_t len) {
 
 int main(int argc, char *argv[]) {
 	int sd = -1;
-	ptrdiff_t i;
+	int i;
+	ptrdiff_t read_size;
 	struct sockaddr_un server;
 	char address[ADDRESS_SIZE];
 	const char eof[2] = "\0\0";
@@ -67,7 +69,8 @@ int main(int argc, char *argv[]) {
 	char **envp;
 
 	if (argc < 2) {
-		printf("Must provide at least one argument.\n"); return EXIT_FAILURE;
+		printf("Must provide at least one argument.\n");
+		return EXIT_FAILURE;
 	}
 
 	snprintf(address, ADDRESS_SIZE, ADDRESS_TEMPLATE, getuid());
@@ -113,14 +116,14 @@ int main(int argc, char *argv[]) {
 
 	do_write(sd, eof, 2);
 
-	i = -1;
-	while (i != 0) {
-		TEMP_FAILURE_RETRY(i, read(sd, buf, BUF_SIZE));
-		if (i == -1) {
+	read_size = -1;
+	while (read_size != 0) {
+		TEMP_FAILURE_RETRY(read_size, read(sd, buf, BUF_SIZE));
+		if (read_size == -1) {
 			close(sd);
 			HANDLE_ERROR("read() failed");
-		} else if (i > 0) {
-			(void) write(STDOUT_FILENO, buf, (size_t) i);
+		} else if (read_size > 0) {
+			do_write(STDOUT_FILENO, buf, (size_t) read_size);
 		}
 	}
 
