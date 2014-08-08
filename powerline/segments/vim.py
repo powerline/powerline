@@ -710,7 +710,7 @@ def bufferlister(pl, segment_info):
 			buffer_updated_segment_info(segment_info, buffer),
 			add_multiplier(buffer, {'mode': ('tab' if buffer == cur_buffer else 'nc')})
 		)
-		for buffer in vim.buffers
+		for buffer in vim.buffers if buffer.options["buflisted"]
 	]
 
 
