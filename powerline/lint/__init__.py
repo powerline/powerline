@@ -8,6 +8,7 @@ from powerline.segments.vim import vim_modes
 from powerline.lint.inspect import getconfigargspec
 from powerline.lib.threaded import ThreadedSegment
 from powerline.lib import mergedicts_copy
+from powerline.lib.unicode import unicode
 import itertools
 import sys
 import os
@@ -15,12 +16,6 @@ import re
 from collections import defaultdict
 from copy import copy
 import logging
-
-
-try:
-	from __builtin__ import unicode
-except ImportError:
-	unicode = str
 
 
 def open_file(path):
@@ -1078,8 +1073,8 @@ def list_themes(data, context):
 	is_main_theme = (data['theme'] == main_theme_name)
 	if theme_type == 'top':
 		return list(itertools.chain(*[
-			[(ext, theme) for theme in theme_configs.values()]
-			for ext, theme_configs in data['theme_configs'].items()
+			[(theme_ext, theme) for theme in theme_configs.values()]
+			for theme_ext, theme_configs in data['theme_configs'].items()
 		]))
 	elif theme_type == 'main' or is_main_theme:
 		return [(ext, theme) for theme in data['ext_theme_configs'].values()]
