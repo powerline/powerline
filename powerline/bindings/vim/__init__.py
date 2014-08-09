@@ -99,9 +99,22 @@ else:
 if hasattr(vim, 'options'):
 	def vim_getbufoption(info, option):
 		return info['buffer'].options[str(option)]
+
+	def vim_getoption(option):
+		return vim.options[str(option)]
+
+	def vim_setoption(option, value):
+		vim.options[str(option)] = value
 else:
 	def vim_getbufoption(info, option):  # NOQA
 		return getbufvar(info['bufnr'], '&' + option)
+
+	def vim_getoption(option):  # NOQA
+		return vim.eval('&g:' + option)
+
+	def vim_setoption(option, value):  # NOQA
+		vim.command('let &g:{option} = {value}'.format(
+			option=option, value=json.encode(value)))
 
 
 if hasattr(vim, 'tabpages'):
