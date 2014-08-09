@@ -1035,6 +1035,7 @@ class NowPlayingSegment(Segment):
 		}
 
 	def player_spotify_apple_script(self, pl):
+		status_delimiter = '-~`/='
 		ascript = '''
 		tell application "System Events"
 			set process_list to (name of every process)
@@ -1047,13 +1048,8 @@ class NowPlayingSegment(Segment):
 					set artist_name to artist of current track
 					set album_name to album of current track
 					set track_length to duration of current track
-					set trim_length to 40
-					set now_playing to player state & album_name & artist_name & track_name & track_length
-					if length of now_playing is less than trim_length then
-						set now_playing_trim to now_playing
-					else
-						set now_playing_trim to characters 1 thru trim_length of now_playing as string
-					end if
+					set now_playing to "" & player state & "{0}" & album_name & "{0}" & artist_name & "{0}" & track_name & "{0}" & track_length
+					return now_playing
 				else
 					return player state
 				end if
@@ -1062,13 +1058,13 @@ class NowPlayingSegment(Segment):
 		else
 			return "stopped"
 		end if
-		'''
+		'''.format(status_delimiter)
 
 		spotify = asrun(pl, ascript)
 		if not asrun:
 			return None
 
-		spotify_status = spotify.split(", ")
+		spotify_status = spotify.split(status_delimiter)
 		state = self._convert_state(spotify_status[0])
 		if state == 'stop':
 			return None
