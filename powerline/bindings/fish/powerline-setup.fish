@@ -27,6 +27,14 @@ function powerline-setup
 				set -g -x POWERLINE_COMMAND (eval $powerline_dir/scripts/powerline-config shell command)
 			end
 		end
+		function --on-variable fish_bind_mode _powerline_bind_mode
+			set -g -x _POWERLINE_MODE $fish_bind_mode
+			if test x$fish_key_bindings != xfish_vi_key_bindings
+				set -g -x _POWERLINE_DEFAULT_MODE default
+			else
+				set -g -e _POWERLINE_DEFAULT_MODE
+			end
+		end
 		function --on-variable POWERLINE_COMMAND _powerline_update
 			set -l addargs "--last_exit_code=\$status"
 			set -l addargs "$addargs --last_pipe_status=\$status"
@@ -58,6 +66,7 @@ function powerline-setup
 			"
 			_powerline_set_columns
 		end
+		_powerline_bind_mode
 		_powerline_update
 	end
 	if test -z "$POWERLINE_NO_FISH_TMUX_SUPPORT$POWERLINE_NO_SHELL_TMUX_SUPPORT"
