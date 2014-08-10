@@ -28,7 +28,7 @@ class Theme(object):
 				theme_config,
 				common_config,
 				pl,
-				top_theme_config=None,
+				main_theme_config=None,
 				run_once=False,
 				shutdown_event=None):
 		self.dividers = theme_config['dividers']
@@ -45,8 +45,8 @@ class Theme(object):
 		}
 		self.pl = pl
 		theme_configs = [theme_config]
-		if top_theme_config:
-			theme_configs.append(top_theme_config)
+		if main_theme_config:
+			theme_configs.append(main_theme_config)
 		get_segment = gen_segment_getter(pl, ext, common_config, theme_configs, theme_config.get('default_module'))
 		for segdict in itertools.chain((theme_config['segments'],),
 										theme_config['segments'].get('above', ())):

@@ -21,7 +21,7 @@ class IpythonRenderer(ShellRenderer):
 			except KeyError:
 				match['theme'] = Theme(
 					theme_config=match['config'],
-					top_theme_config=self.theme_config,
+					main_theme_config=self.theme_config,
 					**self.theme_kwargs
 				)
 				return match['theme']
