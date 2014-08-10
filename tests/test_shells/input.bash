@@ -8,7 +8,7 @@ cd .git
 cd ..
 VIRTUAL_ENV="$HOME/.virtenvs/some-virtual-environment"
 VIRTUAL_ENV=
-bgscript.sh &
+bgscript.sh & waitpid.sh
 false
 kill `cat pid` ; sleep 1s
 cd "$DIR1"

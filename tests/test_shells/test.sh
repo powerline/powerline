@@ -78,6 +78,7 @@ run_test() {
 		sleep 0.1s
 	done
 	./tests/test_shells/postproc.py ${TEST_TYPE} ${SH}
+	rm -f tests/shell/3rd/pid
 	if ! check_screen_log ${TEST_TYPE} ${SH} ; then
 		echo '____________________________________________________________'
 		# Repeat the diff to make it better viewable in travis output
@@ -152,6 +153,7 @@ ln -s "$(which bc)" tests/shell/path
 ln -s "$(which expr)" tests/shell/path
 ln -s "$(which mktemp)" tests/shell/path
 ln -s ../../test_shells/bgscript.sh tests/shell/path
+ln -s ../../test_shells/waitpid.sh tests/shell/path
 for pexe in powerline powerline-config ; do
 	if test -e scripts/$pexe ; then
 		ln -s "$PWD/scripts/$pexe" tests/shell/path
