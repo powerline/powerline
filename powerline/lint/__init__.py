@@ -525,6 +525,7 @@ ext_spec = Spec(
 	theme=ext_theme_spec(),
 	top_theme=top_theme_spec().optional(),
 ).copy
+gen_components_spec = (lambda *components: Spec().list(Spec().type(unicode).oneof(set(components))))
 main_spec = (Spec(
 	common=Spec(
 		default_top_theme=top_theme_spec().optional(),
@@ -556,6 +557,7 @@ main_spec = (Spec(
 	).context_message('Error while loading common configuration (key {key})'),
 	ext=Spec(
 		vim=ext_spec().update(
+			components=gen_components_spec('statusline', 'tabline').optional(),
 			local_themes=Spec(
 				__tabline__=ext_theme_spec(),
 			).unknown_spec(
@@ -570,6 +572,7 @@ main_spec = (Spec(
 			),
 		).optional(),
 		shell=ext_spec().update(
+			components=gen_components_spec('tmux', 'prompt').optional(),
 			local_themes=Spec(
 				continuation=ext_theme_spec(),
 				select=ext_theme_spec(),

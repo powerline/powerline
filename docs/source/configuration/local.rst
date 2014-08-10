@@ -115,9 +115,9 @@ Prompt command
 
 In addition to the above configuration options you can use 
 ``$POWERLINE_COMMAND`` environment variable to tell shell or tmux to use 
-specific powerline implementation. This is mostly useful for putting powerline 
-into different directory or replacing ``powerline`` script with 
-``powerline-client`` for performance reasons.
+specific powerline implementation and ``$POWERLINE_CONFIG`` to tell zsh or tmux 
+where ``powerline-config`` script is located. This is mostly useful for putting 
+powerline into different directory.
 
 .. note::
 
@@ -150,6 +150,6 @@ fish in order to support multiline prompt you should set
 
 .. note::
 
-    Most supported shells’ configuration scripts check for additional 
-    configuration variables being empty. But tcsh configuration script checks 
-    for variables being *defined*, not empty.
+    Most supported shells’ configuration scripts check for ``$POWERLINE_CONFIG`` 
+    and ``$POWERLINE_COMMAND`` configuration variables being empty. But tcsh 
+    configuration script checks for variables being *defined*, not empty.

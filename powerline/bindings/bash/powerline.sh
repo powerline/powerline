@@ -35,7 +35,7 @@ _powerline_init_tmux_support() {
 		_powerline_tmux_set_columns
 
 		test "x$PROMPT_COMMAND" != "x${PROMPT_COMMAND/_powerline_tmux_set_pwd}" ||
-			export PROMPT_COMMAND="${PROMPT_COMMAND}"$'\n_powerline_tmux_set_pwd'
+			PROMPT_COMMAND="${PROMPT_COMMAND}"$'\n_powerline_tmux_set_pwd'
 	fi
 }
 
@@ -54,21 +54,23 @@ _powerline_set_prompt() {
 _powerline_setup_prompt() {
 	VIRTUAL_ENV_DISABLE_PROMPT=1
 	if test -z "${POWERLINE_COMMAND}" ; then
-		if which powerline-config &>/dev/null ; then
-			export POWERLINE_COMMAND="$(powerline-config shell command)"
-		else
-			# `$0` is set to `-bash` when using SSH so that won't work
-			local powerline_dir="$(dirname "$BASH_SOURCE")/../../.."
-			export POWERLINE_COMMAND="$($powerline_dir/scripts/powerline-config shell command)"
-		fi
+		POWERLINE_COMMAND="$("$POWERLINE_CONFIG" shell command)"
 	fi
 	test "x$PROMPT_COMMAND" != "x${PROMPT_COMMAND%_powerline_set_prompt*}" ||
-		export PROMPT_COMMAND=$'_powerline_set_prompt\n'"${PROMPT_COMMAND}"
+		PROMPT_COMMAND=$'_powerline_set_prompt\n'"${PROMPT_COMMAND}"
 }
 
-if test -z "$POWERLINE_NO_BASH_PROMPT$POWERLINE_NO_SHELL_PROMPT" ; then
+if test -z "${POWERLINE_CONFIG}" ; then
+	if which powerline-config >/dev/null ; then
+		POWERLINE_CONFIG=powerline-config
+	else
+		POWERLINE_CONFIG="$(dirname "$BASH_SOURCE")/../../../scripts/powerline-config"
+	fi
+fi
+
+if "${POWERLINE_CONFIG}" shell --shell=bash uses prompt ; then
 	_powerline_setup_prompt
 fi
-if test -z "$POWERLINE_NO_BASH_TMUX_SUPPORT$POWERLINE_NO_SHELL_TMUX_SUPPORT" ; then
+if "${POWERLINE_CONFIG}" shell --shell=bash uses tmux ; then
 	_powerline_init_tmux_support
 fi

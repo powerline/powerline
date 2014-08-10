@@ -98,12 +98,7 @@ _powerline_set_set_jobs() {
 
 _powerline_set_command() {
 	if test -z "${POWERLINE_COMMAND}" ; then
-		if which powerline-config &>/dev/null ; then
-			export POWERLINE_COMMAND="$(powerline-config shell command)"
-		else
-			local powerline_dir="$(dirname "$POWERLINE_SOURCED")/../../.."
-			export POWERLINE_COMMAND="$($powerline_dir/scripts/powerline-config shell command)"
-		fi
+		POWERLINE_COMMAND="$("$POWERLINE_CONFIG" shell command)"
 	fi
 }
 
@@ -167,14 +162,22 @@ _powerline_init_tmux_support() {
 	fi
 }
 
+if test -z "${POWERLINE_CONFIG}" ; then
+	if which powerline-config >/dev/null ; then
+		POWERLINE_CONFIG=powerline-config
+	else
+		POWERLINE_CONFIG="$(dirname "$_POWERLINE_SOURCED")/../../../scripts/powerline-config"
+	fi
+fi
+
 # Strips the leading `-`: it may be present when shell is a login shell
 _POWERLINE_USED_SHELL=${0#-}
 _POWERLINE_USED_SHELL=${_POWERLINE_USED_SHELL#/usr}
 _POWERLINE_USED_SHELL=${_POWERLINE_USED_SHELL#/bin/}
 
-if test -z "$POWERLINE_NO_BB_PROMPT$POWERLINE_NO_SHELL_PROMPT" ; then
-	_powerline_setup_prompt $_POWERLINE_USED_SHELL
-fi
-if test -z "$POWERLINE_NO_BB_TMUX_SUPPORT$POWERLINE_NO_SHELL_TMUX_SUPPORT" ; then
+if "${POWERLINE_CONFIG}" shell uses tmux ; then
 	_powerline_init_tmux_support $_POWERLINE_USED_SHELL
+fi
+if "${POWERLINE_CONFIG}" shell --shell=bash uses prompt ; then
+	_powerline_setup_prompt $_POWERLINE_USED_SHELL
 fi

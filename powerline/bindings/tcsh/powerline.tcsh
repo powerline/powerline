@@ -5,17 +5,20 @@
 # Guess this relies on `$_` being set as to last argument to previous command 
 # which must be `.` or `source` in this case
 set POWERLINE_SOURCED=($_)
-if ! ( $?POWERLINE_NO_TCSH_TMUX_SUPPORT || $?POWERLINE_NO_SHELL_TMUX_SUPPORT ) then
+if ! $?POWERLINE_CONFIG then
+	if ( { which powerline-config > /dev/null } ) then
+		set POWERLINE_CONFIG="powerline-config"
+	else
+		set POWERLINE_CONFIG="$POWERLINE_SOURCED[2]:h:h:h:h/scripts/powerline-config"
+	endif
+endif
+if ( { $POWERLINE_CONFIG shell --shell=tcsh uses tmux } ) then
 	alias _powerline_tmux_set_pwd 'if ( $?TMUX && { tmux refresh -S >&/dev/null } ) tmux setenv -g TMUX_PWD_`tmux display -p "#D" | tr -d %` $PWD:q ; if ( $?TMUX ) tmux refresh -S >&/dev/null'
 	alias cwdcmd "`alias cwdcmd` ; _powerline_tmux_set_pwd"
 endif
-if ! ( $?POWERLINE_NO_TCSH_PROMPT || $?POWERLINE_NO_SHELL_PROMPT ) then
+if ( { $POWERLINE_CONFIG shell --shell=tcsh uses prompt } ) then
 	if ! $?POWERLINE_COMMAND then
-		if ( { which powerline-config > /dev/null } ) then
-			setenv POWERLINE_COMMAND "`powerline-config shell command`"
-		else
-			setenv POWERLINE_COMMAND "`$POWERLINE_SOURCED[2]:h:h:h:h:q/scripts/powerline-config shell command`"
-		endif
+		set POWERLINE_COMMAND="`$POWERLINE_CONFIG:q shell command`"
 	endif
 
 	if ( $?POWERLINE_NO_TCSH_ABOVE || $?POWERLINE_NO_SHELL_ABOVE ) then

@@ -394,7 +394,15 @@ class Powerline(object):
 			self.ext_config = config['ext'][self.ext]
 			if self.ext_config != self.prev_ext_config:
 				ext_config_differs = True
-				if not self.prev_ext_config or self.ext_config.get('local_themes') != self.prev_ext_config.get('local_themes'):
+				if (
+					not self.prev_ext_config
+					or self.ext_config.get('components') != self.prev_ext_config.get('components')
+				):
+					self.setup_components(self.ext_config.get('components'))
+				if (
+					not self.prev_ext_config
+					or self.ext_config.get('local_themes') != self.prev_ext_config.get('local_themes')
+				):
 					self.renderer_options['local_themes'] = self.get_local_themes(self.ext_config.get('local_themes'))
 				load_colorscheme = (load_colorscheme
 							or not self.prev_ext_config
@@ -438,6 +446,16 @@ class Powerline(object):
 					raise
 			else:
 				self.renderer = renderer
+
+	def setup_components(self, components):
+		'''Run component-specific setup
+
+		:param set components:
+			Set of the enabled componets or None.
+
+		Should be overridden by subclasses.
+		'''
+		pass
 
 	@staticmethod
 	def get_config_paths():

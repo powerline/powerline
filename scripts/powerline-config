@@ -20,6 +20,7 @@ TMUX_ACTIONS = {
 
 SHELL_ACTIONS = {
 	'command': config.shell_command,
+	'uses': config.uses,
 }
 
 
@@ -40,7 +41,19 @@ if __name__ == '__main__':
 		'function',
 		choices=tuple(SHELL_ACTIONS.values()),
 		type=(lambda v: SHELL_ACTIONS.get(v)),
-		help='If action is "command" then preferred powerline command is output',
+		metavar='action',
+		help='If action is "command" then preferred powerline command is output, if it is “uses” then powerline-config script will exit with 1 if specified component is disabled and 0 otherwise.',
+	)
+	shell_parser.add_argument(
+		'component',
+		nargs='?',
+		choices=('tmux', 'prompt'),
+		metavar='component',
+	)
+	shell_parser.add_argument(
+		'-s', '--shell',
+		nargs='?',
+		help='Shell for which query is run',
 	)
 
 	args = parser.parse_args()

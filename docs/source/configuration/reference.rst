@@ -123,6 +123,28 @@ Common configuration is a subdictionary that is a value of ``ext`` key in
     ``module_attribute`` should point to a function that returns boolean value 
     indicating that current buffer has (not) matched conditions.
 
+``components``
+    Determines which extension components should be enabled. This key is highly 
+    extension-specific, here is the table of extensions and corresponding 
+    components:
+
+    +---------+----------+-----------------------------------------------------+
+    |Extension|Component |Description                                          |
+    +---------+----------+-----------------------------------------------------+
+    |vim      |statusline|Makes Vim use powerline statusline.                  |
+    |         +----------+-----------------------------------------------------+
+    |         |tabline   |Makes Vim use powerline tabline.                     |
+    +---------+----------+-----------------------------------------------------+
+    |shell    |prompt    |Makes shell display powerline prompt.                |
+    |         +----------+-----------------------------------------------------+
+    |         |tmux      |Makes shell report its current working directory     |
+    |         |          |and screen width to tmux for tmux powerline          |
+    |         |          |bindings.                                            |
+    |         |          |                                                     |
+    +---------+----------+-----------------------------------------------------+
+
+    All components are enabled by default.
+
 .. _config-colors:
 
 Color definitions
