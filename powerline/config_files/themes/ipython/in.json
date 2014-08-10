@@ -3,7 +3,8 @@
 	"segments": {
 		"left": [
 			{
-				"name": "virtualenv"
+				"name": "virtualenv",
+				"priority": 10
 			},
 			{
 				"type": "string",
