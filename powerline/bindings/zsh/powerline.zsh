@@ -129,7 +129,8 @@ _powerline_setup_prompt() {
 			POWERLINE_COMMAND=( "$($POWERLINE_CONFIG shell command)" )
 		fi
 
-		local add_args='--last_exit_code=$?'
+		local add_args='-r zsh_prompt'
+		add_args+=' --last_exit_code=$?'
 		add_args+=' --last_pipe_status="$pipestatus"'
 		add_args+=' --renderer_arg="client_id=$$"'
 		add_args+=' --jobnum=$_POWERLINE_JOBNUM'
@@ -139,11 +140,11 @@ _powerline_setup_prompt() {
 		local add_args_2=$add_args$new_args_2
 		add_args+=' --width=$(( ${COLUMNS:-$(_powerline_columns_fallback)} - 1 ))'
 		local add_args_r2=$add_args$new_args_2
-		PS1='$($POWERLINE_COMMAND shell aboveleft -r zsh_prompt '$add_args')'
-		RPS1='$($POWERLINE_COMMAND shell right -r zsh_prompt '$add_args')'
-		PS2='$($POWERLINE_COMMAND shell left -r zsh_prompt '$add_args_2')'
-		RPS2='$($POWERLINE_COMMAND shell right -r zsh_prompt '$add_args_r2')'
-		PS3='$($POWERLINE_COMMAND shell left -r zsh_prompt '$add_args_3')'
+		PS1='$($POWERLINE_COMMAND shell aboveleft '$add_args')'
+		RPS1='$($POWERLINE_COMMAND shell right '$add_args')'
+		PS2='$($POWERLINE_COMMAND shell left '$add_args_2')'
+		RPS2='$($POWERLINE_COMMAND shell right '$add_args_r2')'
+		PS3='$($POWERLINE_COMMAND shell left '$add_args_3')'
 	fi
 }
 
