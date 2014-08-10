@@ -126,7 +126,7 @@ export IPYTHONDIR="$PWD/tests/shell/ipython_home"
 
 unset ENV
 
-if test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || test "x${ONLY_SHELL}" = xbb ; then
+if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || test "x${ONLY_SHELL}" = xbb ; then
 	powerline-daemon -k || true
 	sleep 1s
 
