@@ -17,6 +17,25 @@ check_screen_log() {
 	fi
 }
 
+run() {
+	local local_path="$PWD/tests/shell/path:$PWD/scripts"
+	if test "x$SH" = "xfish" ; then
+		local_path="${local_path}:/usr/bin:/bin"
+	fi
+	env -i \
+		PATH="$local_path" \
+		TERM="${TERM}" \
+		COLUMNS="${COLUMNS}" \
+		LINES="${LINES}" \
+		TEST_TYPE="${TEST_TYPE}" \
+		SH="${SH}" \
+		DIR1="${DIR1}" \
+		DIR2="${DIR2}" \
+		XDG_CONFIG_HOME="$PWD/tests/shell/fish_home" \
+		IPYTHONDIR="$PWD/tests/shell/ipython_home" \
+		"$@"
+}
+
 run_test() {
 	TEST_TYPE="$1"
 	shift
@@ -41,7 +60,7 @@ run_test() {
 	export TEST_TYPE
 	export SH
 
-	screen -L -c tests/test_shells/screenrc -d -m -S "$SESNAME" \
+	run screen -L -c tests/test_shells/screenrc -d -m -S "$SESNAME" \
 		env LANG=en_US.UTF-8 BINDFILE="$BINDFILE" "${ARGS[@]}"
 	screen -S "$SESNAME" -X readreg a tests/test_shells/input.$SH
 	# Wait for screen to initialize
@@ -121,8 +140,41 @@ mkdir tests/shell/3rd/'`echo`'
 
 mkdir tests/shell/fish_home
 cp -r tests/test_shells/ipython_home tests/shell
-export XDG_CONFIG_HOME="$PWD/tests/shell/fish_home"
-export IPYTHONDIR="$PWD/tests/shell/ipython_home"
+
+mkdir tests/shell/path
+ln -s "$(which "${PYTHON:-python}")" tests/shell/path/python
+ln -s "$(which screen)" tests/shell/path
+ln -s "$(which env)" tests/shell/path
+ln -s "$(which sleep)" tests/shell/path
+ln -s "$(which cat)" tests/shell/path
+ln -s "$(which false)" tests/shell/path
+ln -s "$(which true)" tests/shell/path
+ln -s "$(which kill)" tests/shell/path
+ln -s "$(which echo)" tests/shell/path
+ln -s "$(which which)" tests/shell/path
+ln -s "$(which dirname)" tests/shell/path
+ln -s "$(which wc)" tests/shell/path
+ln -s "$(which stty)" tests/shell/path
+ln -s "$(which cut)" tests/shell/path
+ln -s "$(which bc)" tests/shell/path
+ln -s "$(which expr)" tests/shell/path
+ln -s "$(which mktemp)" tests/shell/path
+for pexe in powerline powerline-config ; do
+	if test -e scripts/$pexe ; then
+		ln -s "$PWD/scripts/$pexe" tests/shell/path
+	elif which $pexe ; then
+		ln -s "$(which $pexe)" tests/shell/path
+	else
+		echo "Executable $pexe was not found"
+		exit 1
+	fi
+done
+
+for exe in bash zsh bb busybox fish tcsh mksh dash ipython ; do
+	if which $exe >/dev/null ; then
+		ln -s "$(which $exe)" tests/shell/path
+	fi
+done
 
 unset ENV
 
