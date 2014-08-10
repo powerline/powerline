@@ -41,7 +41,12 @@ _powerline_init_tmux_support() {
 
 _powerline_prompt() {
 	# Arguments: side, last_exit_code, jobnum
-	$POWERLINE_COMMAND shell $1 -w "${COLUMNS:-$(_powerline_columns_fallback)}" -r bash_prompt --last_exit_code=$2 --jobnum=$3
+	$POWERLINE_COMMAND shell $1 \
+		--width="${COLUMNS:-$(_powerline_columns_fallback)}" \
+		-r bash_prompt \
+		--last_exit_code=$2 \
+		--jobnum=$3 \
+		--renderer_arg="client_id=$$"
 }
 
 _powerline_set_prompt() {

@@ -21,7 +21,7 @@ class IpythonRenderer(ShellRenderer):
 			except KeyError:
 				match['theme'] = Theme(
 					theme_config=match['config'],
-					top_theme_config=self.theme_config,
+					main_theme_config=self.theme_config,
 					**self.theme_kwargs
 				)
 				return match['theme']
@@ -31,6 +31,10 @@ class IpythonRenderer(ShellRenderer):
 		for match in self.local_themes.values():
 			if 'theme' in match:
 				match['theme'].shutdown()
+
+	def render(self, *args, **kwargs):
+		# XXX super(ShellRenderer), *not* super(IpythonRenderer)
+		return super(ShellRenderer, self).render(*args, **kwargs)
 
 
 renderer = IpythonRenderer

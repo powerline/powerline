@@ -54,10 +54,14 @@ run_test() {
 
 	run screen -L -c tests/test_shells/screenrc -d -m -S "$SESNAME" \
 		env LANG=en_US.UTF-8 BINDFILE="$BINDFILE" "${ARGS[@]}"
-	screen -S "$SESNAME" -X readreg a tests/test_shells/input.$SH
+	while ! screen -S "$SESNAME" -X readreg a tests/test_shells/input.$SH ; do
+		sleep 0.1s
+	done
 	# Wait for screen to initialize
 	sleep 1
-	screen -S "$SESNAME" -p 0 -X width 300 1
+	while ! screen -S "$SESNAME" -p 0 -X width 300 1 ; do
+		sleep 0.1s
+	done
 	if test "x${SH}" = "xdash" ; then
 		# If I do not use this hack for dash then output will look like
 		#

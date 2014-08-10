@@ -15,11 +15,15 @@ except ImportError:
 	pass
 
 
-def construct_returned_value(rendered_highlighted, segments, output_raw):
-	if output_raw:
-		return rendered_highlighted, ''.join((segment['_rendered_raw'] for segment in segments))
-	else:
+def construct_returned_value(rendered_highlighted, segments, width, output_raw, output_width):
+	if not (output_raw or output_width):
 		return rendered_highlighted
+	else:
+		return (
+			(rendered_highlighted,)
+			+ ((''.join((segment['_rendered_raw'] for segment in segments)),) if output_raw else ())
+			+ ((width,) if output_width else ())
+		)
 
 
 class Renderer(object):
@@ -188,7 +192,7 @@ class Renderer(object):
 		for line in range(theme.get_line_number() - 1, 0, -1):
 			yield self.render(side=None, line=line, **kwargs)
 
-	def render(self, mode=None, width=None, side=None, line=0, output_raw=False, segment_info=None, matcher_info=None):
+	def render(self, mode=None, width=None, side=None, line=0, output_raw=False, output_width=False, segment_info=None, matcher_info=None):
 		'''Render all segments.
 
 		When a width is provided, low-priority segments are dropped one at
@@ -213,14 +217,44 @@ class Renderer(object):
 			Changes the output: if this parameter is ``True`` then in place of 
 			one string this method outputs a pair ``(colored_string, 
 			colorless_string)``.
+		:param bool output_width:
+			Changes the output: if this parameter is ``True`` then in place of 
+			one string this method outputs a pair ``(colored_string, 
+			string_width)``. Returns a three-tuple if ``output_raw`` is also 
+			``True``: ``(colored_string, colorless_string, string_width)``.
 		:param dict segment_info:
 			Segment information. See also ``.get_segment_info()`` method.
 		:param matcher_info:
 			Matcher information. Is processed in ``.get_theme()`` method.
 		'''
 		theme = self.get_theme(matcher_info)
-		segments = theme.get_segments(side, line, self.get_segment_info(segment_info, mode))
+		return self.do_render(
+			mode=mode,
+			width=width,
+			side=side,
+			line=line,
+			output_raw=output_raw,
+			output_width=output_width,
+			segment_info=segment_info,
+			theme=theme,
+		)
 
+	def compute_divider_widths(self, theme):
+		return {
+			'left': {
+				'hard': self.strwidth(theme.get_divider('left', 'hard')),
+				'soft': self.strwidth(theme.get_divider('left', 'soft')),
+			},
+			'right': {
+				'hard': self.strwidth(theme.get_divider('right', 'hard')),
+				'soft': self.strwidth(theme.get_divider('right', 'soft')),
+			},
+		}
+
+	def do_render(self, mode, width, side, line, output_raw, output_width, segment_info, theme):
+		'''Like Renderer.render(), but accept theme in place of matcher_info
+		'''
+		segments = theme.get_segments(side, line, self.get_segment_info(segment_info, mode))
 		# Handle excluded/included segments for the current mode
 		segments = [
 			self._get_highlighting(segment, segment['mode'] or mode)
@@ -234,37 +268,36 @@ class Renderer(object):
 			)
 		]
 
+		current_width = 0
+
 		if not width:
 			# No width specified, so we don't need to crop or pad anything
+			if output_width:
+				current_width = self._render_length(theme, segments, self.compute_divider_widths(theme))
 			return construct_returned_value(''.join([
 				segment['_rendered_hl']
 				for segment in self._render_segments(theme, segments)
-			]) + self.hlstyle(), segments, output_raw)
+			]) + self.hlstyle(), segments, current_width, output_raw, output_width)
 
-		divider_lengths = {
-			'left': {
-				'hard': self.strwidth(theme.get_divider('left', 'hard')),
-				'soft': self.strwidth(theme.get_divider('left', 'soft')),
-			},
-			'right': {
-				'hard': self.strwidth(theme.get_divider('right', 'hard')),
-				'soft': self.strwidth(theme.get_divider('right', 'soft')),
-			},
-		}
-
-		length = self._render_length(theme, segments, divider_lengths)
+		divider_widths = self.compute_divider_widths(theme)
 
 		# Create an ordered list of segments that can be dropped
 		segments_priority = sorted((segment for segment in segments if segment['priority'] is not None), key=lambda segment: segment['priority'], reverse=True)
 		for segment in segments_priority:
-			if self._render_length(theme, segments, divider_lengths) <= width:
+			current_width = self._render_length(theme, segments, divider_widths)
+			if current_width <= width:
 				break
 			segments.remove(segment)
 
 		# Distribute the remaining space on spacer segments
 		segments_spacers = [segment for segment in segments if segment['width'] == 'auto']
 		if segments_spacers:
-			distribute_len, distribute_len_remainder = divmod(width - sum([segment['_len'] for segment in segments]), len(segments_spacers))
+			if not segments_priority:
+				# Update segment['_len'] and current_width if not already done 
+				# (is not done in shells where there is nothing to remove 
+				# because “priority” key is not specified)
+				current_width = self._render_length(theme, segments, divider_widths)
+			distribute_len, distribute_len_remainder = divmod(width - current_width, len(segments_spacers))
 			for segment in segments_spacers:
 				if segment['align'] == 'l':
 					segment['_space_right'] += distribute_len
@@ -275,12 +308,17 @@ class Renderer(object):
 					segment['_space_left'] += space_side + space_side_remainder
 					segment['_space_right'] += space_side
 			segments_spacers[0]['_space_right'] += distribute_len_remainder
+			# `_len` key is not needed anymore, but current_width should have an 
+			# actual value for various bindings.
+			current_width = width
+		elif output_width:
+			current_width = self._render_length(theme, segments, divider_widths)
 
 		rendered_highlighted = ''.join([segment['_rendered_hl'] for segment in self._render_segments(theme, segments)]) + self.hlstyle()
 
-		return construct_returned_value(rendered_highlighted, segments, output_raw)
+		return construct_returned_value(rendered_highlighted, segments, current_width, output_raw, output_width)
 
-	def _render_length(self, theme, segments, divider_lengths):
+	def _render_length(self, theme, segments, divider_widths):
 		'''Update segments lengths and return them
 		'''
 		segments_len = len(segments)
@@ -306,7 +344,7 @@ class Renderer(object):
 			draw_divider = segment['draw_' + divider_type + '_divider']
 			segment_len += segment['_space_left'] + segment['_space_right'] + outer_padding
 			if draw_divider:
-				segment_len += divider_lengths[side][divider_type] + divider_spaces
+				segment_len += divider_widths[side][divider_type] + divider_spaces
 
 			segment['_len'] = segment_len
 			ret += segment_len

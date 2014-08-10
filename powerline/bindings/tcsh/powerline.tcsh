@@ -24,11 +24,11 @@ if ( { $POWERLINE_CONFIG shell --shell=tcsh uses prompt } ) then
 	if ( $?POWERLINE_NO_TCSH_ABOVE || $?POWERLINE_NO_SHELL_ABOVE ) then
 		alias _powerline_above true
 	else
-		alias _powerline_above '$POWERLINE_COMMAND shell above --last_exit_code=$POWERLINE_STATUS --width=$POWERLINE_COLUMNS'
+		alias _powerline_above '$POWERLINE_COMMAND shell above --renderer_arg=client_id=$$ --last_exit_code=$POWERLINE_STATUS --width=$POWERLINE_COLUMNS'
 	endif
 
-	alias _powerline_set_prompt 'set prompt="`$POWERLINE_COMMAND shell left -r tcsh_prompt --last_exit_code=$POWERLINE_STATUS --width=$POWERLINE_COLUMNS`"'
-	alias _powerline_set_rprompt 'set rprompt="`$POWERLINE_COMMAND shell right -r tcsh_prompt --last_exit_code=$POWERLINE_STATUS --width=$POWERLINE_COLUMNS` "'
+	alias _powerline_set_prompt 'set prompt="`$POWERLINE_COMMAND shell left -r tcsh_prompt --renderer_arg=client_id=$$ --last_exit_code=$POWERLINE_STATUS --width=$POWERLINE_COLUMNS`"'
+	alias _powerline_set_rprompt 'set rprompt="`$POWERLINE_COMMAND shell right -r tcsh_prompt --renderer_arg=client_id=$$ --last_exit_code=$POWERLINE_STATUS --width=$POWERLINE_COLUMNS` "'
 	alias _powerline_set_columns 'set POWERLINE_COLUMNS=`stty size|cut -d" " -f2` ; set POWERLINE_COLUMNS=`expr $POWERLINE_COLUMNS - 2`'
 
 	alias precmd 'set POWERLINE_STATUS=$? ; '"`alias precmd`"' ; _powerline_set_columns ; _powerline_above ; _powerline_set_prompt ; _powerline_set_rprompt'

@@ -1,4 +1,5 @@
 # vim:fileencoding=utf-8:noet
+from __future__ import division
 
 from powerline.segment import gen_segment_getter, process_segment
 from powerline.lib.unicode import u
@@ -28,7 +29,7 @@ class Theme(object):
 				theme_config,
 				common_config,
 				pl,
-				top_theme_config=None,
+				main_theme_config=None,
 				run_once=False,
 				shutdown_event=None):
 		self.dividers = theme_config['dividers']
@@ -37,6 +38,11 @@ class Theme(object):
 			for k, v in val.items()))
 			for key, val in self.dividers.items()
 		))
+		try:
+			self.cursor_space_multiplier = 1 - (theme_config['cursor_space'] / 100)
+		except KeyError:
+			self.cursor_space_multiplier = None
+		self.cursor_columns = theme_config.get('cursor_columns')
 		self.spaces = theme_config['spaces']
 		self.segments = []
 		self.EMPTY_SEGMENT = {
@@ -45,8 +51,8 @@ class Theme(object):
 		}
 		self.pl = pl
 		theme_configs = [theme_config]
-		if top_theme_config:
-			theme_configs.append(top_theme_config)
+		if main_theme_config:
+			theme_configs.append(main_theme_config)
 		get_segment = gen_segment_getter(pl, ext, common_config, theme_configs, theme_config.get('default_module'))
 		for segdict in itertools.chain((theme_config['segments'],),
 										theme_config['segments'].get('above', ())):

@@ -1,6 +1,6 @@
 # vim:fileencoding=utf-8:noet
 
-from __future__ import absolute_import, unicode_literals
+from __future__ import absolute_import, unicode_literals, division, print_function
 
 from powerline.renderer import Renderer
 from powerline.colorscheme import ATTR_BOLD, ATTR_ITALIC, ATTR_UNDERLINE
@@ -22,6 +22,60 @@ class ShellRenderer(Renderer):
 	screen_escape = False
 
 	character_translations = Renderer.character_translations.copy()
+
+	def __init__(self, *args, **kwargs):
+		super(ShellRenderer, self).__init__(*args, **kwargs)
+		self.old_widths = {}
+
+	def render(self, segment_info, **kwargs):
+		local_theme = segment_info.get('local_theme')
+		return super(ShellRenderer, self).render(
+			matcher_info=local_theme,
+			segment_info=segment_info,
+			**kwargs
+		)
+
+	def do_render(self, output_width, segment_info, side, theme, width=None, **kwargs):
+		if isinstance(segment_info, dict):
+			client_id = segment_info.get('client_id')
+		else:
+			client_id = None
+		local_key = (client_id, side, None if theme is self.theme else id(theme))
+		key = (client_id, side, None)
+		did_width = False
+		if local_key[-1] != key[-1] and side == 'left':
+			try:
+				width = self.old_widths[key]
+			except KeyError:
+				pass
+			else:
+				did_width = True
+		if not did_width:
+			if width is not None:
+				if theme.cursor_space_multiplier is not None:
+					width = int(width * theme.cursor_space_multiplier)
+				elif theme.cursor_columns:
+					width -= theme.cursor_columns
+
+				if side == 'right':
+					try:
+						width -= self.old_widths[(client_id, 'left', local_key[-1])]
+					except KeyError:
+						pass
+		res = super(ShellRenderer, self).do_render(
+			output_width=True,
+			width=width,
+			theme=theme,
+			segment_info=segment_info,
+			side=side,
+			**kwargs
+		)
+		self.old_widths[local_key] = res[-1]
+		ret = res if output_width else res[:-1]
+		if len(ret) == 1:
+			return ret[0]
+		else:
+			return ret
 
 	def hlstyle(self, fg=None, bg=None, attr=None):
 		'''Highlight a segment.

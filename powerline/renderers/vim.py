@@ -57,7 +57,7 @@ class VimRenderer(Renderer):
 		try:
 			return match['theme']
 		except KeyError:
-			match['theme'] = Theme(theme_config=match['config'], top_theme_config=self.theme_config, **self.theme_kwargs)
+			match['theme'] = Theme(theme_config=match['config'], main_theme_config=self.theme_config, **self.theme_kwargs)
 			return match['theme']
 
 	def get_theme(self, matcher_info):

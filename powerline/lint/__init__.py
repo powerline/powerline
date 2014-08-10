@@ -1279,6 +1279,8 @@ spaces_spec = Spec().unsigned().cmp(
 ).copy
 common_theme_spec = Spec(
 	default_module=segment_module_spec().optional(),
+	cursor_space=Spec().type(int, float).cmp('le', 100).cmp('gt', 0).optional(),
+	cursor_columns=Spec().type(int).cmp('gt', 0).optional(),
 ).context_message('Error while loading theme').copy
 top_theme_spec = common_theme_spec().update(
 	dividers=dividers_spec(),

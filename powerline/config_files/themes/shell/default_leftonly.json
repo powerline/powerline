@@ -3,27 +3,34 @@
 	"segments": {
 		"left": [
 			{
-				"name": "hostname"
+				"name": "hostname",
+				"priority": 10
 			},
 			{
-				"name": "user"
+				"name": "user",
+				"priority": 30
 			},
 			{
-				"name": "virtualenv"
+				"name": "virtualenv",
+				"priority": 50
 			},
 			{
-				"name": "branch"
+				"name": "branch",
+				"priority": 40
 			},
 			{
-				"name": "cwd"
+				"name": "cwd",
+				"priority": 10
 			},
 			{
 				"module": "powerline.segments.shell",
-				"name": "jobnum"
+				"name": "jobnum",
+				"priority": 20
 			},
 			{
+				"module": "powerline.segments.shell",
 				"name": "last_status",
-				"module": "powerline.segments.shell"
+				"priority": 10
 			}
 		]
 	}
