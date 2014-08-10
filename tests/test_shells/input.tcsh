@@ -6,7 +6,7 @@ cd .git
 cd ..
 setenv VIRTUAL_ENV "/home/foo/.virtenvs/some-virtual-environment"
 unsetenv VIRTUAL_ENV
-bash -c 'echo $$>pid ; while true ; do sleep 0.1s ; done' &
+bgscript.sh & waitpid.sh
 false # Warning: currently tcsh bindings do not support job count
 kill `cat pid` ; sleep 1s
 cd $DIR1:q
