@@ -219,8 +219,20 @@ class Renderer(object):
 			Matcher information. Is processed in ``.get_theme()`` method.
 		'''
 		theme = self.get_theme(matcher_info)
-		segments = theme.get_segments(side, line, self.get_segment_info(segment_info, mode))
+		return self.do_render(
+			mode=mode,
+			width=width,
+			side=side,
+			line=line,
+			output_raw=output_raw,
+			segment_info=segment_info,
+			theme=theme,
+		)
 
+	def do_render(self, mode, width, side, line, output_raw, segment_info, theme):
+		'''Like Renderer.render(), but accept theme in place of matcher_info
+		'''
+		segments = theme.get_segments(side, line, self.get_segment_info(segment_info, mode))
 		# Handle excluded/included segments for the current mode
 		segments = [
 			self._get_highlighting(segment, segment['mode'] or mode)
@@ -251,8 +263,6 @@ class Renderer(object):
 				'soft': self.strwidth(theme.get_divider('right', 'soft')),
 			},
 		}
-
-		length = self._render_length(theme, segments, divider_lengths)
 
 		# Create an ordered list of segments that can be dropped
 		segments_priority = sorted((segment for segment in segments if segment['priority'] is not None), key=lambda segment: segment['priority'], reverse=True)
