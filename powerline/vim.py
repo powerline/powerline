@@ -155,7 +155,7 @@ class VimPowerline(Powerline):
 		# requirements to __main__ globals to just one powerline object 
 		# (previously it required as well vim and json)
 		@staticmethod
-		def pyeval():
+		def do_pyeval():
 			import __main__
 			vim.command('return ' + json.dumps(eval(vim.eval('a:e'),
 													__main__.__dict__)))
@@ -199,7 +199,7 @@ def setup(pyeval=None, pycmd=None, can_replace_pyeval=True):
 	if not hasattr(vim, 'bindeval') and can_replace_pyeval:
 		vim.command(('''
 				function! PowerlinePyeval(e)
-					{pycmd} powerline.pyeval()
+					{pycmd} powerline.do_pyeval()
 				endfunction
 			''').format(pycmd=pycmd))
 		pyeval = 'PowerlinePyeval'
