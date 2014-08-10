@@ -133,9 +133,9 @@ _powerline_setup_prompt() {
 		add_args+=' --last_pipe_status="$pipestatus"'
 		add_args+=' --renderer_arg="client_id=$$"'
 		add_args+=' --jobnum=$_POWERLINE_JOBNUM'
-		local new_args_2=' -R parser_state=${(%%):-%_}'
-		new_args_2+=' -R local_theme=continuation'
-		local add_args_3=$add_args' -R local_theme=select'
+		local new_args_2=' --renderer_arg="parser_state=${(%%):-%_}"'
+		new_args_2+=' --renderer_arg="local_theme=continuation"'
+		local add_args_3=$add_args' --renderer_arg="local_theme=select"'
 		local add_args_2=$add_args$new_args_2
 		add_args+=' --width=$(( ${COLUMNS:-$(_powerline_columns_fallback)} - 1 ))'
 		local add_args_r2=$add_args$new_args_2

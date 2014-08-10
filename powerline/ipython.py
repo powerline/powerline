@@ -23,12 +23,17 @@ class RewriteResult(object):
 
 
 class IpythonPowerline(Powerline):
-	def __init__(self, is_prompt):
+	def __init__(self, is_prompt, old_widths):
 		super(IpythonPowerline, self).__init__(
 			'ipython',
 			renderer_module=('ipython_prompt' if is_prompt else 'ipython'),
 			use_daemon_threads=True
 		)
+		self.old_widths = old_widths
+
+	def create_renderer(self, *args, **kwargs):
+		super(IpythonPowerline, self).create_renderer(*args, **kwargs)
+		self.renderer.old_widths = self.old_widths
 
 	def get_config_paths(self):
 		if self.paths:

@@ -283,6 +283,16 @@ ascii                       Theme without any unicode characters at all
     background colors, while the ``soft`` dividers are used to divide 
     segments with the same background color.
 
+.. _config-themes-cursor_space:
+
+``cursor_space``
+    Space reserved for user input in shell bindings. It is measured in per 
+    cents.
+
+``cursor_columns``
+    Space reserved for user input in shell bindings. Unlike :ref:`cursor_space 
+    <config-themes-cursor_space>` it is measured in absolute amout of columns.
+
 .. _config-themes-segment_data:
 
 ``segment_data``

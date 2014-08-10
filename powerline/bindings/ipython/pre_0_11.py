@@ -32,14 +32,14 @@ class PowerlinePrompt(BasePrompt):
 		self.set_p_str()
 		return string(self.p_str)
 
-	def set_p_str(self, width=None):
+	def set_p_str(self):
 		self.p_str, self.p_str_nocolor, self.powerline_prompt_width = (
 			self.powerline.render(
+				side='left',
 				output_raw=True,
 				output_width=True,
 				segment_info=self.powerline_segment_info,
 				matcher_info=self.powerline_prompt_type,
-				width=width
 			)
 		)
 
@@ -61,20 +61,21 @@ class PowerlinePrompt1(PowerlinePrompt):
 	def set_p_str(self):
 		super(PowerlinePrompt1, self).set_p_str()
 		self.nrspaces = len(self.rspace.search(self.p_str_nocolor).group())
-		self.prompt_text_len = self.powerline_prompt_width - self.nrspaces
 		self.powerline_last_in['nrspaces'] = self.nrspaces
-		self.powerline_last_in['prompt_text_len'] = self.prompt_text_len
 
 	def auto_rewrite(self):
-		return RewriteResult(self.other_powerline.render(matcher_info='rewrite', width=self.prompt_text_len, segment_info=self.powerline_segment_info)
-						+ (' ' * self.nrspaces))
+		return RewriteResult(self.other_powerline.render(
+			side='left',
+			matcher_info='rewrite',
+			segment_info=self.powerline_segment_info) + (' ' * self.nrspaces)
+		)
 
 
 class PowerlinePromptOut(PowerlinePrompt):
 	powerline_prompt_type = 'out'
 
 	def set_p_str(self):
-		super(PowerlinePromptOut, self).set_p_str(width=self.powerline_last_in['prompt_text_len'])
+		super(PowerlinePromptOut, self).set_p_str()
 		spaces = ' ' * self.powerline_last_in['nrspaces']
 		self.p_str += spaces
 		self.p_str_nocolor += spaces
@@ -85,21 +86,22 @@ class PowerlinePrompt2(PowerlinePromptOut):
 
 
 class ConfigurableIpythonPowerline(IpythonPowerline):
-	def __init__(self, is_prompt, config_overrides=None, theme_overrides={}, paths=None):
+	def __init__(self, is_prompt, old_widths, config_overrides=None, theme_overrides={}, paths=None):
 		self.config_overrides = config_overrides
 		self.theme_overrides = theme_overrides
 		self.paths = paths
-		super(ConfigurableIpythonPowerline, self).__init__(is_prompt)
+		super(ConfigurableIpythonPowerline, self).__init__(is_prompt, old_widths)
 
 
 def setup(**kwargs):
 	ip = get_ipython()
 
-	prompt_powerline = ConfigurableIpythonPowerline(True, **kwargs)
-	non_prompt_powerline = ConfigurableIpythonPowerline(False, **kwargs)
+	old_widths = {}
+	prompt_powerline = ConfigurableIpythonPowerline(True, old_widths, **kwargs)
+	non_prompt_powerline = ConfigurableIpythonPowerline(False, old_widths, **kwargs)
 
 	def late_startup_hook():
-		last_in = {'nrspaces': 0, 'prompt_text_len': None}
+		last_in = {'nrspaces': 0}
 		for attr, prompt_class, powerline, other_powerline in (
 			('prompt1', PowerlinePrompt1, prompt_powerline, non_prompt_powerline),
 			('prompt2', PowerlinePrompt2, prompt_powerline, None),

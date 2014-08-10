@@ -22,15 +22,14 @@ class PowerlinePromptManager(PromptManager):
 		self.shell = shell
 
 	def render(self, name, color=True, *args, **kwargs):
-		width = None if name == 'in' else self.width
 		if name == 'out' or name == 'rewrite':
 			powerline = self.non_prompt_powerline
 		else:
 			powerline = self.prompt_powerline
 		res = powerline.render(
+			side='left',
 			output_width=True,
 			output_raw=not color,
-			width=width,
 			matcher_info=name,
 			segment_info=self.powerline_segment_info,
 		)
@@ -44,12 +43,12 @@ class PowerlinePromptManager(PromptManager):
 
 
 class ConfigurableIpythonPowerline(IpythonPowerline):
-	def __init__(self, ip, is_prompt):
+	def __init__(self, ip, is_prompt, old_widths):
 		config = ip.config.Powerline
 		self.config_overrides = config.get('config_overrides')
 		self.theme_overrides = config.get('theme_overrides', {})
 		self.paths = config.get('paths')
-		super(ConfigurableIpythonPowerline, self).__init__(is_prompt)
+		super(ConfigurableIpythonPowerline, self).__init__(is_prompt, old_widths)
 
 
 old_prompt_manager = None
@@ -59,8 +58,9 @@ def load_ipython_extension(ip):
 	global old_prompt_manager
 
 	old_prompt_manager = ip.prompt_manager
-	prompt_powerline = ConfigurableIpythonPowerline(ip, True)
-	non_prompt_powerline = ConfigurableIpythonPowerline(ip, False)
+	old_widths = {}
+	prompt_powerline = ConfigurableIpythonPowerline(ip, True, old_widths)
+	non_prompt_powerline = ConfigurableIpythonPowerline(ip, False, old_widths)
 
 	ip.prompt_manager = PowerlinePromptManager(
 		prompt_powerline=prompt_powerline,
