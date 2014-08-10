@@ -5,6 +5,7 @@ import zsh
 import atexit
 from powerline.shell import ShellPowerline
 from powerline.lib import parsedotval
+from powerline.lib.unicode import unicode
 
 
 used_powerlines = []
@@ -44,9 +45,14 @@ class Args(object):
 	@property
 	def config_path(self):
 		try:
-			return zsh.getvalue('POWERLINE_CONFIG_PATH')
+			ret = zsh.getvalue('POWERLINE_CONFIG_PATHS')
 		except IndexError:
 			return None
+		else:
+			if isinstance(ret, (unicode, str, bytes)):
+				return ret.split(type(ret)(':'))
+			else:
+				return ret
 
 	@property
 	def jobnum(self):

@@ -81,12 +81,13 @@ are taken from zsh variables.
     but only subdictionaries for ``THEME_NAME`` key are merged with theme 
     configuration when theme with given name is requested.
 
-``POWERLINE_CONFIG_PATH``
-    Sets directory where configuration should be read from. If present, no 
+``POWERLINE_CONFIG_PATHS``
+    Sets directories where configuration should be read from. If present, no 
     default locations are searched for configuration. No expansions are 
     performed by powerline script itself, but zsh usually performs them on its 
-    own if you set variable without quotes: ``POWERLINE_CONFIG_PATH=~/example``. 
-    Expansion depends on zsh configuration.
+    own if you set variable without quotes: ``POWERLINE_CONFIG_PATHS=( ~/example 
+    )``. You should use array parameter or the usual colon-separated 
+    ``POWERLINE_CONFIG_PATHS=$HOME/path1:$HOME/path2``.
 
 Ipython overrides
 =================
