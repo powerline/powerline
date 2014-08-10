@@ -211,8 +211,15 @@ def command(cmd):
 			if not aucmd.startswith(':python3 '):
 				raise NotImplementedError
 		_on_wipeout.append(aucmd.partition(' ')[2])
+	elif cmd.startswith('set '):
+		if cmd.startswith('set statusline='):
+			options['statusline'] = cmd[len('set statusline='):]
+		elif cmd.startswith('set tabline='):
+			options['tabline'] = cmd[len('set tabline='):]
+		else:
+			raise NotImplementedError(cmd)
 	else:
-		raise NotImplementedError
+		raise NotImplementedError(cmd)
 
 
 @_vim
@@ -481,6 +488,7 @@ class _Tabpage(object):
 		return win
 
 	def _close(self):
+		global _tabpage
 		while self.windows:
 			self._close_window(1, False)
 		tabpages._pop(self.number)
@@ -532,7 +540,7 @@ class _Buffer(object):
 			import os
 			if type(name) is not bytes:
 				name = name.encode('utf-8')
-			if b':/' in  name:
+			if b':/' in name:
 				self._name = name
 			else:
 				self._name = os.path.abspath(name)
@@ -680,6 +688,7 @@ def _edit(name=None):
 @_vim
 def _tabnew(name=None):
 	global windows
+	global _tabpage
 	tabpage = tabpages._new()
 	windows = tabpage.windows
 	_tabpage = len(tabpages)
