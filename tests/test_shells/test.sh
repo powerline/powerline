@@ -183,5 +183,5 @@ if ! run_test ipython ipython ; then
 	FAILED=1
 fi
 
-test "x$ONLY_SHELL" = "x" && rm -r tests/shell
+test $FAILED -eq 0 && rm -r tests/shell
 exit $FAILED
