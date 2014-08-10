@@ -1,7 +1,5 @@
 # vim:fileencoding=utf-8:noet
 
-import os
-
 from powerline import Powerline
 from powerline.lib import mergedicts, parsedotval
 
@@ -82,7 +80,7 @@ def write_output(args, powerline, segment_info, write):
 		for line in powerline.render_above_lines(
 			width=args.width,
 			segment_info=segment_info,
-			mode=os.environ.get('_POWERLINE_MODE'),
+			mode=segment_info['environ'].get('_POWERLINE_MODE'),
 		):
 			write(line)
 			write('\n')
@@ -93,6 +91,6 @@ def write_output(args, powerline, segment_info, write):
 			width=args.width,
 			side=args.side,
 			segment_info=segment_info,
-			mode=os.environ.get('_POWERLINE_MODE'),
+			mode=segment_info['environ'].get('_POWERLINE_MODE'),
 		)
 		write(rendered)

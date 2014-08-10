@@ -101,20 +101,20 @@ Common configuration is a subdictionary that is a value of ``ext`` key in
 ``colorscheme``
     Defines the colorscheme used for this extension.
 
-``theme``
-    .. _config-ext-theme:
+.. _config-ext-theme:
 
+``theme``
     Defines the theme used for this extension.
 
-``top_theme``
-    .. _config-ext-top_theme:
+.. _config-ext-top_theme:
 
+``top_theme``
     Defines the top-level theme used for this extension. See `Themes`_ section 
     for more details.
 
-``local_themes``
-    .. _config-ext-local_themes:
+.. _config-ext-local_themes:
 
+``local_themes``
     Defines themes used when certain conditions are met, e.g. for 
     buffer-specific statuslines in vim. Value depends on extension used. For vim 
     it is a dictionary ``{matcher_name : theme_name}``, where ``matcher_name`` 
@@ -122,6 +122,28 @@ Common configuration is a subdictionary that is a value of ``ext`` key in
     (``matcher_module`` defaults to ``powerline.matchers.vim``) and 
     ``module_attribute`` should point to a function that returns boolean value 
     indicating that current buffer has (not) matched conditions.
+
+``components``
+    Determines which extension components should be enabled. This key is highly 
+    extension-specific, here is the table of extensions and corresponding 
+    components:
+
+    +---------+----------+-----------------------------------------------------+
+    |Extension|Component |Description                                          |
+    +---------+----------+-----------------------------------------------------+
+    |vim      |statusline|Makes Vim use powerline statusline.                  |
+    |         +----------+-----------------------------------------------------+
+    |         |tabline   |Makes Vim use powerline tabline.                     |
+    +---------+----------+-----------------------------------------------------+
+    |shell    |prompt    |Makes shell display powerline prompt.                |
+    |         +----------+-----------------------------------------------------+
+    |         |tmux      |Makes shell report its current working directory     |
+    |         |          |and screen width to tmux for tmux powerline          |
+    |         |          |bindings.                                            |
+    |         |          |                                                     |
+    +---------+----------+-----------------------------------------------------+
+
+    All components are enabled by default.
 
 .. _config-colors:
 
@@ -324,54 +346,54 @@ ascii                       Theme without any unicode characters at all
             <config-themes-seg-segments>` and :ref:`args 
             <config-themes-seg-args>` options.
 
-    ``module``
-        .. _config-themes-seg-module:
+    .. _config-themes-seg-module:
 
+    ``module``
         Function module, only required for function segments. Defaults to 
         ``powerline.segments.{extension}``. Default is overriden by 
         :ref:`default_module theme option <config-themes-default_module>`.
 
-    ``name``
-        .. _config-themes-seg-name:
+    .. _config-themes-seg-name:
 
+    ``name``
         Function name, only required for function and list segments.
 
-    ``highlight_group``
-        .. _config-themes-seg-highlight_group:
+    .. _config-themes-seg-highlight_group:
 
-        Highlighting group for this segment. Consists of a prioritized list 
-        of highlighting groups, where the first highlighting group that is 
+    ``highlight_group``
+        Highlighting group for this segment. Consists of a prioritized list of 
+        highlighting groups, where the first highlighting group that is 
         available in the colorscheme is used.
 
         Ignored for segments that have ``function`` type.
 
-    ``before``
-        .. _config-themes-seg-before:
+    .. _config-themes-seg-before:
 
+    ``before``
         A string which will be prepended to the segment contents.
 
-    ``after``
-        .. _config-themes-seg-after:
+    .. _config-themes-seg-after:
 
+    ``after``
         A string which will be appended to the segment contents.
 
-    ``contents``
-        .. _config-themes-seg-contents:
+    .. _config-themes-seg-contents:
 
+    ``contents``
         Segment contents, only required for ``string`` segments.
 
-    ``args``
-        .. _config-themes-seg-args:
+    .. _config-themes-seg-args:
 
+    ``args``
         A dict of arguments to be passed to a ``function`` segment.
 
     ``align``
         Aligns the segments contents to the left (``l``), center (``c``) or 
         right (``r``).
 
-    ``width``
-        .. _config-themes-seg-width:
+    .. _config-themes-seg-width:
 
+    ``width``
         Enforces a specific width for this segment.
 
         This segment will work as a spacer if the width is set to ``auto``.
@@ -412,13 +434,13 @@ ascii                       Theme without any unicode characters at all
         A list of modes where this segment will be included: The segment is 
         *not* included in any modes, *except* for the modes in this list.
 
-    ``display``
-        .. _config-themes-seg-display:
+    .. _config-themes-seg-display:
 
+    ``display``
         Boolean. If false disables displaying of the segment.
         Defaults to ``True``.
 
-    ``segments``
-        .. _config-themes-seg-segments:
+    .. _config-themes-seg-segments:
 
+    ``segments``
         A list of subsegments.

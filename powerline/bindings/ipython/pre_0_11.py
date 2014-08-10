@@ -82,10 +82,10 @@ class PowerlinePrompt2(PowerlinePromptOut):
 
 
 class ConfigurableIpythonPowerline(IpythonPowerline):
-	def __init__(self, is_prompt, config_overrides=None, theme_overrides={}, path=None):
+	def __init__(self, is_prompt, config_overrides=None, theme_overrides={}, paths=None):
 		self.config_overrides = config_overrides
 		self.theme_overrides = theme_overrides
-		self.path = path
+		self.paths = paths
 		super(ConfigurableIpythonPowerline, self).__init__(is_prompt)
 
 

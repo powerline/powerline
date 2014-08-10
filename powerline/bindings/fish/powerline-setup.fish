@@ -18,14 +18,17 @@ function powerline-setup
 		end
 	end
 
-	if test -z "$POWERLINE_NO_FISH_PROMPT$POWERLINE_NO_SHELL_PROMPT"
+	if test -z "$POWERLINE_CONFIG"
+		if which powerline-config >/dev/null
+			set -g POWERLINE_CONFIG powerline-config
+		else
+			set -g POWERLINE_CONFIG (dirname (status -f))/../../../scripts/powerline-config
+		end
+	end
+
+	if eval $POWERLINE_CONFIG shell --shell=fish uses prompt
 		if test -z "$POWERLINE_COMMAND"
-			if false ;and which powerline-config >/dev/null
-				set -g -x POWERLINE_COMMAND (powerline-config shell command)
-			else
-				set -l powerline_dir (dirname (status -f))/../../..
-				set -g -x POWERLINE_COMMAND (eval $powerline_dir/scripts/powerline-config shell command)
-			end
+			set -g POWERLINE_COMMAND (eval $POWERLINE_CONFIG shell command)
 		end
 		function --on-variable POWERLINE_COMMAND _powerline_update
 			set -l addargs "--last_exit_code=\$status"
@@ -60,7 +63,7 @@ function powerline-setup
 		end
 		_powerline_update
 	end
-	if test -z "$POWERLINE_NO_FISH_TMUX_SUPPORT$POWERLINE_NO_SHELL_TMUX_SUPPORT"
+	if eval $POWERLINE_CONFIG shell --shell=fish uses tmux
 		if test -n "$TMUX"
 			if tmux refresh -S ^/dev/null
 				function _powerline_tmux_setenv
@@ -79,3 +82,4 @@ function powerline-setup
 		end
 	end
 end
+# vim: ft=fish

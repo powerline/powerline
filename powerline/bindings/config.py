@@ -118,10 +118,14 @@ def source_tmux_files(pl, args):
 	run_tmux_command('refresh-client')
 
 
-def create_powerline_logger(args):
+def get_main_config(args):
 	find_config_files = generate_config_finder()
 	config_loader = ConfigLoader(run_once=True)
-	config = load_config('config', find_config_files, config_loader)
+	return load_config('config', find_config_files, config_loader)
+
+
+def create_powerline_logger(args):
+	config = get_main_config(args)
 	common_config = finish_common_config(config['common'])
 	logger = create_logger(common_config)
 	return PowerlineLogger(use_daemon_threads=True, logger=logger, ext='config')
@@ -165,4 +169,23 @@ def shell_command(pl, args):
 	if cmd:
 		print(cmd)
 	else:
+		sys.exit(1)
+
+
+def uses(pl, args):
+	component = args.component
+	if not component:
+		raise ValueError('Must specify component')
+	shell = args.shell
+	template = 'POWERLINE_NO_{shell}_{component}'
+	for sh in (shell, 'shell') if shell else ('shell'):
+		varname = template.format(shell=sh.upper(), component=component.upper())
+		if os.environ.get(varname):
+			print ('HERE')
+			sys.exit(1)
+	config = get_main_config(args)
+	if component in config.get('ext', {}).get('shell', {}).get('components', ('tmux', 'prompt')):
+		sys.exit(0)
+	else:
+		print ('THERE')
 		sys.exit(1)

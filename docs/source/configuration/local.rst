@@ -81,12 +81,13 @@ are taken from zsh variables.
     but only subdictionaries for ``THEME_NAME`` key are merged with theme 
     configuration when theme with given name is requested.
 
-``POWERLINE_CONFIG_PATH``
-    Sets directory where configuration should be read from. If present, no 
+``POWERLINE_CONFIG_PATHS``
+    Sets directories where configuration should be read from. If present, no 
     default locations are searched for configuration. No expansions are 
     performed by powerline script itself, but zsh usually performs them on its 
-    own if you set variable without quotes: ``POWERLINE_CONFIG_PATH=~/example``. 
-    Expansion depends on zsh configuration.
+    own if you set variable without quotes: ``POWERLINE_CONFIG_PATHS=( ~/example 
+    )``. You should use array parameter or the usual colon-separated 
+    ``POWERLINE_CONFIG_PATHS=$HOME/path1:$HOME/path2``.
 
 Ipython overrides
 =================
@@ -104,8 +105,8 @@ use ``c.Powerline.KEY``. Supported ``KEY`` strings or keyword argument names:
     a dictionary where keys are theme names and values are dictionaries which 
     will be recursively merged with the contents of the given theme.
 
-``path``
-    Sets directory where configuration should be read from. If present, no 
+``paths``
+    Sets directories where configuration should be read from. If present, no 
     default locations are searched for configuration. No expansions are 
     performed thus you cannot use paths starting with ``~/``.
 
@@ -114,9 +115,9 @@ Prompt command
 
 In addition to the above configuration options you can use 
 ``$POWERLINE_COMMAND`` environment variable to tell shell or tmux to use 
-specific powerline implementation. This is mostly useful for putting powerline 
-into different directory or replacing ``powerline`` script with 
-``powerline-client`` for performance reasons.
+specific powerline implementation and ``$POWERLINE_CONFIG`` to tell zsh or tmux 
+where ``powerline-config`` script is located. This is mostly useful for putting 
+powerline into different directory.
 
 .. note::
 
@@ -149,6 +150,6 @@ fish in order to support multiline prompt you should set
 
 .. note::
 
-    Most supported shells’ configuration scripts check for additional 
-    configuration variables being empty. But tcsh configuration script checks 
-    for variables being *defined*, not empty.
+    Most supported shells’ configuration scripts check for ``$POWERLINE_CONFIG`` 
+    and ``$POWERLINE_COMMAND`` configuration variables being empty. But tcsh 
+    configuration script checks for variables being *defined*, not empty.

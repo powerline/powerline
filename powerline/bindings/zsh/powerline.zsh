@@ -126,12 +126,7 @@ _powerline_setup_prompt() {
 		zpython 'del _powerline_setup'
 	else
 		if test -z "${POWERLINE_COMMAND}" ; then
-			if which powerline-config &>/dev/null ; then
-				export POWERLINE_COMMAND="$(powerline-config shell command)"
-			else
-				local powerline_dir="$POWERLINE_SOURCED:h:h:h:h"
-				export POWERLINE_COMMAND="$($powerline_dir/scripts/powerline-config shell command)"
-			fi
+			POWERLINE_COMMAND=( "$($POWERLINE_CONFIG shell command)" )
 		fi
 
 		local add_args='--last_exit_code=$?'
@@ -176,12 +171,21 @@ _powerline_add_widget() {
 	fi
 }
 
+if test -z "${POWERLINE_CONFIG}" ; then
+	if which powerline-config >/dev/null ; then
+		export POWERLINE_CONFIG=powerline-config
+	else
+		export POWERLINE_CONFIG="$_POWERLINE_SOURCED:h:h:h:h/scripts/powerline-config"
+	fi
+fi
+
 setopt promptpercent
 setopt promptsubst
-if test -z "$POWERLINE_NO_ZSH_PROMPT$POWERLINE_NO_SHELL_PROMPT" ; then
+
+if ${POWERLINE_CONFIG} shell --shell=zsh uses prompt ; then
 	_powerline_setup_prompt
 	_powerline_init_modes_support
 fi
-if test -z "$POWERLINE_NO_ZSH_TMUX_SUPPORT$POWERLINE_NO_SHELL_TMUX_SUPPORT" ; then
+if ${POWERLINE_CONFIG} shell --shell=zsh uses tmux ; then
 	_powerline_init_tmux_support
 fi

@@ -106,8 +106,10 @@ int main(int argc, char *argv[]) {
 	wd = getcwd(NULL, 0);
 	if (wd != NULL) {
 		do_write(sd, wd, strlen(wd));
-		free(wd); wd = NULL;
+		free(wd);
+		wd = NULL;
 	}
+	do_write(sd, eof, 1);
 
 	for(envp=environ; *envp; envp++) {
 		do_write(sd, *envp, strlen(*envp));

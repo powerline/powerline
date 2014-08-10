@@ -47,7 +47,7 @@ class ConfigurableIpythonPowerline(IpythonPowerline):
 		config = ip.config.Powerline
 		self.config_overrides = config.get('config_overrides')
 		self.theme_overrides = config.get('theme_overrides', {})
-		self.path = config.get('path')
+		self.paths = config.get('paths')
 		super(ConfigurableIpythonPowerline, self).__init__(is_prompt)
 
 

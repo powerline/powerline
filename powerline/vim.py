@@ -27,6 +27,7 @@ class VimPowerline(Powerline):
 	def __init__(self, pyeval='PowerlinePyeval', **kwargs):
 		super(VimPowerline, self).__init__('vim', **kwargs)
 		self.last_window_id = 1
+		self.pyeval = pyeval
 		self.window_statusline = '%!' + pyeval + '(\'powerline.statusline({0})\')'
 
 	def add_local_theme(self, key, config):
@@ -154,10 +155,22 @@ class VimPowerline(Powerline):
 		# requirements to __main__ globals to just one powerline object 
 		# (previously it required as well vim and json)
 		@staticmethod
-		def pyeval():
+		def do_pyeval():
 			import __main__
 			vim.command('return ' + json.dumps(eval(vim.eval('a:e'),
 													__main__.__dict__)))
+
+	def setup_components(self, components):
+		if components is None:
+			components = ('statusline', 'tabline')
+		if 'statusline' in components:
+			# Is immediately changed after new_window function is run. Good for 
+			# global value.
+			vim.command('set statusline=%!{pyeval}(\'powerline.new_window()\')'.format(
+				pyeval=self.pyeval))
+		if 'tabline' in components:
+			vim.command('set tabline=%!{pyeval}(\'powerline.tabline()\')'.format(
+				pyeval=self.pyeval))
 
 
 pycmd = None
@@ -186,12 +199,13 @@ def setup(pyeval=None, pycmd=None, can_replace_pyeval=True):
 	if not hasattr(vim, 'bindeval') and can_replace_pyeval:
 		vim.command(('''
 				function! PowerlinePyeval(e)
-					{pycmd} powerline.pyeval()
+					{pycmd} powerline.do_pyeval()
 				endfunction
 			''').format(pycmd=pycmd))
 		pyeval = 'PowerlinePyeval'
 
 	powerline = VimPowerline(pyeval)
+	powerline.update_renderer()
 	__main__.powerline = powerline
 
 	# Cannot have this in one line due to weird newline handling (in :execute 
@@ -202,8 +216,3 @@ def setup(pyeval=None, pycmd=None, can_replace_pyeval=True):
 	vim.command('	autocmd! ColorScheme * :{pycmd} powerline.reset_highlight()'.format(pycmd=pycmd))
 	vim.command('	autocmd! VimLeavePre * :{pycmd} powerline.shutdown()'.format(pycmd=pycmd))
 	vim.command('augroup END')
-
-	# Is immediately changed after new_window function is run. Good for global 
-	# value.
-	vim.command('set statusline=%!{pyeval}(\'powerline.new_window()\')'.format(pyeval=pyeval))
-	vim.command('set tabline=%!{pyeval}(\'powerline.tabline()\')'.format(pyeval=pyeval))

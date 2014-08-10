@@ -1,4 +1,4 @@
-set fish_function_path $fish_function_path "$PWD/powerline/bindings/fish"
+set fish_function_path "$PWD/powerline/bindings/fish" $fish_function_path
 powerline-setup
 set POWERLINE_COMMAND "$POWERLINE_COMMAND -p $PWD/powerline/config_files"
 set POWERLINE_COMMAND "$POWERLINE_COMMAND -t default_leftonly.segment_data.hostname.args.only_if_ssh=false"
