@@ -23,6 +23,36 @@ class ShellRenderer(Renderer):
 
 	character_translations = Renderer.character_translations.copy()
 
+	def __init__(self, *args, **kwargs):
+		super(ShellRenderer, self).__init__(*args, **kwargs)
+		self.old_widths = {}
+
+	def render(self, segment_info, *args, **kwargs):
+		client_id = segment_info.get('client_id')
+		key = (client_id, kwargs.get('side'))
+		kwargs = kwargs.copy()
+		width = kwargs.pop('width', None)
+		local_theme = segment_info.get('local_theme')
+		if client_id and local_theme:
+			output_raw = False
+			try:
+				width = self.old_widths[key]
+			except KeyError:
+				pass
+		else:
+			output_raw = True
+		ret = super(ShellRenderer, self).render(
+			output_raw=output_raw,
+			width=width,
+			matcher_info=local_theme,
+			segment_info=segment_info,
+			*args, **kwargs
+		)
+		if output_raw:
+			self.old_widths[key] = len(ret[1])
+			ret = ret[0]
+		return ret
+
 	def hlstyle(self, fg=None, bg=None, attr=None):
 		'''Highlight a segment.
 
