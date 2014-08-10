@@ -33,11 +33,14 @@ class PowerlinePrompt(BasePrompt):
 		return string(self.p_str)
 
 	def set_p_str(self, width=None):
-		self.p_str, self.p_str_nocolor = (
-			self.powerline.render(output_raw=True,
-								segment_info=self.powerline_segment_info,
-								matcher_info=self.powerline_prompt_type,
-								width=width)
+		self.p_str, self.p_str_nocolor, self.powerline_prompt_width = (
+			self.powerline.render(
+				output_raw=True,
+				output_width=True,
+				segment_info=self.powerline_segment_info,
+				matcher_info=self.powerline_prompt_type,
+				width=width
+			)
 		)
 
 	@staticmethod
@@ -58,7 +61,7 @@ class PowerlinePrompt1(PowerlinePrompt):
 	def set_p_str(self):
 		super(PowerlinePrompt1, self).set_p_str()
 		self.nrspaces = len(self.rspace.search(self.p_str_nocolor).group())
-		self.prompt_text_len = len(self.p_str_nocolor) - self.nrspaces
+		self.prompt_text_len = self.powerline_prompt_width - self.nrspaces
 		self.powerline_last_in['nrspaces'] = self.nrspaces
 		self.powerline_last_in['prompt_text_len'] = self.prompt_text_len
 

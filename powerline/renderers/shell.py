@@ -34,22 +34,22 @@ class ShellRenderer(Renderer):
 		width = kwargs.pop('width', None)
 		local_theme = segment_info.get('local_theme')
 		if client_id and local_theme:
-			output_raw = False
+			output_width = False
 			try:
 				width = self.old_widths[key]
 			except KeyError:
 				pass
 		else:
-			output_raw = True
+			output_width = True
 		ret = super(ShellRenderer, self).render(
-			output_raw=output_raw,
+			output_width=output_width,
 			width=width,
 			matcher_info=local_theme,
 			segment_info=segment_info,
 			*args, **kwargs
 		)
-		if output_raw:
-			self.old_widths[key] = len(ret[1])
+		if output_width:
+			self.old_widths[key] = ret[1]
 			ret = ret[0]
 		return ret
 

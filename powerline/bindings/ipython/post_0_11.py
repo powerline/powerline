@@ -27,15 +27,16 @@ class PowerlinePromptManager(PromptManager):
 			powerline = self.non_prompt_powerline
 		else:
 			powerline = self.prompt_powerline
-		res, res_nocolor = powerline.render(
-			output_raw=True,
+		res = powerline.render(
+			output_width=True,
+			output_raw=not color,
 			width=width,
 			matcher_info=name,
 			segment_info=self.powerline_segment_info,
 		)
-		self.txtwidth = len(res_nocolor)
-		self.width = self.txtwidth
-		ret = res if color else res_nocolor
+		self.txtwidth = res[-1]
+		self.width = res[-1]
+		ret = res[0] if color else res[1]
 		if name == 'rewrite':
 			return RewriteResult(ret)
 		else:

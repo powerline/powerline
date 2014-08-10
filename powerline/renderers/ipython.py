@@ -32,5 +32,9 @@ class IpythonRenderer(ShellRenderer):
 			if 'theme' in match:
 				match['theme'].shutdown()
 
+	def render(self, *args, **kwargs):
+		# XXX super(ShellRenderer), *not* super(IpythonRenderer)
+		return super(ShellRenderer, self).render(*args, **kwargs)
+
 
 renderer = IpythonRenderer
