@@ -134,7 +134,12 @@ _powerline_set_jobs() {
 _powerline_prompt() {
 	# Arguments: side, exit_code
 	_powerline_set_jobs
-	$POWERLINE_COMMAND shell $1 -w "${COLUMNS:-$(_powerline_columns_fallback)}" $_POWERLINE_RENDERER_ARG --last_exit_code=$2 --jobnum=$_POWERLINE_JOBS
+	$POWERLINE_COMMAND shell $1 \
+		-w "${COLUMNS:-$(_powerline_columns_fallback)}" \
+		$_POWERLINE_RENDERER_ARG \
+		--renderer_arg="client_id=$$" \
+		--last_exit_code=$2 \
+		--jobnum=$_POWERLINE_JOBS
 }
 
 _powerline_setup_prompt() {

@@ -34,6 +34,9 @@ function powerline-setup
 			set -l addargs "--last_exit_code=\$status"
 			set -l addargs "$addargs --last_pipe_status=\$status"
 			set -l addargs "$addargs --jobnum=(jobs -p | wc -l)"
+			# One random value has an 1/32767 = 0.0031% probability of having 
+			# the same value in two shells
+			set -l addargs "$addargs --renderer_arg=client_id="(random)
 			set -l addargs "$addargs --width=\$_POWERLINE_COLUMNS"
 			set -l promptside
 			set -l rpromptpast
