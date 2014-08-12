@@ -39,6 +39,16 @@ _powerline_init_tmux_support() {
 	fi
 }
 
+_powerline_local_prompt() {
+	# Arguments: side, renderer_module arg, last_exit_code, jobnum, local theme
+	$POWERLINE_COMMAND shell $1 \
+		$2 \
+		--last_exit_code=$3 \
+		--jobnum=$4 \
+		--renderer_arg="client_id=$$" \
+		--renderer_arg="local_theme=$5"
+}
+
 _powerline_prompt() {
 	# Arguments: side, last_exit_code, jobnum
 	$POWERLINE_COMMAND shell $1 \
@@ -53,6 +63,12 @@ _powerline_set_prompt() {
 	local last_exit_code=$?
 	local jobnum="$(jobs -p|wc -l)"
 	PS1="$(_powerline_prompt aboveleft $last_exit_code $jobnum)"
+	if test -n "$POWERLINE_SHELL_CONTINUATION$POWERLINE_BASH_CONTINUATION" ; then
+		PS2="$(_powerline_local_prompt left -rbash_prompt $last_exit_code $jobnum continuation)"
+	fi
+	if test -n "$POWERLINE_SHELL_SELECT$POWERLINE_BASH_SELECT" ; then
+		PS3="$(_powerline_local_prompt left '' $last_exit_code $jobnum select)"
+	fi
 	return $last_exit_code
 }
 
@@ -63,6 +79,8 @@ _powerline_setup_prompt() {
 	fi
 	test "x$PROMPT_COMMAND" != "x${PROMPT_COMMAND%_powerline_set_prompt*}" ||
 		PROMPT_COMMAND=$'_powerline_set_prompt\n'"${PROMPT_COMMAND}"
+	PS2="$(_powerline_local_prompt left -rbash_prompt 0 0 continuation)"
+	PS3="$(_powerline_local_prompt left '' 0 0 select)"
 }
 
 if test -z "${POWERLINE_CONFIG}" ; then

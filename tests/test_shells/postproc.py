@@ -58,4 +58,9 @@ with codecs.open(fname, 'r', encoding='utf-8') as R:
 				# command, in travis it is truncated just after `true`.
 				if line.startswith('[1] + Terminated'):
 					line = '[1] + Terminated bash -c ...\n'
+			elif shell == 'dash':
+				# Position of this line is not stable: it may go both before and 
+				# after the next line
+				if line.startswith('[1] + Terminated'):
+					continue
 			W.write(line)
