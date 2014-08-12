@@ -917,7 +917,7 @@ class NowPlayingSegment(Segment):
 			'elapsed': None,
 			'total': None,
 		}
-		func_stats = player_func(state_symbol=state_symbols, **kwargs)
+		func_stats = player_func(**kwargs)
 		if not func_stats:
 			return None
 		stats.update(func_stats)
