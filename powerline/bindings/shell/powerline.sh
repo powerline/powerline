@@ -41,6 +41,8 @@ _powerline_set_append_trap() {
 			if echo "$_powerline_traps" | grep -cm1 $2'$' >/dev/null ; then
 				_powerline_traps="$(echo "$_powerline_traps" | sed "s/ $2/'\\n$1' $2/")"
 				eval "$_powerline_traps"
+			else
+				trap "$1" $2
 			fi
 		}
 	else
@@ -131,6 +133,17 @@ _powerline_set_jobs() {
 	_powerline_set_jobs
 }
 
+_powerline_local_prompt() {
+	# Arguments: side, exit_code, local theme
+	_powerline_set_jobs
+	$POWERLINE_COMMAND shell $1 \
+		$_POWERLINE_RENDERER_ARG \
+		--renderer_arg="client_id=$$" \
+		--last_exit_code=$2 \
+		--jobnum=$_POWERLINE_JOBS \
+		--renderer_arg="local_theme=$3"
+}
+
 _powerline_prompt() {
 	# Arguments: side, exit_code
 	_powerline_set_jobs
@@ -140,6 +153,37 @@ _powerline_prompt() {
 		--renderer_arg="client_id=$$" \
 		--last_exit_code=$2 \
 		--jobnum=$_POWERLINE_JOBS
+	_powerline_update_psN
+}
+
+_powerline_setup_psN() {
+	case "$1" in
+		mksh|ksh|bash)
+			_POWERLINE_PID=$$
+			_powerline_update_psN() {
+				kill -USR1 $_POWERLINE_PID
+			}
+			# No command substitution in PS2 and PS3
+			_powerline_set_psN() {
+				if test -n "$POWERLINE_SHELL_CONTINUATION" ; then
+					PS2="$(_powerline_local_prompt left $? continuation)"
+				fi
+				if test -n "$POWERLINE_SHELL_SELECT" ; then
+					PS3="$(_powerline_local_prompt left $? select)"
+				fi
+			}
+			_powerline_append_trap '_powerline_set_psN' USR1
+			_powerline_set_psN
+			;;
+		bb|ash|dash)
+			_powerline_update_psN() {
+				# Do nothing
+				return
+			}
+			PS2='$(_powerline_local_prompt left $? continuation)'
+			# No select support
+			;;
+	esac
 }
 
 _powerline_setup_prompt() {
@@ -149,6 +193,9 @@ _powerline_setup_prompt() {
 	_powerline_set_command "$@"
 	_powerline_set_renderer_arg "$@"
 	PS1='$(_powerline_prompt aboveleft $?)'
+	PS2="$(_powerline_local_prompt left 0 continuation)"
+	PS3="$(_powerline_local_prompt left 0 select)"
+	_powerline_setup_psN "$@"
 }
 
 _powerline_init_tmux_support() {

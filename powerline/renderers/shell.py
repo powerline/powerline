@@ -3,6 +3,7 @@
 from __future__ import absolute_import, unicode_literals, division, print_function
 
 from powerline.renderer import Renderer
+from powerline.theme import Theme
 from powerline.colorscheme import ATTR_BOLD, ATTR_ITALIC, ATTR_UNDERLINE
 
 
@@ -119,6 +120,20 @@ class ShellRenderer(Renderer):
 		elif self.screen_escape:
 			r = '\033P' + r.replace('\033', '\033\033') + '\033\\'
 		return self.escape_hl_start + r + self.escape_hl_end
+
+	def get_theme(self, matcher_info):
+		if not matcher_info:
+			return self.theme
+		match = self.local_themes[matcher_info]
+		try:
+			return match['theme']
+		except KeyError:
+			match['theme'] = Theme(
+				theme_config=match['config'],
+				main_theme_config=self.theme_config,
+				**self.theme_kwargs
+			)
+			return match['theme']
 
 
 renderer = ShellRenderer

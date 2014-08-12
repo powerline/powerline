@@ -62,13 +62,17 @@ class TestShell(TestCase):
 
 	def test_continuation(self):
 		pl = Pl()
-		self.assertEqual(shell.continuation(pl=pl, segment_info={}), None)
+		self.assertEqual(shell.continuation(pl=pl, segment_info={}), [{
+			'contents': '',
+			'width': 'auto',
+			'highlight_group': ['continuation:current', 'continuation'],
+		}])
 		segment_info = {'parser_state': 'if cmdsubst'}
 		self.assertEqual(shell.continuation(pl=pl, segment_info=segment_info), [
 			{
 				'contents': 'if',
 				'draw_inner_divider': True,
-				'highlight_group': 'continuation:current',
+				'highlight_group': ['continuation:current', 'continuation'],
 				'width': 'auto',
 				'align': 'l',
 			},
@@ -77,7 +81,7 @@ class TestShell(TestCase):
 			{
 				'contents': 'if',
 				'draw_inner_divider': True,
-				'highlight_group': 'continuation:current',
+				'highlight_group': ['continuation:current', 'continuation'],
 				'width': 'auto',
 				'align': 'r',
 			},
@@ -86,12 +90,12 @@ class TestShell(TestCase):
 			{
 				'contents': 'if',
 				'draw_inner_divider': True,
-				'highlight_group': 'continuation',
+				'highlight_group': ['continuation'],
 			},
 			{
 				'contents': 'cmdsubst',
 				'draw_inner_divider': True,
-				'highlight_group': 'continuation:current',
+				'highlight_group': ['continuation:current', 'continuation'],
 				'width': 'auto',
 				'align': 'l',
 			},
@@ -100,21 +104,21 @@ class TestShell(TestCase):
 			{
 				'contents': 'if',
 				'draw_inner_divider': True,
-				'highlight_group': 'continuation',
+				'highlight_group': ['continuation'],
 				'width': 'auto',
 				'align': 'r',
 			},
 			{
 				'contents': 'cmdsubst',
 				'draw_inner_divider': True,
-				'highlight_group': 'continuation:current',
+				'highlight_group': ['continuation:current', 'continuation'],
 			},
 		])
 		self.assertEqual(shell.continuation(pl=pl, segment_info=segment_info, omit_cmdsubst=True, right_align=True), [
 			{
 				'contents': 'if',
 				'draw_inner_divider': True,
-				'highlight_group': 'continuation:current',
+				'highlight_group': ['continuation:current', 'continuation'],
 				'width': 'auto',
 				'align': 'r',
 			},
@@ -123,7 +127,7 @@ class TestShell(TestCase):
 			{
 				'contents': 'IF',
 				'draw_inner_divider': True,
-				'highlight_group': 'continuation:current',
+				'highlight_group': ['continuation:current', 'continuation'],
 				'width': 'auto',
 				'align': 'r',
 			},
@@ -131,7 +135,7 @@ class TestShell(TestCase):
 		self.assertEqual(shell.continuation(pl=pl, segment_info=segment_info, omit_cmdsubst=True, right_align=True, renames={'if': None}), [
 			{
 				'contents': '',
-				'highlight_group': 'continuation:current',
+				'highlight_group': ['continuation:current', 'continuation'],
 				'width': 'auto',
 				'align': 'r',
 			},
@@ -141,17 +145,17 @@ class TestShell(TestCase):
 			{
 				'contents': 'then',
 				'draw_inner_divider': True,
-				'highlight_group': 'continuation',
+				'highlight_group': ['continuation'],
 			},
 			{
 				'contents': 'then',
 				'draw_inner_divider': True,
-				'highlight_group': 'continuation',
+				'highlight_group': ['continuation'],
 			},
 			{
 				'contents': 'then',
 				'draw_inner_divider': True,
-				'highlight_group': 'continuation:current',
+				'highlight_group': ['continuation:current', 'continuation'],
 				'width': 'auto',
 				'align': 'l',
 			},

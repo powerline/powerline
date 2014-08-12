@@ -89,7 +89,11 @@ def continuation(pl, segment_info, omit_cmdsubst=True, right_align=False, rename
 	Highlight groups used: ``continuation``, ``continuation:current``.
 	'''
 	if not segment_info.get('parser_state'):
-		return None
+		return [{
+			'contents': '',
+			'width': 'auto',
+			'highlight_group': ['continuation:current', 'continuation'],
+		}]
 	ret = []
 
 	for state in segment_info['parser_state'].split():
@@ -97,7 +101,7 @@ def continuation(pl, segment_info, omit_cmdsubst=True, right_align=False, rename
 		if state:
 			ret.append({
 				'contents': state,
-				'highlight_group': 'continuation',
+				'highlight_group': ['continuation'],
 				'draw_inner_divider': True,
 			})
 
@@ -111,8 +115,8 @@ def continuation(pl, segment_info, omit_cmdsubst=True, right_align=False, rename
 
 	if right_align:
 		ret[0].update(width='auto', align='r')
-		ret[-1]['highlight_group'] = 'continuation:current'
+		ret[-1]['highlight_group'] = ['continuation:current', 'continuation']
 	else:
-		ret[-1].update(width='auto', align='l', highlight_group='continuation:current')
+		ret[-1].update(width='auto', align='l', highlight_group=['continuation:current', 'continuation'])
 
 	return ret

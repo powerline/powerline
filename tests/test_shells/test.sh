@@ -22,6 +22,11 @@ run() {
 	if test "x$SH" = "xfish" ; then
 		local_path="${local_path}:/usr/bin:/bin"
 	fi
+	if test $TEST_TYPE = daemon ; then
+		local additional_prompts=1
+	else
+		local additional_prompts=
+	fi
 	env -i \
 		PATH="$local_path" \
 		TERM="${TERM}" \
@@ -33,6 +38,8 @@ run() {
 		DIR2="${DIR2}" \
 		XDG_CONFIG_HOME="$PWD/tests/shell/fish_home" \
 		IPYTHONDIR="$PWD/tests/shell/ipython_home" \
+		POWERLINE_SHELL_CONTINUATION=$additional_prompts \
+		POWERLINE_SHELL_SELECT=$additional_prompts \
 		"$@"
 }
 
@@ -156,6 +163,9 @@ ln -s "$(which cut)" tests/shell/path
 ln -s "$(which bc)" tests/shell/path
 ln -s "$(which expr)" tests/shell/path
 ln -s "$(which mktemp)" tests/shell/path
+ln -s "$(which grep)" tests/shell/path
+ln -s "$(which sed)" tests/shell/path
+ln -s "$(which rm)" tests/shell/path
 ln -s ../../test_shells/bgscript.sh tests/shell/path
 ln -s ../../test_shells/waitpid.sh tests/shell/path
 for pexe in powerline powerline-config ; do
@@ -169,7 +179,7 @@ for pexe in powerline powerline-config ; do
 	fi
 done
 
-for exe in bash zsh bb busybox fish tcsh mksh dash ipython ; do
+for exe in bash zsh busybox fish tcsh mksh dash ipython ; do
 	if which $exe >/dev/null ; then
 		ln -s "$(which $exe)" tests/shell/path
 	fi
@@ -177,7 +187,7 @@ done
 
 unset ENV
 
-if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || test "x${ONLY_SHELL}" = xbb ; then
+if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || test "x${ONLY_SHELL}" = xbusybox ; then
 	powerline-daemon -k || true
 	sleep 1s
 

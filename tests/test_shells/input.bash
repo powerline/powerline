@@ -11,6 +11,12 @@ VIRTUAL_ENV=
 bgscript.sh & waitpid.sh
 false
 kill `cat pid` ; sleep 1s
+POWERLINE_COMMAND="$POWERLINE_COMMAND -t default_leftonly.segment_data.hostname.display=false"
+POWERLINE_COMMAND="$POWERLINE_COMMAND -t default_leftonly.segment_data.user.display=false"
+echo '
+abc
+def
+'
 cd "$DIR1"
 cd ../"$DIR2"
 cd ../'\[\]'
