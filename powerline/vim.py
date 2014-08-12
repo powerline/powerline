@@ -51,8 +51,17 @@ class VimPowerline(Powerline):
 		'''
 		self.update_renderer()
 		key = self.get_matcher(key)
+		theme_config = {}
+		for cfg_path in self.theme_levels:
+			try:
+				lvl_config = self.load_config(cfg_path, 'theme')
+			except IOError:
+				pass
+			else:
+				mergedicts(theme_config, lvl_config)
+		mergedicts(theme_config, config)
 		try:
-			self.renderer.add_local_theme(key, {'config': config})
+			self.renderer.add_local_theme(key, {'config': theme_config})
 		except KeyError:
 			return False
 		else:
