@@ -78,10 +78,11 @@ class VimPowerline(Powerline):
 						'powerline_theme_overrides__' + name)
 
 	def get_local_themes(self, local_themes):
+		self.get_matcher = gen_matcher_getter(self.ext, self.import_paths)
+
 		if not local_themes:
 			return {}
 
-		self.get_matcher = gen_matcher_getter(self.ext, self.import_paths)
 		return dict(((None if key == '__tabline__' else self.get_matcher(key),
 						{'config': self.load_theme_config(val)})
 					for key, val in local_themes.items()))
