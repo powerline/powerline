@@ -14,7 +14,7 @@ version = 'beta'
 release = 'beta'
 exclude_patterns = ['_build']
 pygments_style = 'sphinx'
-html_theme = 'sphinx_rtd_theme'
+html_theme = 'default'
 html_static_path = ['_static']
 html_show_copyright = False
 
