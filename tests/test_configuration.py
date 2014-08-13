@@ -402,6 +402,34 @@ class TestVim(TestCase):
 					vim_module._environ['TEST'] = 'def'
 					self.assertEqual(powerline.render(window, window_id, winnr), '%#Pl_3_8404992_4_192_underline#\xa0def%#Pl_4_192_NONE_None_NONE#>>')
 
+	def test_local_themes(self):
+		# Regression test: VimPowerline.add_local_theme did not work properly.
+		from powerline.vim import VimPowerline
+		import powerline as powerline_module
+		import vim
+		with swap_attributes(config, powerline_module):
+			with get_powerline_raw(config, VimPowerline) as powerline:
+				powerline.add_local_theme('tests.matchers.always_true', {
+					'segment_data': {
+						'foo': {
+							'contents': '“bar”'
+						}
+					},
+					'segments': {
+						'left': [
+							{
+								'type': 'string',
+								'name': 'foo',
+								'highlight_group': ['g1']
+							}
+						]
+					}
+				})
+				window = vim_module.current.window
+				window_id = 1
+				winnr = window.number
+				self.assertEqual(powerline.render(window, window_id, winnr), '%#Pl_5_12583104_6_32896_NONE#\xa0\u201cbar\u201d%#Pl_6_32896_NONE_None_NONE#>>')
+
 
 def setUpModule():
 	sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'path')))

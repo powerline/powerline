@@ -389,9 +389,16 @@ class Powerline(object):
 					if interval is not None and not self.config_loader.is_alive():
 						self.config_loader.start()
 
-				self.default_top_theme = self.common_config['default_top_theme']
-
 			self.ext_config = config['ext'][self.ext]
+
+			self.theme_levels = (
+				os.path.join('themes', (
+					self.ext_config.get('top_theme')
+					or self.common_config['default_top_theme']
+				)),
+				os.path.join('themes', self.ext, '__main__'),
+			)
+
 			if self.ext_config != self.prev_ext_config:
 				ext_config_differs = True
 				if (
@@ -468,8 +475,18 @@ class Powerline(object):
 		'''
 		return get_config_paths()
 
-	def _load_config(self, cfg_path, cfg_type):
-		'''Load configuration and setup watches.'''
+	def load_config(self, cfg_path, cfg_type):
+		'''Load configuration and setup watches
+
+		:param str cfg_path:
+			Path to the configuration file without any powerline configuration 
+			directory or ``.json`` suffix.
+		:param str cfg_type:
+			Configuration type. May be one of ``main`` (for ``config.json`` 
+			file), ``colors``, ``colorscheme``, ``theme``.
+
+		:return: dictionary with loaded configuration.
+		'''
 		return load_config(
 			cfg_path,
 			self.find_config_files,
@@ -487,7 +504,7 @@ class Powerline(object):
 
 		:return: dictionary with :ref:`top-level configuration <config-main>`.
 		'''
-		return self._load_config('config', 'main')
+		return self.load_config('config', 'main')
 
 	def _load_hierarhical_config(self, cfg_type, levels, ignore_levels):
 		'''Load and merge multiple configuration files
@@ -509,7 +526,7 @@ class Powerline(object):
 		exceptions = []
 		for i, cfg_path in enumerate(levels):
 			try:
-				lvl_config = self._load_config(cfg_path, cfg_type)
+				lvl_config = self.load_config(cfg_path, cfg_type)
 			except IOError as e:
 				if sys.version_info < (3,):
 					tb = sys.exc_info()[2]
@@ -553,9 +570,7 @@ class Powerline(object):
 
 		:return: dictionary with :ref:`theme configuration <config-themes>`
 		'''
-		levels = (
-			os.path.join('themes', self.ext_config.get('top_theme') or self.default_top_theme),
-			os.path.join('themes', self.ext, '__main__'),
+		levels = self.theme_levels + (
 			os.path.join('themes', self.ext, name),
 		)
 		return self._load_hierarhical_config('theme', levels, (0, 1,))
@@ -565,7 +580,7 @@ class Powerline(object):
 
 		:return: dictionary with :ref:`colors configuration <config-colors>`.
 		'''
-		return self._load_config('colors', 'colors')
+		return self.load_config('colors', 'colors')
 
 	@staticmethod
 	def get_local_themes(local_themes):
