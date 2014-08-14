@@ -252,7 +252,7 @@ Themes
 ======
 
 :Location: :file:`powerline/themes/{top_theme}.json`, 
-           :file:`powerline/themes/__main__.json`, 
+           :file:`powerline/themes/{extension}/__main__.json`, 
            :file:`powerline/themes/{extension}/{name}.json`
 
 Theme files are processed in order given: definitions from each next file 
