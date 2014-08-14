@@ -58,8 +58,9 @@ def get_function(data, segment):
 	oldpath = sys.path
 	sys.path = data['path'] + sys.path
 	segment_module = str(segment.get('module', data['default_module']))
+	name = str(segment['name'])
 	try:
-		return None, getattr(__import__(segment_module, fromlist=[segment['name']]), segment['name']), segment_module
+		return None, getattr(__import__(segment_module, fromlist=[name]), name), segment_module
 	finally:
 		sys.path = oldpath
 
