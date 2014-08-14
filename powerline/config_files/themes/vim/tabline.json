@@ -25,7 +25,10 @@
 						},
 						"priority": 10
 					}
-				]
+				],
+                "args": {
+                    "list_all_buffers": true
+                }
 			},
 			{
 				"type": "string",

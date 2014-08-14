@@ -686,9 +686,17 @@ def buffer_updated_segment_info(segment_info, buffer):
 	)
 	return segment_info
 
+def should_be_listed(segment_info, list_all_buffers):
+	shouldbelisted = (
+		list_all_buffers or
+		vim_getbufoption(segment_info, "buflisted") or
+		segment_info["buffer"] == vim.current.buffer
+		)
+	return shouldbelisted
+
 
 @requires_segment_info
-def bufferlister(pl, segment_info):
+def bufferlister(pl, segment_info, list_all_buffers=False):
 	'''List all buffers in segment_info format
 
 	Specifically generates a list of segment info dictionaries with ``buffer`` 
@@ -707,10 +715,10 @@ def bufferlister(pl, segment_info):
 
 	return [
 		(
-			buffer_updated_segment_info(segment_info, buffer),
-			add_multiplier(buffer, {'mode': ('tab' if buffer == cur_buffer else 'nc')})
+			seg_info,
+			add_multiplier(seg_info["buffer"], {'mode': ('tab' if seg_info["buffer"] == cur_buffer else 'nc')})
 		)
-		for buffer in vim.buffers
+		for seg_info in [ buffer_updated_segment_info(segment_info, buffer) for buffer in vim.buffers ] if should_be_listed(seg_info, list_all_buffers)
 	]
 
 
