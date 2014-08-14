@@ -125,7 +125,16 @@ Common configuration is a subdictionary that is a value of ``ext`` key in
     is either ``matcher_module.module_attribute`` or ``module_attribute`` 
     (``matcher_module`` defaults to ``powerline.matchers.vim``) and 
     ``module_attribute`` should point to a function that returns boolean value 
-    indicating that current buffer has (not) matched conditions.
+    indicating that current buffer has (not) matched conditions. There is an 
+    exception for ``matcher_name`` though: if it is ``__tabline__`` no functions 
+    are loaded. This special theme is used for ``tabline`` Vim option.
+
+    For shell and ipython it is a simple ``{prompt_type : theme_name}``, where 
+    ``prompt_type`` is a string with no special meaning (specifically it does 
+    not refer to any Python function). Shell has ``continuation``, and 
+    ``select`` prompts with rather self-explanatory names, IPython has ``in2``, 
+    ``out`` and ``rewrite`` prompts (refer to IPython documentation for more 
+    details) while ``in`` prompt is the default.
 
 ``components``
     Determines which extension components should be enabled. This key is highly 
