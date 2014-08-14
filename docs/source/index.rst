@@ -10,6 +10,7 @@ Powerline
    installation
    usage
    configuration
+   develop
    troubleshooting
    tips-and-tricks
    license-and-credits

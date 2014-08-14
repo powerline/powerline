@@ -34,6 +34,8 @@ Common configuration is a subdictionary that is a value of ``common`` key in
     letters, Cyrillic letters). Valid values: any positive integer; it is 
     suggested that you only set it to 1 (default) or 2.
 
+.. _config-common-watcher:
+
 ``watcher``
     Select filesystem watcher. Variants are
 
@@ -64,6 +66,8 @@ Common configuration is a subdictionary that is a value of ``common`` key in
     Defines additional paths which will be searched for modules when using 
     :ref:`module segment option <config-themes-seg-module>`. Paths defined here 
     have priority when searching for modules.
+
+.. _config-common-log:
 
 ``log_file``
     Defines path which will hold powerline logs. If not present, logging will be 
@@ -318,6 +322,8 @@ ascii                       Theme without any unicode characters at all
     .. note:: Top-level themes are out of equation here: they are merged
         before the above merging process happens.
 
+.. _config-themes-segments:
+
 ``segments``
     A dict with a ``left`` and a ``right`` lists, consisting of segment 
     dictionaries. Shell themes may also contain ``above`` list of dictionaries. 
@@ -423,6 +429,8 @@ ascii                       Theme without any unicode characters at all
 
         Segments are removed according to their priority, with low priority 
         segments being removed first.
+
+    .. _config-themes-seg-draw_divider:
 
     ``draw_hard_divider``, ``draw_soft_divider``
         Whether to draw a divider between this and the adjacent segment. The 

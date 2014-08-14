@@ -36,6 +36,24 @@ def _find_config_files(search_paths, config_file, config_loader=None, loader_cal
 
 
 class PowerlineLogger(object):
+	'''Proxy class for logging.Logger instance
+
+	It emits messages in format ``{ext}:{prefix}:{message}`` where
+
+	``{ext}``
+		is a used powerline extension (e.g. “vim”, “shell”, “ipython”).
+	``{prefix}``
+		is a local prefix, usually a segment name.
+	``{message}``
+		is the original message passed to one of the logging methods.
+
+	Each of the methods (``critical``, ``exception``, ``info``, ``error``, 
+	``warn``, ``debug``) expects to receive message in an ``str.format`` format, 
+	not in printf-like format.
+
+	Log is saved to the location :ref:`specified by user <config-common-log>`.
+	'''
+
 	def __init__(self, use_daemon_threads, logger, ext):
 		self.logger = logger
 		self.ext = ext
