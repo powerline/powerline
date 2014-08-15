@@ -26,7 +26,7 @@ class IpythonPowerline(Powerline):
 	def __init__(self, is_prompt, old_widths):
 		super(IpythonPowerline, self).__init__(
 			'ipython',
-			renderer_module=('ipython_prompt' if is_prompt else 'ipython'),
+			renderer_module=('.prompt' if is_prompt else None),
 			use_daemon_threads=True
 		)
 		self.old_widths = old_widths

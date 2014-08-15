@@ -36,6 +36,24 @@ def _find_config_files(search_paths, config_file, config_loader=None, loader_cal
 
 
 class PowerlineLogger(object):
+	'''Proxy class for logging.Logger instance
+
+	It emits messages in format ``{ext}:{prefix}:{message}`` where
+
+	``{ext}``
+		is a used powerline extension (e.g. “vim”, “shell”, “ipython”).
+	``{prefix}``
+		is a local prefix, usually a segment name.
+	``{message}``
+		is the original message passed to one of the logging methods.
+
+	Each of the methods (``critical``, ``exception``, ``info``, ``error``, 
+	``warn``, ``debug``) expects to receive message in an ``str.format`` format, 
+	not in printf-like format.
+
+	Log is saved to the location :ref:`specified by user <config-common-log>`.
+	'''
+
 	def __init__(self, use_daemon_threads, logger, ext):
 		self.logger = logger
 		self.ext = ext
@@ -261,23 +279,26 @@ class Powerline(object):
 		colorschemes, render module (``powerline.renders.{ext}``).
 	:param str renderer_module:
 		Overrides renderer module (defaults to ``ext``). Should be the name of 
-		the package imported like this: ``powerline.renders.{render_module}``. 
-		If this parameter contains a dot, ``powerline.renderers.`` is not 
+		the package imported like this: ``powerline.renderers.{render_module}``. 
+		If this parameter contains a dot ``powerline.renderers.`` is not 
 		prepended. There is also a special case for renderers defined in 
 		toplevel modules: ``foo.`` (note: dot at the end) tries to get renderer 
 		from module ``foo`` (because ``foo`` (without dot) tries to get renderer 
-		from module ``powerline.renderers.foo``).
+		from module ``powerline.renderers.foo``). When ``.foo`` (with leading 
+		dot) variant is used ``renderer_module`` will be 
+		``powerline.renderers.{ext}{renderer_module}``.
 	:param bool run_once:
-		Determines whether .renderer.render() method will be run only once 
+		Determines whether :py:meth:`render` method will be run only once 
 		during python session.
 	:param Logger logger:
-		If present, no new logger will be created and this logger will be used.
+		If present no new logger will be created and the provided logger will be 
+		used.
 	:param bool use_daemon_threads:
-		Use daemon threads for.
+		When creating threads make them daemon ones.
 	:param Event shutdown_event:
-		Use this Event as shutdown_event.
+		Use this Event as shutdown_event instead of creating new event.
 	:param ConfigLoader config_loader:
-		Class that manages (re)loading of configuration.
+		Instance of the class that manages (re)loading of the configuration.
 	'''
 
 	def __init__(self,
@@ -289,15 +310,20 @@ class Powerline(object):
 				shutdown_event=None,
 				config_loader=None):
 		self.ext = ext
-		self.renderer_module = renderer_module or ext
 		self.run_once = run_once
 		self.logger = logger
 		self.use_daemon_threads = use_daemon_threads
 
-		if '.' not in self.renderer_module:
-			self.renderer_module = 'powerline.renderers.' + self.renderer_module
-		elif self.renderer_module[-1] == '.':
-			self.renderer_module = self.renderer_module[:-1]
+		if not renderer_module:
+			self.renderer_module = 'powerline.renderers.' + ext
+		elif '.' not in renderer_module:
+			self.renderer_module = 'powerline.renderers.' + renderer_module
+		elif renderer_module.startswith('.'):
+			self.renderer_module = 'powerline.renderers.' + ext + renderer_module
+		elif renderer_module.endswith('.'):
+			self.renderer_module = renderer_module[:-1]
+		else:
+			self.renderer_module = renderer_module
 
 		self.find_config_files = generate_config_finder(self.get_config_paths)
 

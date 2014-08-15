@@ -1,5 +1,5 @@
 {
-	"default_module": "powerline.segments.plugin.ctrlp",
+	"default_module": "powerline.segments.vim.plugin.ctrlp",
 	"segments": {
 		"left": [
 			{

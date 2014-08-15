@@ -1,5 +1,5 @@
 {
-	"default_module": "powerline.segments.plugin.nerdtree",
+	"default_module": "powerline.segments.vim.plugin.nerdtree",
 	"segments": {
 		"left": [
 			{

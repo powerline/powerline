@@ -18,7 +18,7 @@ Getting started
   already exist.
 
   * Clearly describe the issue.
-  * If the issue is a bug: Make sure you include steps to reproduce, and 
+  * If the issue is a bug: make sure you include steps to reproduce, and 
     include the earliest revision that you know has the issue.
 
 * Fork the repository on GitHub.
@@ -60,12 +60,13 @@ Programming style
 
 * The project uses *tabs for indentation* and *spaces for alignment*, this 
   is also included in a vim modeline on top of every script file.
-* Run your code through ``flake8 
-  --ignore=W191,E501,E121,E122,E123,E128,E225`` to fix any style errors. Use 
-  common sense regarding whitespace warnings, not all ``flake8`` warnings 
-  need to be fixed.
+* Run your code through ``flake8 --ignore=W191,E501,E128,W291,E126,E101`` to fix 
+  any style errors. Use common sense regarding whitespace warnings, not all 
+  ``flake8`` warnings need to be fixed.
 * Trailing whitespace to indicate a continuing paragraph is OK in comments, 
   documentation and commit messages.
+* It is allowed to have too long lines. It is advised though to avoid lines 
+  wider then a hundred of characters.
 
 Submitting changes
 ==================

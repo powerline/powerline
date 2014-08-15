@@ -53,7 +53,7 @@ _powerline_prompt() {
 	# Arguments: side, last_exit_code, jobnum
 	$POWERLINE_COMMAND shell $1 \
 		--width="${COLUMNS:-$(_powerline_columns_fallback)}" \
-		-r bash_prompt \
+		-r.bash \
 		--last_exit_code=$2 \
 		--jobnum=$3 \
 		--renderer_arg="client_id=$$"
@@ -64,7 +64,7 @@ _powerline_set_prompt() {
 	local jobnum="$(jobs -p|wc -l)"
 	PS1="$(_powerline_prompt aboveleft $last_exit_code $jobnum)"
 	if test -n "$POWERLINE_SHELL_CONTINUATION$POWERLINE_BASH_CONTINUATION" ; then
-		PS2="$(_powerline_local_prompt left -rbash_prompt $last_exit_code $jobnum continuation)"
+		PS2="$(_powerline_local_prompt left -r.bash $last_exit_code $jobnum continuation)"
 	fi
 	if test -n "$POWERLINE_SHELL_SELECT$POWERLINE_BASH_SELECT" ; then
 		PS3="$(_powerline_local_prompt left '' $last_exit_code $jobnum select)"
@@ -79,7 +79,7 @@ _powerline_setup_prompt() {
 	fi
 	test "x$PROMPT_COMMAND" != "x${PROMPT_COMMAND%_powerline_set_prompt*}" ||
 		PROMPT_COMMAND=$'_powerline_set_prompt\n'"${PROMPT_COMMAND}"
-	PS2="$(_powerline_local_prompt left -rbash_prompt 0 0 continuation)"
+	PS2="$(_powerline_local_prompt left -r.bash 0 0 continuation)"
 	PS3="$(_powerline_local_prompt left '' 0 0 select)"
 }
 

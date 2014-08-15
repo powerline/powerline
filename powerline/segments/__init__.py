@@ -13,7 +13,14 @@ __path__ = extend_path(__path__, __name__)
 class Segment(object):
 	'''Base class for any segment that is not a function
 
-	Required for powerline.lint.inspect to work properly.
+	Required for powerline.lint.inspect to work properly: it defines methods for 
+	omitting existing or adding new arguments.
+
+	.. note::
+		Until python-3.4 ``inspect.getargspec`` does not support querying 
+		callable classes for arguments of their ``__call__`` method, requiring 
+		to use this method directly (i.e. before 3.4 you should write 
+		``getargspec(obj.__call__)`` in place of ``getargspec(obj)``).
 	'''
 	if sys.version_info < (3, 4):
 		def argspecobjs(self):

@@ -432,7 +432,7 @@ def check_matcher_func(ext, match_name, data, context, echoerr):
 		match_function = match_name
 	with WithPath(import_paths):
 		try:
-			func = getattr(__import__(match_module, fromlist=[match_function]), unicode(match_function))
+			func = getattr(__import__(str(match_module), fromlist=[str(match_function)]), str(match_function))
 		except ImportError:
 			echoerr(context='Error while loading matcher functions',
 					problem='failed to load module {0}'.format(match_module),
@@ -823,7 +823,7 @@ def check_key_compatibility(segment, data, context, echoerr):
 def check_segment_module(module, data, context, echoerr):
 	with WithPath(data['import_paths']):
 		try:
-			__import__(unicode(module))
+			__import__(str(module))
 		except ImportError as e:
 			if echoerr.logger.level >= logging.DEBUG:
 				echoerr.logger.exception(e)
@@ -875,7 +875,7 @@ def import_segment(name, data, context, echoerr, module=None):
 
 	with WithPath(data['import_paths']):
 		try:
-			func = getattr(__import__(unicode(module), fromlist=[unicode(name)]), unicode(name))
+			func = getattr(__import__(str(module), fromlist=[str(name)]), str(name))
 		except ImportError:
 			echoerr(context='Error while checking segments (key {key})'.format(key=context_key(context)),
 					problem='failed to import module {0}'.format(module),
@@ -1252,7 +1252,7 @@ segment_spec = Spec(
 ).func(check_full_segment_data)
 sub_segments_spec.optional().list(segment_spec)
 segments_spec = Spec().optional().list(segment_spec).copy
-segdict_spec=Spec(
+segdict_spec = Spec(
 	left=segments_spec().context_message('Error while loading segments from left side (key {key})'),
 	right=segments_spec().context_message('Error while loading segments from right side (key {key})'),
 ).func(

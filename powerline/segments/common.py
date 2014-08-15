@@ -1130,7 +1130,7 @@ def _get_battery(pl):
 						what,
 						dbus_interface=devinterface
 					)
-					if int(devget('Type'))!= 2:
+					if int(devget('Type')) != 2:
 						pl.debug('Not using DBUS+UPower with {0}: invalid type', devpath)
 						continue
 					if not bool(devget('IsPresent')):
