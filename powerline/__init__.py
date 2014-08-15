@@ -280,7 +280,7 @@ class Powerline(object):
 	:param str renderer_module:
 		Overrides renderer module (defaults to ``ext``). Should be the name of 
 		the package imported like this: ``powerline.renderers.{render_module}``. 
-		If this parameter contains a dot, ``powerline.renderers.`` is not 
+		If this parameter contains a dot ``powerline.renderers.`` is not 
 		prepended. There is also a special case for renderers defined in 
 		toplevel modules: ``foo.`` (note: dot at the end) tries to get renderer 
 		from module ``foo`` (because ``foo`` (without dot) tries to get renderer 
@@ -288,16 +288,17 @@ class Powerline(object):
 		dot) variant is used ``renderer_module`` will be 
 		``powerline.renderers.{ext}{renderer_module}``.
 	:param bool run_once:
-		Determines whether .renderer.render() method will be run only once 
+		Determines whether :py:meth:`render` method will be run only once 
 		during python session.
 	:param Logger logger:
-		If present, no new logger will be created and this logger will be used.
+		If present no new logger will be created and the provided logger will be 
+		used.
 	:param bool use_daemon_threads:
-		Use daemon threads for.
+		When creating threads make them daemon ones.
 	:param Event shutdown_event:
-		Use this Event as shutdown_event.
+		Use this Event as shutdown_event instead of creating new event.
 	:param ConfigLoader config_loader:
-		Class that manages (re)loading of configuration.
+		Instance of the class that manages (re)loading of the configuration.
 	'''
 
 	def __init__(self,
