@@ -62,6 +62,24 @@
 		"powerline.segments.common.hostname": {
 			"before": "⌂"
 		},
+		"powerline.segments.common.weather": {
+			"args": {
+				"icons": {
+					"day":           "D",
+					"blustery":      "W",
+					"rainy":         "R",
+					"cloudy":        "c",
+					"snowy":         "*",
+					"stormy":        "S",
+					"foggy":         "f",
+					"sunny":         "s",
+					"night":         "N",
+					"windy":         "w",
+					"not_available": "-",
+					"unknown":       "!"
+				}
+			}
+		},
 
 		"powerline.segments.vim.mode": {
 			"args": {
