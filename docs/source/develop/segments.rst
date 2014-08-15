@@ -153,6 +153,8 @@ keys:
 ``home``
     Current home directory. May be false.
 
+.. _dev-segment_info-vim:
+
 Vim
 ---
 

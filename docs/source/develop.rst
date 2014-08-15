@@ -7,3 +7,4 @@ Developer guide
    :glob:
 
    develop/segments
+   develop/local-themes
