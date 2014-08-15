@@ -1252,7 +1252,7 @@ segment_spec = Spec(
 ).func(check_full_segment_data)
 sub_segments_spec.optional().list(segment_spec)
 segments_spec = Spec().optional().list(segment_spec).copy
-segdict_spec=Spec(
+segdict_spec = Spec(
 	left=segments_spec().context_message('Error while loading segments from left side (key {key})'),
 	right=segments_spec().context_message('Error while loading segments from right side (key {key})'),
 ).func(
