@@ -110,11 +110,15 @@ def gen_marked_value(value, mark, use_special_classes=True):
 				elif func not in set(('__init__', '__new__', '__getattribute__')):
 					if func in set(('__eq__',)):
 						# HACK to make marked dictionaries always work
-						exec (('def {0}(self, *args):\n'
-								'	return self.value.{0}(*[arg.value if isinstance(arg, MarkedValue) else arg for arg in args])').format(func))
+						exec ((
+							'def {0}(self, *args):\n'
+							'	return self.value.{0}(*[arg.value if isinstance(arg, MarkedValue) else arg for arg in args])'
+						).format(func))
 					else:
-						exec (('def {0}(self, *args, **kwargs):\n'
-								'	return self.value.{0}(*args, **kwargs)\n').format(func))
+						exec ((
+							'def {0}(self, *args, **kwargs):\n'
+							'	return self.value.{0}(*args, **kwargs)\n'
+						).format(func))
 		classcache[value.__class__] = Marked
 
 	return Marked(value, mark)

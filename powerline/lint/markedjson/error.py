@@ -53,13 +53,15 @@ class Mark:
 				break
 		snippet = [self.buffer[start:self.pointer], self.buffer[self.pointer], self.buffer[self.pointer + 1:end]]
 		snippet = [strtrans(s) for s in snippet]
-		return (' ' * indent + head + ''.join(snippet) + tail + '\n'
-				+ ' ' * (indent + len(head) + len(snippet[0])) + '^')
+		return (
+			' ' * indent + head + ''.join(snippet) + tail + '\n'
+			+ ' ' * (indent + len(head) + len(snippet[0])) + '^'
+		)
 
 	def __str__(self):
 		snippet = self.get_snippet()
-		where = ("  in \"%s\", line %d, column %d"
-				% (self.name, self.line + 1, self.column + 1))
+		where = ("  in \"%s\", line %d, column %d" % (
+			self.name, self.line + 1, self.column + 1))
 		if snippet is not None:
 			where += ":\n" + snippet
 		if type(where) is str:
@@ -77,11 +79,15 @@ def format_error(context=None, context_mark=None, problem=None, problem_mark=Non
 	lines = []
 	if context is not None:
 		lines.append(context)
-	if context_mark is not None  \
-		and (problem is None or problem_mark is None
-				or context_mark.name != problem_mark.name
-				or context_mark.line != problem_mark.line
-				or context_mark.column != problem_mark.column):
+	if (
+		context_mark is not None
+		and (
+			problem is None or problem_mark is None
+			or context_mark.name != problem_mark.name
+			or context_mark.line != problem_mark.line
+			or context_mark.column != problem_mark.column
+		)
+	):
 		lines.append(str(context_mark))
 	if problem is not None:
 		lines.append(problem)
@@ -93,7 +99,5 @@ def format_error(context=None, context_mark=None, problem=None, problem_mark=Non
 
 
 class MarkedError(Exception):
-	def __init__(self, context=None, context_mark=None,
-			problem=None, problem_mark=None, note=None):
-		Exception.__init__(self, format_error(context, context_mark, problem,
-										problem_mark, note))
+	def __init__(self, context=None, context_mark=None, problem=None, problem_mark=None, note=None):
+		Exception.__init__(self, format_error(context, context_mark, problem, problem_mark, note))

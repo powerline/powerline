@@ -26,8 +26,10 @@ def num2(s):
 
 
 def rgbint_to_lab(rgbint):
-	rgb = sRGBColor((rgbint >> 16) & 0xFF, (rgbint >> 8) & 0xFF, rgbint & 0xFF,
-			is_upscaled=True)
+	rgb = sRGBColor(
+		(rgbint >> 16) & 0xFF, (rgbint >> 8) & 0xFF, rgbint & 0xFF,
+		is_upscaled=True
+	)
 	return convert_color(rgb, LabColor)
 
 
@@ -52,8 +54,10 @@ def linear_gradient(start_value, stop_value, start_offset, stop_offset, offset):
 def lab_gradient(slab, elab, soff, eoff, off):
 	svals = slab.get_value_tuple()
 	evals = elab.get_value_tuple()
-	return LabColor(*[linear_gradient(start_value, end_value, soff, eoff, off)
-						for start_value, end_value in zip(svals, evals)])
+	return LabColor(*[
+		linear_gradient(start_value, end_value, soff, eoff, off)
+		for start_value, end_value in zip(svals, evals)
+	])
 
 
 def generate_gradient_function(DATA):
@@ -185,8 +189,10 @@ if __name__ == '__main__':
 
 	steps = compute_steps(args.gradient, args.weights)
 
-	data = [(weight, args.gradient[i - 1], args.gradient[i])
-			for weight, i in zip(steps, range(1, len(args.gradient)))]
+	data = [
+		(weight, args.gradient[i - 1], args.gradient[i])
+		for weight, i in zip(steps, range(1, len(args.gradient)))
+	]
 	gr_func = generate_gradient_function(data)
 	gradient = [gr_func(y) for y in range(0, m)]
 

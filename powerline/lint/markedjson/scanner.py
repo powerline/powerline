@@ -48,9 +48,9 @@ class Scanner:
 		# input data to Unicode. It also adds NUL to the end.
 		#
 		# Reader supports the following methods
-		#	self.peek(i=0)		 # peek the next i-th character
-		#	self.prefix(l=1)	 # peek the next l characters
-		#	self.forward(l=1)	 # read the next l characters and move the pointer.
+		# 	self.peek(i=0)		 # peek the next i-th character
+		# 	self.prefix(l=1)	 # peek the next l characters
+		# 	self.forward(l=1)	 # read the next l characters and move the pointer.
 
 		# Had we reached the end of the stream?
 		self.done = False
@@ -83,7 +83,7 @@ class Scanner:
 		# Keep track of possible simple keys. This is a dictionary. The key
 		# is `flow_level`; there can be no more that one possible simple key
 		# for each level. The value is a SimpleKey record:
-		#	(token_number, index, line, column, mark)
+		# 	(token_number, index, line, column, mark)
 		# A simple key may start with SCALAR(flow), '[', or '{' tokens.
 		self.possible_simple_keys = {}
 
@@ -179,9 +179,11 @@ class Scanner:
 			return self.fetch_plain()
 
 		# No? It's an error. Let's produce a nice error message.
-		raise ScannerError("while scanning for the next token", None,
-				"found character %r that cannot start any token" % ch,
-				self.get_mark())
+		raise ScannerError(
+			"while scanning for the next token", None,
+			"found character %r that cannot start any token" % ch,
+			self.get_mark()
+		)
 
 	# Simple keys treatment.
 
@@ -189,10 +191,10 @@ class Scanner:
 		# Return the number of the nearest possible simple key. Actually we
 		# don't need to loop through the whole dictionary. We may replace it
 		# with the following code:
-		#	if not self.possible_simple_keys:
-		#		return None
-		#	return self.possible_simple_keys[
-		#			min(self.possible_simple_keys.keys())].token_number
+		# 	if not self.possible_simple_keys:
+		# 		return None
+		# 	return self.possible_simple_keys[
+		# 			min(self.possible_simple_keys.keys())].token_number
 		min_token_number = None
 		for level in self.possible_simple_keys:
 			key = self.possible_simple_keys[level]
@@ -214,15 +216,14 @@ class Scanner:
 	def save_possible_simple_key(self):
 		# The next token may start a simple key. We check if it's possible
 		# and save its position. This function is called for
-		#	SCALAR(flow), '[', and '{'.
+		# 	SCALAR(flow), '[', and '{'.
 
 		# The next token might be a simple key. Let's save it's number and
 		# position.
 		if self.allow_simple_key:
 			self.remove_possible_simple_key()
 			token_number = self.tokens_taken + len(self.tokens)
-			key = SimpleKey(token_number,
-					self.index, self.line, self.column, self.get_mark())
+			key = SimpleKey(token_number, self.index, self.line, self.column, self.get_mark())
 			self.possible_simple_keys[self.flow_level] = key
 
 	def remove_possible_simple_key(self):
@@ -311,8 +312,7 @@ class Scanner:
 			# Add KEY.
 			key = self.possible_simple_keys[self.flow_level]
 			del self.possible_simple_keys[self.flow_level]
-			self.tokens.insert(key.token_number - self.tokens_taken,
-					KeyToken(key.mark, key.mark))
+			self.tokens.insert(key.token_number - self.tokens_taken, KeyToken(key.mark, key.mark))
 
 			# There cannot be two simple keys one after another.
 			self.allow_simple_key = False
@@ -423,15 +423,20 @@ class Scanner:
 					self.forward()
 					for k in range(length):
 						if self.peek(k) not in '0123456789ABCDEFabcdef':
-							raise ScannerError("while scanning a double-quoted scalar", start_mark,
-									"expected escape sequence of %d hexdecimal numbers, but found %r" %
-										(length, self.peek(k)), self.get_mark())
+							raise ScannerError(
+								"while scanning a double-quoted scalar", start_mark,
+								"expected escape sequence of %d hexdecimal numbers, but found %r" % (
+									length, self.peek(k)),
+								self.get_mark()
+							)
 					code = int(self.prefix(length), 16)
 					chunks.append(chr(code))
 					self.forward(length)
 				else:
-					raise ScannerError("while scanning a double-quoted scalar", start_mark,
-							"found unknown escape character %r" % ch, self.get_mark())
+					raise ScannerError(
+						"while scanning a double-quoted scalar", start_mark,
+						("found unknown escape character %r" % ch), self.get_mark()
+					)
 			else:
 				return chunks
 
@@ -445,11 +450,15 @@ class Scanner:
 		self.forward(length)
 		ch = self.peek()
 		if ch == '\0':
-			raise ScannerError("while scanning a quoted scalar", start_mark,
-					"found unexpected end of stream", self.get_mark())
+			raise ScannerError(
+				"while scanning a quoted scalar", start_mark,
+				"found unexpected end of stream", self.get_mark()
+			)
 		elif ch == '\n':
-			raise ScannerError("while scanning a quoted scalar", start_mark,
-					"found unexpected line end", self.get_mark())
+			raise ScannerError(
+				"while scanning a quoted scalar", start_mark,
+				"found unexpected line end", self.get_mark()
+			)
 		else:
 			chunks.append(whitespaces)
 		return chunks

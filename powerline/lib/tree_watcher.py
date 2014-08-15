@@ -94,13 +94,15 @@ class INotifyTreeWatcher(INotify):
 	def add_watch(self, path):
 		import ctypes
 		bpath = path if isinstance(path, bytes) else path.encode(self.fenc)
-		wd = self._add_watch(self._inotify_fd, ctypes.c_char_p(bpath),
-				# Ignore symlinks and watch only directories
-				self.DONT_FOLLOW | self.ONLYDIR |
+		wd = self._add_watch(
+			self._inotify_fd, ctypes.c_char_p(bpath),
+			# Ignore symlinks and watch only directories
+			self.DONT_FOLLOW | self.ONLYDIR |
 
-				self.MODIFY | self.CREATE | self.DELETE |
-				self.MOVE_SELF | self.MOVED_FROM | self.MOVED_TO |
-				self.ATTRIB | self.DELETE_SELF)
+			self.MODIFY | self.CREATE | self.DELETE |
+			self.MOVE_SELF | self.MOVED_FROM | self.MOVED_TO |
+			self.ATTRIB | self.DELETE_SELF
+		)
 		if wd == -1:
 			eno = ctypes.get_errno()
 			if eno == errno.ENOTDIR:

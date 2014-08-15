@@ -8,8 +8,10 @@ from colormath.color_diff import delta_e_cie2000
 
 
 def get_lab(name, rgb):
-	rgb = sRGBColor(int(rgb[:2], 16), int(rgb[2:4], 16), int(rgb[4:6], 16),
-				is_upscaled=True)
+	rgb = sRGBColor(
+		int(rgb[:2], 16), int(rgb[2:4], 16), int(rgb[4:6], 16),
+		is_upscaled=True
+	)
 	lab = convert_color(rgb, LabColor)
 	return name, lab
 

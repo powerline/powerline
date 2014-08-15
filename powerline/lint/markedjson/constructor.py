@@ -95,39 +95,53 @@ class BaseConstructor:
 	@marked
 	def construct_scalar(self, node):
 		if not isinstance(node, ScalarNode):
-			raise ConstructorError(None, None,
-					"expected a scalar node, but found %s" % node.id,
-					node.start_mark)
+			raise ConstructorError(
+				None, None,
+				"expected a scalar node, but found %s" % node.id,
+				node.start_mark
+			)
 		return node.value
 
 	def construct_sequence(self, node, deep=False):
 		if not isinstance(node, SequenceNode):
-			raise ConstructorError(None, None,
-					"expected a sequence node, but found %s" % node.id,
-					node.start_mark)
-		return [self.construct_object(child, deep=deep)
-				for child in node.value]
+			raise ConstructorError(
+				None, None,
+				"expected a sequence node, but found %s" % node.id,
+				node.start_mark
+			)
+		return [
+			self.construct_object(child, deep=deep)
+			for child in node.value
+		]
 
 	@marked
 	def construct_mapping(self, node, deep=False):
 		if not isinstance(node, MappingNode):
-			raise ConstructorError(None, None,
-					"expected a mapping node, but found %s" % node.id,
-					node.start_mark)
+			raise ConstructorError(
+				None, None,
+				"expected a mapping node, but found %s" % node.id,
+				node.start_mark
+			)
 		mapping = {}
 		for key_node, value_node in node.value:
 			key = self.construct_object(key_node, deep=deep)
 			if not isinstance(key, collections.Hashable):
-				self.echoerr('While constructing a mapping', node.start_mark,
-						'found unhashable key', key_node.start_mark)
+				self.echoerr(
+					'While constructing a mapping', node.start_mark,
+					'found unhashable key', key_node.start_mark
+				)
 				continue
 			elif type(key.value) != unicode:
-				self.echoerr('Error while constructing a mapping', node.start_mark,
-						'found key that is not a string', key_node.start_mark)
+				self.echoerr(
+					'Error while constructing a mapping', node.start_mark,
+					'found key that is not a string', key_node.start_mark
+				)
 				continue
 			elif key in mapping:
-				self.echoerr('Error while constructing a mapping', node.start_mark,
-						'found duplicate key', key_node.start_mark)
+				self.echoerr(
+					'Error while constructing a mapping', node.start_mark,
+					'found duplicate key', key_node.start_mark
+				)
 				continue
 			value = self.construct_object(value_node, deep=deep)
 			mapping[key] = value
@@ -135,7 +149,7 @@ class BaseConstructor:
 
 	@classmethod
 	def add_constructor(cls, tag, constructor):
-		if not 'yaml_constructors' in cls.__dict__:
+		if 'yaml_constructors' not in cls.__dict__:
 			cls.yaml_constructors = cls.yaml_constructors.copy()
 		cls.yaml_constructors[tag] = constructor
 
@@ -162,19 +176,24 @@ class Constructor(BaseConstructor):
 					submerge = []
 					for subnode in value_node.value:
 						if not isinstance(subnode, MappingNode):
-							raise ConstructorError("while constructing a mapping",
-									node.start_mark,
-									"expected a mapping for merging, but found %s"
-									% subnode.id, subnode.start_mark)
+							raise ConstructorError(
+								"while constructing a mapping",
+								node.start_mark,
+								"expected a mapping for merging, but found %s" % subnode.id,
+								subnode.start_mark
+							)
 						self.flatten_mapping(subnode)
 						submerge.append(subnode.value)
 					submerge.reverse()
 					for value in submerge:
 						merge.extend(value)
 				else:
-					raise ConstructorError("while constructing a mapping", node.start_mark,
-							"expected a mapping or list of mappings for merging, but found %s"
-							% value_node.id, value_node.start_mark)
+					raise ConstructorError(
+						"while constructing a mapping",
+						node.start_mark,
+						("expected a mapping or list of mappings for merging, but found %s" % value_node.id),
+						value_node.start_mark
+					)
 			elif key_node.tag == 'tag:yaml.org,2002:value':
 				key_node.tag = 'tag:yaml.org,2002:str'
 				index += 1
@@ -237,9 +256,11 @@ class Constructor(BaseConstructor):
 		data.update(value)
 
 	def construct_undefined(self, node):
-		raise ConstructorError(None, None,
-				"could not determine a constructor for the tag %r" % node.tag,
-				node.start_mark)
+		raise ConstructorError(
+			None, None,
+			"could not determine a constructor for the tag %r" % node.tag,
+			node.start_mark
+		)
 
 
 Constructor.add_constructor(

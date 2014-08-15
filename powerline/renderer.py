@@ -90,13 +90,13 @@ class Renderer(object):
 	'''
 
 	def __init__(self,
-				theme_config,
-				local_themes,
-				theme_kwargs,
-				colorscheme,
-				pl,
-				ambiwidth=1,
-				**options):
+	             theme_config,
+	             local_themes,
+	             theme_kwargs,
+	             colorscheme,
+	             pl,
+	             ambiwidth=1,
+	             **options):
 		self.__dict__.update(options)
 		self.theme_config = theme_config
 		theme_kwargs['pl'] = pl

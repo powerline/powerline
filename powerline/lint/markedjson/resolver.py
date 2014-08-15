@@ -24,7 +24,7 @@ class BaseResolver:
 
 	@classmethod
 	def add_implicit_resolver(cls, tag, regexp, first):
-		if not 'yaml_implicit_resolvers' in cls.__dict__:
+		if 'yaml_implicit_resolvers' not in cls.__dict__:
 			cls.yaml_implicit_resolvers = cls.yaml_implicit_resolvers.copy()
 		if first is None:
 			first = [None]
@@ -39,8 +39,7 @@ class BaseResolver:
 		if current_node:
 			depth = len(self.resolver_prefix_paths)
 			for path, kind in self.resolver_prefix_paths[-1]:
-				if self.check_resolver_prefix(depth, path, kind,
-						current_node, current_index):
+				if self.check_resolver_prefix(depth, path, kind, current_node, current_index):
 					if len(path) > depth:
 						prefix_paths.append((path, kind))
 					else:
@@ -60,8 +59,7 @@ class BaseResolver:
 		self.resolver_exact_paths.pop()
 		self.resolver_prefix_paths.pop()
 
-	def check_resolver_prefix(self, depth, path, kind,
-			current_node, current_index):
+	def check_resolver_prefix(self, depth, path, kind, current_node, current_index):
 		node_check, index_check = path[depth - 1]
 		if isinstance(node_check, str):
 			if current_node.tag != node_check:
@@ -75,8 +73,7 @@ class BaseResolver:
 			and current_index is None):
 			return
 		if isinstance(index_check, str):
-			if not (isinstance(current_index, ScalarNode)
-					and index_check == current_index.value):
+			if not (isinstance(current_index, ScalarNode) and index_check == current_index.value):
 				return
 		elif isinstance(index_check, int) and not isinstance(index_check, bool):
 			if index_check != current_index:
@@ -94,9 +91,11 @@ class BaseResolver:
 				if regexp.match(value):
 					return tag
 			else:
-				self.echoerr('While resolving plain scalar', None,
-						'expected floating-point value, integer, null or boolean, but got %r' % value,
-						mark)
+				self.echoerr(
+					'While resolving plain scalar', None,
+					'expected floating-point value, integer, null or boolean, but got %r' % value,
+					mark
+				)
 				return self.DEFAULT_SCALAR_TAG
 		if kind is ScalarNode:
 			return self.DEFAULT_SCALAR_TAG

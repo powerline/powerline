@@ -82,8 +82,11 @@ except ImportError:
 		# Additionally check that `file` is not a directory, as on Windows
 		# directories pass the os.access check.
 		def _access_check(fn, mode):
-			return (os.path.exists(fn) and os.access(fn, mode)
-					and not os.path.isdir(fn))
+			return (
+				os.path.exists(fn)
+				and os.access(fn, mode)
+				and not os.path.isdir(fn)
+			)
 
 		# If we're given a path with a directory part, look it up directly rather
 		# than referring to PATH directories. This includes checking relative to the
@@ -101,7 +104,7 @@ except ImportError:
 
 		if sys.platform == "win32":
 			# The current directory takes precedence on Windows.
-			if not os.curdir in path:
+			if os.curdir not in path:
 				path.insert(0, os.curdir)
 
 			# PATHEXT is necessary to check on Windows.
@@ -122,7 +125,7 @@ except ImportError:
 		seen = set()
 		for dir in path:
 			normdir = os.path.normcase(dir)
-			if not normdir in seen:
+			if normdir not in seen:
 				seen.add(normdir)
 				for thefile in files:
 					name = os.path.join(dir, thefile)

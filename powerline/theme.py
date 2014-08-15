@@ -25,13 +25,13 @@ def new_empty_segment_line():
 
 class Theme(object):
 	def __init__(self,
-				ext,
-				theme_config,
-				common_config,
-				pl,
-				main_theme_config=None,
-				run_once=False,
-				shutdown_event=None):
+	             ext,
+	             theme_config,
+	             common_config,
+	             pl,
+	             main_theme_config=None,
+	             run_once=False,
+	             shutdown_event=None):
 		self.dividers = theme_config['dividers']
 		self.dividers = dict((
 			(key, dict((k, u(v))
@@ -55,7 +55,7 @@ class Theme(object):
 			theme_configs.append(main_theme_config)
 		get_segment = gen_segment_getter(pl, ext, common_config, theme_configs, theme_config.get('default_module'))
 		for segdict in itertools.chain((theme_config['segments'],),
-										theme_config['segments'].get('above', ())):
+		                               theme_config['segments'].get('above', ())):
 			self.segments.append(new_empty_segment_line())
 			for side in ['left', 'right']:
 				for segment in segdict.get(side, []):

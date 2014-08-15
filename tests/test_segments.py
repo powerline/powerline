@@ -29,8 +29,9 @@ class TestShell(TestCase):
 	def test_last_status(self):
 		pl = Pl()
 		segment_info = {'args': Args(last_exit_code=10)}
-		self.assertEqual(shell.last_status(pl=pl, segment_info=segment_info),
-				[{'contents': '10', 'highlight_group': 'exit_fail'}])
+		self.assertEqual(shell.last_status(pl=pl, segment_info=segment_info), [
+			{'contents': '10', 'highlight_group': 'exit_fail'}
+		])
 		segment_info['args'].last_exit_code = 0
 		self.assertEqual(shell.last_status(pl=pl, segment_info=segment_info), None)
 		segment_info['args'].last_exit_code = None
@@ -222,18 +223,23 @@ class TestCommon(TestCase):
 		branch = partial(common.branch, pl=pl, create_watcher=create_watcher)
 		with replace_attr(common, 'guess', get_dummy_guess(status=lambda: None, directory='/tmp/tests')):
 			with replace_attr(common, 'tree_status', lambda repo, pl: None):
-				self.assertEqual(branch(segment_info=segment_info, status_colors=False),
-						[{'highlight_group': ['branch'], 'contents': 'tests'}])
-				self.assertEqual(branch(segment_info=segment_info, status_colors=True),
-						[{'contents': 'tests', 'highlight_group': ['branch_clean', 'branch']}])
+				self.assertEqual(branch(segment_info=segment_info, status_colors=False), [
+					{'highlight_group': ['branch'], 'contents': 'tests'}
+				])
+				self.assertEqual(branch(segment_info=segment_info, status_colors=True), [
+					{'contents': 'tests', 'highlight_group': ['branch_clean', 'branch']}
+				])
 		with replace_attr(common, 'guess', get_dummy_guess(status=lambda: 'D  ', directory='/tmp/tests')):
 			with replace_attr(common, 'tree_status', lambda repo, pl: 'D '):
-				self.assertEqual(branch(segment_info=segment_info, status_colors=False),
-						[{'highlight_group': ['branch'], 'contents': 'tests'}])
-				self.assertEqual(branch(segment_info=segment_info, status_colors=True),
-						[{'contents': 'tests', 'highlight_group': ['branch_dirty', 'branch']}])
-				self.assertEqual(branch(segment_info=segment_info, status_colors=False),
-						[{'highlight_group': ['branch'], 'contents': 'tests'}])
+				self.assertEqual(branch(segment_info=segment_info, status_colors=False), [
+					{'highlight_group': ['branch'], 'contents': 'tests'}
+				])
+				self.assertEqual(branch(segment_info=segment_info, status_colors=True), [
+					{'contents': 'tests', 'highlight_group': ['branch_dirty', 'branch']}
+				])
+				self.assertEqual(branch(segment_info=segment_info, status_colors=False), [
+					{'highlight_group': ['branch'], 'contents': 'tests'}
+				])
 		with replace_attr(common, 'guess', lambda path, create_watcher: None):
 			self.assertEqual(branch(segment_info=segment_info, status_colors=False), None)
 
@@ -322,8 +328,9 @@ class TestCommon(TestCase):
 			ose = OSError()
 			ose.errno = 2
 			cwd[0] = ose
-			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info, dir_limit_depth=2, dir_shorten_len=2),
-					[{'contents': '[not found]', 'divider_highlight_group': 'cwd:divider', 'highlight_group': ['cwd:current_folder', 'cwd'], 'draw_inner_divider': True}])
+			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info, dir_limit_depth=2, dir_shorten_len=2), [
+				{'contents': '[not found]', 'divider_highlight_group': 'cwd:divider', 'highlight_group': ['cwd:current_folder', 'cwd'], 'draw_inner_divider': True}
+			])
 			cwd[0] = OSError()
 			self.assertRaises(OSError, common.cwd, pl=pl, segment_info=segment_info, dir_limit_depth=2, dir_shorten_len=2)
 			cwd[0] = ValueError()
@@ -415,14 +422,16 @@ class TestCommon(TestCase):
 		pl = Pl()
 		with replace_module_module(common, 'os', getloadavg=lambda: (7.5, 3.5, 1.5)):
 			with replace_attr(common, '_cpu_count', lambda: 2):
-				self.assertEqual(common.system_load(pl=pl),
-						[{'contents': '7.5 ', 'highlight_group': ['system_load_gradient', 'system_load'], 'divider_highlight_group': 'background:divider', 'gradient_level': 100},
-						{'contents': '3.5 ', 'highlight_group': ['system_load_gradient', 'system_load'], 'divider_highlight_group': 'background:divider', 'gradient_level': 75.0},
-						{'contents': '1.5', 'highlight_group': ['system_load_gradient', 'system_load'], 'divider_highlight_group': 'background:divider', 'gradient_level': 0}])
-				self.assertEqual(common.system_load(pl=pl, format='{avg:.0f}', threshold_good=0, threshold_bad=1),
-						[{'contents': '8 ', 'highlight_group': ['system_load_gradient', 'system_load'], 'divider_highlight_group': 'background:divider', 'gradient_level': 100},
-						{'contents': '4 ', 'highlight_group': ['system_load_gradient', 'system_load'], 'divider_highlight_group': 'background:divider', 'gradient_level': 100},
-						{'contents': '2', 'highlight_group': ['system_load_gradient', 'system_load'], 'divider_highlight_group': 'background:divider', 'gradient_level': 75.0}])
+				self.assertEqual(common.system_load(pl=pl), [
+					{'contents': '7.5 ', 'highlight_group': ['system_load_gradient', 'system_load'], 'divider_highlight_group': 'background:divider', 'gradient_level': 100},
+					{'contents': '3.5 ', 'highlight_group': ['system_load_gradient', 'system_load'], 'divider_highlight_group': 'background:divider', 'gradient_level': 75.0},
+					{'contents': '1.5', 'highlight_group': ['system_load_gradient', 'system_load'], 'divider_highlight_group': 'background:divider', 'gradient_level': 0}
+				])
+				self.assertEqual(common.system_load(pl=pl, format='{avg:.0f}', threshold_good=0, threshold_bad=1), [
+					{'contents': '8 ', 'highlight_group': ['system_load_gradient', 'system_load'], 'divider_highlight_group': 'background:divider', 'gradient_level': 100},
+					{'contents': '4 ', 'highlight_group': ['system_load_gradient', 'system_load'], 'divider_highlight_group': 'background:divider', 'gradient_level': 100},
+					{'contents': '2', 'highlight_group': ['system_load_gradient', 'system_load'], 'divider_highlight_group': 'background:divider', 'gradient_level': 75.0}
+				])
 
 	def test_cpu_load_percent(self):
 		pl = Pl()
@@ -700,10 +709,12 @@ class TestVim(TestCase):
 		pl = Pl()
 		segment_info = vim_module._get_segment_info()
 		self.assertEqual(vim.file_name(pl=pl, segment_info=segment_info), None)
-		self.assertEqual(vim.file_name(pl=pl, segment_info=segment_info, display_no_file=True),
-				[{'contents': '[No file]', 'highlight_group': ['file_name_no_file', 'file_name']}])
-		self.assertEqual(vim.file_name(pl=pl, segment_info=segment_info, display_no_file=True, no_file_text='X'),
-				[{'contents': 'X', 'highlight_group': ['file_name_no_file', 'file_name']}])
+		self.assertEqual(vim.file_name(pl=pl, segment_info=segment_info, display_no_file=True), [
+			{'contents': '[No file]', 'highlight_group': ['file_name_no_file', 'file_name']}
+		])
+		self.assertEqual(vim.file_name(pl=pl, segment_info=segment_info, display_no_file=True, no_file_text='X'), [
+			{'contents': 'X', 'highlight_group': ['file_name_no_file', 'file_name']}
+		])
 		with vim_module._with('buffer', '/tmp/abc') as segment_info:
 			self.assertEqual(vim.file_name(pl=pl, segment_info=segment_info), 'abc')
 		with vim_module._with('buffer', '/tmp/’’') as segment_info:
@@ -721,14 +732,17 @@ class TestVim(TestCase):
 	def test_file_opts(self):
 		pl = Pl()
 		segment_info = vim_module._get_segment_info()
-		self.assertEqual(vim.file_format(pl=pl, segment_info=segment_info),
-				[{'divider_highlight_group': 'background:divider', 'contents': 'unix'}])
-		self.assertEqual(vim.file_encoding(pl=pl, segment_info=segment_info),
-				[{'divider_highlight_group': 'background:divider', 'contents': 'utf-8'}])
+		self.assertEqual(vim.file_format(pl=pl, segment_info=segment_info), [
+			{'divider_highlight_group': 'background:divider', 'contents': 'unix'}
+		])
+		self.assertEqual(vim.file_encoding(pl=pl, segment_info=segment_info), [
+			{'divider_highlight_group': 'background:divider', 'contents': 'utf-8'}
+		])
 		self.assertEqual(vim.file_type(pl=pl, segment_info=segment_info), None)
 		with vim_module._with('bufoptions', filetype='python'):
-			self.assertEqual(vim.file_type(pl=pl, segment_info=segment_info),
-					[{'divider_highlight_group': 'background:divider', 'contents': 'python'}])
+			self.assertEqual(vim.file_type(pl=pl, segment_info=segment_info), [
+				{'divider_highlight_group': 'background:divider', 'contents': 'python'}
+			])
 
 	def test_window_title(self):
 		pl = Pl()
@@ -745,8 +759,9 @@ class TestVim(TestCase):
 			self.assertEqual(vim.line_percent(pl=pl, segment_info=segment_info), '1')
 			vim_module._set_cursor(50, 0)
 			self.assertEqual(vim.line_percent(pl=pl, segment_info=segment_info), '50')
-			self.assertEqual(vim.line_percent(pl=pl, segment_info=segment_info, gradient=True),
-					[{'contents': '50', 'highlight_group': ['line_percent_gradient', 'line_percent'], 'gradient_level': 50 * 100.0 / 101}])
+			self.assertEqual(vim.line_percent(pl=pl, segment_info=segment_info, gradient=True), [
+				{'contents': '50', 'highlight_group': ['line_percent_gradient', 'line_percent'], 'gradient_level': 50 * 100.0 / 101}
+			])
 		finally:
 			vim_module._bw(segment_info['bufnr'])
 
@@ -768,8 +783,9 @@ class TestVim(TestCase):
 			segment_info['buffer'][0:-1] = [str(i) for i in range(99)]
 			vim_module._set_cursor(49, 0)
 			self.assertEqual(vim.position(pl=pl, segment_info=segment_info), '50%')
-			self.assertEqual(vim.position(pl=pl, segment_info=segment_info, gradient=True),
-					[{'contents': '50%', 'highlight_group': ['position_gradient', 'position'], 'gradient_level': 50.0}])
+			self.assertEqual(vim.position(pl=pl, segment_info=segment_info, gradient=True), [
+				{'contents': '50%', 'highlight_group': ['position_gradient', 'position'], 'gradient_level': 50.0}
+			])
 			vim_module._set_cursor(0, 0)
 			self.assertEqual(vim.position(pl=pl, segment_info=segment_info), 'Top')
 			vim_module._set_cursor(97, 0)
@@ -777,8 +793,9 @@ class TestVim(TestCase):
 			segment_info['buffer'][0:-1] = [str(i) for i in range(2)]
 			vim_module._set_cursor(0, 0)
 			self.assertEqual(vim.position(pl=pl, segment_info=segment_info, position_strings={'top': 'Comienzo', 'bottom': 'Final', 'all': 'Todo'}), 'Todo')
-			self.assertEqual(vim.position(pl=pl, segment_info=segment_info, gradient=True),
-					[{'contents': 'All', 'highlight_group': ['position_gradient', 'position'], 'gradient_level': 0.0}])
+			self.assertEqual(vim.position(pl=pl, segment_info=segment_info, gradient=True), [
+				{'contents': 'All', 'highlight_group': ['position_gradient', 'position'], 'gradient_level': 0.0}
+			])
 		finally:
 			vim_module._bw(segment_info['bufnr'])
 
@@ -805,16 +822,20 @@ class TestVim(TestCase):
 		with vim_module._with('buffer', '/foo') as segment_info:
 			with replace_attr(vim, 'guess', get_dummy_guess(status=lambda: None)):
 				with replace_attr(vim, 'tree_status', lambda repo, pl: None):
-					self.assertEqual(branch(segment_info=segment_info, status_colors=False),
-							[{'divider_highlight_group': 'branch:divider', 'highlight_group': ['branch'], 'contents': 'foo'}])
-					self.assertEqual(branch(segment_info=segment_info, status_colors=True),
-							[{'divider_highlight_group': 'branch:divider', 'highlight_group': ['branch_clean', 'branch'], 'contents': 'foo'}])
+					self.assertEqual(branch(segment_info=segment_info, status_colors=False), [
+						{'divider_highlight_group': 'branch:divider', 'highlight_group': ['branch'], 'contents': 'foo'}
+					])
+					self.assertEqual(branch(segment_info=segment_info, status_colors=True), [
+						{'divider_highlight_group': 'branch:divider', 'highlight_group': ['branch_clean', 'branch'], 'contents': 'foo'}
+					])
 			with replace_attr(vim, 'guess', get_dummy_guess(status=lambda: 'DU')):
 				with replace_attr(vim, 'tree_status', lambda repo, pl: 'DU'):
-					self.assertEqual(branch(segment_info=segment_info, status_colors=False),
-							[{'divider_highlight_group': 'branch:divider', 'highlight_group': ['branch'], 'contents': 'foo'}])
-					self.assertEqual(branch(segment_info=segment_info, status_colors=True),
-							[{'divider_highlight_group': 'branch:divider', 'highlight_group': ['branch_dirty', 'branch'], 'contents': 'foo'}])
+					self.assertEqual(branch(segment_info=segment_info, status_colors=False), [
+						{'divider_highlight_group': 'branch:divider', 'highlight_group': ['branch'], 'contents': 'foo'}
+					])
+					self.assertEqual(branch(segment_info=segment_info, status_colors=True), [
+						{'divider_highlight_group': 'branch:divider', 'highlight_group': ['branch_dirty', 'branch'], 'contents': 'foo'}
+					])
 
 	def test_file_vcs_status(self):
 		pl = Pl()
@@ -822,8 +843,9 @@ class TestVim(TestCase):
 		file_vcs_status = partial(vim.file_vcs_status, pl=pl, create_watcher=create_watcher)
 		with vim_module._with('buffer', '/foo') as segment_info:
 			with replace_attr(vim, 'guess', get_dummy_guess(status=lambda file: 'M')):
-				self.assertEqual(file_vcs_status(segment_info=segment_info),
-						[{'highlight_group': ['file_vcs_status_M', 'file_vcs_status'], 'contents': 'M'}])
+				self.assertEqual(file_vcs_status(segment_info=segment_info), [
+					{'highlight_group': ['file_vcs_status_M', 'file_vcs_status'], 'contents': 'M'}
+				])
 			with replace_attr(vim, 'guess', get_dummy_guess(status=lambda file: None)):
 				self.assertEqual(file_vcs_status(segment_info=segment_info), None)
 		with vim_module._with('buffer', '/bar') as segment_info:

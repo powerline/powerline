@@ -74,8 +74,10 @@ class VimPowerline(Powerline):
 		# Note: themes with non-[a-zA-Z0-9_] names are impossible to override 
 		# (though as far as I know exists() won’t throw). Won’t fix, use proper 
 		# theme names.
-		return _override_from(super(VimPowerline, self).load_theme_config(name),
-						'powerline_theme_overrides__' + name)
+		return _override_from(
+			super(VimPowerline, self).load_theme_config(name),
+			'powerline_theme_overrides__' + name
+		)
 
 	def get_local_themes(self, local_themes):
 		self.get_matcher = gen_matcher_getter(self.ext, self.import_paths)
@@ -83,9 +85,13 @@ class VimPowerline(Powerline):
 		if not local_themes:
 			return {}
 
-		return dict(((None if key == '__tabline__' else self.get_matcher(key),
-						{'config': self.load_theme_config(val)})
-					for key, val in local_themes.items()))
+		return dict((
+			(
+				(None if key == '__tabline__' else self.get_matcher(key)),
+				{'config': self.load_theme_config(val)}
+			)
+			for key, val in local_themes.items())
+		)
 
 	def get_config_paths(self):
 		try:
@@ -167,8 +173,7 @@ class VimPowerline(Powerline):
 		@staticmethod
 		def do_pyeval():
 			import __main__
-			vim.command('return ' + json.dumps(eval(vim.eval('a:e'),
-													__main__.__dict__)))
+			vim.command('return ' + json.dumps(eval(vim.eval('a:e'), __main__.__dict__)))
 
 	def setup_components(self, components):
 		if components is None:
@@ -208,10 +213,10 @@ def setup(pyeval=None, pycmd=None, can_replace_pyeval=True):
 	# pyeval() and vim.bindeval were both introduced in one patch
 	if not hasattr(vim, 'bindeval') and can_replace_pyeval:
 		vim.command(('''
-				function! PowerlinePyeval(e)
-					{pycmd} powerline.do_pyeval()
-				endfunction
-			''').format(pycmd=pycmd))
+			function! PowerlinePyeval(e)
+				{pycmd} powerline.do_pyeval()
+			endfunction
+		''').format(pycmd=pycmd))
 		pyeval = 'PowerlinePyeval'
 
 	powerline = VimPowerline(pyeval)
