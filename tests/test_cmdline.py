@@ -42,7 +42,7 @@ class TestParser(TestCase):
 				(['shell', '--config_path'],             'expected one argument'),
 				(['shell', '--renderer_arg'],            'expected one argument'),
 				(['shell', '--jobnum'],                  'expected one argument'),
-				(['-r', 'zsh_prompt'],                   'too few arguments|the following arguments are required: ext'),
+				(['-r', '.zsh'],                         'too few arguments|the following arguments are required: ext'),
 				(['shell', '--last_exit_code', 'i'],     'invalid int value'),
 				(['shell', '--last_pipe_status', '1 i'], 'invalid <lambda> value'),
 			]:
@@ -57,12 +57,12 @@ class TestParser(TestCase):
 		err = StrIO()
 		with replace_attr(sys, 'stdout', out, 'stderr', err):
 			for argv, expargs in [
-				(['shell'],                     {'ext': ['shell']}),
-				(['shell', '-r', 'zsh_prompt'], {'ext': ['shell'], 'renderer_module': 'zsh_prompt'}),
+				(['shell'],               {'ext': ['shell']}),
+				(['shell', '-r', '.zsh'], {'ext': ['shell'], 'renderer_module': '.zsh'}),
 				([
 					'shell',
 					'left',
-					'-r', 'zsh_prompt',
+					'-r', '.zsh',
 					'--last_exit_code', '10',
 					'--last_pipe_status', '10 20 30',
 					'--jobnum=10',
@@ -76,7 +76,7 @@ class TestParser(TestCase):
 				], {
 					'ext': ['shell'],
 					'side': 'left',
-					'renderer_module': 'zsh_prompt',
+					'renderer_module': '.zsh',
 					'last_exit_code': 10,
 					'last_pipe_status': [10, 20, 30],
 					'jobnum': 10,

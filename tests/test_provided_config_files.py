@@ -86,7 +86,7 @@ class TestConfig(TestCase):
 
 	def test_zsh(self):
 		from powerline.shell import ShellPowerline
-		args = Args(last_pipe_status=[1, 0], jobnum=0, ext=['shell'], renderer_module='zsh_prompt')
+		args = Args(last_pipe_status=[1, 0], jobnum=0, ext=['shell'], renderer_module='.zsh')
 		segment_info = {'args': args}
 		with ShellPowerline(args, run_once=False) as powerline:
 			powerline.render(segment_info=segment_info)
@@ -102,7 +102,7 @@ class TestConfig(TestCase):
 
 	def test_bash(self):
 		from powerline.shell import ShellPowerline
-		args = Args(last_exit_code=1, jobnum=0, ext=['shell'], renderer_module='bash_prompt', config={'ext': {'shell': {'theme': 'default_leftonly'}}})
+		args = Args(last_exit_code=1, jobnum=0, ext=['shell'], renderer_module='.bash', config={'ext': {'shell': {'theme': 'default_leftonly'}}})
 		with ShellPowerline(args, run_once=False) as powerline:
 			powerline.render(segment_info={'args': args})
 		with ShellPowerline(args, run_once=False) as powerline:

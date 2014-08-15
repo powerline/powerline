@@ -129,7 +129,7 @@ _powerline_setup_prompt() {
 			POWERLINE_COMMAND=( "$($POWERLINE_CONFIG shell command)" )
 		fi
 
-		local add_args='-r zsh_prompt'
+		local add_args='-r .zsh'
 		add_args+=' --last_exit_code=$?'
 		add_args+=' --last_pipe_status="$pipestatus"'
 		add_args+=' --renderer_arg="client_id=$$"'

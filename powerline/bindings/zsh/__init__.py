@@ -26,7 +26,7 @@ def get_var_config(var):
 class Args(object):
 	__slots__ = ('last_pipe_status', 'last_exit_code')
 	ext = ['shell']
-	renderer_module = 'zsh_prompt'
+	renderer_module = '.zsh'
 
 	@property
 	def config(self):

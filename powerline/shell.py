@@ -50,7 +50,7 @@ def get_argparser(parser=None, *args, **kwargs):
 	p.add_argument('ext', nargs=1, help='Extension: application for which powerline command is launched (usually `shell\' or `tmux\')')
 	p.add_argument('side', nargs='?', choices=('left', 'right', 'above', 'aboveleft'), help='Side: `left\' and `right\' represent left and right side respectively, `above\' emits lines that are supposed to be printed just above the prompt and `aboveleft\' is like concatenating `above\' with `left\' with the exception that only one Python instance is used in this case.')
 	p.add_argument('-r', '--renderer_module', metavar='MODULE', type=str,
-				help='Renderer module. Usually something like `bash_prompt\' or `zsh_prompt\', is supposed to be set only in shell-specific bindings file.')
+				help='Renderer module. Usually something like `.bash\' or `.zsh\', is supposed to be set only in shell-specific bindings file.')
 	p.add_argument('-w', '--width', type=int, help='Maximum prompt with. Triggers truncation of some segments')
 	p.add_argument('--last_exit_code', metavar='INT', type=int, help='Last exit code')
 	p.add_argument('--last_pipe_status', metavar='LIST', default='', type=lambda s: [int(status) for status in s.split()], help='Like above, but is supposed to contain space-separated array of statuses, representing exit statuses of commands in one pipe.')

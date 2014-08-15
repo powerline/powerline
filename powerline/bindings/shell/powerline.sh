@@ -122,8 +122,8 @@ _powerline_tmux_set_columns() {
 
 _powerline_set_renderer_arg() {
 	case "$1" in
-		bb|ash) _POWERLINE_RENDERER_ARG="-rbash_prompt" ;;
-		mksh|ksh) _POWERLINE_RENDERER_ARG="-rksh_prompt" ;;
+		bb|ash) _POWERLINE_RENDERER_ARG="-r .bash" ;;
+		mksh|ksh) _POWERLINE_RENDERER_ARG="-r .ksh" ;;
 		bash|dash) _POWERLINE_RENDERER_ARG= ;;
 	esac
 }
