@@ -60,10 +60,9 @@ Programming style
 
 * The project uses *tabs for indentation* and *spaces for alignment*, this 
   is also included in a vim modeline on top of every script file.
-* Run your code through ``flake8 
-  --ignore=W191,E501,E121,E122,E123,E128,E225`` to fix any style errors. Use 
-  common sense regarding whitespace warnings, not all ``flake8`` warnings 
-  need to be fixed.
+* Run your code through ``flake8 --ignore=W191,E501,E128,W291,E126`` to fix any 
+  style errors. Use common sense regarding whitespace warnings, not all 
+  ``flake8`` warnings need to be fixed.
 * Trailing whitespace to indicate a continuing paragraph is OK in comments, 
   documentation and commit messages.
 
