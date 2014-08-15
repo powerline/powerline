@@ -128,14 +128,16 @@ class Spec(object):
 
 	def check_type(self, value, context_mark, data, context, echoerr, types):
 		if type(value.value) not in types:
-			echoerr(context=self.cmsg.format(key=context_key(context)),
-					context_mark=context_mark,
-					problem='{0!r} must be a {1} instance, not {2}'.format(
-						value,
-						list_sep.join((t.__name__ for t in types)),
-						type(value.value).__name__
-					),
-					problem_mark=value.mark)
+			echoerr(
+				context=self.cmsg.format(key=context_key(context)),
+				context_mark=context_mark,
+				problem='{0!r} must be a {1} instance, not {2}'.format(
+					value,
+					list_sep.join((t.__name__ for t in types)),
+					type(value.value).__name__
+				),
+				problem_mark=value.mark
+			)
 			return False, True
 		return True, False
 
@@ -143,9 +145,9 @@ class Spec(object):
 		proceed, echo, hadproblem = func(value, data, context, echoerr)
 		if echo and hadproblem:
 			echoerr(context=self.cmsg.format(key=context_key(context)),
-					context_mark=context_mark,
-					problem=msg_func(value),
-					problem_mark=value.mark)
+			        context_mark=context_mark,
+			        problem=msg_func(value),
+			        problem_mark=value.mark)
 		return proceed, hadproblem
 
 	def check_list(self, value, context_mark, data, context, echoerr, item_func, msg_func):
@@ -165,9 +167,9 @@ class Spec(object):
 				proceed, echo, fhadproblem = item_func(item, data, context, echoerr)
 				if echo and fhadproblem:
 					echoerr(context=self.cmsg.format(key=context_key(context) + '/list item ' + unicode(i)),
-							context_mark=value.mark,
-							problem=msg_func(item),
-							problem_mark=item.mark)
+					        context_mark=value.mark,
+					        problem=msg_func(item),
+					        problem_mark=item.mark)
 			if fhadproblem:
 				hadproblem = True
 			if not proceed:
@@ -376,9 +378,9 @@ class Spec(object):
 						if not valspec.isoptional:
 							hadproblem = True
 							echoerr(context=self.cmsg.format(key=context_key(context)),
-									context_mark=None,
-									problem='required key is missing: {0}'.format(key),
-									problem_mark=value.mark)
+							        context_mark=None,
+							        problem='required key is missing: {0}'.format(key),
+							        problem_mark=value.mark)
 				for key in value.keys():
 					if key not in self.keys:
 						for keyfunc, vali in self.uspecs:
@@ -405,9 +407,9 @@ class Spec(object):
 							hadproblem = True
 							if self.ufailmsg:
 								echoerr(context=self.cmsg.format(key=context_key(context)),
-										context_mark=None,
-										problem=self.ufailmsg(key),
-										problem_mark=key.mark)
+								        context_mark=None,
+								        problem=self.ufailmsg(key),
+								        problem_mark=key.mark)
 		return True, hadproblem
 
 
@@ -435,19 +437,19 @@ def check_matcher_func(ext, match_name, data, context, echoerr):
 			func = getattr(__import__(str(match_module), fromlist=[str(match_function)]), str(match_function))
 		except ImportError:
 			echoerr(context='Error while loading matcher functions',
-					problem='failed to load module {0}'.format(match_module),
-					problem_mark=match_name.mark)
+			        problem='failed to load module {0}'.format(match_module),
+			        problem_mark=match_name.mark)
 			return True, True
 		except AttributeError:
 			echoerr(context='Error while loading matcher functions',
-					problem='failed to load matcher function {0}'.format(match_function),
-					problem_mark=match_name.mark)
+			        problem='failed to load matcher function {0}'.format(match_function),
+			        problem_mark=match_name.mark)
 			return True, True
 
 	if not callable(func):
 		echoerr(context='Error while loading matcher functions',
-				problem='loaded "function" {0} is not callable'.format(match_function),
-				problem_mark=match_name.mark)
+		        problem='loaded "function" {0} is not callable'.format(match_function),
+		        problem_mark=match_name.mark)
 		return True, True
 
 	if hasattr(func, 'func_code') and hasattr(func.func_code, 'co_argcount'):
@@ -470,15 +472,15 @@ def check_ext(ext, data, context, echoerr):
 	if ext not in data['lists']['exts']:
 		hadproblem = True
 		echoerr(context='Error while loading {0} extension configuration'.format(ext),
-				context_mark=ext.mark,
-				problem='extension configuration does not exist')
+		        context_mark=ext.mark,
+		        problem='extension configuration does not exist')
 	else:
 		for typ in ('themes', 'colorschemes'):
 			if ext not in data['configs'][typ] and not data['configs']['top_' + typ]:
 				hadproblem = True
 				echoerr(context='Error while loading {0} extension configuration'.format(ext),
-						context_mark=ext.mark,
-						problem='{0} configuration does not exist'.format(typ))
+				        context_mark=ext.mark,
+				        problem='{0} configuration does not exist'.format(typ))
 			else:
 				hadsomedirs = True
 	return hadsomedirs, hadproblem
@@ -492,14 +494,16 @@ def check_config(d, theme, data, context, echoerr):
 		ext = context[-3][0]
 	if ext not in data['lists']['exts']:
 		echoerr(context='Error while loading {0} extension configuration'.format(ext),
-				context_mark=ext.mark,
-				problem='extension configuration does not exist')
+		        context_mark=ext.mark,
+		        problem='extension configuration does not exist')
 		return True, False, True
-	if ((ext not in data['configs'][d] or theme not in data['configs'][d][ext])
-			and theme not in data['configs']['top_' + d]):
+	if (
+		(ext not in data['configs'][d] or theme not in data['configs'][d][ext])
+		and theme not in data['configs']['top_' + d]
+	):
 		echoerr(context='Error while loading {0} from {1} extension configuration'.format(d[:-1], ext),
-				problem='failed to find configuration file {0}/{1}/{2}.json'.format(d, ext, theme),
-				problem_mark=theme.mark)
+		        problem='failed to find configuration file {0}/{1}/{2}.json'.format(d, ext, theme),
+		        problem_mark=theme.mark)
 		return True, False, True
 	return True, False, False
 
@@ -507,9 +511,9 @@ def check_config(d, theme, data, context, echoerr):
 def check_top_theme(theme, data, context, echoerr):
 	if theme not in data['configs']['top_themes']:
 		echoerr(context='Error while checking extension configuration (key {key})'.format(key=context_key(context)),
-				context_mark=context[-2][0].mark,
-				problem='failed to find top theme {0}'.format(theme),
-				problem_mark=theme.mark)
+		        context_mark=context[-2][0].mark,
+		        problem='failed to find top theme {0}'.format(theme),
+		        problem_mark=theme.mark)
 		return True, False, True
 	return True, False, False
 
@@ -778,8 +782,8 @@ def check_key_compatibility(segment, data, context, echoerr):
 
 	if segment_type not in type_keys:
 		echoerr(context='Error while checking segments (key {key})'.format(key=context_key(context)),
-				problem='found segment with unknown type {0}'.format(segment_type),
-				problem_mark=segment_type.mark)
+		        problem='found segment with unknown type {0}'.format(segment_type),
+		        problem_mark=segment_type.mark)
 		return False, False, True
 
 	hadproblem = False
@@ -828,8 +832,8 @@ def check_segment_module(module, data, context, echoerr):
 			if echoerr.logger.level >= logging.DEBUG:
 				echoerr.logger.exception(e)
 			echoerr(context='Error while checking segments (key {key})'.format(key=context_key(context)),
-					problem='failed to import module {0}'.format(module),
-					problem_mark=module.mark)
+			        problem='failed to import module {0}'.format(module),
+			        problem_mark=module.mark)
 			return True, False, True
 	return True, False, False
 
@@ -878,19 +882,19 @@ def import_segment(name, data, context, echoerr, module=None):
 			func = getattr(__import__(str(module), fromlist=[str(name)]), str(name))
 		except ImportError:
 			echoerr(context='Error while checking segments (key {key})'.format(key=context_key(context)),
-					problem='failed to import module {0}'.format(module),
-					problem_mark=module.mark)
+			        problem='failed to import module {0}'.format(module),
+			        problem_mark=module.mark)
 			return None
 		except AttributeError:
 			echoerr(context='Error while loading segment function (key {key})'.format(key=context_key(context)),
-					problem='failed to load function {0} from module {1}'.format(name, module),
-					problem_mark=name.mark)
+			        problem='failed to load function {0} from module {1}'.format(name, module),
+			        problem_mark=name.mark)
 			return None
 
 	if not callable(func):
 		echoerr(context='Error while checking segments (key {key})'.format(key=context_key(context)),
-				problem='imported "function" {0} from module {1} is not callable'.format(name, module),
-				problem_mark=module.mark)
+		        problem='imported "function" {0} from module {1} is not callable'.format(name, module),
+		        problem_mark=module.mark)
 		return None
 
 	return func
@@ -933,11 +937,15 @@ def check_segment_name(name, data, context, echoerr):
 
 		if hl_groups:
 			greg = re.compile(r'``([^`]+)``( \(gradient\))?')
-			hl_groups = [[greg.match(subs).groups() for subs in s.split(' or ')]
-						for s in (list_sep.join(hl_groups)).split(', ')]
+			hl_groups = [
+				[greg.match(subs).groups() for subs in s.split(' or ')]
+				for s in (list_sep.join(hl_groups)).split(', ')
+			]
 			for required_pack in hl_groups:
-				rs = [hl_exists(hl_group, data, context, echoerr, allow_gradients=('force' if gradient else False))
-						for hl_group, gradient in required_pack]
+				rs = [
+					hl_exists(hl_group, data, context, echoerr, allow_gradients=('force' if gradient else False))
+					for hl_group, gradient in required_pack
+				]
 				if all(rs):
 					echoerr(
 						context='Error while checking theme (key {key})'.format(key=context_key(context)),
@@ -983,8 +991,8 @@ def check_segment_name(name, data, context, echoerr):
 				and not any(((name in theme.get('segment_data', {})) for theme in data['top_themes'].values()))
 			):
 				echoerr(context='Error while checking segments (key {key})'.format(key=context_key(context)),
-						problem='found useless use of name key (such name is not present in theme/segment_data)',
-						problem_mark=name.mark)
+				        problem='found useless use of name key (such name is not present in theme/segment_data)',
+				        problem_mark=name.mark)
 
 	return True, False, False
 
@@ -1025,14 +1033,14 @@ def hl_exists(hl_group, data, context, echoerr, allow_gradients=False):
 					r.append(colorscheme)
 					continue
 			if allow_gradients == 'force' and not hadgradient:
-					echoerr(
-						context='Error while checking highlight group in theme (key {key})'.format(
-							key=context_key(context)),
-						context_mark=getattr(hl_group, 'mark', None),
-						problem='group {0} should have at least one gradient color, but it has no'.format(hl_group),
-						problem_mark=group_config.mark
-					)
-					r.append(colorscheme)
+				echoerr(
+					context='Error while checking highlight group in theme (key {key})'.format(
+						key=context_key(context)),
+					context_mark=getattr(hl_group, 'mark', None),
+					problem='group {0} should have at least one gradient color, but it has no'.format(hl_group),
+					problem_mark=group_config.mark
+				)
+				r.append(colorscheme)
 	return r
 
 
@@ -1109,8 +1117,8 @@ def check_segment_data_key(key, data, context, echoerr):
 	else:
 		if data['theme_type'] != 'top':
 			echoerr(context='Error while checking segment data',
-					problem='found key {0} that cannot be associated with any segment'.format(key),
-					problem_mark=key.mark)
+			        problem='found key {0} that cannot be associated with any segment'.format(key),
+			        problem_mark=key.mark)
 			return True, False, True
 
 	return True, False, False
@@ -1141,9 +1149,9 @@ def check_args_variant(func, args, data, context, echoerr):
 
 	if not all_args >= present_args:
 		echoerr(context='Error while checking segment arguments (key {key})'.format(key=context_key(context)),
-				context_mark=args.mark,
-				problem='found unknown keys: {0}'.format(list_sep.join(present_args - all_args)),
-				problem_mark=next(iter(present_args - all_args)).mark)
+		        context_mark=args.mark,
+		        problem='found unknown keys: {0}'.format(list_sep.join(present_args - all_args)),
+		        problem_mark=next(iter(present_args - all_args)).mark)
 		hadproblem = True
 
 	if isinstance(func, ThreadedSegment):
@@ -1179,8 +1187,8 @@ def check_args(get_functions, args, data, context, echoerr):
 			new_echoerr.echo_all()
 		else:
 			echoerr(context='Error while checking segment arguments (key {key})'.format(key=context_key(context)),
-					context_mark=context[-2][1].mark,
-					problem='no suitable segments found')
+			        context_mark=context[-2][1].mark,
+			        problem='no suitable segments found')
 
 	return True, False, hadproblem
 

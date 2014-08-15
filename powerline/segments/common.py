@@ -368,9 +368,11 @@ class WeatherSegment(ThreadedSegment):
 			# only in .update()
 			if not self.location:
 				location_data = json.loads(urllib_read('http://freegeoip.net/json/'))
-				self.location = ','.join([location_data['city'],
-											location_data['region_code'],
-											location_data['country_code']])
+				self.location = ','.join((
+					location_data['city'],
+					location_data['region_code'],
+					location_data['country_code']
+				))
 			query_data = {
 				'q':
 				'use "https://raw.githubusercontent.com/yql/yql-tables/master/weather/weather.bylocation.xml" as we;'

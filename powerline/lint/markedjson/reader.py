@@ -89,9 +89,11 @@ class Reader(object):
 		match = NON_PRINTABLE.search(data)
 		if match:
 			self.update_pointer(match.start())
-			raise ReaderError('while reading from stream', None,
-					'found special characters which are not allowed',
-					Mark(self.name, self.line, self.column, self.full_buffer, self.full_pointer))
+			raise ReaderError(
+				'while reading from stream', None,
+				'found special characters which are not allowed',
+				Mark(self.name, self.line, self.column, self.full_buffer, self.full_pointer)
+			)
 
 	def update(self, length):
 		if self.raw_buffer is None:
@@ -102,8 +104,7 @@ class Reader(object):
 			if not self.eof:
 				self.update_raw()
 			try:
-				data, converted = self.raw_decode(self.raw_buffer,
-						'strict', self.eof)
+				data, converted = self.raw_decode(self.raw_buffer, 'strict', self.eof)
 			except UnicodeDecodeError as exc:
 				character = self.raw_buffer[exc.start]
 				position = self.stream_pointer - len(self.raw_buffer) + exc.start
@@ -112,9 +113,11 @@ class Reader(object):
 				self.full_buffer += data + '<' + str(ord(character)) + '>'
 				self.raw_buffer = self.raw_buffer[converted:]
 				self.update_pointer(exc.start - 1)
-				raise ReaderError('while reading from stream', None,
-						'found character #x%04x that cannot be decoded by UTF-8 codec' % ord(character),
-						Mark(self.name, self.line, self.column, self.full_buffer, position))
+				raise ReaderError(
+					'while reading from stream', None,
+					'found character #x%04x that cannot be decoded by UTF-8 codec' % ord(character),
+					Mark(self.name, self.line, self.column, self.full_buffer, position)
+				)
 			self.buffer += data
 			self.full_buffer += data
 			self.raw_buffer = self.raw_buffer[converted:]

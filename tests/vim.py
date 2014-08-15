@@ -153,8 +153,10 @@ def _construct_result(r):
 		elif isinstance(r, list):
 			return [_construct_result(i) for i in r]
 		elif isinstance(r, dict):
-			return dict(((_construct_result(k), _construct_result(v))
-						for k, v in r.items()))
+			return dict((
+				(_construct_result(k), _construct_result(v))
+				for k, v in r.items()
+			))
 		return r
 
 

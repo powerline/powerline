@@ -255,11 +255,13 @@ def finish_common_config(common_config):
 if sys.version_info < (3,):
 	# `raise exception[0], None, exception[1]` is a SyntaxError in python-3*
 	# Not using ('''…''') because this syntax does not work in python-2.6
-	exec(('def reraise(exception):\n'
-			'	if type(exception) is tuple:\n'
-			'		raise exception[0], None, exception[1]\n'
-			'	else:\n'
-			'		raise exception\n'))
+	exec((
+		'def reraise(exception):\n'
+		'	if type(exception) is tuple:\n'
+		'		raise exception[0], None, exception[1]\n'
+		'	else:\n'
+		'		raise exception\n'
+	))
 else:
 	def reraise(exception):
 		if type(exception) is tuple:
@@ -302,13 +304,13 @@ class Powerline(object):
 	'''
 
 	def __init__(self,
-				ext,
-				renderer_module=None,
-				run_once=False,
-				logger=None,
-				use_daemon_threads=True,
-				shutdown_event=None,
-				config_loader=None):
+	             ext,
+	             renderer_module=None,
+	             run_once=False,
+	             logger=None,
+	             use_daemon_threads=True,
+	             shutdown_event=None,
+	             config_loader=None):
 		self.ext = ext
 		self.run_once = run_once
 		self.logger = logger
@@ -437,12 +439,16 @@ class Powerline(object):
 					or self.ext_config.get('local_themes') != self.prev_ext_config.get('local_themes')
 				):
 					self.renderer_options['local_themes'] = self.get_local_themes(self.ext_config.get('local_themes'))
-				load_colorscheme = (load_colorscheme
-							or not self.prev_ext_config
-							or self.prev_ext_config['colorscheme'] != self.ext_config['colorscheme'])
-				load_theme = (load_theme
-							or not self.prev_ext_config
-							or self.prev_ext_config['theme'] != self.ext_config['theme'])
+				load_colorscheme = (
+					load_colorscheme
+					or not self.prev_ext_config
+					or self.prev_ext_config['colorscheme'] != self.ext_config['colorscheme']
+				)
+				load_theme = (
+					load_theme
+					or not self.prev_ext_config
+					or self.prev_ext_config['theme'] != self.ext_config['theme']
+				)
 				self.prev_ext_config = self.ext_config
 
 		create_renderer = load_colors or load_colorscheme or load_theme or common_config_differs or ext_config_differs

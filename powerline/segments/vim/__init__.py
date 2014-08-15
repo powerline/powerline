@@ -244,8 +244,10 @@ def file_directory(pl, segment_info, remove_scheme=True, shorten_user=True, shor
 			name = name[len(match.group(0)) + 1:]  # Remove scheme and colon
 		file_directory = vim_funcs['fnamemodify'](name, ':h')
 	else:
-		file_directory = vim_funcs['fnamemodify'](name, (':~' if shorten_user else '')
-													+ (':.' if shorten_cwd else '') + ':h')
+		file_directory = vim_funcs['fnamemodify'](
+			name,
+			(':~' if shorten_user else '') + (':.' if shorten_cwd else '') + ':h'
+		)
 		if not file_directory:
 			return None
 		if shorten_home and file_directory.startswith('/home/'):
@@ -507,7 +509,7 @@ def file_vcs_status(pl, segment_info, create_watcher):
 				ret.append({
 					'contents': status,
 					'highlight_group': ['file_vcs_status_' + status, 'file_vcs_status'],
-					})
+				})
 			return ret
 
 

@@ -7,10 +7,14 @@ class Event(object):
 		self.end_mark = end_mark
 
 	def __repr__(self):
-		attributes = [key for key in ['implicit', 'value']
-				if hasattr(self, key)]
-		arguments = ', '.join(['%s=%r' % (key, getattr(self, key))
-				for key in attributes])
+		attributes = [
+			key for key in ['implicit', 'value']
+			if hasattr(self, key)
+		]
+		arguments = ', '.join([
+			'%s=%r' % (key, getattr(self, key))
+			for key in attributes
+		])
 		return '%s(%s)' % (self.__class__.__name__, arguments)
 
 
@@ -21,8 +25,7 @@ class NodeEvent(Event):
 
 
 class CollectionStartEvent(NodeEvent):
-	def __init__(self, implicit, start_mark=None, end_mark=None,
-			flow_style=None):
+	def __init__(self, implicit, start_mark=None, end_mark=None, flow_style=None):
 		self.tag = None
 		self.implicit = implicit
 		self.start_mark = start_mark
@@ -49,8 +52,7 @@ class StreamEndEvent(Event):
 
 
 class DocumentStartEvent(Event):
-	def __init__(self, start_mark=None, end_mark=None,
-			explicit=None, version=None, tags=None):
+	def __init__(self, start_mark=None, end_mark=None, explicit=None, version=None, tags=None):
 		self.start_mark = start_mark
 		self.end_mark = end_mark
 		self.explicit = explicit
@@ -59,8 +61,7 @@ class DocumentStartEvent(Event):
 
 
 class DocumentEndEvent(Event):
-	def __init__(self, start_mark=None, end_mark=None,
-			explicit=None):
+	def __init__(self, start_mark=None, end_mark=None, explicit=None):
 		self.start_mark = start_mark
 		self.end_mark = end_mark
 		self.explicit = explicit
@@ -71,8 +72,7 @@ class AliasEvent(NodeEvent):
 
 
 class ScalarEvent(NodeEvent):
-	def __init__(self, implicit, value,
-			start_mark=None, end_mark=None, style=None):
+	def __init__(self, implicit, value, start_mark=None, end_mark=None, style=None):
 		self.tag = None
 		self.implicit = implicit
 		self.value = value

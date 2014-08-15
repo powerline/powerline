@@ -139,13 +139,14 @@ try:
 						untracked_column = 'U'
 						continue
 
-					if status & (git.GIT_STATUS_WT_DELETED
-							| git.GIT_STATUS_WT_MODIFIED):
+					if status & (git.GIT_STATUS_WT_DELETED | git.GIT_STATUS_WT_MODIFIED):
 						wt_column = 'D'
 
-					if status & (git.GIT_STATUS_INDEX_NEW
-							| git.GIT_STATUS_INDEX_MODIFIED
-							| git.GIT_STATUS_INDEX_DELETED):
+					if status & (
+						git.GIT_STATUS_INDEX_NEW
+						| git.GIT_STATUS_INDEX_MODIFIED
+						| git.GIT_STATUS_INDEX_DELETED
+					):
 						index_column = 'I'
 				r = wt_column + index_column + untracked_column
 				return r if r != '   ' else None

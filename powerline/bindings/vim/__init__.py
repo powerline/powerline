@@ -86,8 +86,9 @@ else:
 		if not buffer or buffer.number == vim.current.buffer.number:
 			return int(vim.eval('exists("b:{0}")'.format(varname)))
 		else:
-			return int(vim.eval('has_key(getbufvar({0}, ""), {1})'
-							.format(buffer.number, varname)))
+			return int(vim.eval(
+				'has_key(getbufvar({0}, ""), {1})'.format(buffer.number, varname)
+			))
 
 	def vim_getwinvar(segment_info, varname):  # NOQA
 		result = vim.eval('getwinvar({0}, "{1}")'.format(segment_info['winnr'], varname))
@@ -210,9 +211,15 @@ class VimEnviron(object):
 
 	@staticmethod
 	def __setitem__(key, value):
-		return vim.command('let $' + key + '="'
-					+ value.replace('"', '\\"').replace('\\', '\\\\').replace('\n', '\\n').replace('\0', '')
-					+ '"')
+		return vim.command(
+			'let ${0}="{1}"'.format(
+				key,
+				value.replace('"', '\\"')
+				     .replace('\\', '\\\\')
+				     .replace('\n', '\\n')
+				     .replace('\0', '')
+			)
+		)
 
 
 if sys.version_info < (3,):

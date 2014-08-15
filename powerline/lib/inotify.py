@@ -97,9 +97,10 @@ class INotify(object):
 	ONESHOT = 0x80000000      # Only send event once.
 
 	# All events which a program can wait on.
-	ALL_EVENTS = (ACCESS | MODIFY | ATTRIB | CLOSE_WRITE | CLOSE_NOWRITE |
-					OPEN | MOVED_FROM | MOVED_TO | CREATE | DELETE |
-					DELETE_SELF | MOVE_SELF)
+	ALL_EVENTS = (
+		ACCESS | MODIFY | ATTRIB | CLOSE_WRITE | CLOSE_NOWRITE | OPEN |
+		MOVED_FROM | MOVED_TO | CREATE | DELETE | DELETE_SELF | MOVE_SELF
+	)
 
 	# See <bits/inotify.h>
 	CLOEXEC = 0x80000
