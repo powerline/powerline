@@ -1,7 +1,7 @@
 function powerline-setup
 	function _powerline_columns_fallback
-		if which stty ^/dev/null
-			if stty size ^/dev/null
+		if which stty >/dev/null
+			if stty size >/dev/null
 				stty size | cut -d' ' -f2
 				return 0
 			end
@@ -11,7 +11,10 @@ function powerline-setup
 	end
 
 	function _powerline_columns
-		if test -z "$COLUMNS"
+		# Hack: `test "" -eq 0` is true, as well as `test 0 -eq 0`
+		# Note: at fish startup `$COLUMNS` is equal to zero, meaning that it may 
+		# not be used.
+		if test "$COLUMNS" -eq 0
 			_powerline_columns_fallback
 		else
 			echo "$COLUMNS"
