@@ -8,3 +8,4 @@ Developer guide
 
    develop/segments
    develop/local-themes
+   develop/extensions
