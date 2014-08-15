@@ -218,6 +218,24 @@ def setup(pyeval=None, pycmd=None, can_replace_pyeval=True):
 	powerline.update_renderer()
 	__main__.powerline = powerline
 
+	if (
+		bool(int(vim.eval("has('gui_running') && argc() == 0")))
+		and not vim.current.buffer.name
+		and len(vim.windows) == 1
+	):
+		# Hack to show startup screen. Problems in GUI:
+		# - Defining local value of &statusline option while computing global
+		#   value purges startup screen.
+		# - Defining highlight group while computing statusline purges startup
+		#   screen.
+		# This hack removes the “while computing statusline” part: both things 
+		# are defined, but they are defined right now.
+		#
+		# The above condition disables this hack if no GUI is running, Vim did 
+		# not open any files and there is only one window. Without GUI 
+		# everything works, in other cases startup screen is not shown.
+		powerline.new_window()
+
 	# Cannot have this in one line due to weird newline handling (in :execute 
 	# context newline is considered part of the command in just the same cases 
 	# when bar is considered part of the command (unless defining function 
