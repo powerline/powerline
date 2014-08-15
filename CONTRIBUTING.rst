@@ -18,7 +18,7 @@ Getting started
   already exist.
 
   * Clearly describe the issue.
-  * If the issue is a bug: Make sure you include steps to reproduce, and 
+  * If the issue is a bug: make sure you include steps to reproduce, and 
     include the earliest revision that you know has the issue.
 
 * Fork the repository on GitHub.
@@ -65,6 +65,8 @@ Programming style
   ``flake8`` warnings need to be fixed.
 * Trailing whitespace to indicate a continuing paragraph is OK in comments, 
   documentation and commit messages.
+* It is allowed to have too long lines. It is advised though to avoid lines 
+  wider then a hundred of characters.
 
 Submitting changes
 ==================
