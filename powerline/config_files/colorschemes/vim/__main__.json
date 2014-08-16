@@ -15,7 +15,7 @@
 		"position":         "information:additional",
 		"single_tab":       "line_current",
 		"many_tabs":        "line_current",
-		"bufnr":            "information:unimportant",
+		"bufnr":            "file_directory",
 		"winnr":            "information:unimportant",
 		"tabnr":            "file_directory"
 	}
