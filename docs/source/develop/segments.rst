@@ -1,3 +1,5 @@
+.. _dev-segments:
+
 ****************
 Writing segments
 ****************
