@@ -56,7 +56,7 @@
 			"before": "MAIL "
 		},
 		"powerline.segments.common.virtualenv": {
-			"before": "(e)  "
+			"before": "(e) "
 		},
 		"powerline.segments.common.hostname": {
 			"before": "⌂ "
