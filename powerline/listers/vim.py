@@ -8,7 +8,7 @@ except ImportError:
 	vim = {}  # NOQA
 
 from powerline.theme import requires_segment_info
-from powerline.bindings.vim import (current_tabpage, list_tabpages)
+from powerline.bindings.vim import (current_tabpage, list_tabpages, vim_getbufoption)
 
 
 def tabpage_updated_segment_info(segment_info, tabpage):
@@ -57,7 +57,7 @@ def tablister(pl, segment_info, **kwargs):
 	]
 
 
-def buffer_updated_segment_info(segment_info, buffer):
+def buffer_updated_segment_info(segment_info, buffer, mode):
 	segment_info = segment_info.copy()
 	segment_info.update(
 		window=None,
@@ -65,20 +65,25 @@ def buffer_updated_segment_info(segment_info, buffer):
 		window_id=None,
 		buffer=buffer,
 		bufnr=buffer.number,
+		mode=mode,
 	)
 	return segment_info
 
 
 @requires_segment_info
-def bufferlister(pl, segment_info, **kwargs):
+def bufferlister(pl, segment_info, show_unlisted=False, **kwargs):
 	'''List all buffers in segment_info format
 
 	Specifically generates a list of segment info dictionaries with ``buffer`` 
 	and ``bufnr`` keys set to buffer-specific ones, ``window``, ``winnr`` and 
-	``window_id`` keys unset.
+	``window_id`` keys set to None.
 
 	Sets segment ``mode`` to either ``buf`` (for current buffer) or ``nc`` 
 	(for all other buffers).
+
+	:param bool show_unlisted:
+		True if unlisted buffers should be shown as well. Current buffer is 
+		always shown.
 	'''
 	cur_buffer = vim.current.buffer
 	cur_bufnr = cur_buffer.number
@@ -89,10 +94,21 @@ def bufferlister(pl, segment_info, **kwargs):
 
 	return [
 		(
-			buffer_updated_segment_info(segment_info, buffer),
-			add_multiplier(buffer, {'mode': ('tab' if buffer == cur_buffer else 'nc')})
+			buf_segment_info,
+			add_multiplier(buf_segment_info['buffer'], {'mode': buf_segment_info['mode']})
 		)
-		for buffer in vim.buffers
+		for buf_segment_info in (
+			buffer_updated_segment_info(
+				segment_info,
+				buffer,
+				('buf' if buffer is cur_buffer else 'nc')
+			)
+			for buffer in vim.buffers
+		) if (
+			buf_segment_info['buffer'] is cur_buffer
+			or show_unlisted
+			or int(vim_getbufoption(buf_segment_info, 'buflisted'))
+		)
 	]
 
 
