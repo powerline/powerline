@@ -733,7 +733,7 @@ top_colorscheme_spec = (Spec(
 		mode_translations_value_spec(),
 	).optional().context_message('Error while loading mode translations (key {key})').optional(),
 ).context_message('Error while loading top-level coloscheme'))
-vim_mode_spec = Spec().oneof(set(list(vim_modes) + ['nc'])).copy
+vim_mode_spec = Spec().oneof(set(list(vim_modes) + ['nc', 'tab_nc', 'buf_nc'])).copy
 vim_colorscheme_spec = (Spec(
 	name=name_spec(),
 	groups=groups_spec(),

@@ -11,7 +11,7 @@
 						"name": "tabnr",
 						"after": " ",
 						"draw_soft_divider": false,
-						"exclude_modes": ["tab", "buf"],
+						"exclude_modes": ["tab", "buf", "buf_nc"],
 						"priority": 5
 					},
 					{

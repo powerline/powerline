@@ -36,7 +36,7 @@ def tablister(pl, segment_info, **kwargs):
 	``winnr``, ``window_id``, ``buffer`` and ``bufnr`` keys set to tab-local 
 	ones and additional ``tabpage`` and ``tabnr`` keys.
 
-	Sets segment ``mode`` to either ``tab`` (for current tab page) or ``nc`` 
+	Sets segment ``mode`` to either ``tab`` (for current tab page) or ``tab_nc`` 
 	(for all other tab pages).
 
 	Works best with vim-7.4 or later: earlier versions miss tabpage object and 
@@ -53,7 +53,7 @@ def tablister(pl, segment_info, **kwargs):
 		(lambda tabpage, mode: (
 			tabpage_updated_segment_info(segment_info, tabpage, mode),
 			add_multiplier(tabpage, {'mode': mode})
-		))(tabpage, 'tab' if tabpage == cur_tabpage else 'nc')
+		))(tabpage, 'tab' if tabpage == cur_tabpage else 'tab_nc')
 		for tabpage in list_tabpages()
 	)
 
@@ -79,7 +79,7 @@ def bufferlister(pl, segment_info, show_unlisted=False, **kwargs):
 	and ``bufnr`` keys set to buffer-specific ones, ``window``, ``winnr`` and 
 	``window_id`` keys set to None.
 
-	Sets segment ``mode`` to either ``buf`` (for current buffer) or ``nc`` 
+	Sets segment ``mode`` to either ``buf`` (for current buffer) or ``buf_nc`` 
 	(for all other buffers).
 
 	:param bool show_unlisted:
@@ -102,7 +102,7 @@ def bufferlister(pl, segment_info, show_unlisted=False, **kwargs):
 			buffer_updated_segment_info(
 				segment_info,
 				buffer,
-				('buf' if buffer is cur_buffer else 'nc')
+				('buf' if buffer is cur_buffer else 'buf_nc')
 			)
 			for buffer in vim.buffers
 		) if (

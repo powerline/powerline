@@ -43,6 +43,26 @@
 				"gray13": "gray61"
 			}
 		},
+		"tab_nc": {
+			"colors": {
+				"lightyellow": "darkgreencopper",
+				"azure4": "darkgreencopper",
+				"lightskyblue4": "lightyellow",
+				"gray61": "azure4",
+				"royalblue5": "lightskyblue4",
+				"gray13": "gray61"
+			}
+		},
+		"buf_nc": {
+			"colors": {
+				"lightyellow": "darkgreencopper",
+				"azure4": "darkgreencopper",
+				"lightskyblue4": "lightyellow",
+				"gray61": "azure4",
+				"royalblue5": "lightskyblue4",
+				"gray13": "gray61"
+			}
+		},
 		"i": {
 			"groups": {
 				"background":             { "fg": "gray13", "bg": "lightyellow", "attr": [] },
