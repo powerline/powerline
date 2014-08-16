@@ -12,6 +12,8 @@ Listers appear in configuration as irregular segments having ``segment_list`` as
 their type and ``segments`` key with a list of segments (a bit more details in 
 :ref:`Themes section of configuration reference <config-themes-segments>`).
 
+More information in :ref:`Writing listers <dev-listers>` section.
+
 Currently only Vim listers are available.
 
 Vim listers

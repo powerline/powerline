@@ -7,5 +7,6 @@ Developer guide
    :glob:
 
    develop/segments
+   develop/listers
    develop/local-themes
    develop/extensions
