@@ -350,7 +350,11 @@ class Powerline(object):
 	         config_loader=None):
 		'''Do actual initialization.
 		
-		__init__ function only stores the arguments.
+		__init__ function only stores the arguments and runs this function. This 
+		function exists for powerline to be able to reload itself: it is easier 
+		to make ``__init__`` store arguments and call overriddable ``init`` than 
+		tell developers that each time they override Powerline.__init__ in 
+		subclasses they must store actual arguments.
 		'''
 		self.ext = ext
 		self.run_once = run_once
