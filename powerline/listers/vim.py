@@ -28,7 +28,7 @@ def tabpage_updated_segment_info(segment_info, tabpage):
 
 
 @requires_segment_info
-def tablister(pl, segment_info):
+def tablister(pl, segment_info, **kwargs):
 	'''List all tab pages in segment_info format
 
 	Specifically generates a list of segment info dictionaries with ``window``, 
@@ -70,7 +70,7 @@ def buffer_updated_segment_info(segment_info, buffer):
 
 
 @requires_segment_info
-def bufferlister(pl, segment_info):
+def bufferlister(pl, segment_info, **kwargs):
 	'''List all buffers in segment_info format
 
 	Specifically generates a list of segment info dictionaries with ``buffer`` 
@@ -97,8 +97,8 @@ def bufferlister(pl, segment_info):
 
 
 @requires_segment_info
-def tabbuflister(*args, **kwargs):
+def tabbuflister(**kwargs):
 	if len(list_tabpages()) == 1:
-		return bufferlister(*args, **kwargs)
+		return bufferlister(**kwargs)
 	else:
-		return tablister(*args, **kwargs)
+		return tablister(**kwargs)
