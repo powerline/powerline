@@ -6,6 +6,8 @@ import errno
 from threading import Lock
 from collections import defaultdict
 
+from powerline.lib.watcher import create_tree_watcher
+
 
 def generate_directories(path):
 	if os.path.isdir(path):
@@ -178,9 +180,9 @@ def get_file_status(directory, dirstate_file, file_path, ignore_file_name, get_f
 
 
 class TreeStatusCache(dict):
-	def __init__(self):
-		from powerline.lib.tree_watcher import TreeWatcher
-		self.tw = TreeWatcher()
+	def __init__(self, pl):
+		self.tw = create_tree_watcher(pl)
+		self.pl = pl
 
 	def cache_and_get(self, key, status):
 		ans = self.get(key, self)
@@ -188,24 +190,24 @@ class TreeStatusCache(dict):
 			ans = self[key] = status()
 		return ans
 
-	def __call__(self, repo, logger):
+	def __call__(self, repo):
 		key = repo.directory
 		try:
-			if self.tw(key, logger=logger, ignore_event=getattr(repo, 'ignore_event', None)):
+			if self.tw(key, ignore_event=getattr(repo, 'ignore_event', None)):
 				self.pop(key, None)
 		except OSError as e:
-			logger.warn('Failed to check %s for changes, with error: %s' % key, e)
+			self.pl.warn('Failed to check %s for changes, with error: %s' % key, e)
 		return self.cache_and_get(key, repo.status)
 
 
 _tree_status_cache = None
 
 
-def tree_status(repo, logger):
+def tree_status(repo, pl):
 	global _tree_status_cache
 	if _tree_status_cache is None:
-		_tree_status_cache = TreeStatusCache()
-	return _tree_status_cache(repo, logger)
+		_tree_status_cache = TreeStatusCache(pl)
+	return _tree_status_cache(repo)
 
 
 vcs_props = (
@@ -232,7 +234,7 @@ def guess(path, create_watcher):
 
 
 def get_fallback_create_watcher():
-	from powerline.lib.file_watcher import create_file_watcher
+	from powerline.lib.watcher import create_file_watcher
 	from powerline import get_fallback_logger
 	from functools import partial
 	return partial(create_file_watcher, get_fallback_logger(), 'auto')
