@@ -23,7 +23,7 @@ _powerline_tmux_set_pwd() {
 }
 
 _powerline_tmux_set_columns() {
-	_powerline_tmux_setenv COLUMNS "${COLUMNS:-$(_powerline_columns_fallback)}"
+	_powerline_tmux_setenv COLUMNS "${COLUMNS:-`_powerline_columns_fallback`}"
 }
 
 _powerline_init_tmux_support() {
