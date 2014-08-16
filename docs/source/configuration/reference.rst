@@ -448,6 +448,8 @@ ascii                       Theme without any unicode characters at all
         background colors, soft ones are used between segments with same 
         background. Both options default to ``True``.
 
+    .. _config-themes-seg-draw_inner_divider:
+
     ``draw_inner_divider``
         Determines whether inner soft dividers are to be drawn for function 
         segments. Only applicable for functions returning multiple segments. 
