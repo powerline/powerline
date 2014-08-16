@@ -23,6 +23,12 @@ following arguments:
     Refer to :ref:`segment_info detailed description <dev-segments-info>` for 
     further details.
 
+``draw_inner_divider``
+    If False (default) soft dividers between segments in the listed group will 
+    not be drawn regardless of actual segment settings. If True they will be 
+    drawn, again regardless of actual segment settings. Set it to ``None`` in 
+    order to respect segment settings.
+
 And also any other argument(s) specified by user in :ref:`args key 
 <config-themes-seg-args>` (no additional arguments by default).
 

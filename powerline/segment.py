@@ -95,6 +95,8 @@ def get_attr_func(contents_func, key, args):
 
 def process_segment_lister(pl, segment_info, parsed_segments, side, lister, subsegments, patcher_args):
 	for subsegment_info, subsegment_update in lister(pl=pl, segment_info=segment_info, **patcher_args):
+		draw_inner_divider = subsegment_update.pop('draw_inner_divider', False)
+		old_pslen = len(parsed_segments)
 		for subsegment in subsegments:
 			if subsegment_update:
 				subsegment = subsegment.copy()
@@ -102,6 +104,10 @@ def process_segment_lister(pl, segment_info, parsed_segments, side, lister, subs
 				if subsegment_update['priority_multiplier'] and subsegment['priority']:
 					subsegment['priority'] *= subsegment_update['priority_multiplier']
 			process_segment(pl, side, subsegment_info, parsed_segments, subsegment)
+		new_pslen = len(parsed_segments)
+		if new_pslen > old_pslen + 1 and draw_inner_divider is not None:
+			for i in range(old_pslen, new_pslen - 1) if side == 'left' else range(old_pslen + 1, new_pslen):
+				parsed_segments[i]['draw_soft_divider'] = draw_inner_divider
 	return None
 
 

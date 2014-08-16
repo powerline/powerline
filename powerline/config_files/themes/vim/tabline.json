@@ -10,13 +10,11 @@
 					{
 						"name": "tabnr",
 						"after": " ",
-						"draw_soft_divider": false,
 						"exclude_modes": ["tab", "buf", "buf_nc"],
 						"priority": 5
 					},
 					{
 						"name": "file_directory",
-						"draw_soft_divider": false,
 						"priority": 40
 					},
 					{
