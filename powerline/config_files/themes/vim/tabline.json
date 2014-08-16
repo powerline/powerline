@@ -4,6 +4,7 @@
 		"left": [
 			{
 				"type": "segment_list",
+				"module": "powerline.listers.vim",
 				"name": "tabbuflister",
 				"segments": [
 					{
