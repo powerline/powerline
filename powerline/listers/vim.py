@@ -11,7 +11,7 @@ from powerline.theme import requires_segment_info
 from powerline.bindings.vim import (current_tabpage, list_tabpages, vim_getbufoption)
 
 
-def tabpage_updated_segment_info(segment_info, tabpage):
+def tabpage_updated_segment_info(segment_info, tabpage, mode):
 	segment_info = segment_info.copy()
 	window = tabpage.window
 	buffer = window.buffer
@@ -23,6 +23,7 @@ def tabpage_updated_segment_info(segment_info, tabpage):
 		window_id=int(window.vars.get('powerline_window_id', -1)),
 		buffer=buffer,
 		bufnr=buffer.number,
+		mode=mode,
 	)
 	return segment_info
 
@@ -49,10 +50,10 @@ def tablister(pl, segment_info, **kwargs):
 		return dct
 
 	return [
-		(
-			tabpage_updated_segment_info(segment_info, tabpage),
-			add_multiplier(tabpage, {'mode': ('tab' if tabpage == cur_tabpage else 'nc')})
-		)
+		(lambda mode: (
+			tabpage_updated_segment_info(segment_info, tabpage, mode),
+			add_multiplier(tabpage, {'mode': mode})
+		))('tab' if tabpage == cur_tabpage else 'nc')
 		for tabpage in list_tabpages()
 	]
 
