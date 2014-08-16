@@ -49,13 +49,13 @@ def tablister(pl, segment_info, **kwargs):
 		dct['priority_multiplier'] = 1 + (0.001 * abs(tabpage.number - cur_tabnr))
 		return dct
 
-	return [
-		(lambda mode: (
+	return (
+		(lambda tabpage, mode: (
 			tabpage_updated_segment_info(segment_info, tabpage, mode),
 			add_multiplier(tabpage, {'mode': mode})
-		))('tab' if tabpage == cur_tabpage else 'nc')
+		))(tabpage, 'tab' if tabpage == cur_tabpage else 'nc')
 		for tabpage in list_tabpages()
-	]
+	)
 
 
 def buffer_updated_segment_info(segment_info, buffer, mode):
@@ -93,7 +93,7 @@ def bufferlister(pl, segment_info, show_unlisted=False, **kwargs):
 		dct['priority_multiplier'] = 1 + (0.001 * abs(buffer.number - cur_bufnr))
 		return dct
 
-	return [
+	return (
 		(
 			buf_segment_info,
 			add_multiplier(buf_segment_info['buffer'], {'mode': buf_segment_info['mode']})
@@ -110,7 +110,7 @@ def bufferlister(pl, segment_info, show_unlisted=False, **kwargs):
 			or show_unlisted
 			or int(vim_getbufoption(buf_segment_info, 'buflisted'))
 		)
-	]
+	)
 
 
 @requires_segment_info
