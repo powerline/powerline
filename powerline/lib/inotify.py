@@ -7,6 +7,10 @@ __docformat__ = 'restructuredtext en'
 import sys
 import os
 import errno
+import ctypes
+import struct
+
+from ctypes.util import find_library
 
 
 class INotifyError(Exception):
@@ -28,10 +32,8 @@ def load_inotify():
 			raise INotifyError('INotify not available on windows')
 		if sys.platform == 'darwin':
 			raise INotifyError('INotify not available on OS X')
-		import ctypes
 		if not hasattr(ctypes, 'c_ssize_t'):
 			raise INotifyError('You need python >= 2.7 to use inotify')
-		from ctypes.util import find_library
 		name = find_library('c')
 		if not name:
 			raise INotifyError('Cannot find C library')
@@ -107,8 +109,6 @@ class INotify(object):
 	NONBLOCK = 0x800
 
 	def __init__(self, cloexec=True, nonblock=True):
-		import ctypes
-		import struct
 		self._init1, self._add_watch, self._rm_watch, self._read = load_inotify()
 		flags = 0
 		if cloexec:
@@ -130,7 +130,6 @@ class INotify(object):
 		self.os = os
 
 	def handle_error(self):
-		import ctypes
 		eno = ctypes.get_errno()
 		extra = ''
 		if eno == errno.ENOSPC:
@@ -155,7 +154,6 @@ class INotify(object):
 			del self._inotify_fd
 
 	def read(self, get_name=True):
-		import ctypes
 		buf = []
 		while True:
 			num = self._read(self._inotify_fd, self._buf, len(self._buf))

@@ -3,6 +3,7 @@ from __future__ import unicode_literals, absolute_import
 
 import errno
 import os
+import ctypes
 
 from threading import RLock
 
@@ -80,7 +81,6 @@ class INotifyFileWatcher(INotify):
 	def watch(self, path):
 		''' Register a watch for the file/directory named path. Raises an OSError if path
 		does not exist. '''
-		import ctypes
 		path = realpath(path)
 		with self.lock:
 			if path not in self.watches:
@@ -212,7 +212,6 @@ class INotifyTreeWatcher(INotify):
 				raise NoSuchDir('The dir {0} does not exist'.format(base))
 
 	def add_watch(self, path):
-		import ctypes
 		bpath = path if isinstance(path, bytes) else path.encode(self.fenc)
 		wd = self._add_watch(self._inotify_fd, ctypes.c_char_p(bpath),
 				# Ignore symlinks and watch only directories
