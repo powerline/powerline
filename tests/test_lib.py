@@ -4,6 +4,7 @@ from __future__ import division
 import threading
 import os
 import re
+import shutil
 
 from time import sleep
 from subprocess import call, PIPE
@@ -581,12 +582,7 @@ class TestVCS(TestCase):
 	@classmethod
 	def tearDownClass(cls):
 		for repo_dir in [GIT_REPO] + ([HG_REPO] if use_mercurial else []) + ([BZR_REPO] if use_bzr else []):
-			for root, dirs, files in list(os.walk(repo_dir, topdown=False)):
-				for file in files:
-					os.remove(os.path.join(root, file))
-				for dir in dirs:
-					os.rmdir(os.path.join(root, dir))
-			os.rmdir(repo_dir)
+			shutil.rmtree(repo_dir)
 		if use_mercurial:
 			if cls.powerline_old_HGRCPATH is None:
 				os.environ.pop('HGRCPATH')

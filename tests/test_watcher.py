@@ -1,15 +1,16 @@
 # vim:fileencoding=utf-8:noet
 from __future__ import absolute_import, unicode_literals, print_function, division
 
+import shutil
+import os
+
+from time import sleep
+from functools import partial
+
 from powerline.lib.watcher import create_file_watcher, create_tree_watcher, INotifyError
 from powerline.lib.watcher.uv import UvNotFound
 from powerline import get_fallback_logger
 from powerline.lib.monotonic import monotonic
-
-import shutil
-from time import sleep
-from functools import partial
-import os
 
 from tests import TestCase, SkipTest
 
@@ -150,9 +151,7 @@ def setUpModule():
 
 
 def tearDownModule():
-	for d in [INOTIFY_DIR]:
-		clear_dir(d)
-		os.rmdir(d)
+	shutil.rmtree(INOTIFY_DIR)
 	os.chdir(old_cwd)
 
 
