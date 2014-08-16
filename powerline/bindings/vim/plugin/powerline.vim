@@ -49,7 +49,7 @@ if !s:has_python
 endif
 unlet s:has_python
 
-let s:import_cmd = 'from powerline.vim import setup as powerline_setup'
+let s:import_cmd = 'from powerline.vim import VimPowerline'
 try
 	let s:pystr  = "try:\n"
 	let s:pystr .= "	".s:import_cmd."\n"
@@ -120,8 +120,8 @@ endtry
 let s:can_replace_pyeval = !exists('g:powerline_pyeval')
 
 execute s:pycmd 'import vim'
-execute s:pycmd 'powerline_setup(pyeval=vim.eval("s:pyeval"), pycmd=vim.eval("s:pycmd"), can_replace_pyeval=int(vim.eval("s:can_replace_pyeval")))'
-execute s:pycmd 'del powerline_setup'
+execute s:pycmd 'VimPowerline().setup(pyeval=vim.eval("s:pyeval"), pycmd=vim.eval("s:pycmd"), can_replace_pyeval=int(vim.eval("s:can_replace_pyeval")))'
+execute s:pycmd 'del VimPowerline'
 
 unlet s:can_replace_pyeval
 unlet s:pycmd

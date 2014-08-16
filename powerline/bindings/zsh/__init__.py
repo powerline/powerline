@@ -104,6 +104,7 @@ class Prompt(object):
 
 	def __init__(self, powerline, side, theme, savedpsvar=None, savedps=None, above=False):
 		self.powerline = powerline
+		powerline.setup(self)
 		self.side = side
 		self.above = above
 		self.savedpsvar = savedpsvar

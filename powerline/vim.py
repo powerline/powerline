@@ -6,7 +6,6 @@ import sys
 from powerline.bindings.vim import vim_get_func, vim_getvar
 from powerline import Powerline
 from powerline.lib import mergedicts
-from powerline.matcher import gen_matcher_getter
 import vim
 from itertools import count
 
@@ -24,8 +23,8 @@ def _override_from(config, override_varname):
 
 
 class VimPowerline(Powerline):
-	def __init__(self, pyeval='PowerlinePyeval', **kwargs):
-		super(VimPowerline, self).__init__('vim', **kwargs)
+	def init(self, pyeval='PowerlinePyeval', **kwargs):
+		super(VimPowerline, self).init('vim', **kwargs)
 		self.last_window_id = 1
 		self.pyeval = pyeval
 		self.window_statusline = '%!' + pyeval + '(\'powerline.statusline({0})\')'
@@ -80,24 +79,89 @@ class VimPowerline(Powerline):
 		)
 
 	def get_local_themes(self, local_themes):
-		self.get_matcher = gen_matcher_getter(self.ext, self.import_paths)
-
 		if not local_themes:
 			return {}
 
 		return dict((
-			(
-				(None if key == '__tabline__' else self.get_matcher(key)),
-				{'config': self.load_theme_config(val)}
+			(matcher, {'config': self.load_theme_config(val)})
+			for matcher, key, val in (
+				(
+					(None if k == '__tabline__' else self.get_matcher(k)),
+					k,
+					v
+				)
+				for k, v in local_themes.items()
+			) if (
+				matcher or
+				key == '__tabline__'
 			)
-			for key, val in local_themes.items())
-		)
+		))
+
+	def get_matcher(self, match_name):
+		match_module, separator, match_function = match_name.rpartition('.')
+		if not separator:
+			match_module = 'powerline.matchers.{0}'.format(self.ext)
+			match_function = match_name
+		return self.get_module_attr(match_module, match_function, prefix='matcher_generator')
 
 	def get_config_paths(self):
 		try:
 			return [vim_getvar('powerline_config_path')]
 		except KeyError:
 			return super(VimPowerline, self).get_config_paths()
+
+	def setup(self, pyeval=None, pycmd=None, can_replace_pyeval=True):
+		super(VimPowerline, self).setup()
+		import __main__
+		if not pyeval:
+			pyeval = 'pyeval' if sys.version_info < (3,) else 'py3eval'
+			can_replace_pyeval = True
+		if not pycmd:
+			pycmd = get_default_pycmd()
+
+		set_pycmd(pycmd)
+
+		# pyeval() and vim.bindeval were both introduced in one patch
+		if not hasattr(vim, 'bindeval') and can_replace_pyeval:
+			vim.command(('''
+				function! PowerlinePyeval(e)
+					{pycmd} powerline.do_pyeval()
+				endfunction
+			''').format(pycmd=pycmd))
+			pyeval = 'PowerlinePyeval'
+
+		self.pyeval = pyeval
+		self.window_statusline = '%!' + pyeval + '(\'powerline.statusline({0})\')'
+
+		self.update_renderer()
+		__main__.powerline = self
+
+		if (
+			bool(int(vim.eval("has('gui_running') && argc() == 0")))
+			and not vim.current.buffer.name
+			and len(vim.windows) == 1
+		):
+			# Hack to show startup screen. Problems in GUI:
+			# - Defining local value of &statusline option while computing global
+			#   value purges startup screen.
+			# - Defining highlight group while computing statusline purges startup
+			#   screen.
+			# This hack removes the “while computing statusline” part: both things 
+			# are defined, but they are defined right now.
+			#
+			# The above condition disables this hack if no GUI is running, Vim did 
+			# not open any files and there is only one window. Without GUI 
+			# everything works, in other cases startup screen is not shown.
+			self.new_window()
+
+		# Cannot have this in one line due to weird newline handling (in :execute 
+		# context newline is considered part of the command in just the same cases 
+		# when bar is considered part of the command (unless defining function 
+		# inside :execute)). vim.command is :execute equivalent regarding this case.
+		vim.command('augroup Powerline')
+		vim.command('	autocmd! ColorScheme * :{pycmd} powerline.reset_highlight()'.format(pycmd=pycmd))
+		vim.command('	autocmd! VimLeavePre * :{pycmd} powerline.shutdown()'.format(pycmd=pycmd))
+		vim.command('augroup END')
 
 	@staticmethod
 	def get_segment_info():
@@ -200,52 +264,6 @@ def get_default_pycmd():
 	return 'python' if sys.version_info < (3,) else 'python3'
 
 
-def setup(pyeval=None, pycmd=None, can_replace_pyeval=True):
-	import __main__
-	if not pyeval:
-		pyeval = 'pyeval' if sys.version_info < (3,) else 'py3eval'
-		can_replace_pyeval = True
-	if not pycmd:
-		pycmd = get_default_pycmd()
-
-	set_pycmd(pycmd)
-
-	# pyeval() and vim.bindeval were both introduced in one patch
-	if not hasattr(vim, 'bindeval') and can_replace_pyeval:
-		vim.command(('''
-			function! PowerlinePyeval(e)
-				{pycmd} powerline.do_pyeval()
-			endfunction
-		''').format(pycmd=pycmd))
-		pyeval = 'PowerlinePyeval'
-
-	powerline = VimPowerline(pyeval)
-	powerline.update_renderer()
-	__main__.powerline = powerline
-
-	if (
-		bool(int(vim.eval("has('gui_running') && argc() == 0")))
-		and not vim.current.buffer.name
-		and len(vim.windows) == 1
-	):
-		# Hack to show startup screen. Problems in GUI:
-		# - Defining local value of &statusline option while computing global
-		#   value purges startup screen.
-		# - Defining highlight group while computing statusline purges startup
-		#   screen.
-		# This hack removes the “while computing statusline” part: both things 
-		# are defined, but they are defined right now.
-		#
-		# The above condition disables this hack if no GUI is running, Vim did 
-		# not open any files and there is only one window. Without GUI 
-		# everything works, in other cases startup screen is not shown.
-		powerline.new_window()
-
-	# Cannot have this in one line due to weird newline handling (in :execute 
-	# context newline is considered part of the command in just the same cases 
-	# when bar is considered part of the command (unless defining function 
-	# inside :execute)). vim.command is :execute equivalent regarding this case.
-	vim.command('augroup Powerline')
-	vim.command('	autocmd! ColorScheme * :{pycmd} powerline.reset_highlight()'.format(pycmd=pycmd))
-	vim.command('	autocmd! VimLeavePre * :{pycmd} powerline.shutdown()'.format(pycmd=pycmd))
-	vim.command('augroup END')
+def setup(*args, **kwargs):
+	powerline = VimPowerline()
+	return powerline.setup(*args, **kwargs)

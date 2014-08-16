@@ -14,10 +14,10 @@ def mergeargs(argvalue):
 
 
 class ShellPowerline(Powerline):
-	def __init__(self, args, **kwargs):
+	def init(self, args, **kwargs):
 		self.args = args
 		self.theme_option = args.theme_option
-		super(ShellPowerline, self).__init__(args.ext[0], args.renderer_module, **kwargs)
+		super(ShellPowerline, self).init(args.ext[0], args.renderer_module, **kwargs)
 
 	def load_main_config(self):
 		r = super(ShellPowerline, self).load_main_config()
@@ -42,6 +42,10 @@ class ShellPowerline(Powerline):
 			(key, {'config': self.load_theme_config(val)})
 			for key, val in local_themes.items()
 		))
+
+	def setup(self, obj):
+		obj.powerline = self
+		super(ShellPowerline, self).setup(obj)
 
 
 def get_argparser(parser=None, *args, **kwargs):

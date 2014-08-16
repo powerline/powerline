@@ -55,14 +55,11 @@ def get_segment_key(merge, *args, **kwargs):
 
 
 def get_function(data, segment):
-	oldpath = sys.path
-	sys.path = data['path'] + sys.path
 	segment_module = str(segment.get('module', data['default_module']))
-	name = str(segment['name'])
-	try:
-		return None, getattr(__import__(segment_module, fromlist=[name]), name), segment_module
-	finally:
-		sys.path = oldpath
+	function = data['get_module_attr'](segment_module, segment['name'], prefix='segment_generator')
+	if not function:
+		raise ImportError('Failed to obtain segment function')
+	return None, function, segment_module
 
 
 def get_string(data, segment):
@@ -162,10 +159,10 @@ def process_segment(pl, side, segment_info, parsed_segments, segment):
 		parsed_segments.append(segment)
 
 
-def gen_segment_getter(pl, ext, common_config, theme_configs, default_module=None):
+def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, get_module_attr):
 	data = {
 		'default_module': default_module or 'powerline.segments.' + ext,
-		'path': common_config['paths'],
+		'get_module_attr': get_module_attr,
 	}
 
 	def get_key(merge, segment, module, key, default=None):

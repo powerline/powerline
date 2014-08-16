@@ -270,6 +270,39 @@ else:
 			raise exception
 
 
+def gen_module_attr_getter(pl, import_paths, imported_modules):
+	def get_module_attr(module, attr, prefix='powerline'):
+		'''Import module and get its attribute.
+
+		Replaces ``from {module} import {attr}``.
+
+		:param str module:
+			Module name, will be passed as first argument to ``__import__``.
+		:param str attr:
+			Module attribute, will be passed to ``__import__`` as the only value 
+			in ``fromlist`` tuple.
+
+		:return:
+			Attribute value or ``None``. Note: there is no way to distinguish 
+			between successfull import of attribute equal to ``None`` and 
+			unsuccessfull import.
+		'''
+		oldpath = sys.path
+		sys.path = import_paths + sys.path
+		module = str(module)
+		attr = str(attr)
+		try:
+			imported_modules.add(module)
+			return getattr(__import__(module, fromlist=(attr,)), attr)
+		except Exception as e:
+			pl.exception('Failed to import attr {0} from module {1}: {2}', attr, module, str(e), prefix=prefix)
+			return None
+		finally:
+			sys.path = oldpath
+
+	return get_module_attr
+
+
 class Powerline(object):
 	'''Main powerline class, entrance point for all powerline uses. Sets 
 	powerline up and loads the configuration.
@@ -303,14 +336,26 @@ class Powerline(object):
 		Instance of the class that manages (re)loading of the configuration.
 	'''
 
-	def __init__(self,
-	             ext,
-	             renderer_module=None,
-	             run_once=False,
-	             logger=None,
-	             use_daemon_threads=True,
-	             shutdown_event=None,
-	             config_loader=None):
+	def __init__(self, *args, **kwargs):
+		self.init_args = (args, kwargs)
+		self.init(*args, **kwargs)
+
+	def init(self,
+	         ext,
+	         renderer_module=None,
+	         run_once=False,
+	         logger=None,
+	         use_daemon_threads=True,
+	         shutdown_event=None,
+	         config_loader=None):
+		'''Do actual initialization.
+		
+		__init__ function only stores the arguments and runs this function. This 
+		function exists for powerline to be able to reload itself: it is easier 
+		to make ``__init__`` store arguments and call overriddable ``init`` than 
+		tell developers that each time they override Powerline.__init__ in 
+		subclasses they must store actual arguments.
+		'''
 		self.ext = ext
 		self.run_once = run_once
 		self.logger = logger
@@ -349,6 +394,8 @@ class Powerline(object):
 		self.prev_common_config = None
 		self.prev_ext_config = None
 		self.pl = None
+		self.setup_args = None
+		self.imported_modules = set()
 
 	def create_renderer(self, load_main=False, load_colors=False, load_colorscheme=False, load_theme=False):
 		'''(Re)create renderer object. Can be used after Powerline object was 
@@ -396,6 +443,8 @@ class Powerline(object):
 				if not self.run_once:
 					self.config_loader.set_watcher(self.common_config['watcher'])
 
+				self.get_module_attr = gen_module_attr_getter(self.pl, self.import_paths, self.imported_modules)
+
 				self.renderer_options.update(
 					pl=self.pl,
 					term_truecolor=self.common_config['term_truecolor'],
@@ -407,6 +456,7 @@ class Powerline(object):
 						'common_config': self.common_config,
 						'run_once': self.run_once,
 						'shutdown_event': self.shutdown_event,
+						'get_module_attr': self.get_module_attr,
 					},
 				)
 
@@ -468,11 +518,12 @@ class Powerline(object):
 			self.renderer_options['theme_config'] = self.load_theme_config(self.ext_config.get('theme', 'default'))
 
 		if create_renderer:
-			try:
-				Renderer = __import__(self.renderer_module, fromlist=['renderer']).renderer
-			except Exception as e:
-				self.exception('Failed to import renderer module: {0}', str(e))
-				sys.exit(1)
+			Renderer = self.get_module_attr(self.renderer_module, 'renderer')
+			if not Renderer:
+				if hasattr(self, 'renderer'):
+					return
+				else:
+					raise ImportError('Failed to obtain renderer')
 
 			# Renderer updates configuration file via segments’ .startup thus it 
 			# should be locked to prevent state when configuration was updated, 
@@ -690,15 +741,63 @@ class Powerline(object):
 				pass
 			yield FailedUnicode(safe_unicode(e))
 
-	def shutdown(self):
-		'''Shut down all background threads. Must be run only prior to exiting 
-		current application.
+	def setup(self, *args, **kwargs):
+		'''Setup the environment to use powerline.
+
+		To be overridden by subclasses, this one only saves args and kwargs and 
+		unsets shutdown_event.
 		'''
-		self.shutdown_event.set()
-		try:
-			self.renderer.shutdown()
-		except AttributeError:
-			pass
+		self.shutdown_event.clear()
+		self.setup_args = (args, kwargs)
+
+	def reload(self):
+		'''Reload powerline after update.
+
+		Should handle most (but not all) powerline updates.
+
+		Purges out all powerline modules and modules imported by powerline for 
+		segment and matcher functions. Requires defining ``setup`` function that 
+		updates reference to main powerline object.
+
+		.. warning::
+			Not guaranteed to work properly, use it at your own risk. It 
+			may break your python code.
+		'''
+		from imp import reload
+		modules = self.imported_modules | set((module for module in sys.modules if module.startswith('powerline')))
+		modules_holder = []
+		for module in modules:
+			try:
+				# Needs to hold module to prevent garbage collecting until they 
+				# are all reloaded.
+				modules_holder.append(sys.modules.pop(module))
+			except KeyError:
+				pass
+		PowerlineClass = getattr(__import__(self.__module__, fromlist=(self.__class__.__name__,)), self.__class__.__name__)
+		self.shutdown(set_event=True)
+		init_args, init_kwargs = self.init_args
+		powerline = PowerlineClass(*init_args, **init_kwargs)
+		setup_args, setup_kwargs = self.setup_args
+		powerline.setup(*setup_args, **setup_kwargs)
+
+	def shutdown(self, set_event=True):
+		'''Shut down all background threads.
+
+		:param bool set_event:
+			Set ``shutdown_event`` and call ``renderer.shutdown`` which should 
+			shut down all threads. Set it to False unless you are exiting an 
+			application.
+
+			If set to False this does nothing more then resolving reference 
+			cycle ``powerline → config_loader → bound methods → powerline`` by 
+			unsubscribing from config_loader events.
+		'''
+		if set_event:
+			self.shutdown_event.set()
+			try:
+				self.renderer.shutdown()
+			except AttributeError:
+				pass
 		functions = tuple(self.cr_callbacks.values())
 		self.config_loader.unregister_functions(set(functions))
 		self.config_loader.unregister_missing(set(((self.find_config_files, function) for function in functions)))
