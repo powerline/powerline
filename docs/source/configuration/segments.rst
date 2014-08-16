@@ -15,13 +15,7 @@ Segments are regular Python functions, and they may accept arguments. All
 arguments should have a default value which will be used for themes that 
 don't provide an ``args`` dict.
 
-A segment function must return one of the following values:
-
-* ``None``, which will remove the segment from the prompt/statusline.
-* A string, which will be the segment contents.
-* A list of dicts consisting of a ``contents`` string, and 
-  a ``highlight_group`` list. This is useful for providing a particular 
-  highlighting group depending on the segment contents.
+More information is available in :ref:`Writing segments <dev-segments>` section.
 
 Available segments
 ==================
