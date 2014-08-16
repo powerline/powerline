@@ -61,8 +61,8 @@ Detailed description of used dictionary keys:
 .. _dev-segments-draw_inner_divider:
 
 ``draw_inner_divider``
-    Determines whether *any* divider between segments returned by function 
-    should be drawn. Defaults to ``False``.
+    Determines whether soft divider between segments returned by function should 
+    be drawn. Defaults to ``False``.
 
 .. _dev-segments-highlight_group:
 
