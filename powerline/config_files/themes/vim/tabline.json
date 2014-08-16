@@ -4,18 +4,23 @@
 		"left": [
 			{
 				"type": "segment_list",
+				"module": "powerline.listers.vim",
 				"name": "tabbuflister",
 				"segments": [
 					{
 						"name": "tabnr",
 						"after": " ",
-						"draw_soft_divider": false,
-						"exclude_modes": ["tab", "buf"],
+						"exclude_modes": ["tab", "buf", "buf_nc"],
+						"priority": 5
+					},
+					{
+						"name": "bufnr",
+						"after": " ",
+						"exclude_modes": ["tab", "buf", "tab_nc"],
 						"priority": 5
 					},
 					{
 						"name": "file_directory",
-						"draw_soft_divider": false,
 						"priority": 40
 					},
 					{
@@ -24,6 +29,11 @@
 							"display_no_file": true
 						},
 						"priority": 10
+					},
+					{
+						"name": "modified_indicator",
+						"exclude_modes": ["tab", "tab_nc"],
+						"priority": 5
 					}
 				]
 			},
