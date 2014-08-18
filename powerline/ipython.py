@@ -56,6 +56,5 @@ class IpythonPowerline(Powerline):
 			mergedicts(r, self.theme_overrides[name])
 		return r
 
-	def setup(self, attr, obj):
+	def do_setup(self, attr, obj):
 		setattr(obj, attr, self)
-		super(IpythonPowerline, self).setup(attr, obj)

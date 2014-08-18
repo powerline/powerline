@@ -43,9 +43,8 @@ class ShellPowerline(Powerline):
 			for key, val in local_themes.items()
 		))
 
-	def setup(self, obj):
+	def do_setup(self, obj):
 		obj.powerline = self
-		super(ShellPowerline, self).setup(obj)
 
 
 def get_argparser(parser=None, *args, **kwargs):
