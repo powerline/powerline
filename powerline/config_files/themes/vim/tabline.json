@@ -31,6 +31,11 @@
 						"priority": 10
 					},
 					{
+						"name": "tab_modified_indicator",
+						"exclude_modes": ["buf", "buf_nc"],
+						"priority": 5
+					},
+					{
 						"name": "modified_indicator",
 						"exclude_modes": ["tab", "tab_nc"],
 						"priority": 5
