@@ -1,11 +1,11 @@
 # vim:fileencoding=utf-8:noet
-from powerline.ipython import IpythonPowerline, RewriteResult
+from powerline.ipython import IPythonPowerline, RewriteResult
 
 from IPython.core.prompts import PromptManager
 from IPython.core.hooks import TryNext
 
 
-class IpythonInfo(object):
+class IPythonInfo(object):
 	def __init__(self, shell):
 		self._shell = shell
 
@@ -18,7 +18,7 @@ class PowerlinePromptManager(PromptManager):
 	def __init__(self, prompt_powerline, non_prompt_powerline, shell):
 		prompt_powerline.setup('prompt_powerline', self)
 		non_prompt_powerline.setup('non_prompt_powerline', self)
-		self.powerline_segment_info = IpythonInfo(shell)
+		self.powerline_segment_info = IPythonInfo(shell)
 		self.shell = shell
 
 	def render(self, name, color=True, *args, **kwargs):
@@ -42,13 +42,13 @@ class PowerlinePromptManager(PromptManager):
 			return ret
 
 
-class ConfigurableIpythonPowerline(IpythonPowerline):
+class ConfigurableIPythonPowerline(IPythonPowerline):
 	def init(self, ip, is_prompt, old_widths):
 		config = ip.config.Powerline
 		self.config_overrides = config.get('config_overrides')
 		self.theme_overrides = config.get('theme_overrides', {})
 		self.paths = config.get('paths')
-		super(ConfigurableIpythonPowerline, self).init(is_prompt, old_widths)
+		super(ConfigurableIPythonPowerline, self).init(is_prompt, old_widths)
 
 
 old_prompt_manager = None
@@ -59,8 +59,8 @@ def load_ipython_extension(ip):
 
 	old_prompt_manager = ip.prompt_manager
 	old_widths = {}
-	prompt_powerline = ConfigurableIpythonPowerline(ip, True, old_widths)
-	non_prompt_powerline = ConfigurableIpythonPowerline(ip, False, old_widths)
+	prompt_powerline = ConfigurableIPythonPowerline(ip, True, old_widths)
+	non_prompt_powerline = ConfigurableIPythonPowerline(ip, False, old_widths)
 
 	ip.prompt_manager = PowerlinePromptManager(
 		prompt_powerline=prompt_powerline,

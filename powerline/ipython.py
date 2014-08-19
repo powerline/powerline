@@ -22,9 +22,9 @@ class RewriteResult(object):
 		return RewriteResult(self.prompt + s)
 
 
-class IpythonPowerline(Powerline):
+class IPythonPowerline(Powerline):
 	def init(self, is_prompt, old_widths):
-		super(IpythonPowerline, self).init(
+		super(IPythonPowerline, self).init(
 			'ipython',
 			renderer_module=('.prompt' if is_prompt else None),
 			use_daemon_threads=True
@@ -32,26 +32,26 @@ class IpythonPowerline(Powerline):
 		self.old_widths = old_widths
 
 	def create_renderer(self, *args, **kwargs):
-		super(IpythonPowerline, self).create_renderer(*args, **kwargs)
+		super(IPythonPowerline, self).create_renderer(*args, **kwargs)
 		self.renderer.old_widths = self.old_widths
 
 	def get_config_paths(self):
 		if self.paths:
 			return self.paths
 		else:
-			return super(IpythonPowerline, self).get_config_paths()
+			return super(IPythonPowerline, self).get_config_paths()
 
 	def get_local_themes(self, local_themes):
 		return dict(((type, {'config': self.load_theme_config(name)}) for type, name in local_themes.items()))
 
 	def load_main_config(self):
-		r = super(IpythonPowerline, self).load_main_config()
+		r = super(IPythonPowerline, self).load_main_config()
 		if self.config_overrides:
 			mergedicts(r, self.config_overrides)
 		return r
 
 	def load_theme_config(self, name):
-		r = super(IpythonPowerline, self).load_theme_config(name)
+		r = super(IPythonPowerline, self).load_theme_config(name)
 		if name in self.theme_overrides:
 			mergedicts(r, self.theme_overrides[name])
 		return r

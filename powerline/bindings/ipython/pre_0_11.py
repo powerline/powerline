@@ -1,5 +1,5 @@
 # vim:fileencoding=utf-8:noet
-from powerline.ipython import IpythonPowerline, RewriteResult
+from powerline.ipython import IPythonPowerline, RewriteResult
 from powerline.lib.unicode import string
 from IPython.Prompts import BasePrompt
 from IPython.ipapi import get as get_ipython
@@ -8,7 +8,7 @@ from IPython.ipapi import TryNext
 import re
 
 
-class IpythonInfo(object):
+class IPythonInfo(object):
 	def __init__(self, cache):
 		self._cache = cache
 
@@ -22,7 +22,7 @@ class PowerlinePrompt(BasePrompt):
 		powerline.setup('powerline', self)
 		other_powerline.setup('other_powerline', self)
 		self.powerline_last_in = powerline_last_in
-		self.powerline_segment_info = IpythonInfo(old_prompt.cache)
+		self.powerline_segment_info = IPythonInfo(old_prompt.cache)
 		self.cache = old_prompt.cache
 		if hasattr(old_prompt, 'sep'):
 			self.sep = old_prompt.sep
@@ -85,20 +85,20 @@ class PowerlinePrompt2(PowerlinePromptOut):
 	powerline_prompt_type = 'in2'
 
 
-class ConfigurableIpythonPowerline(IpythonPowerline):
+class ConfigurableIPythonPowerline(IPythonPowerline):
 	def init(self, is_prompt, old_widths, config_overrides=None, theme_overrides={}, paths=None):
 		self.config_overrides = config_overrides
 		self.theme_overrides = theme_overrides
 		self.paths = paths
-		super(ConfigurableIpythonPowerline, self).init(is_prompt, old_widths)
+		super(ConfigurableIPythonPowerline, self).init(is_prompt, old_widths)
 
 
 def setup(**kwargs):
 	ip = get_ipython()
 
 	old_widths = {}
-	prompt_powerline = ConfigurableIpythonPowerline(True, old_widths, **kwargs)
-	non_prompt_powerline = ConfigurableIpythonPowerline(False, old_widths, **kwargs)
+	prompt_powerline = ConfigurableIPythonPowerline(True, old_widths, **kwargs)
+	non_prompt_powerline = ConfigurableIPythonPowerline(False, old_widths, **kwargs)
 
 	def late_startup_hook():
 		last_in = {'nrspaces': 0}

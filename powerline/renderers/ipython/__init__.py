@@ -4,7 +4,7 @@ from powerline.renderers.shell import ShellRenderer
 from powerline.theme import Theme
 
 
-class IpythonRenderer(ShellRenderer):
+class IPythonRenderer(ShellRenderer):
 	'''Powerline ipython segment renderer.'''
 	def get_segment_info(self, segment_info, mode):
 		r = self.segment_info.copy()
@@ -33,8 +33,8 @@ class IpythonRenderer(ShellRenderer):
 				match['theme'].shutdown()
 
 	def render(self, *args, **kwargs):
-		# XXX super(ShellRenderer), *not* super(IpythonRenderer)
+		# XXX super(ShellRenderer), *not* super(IPythonRenderer)
 		return super(ShellRenderer, self).render(*args, **kwargs)
 
 
-renderer = IpythonRenderer
+renderer = IPythonRenderer

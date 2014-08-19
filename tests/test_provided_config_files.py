@@ -109,9 +109,9 @@ class TestConfig(TestCase):
 			powerline.render(segment_info={'args': args})
 
 	def test_ipython(self):
-		from powerline.ipython import IpythonPowerline
+		from powerline.ipython import IPythonPowerline
 
-		class IpyPowerline(IpythonPowerline):
+		class IpyPowerline(IPythonPowerline):
 			paths = None
 			config_overrides = None
 			theme_overrides = {}
