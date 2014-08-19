@@ -41,7 +41,7 @@ else:
 	vim_get_func = VimFunc
 
 
-if hasattr(vim, 'bindeval'):
+if hasattr(vim, 'bindeval') and vim.vvars['version'] > 703:
 	_vim_to_python_types = {
 		getattr(vim, 'Dictionary', None) or type(vim.bindeval('{}')):
 			lambda value: dict(((key, _vim_to_python(value[key])) for key in value.keys())),
