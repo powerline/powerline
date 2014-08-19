@@ -49,3 +49,46 @@ of the fonts play a role in whether or not the > or the < separators showing up
 or not. Using font size 12, glyphs on the right hand side of the powerline are 
 present, but the ones on the left don't. Pixel size 14, brings the reverse 
 problem. Font size 13 seems to work just fine.
+
+Reloading powerline after update
+================================
+
+Once you have updated powerline you generally have the following options:
+
+#. Restart the application you are using it in. This is the safest one. Will not 
+   work if the application uses ``powerline-daemon``.
+#. For shell and tmux bindings (except for zsh with libzpython): do not do 
+   anything if you do not use ``powerline-daemon``, run ``powerline-daemon 
+   --replace`` if you do.
+#. Use powerline reloading feature.
+
+    .. warning::
+      This feature is an unsafe one. It is not guaranteed to work always, it may 
+      render your Python constantly error out in place of displaying powerline 
+      and sometimes may render your application useless, forcing you to 
+      restart.
+
+      *Do not report any bugs occurred when using this feature unless you know 
+      both what caused it and how this can be fixed.*
+
+   * When using zsh with libzpython use
+
+     .. code-block:: bash
+
+        powerline-reload
+
+     .. note:: This shell function is only defined when using libzpython.
+
+   * When using IPython use
+
+     ::
+
+        %powerline reload
+
+   * When using Vim use
+
+     .. code-block:: Vim
+
+        py powerline.reload()
+        " or (depending on Python version you are using)
+        py3 powerline.reload()

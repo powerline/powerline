@@ -744,11 +744,21 @@ class Powerline(object):
 	def setup(self, *args, **kwargs):
 		'''Setup the environment to use powerline.
 
-		To be overridden by subclasses, this one only saves args and kwargs and 
-		unsets shutdown_event.
+		Must not be overridden by subclasses. This one only saves setup 
+		arguments for :py:meth:`reload` method and calls :py:meth:`do_setup`.
 		'''
 		self.shutdown_event.clear()
 		self.setup_args = (args, kwargs)
+		self.do_setup(*args, **kwargs)
+
+	@staticmethod
+	def do_setup():
+		'''Function that does initialization
+
+		Should be overridden by subclasses. May accept any number of regular or 
+		keyword arguments.
+		'''
+		pass
 
 	def reload(self):
 		'''Reload powerline after update.
@@ -764,6 +774,7 @@ class Powerline(object):
 			may break your python code.
 		'''
 		from imp import reload
+		import sys
 		modules = self.imported_modules | set((module for module in sys.modules if module.startswith('powerline')))
 		modules_holder = []
 		for module in modules:

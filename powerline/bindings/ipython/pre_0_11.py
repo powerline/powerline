@@ -1,14 +1,18 @@
 # vim:fileencoding=utf-8:noet
-from powerline.ipython import IpythonPowerline, RewriteResult
+
+import re
+
+from weakref import ref
+
+from powerline.ipython import IPythonPowerline, RewriteResult
 from powerline.lib.unicode import string
+
 from IPython.Prompts import BasePrompt
 from IPython.ipapi import get as get_ipython
 from IPython.ipapi import TryNext
 
-import re
 
-
-class IpythonInfo(object):
+class IPythonInfo(object):
 	def __init__(self, cache):
 		self._cache = cache
 
@@ -18,11 +22,10 @@ class IpythonInfo(object):
 
 
 class PowerlinePrompt(BasePrompt):
-	def __init__(self, powerline, other_powerline, powerline_last_in, old_prompt):
-		powerline.setup('powerline', self)
-		other_powerline.setup('other_powerline', self)
+	def __init__(self, powerline, powerline_last_in, old_prompt):
+		self.powerline = powerline
 		self.powerline_last_in = powerline_last_in
-		self.powerline_segment_info = IpythonInfo(old_prompt.cache)
+		self.powerline_segment_info = IPythonInfo(old_prompt.cache)
 		self.cache = old_prompt.cache
 		if hasattr(old_prompt, 'sep'):
 			self.sep = old_prompt.sep
@@ -35,6 +38,7 @@ class PowerlinePrompt(BasePrompt):
 	def set_p_str(self):
 		self.p_str, self.p_str_nocolor, self.powerline_prompt_width = (
 			self.powerline.render(
+				is_prompt=self.powerline_is_prompt,
 				side='left',
 				output_raw=True,
 				output_width=True,
@@ -50,6 +54,7 @@ class PowerlinePrompt(BasePrompt):
 
 class PowerlinePrompt1(PowerlinePrompt):
 	powerline_prompt_type = 'in'
+	powerline_is_prompt = True
 	rspace = re.compile(r'(\s*)$')
 
 	def __str__(self):
@@ -64,7 +69,8 @@ class PowerlinePrompt1(PowerlinePrompt):
 		self.powerline_last_in['nrspaces'] = self.nrspaces
 
 	def auto_rewrite(self):
-		return RewriteResult(self.other_powerline.render(
+		return RewriteResult(self.powerline.render(
+			is_prompt=False,
 			side='left',
 			matcher_info='rewrite',
 			segment_info=self.powerline_segment_info) + (' ' * self.nrspaces)
@@ -73,6 +79,7 @@ class PowerlinePrompt1(PowerlinePrompt):
 
 class PowerlinePromptOut(PowerlinePrompt):
 	powerline_prompt_type = 'out'
+	powerline_is_prompt = False
 
 	def set_p_str(self):
 		super(PowerlinePromptOut, self).set_p_str()
@@ -83,37 +90,55 @@ class PowerlinePromptOut(PowerlinePrompt):
 
 class PowerlinePrompt2(PowerlinePromptOut):
 	powerline_prompt_type = 'in2'
+	powerline_is_prompt = True
 
 
-class ConfigurableIpythonPowerline(IpythonPowerline):
-	def init(self, is_prompt, old_widths, config_overrides=None, theme_overrides={}, paths=None):
+class ConfigurableIPythonPowerline(IPythonPowerline):
+	def init(self, config_overrides=None, theme_overrides={}, paths=None):
 		self.config_overrides = config_overrides
 		self.theme_overrides = theme_overrides
 		self.paths = paths
-		super(ConfigurableIpythonPowerline, self).init(is_prompt, old_widths)
+		super(ConfigurableIPythonPowerline, self).init()
+
+	def ipython_magic(self, ip, parameter_s=''):
+		if parameter_s == 'reload':
+			self.reload()
+		else:
+			raise ValueError('Expected `reload`, but got {0}'.format(parameter_s))
+
+	def do_setup(self, ip, shutdown_hook):
+		last_in = {'nrspaces': 0}
+		for attr, prompt_class in (
+			('prompt1', PowerlinePrompt1),
+			('prompt2', PowerlinePrompt2),
+			('prompt_out', PowerlinePromptOut)
+		):
+			old_prompt = getattr(ip.IP.outputcache, attr)
+			prompt = prompt_class(self, last_in, old_prompt)
+			setattr(ip.IP.outputcache, attr, prompt)
+		ip.expose_magic('powerline', self.ipython_magic)
+		shutdown_hook.powerline = ref(self)
+
+
+class ShutdownHook(object):
+	powerline = lambda: None
+
+	def __call__(self):
+		from IPython.ipapi import TryNext
+		powerline = self.powerline()
+		if powerline is not None:
+			powerline.shutdown()
+		raise TryNext()
 
 
 def setup(**kwargs):
 	ip = get_ipython()
 
-	old_widths = {}
-	prompt_powerline = ConfigurableIpythonPowerline(True, old_widths, **kwargs)
-	non_prompt_powerline = ConfigurableIpythonPowerline(False, old_widths, **kwargs)
+	powerline = ConfigurableIPythonPowerline(**kwargs)
+	shutdown_hook = ShutdownHook()
 
 	def late_startup_hook():
-		last_in = {'nrspaces': 0}
-		for attr, prompt_class, powerline, other_powerline in (
-			('prompt1', PowerlinePrompt1, prompt_powerline, non_prompt_powerline),
-			('prompt2', PowerlinePrompt2, prompt_powerline, None),
-			('prompt_out', PowerlinePromptOut, non_prompt_powerline, None)
-		):
-			old_prompt = getattr(ip.IP.outputcache, attr)
-			setattr(ip.IP.outputcache, attr, prompt_class(powerline, other_powerline, last_in, old_prompt))
-		raise TryNext()
-
-	def shutdown_hook():
-		prompt_powerline.shutdown()
-		non_prompt_powerline.shutdown()
+		powerline.setup(ip, shutdown_hook)
 		raise TryNext()
 
 	ip.IP.hooks.late_startup_hook.add(late_startup_hook)

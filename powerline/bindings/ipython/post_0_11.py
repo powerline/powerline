@@ -1,11 +1,28 @@
 # vim:fileencoding=utf-8:noet
-from powerline.ipython import IpythonPowerline, RewriteResult
+
+from weakref import ref
+
+from powerline.ipython import IPythonPowerline, RewriteResult
 
 from IPython.core.prompts import PromptManager
-from IPython.core.hooks import TryNext
+from IPython.core.magic import Magics, magics_class, line_magic
 
 
-class IpythonInfo(object):
+@magics_class
+class PowerlineMagics(Magics):
+	def __init__(self, ip, powerline):
+		super(PowerlineMagics, self).__init__(ip)
+		self._powerline = powerline
+
+	@line_magic
+	def powerline(self, line):
+		if line == 'reload':
+			self._powerline.reload()
+		else:
+			raise ValueError('Expected `reload`, but got {0}'.format(line))
+
+
+class IPythonInfo(object):
 	def __init__(self, shell):
 		self._shell = shell
 
@@ -15,18 +32,14 @@ class IpythonInfo(object):
 
 
 class PowerlinePromptManager(PromptManager):
-	def __init__(self, prompt_powerline, non_prompt_powerline, shell):
-		prompt_powerline.setup('prompt_powerline', self)
-		non_prompt_powerline.setup('non_prompt_powerline', self)
-		self.powerline_segment_info = IpythonInfo(shell)
+	def __init__(self, powerline, shell):
+		self.powerline = powerline
+		self.powerline_segment_info = IPythonInfo(shell)
 		self.shell = shell
 
 	def render(self, name, color=True, *args, **kwargs):
-		if name == 'out' or name == 'rewrite':
-			powerline = self.non_prompt_powerline
-		else:
-			powerline = self.prompt_powerline
-		res = powerline.render(
+		res = self.powerline.render(
+			is_prompt=name.startswith('in'),
 			side='left',
 			output_width=True,
 			output_raw=not color,
@@ -42,13 +55,35 @@ class PowerlinePromptManager(PromptManager):
 			return ret
 
 
-class ConfigurableIpythonPowerline(IpythonPowerline):
-	def init(self, ip, is_prompt, old_widths):
+class ShutdownHook(object):
+	powerline = lambda: None
+
+	def __call__(self):
+		from IPython.core.hooks import TryNext
+		powerline = self.powerline()
+		if powerline is not None:
+			powerline.shutdown()
+		raise TryNext()
+
+
+class ConfigurableIPythonPowerline(IPythonPowerline):
+	def init(self, ip):
 		config = ip.config.Powerline
 		self.config_overrides = config.get('config_overrides')
 		self.theme_overrides = config.get('theme_overrides', {})
 		self.paths = config.get('paths')
-		super(ConfigurableIpythonPowerline, self).init(is_prompt, old_widths)
+		super(ConfigurableIPythonPowerline, self).init()
+
+	def do_setup(self, ip, shutdown_hook):
+		prompt_manager = PowerlinePromptManager(
+			powerline=self,
+			shell=ip.prompt_manager.shell,
+		)
+		magics = PowerlineMagics(ip, self)
+		shutdown_hook.powerline = ref(self)
+
+		ip.prompt_manager = prompt_manager
+		ip.register_magics(magics)
 
 
 old_prompt_manager = None
@@ -56,22 +91,12 @@ old_prompt_manager = None
 
 def load_ipython_extension(ip):
 	global old_prompt_manager
-
 	old_prompt_manager = ip.prompt_manager
-	old_widths = {}
-	prompt_powerline = ConfigurableIpythonPowerline(ip, True, old_widths)
-	non_prompt_powerline = ConfigurableIpythonPowerline(ip, False, old_widths)
 
-	ip.prompt_manager = PowerlinePromptManager(
-		prompt_powerline=prompt_powerline,
-		non_prompt_powerline=non_prompt_powerline,
-		shell=ip.prompt_manager.shell
-	)
+	powerline = ConfigurableIPythonPowerline(ip)
+	shutdown_hook = ShutdownHook()
 
-	def shutdown_hook():
-		prompt_powerline.shutdown()
-		non_prompt_powerline.shutdown()
-		raise TryNext()
+	powerline.setup(ip, shutdown_hook)
 
 	ip.hooks.shutdown_hook.add(shutdown_hook)
 

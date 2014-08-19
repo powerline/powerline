@@ -109,20 +109,20 @@ class TestConfig(TestCase):
 			powerline.render(segment_info={'args': args})
 
 	def test_ipython(self):
-		from powerline.ipython import IpythonPowerline
+		from powerline.ipython import IPythonPowerline
 
-		class IpyPowerline(IpythonPowerline):
+		class IpyPowerline(IPythonPowerline):
 			paths = None
 			config_overrides = None
 			theme_overrides = {}
 
 		segment_info = Args(prompt_count=1)
 
-		with IpyPowerline(True, {}) as powerline:
+		with IpyPowerline() as powerline:
 			for prompt_type in ['in', 'in2']:
 				powerline.render(matcher_info=prompt_type, segment_info=segment_info)
 				powerline.render(matcher_info=prompt_type, segment_info=segment_info)
-		with IpyPowerline(False, {}) as powerline:
+		with IpyPowerline() as powerline:
 			for prompt_type in ['out', 'rewrite']:
 				powerline.render(matcher_info=prompt_type, segment_info=segment_info)
 				powerline.render(matcher_info=prompt_type, segment_info=segment_info)

@@ -110,8 +110,7 @@ class VimPowerline(Powerline):
 		except KeyError:
 			return super(VimPowerline, self).get_config_paths()
 
-	def setup(self, pyeval=None, pycmd=None, can_replace_pyeval=True):
-		super(VimPowerline, self).setup()
+	def do_setup(self, pyeval=None, pycmd=None, can_replace_pyeval=True):
 		import __main__
 		if not pyeval:
 			pyeval = 'pyeval' if sys.version_info < (3,) else 'py3eval'

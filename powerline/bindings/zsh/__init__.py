@@ -1,18 +1,22 @@
 # vim:fileencoding=utf-8:noet
 from __future__ import absolute_import, unicode_literals, division, print_function
 
-import zsh
 import atexit
+
+import zsh
+
+from weakref import WeakValueDictionary, ref
+
 from powerline.shell import ShellPowerline
 from powerline.lib import parsedotval
 from powerline.lib.unicode import unicode
 
 
-used_powerlines = []
+used_powerlines = WeakValueDictionary()
 
 
 def shutdown():
-	for powerline in used_powerlines:
+	for powerline in tuple(used_powerlines.values()):
 		powerline.shutdown()
 
 
@@ -94,17 +98,28 @@ environ = Environment()
 
 
 class ZshPowerline(ShellPowerline):
+	def init(self, **kwargs):
+		super(ZshPowerline, self).init(Args(), **kwargs)
+
 	def precmd(self):
 		self.args.last_pipe_status = zsh.pipestatus()
 		self.args.last_exit_code = zsh.last_exit_code()
 
+	def do_setup(self, zsh_globals):
+		set_prompt(self, 'PS1', 'left', None, above=True)
+		set_prompt(self, 'RPS1', 'right', None)
+		set_prompt(self, 'PS2', 'left', 'continuation')
+		set_prompt(self, 'RPS2', 'right', 'continuation')
+		set_prompt(self, 'PS3', 'left', 'select')
+		used_powerlines[id(self)] = self
+		zsh_globals['_powerline'] = self
+
 
 class Prompt(object):
-	__slots__ = ('powerline', 'side', 'savedpsvar', 'savedps', 'args', 'theme', 'above')
+	__slots__ = ('powerline', 'side', 'savedpsvar', 'savedps', 'args', 'theme', 'above', '__weakref__')
 
 	def __init__(self, powerline, side, theme, savedpsvar=None, savedps=None, above=False):
 		self.powerline = powerline
-		powerline.setup(self)
 		self.side = side
 		self.above = above
 		self.savedpsvar = savedpsvar
@@ -143,9 +158,7 @@ class Prompt(object):
 	def __del__(self):
 		if self.savedps:
 			zsh.setvalue(self.savedpsvar, self.savedps)
-		used_powerlines.remove(self.powerline)
-		if self.powerline not in used_powerlines:
-			self.powerline.shutdown()
+		self.powerline.shutdown()
 
 
 def set_prompt(powerline, psvar, side, theme, above=False):
@@ -155,18 +168,18 @@ def set_prompt(powerline, psvar, side, theme, above=False):
 		savedps = None
 	zpyvar = 'ZPYTHON_POWERLINE_' + psvar
 	prompt = Prompt(powerline, side, theme, psvar, savedps, above)
+	zsh.eval('unset ' + zpyvar)
 	zsh.set_special_string(zpyvar, prompt)
 	zsh.setvalue(psvar, '${' + zpyvar + '}')
+	return ref(prompt)
 
 
-def setup():
-	powerline = ZshPowerline(Args())
-	used_powerlines.append(powerline)
-	used_powerlines.append(powerline)
-	set_prompt(powerline, 'PS1', 'left', None, above=True)
-	set_prompt(powerline, 'RPS1', 'right', None)
-	set_prompt(powerline, 'PS2', 'left', 'continuation')
-	set_prompt(powerline, 'RPS2', 'right', 'continuation')
-	set_prompt(powerline, 'PS3', 'left', 'select')
+def reload():
+	for powerline in tuple(used_powerlines.values()):
+		powerline.reload()
+
+
+def setup(zsh_globals):
+	powerline = ZshPowerline()
+	powerline.setup(zsh_globals)
 	atexit.register(shutdown)
-	return powerline
