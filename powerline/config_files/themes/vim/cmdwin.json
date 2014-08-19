@@ -1,0 +1,18 @@
+{
+	"segments": {
+		"left": [
+			{
+				"type": "string",
+				"contents": "Command Line",
+				"highlight_group": ["file_name"]
+			},
+			{
+				"type": "string",
+				"highlight_group": ["background"],
+				"draw_soft_divider": false,
+				"draw_hard_divider": false,
+				"width": "auto"
+			}
+		]
+	}
+}

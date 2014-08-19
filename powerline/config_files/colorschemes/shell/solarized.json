@@ -1,0 +1,16 @@
+{
+	"name": "Solarized dark for shell",
+	"groups": {
+		"jobnum":             { "fg": "oldlace", "bg": "darkgreencopper", "attr": [] },
+		"exit_fail":          { "fg": "oldlace", "bg": "red", "attr": [] },
+		"exit_success":       { "fg": "oldlace", "bg": "green", "attr": [] },
+		"mode":               { "fg": "oldlace", "bg": "green", "attr": ["bold"] }
+	},
+	"mode_translations": {
+		"vicmd": {
+			"groups": {
+				"mode": { "fg": "oldlace", "bg": "blue", "attr": ["bold"] }
+			}
+		}
+	}
+}

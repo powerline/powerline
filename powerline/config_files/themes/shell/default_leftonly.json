@@ -1,0 +1,37 @@
+{
+	"default_module": "powerline.segments.common",
+	"segments": {
+		"left": [
+			{
+				"name": "hostname",
+				"priority": 10
+			},
+			{
+				"name": "user",
+				"priority": 30
+			},
+			{
+				"name": "virtualenv",
+				"priority": 50
+			},
+			{
+				"name": "branch",
+				"priority": 40
+			},
+			{
+				"name": "cwd",
+				"priority": 10
+			},
+			{
+				"module": "powerline.segments.shell",
+				"name": "jobnum",
+				"priority": 20
+			},
+			{
+				"module": "powerline.segments.shell",
+				"name": "last_status",
+				"priority": 10
+			}
+		]
+	}
+}
