@@ -50,7 +50,8 @@ class IPythonPowerline(Powerline):
 			mergedicts(r, self.theme_overrides[name])
 		return r
 
-	def do_setup(self, wref):
-		obj = wref()
-		if obj:
-			setattr(obj, 'powerline', self)
+	def do_setup(self, wrefs):
+		for wref in wrefs:
+			obj = wref()
+			if obj is not None:
+				setattr(obj, 'powerline', self)

@@ -23,6 +23,7 @@ class IPythonInfo(object):
 
 class PowerlinePrompt(BasePrompt):
 	def __init__(self, powerline, powerline_last_in, old_prompt):
+		self.powerline = powerline
 		self.powerline_last_in = powerline_last_in
 		self.powerline_segment_info = IPythonInfo(old_prompt.cache)
 		self.cache = old_prompt.cache
@@ -99,36 +100,45 @@ class ConfigurableIPythonPowerline(IPythonPowerline):
 		self.paths = paths
 		super(ConfigurableIPythonPowerline, self).init()
 
-	def do_setup(self, wrefs):
-		for wref in wrefs:
-			obj = wref()
-			if obj is not None:
-				setattr(obj, 'powerline', self)
+	def ipython_magic(self, ip, parameter_s=''):
+		if parameter_s == 'reload':
+			self.reload()
+		else:
+			raise ValueError('Expected `reload`, but got {0}'.format(parameter_s))
 
-
-def setup(**kwargs):
-	ip = get_ipython()
-
-	old_widths = {}
-	powerline = ConfigurableIPythonPowerline(**kwargs)
-
-	def late_startup_hook():
+	def do_setup(self, ip, shutdown_hook):
 		last_in = {'nrspaces': 0}
-		prompts = []
 		for attr, prompt_class in (
 			('prompt1', PowerlinePrompt1),
 			('prompt2', PowerlinePrompt2),
 			('prompt_out', PowerlinePromptOut)
 		):
 			old_prompt = getattr(ip.IP.outputcache, attr)
-			prompt = prompt_class(powerline, last_in, old_prompt)
+			prompt = prompt_class(self, last_in, old_prompt)
 			setattr(ip.IP.outputcache, attr, prompt)
-			prompts.append(ref(prompt))
-		powerline.setup(prompts)
+		ip.expose_magic('powerline', self.ipython_magic)
+		shutdown_hook.powerline = ref(self)
+
+
+class ShutdownHook(object):
+	powerline = lambda: None
+
+	def __call__(self):
+		from IPython.ipapi import TryNext
+		powerline = self.powerline()
+		if powerline is not None:
+			powerline.shutdown()
 		raise TryNext()
 
-	def shutdown_hook():
-		powerline.shutdown()
+
+def setup(**kwargs):
+	ip = get_ipython()
+
+	powerline = ConfigurableIPythonPowerline(**kwargs)
+	shutdown_hook = ShutdownHook()
+
+	def late_startup_hook():
+		powerline.setup(ip, shutdown_hook)
 		raise TryNext()
 
 	ip.IP.hooks.late_startup_hook.add(late_startup_hook)

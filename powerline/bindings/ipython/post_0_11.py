@@ -5,7 +5,21 @@ from weakref import ref
 from powerline.ipython import IPythonPowerline, RewriteResult
 
 from IPython.core.prompts import PromptManager
-from IPython.core.hooks import TryNext
+from IPython.core.magic import Magics, magics_class, line_magic
+
+
+@magics_class
+class PowerlineMagics(Magics):
+	def __init__(self, ip, powerline):
+		super(PowerlineMagics, self).__init__(ip)
+		self._powerline = powerline
+
+	@line_magic
+	def powerline(self, line):
+		if line == 'reload':
+			self._powerline.reload()
+		else:
+			raise ValueError('Expected `reload`, but got {0}'.format(line))
 
 
 class IPythonInfo(object):
@@ -19,6 +33,7 @@ class IPythonInfo(object):
 
 class PowerlinePromptManager(PromptManager):
 	def __init__(self, powerline, shell):
+		self.powerline = powerline
 		self.powerline_segment_info = IPythonInfo(shell)
 		self.shell = shell
 
@@ -40,6 +55,17 @@ class PowerlinePromptManager(PromptManager):
 			return ret
 
 
+class ShutdownHook(object):
+	powerline = lambda: None
+
+	def __call__(self):
+		from IPython.core.hooks import TryNext
+		powerline = self.powerline()
+		if powerline is not None:
+			powerline.shutdown()
+		raise TryNext()
+
+
 class ConfigurableIPythonPowerline(IPythonPowerline):
 	def init(self, ip):
 		config = ip.config.Powerline
@@ -48,25 +74,29 @@ class ConfigurableIPythonPowerline(IPythonPowerline):
 		self.paths = config.get('paths')
 		super(ConfigurableIPythonPowerline, self).init()
 
+	def do_setup(self, ip, shutdown_hook):
+		prompt_manager = PowerlinePromptManager(
+			powerline=self,
+			shell=ip.prompt_manager.shell,
+		)
+		magics = PowerlineMagics(ip, self)
+		shutdown_hook.powerline = ref(self)
+
+		ip.prompt_manager = prompt_manager
+		ip.register_magics(magics)
+
 
 old_prompt_manager = None
 
 
 def load_ipython_extension(ip):
 	global old_prompt_manager
-
 	old_prompt_manager = ip.prompt_manager
+
 	powerline = ConfigurableIPythonPowerline(ip)
+	shutdown_hook = ShutdownHook()
 
-	ip.prompt_manager = PowerlinePromptManager(
-		powerline=powerline,
-		shell=ip.prompt_manager.shell,
-	)
-	powerline.setup(ref(ip.prompt_manager))
-
-	def shutdown_hook():
-		powerline.shutdown()
-		raise TryNext()
+	powerline.setup(ip, shutdown_hook)
 
 	ip.hooks.shutdown_hook.add(shutdown_hook)
 
