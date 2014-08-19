@@ -53,6 +53,8 @@ Detailed description of used dictionary keys:
     Text displayed by segment. Should be a ``unicode`` (Python2) or ``str`` 
     (Python3) instance.
 
+.. _dev-segments-draw_inner_divider:
+
 ``draw_hard_divider``, ``draw_soft_divider``, ``draw_inner_divider``
     Determines whether given divider should be drawn. All have the same meaning 
     as :ref:`the similar keys in configuration <config-themes-seg-draw_divider>` 
