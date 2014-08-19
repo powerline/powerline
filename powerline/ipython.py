@@ -23,17 +23,11 @@ class RewriteResult(object):
 
 
 class IPythonPowerline(Powerline):
-	def init(self, is_prompt, old_widths):
+	def init(self):
 		super(IPythonPowerline, self).init(
 			'ipython',
-			renderer_module=('.prompt' if is_prompt else None),
 			use_daemon_threads=True
 		)
-		self.old_widths = old_widths
-
-	def create_renderer(self, *args, **kwargs):
-		super(IPythonPowerline, self).create_renderer(*args, **kwargs)
-		self.renderer.old_widths = self.old_widths
 
 	def get_config_paths(self):
 		if self.paths:
@@ -56,5 +50,7 @@ class IPythonPowerline(Powerline):
 			mergedicts(r, self.theme_overrides[name])
 		return r
 
-	def do_setup(self, attr, obj):
-		setattr(obj, attr, self)
+	def do_setup(self, wref):
+		obj = wref()
+		if obj:
+			setattr(obj, 'powerline', self)

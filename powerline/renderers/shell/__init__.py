@@ -24,9 +24,9 @@ class ShellRenderer(Renderer):
 
 	character_translations = Renderer.character_translations.copy()
 
-	def __init__(self, *args, **kwargs):
-		super(ShellRenderer, self).__init__(*args, **kwargs)
-		self.old_widths = {}
+	def __init__(self, old_widths=None, **kwargs):
+		super(ShellRenderer, self).__init__(**kwargs)
+		self.old_widths = old_widths if old_widths is not None else {}
 
 	def render(self, segment_info, **kwargs):
 		local_theme = segment_info.get('local_theme')

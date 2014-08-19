@@ -1,4 +1,7 @@
 # vim:fileencoding=utf-8:noet
+
+from weakref import ref
+
 from powerline.ipython import IPythonPowerline, RewriteResult
 
 from IPython.core.prompts import PromptManager
@@ -15,18 +18,13 @@ class IPythonInfo(object):
 
 
 class PowerlinePromptManager(PromptManager):
-	def __init__(self, prompt_powerline, non_prompt_powerline, shell):
-		prompt_powerline.setup('prompt_powerline', self)
-		non_prompt_powerline.setup('non_prompt_powerline', self)
+	def __init__(self, powerline, shell):
 		self.powerline_segment_info = IPythonInfo(shell)
 		self.shell = shell
 
 	def render(self, name, color=True, *args, **kwargs):
-		if name == 'out' or name == 'rewrite':
-			powerline = self.non_prompt_powerline
-		else:
-			powerline = self.prompt_powerline
-		res = powerline.render(
+		res = self.powerline.render(
+			is_prompt=name.startswith('in'),
 			side='left',
 			output_width=True,
 			output_raw=not color,
@@ -43,12 +41,12 @@ class PowerlinePromptManager(PromptManager):
 
 
 class ConfigurableIPythonPowerline(IPythonPowerline):
-	def init(self, ip, is_prompt, old_widths):
+	def init(self, ip):
 		config = ip.config.Powerline
 		self.config_overrides = config.get('config_overrides')
 		self.theme_overrides = config.get('theme_overrides', {})
 		self.paths = config.get('paths')
-		super(ConfigurableIPythonPowerline, self).init(is_prompt, old_widths)
+		super(ConfigurableIPythonPowerline, self).init()
 
 
 old_prompt_manager = None
@@ -58,19 +56,16 @@ def load_ipython_extension(ip):
 	global old_prompt_manager
 
 	old_prompt_manager = ip.prompt_manager
-	old_widths = {}
-	prompt_powerline = ConfigurableIPythonPowerline(ip, True, old_widths)
-	non_prompt_powerline = ConfigurableIPythonPowerline(ip, False, old_widths)
+	powerline = ConfigurableIPythonPowerline(ip)
 
 	ip.prompt_manager = PowerlinePromptManager(
-		prompt_powerline=prompt_powerline,
-		non_prompt_powerline=non_prompt_powerline,
-		shell=ip.prompt_manager.shell
+		powerline=powerline,
+		shell=ip.prompt_manager.shell,
 	)
+	powerline.setup(ref(ip.prompt_manager))
 
 	def shutdown_hook():
-		prompt_powerline.shutdown()
-		non_prompt_powerline.shutdown()
+		powerline.shutdown()
 		raise TryNext()
 
 	ip.hooks.shutdown_hook.add(shutdown_hook)

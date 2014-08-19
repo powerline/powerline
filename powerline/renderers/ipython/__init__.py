@@ -37,4 +37,38 @@ class IPythonRenderer(ShellRenderer):
 		return super(ShellRenderer, self).render(*args, **kwargs)
 
 
-renderer = IPythonRenderer
+class IPythonPromptRenderer(IPythonRenderer):
+	'''Powerline ipython prompt (in and in2) renderer'''
+	escape_hl_start = '\x01'
+	escape_hl_end = '\x02'
+
+
+class IPythonNonPromptRenderer(IPythonRenderer):
+	'''Powerline ipython non-prompt (out and rewrite) renderer'''
+	pass
+
+
+class RendererProxy(object):
+	'''Powerline IPython renderer proxy which chooses appropriate renderer
+
+	Instantiates two renderer objects: one will be used for prompts and the 
+	other for non-prompts.
+	'''
+	def __init__(self, **kwargs):
+		old_widths = {}
+		self.non_prompt_renderer = IPythonNonPromptRenderer(old_widths=old_widths, **kwargs)
+		self.prompt_renderer = IPythonPromptRenderer(old_widths=old_widths, **kwargs)
+
+	def render_above_lines(self, *args, **kwargs):
+		return self.non_prompt_renderer.render_above_lines(*args, **kwargs)
+
+	def render(self, is_prompt, *args, **kwargs):
+		return (self.prompt_renderer if is_prompt else self.non_prompt_renderer).render(
+			*args, **kwargs)
+
+	def shutdown(self, *args, **kwargs):
+		self.prompt_renderer.shutdown(*args, **kwargs)
+		self.non_prompt_renderer.shutdown(*args, **kwargs)
+
+
+renderer = RendererProxy
