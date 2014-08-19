@@ -122,7 +122,7 @@ _powerline_setup_prompt() {
 	if test -z "${POWERLINE_NO_ZSH_ZPYTHON}" && { zmodload libzpython || zmodload zsh/zpython } &>/dev/null ; then
 		precmd_functions+=( _powerline_update_counter )
 		zpython 'from powerline.bindings.zsh import setup as _powerline_setup'
-		zpython '_powerline = _powerline_setup()'
+		zpython '_powerline_setup(globals())'
 		zpython 'del _powerline_setup'
 	else
 		if test -z "${POWERLINE_COMMAND}" ; then
