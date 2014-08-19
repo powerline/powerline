@@ -774,6 +774,7 @@ class Powerline(object):
 			may break your python code.
 		'''
 		from imp import reload
+		import sys
 		modules = self.imported_modules | set((module for module in sys.modules if module.startswith('powerline')))
 		modules_holder = []
 		for module in modules:
