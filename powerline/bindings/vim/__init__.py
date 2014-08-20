@@ -41,7 +41,12 @@ else:
 	vim_get_func = VimFunc
 
 
-if hasattr(vim, 'bindeval'):
+_getbufvar = vim_get_func('getbufvar')
+
+
+# It may crash on some old vim versions and I do not remember in which patch 
+# I fixed this crash.
+if hasattr(vim, 'vvars') and vim.vvars['version'] > 703:
 	_vim_to_python_types = {
 		getattr(vim, 'Dictionary', None) or type(vim.bindeval('{}')):
 			lambda value: dict(((key, _vim_to_python(value[key])) for key in value.keys())),
@@ -51,18 +56,6 @@ if hasattr(vim, 'bindeval'):
 			lambda _: None,
 	}
 
-	if sys.version_info >= (3,):
-		_vim_to_python_types[bytes] = lambda value: value.decode('utf-8')
-
-	_id = lambda value: value
-
-	def _vim_to_python(value):
-		return _vim_to_python_types.get(type(value), _id)(value)
-
-
-# It may crash on some old vim versions and I do not remember in which patch 
-# I fixed this crash.
-if hasattr(vim, 'vvars') and vim.vvars['version'] > 703:
 	def vim_getvar(varname):
 		return _vim_to_python(vim.vars[str(varname)])
 
@@ -73,6 +66,11 @@ if hasattr(vim, 'vvars') and vim.vvars['version'] > 703:
 	def vim_getwinvar(segment_info, varname):
 		return _vim_to_python(segment_info['window'].vars[str(varname)])
 else:
+	_vim_to_python_types = {
+		dict: (lambda value: dict(((k, _vim_to_python(v)) for k, v in value.items()))),
+		list: (lambda value: [_vim_to_python(i) for i in value]),
+	}
+
 	_vim_exists = vim_get_func('exists', rettype=int)
 
 	def vim_getvar(varname):  # NOQA
@@ -96,6 +94,23 @@ else:
 			if not int(vim.eval('has_key(getwinvar({0}, ""), "{1}")'.format(segment_info['winnr'], varname))):
 				raise KeyError(varname)
 		return result
+
+
+if sys.version_info < (3,):
+	getbufvar = _getbufvar
+else:
+	_vim_to_python_types[bytes] = lambda value: value.decode('utf-8')
+
+	def getbufvar(*args):
+		return _vim_to_python(_getbufvar(*args))
+
+
+_id = lambda value: value
+
+
+def _vim_to_python(value):
+	return _vim_to_python_types.get(type(value), _id)(value)
+
 
 if hasattr(vim, 'options'):
 	def vim_getbufoption(info, option):
@@ -189,15 +204,6 @@ else:
 
 	def list_tabpages():  # NOQA
 		return [Tabpage(nr) for nr in range(1, _last_tab_nr() + 1)]
-
-
-if sys.version_info < (3,) or not hasattr(vim, 'bindeval'):
-	getbufvar = vim_get_func('getbufvar')
-else:
-	_getbufvar = vim_get_func('getbufvar')
-
-	def getbufvar(*args):
-		return _vim_to_python(_getbufvar(*args))
 
 
 class VimEnviron(object):
