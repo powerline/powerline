@@ -120,12 +120,12 @@ class TestConfig(TestCase):
 
 		with IpyPowerline() as powerline:
 			for prompt_type in ['in', 'in2']:
-				powerline.render(matcher_info=prompt_type, segment_info=segment_info)
-				powerline.render(matcher_info=prompt_type, segment_info=segment_info)
+				powerline.render(is_prompt=True, matcher_info=prompt_type, segment_info=segment_info)
+				powerline.render(is_prompt=True, matcher_info=prompt_type, segment_info=segment_info)
 		with IpyPowerline() as powerline:
 			for prompt_type in ['out', 'rewrite']:
-				powerline.render(matcher_info=prompt_type, segment_info=segment_info)
-				powerline.render(matcher_info=prompt_type, segment_info=segment_info)
+				powerline.render(is_prompt=False, matcher_info=prompt_type, segment_info=segment_info)
+				powerline.render(is_prompt=False, matcher_info=prompt_type, segment_info=segment_info)
 
 	def test_wm(self):
 		from powerline.segments import common
