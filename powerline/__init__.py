@@ -349,7 +349,7 @@ class Powerline(object):
 	         shutdown_event=None,
 	         config_loader=None):
 		'''Do actual initialization.
-		
+
 		__init__ function only stores the arguments and runs this function. This 
 		function exists for powerline to be able to reload itself: it is easier 
 		to make ``__init__`` store arguments and call overriddable ``init`` than 
@@ -773,7 +773,6 @@ class Powerline(object):
 			Not guaranteed to work properly, use it at your own risk. It 
 			may break your python code.
 		'''
-		from imp import reload
 		import sys
 		modules = self.imported_modules | set((module for module in sys.modules if module.startswith('powerline')))
 		modules_holder = []
