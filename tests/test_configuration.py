@@ -384,6 +384,50 @@ class TestThemeHierarchy(TestRender):
 		])
 
 
+class TestModes(TestRender):
+	@add_args
+	def test_include_modes(self, p, config):
+		config['themes/test/default']['segments'] = {
+			'left': [
+				highlighted_string('s1', 'g1', include_modes=['m1']),
+				highlighted_string('s2', 'g1', include_modes=['m1', 'm2']),
+				highlighted_string('s3', 'g1', include_modes=['m3']),
+			]
+		}
+		self.assertRenderEqual(p, '{--}')
+		self.assertRenderEqual(p, '{56} s1{56}>{56}s2{6-}>>{--}', mode='m1')
+		self.assertRenderEqual(p, '{56} s2{6-}>>{--}', mode='m2')
+		self.assertRenderEqual(p, '{56} s3{6-}>>{--}', mode='m3')
+
+	@add_args
+	def test_exclude_modes(self, p, config):
+		config['themes/test/default']['segments'] = {
+			'left': [
+				highlighted_string('s1', 'g1', exclude_modes=['m1']),
+				highlighted_string('s2', 'g1', exclude_modes=['m1', 'm2']),
+				highlighted_string('s3', 'g1', exclude_modes=['m3']),
+			]
+		}
+		self.assertRenderEqual(p, '{56} s1{56}>{56}s2{56}>{56}s3{6-}>>{--}')
+		self.assertRenderEqual(p, '{56} s3{6-}>>{--}', mode='m1')
+		self.assertRenderEqual(p, '{56} s1{56}>{56}s3{6-}>>{--}', mode='m2')
+		self.assertRenderEqual(p, '{56} s1{56}>{56}s2{6-}>>{--}', mode='m3')
+
+	@add_args
+	def test_exinclude_modes(self, p, config):
+		config['themes/test/default']['segments'] = {
+			'left': [
+				highlighted_string('s1', 'g1', exclude_modes=['m1'], include_modes=['m2']),
+				highlighted_string('s2', 'g1', exclude_modes=['m1', 'm2'], include_modes=['m3']),
+				highlighted_string('s3', 'g1', exclude_modes=['m3'], include_modes=['m3']),
+			]
+		}
+		self.assertRenderEqual(p, '{--}')
+		self.assertRenderEqual(p, '{--}', mode='m1')
+		self.assertRenderEqual(p, '{56} s1{6-}>>{--}', mode='m2')
+		self.assertRenderEqual(p, '{56} s2{6-}>>{--}', mode='m3')
+
+
 class TestVim(TestCase):
 	def test_environ_update(self):
 		# Regression test: test that segment obtains environment from vim, not 
