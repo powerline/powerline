@@ -49,7 +49,7 @@ class VimPowerline(Powerline):
 			the same matcher already exists.
 		'''
 		self.update_renderer()
-		key = self.get_matcher(key)
+		matcher = self.get_matcher(key)
 		theme_config = {}
 		for cfg_path in self.theme_levels:
 			try:
@@ -60,10 +60,15 @@ class VimPowerline(Powerline):
 				mergedicts(theme_config, lvl_config)
 		mergedicts(theme_config, config)
 		try:
-			self.renderer.add_local_theme(key, {'config': theme_config})
+			self.renderer.add_local_theme(matcher, {'config': theme_config})
 		except KeyError:
 			return False
 		else:
+			# Hack for local themes support: when reloading modules it is not 
+			# guaranteed that .add_local_theme will be called once again, so 
+			# this function arguments will be saved here for calling from 
+			# .do_setup().
+			self.setup_kwargs.setdefault('_local_themes', []).append((key, config))
 			return True
 
 	def load_main_config(self):
@@ -110,7 +115,7 @@ class VimPowerline(Powerline):
 		except KeyError:
 			return super(VimPowerline, self).get_config_paths()
 
-	def do_setup(self, pyeval=None, pycmd=None, can_replace_pyeval=True):
+	def do_setup(self, pyeval=None, pycmd=None, can_replace_pyeval=True, _local_themes=()):
 		import __main__
 		if not pyeval:
 			pyeval = 'pyeval' if sys.version_info < (3,) else 'py3eval'
@@ -161,6 +166,10 @@ class VimPowerline(Powerline):
 		vim.command('	autocmd! ColorScheme * :{pycmd} powerline.reset_highlight()'.format(pycmd=pycmd))
 		vim.command('	autocmd! VimLeavePre * :{pycmd} powerline.shutdown()'.format(pycmd=pycmd))
 		vim.command('augroup END')
+
+		# Hack for local themes support after reloading.
+		for args in _local_themes:
+			self.add_local_theme(*args)
 
 	@staticmethod
 	def get_segment_info():
