@@ -703,7 +703,7 @@ def uptime(pl, days_format='{days:d}d', hours_format=' {hours:d}h', minutes_form
 		hours_format.format(hours=hours) if hours and hours_format else None,
 		minutes_format.format(minutes=minutes) if minutes and minutes_format else None,
 		seconds_format.format(seconds=seconds) if seconds and seconds_format else None,
-		]))[0:shorten_len]
+	]))[0:shorten_len]
 	return ''.join(time_formatted).strip()
 
 
