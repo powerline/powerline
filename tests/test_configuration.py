@@ -406,7 +406,6 @@ class TestVim(TestCase):
 		# Regression test: VimPowerline.add_local_theme did not work properly.
 		from powerline.vim import VimPowerline
 		import powerline as powerline_module
-		import vim
 		with swap_attributes(config, powerline_module):
 			with get_powerline_raw(config, VimPowerline) as powerline:
 				powerline.add_local_theme('tests.matchers.always_true', {
