@@ -90,7 +90,7 @@ class Theme(object):
 	def get_line_number(self):
 		return len(self.segments)
 
-	def get_segments(self, side=None, line=0, segment_info=None):
+	def get_segments(self, side=None, line=0, segment_info=None, mode=None):
 		'''Return all segments.
 
 		Function segments are called, and all segments get their before/after
@@ -103,8 +103,21 @@ class Theme(object):
 		for side in [side] if side else ['left', 'right']:
 			parsed_segments = []
 			for segment in self.segments[line][side]:
-				process_segment(self.pl, side, segment_info, parsed_segments, segment)
+				# No segment-local modes at this point
+				if mode not in segment['exclude_modes'] and (
+					not segment['include_modes'] or mode in segment['include_modes']
+				):
+					process_segment(self.pl, side, segment_info, parsed_segments, segment)
 			for segment in parsed_segments:
+				segment_mode = segment['mode']
+				if segment_mode and (
+					segment_mode in segment['exclude_modes']
+					or (
+						segment['include_modes']
+						and segment_mode not in segment['include_modes']
+					)
+				):
+					continue
 				segment['contents'] = segment['before'] + u(segment['contents'] if segment['contents'] is not None else '') + segment['after']
 				# Align segment contents
 				if segment['width'] and segment['width'] != 'auto':
@@ -117,4 +130,6 @@ class Theme(object):
 				# We need to yield a copy of the segment, or else mode-dependent
 				# segment contents can't be cached correctly e.g. when caching
 				# non-current window contents for vim statuslines
-				yield segment.copy()
+				segment = segment.copy()
+				segment['mode'] = segment_mode or mode
+				yield segment
