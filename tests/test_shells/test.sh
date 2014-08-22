@@ -292,6 +292,23 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 	done
 fi
 
+if ! $PYTHON scripts/powerline-daemon &> tests/shell/daemon_log_2 ; then
+	echo "Daemon exited with status $?"
+	FAILED=1
+else
+	sleep 1
+	$PYTHON scripts/powerline-daemon -k
+fi
+
+if ! test -z "$(cat tests/shell/daemon_log_2)" ; then
+	FAILED=1
+	echo '____________________________________________________________'
+	echo "Daemon log (2nd):"
+	echo '============================================================'
+	cat tests/shell/daemon_log_2
+	FAILED=1
+fi
+
 if test "x${ONLY_SHELL}" = "x" || test "x${ONLY_SHELL}" = "xipython" ; then
 	echo "> $(which ipython)"
 	if ! run_test ipython ipython ipython ; then
