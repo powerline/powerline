@@ -274,9 +274,9 @@ def daemonize(stdin=os.devnull, stdout=os.devnull, stderr=os.devnull):
 		sys.exit(1)
 
 	# Redirect standard file descriptors.
-	si = file(stdin, 'r')
-	so = file(stdout, 'a+')
-	se = file(stderr, 'a+', 0)
+	si = open(stdin, 'rb')
+	so = open(stdout, 'a+b')
+	se = open(stderr, 'a+b', 0)
 	os.dup2(si.fileno(), sys.stdin.fileno())
 	os.dup2(so.fileno(), sys.stdout.fileno())
 	os.dup2(se.fileno(), sys.stderr.fileno())
