@@ -13,9 +13,9 @@ except ImportError:
 from collections import defaultdict
 
 from powerline.bindings.vim import (vim_get_func, getbufvar, vim_getbufoption,
-									buffer_name, vim_getwinvar,
-									register_buffer_cache, current_tabpage,
-									list_tabpages)
+                                    buffer_name, vim_getwinvar,
+                                    register_buffer_cache, current_tabpage,
+                                    list_tabpages)
 from powerline.theme import requires_segment_info, requires_filesystem_watcher
 from powerline.lib import add_divider_highlight_group
 from powerline.lib.vcs import guess, tree_status
