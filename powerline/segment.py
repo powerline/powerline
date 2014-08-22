@@ -1,8 +1,6 @@
 # vim:fileencoding=utf-8:noet
 from __future__ import absolute_import, unicode_literals, division, print_function
 
-import sys
-
 from powerline.lib.watcher import create_file_watcher
 
 
@@ -90,7 +88,7 @@ def get_attr_func(contents_func, key, args):
 			return lambda pl, shutdown_event: func(pl=pl, shutdown_event=shutdown_event, **args)
 
 
-def process_segment_lister(pl, segment_info, parsed_segments, side, lister, subsegments, patcher_args):
+def process_segment_lister(pl, segment_info, parsed_segments, side, mode, lister, subsegments, patcher_args):
 	for subsegment_info, subsegment_update in lister(pl=pl, segment_info=segment_info, **patcher_args):
 		draw_inner_divider = subsegment_update.pop('draw_inner_divider', False)
 		old_pslen = len(parsed_segments)
@@ -100,7 +98,18 @@ def process_segment_lister(pl, segment_info, parsed_segments, side, lister, subs
 				subsegment.update(subsegment_update)
 				if subsegment_update['priority_multiplier'] and subsegment['priority']:
 					subsegment['priority'] *= subsegment_update['priority_multiplier']
-			process_segment(pl, side, subsegment_info, parsed_segments, subsegment)
+
+			subsegment_mode = subsegment_update.get('mode')
+			if subsegment_mode and (
+				subsegment_mode in subsegment['exclude_modes']
+				or (
+					subsegment['include_modes']
+					and subsegment_mode not in subsegment['include_modes']
+				)
+			):
+				continue
+
+			process_segment(pl, side, subsegment_info, parsed_segments, subsegment, subsegment_mode or mode)
 		new_pslen = len(parsed_segments)
 		if new_pslen > old_pslen + 1 and draw_inner_divider is not None:
 			for i in range(old_pslen, new_pslen - 1) if side == 'left' else range(old_pslen + 1, new_pslen):
@@ -108,22 +117,27 @@ def process_segment_lister(pl, segment_info, parsed_segments, side, lister, subs
 	return None
 
 
-def process_segment(pl, side, segment_info, parsed_segments, segment):
+def process_segment(pl, side, segment_info, parsed_segments, segment, mode):
+	segment = segment.copy()
+	segment['mode'] = mode
 	if segment['type'] in ('function', 'segment_list'):
 		pl.prefix = segment['name']
 		try:
 			if segment['type'] == 'function':
 				contents = segment['contents_func'](pl, segment_info)
 			else:
-				contents = segment['contents_func'](pl, segment_info, parsed_segments, side)
+				contents = segment['contents_func'](pl, segment_info, parsed_segments, side, mode)
 		except Exception as e:
 			pl.exception('Exception while computing segment: {0}', str(e))
 			return
 
 		if contents is None:
 			return
+
 		if isinstance(contents, list):
-			segment_base = segment.copy()
+			# Needs copying here, but it was performed at the very start of the 
+			# function
+			segment_base = segment
 			if contents:
 				draw_divider_position = -1 if side == 'left' else 0
 				for key, i, newval in (
@@ -206,8 +220,8 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, ge
 				'divider_highlight_group': None,
 				'before': None,
 				'after': None,
-				'contents_func': lambda pl, segment_info, parsed_segments, side: process_segment_lister(
-					pl, segment_info, parsed_segments, side,
+				'contents_func': lambda pl, segment_info, parsed_segments, side, mode: process_segment_lister(
+					pl, segment_info, parsed_segments, side, mode,
 					patcher_args=args,
 					subsegments=subsegments,
 					lister=_contents_func,
