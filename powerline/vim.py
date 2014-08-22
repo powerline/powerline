@@ -4,7 +4,7 @@ from __future__ import absolute_import
 
 import sys
 from powerline.bindings.vim import vim_get_func, vim_getvar
-from powerline import Powerline
+from powerline import Powerline, FailedUnicode
 from powerline.lib import mergedicts
 import vim
 from itertools import count
@@ -228,15 +228,14 @@ class VimPowerline(Powerline):
 	def statusline(self, window_id):
 		window, window_id, winnr = self.win_idx(window_id) or (None, None, None)
 		if not window:
-			return 'No window {0}'.format(window_id)
+			return FailedUnicode('No window {0}'.format(window_id))
 		return self.render(window, window_id, winnr)
 
 	def tabline(self):
-		return self.render()
+		return self.render(*self.win_idx(None), is_tabline=True)
 
 	def new_window(self):
-		window, window_id, winnr = self.win_idx(None)
-		return self.render(window, window_id, winnr)
+		return self.render(*self.win_idx(None))
 
 	if not hasattr(vim, 'bindeval'):
 		# Method for PowerlinePyeval function. Is here to reduce the number of 

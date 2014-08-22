@@ -147,10 +147,17 @@ class Renderer(object):
 		'''
 		self.theme.shutdown()
 
-	def _get_highlighting(self, segment, mode):
-		segment['highlight'] = self.colorscheme.get_highlighting(segment['highlight_group'], mode, segment.get('gradient_level'))
+	def _set_highlighting(self, segment):
+		segment['highlight'] = self.colorscheme.get_highlighting(
+			segment['highlight_group'],
+			segment['mode'],
+			segment.get('gradient_level')
+		)
 		if segment['divider_highlight_group']:
-			segment['divider_highlight'] = self.colorscheme.get_highlighting(segment['divider_highlight_group'], mode)
+			segment['divider_highlight'] = self.colorscheme.get_highlighting(
+				segment['divider_highlight_group'],
+				segment['mode']
+			)
 		else:
 			segment['divider_highlight'] = None
 		return segment
@@ -254,19 +261,10 @@ class Renderer(object):
 	def do_render(self, mode, width, side, line, output_raw, output_width, segment_info, theme):
 		'''Like Renderer.render(), but accept theme in place of matcher_info
 		'''
-		segments = theme.get_segments(side, line, self.get_segment_info(segment_info, mode))
-		# Handle excluded/included segments for the current mode
 		segments = [
-			self._get_highlighting(segment, segment_mode)
-			for segment, segment_mode in (
-				(segment, segment['mode'] or mode)
-				for segment in segments
-			) if (
-				segment_mode not in segment['exclude_modes']
-				and (
-					not segment['include_modes']
-					or segment_mode in segment['include_modes']
-				)
+			self._set_highlighting(segment)
+			for segment in (
+				theme.get_segments(side, line, self.get_segment_info(segment_info, mode), mode)
 			)
 		]
 

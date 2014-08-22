@@ -13,9 +13,10 @@ except ImportError:
 from collections import defaultdict
 
 from powerline.bindings.vim import (vim_get_func, getbufvar, vim_getbufoption,
-									buffer_name, vim_getwinvar,
-									register_buffer_cache, current_tabpage,
-									list_tabpages)
+                                    buffer_name, vim_getwinvar,
+                                    register_buffer_cache, current_tabpage,
+                                    list_tabpages,
+                                    list_tabpage_buffers_segment_info)
 from powerline.theme import requires_segment_info, requires_filesystem_watcher
 from powerline.lib import add_divider_highlight_group
 from powerline.lib.vcs import guess, tree_status
@@ -165,6 +166,24 @@ def modified_indicator(pl, segment_info, text='+'):
 		text to display if the current buffer is modified
 	'''
 	return text if int(vim_getbufoption(segment_info, 'modified')) else None
+
+
+@requires_segment_info
+def tab_modified_indicator(pl, segment_info, text='+'):
+	'''Return a file modified indicator for tabpages.
+
+	:param string text:
+		text to display if any buffer in the current tab is modified
+
+	Highlight groups used: ``tab_modified_indicator`` or ``modified_indicator``.
+	'''
+	for buf_segment_info in list_tabpage_buffers_segment_info(segment_info):
+		if int(vim_getbufoption(buf_segment_info, 'modified')):
+			return [{
+				'contents': text,
+				'highlight_group': ['tab_modified_indicator', 'modified_indicator'],
+			}]
+	return None
 
 
 @requires_segment_info
@@ -427,7 +446,6 @@ def col_current(pl, segment_info):
 	return str(segment_info['window'].cursor[1] + 1)
 
 
-# TODO Add &textwidth-based gradient
 @window_cached
 def virtcol_current(pl, gradient=True):
 	'''Return current visual column with concealed characters ingored

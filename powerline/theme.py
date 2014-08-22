@@ -90,7 +90,7 @@ class Theme(object):
 	def get_line_number(self):
 		return len(self.segments)
 
-	def get_segments(self, side=None, line=0, segment_info=None):
+	def get_segments(self, side=None, line=0, segment_info=None, mode=None):
 		'''Return all segments.
 
 		Function segments are called, and all segments get their before/after
@@ -103,7 +103,11 @@ class Theme(object):
 		for side in [side] if side else ['left', 'right']:
 			parsed_segments = []
 			for segment in self.segments[line][side]:
-				process_segment(self.pl, side, segment_info, parsed_segments, segment)
+				# No segment-local modes at this point
+				if mode not in segment['exclude_modes'] and (
+					not segment['include_modes'] or mode in segment['include_modes']
+				):
+					process_segment(self.pl, side, segment_info, parsed_segments, segment, mode)
 			for segment in parsed_segments:
 				segment['contents'] = segment['before'] + u(segment['contents'] if segment['contents'] is not None else '') + segment['after']
 				# Align segment contents
