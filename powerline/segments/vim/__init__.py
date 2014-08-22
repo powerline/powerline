@@ -15,7 +15,8 @@ from collections import defaultdict
 from powerline.bindings.vim import (vim_get_func, getbufvar, vim_getbufoption,
                                     buffer_name, vim_getwinvar,
                                     register_buffer_cache, current_tabpage,
-                                    list_tabpages)
+                                    list_tabpages,
+                                    list_tabpage_buffers_segment_info)
 from powerline.theme import requires_segment_info, requires_filesystem_watcher
 from powerline.lib import add_divider_highlight_group
 from powerline.lib.vcs import guess, tree_status
@@ -176,13 +177,10 @@ def tab_modified_indicator(pl, segment_info, text='+'):
 
 	Highlight groups used: ``tab_modified_indicator`` or ``modified_indicator``.
 	'''
-	if 'tabpage' in segment_info:
-		buffers = [dict(buffer=w.buffer) for w in segment_info['tabpage'].windows]
-		modified = [int(vim_getbufoption(buf, 'modified')) != 0 for buf in buffers]
-		ret = text if reduce(lambda x, y: x or y, modified) else None
-		if ret:
+	for buf_segment_info in list_tabpage_buffers_segment_info(segment_info):
+		if int(vim_getbufoption(buf_segment_info, 'modified')):
 			return [{
-				'contents': ret,
+				'contents': text,
 				'highlight_group': ['tab_modified_indicator', 'modified_indicator'],
 			}]
 	return None

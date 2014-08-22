@@ -136,6 +136,12 @@ else:
 if hasattr(vim, 'tabpages'):
 	current_tabpage = lambda: vim.current.tabpage
 	list_tabpages = lambda: vim.tabpages
+
+	def list_tabpage_buffers_segment_info(segment_info):
+		return (
+			{'buffer': window.buffer, 'bufnr': window.buffer.number}
+			for window in segment_info['tabpage'].windows
+		)
 else:
 	class FalseObject(object):
 		@staticmethod
@@ -204,6 +210,24 @@ else:
 
 	def list_tabpages():  # NOQA
 		return [Tabpage(nr) for nr in range(1, _last_tab_nr() + 1)]
+
+	class TabBufSegmentInfo(dict):
+		def __getitem__(self, key):
+			try:
+				return super(TabBufSegmentInfo, self).__getitem__(key)
+			except KeyError:
+				if key != 'buffer':
+					raise
+				else:
+					buffer = get_buffer(super(TabBufSegmentInfo, self).__getitem__('bufnr'))
+					self['buffer'] = buffer
+					return buffer
+
+	def list_tabpage_buffers_segment_info(segment_info):
+		return (
+			TabBufSegmentInfo(bufnr=int(bufnrstr))
+			for bufnrstr in vim.eval('tabpagebuflist({0})'.format(segment_info['tabnr']))
+		)
 
 
 class VimEnviron(object):
