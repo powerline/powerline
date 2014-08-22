@@ -84,36 +84,33 @@ class VimRenderer(Renderer):
 	def get_segment_info(self, segment_info, mode):
 		return segment_info or self.segment_info
 
-	def render(self, window=None, window_id=None, winnr=None):
+	def render(self, window=None, window_id=None, winnr=None, is_tabline=False):
 		'''Render all segments.'''
 		segment_info = self.segment_info.copy()
-		if window is not None:
-			if window is vim.current.window:
-				mode = vim_mode(1)
-				mode = mode_translations.get(mode, mode)
-			else:
-				mode = 'nc'
-			segment_info.update(
-				window=window,
-				mode=mode,
-				window_id=window_id,
-				winnr=winnr,
-				buffer=window.buffer,
-				tabpage=current_tabpage(),
-			)
-			segment_info['tabnr'] = segment_info['tabpage'].number
-			segment_info['bufnr'] = segment_info['buffer'].number
-			winwidth = segment_info['window'].width
-			matcher_info = segment_info
+
+		if window is vim.current.window:
+			mode = vim_mode(1)
+			mode = mode_translations.get(mode, mode)
 		else:
-			mode = None
-			winwidth = int(vim.eval('&columns'))
-			matcher_info = None
+			mode = 'nc'
+
+		segment_info.update(
+			window=window,
+			mode=mode,
+			window_id=window_id,
+			winnr=winnr,
+			buffer=window.buffer,
+			tabpage=current_tabpage(),
+		)
+		segment_info['tabnr'] = segment_info['tabpage'].number
+		segment_info['bufnr'] = segment_info['buffer'].number
+		winwidth = segment_info['window'].width
+
 		statusline = super(VimRenderer, self).render(
 			mode=mode,
 			width=winwidth,
 			segment_info=segment_info,
-			matcher_info=matcher_info,
+			matcher_info=(None if is_tabline else segment_info),
 		)
 		return statusline
 
