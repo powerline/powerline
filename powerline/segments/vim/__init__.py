@@ -173,6 +173,8 @@ def tab_modified_indicator(pl, segment_info, text='+'):
 
 	:param string text:
 		text to display if any buffer in the current tab is modified
+
+	Highlight groups used: ``tab_modified_indicator`` or ``modified_indicator``.
 	'''
 	if 'tabpage' in segment_info:
 		buffers = [dict(buffer=w.buffer) for w in segment_info['tabpage'].windows]
@@ -181,7 +183,7 @@ def tab_modified_indicator(pl, segment_info, text='+'):
 		if ret:
 			return [{
 				'contents': ret,
-				'highlight_group': ['modified_indicator'],
+				'highlight_group': ['tab_modified_indicator', 'modified_indicator'],
 			}]
 	return None
 
