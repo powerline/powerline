@@ -903,6 +903,29 @@ class TestVim(TestCase):
 		self.assertEqual(single_tab(multiple_text='m'), [{'highlight_group': ['single_tab'], 'contents': 'Bufs'}])
 		self.assertEqual(single_tab(single_text='s'), [{'highlight_group': ['single_tab'], 'contents': 's'}])
 
+	def test_segment_info(self):
+		pl = Pl()
+		with vim_module._with('tabpage'):
+			with vim_module._with('buffer', '1') as segment_info:
+				self.assertEqual(vim.tab_modified_indicator(pl=pl, segment_info=segment_info), None)
+				vim_module.current.buffer[0] = ' '
+				self.assertEqual(vim.tab_modified_indicator(pl=pl, segment_info=segment_info), [{
+					'contents': '+',
+					'highlight_group': ['tab_modified_indicator', 'modified_indicator'],
+				}])
+				vim_module._undo()
+				self.assertEqual(vim.tab_modified_indicator(pl=pl, segment_info=segment_info), None)
+				old_buffer = vim_module.current.buffer
+				vim_module._new('2')
+				segment_info = vim_module._get_segment_info()
+				self.assertEqual(vim.tab_modified_indicator(pl=pl, segment_info=segment_info), None)
+				old_buffer[0] = ' '
+				self.assertEqual(vim.modified_indicator(pl=pl, segment_info=segment_info), None)
+				self.assertEqual(vim.tab_modified_indicator(pl=pl, segment_info=segment_info), [{
+					'contents': '+',
+					'highlight_group': ['tab_modified_indicator', 'modified_indicator'],
+				}])
+
 
 old_cwd = None
 
