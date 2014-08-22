@@ -168,6 +168,25 @@ def modified_indicator(pl, segment_info, text='+'):
 
 
 @requires_segment_info
+def tab_modified_indicator(pl, segment_info, text='+'):
+	'''Return a file modified indicator for tabpages.
+
+	:param string text:
+		text to display if any buffer in the current tab is modified
+	'''
+	if 'tabpage' in segment_info:
+		buffers = [dict(buffer=w.buffer) for w in segment_info['tabpage'].windows]
+		modified = [int(vim_getbufoption(buf, 'modified')) != 0 for buf in buffers]
+		ret = text if reduce(lambda x, y: x or y, modified) else None
+		if ret:
+			return [{
+				'contents': ret,
+				'highlight_group': ['modified_indicator'],
+			}]
+	return None
+
+
+@requires_segment_info
 def paste_indicator(pl, segment_info, text='PASTE'):
 	'''Return a paste mode indicator.
 
