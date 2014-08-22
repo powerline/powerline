@@ -394,7 +394,8 @@ class Powerline(object):
 		self.prev_common_config = None
 		self.prev_ext_config = None
 		self.pl = None
-		self.setup_args = None
+		self.setup_args = ()
+		self.setup_kwargs = {}
 		self.imported_modules = set()
 
 	def create_renderer(self, load_main=False, load_colors=False, load_colorscheme=False, load_theme=False):
@@ -748,7 +749,8 @@ class Powerline(object):
 		arguments for :py:meth:`reload` method and calls :py:meth:`do_setup`.
 		'''
 		self.shutdown_event.clear()
-		self.setup_args = (args, kwargs)
+		self.setup_args = args
+		self.setup_kwargs.update(kwargs)
 		self.do_setup(*args, **kwargs)
 
 	@staticmethod
@@ -787,8 +789,7 @@ class Powerline(object):
 		self.shutdown(set_event=True)
 		init_args, init_kwargs = self.init_args
 		powerline = PowerlineClass(*init_args, **init_kwargs)
-		setup_args, setup_kwargs = self.setup_args
-		powerline.setup(*setup_args, **setup_kwargs)
+		powerline.setup(*self.setup_args, **self.setup_kwargs)
 
 	def shutdown(self, set_event=True):
 		'''Shut down all background threads.
