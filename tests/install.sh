@@ -22,7 +22,7 @@ else
 		pip install ipython
 	fi
 fi
-sudo apt-get install -qq screen zsh tcsh mksh busybox
+sudo apt-get install -qq screen zsh tcsh mksh busybox socat
 # Travis has too outdated fish. It cannot be used for tests.
 # sudo apt-get install fish
 true
