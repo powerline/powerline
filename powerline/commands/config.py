@@ -20,6 +20,7 @@ class StrFunction(object):
 
 TMUX_ACTIONS = {
 	'source': StrFunction(config.source_tmux_files, 'source'),
+	'setcolors': StrFunction(config.init_color_variables, 'setcolors'),
 }
 
 
