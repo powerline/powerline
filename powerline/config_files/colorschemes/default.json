@@ -16,6 +16,7 @@
 		"weather_condition_rainy":   { "fg": "skyblue1", "bg": "gray0", "attr": [] },
 		"uptime":                    { "fg": "gray8", "bg": "gray0", "attr": [] },
 		"external_ip":               { "fg": "gray8", "bg": "gray0", "attr": [] },
+		"internal_ip":               { "fg": "gray8", "bg": "gray0", "attr": [] },
 		"network_load":              { "fg": "gray8", "bg": "gray0", "attr": [] },
 		"network_load_gradient":     { "fg": "green_yellow_orange_red", "bg": "gray0", "attr": [] },
 		"system_load":               { "fg": "gray8", "bg": "gray0", "attr": [] },
