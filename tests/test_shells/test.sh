@@ -349,9 +349,11 @@ if ! test -z "$(cat tests/shell/daemon_log_2)" ; then
 fi
 
 if test "x${ONLY_SHELL}" = "x" || test "x${ONLY_SHELL}" = "xipython" ; then
-	echo "> $(which ipython)"
-	if ! run_test ipython ipython ipython ; then
-		FAILED=1
+	if which ipython >/dev/null ; then
+		echo "> $(which ipython)"
+		if ! run_test ipython ipython ipython ; then
+			FAILED=1
+		fi
 	fi
 fi
 
