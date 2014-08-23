@@ -66,6 +66,7 @@ def get_argparser(parser=None, *args, **kwargs):
 	p.add_argument('-t', '--theme_option', metavar='THEME.KEY.KEY=VALUE', action='append', help='Like above, but theme-specific. THEME should point to an existing and used theme to have any effect, but it is fine to use any theme here.')
 	p.add_argument('-R', '--renderer_arg', metavar='KEY=VAL', action='append', help='Like above, but provides argument for renderer. Is supposed to be used only by shell bindings to provide various data like last_exit_code or last_pipe_status (they are not using --renderer_arg for historical resons: renderer_arg was added later).')
 	p.add_argument('-p', '--config_path', action='append', metavar='PATH', help='Path to configuration directory. If it is present then configuration files will only be seeked in the provided path. May be provided multiple times to search in a list of directories.')
+	p.add_argument('--socket', metavar='ADDRESS', type=str, help='Socket address to use in daemon clients. Is always UNIX domain socket on linux and file socket on Mac OS X. Not used here, present only for compatibility with other powerline clients. This argument must always be the first one and be in a form `--socket ADDRESS\': no `=\' or short form allowed (in other powerline clients, not here).')
 	return p
 
 

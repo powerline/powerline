@@ -20,7 +20,7 @@ for script in tests/*.vim ; do
 		FAILED=1
 	fi
 done
-if ! bash tests/test_shells/test.sh ; then
+if ! bash tests/test_shells/test.sh --fast ; then
 	echo "Failed shells"
 	if ${PYTHON} -c 'import platform, sys; sys.exit(1 * (platform.python_implementation() == "PyPy"))' ; then
 		FAILED=1

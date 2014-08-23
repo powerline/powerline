@@ -1,23 +1,55 @@
-#!/bin/bash
+#!/bin/sh
+: ${PYTHON:=python}
 FAILED=0
+if test "x$1" = "x--fast" ; then
+	FAST=1
+	shift
+fi
 ONLY_SHELL="$1"
+ONLY_TEST_TYPE="$2"
+COMMAND_PATTERN="$3"
+
+if ! test -z "$ONLY_SHELL$ONLY_TEST_TYPE$COMMAND_PATTERN" ; then
+	FAST=
+fi
+
+export PYTHON
+
+if test "x$ONLY_SHELL" = "x--help" ; then
+cat << EOF
+Usage:
+	$0 [[[ONLY_SHELL | ""] (ONLY_TEST_TYPE | "")] (COMMAND_PATTERN | "")]
+
+ONLY_SHELL: execute only tests for given shell
+ONLY_TEST_TYPE: execute only "daemon" or "nodaemon" tests
+COMMAND_PATTERN: use only commands that match given pattern for testing
+EOF
+exit 0
+fi
 
 check_screen_log() {
 	TEST_TYPE="$1"
-	SH="$2"
+	TEST_CLIENT="$2"
+	SH="$3"
 	if test -e tests/test_shells/${SH}.${TEST_TYPE}.ok ; then
-		diff -a -u tests/test_shells/${SH}.${TEST_TYPE}.ok tests/shell/${SH}.${TEST_TYPE}.log
+		diff -a -u tests/test_shells/${SH}.${TEST_TYPE}.ok tests/shell/${SH}.${TEST_TYPE}.${TEST_CLIENT}.log
 		return $?
 	elif test -e tests/test_shells/${SH}.ok ; then
-		diff -a -u tests/test_shells/${SH}.ok tests/shell/${SH}.${TEST_TYPE}.log
+		diff -a -u tests/test_shells/${SH}.ok tests/shell/${SH}.${TEST_TYPE}.${TEST_CLIENT}.log
 		return $?
 	else
-		cat tests/shell/${SH}.${TEST_TYPE}.log
+		cat tests/shell/${SH}.${TEST_TYPE}.${TEST_CLIENT}.log
 		return 1
 	fi
 }
 
 run() {
+	TEST_TYPE="$1"
+	shift
+	TEST_CLIENT="$1"
+	shift
+	SH="$1"
+	shift
 	local local_path="$PWD/tests/shell/path:$PWD/scripts"
 	if test "x$SH" = "xfish" ; then
 		local_path="${local_path}:/usr/bin:/bin"
@@ -33,6 +65,7 @@ run() {
 		COLUMNS="${COLUMNS}" \
 		LINES="${LINES}" \
 		TEST_TYPE="${TEST_TYPE}" \
+		TEST_CLIENT="${TEST_CLIENT}" \
 		SH="${SH}" \
 		DIR1="${DIR1}" \
 		DIR2="${DIR2}" \
@@ -40,27 +73,21 @@ run() {
 		IPYTHONDIR="$PWD/tests/shell/ipython_home" \
 		POWERLINE_SHELL_CONTINUATION=$additional_prompts \
 		POWERLINE_SHELL_SELECT=$additional_prompts \
+		POWERLINE_COMMAND="${POWERLINE_COMMAND}" \
 		"$@"
 }
 
 run_test() {
 	TEST_TYPE="$1"
 	shift
+	TEST_CLIENT="$1"
+	shift
 	SH="$1"
 	SESNAME="powerline-shell-test-${SH}-$$"
-	ARGS=( "$@" )
 
-	test "x$ONLY_SHELL" = "x" || test "x$ONLY_SHELL" = "x$SH" || return 0
-
-	if ! which "${SH}" ; then
-		return 0
-	fi
-
-	export TEST_TYPE
-	export SH
-
-	run screen -L -c tests/test_shells/screenrc -d -m -S "$SESNAME" \
-		env LANG=en_US.UTF-8 BINDFILE="$BINDFILE" "${ARGS[@]}"
+	run "${TEST_TYPE}" "${TEST_CLIENT}" "${SH}" \
+		screen -L -c tests/test_shells/screenrc -d -m -S "$SESNAME" \
+			env LANG=en_US.UTF-8 BINDFILE="$BINDFILE" "$@"
 	while ! screen -S "$SESNAME" -X readreg a tests/test_shells/input.$SH ; do
 		sleep 0.1s
 	done
@@ -77,7 +104,7 @@ run_test() {
 		#     …
 		#     prompt1> prompt2> …
 		while read -r line ; do
-			screen -S "$SESNAME" -p 0 -X stuff "$line"$'\n'
+			screen -S "$SESNAME" -p 0 -X stuff "$line"$(printf '\r')
 			sleep 1
 		done < tests/test_shells/input.$SH
 	else
@@ -88,23 +115,27 @@ run_test() {
 	while screen -S "$SESNAME" -X blankerprg "" > /dev/null ; do
 		sleep 0.1s
 	done
-	./tests/test_shells/postproc.py ${TEST_TYPE} ${SH}
+	./tests/test_shells/postproc.py ${TEST_TYPE} ${TEST_CLIENT} ${SH}
 	rm -f tests/shell/3rd/pid
-	if ! check_screen_log ${TEST_TYPE} ${SH} ; then
+	if ! check_screen_log ${TEST_TYPE} ${TEST_CLIENT} ${SH} ; then
 		echo '____________________________________________________________'
-		# Repeat the diff to make it better viewable in travis output
-		echo "Diff (cat -v):"
-		echo '============================================================'
-		check_screen_log  ${TEST_TYPE} ${SH} | cat -v
-		echo '____________________________________________________________'
+		if test "x$POWERLINE_TEST_NO_CAT_V" != "x1" ; then
+			# Repeat the diff to make it better viewable in travis output
+			echo "Diff (cat -v):"
+			echo '============================================================'
+			check_screen_log  ${TEST_TYPE} ${TEST_CLIENT} ${SH} | cat -v
+			echo '____________________________________________________________'
+		fi
 		echo "Failed ${SH}. Full output:"
 		echo '============================================================'
-		cat tests/shell/${SH}.${TEST_TYPE}.full.log
+		cat tests/shell/${SH}.${TEST_TYPE}.${TEST_CLIENT}.full.log
 		echo '____________________________________________________________'
-		echo "Full output (cat -v):"
-		echo '============================================================'
-		cat -v tests/shell/${SH}.${TEST_TYPE}.full.log
-		echo '____________________________________________________________'
+		if test "x$POWERLINE_TEST_NO_CAT_V" != "x1" ; then
+			echo "Full output (cat -v):"
+			echo '============================================================'
+			cat -v tests/shell/${SH}.${TEST_TYPE}.${TEST_CLIENT}.full.log
+			echo '____________________________________________________________'
+		fi
 		case ${SH} in
 			*ksh)
 				${SH} -c 'echo ${KSH_VERSION}'
@@ -146,7 +177,7 @@ mkdir tests/shell/fish_home
 cp -r tests/test_shells/ipython_home tests/shell
 
 mkdir tests/shell/path
-ln -s "$(which "${PYTHON:-python}")" tests/shell/path/python
+ln -s "$(which "${PYTHON}")" tests/shell/path/python
 ln -s "$(which screen)" tests/shell/path
 ln -s "$(which env)" tests/shell/path
 ln -s "$(which sleep)" tests/shell/path
@@ -168,6 +199,9 @@ ln -s "$(which sed)" tests/shell/path
 ln -s "$(which rm)" tests/shell/path
 ln -s ../../test_shells/bgscript.sh tests/shell/path
 ln -s ../../test_shells/waitpid.sh tests/shell/path
+if which socat ; then
+	ln -s "$(which socat)" tests/shell/path
+fi
 for pexe in powerline powerline-config ; do
 	if test -e scripts/$pexe ; then
 		ln -s "$PWD/scripts/$pexe" tests/shell/path
@@ -187,47 +221,104 @@ done
 
 unset ENV
 
-if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || test "x${ONLY_SHELL}" = xbusybox ; then
-	powerline-daemon -k || true
-	sleep 1s
+export ADDRESS="powerline-ipc-test-$$"
+export PYTHON
+echo "Powerline address: $ADDRESS"
 
+if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || test "x${ONLY_SHELL}" = xbusybox ; then
 	scripts/powerline-config shell command
 
 	for TEST_TYPE in "daemon" "nodaemon" ; do
-		if test $TEST_TYPE == daemon ; then
-			sh -c 'echo $$ > tests/shell/daemon_pid; ./scripts/powerline-daemon -f &>tests/shell/daemon_log' &
-		fi
-		if ! run_test $TEST_TYPE bash --norc --noprofile -i ; then
-			FAILED=1
-		fi
-
-		if ! run_test $TEST_TYPE zsh -f -i ; then
-			FAILED=1
-		fi
-
-		if ! run_test $TEST_TYPE fish -i ; then
-			FAILED=1
+		if test x$FAST = x1 ; then
+			if test $TEST_TYPE = daemon ; then
+				VARIANTS=3
+			else
+				VARIANTS=4
+			fi
+			EXETEST="$(( ${RANDOM:-`date +%N | sed s/^0*//`} % $VARIANTS ))"
+			echo "Execute tests: $EXETEST"
 		fi
 
-		if ! run_test $TEST_TYPE tcsh -f -i ; then
-			FAILED=1
+		if test $TEST_TYPE = daemon ; then
+			sh -c '
+				echo $$ > tests/shell/daemon_pid
+				$PYTHON ./scripts/powerline-daemon -s$ADDRESS -f &>tests/shell/daemon_log
+			' &
 		fi
-
-		if ! run_test $TEST_TYPE busybox ash -i ; then
-			FAILED=1
+		if test "x$ONLY_TEST_TYPE" != "x" && test "x$ONLY_TEST_TYPE" != "x$TEST_TYPE" ; then
+			continue
 		fi
-
-		if ! run_test $TEST_TYPE mksh -i ; then
-			FAILED=1
-		fi
-
-		if ! run_test $TEST_TYPE dash -i ; then
-			# dash tests are not stable, see #931
-			# FAILED=1
-			true
-		fi
-		if test $TEST_TYPE == daemon ; then
-			./scripts/powerline-daemon -k
+		echo "> Testing $TEST_TYPE"
+		I=-1
+		for POWERLINE_COMMAND in \
+			$PWD/scripts/powerline \
+			$PWD/scripts/powerline-render \
+			"$PYTHON $PWD/client/powerline.py" \
+			$PWD/client/powerline.sh
+		do
+			case "$POWERLINE_COMMAND" in
+				*powerline)        TEST_CLIENT=C ;;
+				*powerline-render) TEST_CLIENT=render ;;
+				*powerline.py)     TEST_CLIENT=python ;;
+				*powerline.sh)     TEST_CLIENT=shell ;;
+			esac
+			if test "$TEST_CLIENT" = render && test "$TEST_TYPE" = daemon ; then
+				continue
+			fi
+			I="$(( I + 1 ))"
+			if test "$TEST_CLIENT" = "C" && ! test -x scripts/powerline ; then
+				if which powerline >/dev/null ; then
+					POWERLINE_COMMAND=powerline
+				else
+					continue
+				fi
+			fi
+			if test "$TEST_CLIENT" = "shell" && ! which socat >/dev/null ; then
+				continue
+			fi
+			if test "x$COMMAND_PATTERN" != "x" && ! (
+				echo "$POWERLINE_COMMAND" | grep -e"$COMMAND_PATTERN" &>/dev/null)
+			then
+				continue
+			fi
+			POWERLINE_COMMAND="$POWERLINE_COMMAND --socket $ADDRESS"
+			export POWERLINE_COMMAND
+			echo ">> powerline command is ${POWERLINE_COMMAND:-empty}"
+			J=-1
+			for TEST_COMMAND in \
+				"bash --norc --noprofile -i" \
+				"zsh -f -i" \
+				"fish -i" \
+				"tcsh -f -i" \
+				"busybox ash -i" \
+				"mksh -i" \
+				"dash -i"
+			do
+				J="$(( J + 1 ))"
+				if test x$FAST = x1 ; then
+					if test $(( (I + J) % $VARIANTS )) -ne $EXETEST ; then
+						continue
+					fi
+				fi
+				SH="${TEST_COMMAND%% *}"
+				# dash tests are not stable, see #931
+				if test x$FAST$SH = x1dash ; then
+					continue
+				fi
+				if test "x$ONLY_SHELL" != "x" && test "x$ONLY_SHELL" != "x$SH" ; then
+					continue
+				fi
+				if ! which $SH >/dev/null ; then
+					continue
+				fi
+				echo ">>> $(which $SH)"
+				if ! run_test $TEST_TYPE $TEST_CLIENT $TEST_COMMAND ; then
+					FAILED=1
+				fi
+			done
+		done
+		if test $TEST_TYPE = daemon ; then
+			$PYTHON ./scripts/powerline-daemon -s$ADDRESS -k
 			wait $(cat tests/shell/daemon_pid)
 			if ! test -z "$(cat tests/shell/daemon_log)" ; then
 				echo '____________________________________________________________'
@@ -240,8 +331,30 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 	done
 fi
 
-if ! run_test ipython ipython ; then
+if ! $PYTHON scripts/powerline-daemon -s$ADDRESS &> tests/shell/daemon_log_2 ; then
+	echo "Daemon exited with status $?"
 	FAILED=1
+else
+	sleep 1
+	$PYTHON scripts/powerline-daemon -s$ADDRESS -k
+fi
+
+if ! test -z "$(cat tests/shell/daemon_log_2)" ; then
+	FAILED=1
+	echo '____________________________________________________________'
+	echo "Daemon log (2nd):"
+	echo '============================================================'
+	cat tests/shell/daemon_log_2
+	FAILED=1
+fi
+
+if test "x${ONLY_SHELL}" = "x" || test "x${ONLY_SHELL}" = "xipython" ; then
+	if which ipython >/dev/null ; then
+		echo "> $(which ipython)"
+		if ! run_test ipython ipython ipython ; then
+			FAILED=1
+		fi
+	fi
 fi
 
 test $FAILED -eq 0 && rm -r tests/shell

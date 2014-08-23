@@ -9,9 +9,10 @@ import codecs
 
 
 test_type = sys.argv[1]
-shell = sys.argv[2]
-fname = os.path.join('tests', 'shell', shell + '.' + test_type + '.full.log')
-new_fname = os.path.join('tests', 'shell', shell + '.' + test_type + '.log')
+test_client = sys.argv[2]
+shell = sys.argv[3]
+fname = os.path.join('tests', 'shell', '.'.join((shell, test_type, test_client, 'full.log')))
+new_fname = os.path.join('tests', 'shell', '.'.join((shell, test_type, test_client, 'log')))
 pid_fname = os.path.join('tests', 'shell', '3rd', 'pid')
 
 

@@ -8,16 +8,22 @@ import socket
 import os
 import errno
 
+
 if len(sys.argv) < 2:
 	print('Must provide at least one argument.', file=sys.stderr)
 	raise SystemExit(1)
 
 platform = sys.platform.lower()
 use_filesystem = 'darwin' in platform
-# use_filesystem = True
 del platform
 
-address = ('/tmp/powerline-ipc-%d' if use_filesystem else '\0powerline-ipc-%d') % os.getuid()
+if sys.argv[1] == '--socket':
+	address = sys.argv[2]
+	if not use_filesystem:
+		address = '\0' + address
+	del sys.argv[1:3]
+else:
+	address = ('/tmp/powerline-ipc-%d' if use_filesystem else '\0powerline-ipc-%d') % os.getuid()
 
 sock = socket.socket(family=socket.AF_UNIX)
 
@@ -42,22 +48,23 @@ fenc = sys.getfilesystemencoding() or 'utf-8'
 if fenc == 'ascii':
 	fenc = 'utf-8'
 
-args = [bytes('%x' % (len(sys.argv) - 1))]
-args.extend((x.encode(fenc) if isinstance(x, type('')) else x for x in sys.argv[1:]))
+tobytes = lambda s: s if isinstance(s, bytes) else s.encode(fenc)
+
+args = [tobytes('%x' % (len(sys.argv) - 1))]
+args.extend((tobytes(s) for s in sys.argv[1:]))
+
 
 try:
 	cwd = os.getcwd()
 except EnvironmentError:
 	pass
 else:
-	if isinstance(cwd, type('')):
+	if not isinstance(cwd, bytes):
 		cwd = cwd.encode(fenc)
 	args.append(cwd)
 
 
-env = (k + b'=' + v for k, v in os.environ.items())
-env = (x if isinstance(x, bytes) else x.encode(fenc, 'replace') for x in env)
-args.extend(env)
+args.extend((tobytes(k) + b'=' + tobytes(v) for k, v in os.environ.items()))
 
 EOF = b'\0\0'
 
@@ -75,4 +82,7 @@ while True:
 
 sock.close()
 
-sys.stdout.write(b''.join(received))
+if sys.version_info < (3,):
+	sys.stdout.write(b''.join(received))
+else:
+	sys.stdout.buffer.write(b''.join(received))
