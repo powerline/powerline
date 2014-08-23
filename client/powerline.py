@@ -15,10 +15,15 @@ if len(sys.argv) < 2:
 
 platform = sys.platform.lower()
 use_filesystem = 'darwin' in platform
-# use_filesystem = True
 del platform
 
-address = ('/tmp/powerline-ipc-%d' if use_filesystem else '\0powerline-ipc-%d') % os.getuid()
+if sys.argv[1] == '--socket':
+	address = sys.argv[2]
+	if not use_filesystem:
+		address = '\0' + address
+	del sys.argv[1:3]
+else:
+	address = ('/tmp/powerline-ipc-%d' if use_filesystem else '\0powerline-ipc-%d') % os.getuid()
 
 sock = socket.socket(family=socket.AF_UNIX)
 

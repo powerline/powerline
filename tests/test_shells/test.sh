@@ -16,6 +16,7 @@ ONLY_SHELL: execute only tests for given shell
 ONLY_TEST_TYPE: execute only "daemon" or "nodaemon" tests
 COMMAND_PATTERN: use only commands that match given pattern for testing
 EOF
+exit 0
 fi
 
 check_screen_log() {
@@ -213,21 +214,25 @@ done
 
 unset ENV
 
-if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || test "x${ONLY_SHELL}" = xbusybox ; then
-	powerline-daemon -k || true
-	sleep 1s
+export ADDRESS="powerline-ipc-test-$RANDOM"
+export PYTHON
+echo "Powerline address: $ADDRESS"
 
+if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || test "x${ONLY_SHELL}" = xbusybox ; then
 	scripts/powerline-config shell command
 
 	for TEST_TYPE in "daemon" "nodaemon" ; do
 		if test $TEST_TYPE = daemon ; then
-			sh -c 'echo $$ > tests/shell/daemon_pid; $PYTHON ./scripts/powerline-daemon -f &>tests/shell/daemon_log' &
+			sh -c '
+				echo $$ > tests/shell/daemon_pid
+				$PYTHON ./scripts/powerline-daemon -s$ADDRESS -f &>tests/shell/daemon_log
+			' &
 		fi
 		if test "x$ONLY_TEST_TYPE" != "x" && test "x$ONLY_TEST_TYPE" != "x$TEST_TYPE" ; then
 			continue
 		fi
 		echo "> Testing $TEST_TYPE"
-		for POWERLINE_COMMAND in "" \
+		for POWERLINE_COMMAND in \
 			$PWD/scripts/powerline \
 			$PWD/scripts/powerline-render \
 			"$PYTHON $PWD/client/powerline.py" \
@@ -238,7 +243,6 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 				*powerline-render) TEST_CLIENT=render ;;
 				*powerline.py)     TEST_CLIENT=python ;;
 				*powerline.sh)     TEST_CLIENT=shell ;;
-				"")                TEST_CLIENT=auto ;;
 			esac
 			if test "$TEST_CLIENT" = "C" && ! test -x scripts/powerline ; then
 				if which powerline >/dev/null ; then
@@ -258,6 +262,7 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 			then
 				continue
 			fi
+			POWERLINE_COMMAND="$POWERLINE_COMMAND --socket $ADDRESS"
 			export POWERLINE_COMMAND
 			echo ">> powerline command is ${POWERLINE_COMMAND:-empty}"
 			for TEST_COMMAND in \
@@ -286,7 +291,7 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 			done
 		done
 		if test $TEST_TYPE = daemon ; then
-			$PYTHON ./scripts/powerline-daemon -k
+			$PYTHON ./scripts/powerline-daemon -s$ADDRESS -k
 			wait $(cat tests/shell/daemon_pid)
 			if ! test -z "$(cat tests/shell/daemon_log)" ; then
 				echo '____________________________________________________________'
@@ -299,12 +304,12 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 	done
 fi
 
-if ! $PYTHON scripts/powerline-daemon &> tests/shell/daemon_log_2 ; then
+if ! $PYTHON scripts/powerline-daemon -s$ADDRESS &> tests/shell/daemon_log_2 ; then
 	echo "Daemon exited with status $?"
 	FAILED=1
 else
 	sleep 1
-	$PYTHON scripts/powerline-daemon -k
+	$PYTHON scripts/powerline-daemon -s$ADDRESS -k
 fi
 
 if ! test -z "$(cat tests/shell/daemon_log_2)" ; then

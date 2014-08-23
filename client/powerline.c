@@ -60,20 +60,28 @@ int main(int argc, char *argv[]) {
 	int i;
 	ptrdiff_t read_size;
 	struct sockaddr_un server;
-	char address[ADDRESS_SIZE];
+	char address_buf[ADDRESS_SIZE];
 	const char eof[2] = "\0\0";
 	char num_args[NUM_ARGS_SIZE];
 	char buf[BUF_SIZE];
 	char *newargv[NEW_ARGV_SIZE];
 	char *wd = NULL;
 	char **envp;
+	const char *address;
 
 	if (argc < 2) {
 		printf("Must provide at least one argument.\n");
 		return EXIT_FAILURE;
 	}
 
-	snprintf(address, ADDRESS_SIZE, ADDRESS_TEMPLATE, getuid());
+	if (argc > 3 && strcmp(argv[1], "--socket") == 0) {
+		address = argv[2];
+		argv += 2;
+		argc -= 2;
+	} else {
+		snprintf(address_buf, ADDRESS_SIZE, ADDRESS_TEMPLATE, getuid());
+		address = &(address_buf[0]);
+	}
 
 	sd = socket(AF_UNIX, SOCK_STREAM, 0);
 	if (sd == -1)

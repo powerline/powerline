@@ -1,6 +1,12 @@
 #!/bin/sh
 
-ADDRESS="powerline-ipc-${UID:-`id -u`}"
+if test "$1" = "--socket" ; then
+	shift
+	ADDRESS="$1"
+	shift
+else
+	ADDRESS="powerline-ipc-${UID:-`id -u`}"
+fi
 
 # Warning: env -0 does not work in busybox. Consider switching to parsing 
 # `set` output in this case

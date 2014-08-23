@@ -17,20 +17,13 @@ from io import StringIO
 from powerline.shell import get_argparser, finish_args, ShellPowerline, write_output
 from powerline.lib.monotonic import monotonic
 
+
 is_daemon = False
 platform = sys.platform.lower()
 use_filesystem = 'darwin' in platform
-# use_filesystem = True
-del platform
 
-if use_filesystem:
-	address = '/tmp/powerline-ipc-%d'
-	pidfile = address + '.pid'
-else:
-	# Use the abstract namespace for sockets rather than the filesystem
-	# (Available only in linux)
-	address = '\0powerline-ipc-%d'
-address = address % os.getuid()
+address = None
+pidfile = None
 
 
 class NonInteractiveArgParser(ArgumentParser):
@@ -334,8 +327,11 @@ def lockpidfile():
 	import fcntl
 	import atexit
 	import stat
-	fd = os.open(pidfile, os.O_WRONLY | os.O_CREAT,
-					stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
+	fd = os.open(
+		pidfile,
+		os.O_WRONLY | os.O_CREAT,
+		stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH
+	)
 	try:
 		fcntl.lockf(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
 	except EnvironmentError:
@@ -352,14 +348,33 @@ def lockpidfile():
 
 
 def main():
-	p = ArgumentParser(description=
-		'Daemon to improve the performance of powerline')
+	global address
+	global pidfile
+	p = ArgumentParser(description='Daemon to improve the performance of powerline')
 	p.add_argument('--quiet', '-q', action='store_true', help='Without other options: do not complain about already running powerline-daemon instance. Will still exit with 1. With `--kill\' and `--replace\': do not show any messages. With `--foreground\': ignored. Does not silence exceptions in any case.')
+	p.add_argument('--socket', '-s', help='Specify socket which will be used for connecting to daemon.')
 	a = p.add_mutually_exclusive_group().add_argument
 	a('--kill', '-k', action='store_true', help='Kill an already running instance')
 	a('--foreground', '-f', action='store_true', help='Run in the foreground (dont daemonize)')
 	a('--replace', '-r', action='store_true', help='Replace an already running instance')
 	args = p.parse_args()
+
+	if args.socket:
+		address = args.socket
+		if not use_filesystem:
+			address = '\0' + address
+	else:
+		if use_filesystem:
+			address = '/tmp/powerline-ipc-%d'
+		else:
+			# Use the abstract namespace for sockets rather than the filesystem
+			# (Available only in linux)
+			address = '\0powerline-ipc-%d'
+
+		address = address % os.getuid()
+
+	if use_filesystem:
+		pidfile = address + '.pid'
 
 	if args.kill:
 		if kill_daemon():
