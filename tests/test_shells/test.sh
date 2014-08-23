@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 : ${PYTHON:=python}
 FAILED=0
 if test "x$1" = "x--fast" ; then
@@ -84,11 +84,10 @@ run_test() {
 	shift
 	SH="$1"
 	SESNAME="powerline-shell-test-${SH}-$$"
-	ARGS=( "$@" )
 
 	run "${TEST_TYPE}" "${TEST_CLIENT}" "${SH}" \
 		screen -L -c tests/test_shells/screenrc -d -m -S "$SESNAME" \
-			env LANG=en_US.UTF-8 BINDFILE="$BINDFILE" "${ARGS[@]}"
+			env LANG=en_US.UTF-8 BINDFILE="$BINDFILE" "$@"
 	while ! screen -S "$SESNAME" -X readreg a tests/test_shells/input.$SH ; do
 		sleep 0.1s
 	done
@@ -105,7 +104,7 @@ run_test() {
 		#     …
 		#     prompt1> prompt2> …
 		while read -r line ; do
-			screen -S "$SESNAME" -p 0 -X stuff "$line"$'\n'
+			screen -S "$SESNAME" -p 0 -X stuff "$line"$(printf '\r')
 			sleep 1
 		done < tests/test_shells/input.$SH
 	else
@@ -222,7 +221,7 @@ done
 
 unset ENV
 
-export ADDRESS="powerline-ipc-test-$RANDOM"
+export ADDRESS="powerline-ipc-test-$$"
 export PYTHON
 echo "Powerline address: $ADDRESS"
 
