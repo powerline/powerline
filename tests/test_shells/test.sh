@@ -301,6 +301,10 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 					fi
 				fi
 				SH="${TEST_COMMAND%% *}"
+				# dash tests are not stable, see #931
+				if test x$FAST$SH = x1dash ; then
+					continue
+				fi
 				if test "x$ONLY_SHELL" != "x" && test "x$ONLY_SHELL" != "x$SH" ; then
 					continue
 				fi
@@ -309,10 +313,7 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 				fi
 				echo ">>> $(which $SH)"
 				if ! run_test $TEST_TYPE $TEST_CLIENT $TEST_COMMAND ; then
-					# dash tests are not stable, see #931
-					if test "x$SH" != "xdash" ; then
-						FAILED=1
-					fi
+					FAILED=1
 				fi
 			done
 		done
