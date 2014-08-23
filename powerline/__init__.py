@@ -15,7 +15,9 @@ from threading import Lock, Event
 
 
 def _config_loader_condition(path):
-	return path and os.path.isfile(path)
+	if path and os.path.isfile(path):
+		return path
+	return None
 
 
 def _find_config_files(search_paths, config_file, config_loader=None, loader_callback=None):
