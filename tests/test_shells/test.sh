@@ -1,9 +1,17 @@
 #!/bin/bash
 : ${PYTHON:=python}
 FAILED=0
+if test "x$1" = "x--fast" ; then
+	FAST=1
+	shift
+fi
 ONLY_SHELL="$1"
 ONLY_TEST_TYPE="$2"
 COMMAND_PATTERN="$3"
+
+if ! test -z "$ONLY_SHELL$ONLY_TEST_TYPE$COMMAND_PATTERN" ; then
+	FAST=
+fi
 
 export PYTHON
 
@@ -222,6 +230,16 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 	scripts/powerline-config shell command
 
 	for TEST_TYPE in "daemon" "nodaemon" ; do
+		if test x$FAST = x1 ; then
+			if test $TEST_TYPE = daemon ; then
+				VARIANTS=3
+			else
+				VARIANTS=4
+			fi
+			EXETEST="$(( ${RANDOM:-`date +%N | sed s/^0*//`} % $VARIANTS ))"
+			echo "Execute tests: $EXETEST"
+		fi
+
 		if test $TEST_TYPE = daemon ; then
 			sh -c '
 				echo $$ > tests/shell/daemon_pid
@@ -232,6 +250,7 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 			continue
 		fi
 		echo "> Testing $TEST_TYPE"
+		I=-1
 		for POWERLINE_COMMAND in \
 			$PWD/scripts/powerline \
 			$PWD/scripts/powerline-render \
@@ -244,6 +263,10 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 				*powerline.py)     TEST_CLIENT=python ;;
 				*powerline.sh)     TEST_CLIENT=shell ;;
 			esac
+			if test "$TEST_CLIENT" = render && test "$TEST_TYPE" = daemon ; then
+				continue
+			fi
+			I="$(( I + 1 ))"
 			if test "$TEST_CLIENT" = "C" && ! test -x scripts/powerline ; then
 				if which powerline >/dev/null ; then
 					POWERLINE_COMMAND=powerline
@@ -254,9 +277,6 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 			if test "$TEST_CLIENT" = "shell" && ! which socat >/dev/null ; then
 				continue
 			fi
-			if test "$TEST_CLIENT" = render && test "$TEST_TYPE" = daemon ; then
-				continue
-			fi
 			if test "x$COMMAND_PATTERN" != "x" && ! (
 				echo "$POWERLINE_COMMAND" | grep -e"$COMMAND_PATTERN" &>/dev/null)
 			then
@@ -265,6 +285,7 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 			POWERLINE_COMMAND="$POWERLINE_COMMAND --socket $ADDRESS"
 			export POWERLINE_COMMAND
 			echo ">> powerline command is ${POWERLINE_COMMAND:-empty}"
+			J=-1
 			for TEST_COMMAND in \
 				"bash --norc --noprofile -i" \
 				"zsh -f -i" \
@@ -274,6 +295,12 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 				"mksh -i" \
 				"dash -i"
 			do
+				J="$(( J + 1 ))"
+				if test x$FAST = x1 ; then
+					if test $(( (I + J) % $VARIANTS )) -ne $EXETEST ; then
+						continue
+					fi
+				fi
 				SH="${TEST_COMMAND%% *}"
 				if test "x$ONLY_SHELL" != "x" && test "x$ONLY_SHELL" != "x$SH" ; then
 					continue
