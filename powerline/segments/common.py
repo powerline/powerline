@@ -263,6 +263,74 @@ Divider highlight group used: ``background:divider``.
 ''')
 
 
+try:
+	import netifaces
+except ImportError:
+	def internal_ip(pl, interface='detect', ipv=4):
+		return None
+else:
+	_interface_starts = {
+		'eth':   10,  # Regular ethernet adapters         : eth1
+		'enp':   10,  # Regular ethernet adapters, Gentoo : enp2s0
+		'ath':    9,  # Atheros WiFi adapters             : ath0
+		'wlan':   9,  # Other WiFi adapters               : wlan1
+		'wlp':    9,  # Other WiFi adapters, Gentoo       : wlp5s0
+		'teredo': 1,  # miredo interface                  : teredo
+		'lo':   -10,  # Loopback interface                : lo
+	}
+
+	_interface_start_re = re.compile(r'^([a-z]+?)(\d|$)')
+
+	def _interface_key(interface):
+		match = _interface_start_re.match(interface)
+		if match:
+			try:
+				base = _interface_starts[match.group(1)] * 100
+			except KeyError:
+				base = 500
+			if match.group(2):
+				return base - int(match.group(2))
+			else:
+				return base
+		else:
+			return 0
+
+	def internal_ip(pl, interface='detect', ipv=4):
+		if interface == 'detect':
+			try:
+				interface = next(iter(sorted(netifaces.interfaces(), key=_interface_key, reverse=True)))
+			except StopIteration:
+				pl.info('No network interfaces found')
+				return None
+		addrs = netifaces.ifaddresses(interface)
+		try:
+			return addrs[netifaces.AF_INET6 if ipv == 6 else netifaces.AF_INET][0]['addr']
+		except (KeyError, IndexError):
+			return None
+
+
+internal_ip = with_docstring(internal_ip,
+'''Return internal IP address
+
+Requires ``netifaces`` package to work properly.
+
+:param str interface:
+	Interface on which IP will be checked. Use ``detect`` to automatically 
+	detect interface. In this case interfaces with lower numbers will be 
+	preferred over interfaces with similar names. Order of preference based on 
+	names:
+
+	#. ``eth`` and ``enp`` followed by number or the end of string.
+	#. ``ath``, ``wlan`` and ``wlp`` followed by number or the end of string.
+	#. ``teredo`` followed by number or the end of string.
+	#. Any other interface that is not ``lo*``.
+	#. ``lo`` followed by number or the end of string.
+:param int ipv:
+	4 or 6 for ipv4 and ipv6 respectively, depending on which IP address you 
+	need exactly.
+''')
+
+
 # Weather condition code descriptions available at
 # http://developer.yahoo.com/weather/#codes
 weather_conditions_codes = (

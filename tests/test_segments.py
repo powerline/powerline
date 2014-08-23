@@ -9,7 +9,7 @@ import sys
 import os
 from functools import partial
 from tests.lib import Args, urllib_read, replace_attr, new_module, replace_module_module, replace_env, Pl
-from tests import TestCase
+from tests import TestCase, SkipTest
 
 
 vim = None
@@ -586,6 +586,52 @@ class TestCommon(TestCase):
 					'gradient_level': 100
 				}
 			])
+
+	def test_internal_ip(self):
+		try:
+			import netifaces
+		except ImportError:
+			raise SkipTest()
+		pl = Pl()
+		addr = {
+			'enp2s0': {
+				netifaces.AF_INET: [{'addr': '192.168.100.200'}],
+				netifaces.AF_INET6: [{'addr': 'feff::5446:5eff:fe5a:7777%enp2s0'}]
+			},
+			'lo': {
+				netifaces.AF_INET: [{'addr': '127.0.0.1'}],
+				netifaces.AF_INET6: [{'addr': '::1'}]
+			},
+			'teredo': {
+				netifaces.AF_INET6: [{'addr': 'feff::5446:5eff:fe5a:7777'}]
+			},
+		}
+		interfaces = ['lo', 'enp2s0', 'teredo']
+		with replace_module_module(
+			common, 'netifaces',
+			interfaces=(lambda: interfaces),
+			ifaddresses=(lambda interface: addr[interface]),
+			AF_INET=netifaces.AF_INET,
+			AF_INET6=netifaces.AF_INET6,
+		):
+			self.assertEqual(common.internal_ip(pl=pl), '192.168.100.200')
+			self.assertEqual(common.internal_ip(pl=pl, interface='detect'), '192.168.100.200')
+			self.assertEqual(common.internal_ip(pl=pl, interface='lo'), '127.0.0.1')
+			self.assertEqual(common.internal_ip(pl=pl, interface='teredo'), None)
+			self.assertEqual(common.internal_ip(pl=pl, ipv=4), '192.168.100.200')
+			self.assertEqual(common.internal_ip(pl=pl, interface='detect', ipv=4), '192.168.100.200')
+			self.assertEqual(common.internal_ip(pl=pl, interface='lo', ipv=4), '127.0.0.1')
+			self.assertEqual(common.internal_ip(pl=pl, interface='teredo', ipv=4), None)
+			self.assertEqual(common.internal_ip(pl=pl, ipv=6), 'feff::5446:5eff:fe5a:7777%enp2s0')
+			self.assertEqual(common.internal_ip(pl=pl, interface='detect', ipv=6), 'feff::5446:5eff:fe5a:7777%enp2s0')
+			self.assertEqual(common.internal_ip(pl=pl, interface='lo', ipv=6), '::1')
+			self.assertEqual(common.internal_ip(pl=pl, interface='teredo', ipv=6), 'feff::5446:5eff:fe5a:7777')
+			interfaces[1:2] = ()
+			self.assertEqual(common.internal_ip(pl=pl, ipv=6), 'feff::5446:5eff:fe5a:7777')
+			interfaces[1:2] = ()
+			self.assertEqual(common.internal_ip(pl=pl, ipv=6), '::1')
+			interfaces[:] = ()
+			self.assertEqual(common.internal_ip(pl=pl, ipv=6), None)
 
 
 class TestVim(TestCase):

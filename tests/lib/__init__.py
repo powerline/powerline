@@ -9,10 +9,11 @@ class Pl(object):
 		self.errors = []
 		self.warns = []
 		self.debugs = []
+		self.infos = []
 		self.prefix = None
 		self.use_daemon_threads = True
 
-	for meth in ('error', 'warn', 'debug', 'exception'):
+	for meth in ('error', 'warn', 'debug', 'exception', 'info'):
 		exec ((
 			'def {0}(self, msg, *args, **kwargs):\n'
 			'	self.{0}s.append((kwargs.get("prefix") or self.prefix, msg, args, kwargs))\n'
