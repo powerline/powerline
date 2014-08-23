@@ -122,11 +122,9 @@ powerline into different directory.
 .. note::
 
     ``$POWERLINE_COMMAND`` appears in shell scripts without quotes thus you can 
-    specify additional parameters in bash. In zsh you will have to make 
-    ``$POWERLINE_COMMAND`` an array parameter to achieve the same result. In 
-    tmux it is passed to ``eval`` and depends on the shell used. 
-    POSIX-compatible shells, zsh, bash and fish will split this variable in this 
-    case.
+    specify additional parameters in bash. In tmux it is passed to ``eval`` and 
+    depends on the shell used. POSIX-compatible shells, zsh, bash and fish will 
+    split this variable in this case.
 
 If you want to disable prompt in shell, but still have tmux support or if you 
 want to disable tmux support you can use variables 
