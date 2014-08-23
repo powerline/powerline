@@ -240,6 +240,13 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 				*powerline.sh)     TEST_CLIENT=shell ;;
 				"")                TEST_CLIENT=auto ;;
 			esac
+			if test "$TEST_CLIENT" = "C" && ! test -x scripts/powerline ; then
+				if which powerline >/dev/null ; then
+					POWERLINE_COMMAND=powerline
+				else
+					continue
+				fi
+			fi
 			if test "$TEST_CLIENT" = "shell" && ! which socat >/dev/null ; then
 				continue
 			fi
