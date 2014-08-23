@@ -145,9 +145,3 @@ tcsh you should set ``$POWERLINE_NO_TCSH_ABOVE`` or
 If you do not want to see additional space which is added to the right prompt in 
 fish in order to support multiline prompt you should set 
 ``$POWERLINE_NO_FISH_ABOVE`` or ``$POWERLINE_NO_SHELL_ABOVE`` variables.
-
-.. note::
-
-    Most supported shells’ configuration scripts check for ``$POWERLINE_CONFIG`` 
-    and ``$POWERLINE_COMMAND`` configuration variables being empty. But tcsh 
-    configuration script checks for variables being *defined*, not empty.

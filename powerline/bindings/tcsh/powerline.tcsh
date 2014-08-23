@@ -11,6 +11,14 @@ if ! $?POWERLINE_CONFIG then
 	else
 		set POWERLINE_CONFIG="$POWERLINE_SOURCED[2]:h:h:h:h/scripts/powerline-config"
 	endif
+else
+	if "$POWERLINE_CONFIG" == "" then
+		if ( { which powerline-config > /dev/null } ) then
+			set POWERLINE_CONFIG="powerline-config"
+		else
+			set POWERLINE_CONFIG="$POWERLINE_SOURCED[2]:h:h:h:h/scripts/powerline-config"
+		endif
+	endif
 endif
 if ( { $POWERLINE_CONFIG shell --shell=tcsh uses tmux } ) then
 	alias _powerline_tmux_set_pwd 'if ( $?TMUX && { tmux refresh -S >&/dev/null } ) tmux setenv -g TMUX_PWD_`tmux display -p "#D" | tr -d %` $PWD:q ; if ( $?TMUX ) tmux refresh -S >&/dev/null'
@@ -19,6 +27,10 @@ endif
 if ( { $POWERLINE_CONFIG shell --shell=tcsh uses prompt } ) then
 	if ! $?POWERLINE_COMMAND then
 		set POWERLINE_COMMAND="`$POWERLINE_CONFIG:q shell command`"
+	else
+		if "$POWERLINE_COMMAND" == "" then
+			set POWERLINE_COMMAND="`$POWERLINE_CONFIG:q shell command`"
+		endif
 	endif
 
 	if ( $?POWERLINE_NO_TCSH_ABOVE || $?POWERLINE_NO_SHELL_ABOVE ) then
