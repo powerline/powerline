@@ -19,6 +19,7 @@
 				"priority": 50
 			},
 			{
+				"module": "powerline.segments.shell",
 				"name": "cwd",
 				"priority": 10
 			},

@@ -14,16 +14,16 @@
 		"branch": {
 			"before": " "
 		},
+		"cwd": {
+			"args": {
+				"ellipsis": "⋯"
+			}
+		},
 
 		"line_current_symbol": {
 			"contents": " "
 		},
 
-		"powerline.segments.common.cwd": {
-			"args": {
-				"ellipsis": "⋯"
-			}
-		},
 		"powerline.segments.common.network_load": {
 			"args": {
 				"recv_format": "⬇ {value:>8}",

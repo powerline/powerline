@@ -39,5 +39,7 @@ do
 	break
 done
 1
+hash -d foo=$PWD:h ; cd .
+true
 true is the last line
 exit
