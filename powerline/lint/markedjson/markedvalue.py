@@ -64,8 +64,19 @@ class MarkedFloat(float):
 
 class MarkedDict(dict):
 	__new__ = gen_new(dict)
-	__init__ = gen_init(dict)
 	__getnewargs__ = gen_getnewargs(dict)
+
+	def __init__(self, value, mark):
+		dict.__init__(self, value)
+		self.keydict = dict(((key, key) for key in self))
+
+	def __setitem__(self, key, value):
+		dict.__setitem__(self, key, value)
+		self.keydict[key] = key
+
+	def update(self, *args, **kwargs):
+		dict.update(self, *args, **kwargs)
+		self.keydict = dict(((key, key) for key in self))
 
 	def copy(self):
 		return MarkedDict(super(MarkedDict, self).copy(), self.mark)
