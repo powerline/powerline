@@ -1,4 +1,7 @@
 set fish_function_path "$PWD/powerline/bindings/fish" $fish_function_path
+while jobs | grep fish_update_completions
+	sleep 1
+end
 powerline-setup
 set POWERLINE_COMMAND "$POWERLINE_COMMAND -p $PWD/powerline/config_files"
 set POWERLINE_COMMAND "$POWERLINE_COMMAND -t default_leftonly.segment_data.hostname.args.only_if_ssh=false"
@@ -22,4 +25,3 @@ cd ../'$(echo)'
 cd ../'`echo`'
 false
 true is the last line
-exit
