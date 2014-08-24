@@ -135,6 +135,7 @@ class Prompt(object):
 			'client_id': 1,
 			'local_theme': self.theme,
 			'parser_state': zsh.getvalue('_POWERLINE_PARSER_STATE'),
+			'shortened_path': zsh.getvalue('_POWERLINE_SHORTENED_PATH'),
 		}
 		r = ''
 		if self.above:

@@ -14,17 +14,17 @@
 		"branch": {
 			"before": "B "
 		},
-
-		"line_current_symbol": {
-			"contents": "␤"
-		},
-
-		"powerline.segments.common.cwd": {
+		"cwd": {
 			"args": {
 				"use_path_separator": true,
 				"ellipsis": "…"
 			}
 		},
+
+		"line_current_symbol": {
+			"contents": "␤"
+		},
+
 		"powerline.segments.common.network_load": {
 			"args": {
 				"recv_format": "⇓{value:>8}",

@@ -5,7 +5,7 @@
 				"only_if_ssh": true
 			}
 		},
-		"powerline.segments.common.cwd": {
+		"cwd": {
 			"args": {
 				"dir_limit_depth": 3
 			}

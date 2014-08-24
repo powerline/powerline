@@ -1,6 +1,8 @@
 # vim:fileencoding=utf-8:noet
 
 from powerline.theme import requires_segment_info
+from powerline.segments import with_docstring
+from powerline.segments.common import CwdSegment
 
 
 @requires_segment_info
@@ -120,3 +122,42 @@ def continuation(pl, segment_info, omit_cmdsubst=True, right_align=False, rename
 		ret[-1].update(width='auto', align='l', highlight_group=['continuation:current', 'continuation'])
 
 	return ret
+
+
+@requires_segment_info
+class ShellCwdSegment(CwdSegment):
+	def get_shortened_path(self, pl, segment_info, use_shortened_path=True, **kwargs):
+		if use_shortened_path:
+			try:
+				return segment_info['shortened_path']
+			except KeyError:
+				pass
+		return super(ShellCwdSegment, self).get_shortened_path(pl, segment_info, **kwargs)
+
+
+cwd = with_docstring(ShellCwdSegment(),
+'''Return the current working directory.
+
+Returns a segment list to create a breadcrumb-like effect.
+
+:param int dir_shorten_len:
+	shorten parent directory names to this length (e.g. 
+	:file:`/long/path/to/powerline` → :file:`/l/p/t/powerline`)
+:param int dir_limit_depth:
+	limit directory depth to this number (e.g. 
+	:file:`/long/path/to/powerline` → :file:`⋯/to/powerline`)
+:param bool use_path_separator:
+	Use path separator in place of soft divider.
+:param bool use_shortened_path:
+	Use path from shortened_path ``--renderer_arg`` argument. If this argument 
+	is present ``shorten_home`` argument is ignored.
+:param bool shorten_home:
+	Shorten home directory to ``~``.
+:param str ellipsis:
+	Specifies what to use in place of omitted directories. Use None to not 
+	show this subsegment at all.
+
+Divider highlight group used: ``cwd:divider``.
+
+Highlight groups used: ``cwd:current_folder`` or ``cwd``. It is recommended to define all highlight groups.
+''')

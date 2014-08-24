@@ -255,7 +255,7 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 		for POWERLINE_COMMAND in \
 			$PWD/scripts/powerline \
 			$PWD/scripts/powerline-render \
-			"$PYTHON $PWD/client/powerline.py" \
+			$PWD/client/powerline.py \
 			$PWD/client/powerline.sh
 		do
 			case "$POWERLINE_COMMAND" in

@@ -14,16 +14,16 @@
 		"branch": {
 			"before": "BR "
 		},
+		"cwd": {
+			"args": {
+				"ellipsis": "..."
+			}
+		},
 
 		"line_current_symbol": {
 			"contents": "LN "
 		},
 
-		"powerline.segments.common.cwd": {
-			"args": {
-				"ellipsis": "..."
-			}
-		},
 		"powerline.segments.common.network_load": {
 			"args": {
 				"recv_format": "DL {value:>8}",

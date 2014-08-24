@@ -40,7 +40,7 @@ class Segment(object):
 		'''List arguments which should be omitted
 
 		Returns a tuple with indexes of omitted arguments.
-		
+
 		.. note::``segment_info``, ``create_watcher`` and ``pl`` will be omitted 
 			regardless of the below return (for ``segment_info`` and 
 			``create_watcher``: only if object was marked to require segment 
@@ -56,3 +56,8 @@ class Segment(object):
 		'''Returns a list of (additional argument name[, default value]) tuples.
 		'''
 		return ()
+
+
+def with_docstring(instance, doc):
+	instance.__doc__ = doc
+	return instance
