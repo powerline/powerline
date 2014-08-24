@@ -12,7 +12,7 @@ from powerline.lib.vcs import get_fallback_create_watcher
 
 import tests.vim as vim_module
 
-from tests.lib import Args, urllib_read, replace_attr, new_module, replace_module_module, replace_env, Pl, Process
+from tests.lib import Args, urllib_read, replace_attr, new_module, replace_module_module, replace_env, Pl
 from tests import TestCase, SkipTest
 
 
@@ -285,16 +285,15 @@ class TestShell(TestCase):
 
 class TestTmux(TestCase):
 	def test_attached_clients(self):
-		def popen_mock(parameters, **kwargs):
-			if "list-panes" == parameters[1]:
-				return Process("session_name", "")
-			elif "list-clients" == parameters[1]:
-				clients = ["/dev/pts/2: 0 [191x51 xterm-256color] (utf8)", "/dev/pts/3: 0 [191x51 xterm-256color] (utf8)"]
-				return Process(os.linesep.join(clients), "")
+		def get_tmux_output(cmd, *args):
+			if cmd == 'list-panes':
+				return 'session_name\n'
+			elif cmd == 'list-clients':
+				return '/dev/pts/2: 0 [191x51 xterm-256color] (utf8)\n/dev/pts/3: 0 [191x51 xterm-256color] (utf8)'
 
 		pl = Pl()
-		with replace_attr(tmux, 'Popen', popen_mock):
-			self.assertEqual(tmux.attached_clients(pl=pl, ), "2")
+		with replace_attr(tmux, 'get_tmux_output', get_tmux_output):
+			self.assertEqual(tmux.attached_clients(pl=pl), '2')
 			self.assertEqual(tmux.attached_clients(pl=pl, minimum=3), None)
 
 
