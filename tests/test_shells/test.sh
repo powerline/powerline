@@ -174,6 +174,8 @@ mkdir tests/shell/3rd/'$(echo)'
 mkdir tests/shell/3rd/'`echo`'
 
 mkdir tests/shell/fish_home
+mkdir tests/shell/fish_home/fish
+mkdir tests/shell/fish_home/fish/generated_completions
 cp -r tests/test_shells/ipython_home tests/shell
 
 mkdir tests/shell/path
