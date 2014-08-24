@@ -16,6 +16,7 @@
 		"darkestblue": 24,
 		"darkblue": 31,
 
+		"red": 1,
 		"darkestred": 52,
 		"darkred": 88,
 		"mediumred": 124,
@@ -45,25 +46,6 @@
 		"gray9": 250,
 		"gray10": 252,
 
-		"gray61": [14, "93a1a1"],
-		"gray13": [8, "002b36"],
-
-		"royalblue5": [0, "073642"],
-		"darkgreencopper": [10, "586e75"],
-		"lightskyblue4": [11, "657b83"],
-		"azure4": [12, "839496"],
-		"lightyellow": [7, "eee8d5"],
-		"oldlace": [15, "fdf6e3"],
-
-		"green": [2, "719e07"],
-		"cyan": [6, "2aa198"],
-		"blue": [4, "268bd2"],
-		"red": [1, "dc322f"],
-		"magenta": [5, "d33682"],
-		"violet": [13, "6c71c4"],
-		"orange": [9, "cb4b16"],
-		"yellow": [3, "b58900"],
-
 		"lightyellowgreen": 106,
 		"gold3": 178,
 		"orangered": 202,
@@ -71,7 +53,24 @@
 		"steelblue": 67,
 		"darkorange3": 166,
 		"skyblue1": 117,
-		"khaki1": 228
+		"khaki1": 228,
+
+		"solarized:base03": [8, "002b36"],
+		"solarized:base02": [0, "073642"],
+		"solarized:base01": [10, "586e75"],
+		"solarized:base00": [11, "657b83"],
+		"solarized:base0": [12, "839496"],
+		"solarized:base1": [14, "93a1a1"],
+		"solarized:base2": [7, "eee8d5"],
+		"solarized:base3": [15, "fdf6e3"],
+		"solarized:yellow": [3, "b58900"],
+		"solarized:orange": [9, "cb4b16"],
+		"solarized:red": [1, "dc322f"],
+		"solarized:magenta": [5, "d33682"],
+		"solarized:violet": [13, "6c71c4"],
+		"solarized:blue": [4, "268bd2"],
+		"solarized:cyan": [6, "2aa198"],
+		"solarized:green": [2, "859900"]
 	},
 	"gradients": {
 		"dark_GREEN_Orange_red": [
