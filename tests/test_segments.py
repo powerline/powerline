@@ -2,12 +2,16 @@
 
 from __future__ import unicode_literals
 
-from powerline.segments import shell, common
-from powerline.lib.vcs import get_fallback_create_watcher
-import tests.vim as vim_module
 import sys
 import os
+
 from functools import partial
+
+from powerline.segments import shell, tmux, common
+from powerline.lib.vcs import get_fallback_create_watcher
+
+import tests.vim as vim_module
+
 from tests.lib import Args, urllib_read, replace_attr, new_module, replace_module_module, replace_env, Pl
 from tests import TestCase, SkipTest
 
@@ -277,6 +281,20 @@ class TestShell(TestCase):
 		with replace_attr(common, 'datetime', Args(now=lambda: Args(strftime=lambda fmt: fmt))):
 			self.assertEqual(common.date(pl=pl), [{'contents': '%Y-%m-%d', 'highlight_group': ['date'], 'divider_highlight_group': None}])
 			self.assertEqual(common.date(pl=pl, format='%H:%M', istime=True), [{'contents': '%H:%M', 'highlight_group': ['time', 'date'], 'divider_highlight_group': 'time:divider'}])
+
+
+class TestTmux(TestCase):
+	def test_attached_clients(self):
+		def get_tmux_output(cmd, *args):
+			if cmd == 'list-panes':
+				return 'session_name\n'
+			elif cmd == 'list-clients':
+				return '/dev/pts/2: 0 [191x51 xterm-256color] (utf8)\n/dev/pts/3: 0 [191x51 xterm-256color] (utf8)'
+
+		pl = Pl()
+		with replace_attr(tmux, 'get_tmux_output', get_tmux_output):
+			self.assertEqual(tmux.attached_clients(pl=pl), '2')
+			self.assertEqual(tmux.attached_clients(pl=pl, minimum=3), None)
 
 
 class TestCommon(TestCase):

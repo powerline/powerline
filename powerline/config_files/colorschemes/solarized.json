@@ -12,6 +12,7 @@
 		"cwd:current_folder": { "fg": "oldlace", "bg": "darkgreencopper", "attr": ["bold"] },
 		"cwd:divider":        { "fg": "gray61", "bg": "darkgreencopper", "attr": [] },
 		"hostname":           { "fg": "oldlace", "bg": "darkgreencopper", "attr": [] },
-		"environment":        { "fg": "oldlace", "bg": "green", "attr": [] }
+		"environment":        { "fg": "oldlace", "bg": "green", "attr": [] },
+		"attached_clients":   { "fg": "oldlace", "bg": "green", "attr": [] }
 	}
 }
