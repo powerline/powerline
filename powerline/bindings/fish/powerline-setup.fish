@@ -35,6 +35,8 @@ function powerline-setup
 		end
 		function --on-variable fish_bind_mode _powerline_bind_mode
 			set -g -x _POWERLINE_MODE $fish_bind_mode
+		end
+		function --on-variable fish_key_bindings _powerline_set_default_mode
 			if test x$fish_key_bindings != xfish_vi_key_bindings
 				set -g -x _POWERLINE_DEFAULT_MODE default
 			else
@@ -76,6 +78,7 @@ function powerline-setup
 			_powerline_set_columns
 		end
 		_powerline_bind_mode
+		_powerline_set_default_mode
 		_powerline_update
 	end
 	if eval $POWERLINE_CONFIG shell --shell=fish uses tmux
