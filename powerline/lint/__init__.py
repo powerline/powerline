@@ -37,6 +37,10 @@ key_sep = JStr('/')
 list_sep = JStr(', ')
 
 
+def init_context(config):
+	return ((MarkedUnicode('', config.mark), config),)
+
+
 def context_key(context):
 	return key_sep.join((c[0] for c in context))
 
@@ -1474,7 +1478,7 @@ def check(paths=None, debug=False):
 		if main_spec.match(
 			main_config,
 			data={'configs': configs, 'lists': lists},
-			context=(('', main_config),),
+			context=init_context(main_config),
 			echoerr=ee
 		)[1]:
 			hadproblem = True
@@ -1492,7 +1496,7 @@ def check(paths=None, debug=False):
 		sys.stderr.write(str(e) + '\n')
 		hadproblem = True
 	else:
-		if colors_spec.match(colors_config, context=(('', colors_config),), echoerr=ee)[1]:
+		if colors_spec.match(colors_config, context=init_context(colors_config), echoerr=ee)[1]:
 			hadproblem = True
 
 	if lhadproblem[0]:
@@ -1517,7 +1521,7 @@ def check(paths=None, debug=False):
 			hadproblem = True
 		top_colorscheme_configs[colorscheme] = config
 		data['colorscheme'] = colorscheme
-		if top_colorscheme_spec.match(config, context=(('', config),), data=data, echoerr=ee)[1]:
+		if top_colorscheme_spec.match(config, context=init_context(config), data=data, echoerr=ee)[1]:
 			hadproblem = True
 
 	ext_colorscheme_configs = defaultdict(lambda: {})
@@ -1549,7 +1553,7 @@ def check(paths=None, debug=False):
 				spec = shell_colorscheme_spec
 			else:
 				spec = colorscheme_spec
-			if spec.match(config, context=(('', config),), data=data, echoerr=ee)[1]:
+			if spec.match(config, context=init_context(config), data=data, echoerr=ee)[1]:
 				hadproblem = True
 
 	colorscheme_configs = {}
@@ -1618,7 +1622,7 @@ def check(paths=None, debug=False):
 			else:
 				data['theme_type'] = 'regular'
 				spec = theme_spec
-			if spec.match(config, context=(('', config),), data=data, echoerr=ee)[1]:
+			if spec.match(config, context=init_context(config), data=data, echoerr=ee)[1]:
 				hadproblem = True
 
 	for top_theme, config in top_theme_configs.items():
@@ -1633,7 +1637,7 @@ def check(paths=None, debug=False):
 		}
 		data['theme_type'] = 'top'
 		data['theme'] = top_theme
-		if top_theme_spec.match(config, context=(('', config),), data=data, echoerr=ee)[1]:
+		if top_theme_spec.match(config, context=init_context(config), data=data, echoerr=ee)[1]:
 			hadproblem = True
 
 	return hadproblem
