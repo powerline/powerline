@@ -1081,32 +1081,53 @@ class NowPlayingSegment(Segment):
 				'total': self._convert_seconds(now_playing.get('time', 0)),
 			}
 
-	def player_spotify_dbus(self, pl, dbus=None):
+	def player_dbus(self, player_name, bus_name, player_path, iface_prop, iface_player):
 		try:
 			import dbus
 		except ImportError:
-			pl.exception('Could not add Spotify segment: requires python-dbus.')
+			pl.exception('Could not add {0} segment: requires python-dbus', player_name)
 			return
 		bus = dbus.SessionBus()
-		DBUS_IFACE_PROPERTIES = 'org.freedesktop.DBus.Properties'
-		DBUS_IFACE_PLAYER = 'org.freedesktop.MediaPlayer2'
 		try:
-			player = bus.get_object('com.spotify.qt', '/')
-			iface = dbus.Interface(player, DBUS_IFACE_PROPERTIES)
-			info = iface.Get(DBUS_IFACE_PLAYER, 'Metadata')
-			status = iface.Get(DBUS_IFACE_PLAYER, 'PlaybackStatus')
+			player = bus.get_object(bus_name, player_path)
+			iface = dbus.Interface(player, iface_prop)
+			info = iface.Get(iface_player, 'Metadata')
+			status = iface.Get(iface_player, 'PlaybackStatus')
 		except dbus.exceptions.DBusException:
 			return
 		if not info:
 			return
+		album = u(info.get('xesam:album'))
+		title = u(info.get('xesam:title'))
+		artist = info.get('xesam:artist')
 		state = self._convert_state(status)
+		if artist:
+			artist = u(artist[0])
 		return {
 			'state': state,
-			'album': info.get('xesam:album'),
-			'artist': info.get('xesam:artist')[0],
-			'title': info.get('xesam:title'),
+			'album': album,
+			'artist': artist,
+			'title': title,
 			'total': self._convert_seconds(info.get('mpris:length') / 1e6),
 		}
+
+	def player_spotify_dbus(self, pl):
+		return self.player_dbus(
+			player_name='Spotify',
+			bus_name='com.spotify.qt',
+			player_path='/',
+			iface_prop='org.freedesktop.DBus.Properties',
+			iface_player='org.freedesktop.MediaPlayer2',
+		)
+
+	def player_clementine(self, pl):
+		return self.player_dbus(
+			player_name='Clementine',
+			bus_name='org.mpris.MediaPlayer2.clementine',
+			player_path='/org/mpris/MediaPlayer2',
+			iface_prop='org.freedesktop.DBus.Properties',
+			iface_player='org.mpris.MediaPlayer2.Player',
+		)
 
 	def player_spotify_apple_script(self, pl):
 		status_delimiter = '-~`/='
