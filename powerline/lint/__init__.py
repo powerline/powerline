@@ -41,6 +41,20 @@ def context_key(context):
 	return key_sep.join((c[0] for c in context))
 
 
+def havemarks(*args):
+	for i, v in enumerate(args):
+		if not hasattr(v, 'mark'):
+			raise AssertionError('Value #{0} has no attribute `mark`'.format(i))
+
+
+def context_has_marks(context):
+	for i, v in enumerate(context):
+		if not hasattr(v[0], 'mark'):
+			raise AssertionError('Key #{0} in context has no attribute `mark`'.format(i))
+		if not hasattr(v[1], 'mark'):
+			raise AssertionError('Value #{0} in context has no attribute `mark`'.format(i))
+
+
 class EchoErr(object):
 	__slots__ = ('echoerr', 'logger',)
 
@@ -130,6 +144,7 @@ class Spec(object):
 		return self
 
 	def check_type(self, value, context_mark, data, context, echoerr, types):
+		havemarks(value)
 		if type(value.value) not in types:
 			echoerr(
 				context=self.cmsg.format(key=context_key(context)),
@@ -145,6 +160,7 @@ class Spec(object):
 		return True, False
 
 	def check_func(self, value, context_mark, data, context, echoerr, func, msg_func):
+		havemarks(value)
 		proceed, echo, hadproblem = func(value, data, context, echoerr)
 		if echo and hadproblem:
 			echoerr(context=self.cmsg.format(key=context_key(context)),
@@ -154,9 +170,11 @@ class Spec(object):
 		return proceed, hadproblem
 
 	def check_list(self, value, context_mark, data, context, echoerr, item_func, msg_func):
+		havemarks(value)
 		i = 0
 		hadproblem = False
 		for item in value:
+			havemarks(item)
 			if isinstance(item_func, int):
 				spec = self.specs[item_func]
 				proceed, fhadproblem = spec.match(
@@ -181,6 +199,7 @@ class Spec(object):
 		return True, hadproblem
 
 	def check_either(self, value, context_mark, data, context, echoerr, start, end):
+		havemarks(value)
 		new_echoerr = DelayedEchoErr(echoerr)
 
 		hadproblem = False
@@ -196,6 +215,7 @@ class Spec(object):
 		return False, hadproblem
 
 	def check_tuple(self, value, context_mark, data, context, echoerr, start, end):
+		havemarks(value)
 		hadproblem = False
 		for (i, item, spec) in zip(itertools.count(), value, self.specs[start:end]):
 			proceed, ihadproblem = spec.match(
@@ -360,6 +380,7 @@ class Spec(object):
 		return True, hadproblem
 
 	def match(self, value, context_mark=None, data=None, context=EMPTYTUPLE, echoerr=echoerr):
+		havemarks(value)
 		proceed, hadproblem = self.match_checks(value, context_mark, data, context, echoerr)
 		if proceed:
 			if self.keys or self.uspecs:
@@ -385,6 +406,7 @@ class Spec(object):
 							        problem='required key is missing: {0}'.format(key),
 							        problem_mark=value.mark)
 				for key in value.keys():
+					havemarks(key)
 					if key not in self.keys:
 						for keyfunc, vali in self.uspecs:
 							valspec = self.specs[vali]
@@ -429,6 +451,7 @@ class WithPath(object):
 
 
 def check_matcher_func(ext, match_name, data, context, echoerr):
+	havemarks(match_name)
 	import_paths = [os.path.expanduser(path) for path in context[0][1].get('common', {}).get('paths', [])]
 
 	match_module, separator, match_function = match_name.rpartition('.')
@@ -470,6 +493,7 @@ def check_matcher_func(ext, match_name, data, context, echoerr):
 
 
 def check_ext(ext, data, context, echoerr):
+	havemarks(ext)
 	hadsomedirs = False
 	hadproblem = False
 	if ext not in data['lists']['exts']:
@@ -490,6 +514,7 @@ def check_ext(ext, data, context, echoerr):
 
 
 def check_config(d, theme, data, context, echoerr):
+	context_has_marks(context)
 	if len(context) == 4:
 		ext = context[-2][0]
 	else:
@@ -512,6 +537,8 @@ def check_config(d, theme, data, context, echoerr):
 
 
 def check_top_theme(theme, data, context, echoerr):
+	context_has_marks(context)
+	havemarks(theme)
 	if theme not in data['configs']['top_themes']:
 		echoerr(context='Error while checking extension configuration (key {key})'.format(key=context_key(context)),
 		        context_mark=context[-2][0].mark,
@@ -615,6 +642,7 @@ colors_spec = (Spec(
 
 
 def check_color(color, data, context, echoerr):
+	havemarks(color)
 	if (color not in data['colors_config'].get('colors', {})
 		and color not in data['colors_config'].get('gradients', {})):
 		echoerr(
@@ -632,6 +660,7 @@ def check_translated_group_name(group, data, context, echoerr):
 
 
 def check_group(group, data, context, echoerr):
+	havemarks(group)
 	if not isinstance(group, unicode):
 		return True, False, False
 	colorscheme = data['colorscheme']
@@ -671,6 +700,7 @@ def check_group(group, data, context, echoerr):
 				new_data['colorscheme'] = new_colorscheme
 			else:
 				new_data = data
+			havemarks(config)
 			try:
 				group_data = config['groups'][group]
 			except KeyError:
@@ -781,7 +811,10 @@ highlight_keys = set(('highlight_group', 'name'))
 
 
 def check_key_compatibility(segment, data, context, echoerr):
+	context_has_marks(context)
+	havemarks(segment)
 	segment_type = segment.get('type', 'function')
+	havemarks(segment_type)
 
 	if segment_type not in type_keys:
 		echoerr(context='Error while checking segments (key {key})'.format(key=context_key(context)),
@@ -828,6 +861,7 @@ def check_key_compatibility(segment, data, context, echoerr):
 
 
 def check_segment_module(module, data, context, echoerr):
+	havemarks(module)
 	with WithPath(data['import_paths']):
 		try:
 			__import__(str(module))
@@ -878,11 +912,14 @@ def check_full_segment_data(segment, data, context, echoerr):
 
 
 def import_segment(name, data, context, echoerr, module=None):
+	context_has_marks(context)
+	havemarks(name)
 	if not module:
 		module = context[-2][1].get(
 			'module', context[0][1].get(
 				'default_module', MarkedUnicode(
 					'powerline.segments.' + data['ext'], None)))
+	havemarks(module)
 
 	with WithPath(data['import_paths']):
 		try:
@@ -910,6 +947,7 @@ def import_segment(name, data, context, echoerr, module=None):
 
 
 def check_segment_name(name, data, context, echoerr):
+	havemarks(name)
 	ext = data['ext']
 	if context[-2][1].get('type', 'function') == 'function':
 		func = import_segment(name, data, context, echoerr)
@@ -1007,6 +1045,7 @@ def check_segment_name(name, data, context, echoerr):
 
 
 def hl_exists(hl_group, data, context, echoerr, allow_gradients=False):
+	havemarks(hl_group)
 	ext = data['ext']
 	if ext not in data['colorscheme_configs']:
 		# No colorschemes. Error was already reported, no need to report it 
@@ -1018,12 +1057,14 @@ def hl_exists(hl_group, data, context, echoerr, allow_gradients=False):
 			r.append(colorscheme)
 		elif not allow_gradients or allow_gradients == 'force':
 			group_config = cconfig['groups'][hl_group]
+			havemarks(group_config)
 			hadgradient = False
 			for ckey in ('fg', 'bg'):
 				color = group_config.get(ckey)
 				if not color:
 					# No color. Error was already reported.
 					continue
+				havemarks(color)
 				# Gradients are only allowed for function segments. Note that 
 				# whether *either* color or gradient exists should have been 
 				# already checked
@@ -1054,6 +1095,7 @@ def hl_exists(hl_group, data, context, echoerr, allow_gradients=False):
 
 
 def check_highlight_group(hl_group, data, context, echoerr):
+	havemarks(hl_group)
 	r = hl_exists(hl_group, data, context, echoerr)
 	if r:
 		echoerr(
@@ -1067,6 +1109,7 @@ def check_highlight_group(hl_group, data, context, echoerr):
 
 
 def check_highlight_groups(hl_groups, data, context, echoerr):
+	havemarks(hl_groups)
 	rs = [hl_exists(hl_group, data, context, echoerr) for hl_group in hl_groups]
 	if all(rs):
 		echoerr(
@@ -1103,6 +1146,7 @@ def list_themes(data, context):
 
 
 def check_segment_data_key(key, data, context, echoerr):
+	havemarks(key)
 	has_module_name = '.' in key
 	found = False
 	for ext, theme in list_themes(data, context):
@@ -1141,6 +1185,7 @@ threaded_args_specs = {
 
 
 def check_args_variant(func, args, data, context, echoerr):
+	havemarks(args)
 	argspec = getconfigargspec(func)
 	present_args = set(args)
 	all_args = set(argspec.args)
@@ -1181,6 +1226,7 @@ def check_args_variant(func, args, data, context, echoerr):
 
 
 def check_args(get_functions, args, data, context, echoerr):
+	context_has_marks(context)
 	new_echoerr = DelayedEchoErr(echoerr)
 	count = 0
 	hadproblem = False
