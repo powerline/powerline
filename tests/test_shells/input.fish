@@ -25,3 +25,4 @@ cd ../'$(echo)'
 cd ../'`echo`'
 false
 true is the last line
+exit
