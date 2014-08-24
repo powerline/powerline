@@ -1,21 +1,24 @@
 # vim:fileencoding=utf-8:noet
 
+import itertools
+import sys
+import os
+import re
+import logging
+
+from collections import defaultdict
+from copy import copy
+
 from powerline.lint.markedjson import load
 from powerline import generate_config_finder, get_config_paths, load_config
 from powerline.lib.config import ConfigLoader
 from powerline.lint.markedjson.error import echoerr, MarkedError
+from powerline.lint.markedjson.markedvalue import MarkedUnicode
 from powerline.segments.vim import vim_modes
 from powerline.lint.inspect import getconfigargspec
 from powerline.lib.threaded import ThreadedSegment
 from powerline.lib import mergedicts_copy
 from powerline.lib.unicode import unicode
-import itertools
-import sys
-import os
-import re
-from collections import defaultdict
-from copy import copy
-import logging
 
 
 def open_file(path):
@@ -875,13 +878,17 @@ def check_full_segment_data(segment, data, context, echoerr):
 
 def import_segment(name, data, context, echoerr, module=None):
 	if not module:
-		module = context[-2][1].get('module', context[0][1].get('default_module', 'powerline.segments.' + data['ext']))
+		module = context[-2][1].get(
+			'module', context[0][1].get(
+				'default_module', MarkedUnicode(
+					'powerline.segments.' + data['ext'], None)))
 
 	with WithPath(data['import_paths']):
 		try:
 			func = getattr(__import__(str(module), fromlist=[str(name)]), str(name))
 		except ImportError:
 			echoerr(context='Error while checking segments (key {key})'.format(key=context_key(context)),
+			        context_mark=name.mark,
 			        problem='failed to import module {0}'.format(module),
 			        problem_mark=module.mark)
 			return None
@@ -893,6 +900,7 @@ def import_segment(name, data, context, echoerr, module=None):
 
 	if not callable(func):
 		echoerr(context='Error while checking segments (key {key})'.format(key=context_key(context)),
+		        context_mark=name.mark,
 		        problem='imported "function" {0} from module {1} is not callable'.format(name, module),
 		        problem_mark=module.mark)
 		return None
