@@ -1160,27 +1160,27 @@ class NowPlayingSegment(Segment):
 	def player_spotify_apple_script(self, pl):
 		status_delimiter = '-~`/='
 		ascript = '''
-		tell application "System Events"
-			set process_list to (name of every process)
-		end tell
-
-		if process_list contains "Spotify" then
-			tell application "Spotify"
-				if player state is playing or player state is paused then
-					set track_name to name of current track
-					set artist_name to artist of current track
-					set album_name to album of current track
-					set track_length to duration of current track
-					set now_playing to "" & player state & "{0}" & album_name & "{0}" & artist_name & "{0}" & track_name & "{0}" & track_length
-					return now_playing
-				else
-					return player state
-				end if
-
+			tell application "System Events"
+				set process_list to (name of every process)
 			end tell
-		else
-			return "stopped"
-		end if
+
+			if process_list contains "Spotify" then
+				tell application "Spotify"
+					if player state is playing or player state is paused then
+						set track_name to name of current track
+						set artist_name to artist of current track
+						set album_name to album of current track
+						set track_length to duration of current track
+						set now_playing to "" & player state & "{0}" & album_name & "{0}" & artist_name & "{0}" & track_name & "{0}" & track_length
+						return now_playing
+					else
+						return player state
+					end if
+
+				end tell
+			else
+				return "stopped"
+			end if
 		'''.format(status_delimiter)
 
 		spotify = asrun(pl, ascript)
