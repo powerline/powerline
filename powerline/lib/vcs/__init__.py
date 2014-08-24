@@ -196,7 +196,7 @@ class TreeStatusCache(dict):
 			if self.tw(key, ignore_event=getattr(repo, 'ignore_event', None)):
 				self.pop(key, None)
 		except OSError as e:
-			self.pl.warn('Failed to check %s for changes, with error: %s' % key, e)
+			self.pl.warn('Failed to check {0} for changes, with error: {1}', key, str(e))
 		return self.cache_and_get(key, repo.status)
 
 
