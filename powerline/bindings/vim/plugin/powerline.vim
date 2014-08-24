@@ -122,6 +122,10 @@ finally
 			call s:rcmd("			print('You should remove one of this. Check out troubleshooting section,')")
 			call s:rcmd("			print('it contains some information about the alternatives.')")
 		endif
+		call s:rcmd(    "try:")
+		call s:rcmd(    "	powerline_troubleshoot()")
+		call s:rcmd(    "finally:")
+		call s:rcmd(    "	del powerline_troubleshoot")
 		execute s:pycmd s:pystr
 		unlet s:pystr
 		unlet s:pycmd
