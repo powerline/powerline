@@ -20,6 +20,7 @@ if exists('g:powerline_pycmd')
 				echomsg 'specify g:powerline_pyeval explicitly or unset both and let powerline'
 				echomsg 'figure them out.'
 			echohl None
+			unlet s:pycmd
 			finish
 		endif
 		let s:pyeval = g:powerline_pyeval
@@ -45,24 +46,38 @@ if !s:has_python
 			echomsg 'details.'
 		echohl None
 	endif
+	unlet s:has_python
 	finish
 endif
 unlet s:has_python
 
 let s:import_cmd = 'from powerline.vim import VimPowerline'
+function s:rcmd(s)
+	if !exists('s:pystr')
+		let s:pystr = a:s . "\n"
+	else
+		let s:pystr = s:pystr . a:s . "\n"
+	endif
+endfunction
 try
-	let s:pystr  = "try:\n"
-	let s:pystr .= "	".s:import_cmd."\n"
-	let s:pystr .= "except ImportError:\n"
-	let s:pystr .= "	import sys, vim\n"
-	let s:pystr .= "	sys.path.append(vim.eval('expand(\"<sfile>:h:h:h:h:h\")'))\n"
-	let s:pystr .= "	".s:import_cmd."\n"
+	let s:can_replace_pyeval = !exists('g:powerline_pyeval')
+	call s:rcmd("try:")
+	call s:rcmd("	".s:import_cmd."")
+	call s:rcmd("except ImportError:")
+	call s:rcmd("	import sys, vim")
+	call s:rcmd("	sys.path.append(vim.eval('expand(\"<sfile>:h:h:h:h:h\")'))")
+	call s:rcmd("	".s:import_cmd."")
+	call s:rcmd("import vim")
+	call s:rcmd("VimPowerline().setup(pyeval=vim.eval('s:pyeval'), pycmd=vim.eval('s:pycmd'), can_replace_pyeval=int(vim.eval('s:can_replace_pyeval')))")
+	call s:rcmd("del VimPowerline")
 	execute s:pycmd s:pystr
 	unlet s:pystr
 	let s:launched = 1
 finally
+	unlet s:can_replace_pyeval
 	unlet s:import_cmd
 	if !exists('s:launched')
+		unlet s:pystr
 		echohl ErrorMsg
 			echomsg 'An error occurred while importing powerline package.'
 			echomsg 'This could be caused by invalid sys.path setting,'
@@ -75,54 +90,52 @@ finally
 				echomsg 'should set g:powerline_pycmd to "py3" to make it load correctly.'
 			endif
 		echohl None
-		let s:pystr  =     "def powerline_troubleshoot():\n"
-		let s:pystr .=     "	import sys\n"
-		let s:pystr .=     "	if sys.version_info < (2, 6):\n"
-		let s:pystr .=     "		print('Too old python version: ' + sys.version + ' (first supported is 2.6)')\n"
-		let s:pystr .=     "	elif sys.version_info[0] == 3 and sys.version_info[1] < 2:\n"
-		let s:pystr .=     "		print('Too old python 3 version: ' + sys.version + ' (first supported is 3.2)')\n"
-		let s:pystr .=     "	try:\n"
-		let s:pystr .=     "		import powerline\n"
-		let s:pystr .=     "	except ImportError:\n"
-		let s:pystr .=     "		print('Unable to import powerline, is it installed?')\n"
-		if expand('<sfile>')[:4] isnot# '/usr/'
-			let s:pystr .= "	else:\n"
-			let s:pystr .= "		import os\n"
-			let s:pystr .= "		powerline_dir = os.path.dirname(os.path.realpath(powerline.__file__))\n"
-			let s:pystr .= "		this_dir = os.path.dirname(os.path.realpath(vim.eval('expand(\"<sfile>:p\")')))\n"
-			let s:pystr .= "		this_dir = os.path.dirname(os.path.dirname(os.path.dirname(this_dir)))\n"
-			let s:pystr .= "		if os.path.basename(this_dir) != 'powerline':\n"
-			let s:pystr .= "			print('Check your installation:')\n"
-			let s:pystr .= "			print('this script is not in powerline[/bindings/vim/plugin] directory,')\n"
-			let s:pystr .= "			print('neither it is installed system-wide')\n"
-			let s:pystr .= "		this_dir = os.path.dirname(this_dir)\n"
-			let s:pystr .= "		real_powerline_dir = os.path.realpath(powerline_dir)\n"
-			let s:pystr .= "		real_this_dir = os.path.realpath(this_dir)\n"
-			let s:pystr .= "		if real_this_dir != sys.path[-1]:\n"
-			let s:pystr .= "			print('Check your installation:')\n"
-			let s:pystr .= "			print('this script is symlinked somewhere where powerline is not present.')\n"
-			let s:pystr .= "		elif real_powerline_dir != real_this_dir:\n"
-			let s:pystr .= "			print('It appears that you have two powerline versions installed:')\n"
-			let s:pystr .= "			print('one in ' + real_powerline_dir + ', other in ' + real_this_dir + '.')\n"
-			let s:pystr .= "			print('You should remove one of this. Check out troubleshooting section,')\n"
-			let s:pystr .= "			print('it contains some information about the alternatives.')\n"
+		call s:rcmd(    "def powerline_troubleshoot():")
+		call s:rcmd(    "	import sys")
+		call s:rcmd(    "	if sys.version_info < (2, 6):")
+		call s:rcmd(    "		print('Too old python version: ' + sys.version + ' (first supported is 2.6)')")
+		call s:rcmd(    "	elif sys.version_info[0] == 3 and sys.version_info[1] < 2:")
+		call s:rcmd(    "		print('Too old python 3 version: ' + sys.version + ' (first supported is 3.2)')")
+		call s:rcmd(    "	try:")
+		call s:rcmd(    "		import powerline")
+		call s:rcmd(    "	except ImportError:")
+		call s:rcmd(    "		print('Unable to import powerline, is it installed?')")
+		if strpart(expand('<sfile>'), 0, 5) !=# '/usr/'
+			call s:rcmd("	else:")
+			call s:rcmd("		import os")
+			call s:rcmd("		powerline_dir = os.path.dirname(os.path.realpath(powerline.__file__))")
+			call s:rcmd("		this_dir = os.path.dirname(os.path.realpath(vim.eval('expand(\"<sfile>:p\")')))")
+			call s:rcmd("		this_dir = os.path.dirname(os.path.dirname(os.path.dirname(this_dir)))")
+			call s:rcmd("		if os.path.basename(this_dir) != 'powerline':")
+			call s:rcmd("			print('Check your installation:')")
+			call s:rcmd("			print('this script is not in powerline[/bindings/vim/plugin] directory,')")
+			call s:rcmd("			print('neither it is installed system-wide')")
+			call s:rcmd("		this_dir = os.path.dirname(this_dir)")
+			call s:rcmd("		real_powerline_dir = os.path.realpath(powerline_dir)")
+			call s:rcmd("		real_this_dir = os.path.realpath(this_dir)")
+			call s:rcmd("		if real_this_dir != sys.path[-1]:")
+			call s:rcmd("			print('Check your installation:')")
+			call s:rcmd("			print('this script is symlinked somewhere where powerline is not present.')")
+			call s:rcmd("		elif real_powerline_dir != real_this_dir:")
+			call s:rcmd("			print('It appears that you have two powerline versions installed:')")
+			call s:rcmd("			print('one in ' + real_powerline_dir + ', other in ' + real_this_dir + '.')")
+			call s:rcmd("			print('You should remove one of this. Check out troubleshooting section,')")
+			call s:rcmd("			print('it contains some information about the alternatives.')")
 		endif
+		call s:rcmd(    "try:")
+		call s:rcmd(    "	powerline_troubleshoot()")
+		call s:rcmd(    "finally:")
+		call s:rcmd(    "	del powerline_troubleshoot")
 		execute s:pycmd s:pystr
 		unlet s:pystr
 		unlet s:pycmd
 		unlet s:pyeval
+		delfunction s:rcmd
 		finish
 	else
 		unlet s:launched
 	endif
+	unlet s:pycmd
+	unlet s:pyeval
+	delfunction s:rcmd
 endtry
-
-let s:can_replace_pyeval = !exists('g:powerline_pyeval')
-
-execute s:pycmd 'import vim'
-execute s:pycmd 'VimPowerline().setup(pyeval=vim.eval("s:pyeval"), pycmd=vim.eval("s:pycmd"), can_replace_pyeval=int(vim.eval("s:can_replace_pyeval")))'
-execute s:pycmd 'del VimPowerline'
-
-unlet s:can_replace_pyeval
-unlet s:pycmd
-unlet s:pyeval

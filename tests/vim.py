@@ -229,6 +229,8 @@ def command(cmd):
 def eval(expr):
 	if expr.startswith('g:'):
 		return vars[expr[2:]]
+	elif expr.startswith('v:'):
+		return vvars[expr[2:]]
 	elif expr.startswith('&'):
 		return options[expr[1:]]
 	elif expr.startswith('$'):
