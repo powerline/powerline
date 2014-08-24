@@ -15,12 +15,12 @@ from powerline.lib import add_divider_highlight_group
 from powerline.lib.shell import asrun, run_cmd
 from powerline.lib.url import urllib_read, urllib_urlencode
 from powerline.lib.vcs import guess, tree_status
-from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment, with_docstring
+from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment
 from powerline.lib.monotonic import monotonic
 from powerline.lib.humanize_bytes import humanize_bytes
 from powerline.lib.unicode import u
 from powerline.theme import requires_segment_info, requires_filesystem_watcher
-from powerline.segments import Segment
+from powerline.segments import Segment, with_docstring
 from collections import namedtuple
 
 
