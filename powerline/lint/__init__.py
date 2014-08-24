@@ -48,15 +48,15 @@ def context_key(context):
 def havemarks(*args):
 	for i, v in enumerate(args):
 		if not hasattr(v, 'mark'):
-			raise AssertionError('Value #{0} has no attribute `mark`'.format(i))
+			raise AssertionError('Value #{0} ({1!r}) has no attribute `mark`'.format(i, v))
 
 
 def context_has_marks(context):
 	for i, v in enumerate(context):
 		if not hasattr(v[0], 'mark'):
-			raise AssertionError('Key #{0} in context has no attribute `mark`'.format(i))
+			raise AssertionError('Key #{0} ({1!r}) in context has no attribute `mark`'.format(i, v[0]))
 		if not hasattr(v[1], 'mark'):
-			raise AssertionError('Value #{0} in context has no attribute `mark`'.format(i))
+			raise AssertionError('Value #{0} ({1!r}) in context has no attribute `mark`'.format(i, v[1]))
 
 
 class EchoErr(object):
