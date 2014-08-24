@@ -7,7 +7,8 @@ def attached_clients(pl, minimum=1):
 	'''Return the number of tmux clients attached to the currently active session
 
 	:param int minimum:
-		The minimum number of attached clients that must be present for this segment to be visible
+		The minimum number of attached clients that must be present for this 
+		segment to be visible.
 	'''
 	session_output = get_tmux_output('list-panes', '-F', '#{session_name}')
 	if not session_output:
