@@ -20,6 +20,7 @@ if exists('g:powerline_pycmd')
 				echomsg 'specify g:powerline_pyeval explicitly or unset both and let powerline'
 				echomsg 'figure them out.'
 			echohl None
+			unlet s:pycmd
 			finish
 		endif
 		let s:pyeval = g:powerline_pyeval
@@ -45,6 +46,7 @@ if !s:has_python
 			echomsg 'details.'
 		echohl None
 	endif
+	unlet s:has_python
 	finish
 endif
 unlet s:has_python
