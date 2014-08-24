@@ -1223,22 +1223,25 @@ class NowPlayingSegment(Segment):
 		}
 
 	def player_rdio(self, pl):
-		now_playing = self._run_cmd(['osascript',
-			'-e', 'tell application "System Events"',
-			'-e', 'set rdio_active to the count(every process whose name is "Rdio")',
-			'-e', 'if rdio_active is 0 then',
-			'-e', 'return',
-			'-e', 'end if',
-			'-e', 'end tell',
-			'-e', 'tell application "Rdio"',
-			'-e', 'set rdio_name to the name of the current track',
-			'-e', 'set rdio_artist to the artist of the current track',
-			'-e', 'set rdio_album to the album of the current track',
-			'-e', 'set rdio_duration to the duration of the current track',
-			'-e', 'set rdio_state to the player state',
-			'-e', 'set rdio_elapsed to the player position',
-			'-e', 'return rdio_name & "\n" & rdio_artist & "\n" & rdio_album & "\n" & rdio_elapsed & "\n" & rdio_duration & "\n" & rdio_state',
-			'-e', 'end tell'])
+		status_delimiter = '-~`/='
+		ascript = '''
+			tell application "System Events"
+				set rdio_active to the count(every process whose name is "Rdio")
+				if rdio_active is 0 then
+					return
+				end if
+			end tell
+			tell application "Rdio"
+				set rdio_name to the name of the current track
+				set rdio_artist to the artist of the current track
+				set rdio_album to the album of the current track
+				set rdio_duration to the duration of the current track
+				set rdio_state to the player state
+				set rdio_elapsed to the player position
+				return rdio_name & "{0}" & rdio_artist & "{0}" & rdio_album & "{0}" & rdio_elapsed & "{0}" & rdio_duration & "{0}" & rdio_state
+			end tell
+		'''.format(status_delimiter)
+		now_playing = asrun(pl, ascript)
 		if not now_playing:
 			return
 		now_playing = now_playing.split('\n')
