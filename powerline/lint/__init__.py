@@ -315,9 +315,9 @@ class Spec(object):
 	def ident(self, msg_func=None):
 		msg_func = (
 			msg_func
-			or (lambda value: 'String "{0}" is not an alphanumeric/underscore identifier'.format(value))
+			or (lambda value: 'String "{0}" is not an alphanumeric/underscore colon-separated identifier'.format(value))
 		)
-		return self.re('^\w+$', msg_func)
+		return self.re('^\w+(?::\w+)?$', msg_func)
 
 	def oneof(self, collection, msg_func=None):
 		msg_func = msg_func or (lambda value: '"{0}" must be one of {1!r}'.format(value, list(collection)))
@@ -701,7 +701,7 @@ def check_group(group, data, context, echoerr):
 
 color_spec = Spec().type(unicode).func(check_color).copy
 name_spec = Spec().type(unicode).len('gt', 0).optional().copy
-group_name_spec = Spec().re('^\w+(?::\w+)?$').copy
+group_name_spec = Spec().ident().copy
 group_spec = Spec().either(Spec(
 	fg=color_spec(),
 	bg=color_spec(),
