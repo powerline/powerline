@@ -1160,27 +1160,27 @@ class NowPlayingSegment(Segment):
 	def player_spotify_apple_script(self, pl):
 		status_delimiter = '-~`/='
 		ascript = '''
-		tell application "System Events"
-			set process_list to (name of every process)
-		end tell
-
-		if process_list contains "Spotify" then
-			tell application "Spotify"
-				if player state is playing or player state is paused then
-					set track_name to name of current track
-					set artist_name to artist of current track
-					set album_name to album of current track
-					set track_length to duration of current track
-					set now_playing to "" & player state & "{0}" & album_name & "{0}" & artist_name & "{0}" & track_name & "{0}" & track_length
-					return now_playing
-				else
-					return player state
-				end if
-
+			tell application "System Events"
+				set process_list to (name of every process)
 			end tell
-		else
-			return "stopped"
-		end if
+
+			if process_list contains "Spotify" then
+				tell application "Spotify"
+					if player state is playing or player state is paused then
+						set track_name to name of current track
+						set artist_name to artist of current track
+						set album_name to album of current track
+						set track_length to duration of current track
+						set now_playing to "" & player state & "{0}" & album_name & "{0}" & artist_name & "{0}" & track_name & "{0}" & track_length
+						return now_playing
+					else
+						return player state
+					end if
+
+				end tell
+			else
+				return "stopped"
+			end if
 		'''.format(status_delimiter)
 
 		spotify = asrun(pl, ascript)
@@ -1220,6 +1220,44 @@ class NowPlayingSegment(Segment):
 			'title': now_playing[2],
 			'elapsed': now_playing[3],
 			'total': now_playing[4],
+		}
+
+	def player_rdio(self, pl):
+		status_delimiter = '-~`/='
+		ascript = '''
+			tell application "System Events"
+				set rdio_active to the count(every process whose name is "Rdio")
+				if rdio_active is 0 then
+					return
+				end if
+			end tell
+			tell application "Rdio"
+				set rdio_name to the name of the current track
+				set rdio_artist to the artist of the current track
+				set rdio_album to the album of the current track
+				set rdio_duration to the duration of the current track
+				set rdio_state to the player state
+				set rdio_elapsed to the player position
+				return rdio_name & "{0}" & rdio_artist & "{0}" & rdio_album & "{0}" & rdio_elapsed & "{0}" & rdio_duration & "{0}" & rdio_state
+			end tell
+		'''.format(status_delimiter)
+		now_playing = asrun(pl, ascript)
+		if not now_playing:
+			return
+		now_playing = now_playing.split('\n')
+		if len(now_playing) != 6:
+			return
+		state = self._convert_state(now_playing[5])
+		total = self._convert_seconds(now_playing[4])
+		elapsed = self._convert_seconds(float(now_playing[3]) * float(now_playing[4]) / 100)
+		return {
+			'title': now_playing[0],
+			'artist': now_playing[1],
+			'album': now_playing[2],
+			'elapsed': elapsed,
+			'total': total,
+			'state': state,
+			'state_symbol': self.STATE_SYMBOLS.get(state)
 		}
 now_playing = NowPlayingSegment()
 
