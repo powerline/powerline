@@ -18,6 +18,10 @@ except ImportError:
 
 
 vim_mode = vim_get_func('mode', rettype=str)
+if int(vim.eval('v:version')) >= 702:
+	_vim_mode = vim_mode
+	vim_mode = lambda: _vim_mode(1)
+
 mode_translations = {
 	chr(ord('V') - 0x40): '^V',
 	chr(ord('S') - 0x40): '^S',
@@ -89,7 +93,7 @@ class VimRenderer(Renderer):
 		segment_info = self.segment_info.copy()
 
 		if window is vim.current.window:
-			mode = vim_mode(1)
+			mode = vim_mode()
 			mode = mode_translations.get(mode, mode)
 		else:
 			mode = 'nc'
