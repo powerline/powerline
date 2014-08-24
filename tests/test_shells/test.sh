@@ -7,9 +7,9 @@ if test "x$1" = "x--fast" ; then
 fi
 ONLY_SHELL="$1"
 ONLY_TEST_TYPE="$2"
-COMMAND_PATTERN="$3"
+ONLY_TEST_CLIENT="$3"
 
-if ! test -z "$ONLY_SHELL$ONLY_TEST_TYPE$COMMAND_PATTERN" ; then
+if ! test -z "$ONLY_SHELL$ONLY_TEST_TYPE$ONLY_TEST_CLIENT" ; then
 	FAST=
 fi
 
@@ -18,11 +18,11 @@ export PYTHON
 if test "x$ONLY_SHELL" = "x--help" ; then
 cat << EOF
 Usage:
-	$0 [[[ONLY_SHELL | ""] (ONLY_TEST_TYPE | "")] (COMMAND_PATTERN | "")]
+	$0 [[[ONLY_SHELL | ""] (ONLY_TEST_TYPE | "")] (ONLY_TEST_CLIENT | "")]
 
 ONLY_SHELL: execute only tests for given shell
 ONLY_TEST_TYPE: execute only "daemon" or "nodaemon" tests
-COMMAND_PATTERN: use only commands that match given pattern for testing
+ONLY_TEST_CLIENT: use only given test client (one of C, python, render, shell)
 EOF
 exit 0
 fi
@@ -174,6 +174,8 @@ mkdir tests/shell/3rd/'$(echo)'
 mkdir tests/shell/3rd/'`echo`'
 
 mkdir tests/shell/fish_home
+mkdir tests/shell/fish_home/fish
+mkdir tests/shell/fish_home/fish/generated_completions
 cp -r tests/test_shells/ipython_home tests/shell
 
 mkdir tests/shell/path
@@ -276,9 +278,7 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 			if test "$TEST_CLIENT" = "shell" && ! which socat >/dev/null ; then
 				continue
 			fi
-			if test "x$COMMAND_PATTERN" != "x" && ! (
-				echo "$POWERLINE_COMMAND" | grep -e"$COMMAND_PATTERN" &>/dev/null)
-			then
+			if test "x$ONLY_TEST_CLIENT" != "x" && test "x$TEST_CLIENT" != "x$ONLY_TEST_CLIENT" ; then
 				continue
 			fi
 			POWERLINE_COMMAND="$POWERLINE_COMMAND --socket $ADDRESS"
