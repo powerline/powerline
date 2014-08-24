@@ -94,6 +94,10 @@ class DelayedEchoErr(EchoErr):
 	__bool__ = __nonzero__
 
 
+def new_context_item(key, value):
+	return ((value.keydict[key], value[key]),)
+
+
 class Spec(object):
 	def __init__(self, **keys):
 		self.specs = []
@@ -189,7 +193,7 @@ class Spec(object):
 					item,
 					value.mark,
 					data,
-					context + (('list item ' + unicode(i), item),),
+					context + ((MarkedUnicode('list item ' + unicode(i), item.mark), item),),
 					echoerr
 				)
 			else:
@@ -230,7 +234,7 @@ class Spec(object):
 				item,
 				value.mark,
 				data,
-				context + (('tuple item ' + unicode(i), item),),
+				context + ((MarkedUnicode('tuple item ' + unicode(i), item.mark), item),),
 				echoerr
 			)
 			if ihadproblem:
@@ -399,7 +403,7 @@ class Spec(object):
 							value[key],
 							value.mark,
 							data,
-							context + ((key, value[key]),),
+							context + new_context_item(key, value),
 							echoerr
 						)
 						if mhadproblem:
@@ -430,7 +434,7 @@ class Spec(object):
 									value[key],
 									value.mark,
 									data,
-									context + ((key, value[key]),),
+									context + new_context_item(key, value),
 									echoerr
 								)
 								if vhadproblem:
@@ -821,7 +825,7 @@ highlight_keys = set(('highlight_group', 'name'))
 def check_key_compatibility(segment, data, context, echoerr):
 	context_has_marks(context)
 	havemarks(segment)
-	segment_type = segment.get('type', 'function')
+	segment_type = segment.get('type', MarkedUnicode('function', None))
 	havemarks(segment_type)
 
 	if segment_type not in type_keys:
@@ -909,9 +913,7 @@ def check_full_segment_data(segment, data, context, echoerr):
 				for name in names:
 					try:
 						val = segment_data[name][key]
-						# HACK to keep marks
-						l = list(segment_data[name])
-						k = l[l.index(key)]
+						k = segment_data[name].keydict[key]
 						segment_copy[k] = val
 					except KeyError:
 						pass
@@ -1251,7 +1253,7 @@ def check_args_variant(func, args, data, context, echoerr):
 				args[key],
 				args.mark,
 				data,
-				context + ((key, args[key]),),
+				context + new_context_item(key, args),
 				echoerr
 			)
 			if khadproblem:
