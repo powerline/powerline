@@ -63,12 +63,15 @@ class MarkedFloat(float):
 
 
 class MarkedDict(dict):
-	__new__ = gen_new(dict)
+	__init__ = gen_init(dict)
 	__getnewargs__ = gen_getnewargs(dict)
 
-	def __init__(self, value, mark):
-		dict.__init__(self, value)
-		self.keydict = dict(((key, key) for key in self))
+	def __new__(arg_cls, value, mark):
+		r = super(arg_cls, arg_cls).__new__(arg_cls, value)
+		r.mark = mark
+		r.value = value
+		r.keydict = dict(((key, key) for key in r))
+		return r
 
 	def __setitem__(self, key, value):
 		dict.__setitem__(self, key, value)
