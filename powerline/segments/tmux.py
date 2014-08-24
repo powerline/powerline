@@ -1,4 +1,5 @@
 # vim:fileencoding=utf-8:noet
+from __future__ import absolute_import, unicode_literals, division, print_function
 
 from powerline.bindings.tmux import get_tmux_output
 
