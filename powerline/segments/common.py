@@ -69,7 +69,11 @@ def branch(pl, segment_info, create_watcher, status_colors=False):
 		branch = repo.branch()
 		scol = ['branch']
 		if status_colors:
-			status = tree_status(repo, pl)
+			try:
+				status = tree_status(repo, pl)
+			except Exception as e:
+				pl.exception('Failed to compute tree status: {0}', str(e))
+				status = '?'
 			scol.insert(0, 'branch_dirty' if status and status.strip() else 'branch_clean')
 		return [{
 			'contents': branch,
