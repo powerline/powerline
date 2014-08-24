@@ -60,16 +60,21 @@ function s:rcmd(s)
 	endif
 endfunction
 try
+	let s:can_replace_pyeval = !exists('g:powerline_pyeval')
 	call s:rcmd("try:")
 	call s:rcmd("	".s:import_cmd."")
 	call s:rcmd("except ImportError:")
 	call s:rcmd("	import sys, vim")
 	call s:rcmd("	sys.path.append(vim.eval('expand(\"<sfile>:h:h:h:h:h\")'))")
 	call s:rcmd("	".s:import_cmd."")
+	call s:rcmd("import vim")
+	call s:rcmd("VimPowerline().setup(pyeval=vim.eval('s:pyeval'), pycmd=vim.eval('s:pycmd'), can_replace_pyeval=int(vim.eval('s:can_replace_pyeval')))")
+	call s:rcmd("del VimPowerline")
 	execute s:pycmd s:pystr
 	unlet s:pystr
 	let s:launched = 1
 finally
+	unlet s:can_replace_pyeval
 	unlet s:import_cmd
 	if !exists('s:launched')
 		unlet s:pystr
@@ -126,15 +131,7 @@ finally
 	else
 		unlet s:launched
 	endif
+	unlet s:pycmd
+	unlet s:pyeval
 	delfunction s:rcmd
 endtry
-
-let s:can_replace_pyeval = !exists('g:powerline_pyeval')
-
-execute s:pycmd 'import vim'
-execute s:pycmd 'VimPowerline().setup(pyeval=vim.eval("s:pyeval"), pycmd=vim.eval("s:pycmd"), can_replace_pyeval=int(vim.eval("s:can_replace_pyeval")))'
-execute s:pycmd 'del VimPowerline'
-
-unlet s:can_replace_pyeval
-unlet s:pycmd
-unlet s:pyeval
