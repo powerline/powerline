@@ -41,12 +41,16 @@ with codecs.open(fname, 'r', encoding='utf-8') as R:
 			if pid is not None:
 				line = line.replace(pid, 'PID')
 			if shell == 'fish':
+				res = ''
 				try:
-					start = line.index('\033[0;')
-					end = line.index('\033[0m', start)
-					line = line[start:end + 4] + '\n'
+					while line.index('\033[0;'):
+						start = line.index('\033[0;')
+						end = line.index('\033[0m', start)
+						res += line[start:end + 4] + '\n'
+						line = line[end + 4:]
 				except ValueError:
-					line = ''
+					pass
+				line = res
 			elif shell == 'tcsh':
 				try:
 					start = line.index('\033[0;')

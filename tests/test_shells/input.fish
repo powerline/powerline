@@ -23,6 +23,9 @@ cd ../'#[bold]'
 cd ../'(echo)'
 cd ../'$(echo)'
 cd ../'`echo`'
+set POWERLINE_COMMAND "$POWERLINE_COMMAND -c ext.shell.theme=default"
+set -g fish_key_bindings fish_vi_key_bindings
+ii
 false
 true is the last line
 exit
