@@ -12,7 +12,7 @@ from copy import copy
 from powerline.lint.markedjson import load
 from powerline import generate_config_finder, get_config_paths, load_config
 from powerline.lib.config import ConfigLoader
-from powerline.lint.markedjson.error import echoerr, MarkedError
+from powerline.lint.markedjson.error import echoerr, MarkedError, Mark
 from powerline.lint.markedjson.markedvalue import MarkedUnicode
 from powerline.segments.vim import vim_modes
 from powerline.lint.inspect import getconfigargspec
@@ -964,12 +964,24 @@ def check_segment_name(name, data, context, echoerr):
 
 		if func.__doc__:
 			H_G_USED_STR = 'Highlight groups used: '
+			LHGUS = len(H_G_USED_STR)
 			D_H_G_USED_STR = 'Divider highlight group used: '
-			for line in func.__doc__.split('\n'):
+			LDHGUS = len(D_H_G_USED_STR)
+			pointer = 0
+			mark_name = '<{0} docstring>'.format(name)
+			for i, line in enumerate(func.__doc__.split('\n')):
 				if H_G_USED_STR in line:
-					hl_groups.append(line[line.index(H_G_USED_STR) + len(H_G_USED_STR):])
+					idx = line.index(H_G_USED_STR) + LHGUS
+					hl_groups.append((
+						line[idx:],
+						(mark_name, i + 1, idx + 1, func.__doc__),
+						pointer + idx
+					))
 				elif D_H_G_USED_STR in line:
-					divider_hl_group = line[line.index(D_H_G_USED_STR) + len(D_H_G_USED_STR) + 2:-3]
+					idx = line.index(D_H_G_USED_STR) + LDHGUS + 2
+					mark = Mark(mark_name, i + 1, idx + 1, func.__doc__, pointer + idx)
+					divider_hl_group = MarkedUnicode(line[idx:-3], mark)
+				pointer += len(line) + len('\n')
 
 		hadproblem = False
 
@@ -988,11 +1000,28 @@ def check_segment_name(name, data, context, echoerr):
 
 		if hl_groups:
 			greg = re.compile(r'``([^`]+)``( \(gradient\))?')
-			hl_groups = [
-				[greg.match(subs).groups() for subs in s.split(' or ')]
-				for s in (list_sep.join(hl_groups)).split(', ')
-			]
-			for required_pack in hl_groups:
+			parsed_hl_groups = []
+			for line, mark_args, pointer in hl_groups:
+				for s in line.split(', '):
+					required_pack = []
+					sub_pointer = pointer
+					for subs in s.split(' or '):
+						match = greg.match(subs)
+						try:
+							if not match:
+								continue
+							hl_group = MarkedUnicode(
+								match.group(1),
+								Mark(*mark_args, pointer=sub_pointer + match.start(1))
+							)
+							gradient = bool(match.group(2))
+							required_pack.append((hl_group, gradient))
+						finally:
+							sub_pointer += len(subs) + len(' or ')
+					parsed_hl_groups.append(required_pack)
+					pointer += len(s) + len(', ')
+			del hl_group, gradient
+			for required_pack in parsed_hl_groups:
 				rs = [
 					hl_exists(hl_group, data, context, echoerr, allow_gradients=('force' if gradient else False))
 					for hl_group, gradient in required_pack
@@ -1080,7 +1109,7 @@ def hl_exists(hl_group, data, context, echoerr, allow_gradients=False):
 					echoerr(
 						context='Error while checking highlight group in theme (key {key})'.format(
 							key=context_key(context)),
-						context_mark=getattr(hl_group, 'mark', None),
+						context_mark=hl_group.mark,
 						problem='group {0} is using gradient {1} instead of a color'.format(hl_group, color),
 						problem_mark=color.mark
 					)
@@ -1090,7 +1119,7 @@ def hl_exists(hl_group, data, context, echoerr, allow_gradients=False):
 				echoerr(
 					context='Error while checking highlight group in theme (key {key})'.format(
 						key=context_key(context)),
-					context_mark=getattr(hl_group, 'mark', None),
+					context_mark=hl_group.mark,
 					problem='group {0} should have at least one gradient color, but it has no'.format(hl_group),
 					problem_mark=group_config.mark
 				)
