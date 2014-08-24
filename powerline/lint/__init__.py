@@ -855,7 +855,8 @@ def check_full_segment_data(segment, data, context, echoerr):
 
 	names = [segment['name']]
 	if segment.get('type', 'function') == 'function':
-		module = segment.get('module', context[0][1].get('default_module', 'powerline.segments.' + ext))
+		module = segment.get('module', context[0][1].get('default_module', MarkedUnicode(
+			'powerline.segments.' + ext, None)))
 		names.insert(0, unicode(module) + '.' + unicode(names[0]))
 
 	segment_copy = segment.copy()
