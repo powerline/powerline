@@ -1223,7 +1223,8 @@ def get_all_possible_functions(data, context, echoerr):
 					if segment.get('type', 'function') == 'function':
 						module = segment.get(
 							'module',
-							theme_config.get('default_module', 'powerline.segments.' + data['ext'])
+							theme_config.get('default_module', MarkedUnicode(
+								'powerline.segments.' + data['ext'], None))
 						)
 						func = import_segment(name, data, context, echoerr, module=module)
 						if func:
