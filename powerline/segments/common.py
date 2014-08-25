@@ -9,7 +9,6 @@ import socket
 
 from datetime import datetime
 from multiprocessing import cpu_count as _cpu_count
-from functools import partial
 
 from powerline.lib import add_divider_highlight_group
 from powerline.lib.shell import asrun, run_cmd
@@ -804,7 +803,7 @@ def uptime(pl, days_format='{days:d}d', hours_format=' {hours:d}h', minutes_form
 		hours_format.format(hours=hours) if hours and hours_format else None,
 		minutes_format.format(minutes=minutes) if minutes and minutes_format else None,
 		seconds_format.format(seconds=seconds) if seconds and seconds_format else None,
-		]))[0:shorten_len]
+	]))[0:shorten_len]
 	return ''.join(time_formatted).strip()
 
 
@@ -1301,11 +1300,12 @@ def _get_battery(pl):
 						pl.debug('Not using DBUS+UPower with {0}: not a power supply', devpath)
 						continue
 					pl.debug('Using DBUS+UPower with {0}', devpath)
-					return lambda pl: float(partial(
-						dbus.Interface(dev, dbus_interface=devinterface).Get,
-						devtype_name,
-						'Percentage'
-					))
+					return lambda pl: float(
+						dbus.Interface(dev, dbus_interface=devinterface).Get(
+							devtype_name,
+							'Percentage'
+						)
+					)
 				pl.debug('Not using DBUS+UPower as no batteries were found')
 
 	if os.path.isdir('/sys/class/power_supply'):
