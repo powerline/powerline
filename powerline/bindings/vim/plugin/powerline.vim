@@ -62,14 +62,19 @@ endfunction
 try
 	let s:can_replace_pyeval = !exists('g:powerline_pyeval')
 	call s:rcmd("try:")
-	call s:rcmd("	".s:import_cmd."")
-	call s:rcmd("except ImportError:")
-	call s:rcmd("	import sys, vim")
-	call s:rcmd("	sys.path.append(vim.eval('expand(\"<sfile>:h:h:h:h:h\")'))")
-	call s:rcmd("	".s:import_cmd."")
-	call s:rcmd("import vim")
-	call s:rcmd("VimPowerline().setup(pyeval=vim.eval('s:pyeval'), pycmd=vim.eval('s:pycmd'), can_replace_pyeval=int(vim.eval('s:can_replace_pyeval')))")
-	call s:rcmd("del VimPowerline")
+	call s:rcmd("	try:")
+	call s:rcmd("		".s:import_cmd."")
+	call s:rcmd("	except ImportError:")
+	call s:rcmd("		import sys, vim")
+	call s:rcmd("		sys.path.append(vim.eval('expand(\"<sfile>:h:h:h:h:h\")'))")
+	call s:rcmd("		".s:import_cmd."")
+	call s:rcmd("	import vim")
+	call s:rcmd("	VimPowerline().setup(pyeval=vim.eval('s:pyeval'), pycmd=vim.eval('s:pycmd'), can_replace_pyeval=int(vim.eval('s:can_replace_pyeval')))")
+	call s:rcmd("	del VimPowerline")
+	call s:rcmd("except Exception:")
+	call s:rcmd("	import traceback, sys")
+	call s:rcmd("	traceback.print_exc(file=sys.stdout)")
+	call s:rcmd("	raise")
 	execute s:pycmd s:pystr
 	unlet s:pystr
 	let s:launched = 1
