@@ -117,7 +117,6 @@ finally
 			call s:rcmd("			print('Check your installation:')")
 			call s:rcmd("			print('this script is not in powerline[/bindings/vim/plugin] directory,')")
 			call s:rcmd("			print('neither it is installed system-wide')")
-			call s:rcmd("		this_dir = os.path.dirname(this_dir)")
 			call s:rcmd("		real_powerline_dir = os.path.realpath(powerline_dir)")
 			call s:rcmd("		real_this_dir = os.path.realpath(this_dir)")
 			call s:rcmd("		if powerline_appended_path is not None and real_this_dir != powerline_appended_path:")
