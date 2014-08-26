@@ -17,6 +17,11 @@ Python package
 
    .
 
+.. note::
+    In case you want or have to use ``powerline.sh`` socat-based client you 
+    should also install GNU env named ``genv``. This may be achieved by running 
+    ``brew install coreutils``.
+
 2. Install Powerline using the following command::
 
        pip install --user git+git://github.com/Lokaltog/powerline
