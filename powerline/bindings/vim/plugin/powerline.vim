@@ -110,9 +110,13 @@ finally
 		if strpart(expand('<sfile>'), 0, 5) !=# '/usr/'
 			call s:rcmd("	else:")
 			call s:rcmd("		import os")
-			call s:rcmd("		powerline_dir = os.path.dirname(os.path.realpath(powerline.__file__))")
-			call s:rcmd("		this_dir = os.path.dirname(os.path.realpath(vim.eval('expand(\"<sfile>:p\")')))")
-			call s:rcmd("		this_dir = os.path.dirname(os.path.dirname(os.path.dirname(this_dir)))")
+			call s:rcmd("		powerline_dir = os.path.realpath(os.path.normpath(powerline.__file__))")
+			call s:rcmd("		powerline_dir = os.path.dirname(powerline.__file__)")
+			call s:rcmd("		this_dir = os.path.realpath(os.path.normpath(vim.eval('expand(\"<sfile>:p\")')))")
+			call s:rcmd("		this_dir = os.path.dirname(this_dir)")  " powerline/bindings/vim/plugin
+			call s:rcmd("		this_dir = os.path.dirname(this_dir)")  " powerline/bindings/vim
+			call s:rcmd("		this_dir = os.path.dirname(this_dir)")  " powerline/bindings
+			call s:rcmd("		this_dir = os.path.dirname(this_dir)")  " powerline
 			call s:rcmd("		if os.path.basename(this_dir) != 'powerline':")
 			call s:rcmd("			print('Check your installation:')")
 			call s:rcmd("			print('this script is not in powerline[/bindings/vim/plugin] directory,')")
