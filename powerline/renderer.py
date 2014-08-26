@@ -36,8 +36,6 @@ class Renderer(object):
 		base class only records this parameter to a ``.local_themes`` attribute.
 	:param dict theme_kwargs:
 		Keyword arguments for ``Theme`` class constructor.
-	:param Colorscheme colorscheme:
-		Colorscheme object that holds colors configuration.
 	:param PowerlineLogger pl:
 		Object used for logging.
 	:param int ambiwidth:
@@ -93,7 +91,6 @@ class Renderer(object):
 	             theme_config,
 	             local_themes,
 	             theme_kwargs,
-	             colorscheme,
 	             pl,
 	             ambiwidth=1,
 	             **options):
@@ -107,7 +104,6 @@ class Renderer(object):
 		self.theme = Theme(theme_config=theme_config, **theme_kwargs)
 		self.local_themes = local_themes
 		self.theme_kwargs = theme_kwargs
-		self.colorscheme = colorscheme
 		self.width_data = {
 			'N': 1,          # Neutral
 			'Na': 1,         # Narrow
@@ -149,21 +145,6 @@ class Renderer(object):
 		overridden by subclasses in case they support local themes.
 		'''
 		self.theme.shutdown()
-
-	def _set_highlighting(self, segment):
-		segment['highlight'] = self.colorscheme.get_highlighting(
-			segment['highlight_group'],
-			segment['mode'],
-			segment.get('gradient_level')
-		)
-		if segment['divider_highlight_group']:
-			segment['divider_highlight'] = self.colorscheme.get_highlighting(
-				segment['divider_highlight_group'],
-				segment['mode']
-			)
-		else:
-			segment['divider_highlight'] = None
-		return segment
 
 	def get_segment_info(self, segment_info, mode):
 		'''Get segment information.
@@ -264,12 +245,7 @@ class Renderer(object):
 	def do_render(self, mode, width, side, line, output_raw, output_width, segment_info, theme):
 		'''Like Renderer.render(), but accept theme in place of matcher_info
 		'''
-		segments = [
-			self._set_highlighting(segment)
-			for segment in (
-				theme.get_segments(side, line, self.get_segment_info(segment_info, mode), mode)
-			)
-		]
+		segments = list(theme.get_segments(side, line, self.get_segment_info(segment_info, mode), mode))
 
 		current_width = 0
 

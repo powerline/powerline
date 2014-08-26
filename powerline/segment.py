@@ -99,7 +99,8 @@ def get_attr_func(contents_func, key, args):
 			return lambda pl, shutdown_event: func(pl=pl, shutdown_event=shutdown_event, **args)
 
 
-def process_segment_lister(pl, segment_info, parsed_segments, side, mode, lister, subsegments, patcher_args):
+def process_segment_lister(pl, segment_info, parsed_segments, side, mode, colorscheme,
+	                       lister, subsegments, patcher_args):
 	for subsegment_info, subsegment_update in lister(pl=pl, segment_info=segment_info, **patcher_args):
 		draw_inner_divider = subsegment_update.pop('draw_inner_divider', False)
 		old_pslen = len(parsed_segments)
@@ -120,7 +121,15 @@ def process_segment_lister(pl, segment_info, parsed_segments, side, mode, lister
 			):
 				continue
 
-			process_segment(pl, side, subsegment_info, parsed_segments, subsegment, subsegment_mode or mode)
+			process_segment(
+				pl,
+				side,
+				subsegment_info,
+				parsed_segments,
+				subsegment,
+				subsegment_mode or mode,
+				colorscheme,
+			)
 		new_pslen = len(parsed_segments)
 		if new_pslen > old_pslen + 1 and draw_inner_divider is not None:
 			for i in range(old_pslen, new_pslen - 1) if side == 'left' else range(old_pslen + 1, new_pslen):
@@ -128,16 +137,37 @@ def process_segment_lister(pl, segment_info, parsed_segments, side, mode, lister
 	return None
 
 
-def process_segment(pl, side, segment_info, parsed_segments, segment, mode):
+def set_segment_highlighting(pl, colorscheme, segment):
+	try:
+		segment['highlight'] = colorscheme.get_highlighting(
+			segment['highlight_group'],
+			segment['mode'],
+			segment.get('gradient_level')
+		)
+		if segment['divider_highlight_group']:
+			segment['divider_highlight'] = colorscheme.get_highlighting(
+				segment['divider_highlight_group'],
+				segment['mode']
+			)
+		else:
+			segment['divider_highlight'] = None
+	except Exception as e:
+		pl.exception('Failed to set highlight group: {0}', str(e))
+		return False
+	else:
+		return True
+
+
+def process_segment(pl, side, segment_info, parsed_segments, segment, mode, colorscheme):
 	segment = segment.copy()
 	segment['mode'] = mode
+	pl.prefix = segment['name']
 	if segment['type'] in ('function', 'segment_list'):
-		pl.prefix = segment['name']
 		try:
 			if segment['type'] == 'function':
 				contents = segment['contents_func'](pl, segment_info)
 			else:
-				contents = segment['contents_func'](pl, segment_info, parsed_segments, side, mode)
+				contents = segment['contents_func'](pl, segment_info, parsed_segments, side, mode, colorscheme)
 		except Exception as e:
 			pl.exception('Exception while computing segment: {0}', str(e))
 			return
@@ -176,12 +206,15 @@ def process_segment(pl, side, segment_info, parsed_segments, segment, mode):
 				if draw_inner_divider is not None:
 					segment_copy['draw_soft_divider'] = draw_inner_divider
 				draw_inner_divider = segment_copy.pop('draw_inner_divider', None)
-				append(segment_copy)
+				if set_segment_highlighting(pl, colorscheme, segment_copy):
+					append(segment_copy)
 		else:
 			segment['contents'] = contents
-			parsed_segments.append(segment)
+			if set_segment_highlighting(pl, colorscheme, segment):
+				parsed_segments.append(segment)
 	elif segment['width'] == 'auto' or (segment['type'] == 'string' and segment['contents'] is not None):
-		parsed_segments.append(segment)
+		if set_segment_highlighting(pl, colorscheme, segment):
+			parsed_segments.append(segment)
 
 
 def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, get_module_attr, top_theme):
@@ -239,11 +272,13 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, ge
 				'divider_highlight_group': None,
 				'before': None,
 				'after': None,
-				'contents_func': lambda pl, segment_info, parsed_segments, side, mode: process_segment_lister(
-					pl, segment_info, parsed_segments, side, mode,
-					patcher_args=args,
-					subsegments=subsegments,
-					lister=_contents_func,
+				'contents_func': lambda pl, segment_info, parsed_segments, side, mode, colorscheme: (
+					process_segment_lister(
+						pl, segment_info, parsed_segments, side, mode, colorscheme,
+						patcher_args=args,
+						subsegments=subsegments,
+						lister=_contents_func,
+					)
 				),
 				'contents': None,
 				'priority': None,
