@@ -137,7 +137,7 @@ def do_read(conn, timeout=2.0):
 
 def do_write(conn, result):
 	try:
-		eintr_retry_call(conn.sendall, result + b'\0')
+		eintr_retry_call(conn.sendall, result)
 	except Exception:
 		pass
 
