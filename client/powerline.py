@@ -5,8 +5,12 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 
 import sys
 import socket
-import os
 import errno
+import os
+try:
+	from posix import environ
+except ImportError:
+	from os import environ
 
 
 if len(sys.argv) < 2:
@@ -69,7 +73,7 @@ else:
 	args.append(cwd)
 
 
-args.extend((tobytes(k) + b'=' + tobytes(v) for k, v in os.environ.items()))
+args.extend((tobytes(k) + b'=' + tobytes(v) for k, v in environ.items()))
 
 EOF = b'\0\0'
 
