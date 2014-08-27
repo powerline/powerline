@@ -37,6 +37,7 @@ def eintr_retry_call(func, *args, **kwargs):
 				continue
 			raise
 
+
 try:
 	eintr_retry_call(sock.connect, address)
 except Exception:
@@ -46,7 +47,13 @@ except Exception:
 
 fenc = sys.getfilesystemencoding() or 'utf-8'
 
-tobytes = lambda s: s if isinstance(s, bytes) else s.encode(fenc)
+
+def tobytes(s):
+	if isinstance(s, bytes):
+		return s
+	else:
+		return s.encode(fenc)
+
 
 args = [tobytes('%x' % (len(sys.argv) - 1))]
 args.extend((tobytes(s) for s in sys.argv[1:]))
