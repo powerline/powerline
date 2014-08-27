@@ -287,6 +287,19 @@ ascii                       Theme without any unicode characters at all
     after it (on the left side). These spaces will not be added if divider is 
     not drawn.
 
+``use_non_breaking_spaces``
+    Determines whether non-breaking spaces should be used in place of the 
+    regular ones. This option is needed because regular spaces are not displayed 
+    properly when using powerline with some font configuration. Defaults to 
+    ``True``.
+
+    .. note::
+       Unlike all other options this one is only checked once at startup using 
+       whatever theme is :ref:`the default <config-ext-theme>`. If this option 
+       is set in the local themes it will be ignored. This option may also be 
+       ignored in some bindings.
+
+
 ``dividers``
     Defines the dividers used in all Powerline extensions. This option 
     should usually only be changed if you don't have a patched font, or if 

@@ -73,7 +73,7 @@ class Renderer(object):
 		python-2) regular string or ``None``.
 	'''
 
-	character_translations = {ord(' '): NBSP}
+	character_translations = {}
 	'''Character translations for use in escape() function.
 
 	See documentation of ``unicode.translate`` for details.
@@ -101,6 +101,9 @@ class Renderer(object):
 		self.theme_config = theme_config
 		theme_kwargs['pl'] = pl
 		self.pl = pl
+		if theme_config.get('use_non_breaking_spaces', True):
+			self.character_translations = self.character_translations.copy()
+			self.character_translations[ord(' ')] = NBSP
 		self.theme = Theme(theme_config=theme_config, **theme_kwargs)
 		self.local_themes = local_themes
 		self.theme_kwargs = theme_kwargs
@@ -442,11 +445,10 @@ class Renderer(object):
 					segment['_rendered_hl'] = contents_highlighted
 			yield segment
 
-	@classmethod
-	def escape(cls, string):
+	def escape(self, string):
 		'''Method that escapes segment contents.
 		'''
-		return string.translate(cls.character_translations)
+		return string.translate(self.character_translations)
 
 	def hlstyle(fg=None, bg=None, attr=None):
 		'''Output highlight style string.
