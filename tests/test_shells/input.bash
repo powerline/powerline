@@ -25,6 +25,7 @@ cd ../'#[bold]'
 cd ../'(echo)'
 cd ../'$(echo)'
 cd ../'`echo`'
+POWERLINE_COMMAND="$POWERLINE_COMMAND -t default_leftonly.dividers.left.hard=\$ABC"
 false
 true is the last line
 exit

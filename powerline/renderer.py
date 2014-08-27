@@ -385,7 +385,7 @@ class Renderer(object):
 
 			# Pad segments first
 			if draw_divider:
-				divider_raw = theme.get_divider(side, divider_type).replace(' ', NBSP)
+				divider_raw = self.escape(theme.get_divider(side, divider_type))
 				if side == 'left':
 					contents_raw = (
 						outer_padding + (segment['_space_left'] * ' ')
