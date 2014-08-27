@@ -7,6 +7,9 @@ import sys
 import socket
 import errno
 import os
+
+from locale import getpreferredencoding
+
 try:
 	from posix import environ
 except ImportError:
@@ -49,7 +52,7 @@ except Exception:
 	args = ['powerline-render'] + sys.argv[1:]
 	os.execvp('powerline-render', args)
 
-fenc = sys.getfilesystemencoding() or 'utf-8'
+fenc = getpreferredencoding() or 'utf-8'
 
 
 def tobytes(s):
