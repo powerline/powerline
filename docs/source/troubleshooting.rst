@@ -120,6 +120,9 @@ make powerline package importable anywhere: use
 
      pip install --user --editable path/to/powerline
 
+Shell issues
+============
+
 I am suffering bad lags before displaying shell prompt
 ------------------------------------------------------
 
