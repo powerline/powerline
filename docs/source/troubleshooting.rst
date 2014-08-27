@@ -151,6 +151,14 @@ strictly after :file:`powerline/bindings/bash/powerline.sh`. This way background
 jobs are spawned by `z <https://github.com/rupa/z>`_ after powerline has done 
 its job.
 
+When using shell I do not see powerline fancy characters
+--------------------------------------------------------
+
+If your locale encoding is not unicode (any encoding that starts with “utf” or 
+“ucs” will work, case is ignored) powerline falls back to ascii-only theme. You 
+should set up your system to use unicode locale or forget about powerline fancy 
+characters.
+
 Vim issues
 ==========
 
