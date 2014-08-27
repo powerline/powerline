@@ -45,8 +45,6 @@ except Exception:
 	os.execvp('powerline-render', args)
 
 fenc = sys.getfilesystemencoding() or 'utf-8'
-if fenc == 'ascii':
-	fenc = 'utf-8'
 
 tobytes = lambda s: s if isinstance(s, bytes) else s.encode(fenc)
 
