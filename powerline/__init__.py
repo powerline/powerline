@@ -5,13 +5,14 @@ import os
 import sys
 import logging
 
+from locale import getpreferredencoding
+from threading import Lock, Event
+
 from powerline.colorscheme import Colorscheme
 from powerline.lib.config import ConfigLoader
 from powerline.lib.unicode import safe_unicode, FailedUnicode
 from powerline.config import DEFAULT_SYSTEM_CONFIG_DIR
 from powerline.lib import mergedicts
-
-from threading import Lock, Event
 
 
 def _config_loader_condition(path):
@@ -234,8 +235,14 @@ def finish_common_config(common_config):
 		Copy of common configuration with all configuration keys and expanded 
 		paths.
 	'''
+	encoding = getpreferredencoding().lower()
+	if encoding.startswith('utf') or encoding.startswith('ucs'):
+		default_top_theme = 'powerline'
+	else:
+		default_top_theme = 'ascii'
+
 	common_config = common_config.copy()
-	common_config.setdefault('default_top_theme', 'powerline')
+	common_config.setdefault('default_top_theme', default_top_theme)
 	common_config.setdefault('paths', [])
 	common_config.setdefault('watcher', 'auto')
 	common_config.setdefault('log_level', 'WARNING')

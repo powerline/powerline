@@ -94,7 +94,8 @@ Common configuration is a subdictionary that is a value of ``common`` key in
 
 ``default_top_theme``
     String, determines which top-level theme will be used as the default. 
-    Defaults to ``powerline``. See `Themes`_ section for more details.
+    Defaults to ``powerline`` in unicode locales and ``ascii`` in non-unicode 
+    locales. See `Themes`_ section for more details.
 
 Extension-specific configuration
 --------------------------------
