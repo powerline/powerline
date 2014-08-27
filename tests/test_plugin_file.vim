@@ -1,5 +1,5 @@
 #!/usr/bin/vim -S
-set nocompatible
+set encoding=utf-8
 tabedit abc
 tabedit def
 try

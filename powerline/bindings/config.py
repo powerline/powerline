@@ -6,6 +6,8 @@ import os
 import re
 import sys
 
+from locale import getpreferredencoding
+
 from powerline.config import POWERLINE_ROOT, TMUX_CONFIG_DIRECTORY
 from powerline.lib.config import ConfigLoader
 from powerline import generate_config_finder, load_config, create_logger, PowerlineLogger, finish_common_config
@@ -83,7 +85,7 @@ def get_main_config(args):
 
 def create_powerline_logger(args):
 	config = get_main_config(args)
-	common_config = finish_common_config(config['common'])
+	common_config = finish_common_config(getpreferredencoding(), config['common'])
 	logger = create_logger(common_config)
 	return PowerlineLogger(use_daemon_threads=True, logger=logger, ext='config')
 
