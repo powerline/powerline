@@ -3,11 +3,14 @@
 from __future__ import absolute_import
 
 import sys
+
+from itertools import count
+
+import vim
+
 from powerline.bindings.vim import vim_get_func, vim_getvar
 from powerline import Powerline, FailedUnicode
 from powerline.lib import mergedicts
-import vim
-from itertools import count
 
 if not hasattr(vim, 'bindeval'):
 	import json
@@ -70,6 +73,10 @@ class VimPowerline(Powerline):
 			# .do_setup().
 			self.setup_kwargs.setdefault('_local_themes', []).append((key, config))
 			return True
+
+	@staticmethod
+	def get_encoding():
+		return vim.eval('&encoding')
 
 	def load_main_config(self):
 		return _override_from(super(VimPowerline, self).load_main_config(), 'powerline_config_overrides')

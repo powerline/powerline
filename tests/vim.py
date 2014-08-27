@@ -9,6 +9,7 @@ options = {
 	'paste': 0,
 	'ambiwidth': 'single',
 	'columns': 80,
+	'encoding': 'utf-8',
 }
 _last_bufnr = 0
 _highlights = {}

@@ -5,13 +5,14 @@ import os
 import sys
 import logging
 
+from locale import getpreferredencoding
+from threading import Lock, Event
+
 from powerline.colorscheme import Colorscheme
 from powerline.lib.config import ConfigLoader
 from powerline.lib.unicode import safe_unicode, FailedUnicode
 from powerline.config import DEFAULT_SYSTEM_CONFIG_DIR
 from powerline.lib import mergedicts
-
-from threading import Lock, Event
 
 
 def _config_loader_condition(path):
@@ -224,7 +225,7 @@ def create_logger(common_config):
 	return logger
 
 
-def finish_common_config(common_config):
+def finish_common_config(encoding, common_config):
 	'''Add default values to common config and expand ~ in paths
 
 	:param dict common_config:
@@ -234,8 +235,14 @@ def finish_common_config(common_config):
 		Copy of common configuration with all configuration keys and expanded 
 		paths.
 	'''
+	encoding = encoding.lower()
+	if encoding.startswith('utf') or encoding.startswith('ucs'):
+		default_top_theme = 'powerline'
+	else:
+		default_top_theme = 'ascii'
+
 	common_config = common_config.copy()
-	common_config.setdefault('default_top_theme', 'powerline')
+	common_config.setdefault('default_top_theme', default_top_theme)
 	common_config.setdefault('paths', [])
 	common_config.setdefault('watcher', 'auto')
 	common_config.setdefault('log_level', 'WARNING')
@@ -400,6 +407,12 @@ class Powerline(object):
 		self.setup_kwargs = {}
 		self.imported_modules = set()
 
+	get_encoding = staticmethod(getpreferredencoding)
+	'''Get encoding used by the current application
+
+	Usually returns encoding of the current locale.
+	'''
+
 	def create_renderer(self, load_main=False, load_colors=False, load_colorscheme=False, load_theme=False):
 		'''(Re)create renderer object. Can be used after Powerline object was 
 		successfully initialized. If any of the below parameters except 
@@ -424,7 +437,7 @@ class Powerline(object):
 		if load_main:
 			self._purge_configs('main')
 			config = self.load_main_config()
-			self.common_config = finish_common_config(config['common'])
+			self.common_config = finish_common_config(self.get_encoding(), config['common'])
 			if self.common_config != self.prev_common_config:
 				common_config_differs = True
 

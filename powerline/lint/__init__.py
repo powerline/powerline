@@ -1388,6 +1388,7 @@ common_theme_spec = Spec(
 top_theme_spec = common_theme_spec().update(
 	dividers=dividers_spec(),
 	spaces=spaces_spec(),
+	use_non_breaking_spaces=Spec().type(bool).optional(),
 	segment_data=Spec().unknown_spec(
 		Spec().func(check_segment_data_key),
 		segment_data_value_spec(),

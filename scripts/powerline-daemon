@@ -12,7 +12,7 @@ from signal import signal, SIGTERM
 from time import sleep
 from functools import partial
 from locale import getpreferredencoding
-from io import StringIO
+from io import BytesIO
 
 from powerline.shell import get_argparser, finish_args, ShellPowerline, write_output
 from powerline.lib.monotonic import monotonic
@@ -98,8 +98,8 @@ def render(args, environ, cwd):
 				powerline.pl.exception('Failed to render {0}: {1}', str(key), str(e))
 			else:
 				return 'Failed to render {0}: {1}'.format(str(key), str(e))
-	s = StringIO()
-	write_output(args, powerline, segment_info, s.write)
+	s = BytesIO()
+	write_output(args, powerline, segment_info, s.write, encoding)
 	s.seek(0)
 	return s.read()
 
@@ -143,8 +143,6 @@ def do_write(conn, result):
 
 
 encoding = getpreferredencoding() or 'UTF-8'
-if encoding.lower() == 'ascii':
-	encoding = 'UTF-8'
 
 
 def safe_bytes(o, encoding=encoding):

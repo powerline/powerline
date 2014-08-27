@@ -60,6 +60,7 @@ run() {
 		local additional_prompts=
 	fi
 	env -i \
+		LANG=en_US.UTF-8 \
 		PATH="$local_path" \
 		TERM="${TERM}" \
 		COLUMNS="${COLUMNS}" \
@@ -87,7 +88,7 @@ run_test() {
 
 	run "${TEST_TYPE}" "${TEST_CLIENT}" "${SH}" \
 		screen -L -c tests/test_shells/screenrc -d -m -S "$SESNAME" \
-			env LANG=en_US.UTF-8 BINDFILE="$BINDFILE" "$@"
+			"$@"
 	while ! screen -S "$SESNAME" -X readreg a tests/test_shells/input.$SH ; do
 		sleep 0.1s
 	done

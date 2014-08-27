@@ -5,8 +5,15 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 
 import sys
 import socket
-import os
 import errno
+import os
+
+from locale import getpreferredencoding
+
+try:
+	from posix import environ
+except ImportError:
+	from os import environ
 
 
 if len(sys.argv) < 2:
@@ -37,6 +44,7 @@ def eintr_retry_call(func, *args, **kwargs):
 				continue
 			raise
 
+
 try:
 	eintr_retry_call(sock.connect, address)
 except Exception:
@@ -44,11 +52,15 @@ except Exception:
 	args = ['powerline-render'] + sys.argv[1:]
 	os.execvp('powerline-render', args)
 
-fenc = sys.getfilesystemencoding() or 'utf-8'
-if fenc == 'ascii':
-	fenc = 'utf-8'
+fenc = getpreferredencoding() or 'utf-8'
 
-tobytes = lambda s: s if isinstance(s, bytes) else s.encode(fenc)
+
+def tobytes(s):
+	if isinstance(s, bytes):
+		return s
+	else:
+		return s.encode(fenc)
+
 
 args = [tobytes('%x' % (len(sys.argv) - 1))]
 args.extend((tobytes(s) for s in sys.argv[1:]))
@@ -64,7 +76,7 @@ else:
 	args.append(cwd)
 
 
-args.extend((tobytes(k) + b'=' + tobytes(v) for k, v in os.environ.items()))
+args.extend((tobytes(k) + b'=' + tobytes(v) for k, v in environ.items()))
 
 EOF = b'\0\0'
 

@@ -40,6 +40,7 @@ do
 done
 1
 hash -d foo=$PWD:h ; cd .
+POWERLINE_COMMAND=( $POWERLINE_COMMAND -t default.dividers.left.hard=\$ABC )
 true
 true is the last line
 exit

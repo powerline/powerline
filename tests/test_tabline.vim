@@ -1,4 +1,5 @@
 #!/usr/bin/vim -S
+set encoding=utf-8
 source powerline/bindings/vim/plugin/powerline.vim
 edit abc
 tabedit def
