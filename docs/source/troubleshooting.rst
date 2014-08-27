@@ -120,6 +120,37 @@ make powerline package importable anywhere: use
 
      pip install --user --editable path/to/powerline
 
+I am suffering bad lags before displaying shell prompt
+------------------------------------------------------
+
+To get rid of these lags there currently are two options:
+
+* Run ``powerline-daemon``. Powerline does not automatically start it for you.
+* Compile and install ``libzpython`` module that lives in 
+  https://bitbucket.org/ZyX_I/zpython. This variant is zsh-specific.
+
+Prompt is spoiled after completing files in ksh
+-----------------------------------------------
+
+This is exactly why powerline has official mksh support, but not official ksh 
+support. If you know the solution feel free to share it in `powerline bug 
+tracker`_.
+
+When using z powerline shows wrong number of jobs
+-------------------------------------------------
+
+This happens because `z <https://github.com/rupa/z>`_ is launching some jobs in 
+the background from ``$POWERLINE_COMMAND`` and these jobs fail to finish before 
+powerline prompt is run.
+
+Solution to this problem is simple: be sure that :file:`z.sh` is sourced 
+strictly after :file:`powerline/bindings/bash/powerline.sh`. This way background 
+jobs are spawned by `z <https://github.com/rupa/z>`_ after powerline has done 
+its job.
+
+Vim issues
+==========
+
 My vim statusline has strange characters like ``^B`` in it!
 -----------------------------------------------------------
 
@@ -147,34 +178,6 @@ My vim statusline is not displayed completely and has too much spaces
 * Be sure you have ``ambiwidth`` option set to ``single``.
 * Alternative: set :ref:`ambiwidth <config-common-ambiwidth>` to 2, remove fancy 
   dividers (they suck when ``ambiwidth`` is set to double).
-
-When using z powerline shows wrong number of jobs
--------------------------------------------------
-
-This happens because `z <https://github.com/rupa/z>`_ is launching some jobs in 
-the background from ``$POWERLINE_COMMAND`` and these jobs fail to finish before 
-powerline prompt is run.
-
-Solution to this problem is simple: be sure that :file:`z.sh` is sourced 
-strictly after :file:`powerline/bindings/bash/powerline.sh`. This way background 
-jobs are spawned by `z <https://github.com/rupa/z>`_ after powerline has done 
-its job.
-
-I am suffering bad lags before displaying shell prompt
-------------------------------------------------------
-
-To get rid of these lags there currently are two options:
-
-* Run ``powerline-daemon``. Powerline does not automatically start it for you.
-* Compile and install ``libzpython`` module that lives in 
-  https://bitbucket.org/ZyX_I/zpython. This variant is zsh-specific.
-
-Prompt is spoiled after completing files in ksh
------------------------------------------------
-
-This is exactly why powerline has official mksh support, but not official ksh 
-support. If you know the solution feel free to share it in `powerline bug 
-tracker`_.
 
 Powerline loses color after editing vimrc
 -----------------------------------------
