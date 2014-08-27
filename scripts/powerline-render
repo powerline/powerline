@@ -4,6 +4,8 @@
 import sys
 import os
 
+from locale import getpreferredencoding
+
 try:
 	from powerline.shell import ShellPowerline, get_argparser, finish_args, write_output
 except ImportError:
@@ -11,11 +13,10 @@ except ImportError:
 	from powerline.shell import ShellPowerline, get_argparser, finish_args, write_output  # NOQA
 
 
-def write(output):
-	try:
-		sys.stdout.write(output)
-	except UnicodeEncodeError:
-		sys.stdout.write(output.encode('utf-8'))
+if sys.version_info < (3,):
+	write = sys.stdout.write
+else:
+	write = sys.stdout.buffer.write
 
 
 if __name__ == '__main__':
@@ -23,4 +24,4 @@ if __name__ == '__main__':
 	finish_args(args)
 	powerline = ShellPowerline(args, run_once=True)
 	segment_info = {'args': args, 'environ': os.environ}
-	write_output(args, powerline, segment_info, write)
+	write_output(args, powerline, segment_info, write, getpreferredencoding())

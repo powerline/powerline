@@ -81,7 +81,7 @@ def finish_args(args):
 		args.renderer_arg = mergeargs((parsedotval(v) for v in args.renderer_arg))
 
 
-def write_output(args, powerline, segment_info, write):
+def write_output(args, powerline, segment_info, write, encoding):
 	if args.renderer_arg:
 		segment_info.update(args.renderer_arg)
 	if args.side.startswith('above'):
@@ -90,8 +90,8 @@ def write_output(args, powerline, segment_info, write):
 			segment_info=segment_info,
 			mode=segment_info['environ'].get('_POWERLINE_MODE'),
 		):
-			write(line)
-			write('\n')
+			write(line.encode(encoding, 'replace'))
+			write(b'\n')
 		args.side = args.side[len('above'):]
 
 	if args.side:
@@ -101,4 +101,4 @@ def write_output(args, powerline, segment_info, write):
 			segment_info=segment_info,
 			mode=segment_info['environ'].get('_POWERLINE_MODE'),
 		)
-		write(rendered)
+		write(rendered.encode(encoding, 'replace'))
