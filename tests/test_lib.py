@@ -16,7 +16,7 @@ from powerline.lib.monotonic import monotonic
 from powerline.lib.vcs.git import git_directory
 
 from tests.lib import Pl
-from tests import TestCase
+from tests import TestCase, SkipTest
 
 
 try:
@@ -460,94 +460,96 @@ class TestVCS(TestCase):
 			os.remove(dotgit)
 			os.rename(spacegit, dotgit)
 
-	if use_mercurial:
-		def test_mercurial(self):
-			create_watcher = get_fallback_create_watcher()
-			repo = guess(path=HG_REPO, create_watcher=create_watcher)
-			self.assertNotEqual(repo, None)
-			self.assertEqual(repo.branch(), 'default')
-			self.assertEqual(repo.status(), None)
-			with open(os.path.join(HG_REPO, 'file'), 'w') as f:
-				f.write('abc')
-				f.flush()
-				self.assertEqual(repo.status(), ' U')
-				self.assertEqual(repo.status('file'), 'U')
-				call(['hg', 'add', '.'], cwd=HG_REPO, stdout=PIPE)
-				self.assertEqual(repo.status(), 'D ')
-				self.assertEqual(repo.status('file'), 'A')
-			os.remove(os.path.join(HG_REPO, 'file'))
-
-	if use_bzr:
-		def test_bzr(self):
-			create_watcher = get_fallback_create_watcher()
-			repo = guess(path=BZR_REPO, create_watcher=create_watcher)
-			self.assertNotEqual(repo, None, 'No bzr repo found. Do you have bzr installed?')
-			self.assertEqual(repo.branch(), 'test_powerline')
-			self.assertEqual(repo.status(), None)
-			with open(os.path.join(BZR_REPO, 'file'), 'w') as f:
-				f.write('abc')
+	def test_mercurial(self):
+		if not use_mercurial:
+			raise SkipTest('Mercurial is not available')
+		create_watcher = get_fallback_create_watcher()
+		repo = guess(path=HG_REPO, create_watcher=create_watcher)
+		self.assertNotEqual(repo, None)
+		self.assertEqual(repo.branch(), 'default')
+		self.assertEqual(repo.status(), None)
+		with open(os.path.join(HG_REPO, 'file'), 'w') as f:
+			f.write('abc')
+			f.flush()
 			self.assertEqual(repo.status(), ' U')
-			self.assertEqual(repo.status('file'), '? ')
-			call(['bzr', 'add', '-q', '.'], cwd=BZR_REPO, stdout=PIPE)
+			self.assertEqual(repo.status('file'), 'U')
+			call(['hg', 'add', '.'], cwd=HG_REPO, stdout=PIPE)
 			self.assertEqual(repo.status(), 'D ')
-			self.assertEqual(repo.status('file'), '+N')
-			call(['bzr', 'commit', '-q', '-m', 'initial commit'], cwd=BZR_REPO)
-			self.assertEqual(repo.status(), None)
-			with open(os.path.join(BZR_REPO, 'file'), 'w') as f:
-				f.write('def')
-			self.assertEqual(repo.status(), 'D ')
-			self.assertEqual(repo.status('file'), ' M')
-			self.assertEqual(repo.status('notexist'), None)
-			with open(os.path.join(BZR_REPO, 'ignored'), 'w') as f:
-				f.write('abc')
-			self.assertEqual(repo.status('ignored'), '? ')
-			# Test changing the .bzrignore file should update status
-			with open(os.path.join(BZR_REPO, '.bzrignore'), 'w') as f:
-				f.write('ignored')
-			self.assertEqual(repo.status('ignored'), None)
-			# Test changing the dirstate file should invalidate the cache for
-			# all files in the repo
-			with open(os.path.join(BZR_REPO, 'file2'), 'w') as f:
-				f.write('abc')
-			call(['bzr', 'add', 'file2'], cwd=BZR_REPO, stdout=PIPE)
-			call(['bzr', 'commit', '-q', '-m', 'file2 added'], cwd=BZR_REPO)
-			with open(os.path.join(BZR_REPO, 'file'), 'a') as f:
-				f.write('hello')
-			with open(os.path.join(BZR_REPO, 'file2'), 'a') as f:
-				f.write('hello')
-			self.assertEqual(repo.status('file'), ' M')
-			self.assertEqual(repo.status('file2'), ' M')
-			call(['bzr', 'commit', '-q', '-m', 'multi'], cwd=BZR_REPO)
-			self.assertEqual(repo.status('file'), None)
-			self.assertEqual(repo.status('file2'), None)
+			self.assertEqual(repo.status('file'), 'A')
+		os.remove(os.path.join(HG_REPO, 'file'))
 
-			# Test changing branch
-			call(['bzr', 'nick', 'branch1'], cwd=BZR_REPO, stdout=PIPE, stderr=PIPE)
-			self.do_branch_rename_test(repo, 'branch1')
+	def test_bzr(self):
+		if not use_bzr:
+			raise SkipTest('Bazaar is not available')
+		create_watcher = get_fallback_create_watcher()
+		repo = guess(path=BZR_REPO, create_watcher=create_watcher)
+		self.assertNotEqual(repo, None, 'No bzr repo found. Do you have bzr installed?')
+		self.assertEqual(repo.branch(), 'test_powerline')
+		self.assertEqual(repo.status(), None)
+		with open(os.path.join(BZR_REPO, 'file'), 'w') as f:
+			f.write('abc')
+		self.assertEqual(repo.status(), ' U')
+		self.assertEqual(repo.status('file'), '? ')
+		call(['bzr', 'add', '-q', '.'], cwd=BZR_REPO, stdout=PIPE)
+		self.assertEqual(repo.status(), 'D ')
+		self.assertEqual(repo.status('file'), '+N')
+		call(['bzr', 'commit', '-q', '-m', 'initial commit'], cwd=BZR_REPO)
+		self.assertEqual(repo.status(), None)
+		with open(os.path.join(BZR_REPO, 'file'), 'w') as f:
+			f.write('def')
+		self.assertEqual(repo.status(), 'D ')
+		self.assertEqual(repo.status('file'), ' M')
+		self.assertEqual(repo.status('notexist'), None)
+		with open(os.path.join(BZR_REPO, 'ignored'), 'w') as f:
+			f.write('abc')
+		self.assertEqual(repo.status('ignored'), '? ')
+		# Test changing the .bzrignore file should update status
+		with open(os.path.join(BZR_REPO, '.bzrignore'), 'w') as f:
+			f.write('ignored')
+		self.assertEqual(repo.status('ignored'), None)
+		# Test changing the dirstate file should invalidate the cache for
+		# all files in the repo
+		with open(os.path.join(BZR_REPO, 'file2'), 'w') as f:
+			f.write('abc')
+		call(['bzr', 'add', 'file2'], cwd=BZR_REPO, stdout=PIPE)
+		call(['bzr', 'commit', '-q', '-m', 'file2 added'], cwd=BZR_REPO)
+		with open(os.path.join(BZR_REPO, 'file'), 'a') as f:
+			f.write('hello')
+		with open(os.path.join(BZR_REPO, 'file2'), 'a') as f:
+			f.write('hello')
+		self.assertEqual(repo.status('file'), ' M')
+		self.assertEqual(repo.status('file2'), ' M')
+		call(['bzr', 'commit', '-q', '-m', 'multi'], cwd=BZR_REPO)
+		self.assertEqual(repo.status('file'), None)
+		self.assertEqual(repo.status('file2'), None)
 
-			# Test branch name/status changes when swapping repos
-			for x in ('b1', 'b2'):
-				d = os.path.join(BZR_REPO, x)
-				os.mkdir(d)
-				call(['bzr', 'init', '-q'], cwd=d)
-				call(['bzr', 'nick', '-q', x], cwd=d)
-				repo = guess(path=d, create_watcher=create_watcher)
-				self.assertEqual(repo.branch(), x)
+		# Test changing branch
+		call(['bzr', 'nick', 'branch1'], cwd=BZR_REPO, stdout=PIPE, stderr=PIPE)
+		self.do_branch_rename_test(repo, 'branch1')
+
+		# Test branch name/status changes when swapping repos
+		for x in ('b1', 'b2'):
+			d = os.path.join(BZR_REPO, x)
+			os.mkdir(d)
+			call(['bzr', 'init', '-q'], cwd=d)
+			call(['bzr', 'nick', '-q', x], cwd=d)
+			repo = guess(path=d, create_watcher=create_watcher)
+			self.assertEqual(repo.branch(), x)
+			self.assertFalse(repo.status())
+			if x == 'b1':
+				open(os.path.join(d, 'dirty'), 'w').close()
+				self.assertTrue(repo.status())
+		os.rename(os.path.join(BZR_REPO, 'b1'), os.path.join(BZR_REPO, 'b'))
+		os.rename(os.path.join(BZR_REPO, 'b2'), os.path.join(BZR_REPO, 'b1'))
+		os.rename(os.path.join(BZR_REPO, 'b'), os.path.join(BZR_REPO, 'b2'))
+		for x, y in (('b1', 'b2'), ('b2', 'b1')):
+			d = os.path.join(BZR_REPO, x)
+			repo = guess(path=d, create_watcher=create_watcher)
+			self.do_branch_rename_test(repo, y)
+			if x == 'b1':
 				self.assertFalse(repo.status())
-				if x == 'b1':
-					open(os.path.join(d, 'dirty'), 'w').close()
-					self.assertTrue(repo.status())
-			os.rename(os.path.join(BZR_REPO, 'b1'), os.path.join(BZR_REPO, 'b'))
-			os.rename(os.path.join(BZR_REPO, 'b2'), os.path.join(BZR_REPO, 'b1'))
-			os.rename(os.path.join(BZR_REPO, 'b'), os.path.join(BZR_REPO, 'b2'))
-			for x, y in (('b1', 'b2'), ('b2', 'b1')):
-				d = os.path.join(BZR_REPO, x)
-				repo = guess(path=d, create_watcher=create_watcher)
-				self.do_branch_rename_test(repo, y)
-				if x == 'b1':
-					self.assertFalse(repo.status())
-				else:
-					self.assertTrue(repo.status())
+			else:
+				self.assertTrue(repo.status())
 
 old_HGRCPATH = None
 old_cwd = None
