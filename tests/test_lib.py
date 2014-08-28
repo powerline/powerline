@@ -34,6 +34,11 @@ else:
 	use_mercurial = True
 
 
+GIT_REPO = 'git_repo' + os.environ.get('PYTHON', '')
+HG_REPO = 'hg_repo' + os.environ.get('PYTHON', '')
+BZR_REPO = 'bzr_repo' + os.environ.get('PYTHON', '')
+
+
 def thread_number():
 	return len(threading.enumerate())
 
@@ -551,55 +556,43 @@ class TestVCS(TestCase):
 			else:
 				self.assertTrue(repo.status())
 
-old_HGRCPATH = None
-old_cwd = None
+	@classmethod
+	def setUpClass(cls):
+		cls.powerline_old_cwd = os.getcwd()
+		os.chdir(os.path.dirname(__file__))
+		call(['git', 'init', '--quiet', GIT_REPO])
+		assert os.path.isdir(GIT_REPO)
+		call(['git', 'config', '--local', 'user.name', 'Foo'], cwd=GIT_REPO)
+		call(['git', 'config', '--local', 'user.email', 'bar@example.org'], cwd=GIT_REPO)
+		call(['git', 'commit', '--allow-empty', '--message', 'Initial commit', '--quiet'], cwd=GIT_REPO)
+		if use_mercurial:
+			cls.powerline_old_HGRCPATH = os.environ.get('HGRCPATH')
+			os.environ['HGRCPATH'] = ''
+			call(['hg', 'init', HG_REPO])
+			with open(os.path.join(HG_REPO, '.hg', 'hgrc'), 'w') as hgrc:
+				hgrc.write('[ui]\n')
+				hgrc.write('username = Foo <bar@example.org>\n')
+		if use_bzr:
+			call(['bzr', 'init', '--quiet', BZR_REPO])
+			call(['bzr', 'config', 'email=Foo <bar@example.org>'], cwd=BZR_REPO)
+			call(['bzr', 'config', 'nickname=test_powerline'], cwd=BZR_REPO)
+			call(['bzr', 'config', 'create_signatures=0'], cwd=BZR_REPO)
 
-
-GIT_REPO = 'git_repo' + os.environ.get('PYTHON', '')
-HG_REPO = 'hg_repo' + os.environ.get('PYTHON', '')
-BZR_REPO = 'bzr_repo' + os.environ.get('PYTHON', '')
-
-
-def setUpModule():
-	global old_cwd
-	global old_HGRCPATH
-	old_cwd = os.getcwd()
-	os.chdir(os.path.dirname(__file__))
-	call(['git', 'init', '--quiet', GIT_REPO])
-	assert os.path.isdir(GIT_REPO)
-	call(['git', 'config', '--local', 'user.name', 'Foo'], cwd=GIT_REPO)
-	call(['git', 'config', '--local', 'user.email', 'bar@example.org'], cwd=GIT_REPO)
-	call(['git', 'commit', '--allow-empty', '--message', 'Initial commit', '--quiet'], cwd=GIT_REPO)
-	if use_mercurial:
-		old_HGRCPATH = os.environ.get('HGRCPATH')
-		os.environ['HGRCPATH'] = ''
-		call(['hg', 'init', HG_REPO])
-		with open(os.path.join(HG_REPO, '.hg', 'hgrc'), 'w') as hgrc:
-			hgrc.write('[ui]\n')
-			hgrc.write('username = Foo <bar@example.org>\n')
-	if use_bzr:
-		call(['bzr', 'init', '--quiet', BZR_REPO])
-		call(['bzr', 'config', 'email=Foo <bar@example.org>'], cwd=BZR_REPO)
-		call(['bzr', 'config', 'nickname=test_powerline'], cwd=BZR_REPO)
-		call(['bzr', 'config', 'create_signatures=0'], cwd=BZR_REPO)
-
-
-def tearDownModule():
-	global old_cwd
-	global old_HGRCPATH
-	for repo_dir in [GIT_REPO] + ([HG_REPO] if use_mercurial else []) + ([BZR_REPO] if use_bzr else []):
-		for root, dirs, files in list(os.walk(repo_dir, topdown=False)):
-			for file in files:
-				os.remove(os.path.join(root, file))
-			for dir in dirs:
-				os.rmdir(os.path.join(root, dir))
-		os.rmdir(repo_dir)
-	if use_mercurial:
-		if old_HGRCPATH is None:
-			os.environ.pop('HGRCPATH')
-		else:
-			os.environ['HGRCPATH'] = old_HGRCPATH
-	os.chdir(old_cwd)
+	@classmethod
+	def tearDownClass(cls):
+		for repo_dir in [GIT_REPO] + ([HG_REPO] if use_mercurial else []) + ([BZR_REPO] if use_bzr else []):
+			for root, dirs, files in list(os.walk(repo_dir, topdown=False)):
+				for file in files:
+					os.remove(os.path.join(root, file))
+				for dir in dirs:
+					os.rmdir(os.path.join(root, dir))
+			os.rmdir(repo_dir)
+		if use_mercurial:
+			if cls.powerline_old_HGRCPATH is None:
+				os.environ.pop('HGRCPATH')
+			else:
+				os.environ['HGRCPATH'] = cls.powerline_old_HGRCPATH
+		os.chdir(cls.powerline_old_cwd)
 
 
 if __name__ == '__main__':
