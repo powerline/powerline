@@ -1,21 +1,37 @@
 # vim:fileencoding=utf-8:noet
 from __future__ import division
 
+import threading
+import os
+import re
+
+from time import sleep
+from subprocess import call, PIPE
+
 from powerline.lib import mergedicts, add_divider_highlight_group, REMOVE_THIS_KEY
 from powerline.lib.humanize_bytes import humanize_bytes
 from powerline.lib.vcs import guess, get_fallback_create_watcher
 from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment
 from powerline.lib.monotonic import monotonic
 from powerline.lib.vcs.git import git_directory
-import threading
-import os
-import sys
-import re
-import platform
-from time import sleep
-from subprocess import call, PIPE
+
 from tests.lib import Pl
 from tests import TestCase
+
+
+try:
+	__import__('bzrlib')
+except ImportError:
+	use_bzr = False
+else:
+	use_bzr = True
+
+try:
+	__import__('mercurial')
+except ImportError:
+	use_mercurial = False
+else:
+	use_mercurial = True
 
 
 def thread_number():
@@ -373,10 +389,6 @@ class TestLib(TestCase):
 		self.assertEqual(humanize_bytes(1024, si_prefix=True), '1 kB')
 		self.assertEqual(humanize_bytes(1000000000, si_prefix=True), '1.00 GB')
 		self.assertEqual(humanize_bytes(1000000000, si_prefix=False), '953.7 MiB')
-
-
-use_mercurial = use_bzr = (sys.version_info < (3, 0)
-							and platform.python_implementation() == 'CPython')
 
 
 class TestVCS(TestCase):
