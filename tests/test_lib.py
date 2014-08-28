@@ -1,21 +1,42 @@
 # vim:fileencoding=utf-8:noet
 from __future__ import division
 
+import threading
+import os
+import re
+
+from time import sleep
+from subprocess import call, PIPE
+
 from powerline.lib import mergedicts, add_divider_highlight_group, REMOVE_THIS_KEY
 from powerline.lib.humanize_bytes import humanize_bytes
 from powerline.lib.vcs import guess, get_fallback_create_watcher
 from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment
 from powerline.lib.monotonic import monotonic
 from powerline.lib.vcs.git import git_directory
-import threading
-import os
-import sys
-import re
-import platform
-from time import sleep
-from subprocess import call, PIPE
+
 from tests.lib import Pl
-from tests import TestCase
+from tests import TestCase, SkipTest
+
+
+try:
+	__import__('bzrlib')
+except ImportError:
+	use_bzr = False
+else:
+	use_bzr = True
+
+try:
+	__import__('mercurial')
+except ImportError:
+	use_mercurial = False
+else:
+	use_mercurial = True
+
+
+GIT_REPO = 'git_repo' + os.environ.get('PYTHON', '')
+HG_REPO = 'hg_repo' + os.environ.get('PYTHON', '')
+BZR_REPO = 'bzr_repo' + os.environ.get('PYTHON', '')
 
 
 def thread_number():
@@ -375,10 +396,6 @@ class TestLib(TestCase):
 		self.assertEqual(humanize_bytes(1000000000, si_prefix=False), '953.7 MiB')
 
 
-use_mercurial = use_bzr = (sys.version_info < (3, 0)
-							and platform.python_implementation() == 'CPython')
-
-
 class TestVCS(TestCase):
 	def do_branch_rename_test(self, repo, q):
 		st = monotonic()
@@ -448,144 +465,134 @@ class TestVCS(TestCase):
 			os.remove(dotgit)
 			os.rename(spacegit, dotgit)
 
-	if use_mercurial:
-		def test_mercurial(self):
-			create_watcher = get_fallback_create_watcher()
-			repo = guess(path=HG_REPO, create_watcher=create_watcher)
-			self.assertNotEqual(repo, None)
-			self.assertEqual(repo.branch(), 'default')
-			self.assertEqual(repo.status(), None)
-			with open(os.path.join(HG_REPO, 'file'), 'w') as f:
-				f.write('abc')
-				f.flush()
-				self.assertEqual(repo.status(), ' U')
-				self.assertEqual(repo.status('file'), 'U')
-				call(['hg', 'add', '.'], cwd=HG_REPO, stdout=PIPE)
-				self.assertEqual(repo.status(), 'D ')
-				self.assertEqual(repo.status('file'), 'A')
-			os.remove(os.path.join(HG_REPO, 'file'))
-
-	if use_bzr:
-		def test_bzr(self):
-			create_watcher = get_fallback_create_watcher()
-			repo = guess(path=BZR_REPO, create_watcher=create_watcher)
-			self.assertNotEqual(repo, None, 'No bzr repo found. Do you have bzr installed?')
-			self.assertEqual(repo.branch(), 'test_powerline')
-			self.assertEqual(repo.status(), None)
-			with open(os.path.join(BZR_REPO, 'file'), 'w') as f:
-				f.write('abc')
+	def test_mercurial(self):
+		if not use_mercurial:
+			raise SkipTest('Mercurial is not available')
+		create_watcher = get_fallback_create_watcher()
+		repo = guess(path=HG_REPO, create_watcher=create_watcher)
+		self.assertNotEqual(repo, None)
+		self.assertEqual(repo.branch(), 'default')
+		self.assertEqual(repo.status(), None)
+		with open(os.path.join(HG_REPO, 'file'), 'w') as f:
+			f.write('abc')
+			f.flush()
 			self.assertEqual(repo.status(), ' U')
-			self.assertEqual(repo.status('file'), '? ')
-			call(['bzr', 'add', '-q', '.'], cwd=BZR_REPO, stdout=PIPE)
+			self.assertEqual(repo.status('file'), 'U')
+			call(['hg', 'add', '.'], cwd=HG_REPO, stdout=PIPE)
 			self.assertEqual(repo.status(), 'D ')
-			self.assertEqual(repo.status('file'), '+N')
-			call(['bzr', 'commit', '-q', '-m', 'initial commit'], cwd=BZR_REPO)
-			self.assertEqual(repo.status(), None)
-			with open(os.path.join(BZR_REPO, 'file'), 'w') as f:
-				f.write('def')
-			self.assertEqual(repo.status(), 'D ')
-			self.assertEqual(repo.status('file'), ' M')
-			self.assertEqual(repo.status('notexist'), None)
-			with open(os.path.join(BZR_REPO, 'ignored'), 'w') as f:
-				f.write('abc')
-			self.assertEqual(repo.status('ignored'), '? ')
-			# Test changing the .bzrignore file should update status
-			with open(os.path.join(BZR_REPO, '.bzrignore'), 'w') as f:
-				f.write('ignored')
-			self.assertEqual(repo.status('ignored'), None)
-			# Test changing the dirstate file should invalidate the cache for
-			# all files in the repo
-			with open(os.path.join(BZR_REPO, 'file2'), 'w') as f:
-				f.write('abc')
-			call(['bzr', 'add', 'file2'], cwd=BZR_REPO, stdout=PIPE)
-			call(['bzr', 'commit', '-q', '-m', 'file2 added'], cwd=BZR_REPO)
-			with open(os.path.join(BZR_REPO, 'file'), 'a') as f:
-				f.write('hello')
-			with open(os.path.join(BZR_REPO, 'file2'), 'a') as f:
-				f.write('hello')
-			self.assertEqual(repo.status('file'), ' M')
-			self.assertEqual(repo.status('file2'), ' M')
-			call(['bzr', 'commit', '-q', '-m', 'multi'], cwd=BZR_REPO)
-			self.assertEqual(repo.status('file'), None)
-			self.assertEqual(repo.status('file2'), None)
+			self.assertEqual(repo.status('file'), 'A')
+		os.remove(os.path.join(HG_REPO, 'file'))
 
-			# Test changing branch
-			call(['bzr', 'nick', 'branch1'], cwd=BZR_REPO, stdout=PIPE, stderr=PIPE)
-			self.do_branch_rename_test(repo, 'branch1')
+	def test_bzr(self):
+		if not use_bzr:
+			raise SkipTest('Bazaar is not available')
+		create_watcher = get_fallback_create_watcher()
+		repo = guess(path=BZR_REPO, create_watcher=create_watcher)
+		self.assertNotEqual(repo, None, 'No bzr repo found. Do you have bzr installed?')
+		self.assertEqual(repo.branch(), 'test_powerline')
+		self.assertEqual(repo.status(), None)
+		with open(os.path.join(BZR_REPO, 'file'), 'w') as f:
+			f.write('abc')
+		self.assertEqual(repo.status(), ' U')
+		self.assertEqual(repo.status('file'), '? ')
+		call(['bzr', 'add', '-q', '.'], cwd=BZR_REPO, stdout=PIPE)
+		self.assertEqual(repo.status(), 'D ')
+		self.assertEqual(repo.status('file'), '+N')
+		call(['bzr', 'commit', '-q', '-m', 'initial commit'], cwd=BZR_REPO)
+		self.assertEqual(repo.status(), None)
+		with open(os.path.join(BZR_REPO, 'file'), 'w') as f:
+			f.write('def')
+		self.assertEqual(repo.status(), 'D ')
+		self.assertEqual(repo.status('file'), ' M')
+		self.assertEqual(repo.status('notexist'), None)
+		with open(os.path.join(BZR_REPO, 'ignored'), 'w') as f:
+			f.write('abc')
+		self.assertEqual(repo.status('ignored'), '? ')
+		# Test changing the .bzrignore file should update status
+		with open(os.path.join(BZR_REPO, '.bzrignore'), 'w') as f:
+			f.write('ignored')
+		self.assertEqual(repo.status('ignored'), None)
+		# Test changing the dirstate file should invalidate the cache for
+		# all files in the repo
+		with open(os.path.join(BZR_REPO, 'file2'), 'w') as f:
+			f.write('abc')
+		call(['bzr', 'add', 'file2'], cwd=BZR_REPO, stdout=PIPE)
+		call(['bzr', 'commit', '-q', '-m', 'file2 added'], cwd=BZR_REPO)
+		with open(os.path.join(BZR_REPO, 'file'), 'a') as f:
+			f.write('hello')
+		with open(os.path.join(BZR_REPO, 'file2'), 'a') as f:
+			f.write('hello')
+		self.assertEqual(repo.status('file'), ' M')
+		self.assertEqual(repo.status('file2'), ' M')
+		call(['bzr', 'commit', '-q', '-m', 'multi'], cwd=BZR_REPO)
+		self.assertEqual(repo.status('file'), None)
+		self.assertEqual(repo.status('file2'), None)
 
-			# Test branch name/status changes when swapping repos
-			for x in ('b1', 'b2'):
-				d = os.path.join(BZR_REPO, x)
-				os.mkdir(d)
-				call(['bzr', 'init', '-q'], cwd=d)
-				call(['bzr', 'nick', '-q', x], cwd=d)
-				repo = guess(path=d, create_watcher=create_watcher)
-				self.assertEqual(repo.branch(), x)
+		# Test changing branch
+		call(['bzr', 'nick', 'branch1'], cwd=BZR_REPO, stdout=PIPE, stderr=PIPE)
+		self.do_branch_rename_test(repo, 'branch1')
+
+		# Test branch name/status changes when swapping repos
+		for x in ('b1', 'b2'):
+			d = os.path.join(BZR_REPO, x)
+			os.mkdir(d)
+			call(['bzr', 'init', '-q'], cwd=d)
+			call(['bzr', 'nick', '-q', x], cwd=d)
+			repo = guess(path=d, create_watcher=create_watcher)
+			self.assertEqual(repo.branch(), x)
+			self.assertFalse(repo.status())
+			if x == 'b1':
+				open(os.path.join(d, 'dirty'), 'w').close()
+				self.assertTrue(repo.status())
+		os.rename(os.path.join(BZR_REPO, 'b1'), os.path.join(BZR_REPO, 'b'))
+		os.rename(os.path.join(BZR_REPO, 'b2'), os.path.join(BZR_REPO, 'b1'))
+		os.rename(os.path.join(BZR_REPO, 'b'), os.path.join(BZR_REPO, 'b2'))
+		for x, y in (('b1', 'b2'), ('b2', 'b1')):
+			d = os.path.join(BZR_REPO, x)
+			repo = guess(path=d, create_watcher=create_watcher)
+			self.do_branch_rename_test(repo, y)
+			if x == 'b1':
 				self.assertFalse(repo.status())
-				if x == 'b1':
-					open(os.path.join(d, 'dirty'), 'w').close()
-					self.assertTrue(repo.status())
-			os.rename(os.path.join(BZR_REPO, 'b1'), os.path.join(BZR_REPO, 'b'))
-			os.rename(os.path.join(BZR_REPO, 'b2'), os.path.join(BZR_REPO, 'b1'))
-			os.rename(os.path.join(BZR_REPO, 'b'), os.path.join(BZR_REPO, 'b2'))
-			for x, y in (('b1', 'b2'), ('b2', 'b1')):
-				d = os.path.join(BZR_REPO, x)
-				repo = guess(path=d, create_watcher=create_watcher)
-				self.do_branch_rename_test(repo, y)
-				if x == 'b1':
-					self.assertFalse(repo.status())
-				else:
-					self.assertTrue(repo.status())
+			else:
+				self.assertTrue(repo.status())
 
-old_HGRCPATH = None
-old_cwd = None
+	@classmethod
+	def setUpClass(cls):
+		cls.powerline_old_cwd = os.getcwd()
+		os.chdir(os.path.dirname(__file__))
+		call(['git', 'init', '--quiet', GIT_REPO])
+		assert os.path.isdir(GIT_REPO)
+		call(['git', 'config', '--local', 'user.name', 'Foo'], cwd=GIT_REPO)
+		call(['git', 'config', '--local', 'user.email', 'bar@example.org'], cwd=GIT_REPO)
+		call(['git', 'commit', '--allow-empty', '--message', 'Initial commit', '--quiet'], cwd=GIT_REPO)
+		if use_mercurial:
+			cls.powerline_old_HGRCPATH = os.environ.get('HGRCPATH')
+			os.environ['HGRCPATH'] = ''
+			call(['hg', 'init', HG_REPO])
+			with open(os.path.join(HG_REPO, '.hg', 'hgrc'), 'w') as hgrc:
+				hgrc.write('[ui]\n')
+				hgrc.write('username = Foo <bar@example.org>\n')
+		if use_bzr:
+			call(['bzr', 'init', '--quiet', BZR_REPO])
+			call(['bzr', 'config', 'email=Foo <bar@example.org>'], cwd=BZR_REPO)
+			call(['bzr', 'config', 'nickname=test_powerline'], cwd=BZR_REPO)
+			call(['bzr', 'config', 'create_signatures=0'], cwd=BZR_REPO)
 
-
-GIT_REPO = 'git_repo' + os.environ.get('PYTHON', '')
-HG_REPO = 'hg_repo' + os.environ.get('PYTHON', '')
-BZR_REPO = 'bzr_repo' + os.environ.get('PYTHON', '')
-
-
-def setUpModule():
-	global old_cwd
-	global old_HGRCPATH
-	old_cwd = os.getcwd()
-	os.chdir(os.path.dirname(__file__))
-	call(['git', 'init', '--quiet', GIT_REPO])
-	assert os.path.isdir(GIT_REPO)
-	call(['git', 'config', '--local', 'user.name', 'Foo'], cwd=GIT_REPO)
-	call(['git', 'config', '--local', 'user.email', 'bar@example.org'], cwd=GIT_REPO)
-	call(['git', 'commit', '--allow-empty', '--message', 'Initial commit', '--quiet'], cwd=GIT_REPO)
-	if use_mercurial:
-		old_HGRCPATH = os.environ.get('HGRCPATH')
-		os.environ['HGRCPATH'] = ''
-		call(['hg', 'init', HG_REPO])
-		with open(os.path.join(HG_REPO, '.hg', 'hgrc'), 'w') as hgrc:
-			hgrc.write('[ui]\n')
-			hgrc.write('username = Foo <bar@example.org>\n')
-	if use_bzr:
-		call(['bzr', 'init', '--quiet', BZR_REPO])
-		call(['bzr', 'config', 'email=Foo <bar@example.org>'], cwd=BZR_REPO)
-		call(['bzr', 'config', 'nickname=test_powerline'], cwd=BZR_REPO)
-		call(['bzr', 'config', 'create_signatures=0'], cwd=BZR_REPO)
-
-
-def tearDownModule():
-	global old_cwd
-	global old_HGRCPATH
-	for repo_dir in [GIT_REPO] + ([HG_REPO] if use_mercurial else []) + ([BZR_REPO] if use_bzr else []):
-		for root, dirs, files in list(os.walk(repo_dir, topdown=False)):
-			for file in files:
-				os.remove(os.path.join(root, file))
-			for dir in dirs:
-				os.rmdir(os.path.join(root, dir))
-		os.rmdir(repo_dir)
-	if use_mercurial:
-		if old_HGRCPATH is None:
-			os.environ.pop('HGRCPATH')
-		else:
-			os.environ['HGRCPATH'] = old_HGRCPATH
-	os.chdir(old_cwd)
+	@classmethod
+	def tearDownClass(cls):
+		for repo_dir in [GIT_REPO] + ([HG_REPO] if use_mercurial else []) + ([BZR_REPO] if use_bzr else []):
+			for root, dirs, files in list(os.walk(repo_dir, topdown=False)):
+				for file in files:
+					os.remove(os.path.join(root, file))
+				for dir in dirs:
+					os.rmdir(os.path.join(root, dir))
+			os.rmdir(repo_dir)
+		if use_mercurial:
+			if cls.powerline_old_HGRCPATH is None:
+				os.environ.pop('HGRCPATH')
+			else:
+				os.environ['HGRCPATH'] = cls.powerline_old_HGRCPATH
+		os.chdir(cls.powerline_old_cwd)
 
 
 if __name__ == '__main__':
