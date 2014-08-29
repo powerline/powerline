@@ -80,6 +80,11 @@
 				}
 			}
 		},
+		"powerline.segments.common.fuzzy_time": {
+			"args": {
+				"unicode_text": false
+			}
+		},
 
 		"powerline.segments.vim.mode": {
 			"args": {

@@ -79,6 +79,11 @@
 				}
 			}
 		},
+		"powerline.segments.common.fuzzy_time": {
+			"args": {
+				"unicode_text": true
+			}
+		},
 
 		"powerline.segments.vim.mode": {
 			"args": {
