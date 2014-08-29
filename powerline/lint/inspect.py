@@ -2,9 +2,7 @@
 from __future__ import absolute_import
 
 from inspect import ArgSpec, getargspec
-from itertools import count
 
-from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment
 from powerline.segments import Segment
 
 
