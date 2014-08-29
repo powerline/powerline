@@ -2,7 +2,7 @@
 
 from __future__ import absolute_import, unicode_literals
 
-from powerline.bindings.vim import vim_get_func, environ, current_tabpage
+from powerline.bindings.vim import vim_get_func, vim_getoption, environ, current_tabpage
 from powerline.renderer import Renderer
 from powerline.colorscheme import ATTR_BOLD, ATTR_ITALIC, ATTR_UNDERLINE
 from powerline.theme import Theme
@@ -108,7 +108,10 @@ class VimRenderer(Renderer):
 		)
 		segment_info['tabnr'] = segment_info['tabpage'].number
 		segment_info['bufnr'] = segment_info['buffer'].number
-		winwidth = segment_info['window'].width
+		if is_tabline:
+			winwidth = int(vim_getoption('columns'))
+		else:
+			winwidth = segment_info['window'].width
 
 		statusline = super(VimRenderer, self).render(
 			mode=mode,
