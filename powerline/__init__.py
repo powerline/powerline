@@ -67,9 +67,15 @@ class PowerlineLogger(object):
 	def _log(self, attr, msg, *args, **kwargs):
 		prefix = kwargs.get('prefix') or self.prefix
 		prefix = self.ext + ((':' + prefix) if prefix else '')
+		msg = safe_unicode(msg)
 		if args or kwargs:
+			args = [safe_unicode(s) if isinstance(s, bytes) else s for s in args]
+			kwargs = dict((
+				(k, safe_unicode(v) if isinstance(v, bytes) else v)
+				for k, v in kwargs.items()
+			))
 			msg = msg.format(*args, **kwargs)
-		msg = prefix + ':' + safe_unicode(msg)
+		msg = prefix + ':' + msg
 		key = attr + ':' + prefix
 		if msg != self.last_msgs.get(key):
 			getattr(self.logger, attr)(msg)
