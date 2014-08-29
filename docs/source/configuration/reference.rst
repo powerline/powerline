@@ -265,6 +265,8 @@ extension-specific key <config-ext-top_theme>` or from :ref:`default_top_theme
 common configuration key <config-common-default_top_theme>`. Powerline ships 
 with the following top themes:
 
+.. _config-top_themes-list:
+
 ==========================  ====================================================
 Theme                       Description
 ==========================  ====================================================

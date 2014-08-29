@@ -29,6 +29,52 @@ object it should receive the following arguments:
 And also any other argument(s) specified by user in :ref:`args key 
 <config-themes-seg-args>` (no additional arguments by default).
 
+Object representing segment may have the following attributes used by 
+powerline:
+
+``powerline_requires_segment_info``
+    This attribute controls whether segment will receive ``segment_info`` 
+    argument: if it is present argument will be received.
+
+``powerline_requires_filesystem_watcher``
+    This attribute controls whether segment will receive ``create_watcher`` 
+    argument: if it is present argument will be received.
+
+``powerline_segment_datas``
+    This attribute must be a dictionary containing ``top_theme: segment_data`` 
+    mapping where ``top_theme`` is any theme name (it is expected that all of
+    the names from :ref:`top-level themes list <config-top_themes-list>` are 
+    present) and ``segment_data`` is a dictionary like the one that is contained 
+    inside :ref:`segment_data dictionary in configuration 
+    <config-themes-segment_data>`. This attribute should be used to specify 
+    default theme-specific values for *third-party* segments: powerline 
+    theme-specific values go directly to :ref:`top-level themes 
+    <config-themes>`.
+
+``startup``
+    This attribute must be a callable which accepts the following keyword 
+    arguments:
+
+    * ``pl``: :py:class:`powerline.PowerlineLogger` instance which is to be used 
+      for logging.
+    * ``shutdown_event``: :py:class:`Event` object which will be set when 
+      powerline will be shut down.
+    * Any arguments found in user configuration for the given segment (i.e. 
+      :ref:`args key`).
+
+    This function is called at powerline startup when using long-running 
+    processes (e.g. powerline in vim, in zsh with libzpython, in ipython or in 
+    powerline daemon) and not called when ``powerline-render`` executable is 
+    used (more specific: when :py:class:`powerline.Powerline` constructor 
+    received true ``run_once`` argument).
+
+``shutdown``
+    This attribute must be a callable that accepts no arguments and shuts down 
+    threads and frees any other resources allocated in ``startup`` method of the 
+    segment in question.
+
+    This function is not called when ``startup`` method is not called.
+
 This callable object should may return either a string (``unicode`` in Python2 
 or ``str`` in Python3, *not* ``str`` in Python2 or ``bytes`` in Python3) object 
 or a list of dictionaries. String object is a short form of the following return 

@@ -1,12 +1,17 @@
 # vim:fileencoding=utf-8:noet
 from __future__ import unicode_literals, absolute_import, division
-import tests.vim as vim_module
-from tests import TestCase
-from tests.lib.config_mock import get_powerline, get_powerline_raw, swap_attributes
-from functools import wraps
-from copy import deepcopy
+
 import sys
 import os
+
+from functools import wraps
+from copy import deepcopy
+
+import tests.vim as vim_module
+
+from tests import TestCase
+from tests.lib.config_mock import get_powerline, get_powerline_raw, swap_attributes
+from tests.lib import Args
 
 
 def highlighted_string(s, group, **kwargs):
@@ -426,6 +431,50 @@ class TestModes(TestRender):
 		self.assertRenderEqual(p, '{--}', mode='m1')
 		self.assertRenderEqual(p, '{56} s1{6-}>>{--}', mode='m2')
 		self.assertRenderEqual(p, '{56} s2{6-}>>{--}', mode='m3')
+
+
+class TestSegmentAttributes(TestRender):
+	@add_args
+	def test_no_attributes(self, p, config):
+		def m1(divider=',', **kwargs):
+			return divider.join(kwargs.keys()) + divider
+		sys.modules['bar'] = Args(m1=m1)
+		config['themes/test/default']['segments'] = {
+			'left': [
+				{
+					'name': 'm1',
+					'module': 'bar'
+				}
+			]
+		}
+		self.assertRenderEqual(p, '{56} pl,{6-}>>{--}')
+
+	@add_args
+	def test_segment_datas(self, p, config):
+		def m1(divider=',', **kwargs):
+			return divider.join(kwargs.keys()) + divider
+		m1.powerline_segment_datas = {
+			'powerline': {
+				'args': {
+					'divider': ';'
+				}
+			},
+			'ascii': {
+				'args': {
+					'divider': '--'
+				}
+			}
+		}
+		sys.modules['bar'] = Args(m1=m1)
+		config['themes/test/default']['segments'] = {
+			'left': [
+				{
+					'name': 'm1',
+					'module': 'bar'
+				}
+			]
+		}
+		self.assertRenderEqual(p, '{56} pl;{6-}>>{--}')
 
 
 class TestVim(TestCase):

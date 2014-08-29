@@ -4,7 +4,7 @@ from __future__ import absolute_import, unicode_literals, division, print_functi
 from powerline.lib.watcher import create_file_watcher
 
 
-def list_segment_key_values(segment, theme_configs, key, module=None, default=None):
+def list_segment_key_values(segment, theme_configs, segment_data, key, module=None, default=None):
 	try:
 		yield segment[key]
 	except KeyError:
@@ -32,6 +32,11 @@ def list_segment_key_values(segment, theme_configs, key, module=None, default=No
 						yield segment_data[name][key]
 					except KeyError:
 						pass
+	if segment_data is not None:
+		try:
+			yield segment_data[key]
+		except KeyError:
+			pass
 	yield default
 
 
@@ -173,14 +178,15 @@ def process_segment(pl, side, segment_info, parsed_segments, segment, mode):
 		parsed_segments.append(segment)
 
 
-def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, get_module_attr):
+def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, get_module_attr, top_theme):
 	data = {
 		'default_module': default_module or 'powerline.segments.' + ext,
 		'get_module_attr': get_module_attr,
+		'segment_data': None,
 	}
 
 	def get_key(merge, segment, module, key, default=None):
-		return get_segment_key(merge, segment, theme_configs, key, module, default)
+		return get_segment_key(merge, segment, theme_configs, data['segment_data'], key, module, default)
 	data['get_key'] = get_key
 
 	def get(segment, side):
@@ -198,6 +204,13 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, ge
 
 		if not get_key(False, segment, module, 'display', True):
 			return None
+
+		segment_datas = getattr(_contents_func, 'powerline_segment_datas', None)
+		if segment_datas:
+			try:
+				data['segment_data'] = segment_datas[top_theme]
+			except KeyError:
+				pass
 
 		if segment_type == 'function':
 			highlight_group = [module + '.' + segment['name'], segment['name']]
