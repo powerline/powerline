@@ -77,7 +77,13 @@
 					"windy":         "WINDY",
 					"not_available": "NA",
 					"unknown":       "UKN"
-				}
+				},
+				"temp_format": "{temp:.0f} C"
+			}
+		},
+		"powerline.segments.common.fuzzy_time": {
+			"args": {
+				"unicode_text": false
 			}
 		},
 
