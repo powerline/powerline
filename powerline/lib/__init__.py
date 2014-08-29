@@ -15,7 +15,9 @@ def wraps_saveargs(wrapped):
 
 
 def mergedicts(d1, d2):
-	'''Recursively merge two dictionaries. First dictionary is modified in-place.
+	'''Recursively merge two dictionaries
+
+	First dictionary is modified in-place.
 	'''
 	for k in d2:
 		if k in d1 and isinstance(d1[k], dict) and isinstance(d2[k], dict):
@@ -24,6 +26,18 @@ def mergedicts(d1, d2):
 			d1.pop(k, None)
 		else:
 			d1[k] = d2[k]
+
+
+def mergedefaults(d1, d2):
+	'''Recursively merge two dictionaries, keeping existing values
+
+	First dictionary is modified in-place.
+	'''
+	for k in d2:
+		if k in d1 and isinstance(d1[k], dict) and isinstance(d2[k], dict):
+			mergedefaults(d1[k], d2[k])
+		else:
+			d1.setdefault(k, d2[k])
 
 
 def mergedicts_copy(d1, d2):
