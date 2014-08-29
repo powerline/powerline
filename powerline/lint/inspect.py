@@ -2,9 +2,7 @@
 from __future__ import absolute_import
 
 from inspect import ArgSpec, getargspec
-from itertools import count
 
-from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment
 from powerline.segments import Segment
 
 
@@ -31,8 +29,8 @@ def getconfigargspec(obj):
 		if len(arg) > 1:
 			defaults.append(arg[1])
 
-	requires_segment_info = getattr(obj, 'powerline_requires_segment_info', False)
-	requires_filesystem_watcher = getattr(obj, 'powerline_requires_filesystem_watcher', False)
+	requires_segment_info = hasattr(obj, 'powerline_requires_segment_info')
+	requires_filesystem_watcher = hasattr(obj, 'powerline_requires_filesystem_watcher')
 
 	for name, method in argspecobjs:
 		argspec = getargspec(method)

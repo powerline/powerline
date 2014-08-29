@@ -485,13 +485,15 @@ class Powerline(object):
 
 			self.ext_config = config['ext'][self.ext]
 
+			top_theme = (
+				self.ext_config.get('top_theme')
+				or self.common_config['default_top_theme']
+			)
 			self.theme_levels = (
-				os.path.join('themes', (
-					self.ext_config.get('top_theme')
-					or self.common_config['default_top_theme']
-				)),
+				os.path.join('themes', top_theme),
 				os.path.join('themes', self.ext, '__main__'),
 			)
+			self.renderer_options['theme_kwargs']['top_theme'] = top_theme
 
 			if self.ext_config != self.prev_ext_config:
 				ext_config_differs = True
