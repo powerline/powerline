@@ -232,6 +232,9 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 	scripts/powerline-config shell command
 
 	for TEST_TYPE in "daemon" "nodaemon" ; do
+		if test "x$ONLY_TEST_TYPE" != "x" && test "x$ONLY_TEST_TYPE" != "x$TEST_TYPE" ; then
+			continue
+		fi
 		if test x$FAST = x1 ; then
 			if test $TEST_TYPE = daemon ; then
 				VARIANTS=3
@@ -247,9 +250,6 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 				echo $$ > tests/shell/daemon_pid
 				$PYTHON ./scripts/powerline-daemon -s$ADDRESS -f &>tests/shell/daemon_log
 			' &
-		fi
-		if test "x$ONLY_TEST_TYPE" != "x" && test "x$ONLY_TEST_TYPE" != "x$TEST_TYPE" ; then
-			continue
 		fi
 		echo "> Testing $TEST_TYPE"
 		I=-1
