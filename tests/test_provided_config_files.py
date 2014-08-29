@@ -138,10 +138,16 @@ class TestConfig(TestCase):
 
 
 old_cwd = None
+saved_get_config_paths = None
 
 
 def setUpModule():
 	global old_cwd
+	global saved_get_config_paths
+	import powerline
+	saved_get_config_paths = powerline.get_config_paths
+	path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'powerline', 'config_files')
+	powerline.get_config_paths = lambda: [path]
 	sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'path')))
 	old_cwd = os.getcwd()
 	from powerline.segments import vim
@@ -150,6 +156,9 @@ def setUpModule():
 
 def tearDownModule():
 	global old_cwd
+	global saved_get_config_paths
+	import powerline
+	powerline.get_config_paths = saved_get_config_paths
 	os.chdir(old_cwd)
 	old_cwd = None
 	sys.path.pop(0)

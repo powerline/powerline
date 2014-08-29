@@ -3,26 +3,26 @@
 	"segments": {
 		"right": [
 			{
-				"name": "uptime",
+				"function": "uptime",
 				"priority": 50
 			},
 			{
-				"name": "system_load",
+				"function": "system_load",
 				"priority": 50
 			},
 			{
-				"name": "date",
-				"before": ""
+				"function": "date"
 			},
 			{
-				"name": "date",
+				"function": "date",
+				"name": "time",
 				"args": {
 					"format": "%H:%M",
 					"istime": true
 				}
 			},
 			{
-				"name": "hostname"
+				"function": "hostname"
 			}
 		]
 	}

@@ -3,7 +3,6 @@ while jobs | grep fish_update_completions
 	sleep 1
 end
 powerline-setup
-set POWERLINE_COMMAND "$POWERLINE_COMMAND -p $PWD/powerline/config_files"
 set POWERLINE_COMMAND "$POWERLINE_COMMAND -t default_leftonly.segment_data.hostname.args.only_if_ssh=false"
 set POWERLINE_COMMAND "$POWERLINE_COMMAND -c ext.shell.theme=default_leftonly"
 setenv VIRTUAL_ENV

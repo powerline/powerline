@@ -3,7 +3,7 @@
 	"segments": {
 		"left": [
 			{
-				"name": "continuation"
+				"function": "continuation"
 			}
 		],
 		"right": [

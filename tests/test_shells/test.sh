@@ -74,7 +74,7 @@ run() {
 		IPYTHONDIR="$PWD/tests/shell/ipython_home" \
 		POWERLINE_SHELL_CONTINUATION=$additional_prompts \
 		POWERLINE_SHELL_SELECT=$additional_prompts \
-		POWERLINE_COMMAND="${POWERLINE_COMMAND}" \
+		POWERLINE_COMMAND="${POWERLINE_COMMAND} -p $PWD/powerline/config_files" \
 		"$@"
 }
 
@@ -232,6 +232,9 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 	scripts/powerline-config shell command
 
 	for TEST_TYPE in "daemon" "nodaemon" ; do
+		if test "x$ONLY_TEST_TYPE" != "x" && test "x$ONLY_TEST_TYPE" != "x$TEST_TYPE" ; then
+			continue
+		fi
 		if test x$FAST = x1 ; then
 			if test $TEST_TYPE = daemon ; then
 				VARIANTS=3
@@ -245,11 +248,8 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 		if test $TEST_TYPE = daemon ; then
 			sh -c '
 				echo $$ > tests/shell/daemon_pid
-				$PYTHON ./scripts/powerline-daemon -s$ADDRESS -f &>tests/shell/daemon_log
+				$PYTHON ./scripts/powerline-daemon -s$ADDRESS -f >tests/shell/daemon_log 2>&1
 			' &
-		fi
-		if test "x$ONLY_TEST_TYPE" != "x" && test "x$ONLY_TEST_TYPE" != "x$TEST_TYPE" ; then
-			continue
 		fi
 		echo "> Testing $TEST_TYPE"
 		I=-1
@@ -332,7 +332,7 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 	done
 fi
 
-if ! $PYTHON scripts/powerline-daemon -s$ADDRESS &> tests/shell/daemon_log_2 ; then
+if ! $PYTHON scripts/powerline-daemon -s$ADDRESS > tests/shell/daemon_log_2 2>&1 ; then
 	echo "Daemon exited with status $?"
 	FAILED=1
 else

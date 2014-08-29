@@ -808,16 +808,16 @@ generic_keys = set((
 	'display'
 ))
 type_keys = {
-	'function': set(('args', 'module', 'draw_inner_divider')),
+	'function': set(('function', 'args', 'draw_inner_divider')),
 	'string': set(('contents', 'type', 'highlight_group', 'divider_highlight_group')),
 	'filler': set(('type', 'highlight_group', 'divider_highlight_group')),
-	'segment_list': set(('segments', 'module', 'args', 'type')),
+	'segment_list': set(('function', 'segments', 'args', 'type')),
 }
 required_keys = {
-	'function': set(('name',)),
+	'function': set(('function',)),
 	'string': set(()),
 	'filler': set(),
-	'segment_list': set(('name', 'segments',)),
+	'segment_list': set(('function', 'segments',)),
 }
 highlight_keys = set(('highlight_group', 'name'))
 
@@ -887,8 +887,17 @@ def check_segment_module(module, data, context, echoerr):
 	return True, False, False
 
 
+def get_function_strings(function_name, context, ext):
+	if '.' in function_name:
+		module, function_name = function_name.rpartition('.')[::2]
+	else:
+		module = context[0][1].get(
+			'default_module', MarkedUnicode('powerline.segments.' + ext, None))
+	return module, function_name
+
+
 def check_full_segment_data(segment, data, context, echoerr):
-	if 'name' not in segment:
+	if 'name' not in segment and 'function' not in segment:
 		return True, False, False
 
 	ext = data['ext']
@@ -899,11 +908,17 @@ def check_full_segment_data(segment, data, context, echoerr):
 	else:
 		top_segment_data = data['ext_theme_configs'].get(main_theme_name, {}).get('segment_data', {})
 
-	names = [segment['name']]
 	if segment.get('type', 'function') == 'function':
-		module = segment.get('module', context[0][1].get('default_module', MarkedUnicode(
-			'powerline.segments.' + ext, None)))
-		names.insert(0, unicode(module) + '.' + unicode(names[0]))
+		function_name = segment.get('function')
+		if function_name:
+			module, function_name = get_function_strings(function_name, context, ext)
+			names = [module + '.' + function_name, function_name]
+		else:
+			names = []
+	elif segment.get('name'):
+		names = [segment['name']]
+	else:
+		return True, False, False
 
 	segment_copy = segment.copy()
 
@@ -921,15 +936,9 @@ def check_full_segment_data(segment, data, context, echoerr):
 	return check_key_compatibility(segment_copy, data, context, echoerr)
 
 
-def import_segment(name, data, context, echoerr, module=None):
+def import_segment(name, data, context, echoerr, module):
 	context_has_marks(context)
-	havemarks(name)
-	if not module:
-		module = context[-2][1].get(
-			'module', context[0][1].get(
-				'default_module', MarkedUnicode(
-					'powerline.segments.' + data['ext'], None)))
-	havemarks(module)
+	havemarks(name, module)
 
 	with WithPath(data['import_paths']):
 		try:
@@ -956,11 +965,12 @@ def import_segment(name, data, context, echoerr, module=None):
 	return func
 
 
-def check_segment_name(name, data, context, echoerr):
-	havemarks(name)
+def check_segment_function(function_name, data, context, echoerr):
+	havemarks(function_name)
 	ext = data['ext']
+	module, function_name = get_function_strings(function_name, context, ext)
 	if context[-2][1].get('type', 'function') == 'function':
-		func = import_segment(name, data, context, echoerr)
+		func = import_segment(function_name, data, context, echoerr, module=module)
 
 		if not func:
 			return True, False, True
@@ -974,7 +984,7 @@ def check_segment_name(name, data, context, echoerr):
 			D_H_G_USED_STR = 'Divider highlight group used: '
 			LDHGUS = len(D_H_G_USED_STR)
 			pointer = 0
-			mark_name = '<{0} docstring>'.format(name)
+			mark_name = '<{0} docstring>'.format(function_name)
 			for i, line in enumerate(func.__doc__.split('\n')):
 				if H_G_USED_STR in line:
 					idx = line.index(H_G_USED_STR) + LHGUS
@@ -1000,7 +1010,7 @@ def check_segment_name(name, data, context, echoerr):
 						'found highlight group {0} not defined in the following colorschemes: {1}\n'
 						'(Group name was obtained from function documentation.)'
 					).format(divider_hl_group, list_sep.join(r)),
-					problem_mark=name.mark
+					problem_mark=function_name.mark
 				)
 				hadproblem = True
 
@@ -1039,7 +1049,7 @@ def check_segment_name(name, data, context, echoerr):
 							'found highlight groups list ({0}) with all groups not defined in some colorschemes\n'
 							'(Group names were taken from function documentation.)'
 						).format(list_sep.join((h[0] for h in required_pack))),
-						problem_mark=name.mark
+						problem_mark=function_name.mark
 					)
 					for r, h in zip(rs, required_pack):
 						echoerr(
@@ -1049,7 +1059,7 @@ def check_segment_name(name, data, context, echoerr):
 						)
 					hadproblem = True
 		else:
-			r = hl_exists(name, data, context, echoerr, allow_gradients=True)
+			r = hl_exists(function_name, data, context, echoerr, allow_gradients=True)
 			if r:
 				echoerr(
 					context='Error while checking theme (key {key})'.format(key=context_key(context)),
@@ -1058,27 +1068,27 @@ def check_segment_name(name, data, context, echoerr):
 						'(If not specified otherwise in documentation, '
 						'highlight group for function segments\n'
 						'is the same as the function name.)'
-					).format(name, list_sep.join(r)),
-					problem_mark=name.mark
+					).format(function_name, list_sep.join(r)),
+					problem_mark=function_name.mark
 				)
 				hadproblem = True
 
 		return True, False, hadproblem
 	elif context[-2][1].get('type') != 'segment_list':
-		if name not in context[0][1].get('segment_data', {}):
+		if function_name not in context[0][1].get('segment_data', {}):
 			main_theme_name = data['main_config'].get('ext', {}).get(ext, {}).get('theme', None)
 			if data['theme'] == main_theme_name:
 				main_theme = {}
 			else:
 				main_theme = data['ext_theme_configs'].get(main_theme_name, {})
 			if (
-				name not in main_theme.get('segment_data', {})
-				and name not in data['ext_theme_configs'].get('__main__', {}).get('segment_data', {})
-				and not any(((name in theme.get('segment_data', {})) for theme in data['top_themes'].values()))
+				function_name not in main_theme.get('segment_data', {})
+				and function_name not in data['ext_theme_configs'].get('__main__', {}).get('segment_data', {})
+				and not any(((function_name in theme.get('segment_data', {})) for theme in data['top_themes'].values()))
 			):
 				echoerr(context='Error while checking segments (key {key})'.format(key=context_key(context)),
 				        problem='found useless use of name key (such name is not present in theme/segment_data)',
-				        problem_mark=name.mark)
+				        problem_mark=function_name.mark)
 
 	return True, False, False
 
@@ -1192,16 +1202,22 @@ def check_segment_data_key(key, data, context, echoerr):
 		for segments in theme.get('segments', {}).values():
 			for segment in segments:
 				if 'name' in segment:
-					if has_module_name:
-						module = segment.get('module', theme.get('default_module', 'powerline.segments.' + ext))
-						full_name = unicode(module) + '.' + unicode(segment['name'])
-						if key == full_name:
-							found = True
-							break
-					else:
-						if key == segment['name']:
-							found = True
-							break
+					if key == segment['name']:
+						found = True
+						break
+				else:
+					function_name = segment.get('function')
+					if function_name:
+						module, function_name = get_function_strings(function_name, ((None, theme),), ext)
+						if has_module_name:
+							full_name = module + '.' + function_name
+							if key == full_name:
+								found = True
+								break
+						else:
+							if key == function_name:
+								found = True
+								break
 			if found:
 				break
 		if found:
@@ -1288,9 +1304,11 @@ def check_args(get_functions, args, data, context, echoerr):
 
 
 def get_one_segment_function(data, context, echoerr):
-	name = context[-2][1].get('name')
-	if name:
-		func = import_segment(name, data, context, echoerr)
+	ext = data['ext']
+	function_name = context[-2][1].get('function')
+	if function_name:
+		module, function_name = get_function_strings(function_name, context, ext)
+		func = import_segment(function_name, data, context, echoerr, module=module)
 		if func:
 			yield func
 
@@ -1307,14 +1325,14 @@ def get_all_possible_functions(data, context, echoerr):
 			for segments in theme_config.get('segments', {}).values():
 				for segment in segments:
 					if segment.get('type', 'function') == 'function':
-						module = segment.get(
-							'module',
-							theme_config.get('default_module', MarkedUnicode(
-								'powerline.segments.' + data['ext'], None))
-						)
-						func = import_segment(name, data, context, echoerr, module=module)
-						if func:
-							yield func
+						function_name = segment.get('function')
+						current_name = segment.get('name')
+						if function_name:
+							module, function_name = get_function_strings(function_name, ((None, theme_config),), ext)
+							if current_name == name or function_name == name:
+								func = import_segment(function_name, data, context, echoerr, module=module)
+								if func:
+									yield func
 
 
 args_spec = Spec(
@@ -1326,7 +1344,8 @@ segment_module_spec = Spec().type(unicode).func(check_segment_module).optional()
 sub_segments_spec = Spec()
 segment_spec = Spec(
 	type=Spec().oneof(type_keys).optional(),
-	name=Spec().re('^[a-zA-Z_]\w*$').func(check_segment_name).optional(),
+	name=Spec().re('^[a-zA-Z_]\w*$').optional(),
+	function=Spec().re('^(\w+\.)*[a-zA-Z_]\w*$').func(check_segment_function).optional(),
 	exclude_modes=Spec().list(vim_mode_spec()).optional(),
 	include_modes=Spec().list(vim_mode_spec()).optional(),
 	draw_hard_divider=Spec().type(bool).optional(),

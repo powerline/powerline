@@ -12,7 +12,7 @@
 				"highlight_group": ["file_name"]
 			},
 			{
-				"name": "window_title",
+				"function": "window_title",
 				"draw_soft_divider": false
 			},
 			{
@@ -30,7 +30,7 @@
 				"highlight_group": ["line_current_symbol", "line_current"]
 			},
 			{
-				"name": "line_current",
+				"function": "line_current",
 				"draw_soft_divider": false,
 				"width": 3,
 				"align": "r"

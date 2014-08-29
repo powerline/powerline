@@ -3,7 +3,7 @@
 	"segments": {
 		"left": [
 			{
-				"name": "nerdtree"
+				"function": "nerdtree"
 			},
 			{
 				"type": "string",

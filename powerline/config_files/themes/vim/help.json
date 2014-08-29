@@ -2,7 +2,7 @@
 	"segments": {
 		"left": [
 			{
-				"name": "file_name",
+				"function": "file_name",
 				"draw_soft_divider": false
 			},
 			{
@@ -15,7 +15,7 @@
 		],
 		"right": [
 			{
-				"name": "line_percent",
+				"function": "line_percent",
 				"priority": 30,
 				"width": 4,
 				"align": "r"
@@ -26,7 +26,7 @@
 				"highlight_group": ["line_current_symbol", "line_current"]
 			},
 			{
-				"name": "line_current",
+				"function": "line_current",
 				"draw_soft_divider": false,
 				"width": 3,
 				"align": "r"

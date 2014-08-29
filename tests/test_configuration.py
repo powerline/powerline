@@ -123,7 +123,7 @@ config = {
 		'segments': {
 			'left': [
 				{
-					'name': 'environment',
+					'function': 'environment',
 					'args': {
 						'variable': 'TEST',
 					},
@@ -442,8 +442,7 @@ class TestSegmentAttributes(TestRender):
 		config['themes/test/default']['segments'] = {
 			'left': [
 				{
-					'name': 'm1',
-					'module': 'bar'
+					'function': 'bar.m1'
 				}
 			]
 		}
@@ -469,12 +468,55 @@ class TestSegmentAttributes(TestRender):
 		config['themes/test/default']['segments'] = {
 			'left': [
 				{
-					'name': 'm1',
-					'module': 'bar'
+					'function': 'bar.m1'
 				}
 			]
 		}
 		self.assertRenderEqual(p, '{56} pl;{6-}>>{--}')
+
+
+class TestSegmentData(TestRender):
+	@add_args
+	def test_segment_data(self, p, config):
+		def m1(**kwargs):
+			return 'S'
+
+		def m2(**kwargs):
+			return 'S'
+		sys.modules['bar'] = Args(m1=m1, m2=m2)
+		config['themes/powerline']['segment_data'] = {
+			'm1': {
+				'before': '1'
+			},
+			'bar.m2': {
+				'before': '2'
+			},
+			'n': {
+				'before': '3'
+			},
+			'm2': {
+				'before': '4'
+			},
+		}
+		config['themes/test/default']['segments'] = {
+			'left': [
+				{
+					'function': 'bar.m1'
+				},
+				{
+					'function': 'bar.m1',
+					'name': 'n'
+				},
+				{
+					'function': 'bar.m2',
+					'name': 'n'
+				},
+				{
+					'function': 'bar.m2'
+				}
+			]
+		}
+		self.assertRenderEqual(p, '{56} 1S{56}>{56}3S{610}>>{910}3S{910}>{910}2S{10-}>>{--}')
 
 
 class TestVim(TestCase):
