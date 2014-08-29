@@ -40,6 +40,17 @@ powerline:
     This attribute controls whether segment will receive ``create_watcher`` 
     argument: if it is present argument will be received.
 
+``powerline_segment_datas``
+    This attribute must be a dictionary containing ``top_theme: segment_data`` 
+    mapping where ``top_theme`` is any theme name (it is expected that all of
+    the names from :ref:`top-level themes list <config-top_themes-list>` are 
+    present) and ``segment_data`` is a dictionary like the one that is contained 
+    inside :ref:`segment_data dictionary in configuration 
+    <config-themes-segment_data>`. This attribute should be used to specify 
+    default theme-specific values for *third-party* segments: powerline 
+    theme-specific values go directly to :ref:`top-level themes 
+    <config-themes>`.
+
 ``startup``
     This attribute must be a callable which accepts the following keyword 
     arguments:

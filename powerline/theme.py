@@ -30,6 +30,7 @@ class Theme(object):
 	             common_config,
 	             pl,
 	             get_module_attr,
+	             top_theme,
 	             main_theme_config=None,
 	             run_once=False,
 	             shutdown_event=None):
@@ -54,7 +55,15 @@ class Theme(object):
 		theme_configs = [theme_config]
 		if main_theme_config:
 			theme_configs.append(main_theme_config)
-		get_segment = gen_segment_getter(pl, ext, common_config, theme_configs, theme_config.get('default_module'), get_module_attr)
+		get_segment = gen_segment_getter(
+			pl,
+			ext,
+			common_config,
+			theme_configs,
+			theme_config.get('default_module'),
+			get_module_attr,
+			top_theme
+		)
 		for segdict in itertools.chain((theme_config['segments'],),
 		                               theme_config['segments'].get('above', ())):
 			self.segments.append(new_empty_segment_line())
