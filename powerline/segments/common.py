@@ -116,7 +116,7 @@ class CwdSegment(Segment):
 	             dir_shorten_len=None,
 	             dir_limit_depth=None,
 	             use_path_separator=False,
-	             ellipsis='⋯',
+	             ellipsis='...',
 	             **kwargs):
 		cwd = self.get_shortened_path(pl, segment_info, **kwargs)
 		cwd_split = cwd.split(os.sep)
@@ -198,7 +198,7 @@ UNICODE_TEXT_TRANSLATION = {
 }
 
 
-def fuzzy_time(pl, unicode_text=True):
+def fuzzy_time(pl, unicode_text=False):
 	'''Display the current time as fuzzy time, e.g. "quarter past six".
 
 	:param bool unicode_text:
@@ -423,18 +423,18 @@ weather_conditions_codes = (
 # ('sunny',  (32, 36)),
 # ('night',  (31, 33))):
 weather_conditions_icons = {
-	'day':           '〇',
-	'blustery':      '⚑',
-	'rainy':         '☔',
-	'cloudy':        '☁',
-	'snowy':         '❅',
-	'stormy':        '☈',
-	'foggy':         '〰',
-	'sunny':         '☼',
-	'night':         '☾',
-	'windy':         '☴',
-	'not_available': '�',
-	'unknown':       '⚠',
+	'day':           'DAY',
+	'blustery':      'WIND',
+	'rainy':         'RAIN',
+	'cloudy':        'CLOUDS',
+	'snowy':         'SNOW',
+	'stormy':        'STORM',
+	'foggy':         'FOG',
+	'sunny':         'SUN',
+	'night':         'NIGHT',
+	'windy':         'WINDY',
+	'not_available': 'NA',
+	'unknown':       'UKN',
 }
 
 temp_conversions = {
@@ -859,7 +859,7 @@ class NetworkLoadSegment(KwThreadedSegment):
 		idata['last'] = (monotonic(), _get_bytes(interface))
 		return idata.copy()
 
-	def render_one(self, idata, recv_format='⬇ {value:>8}', sent_format='⬆ {value:>8}', suffix='B/s', si_prefix=False, **kwargs):
+	def render_one(self, idata, recv_format='DL {value:>8}', sent_format='UL {value:>8}', suffix='B/s', si_prefix=False, **kwargs):
 		if not idata or 'prev' not in idata:
 			return None
 
@@ -1000,10 +1000,10 @@ Highlight groups used: ``email_alert_gradient`` (gradient), ``email_alert``.
 
 
 STATE_SYMBOLS = {
-	'fallback': '♫',
-	'play': '▶',
-	'pause': '▮▮',
-	'stop': '■',
+	'fallback': '',
+	'play': '>',
+	'pause': '~',
+	'stop': 'X',
 }
 
 
@@ -1411,7 +1411,7 @@ def _get_capacity(pl):
 	return _get_capacity(pl)
 
 
-def battery(pl, format='{capacity:3.0%}', steps=5, gamify=False, full_heart='♥', empty_heart='♥'):
+def battery(pl, format='{capacity:3.0%}', steps=5, gamify=False, full_heart='O', empty_heart='O'):
 	'''Return battery charge status.
 
 	:param str format:

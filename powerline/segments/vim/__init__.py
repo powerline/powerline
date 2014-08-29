@@ -41,16 +41,16 @@ vim_funcs = {
 
 vim_modes = {
 	'n': 'NORMAL',
-	'no': 'N·OPER',
+	'no': 'N-OPER',
 	'v': 'VISUAL',
-	'V': 'V·LINE',
-	'^V': 'V·BLCK',
+	'V': 'V-LINE',
+	'^V': 'V-BLCK',
 	's': 'SELECT',
-	'S': 'S·LINE',
-	'^S': 'S·BLCK',
+	'S': 'S-LINE',
+	'^S': 'S-BLCK',
 	'i': 'INSERT',
 	'R': 'REPLACE',
-	'Rv': 'V·RPLCE',
+	'Rv': 'V-RPLCE',
 	'c': 'COMMND',
 	'cv': 'VIM EX',
 	'ce': 'EX',
@@ -107,7 +107,7 @@ def mode(pl, segment_info, override=None):
 
 @window_cached
 @requires_segment_info
-def visual_range(pl, segment_info, CTRL_V_text='{rows} × {vcols}', v_text_oneline='C:{vcols}', v_text_multiline='L:{rows}', V_text='L:{rows}'):
+def visual_range(pl, segment_info, CTRL_V_text='{rows} x {vcols}', v_text_oneline='C:{vcols}', v_text_multiline='L:{rows}', V_text='L:{rows}'):
 	'''Return the current visual selection range.
 
 	:param str CTRL_V_text:
@@ -197,7 +197,7 @@ def paste_indicator(pl, segment_info, text='PASTE'):
 
 
 @requires_segment_info
-def readonly_indicator(pl, segment_info, text=''):
+def readonly_indicator(pl, segment_info, text='RO'):
 	'''Return a read-only indicator.
 
 	:param string text:
