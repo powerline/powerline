@@ -64,8 +64,9 @@ Common configuration is a subdictionary that is a value of ``common`` key in
 
 ``paths``
     Defines additional paths which will be searched for modules when using 
-    :ref:`module segment option <config-themes-seg-module>`. Paths defined here 
-    have priority when searching for modules.
+    :ref:`function segment option <config-themes-seg-function>` or :ref:`Vim 
+    local_themes option <config-ext-local_themes>`. Paths defined here have 
+    priority when searching for modules.
 
 .. _config-common-log:
 
@@ -283,7 +284,8 @@ ascii                       Theme without any unicode characters at all
 .. _config-themes-default_module:
 
 ``default_module``
-    Python module where segments will be looked by default.
+    Python module where segments will be looked by default. Defaults to 
+    ``powerline.segments.{ext}``.
 
 ``spaces``
     Defines number of spaces just before the divider (on the right side) or just 
@@ -325,8 +327,8 @@ ascii                       Theme without any unicode characters at all
 .. _config-themes-segment_data:
 
 ``segment_data``
-    A dict where keys are segment names or strings ``{module}.{name}``. Used to 
-    specify default values for various keys:
+    A dict where keys are segment names or strings ``{module}.{function}``. Used 
+    to specify default values for various keys:
     :ref:`after <config-themes-seg-after>`,
     :ref:`before <config-themes-seg-before>`,
     :ref:`contents <config-themes-seg-contents>` (only for string segments
@@ -335,8 +337,8 @@ ascii                       Theme without any unicode characters at all
 
     Key :ref:`args <config-themes-seg-args>` (only for function and 
     segments_list segments) is handled specially: unlike other values it is 
-    merged with all other values, except that a single ``{module}.{name}`` key 
-    if found prevents merging all ``{name}`` values.
+    merged with all other values, except that a single ``{module}.{function}`` 
+    key if found prevents merging all ``{function}`` values.
 
     When using :ref:`local themes <config-ext-local_themes>` values of these 
     keys are first searched in the segment description, then in ``segment_data`` 
@@ -372,8 +374,8 @@ ascii                       Theme without any unicode characters at all
         ``filler`` or ``segments_list``:
 
         ``function``
-            The segment contents is the return value of the function defined 
-            in the :ref:`name option <config-themes-seg-name>`.
+            The segment contents is the return value of the function defined in 
+            the :ref:`function option <config-themes-seg-function>`.
 
         ``string``
             A static string segment where the contents is defined in the 
@@ -382,22 +384,31 @@ ascii                       Theme without any unicode characters at all
             option <config-themes-seg-highlight_group>`.
 
         ``segments_list``
-            Sub-list of segments. This list only allows :ref:`name 
-            <config-themes-seg-name>`, :ref:`segments 
+            Sub-list of segments. This list only allows :ref:`function 
+            <config-themes-seg-function>`, :ref:`segments 
             <config-themes-seg-segments>` and :ref:`args 
             <config-themes-seg-args>` options.
-
-    .. _config-themes-seg-module:
-
-    ``module``
-        Function module, only required for function segments. Defaults to 
-        ``powerline.segments.{extension}``. Default is overriden by 
-        :ref:`default_module theme option <config-themes-default_module>`.
 
     .. _config-themes-seg-name:
 
     ``name``
-        Function name, only required for function and list segments.
+        Segment name. If present allows referring to this segment in 
+        :ref:`segment_data <config-themes-segment_data>` dictionary by this 
+        name. If not ``string`` segments may not be referred there at all and 
+        ``function`` and ``segments_list`` segments may be referred there using 
+        either ``{module}.{function_name}`` or ``{function_name}``, whichever 
+        will be found first. Function name is taken from :ref:`function key 
+        <config-themes-seg-function>`.
+
+        .. note::
+            If present prevents ``function`` key from acting as a segment name.
+
+    .. _config-themes-seg-function:
+
+    ``function``
+        Function used to get segment contents, in format ``{module}.{function}`` 
+        or ``{function}``. If ``{module}`` is omitted :ref:`default_module 
+        option <config-themes-default_module>` is used.
 
     .. _config-themes-seg-highlight_group:
 

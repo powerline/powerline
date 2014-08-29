@@ -4,39 +4,38 @@
 		"left": [
 			{
 				"type": "segment_list",
-				"module": "powerline.listers.vim",
-				"name": "tabbuflister",
+				"function": "powerline.listers.vim.tabbuflister",
 				"segments": [
 					{
-						"name": "tabnr",
+						"function": "tabnr",
 						"after": " ",
 						"exclude_modes": ["tab", "buf", "buf_nc"],
 						"priority": 5
 					},
 					{
-						"name": "bufnr",
+						"function": "bufnr",
 						"after": " ",
 						"exclude_modes": ["tab", "buf", "tab_nc"],
 						"priority": 5
 					},
 					{
-						"name": "file_directory",
+						"function": "file_directory",
 						"priority": 40
 					},
 					{
-						"name": "file_name",
+						"function": "file_name",
 						"args": {
 							"display_no_file": true
 						},
 						"priority": 10
 					},
 					{
-						"name": "tab_modified_indicator",
+						"function": "tab_modified_indicator",
 						"exclude_modes": ["buf", "buf_nc"],
 						"priority": 5
 					},
 					{
-						"name": "modified_indicator",
+						"function": "modified_indicator",
 						"exclude_modes": ["tab", "tab_nc"],
 						"priority": 5
 					}
@@ -52,7 +51,7 @@
 		],
 		"right": [
 			{
-				"name": "single_tab"
+				"function": "single_tab"
 			}
 		]
 	}

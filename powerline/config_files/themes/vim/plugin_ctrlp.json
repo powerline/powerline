@@ -3,7 +3,7 @@
 	"segments": {
 		"left": [
 			{
-				"name": "ctrlp",
+				"function": "ctrlp",
 				"args": {
 					"side": "left"
 				}
@@ -18,7 +18,7 @@
 		],
 		"right": [
 			{
-				"name": "ctrlp",
+				"function": "ctrlp",
 				"args": {
 					"side": "right"
 				}

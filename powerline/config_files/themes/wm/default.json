@@ -3,22 +3,22 @@
 	"segments": {
 		"right": [
 			{
-				"name": "weather",
+				"function": "weather",
 				"priority": 50
 			},
 			{
-				"name": "date",
+				"function": "date",
 				"before": ""
 			},
 			{
-				"name": "date",
+				"function": "date",
 				"args": {
 					"format": "%H:%M",
 					"istime": true
 				}
 			},
 			{
-				"name": "email_imap_alert",
+				"function": "email_imap_alert",
 				"priority": 10,
 				"args": {
 					"username": "",

@@ -3,7 +3,7 @@
 	"segments": {
 		"left": [
 			{
-				"name": "virtualenv",
+				"function": "virtualenv",
 				"priority": 10
 			},
 			{
@@ -13,8 +13,7 @@
 				"highlight_group": ["prompt"]
 			},
 			{
-				"name": "prompt_count",
-				"module": "powerline.segments.ipython",
+				"function": "powerline.segments.ipython.prompt_count",
 				"draw_soft_divider": false
 			},
 			{
