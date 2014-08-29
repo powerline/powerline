@@ -1,5 +1,5 @@
 source powerline/bindings/tcsh/powerline.tcsh
-set POWERLINE_COMMAND=$POWERLINE_COMMAND:q" -p "$PWD:q/powerline/config_files" -t default_leftonly.segment_data.hostname.args.only_if_ssh=false -c ext.shell.theme=default_leftonly"
+set POWERLINE_COMMAND=$POWERLINE_COMMAND:q" -t default_leftonly.segment_data.hostname.args.only_if_ssh=false -c ext.shell.theme=default_leftonly"
 unsetenv VIRTUAL_ENV
 cd tests/shell/3rd
 cd .git

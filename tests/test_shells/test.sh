@@ -74,7 +74,7 @@ run() {
 		IPYTHONDIR="$PWD/tests/shell/ipython_home" \
 		POWERLINE_SHELL_CONTINUATION=$additional_prompts \
 		POWERLINE_SHELL_SELECT=$additional_prompts \
-		POWERLINE_COMMAND="${POWERLINE_COMMAND}" \
+		POWERLINE_COMMAND="${POWERLINE_COMMAND} -p $PWD/powerline/config_files" \
 		"$@"
 }
 

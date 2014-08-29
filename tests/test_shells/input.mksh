@@ -1,5 +1,4 @@
 . powerline/bindings/shell/powerline.sh
-POWERLINE_COMMAND="$POWERLINE_COMMAND -p $PWD/powerline/config_files"
 POWERLINE_COMMAND="$POWERLINE_COMMAND -t default_leftonly.segment_data.hostname.args.only_if_ssh=false"
 POWERLINE_COMMAND="$POWERLINE_COMMAND -c ext.shell.theme=default_leftonly"
 export VIRTUAL_ENV=
