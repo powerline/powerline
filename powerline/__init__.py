@@ -467,7 +467,7 @@ class Powerline(object):
 
 				self.get_module_attr = gen_module_attr_getter(self.pl, self.import_paths, self.imported_modules)
 
-				self.renderer_options.update(
+				mergedicts(self.renderer_options, dict(
 					pl=self.pl,
 					term_truecolor=self.common_config['term_truecolor'],
 					ambiwidth=self.common_config['ambiwidth'],
@@ -480,7 +480,7 @@ class Powerline(object):
 						'shutdown_event': self.shutdown_event,
 						'get_module_attr': self.get_module_attr,
 					},
-				)
+				))
 
 				if not self.run_once and self.common_config['reload_config']:
 					interval = self.common_config['interval']
@@ -535,7 +535,8 @@ class Powerline(object):
 			self._purge_configs('colorscheme')
 			if load_colorscheme:
 				self.colorscheme_config = self.load_colorscheme_config(self.ext_config['colorscheme'])
-			self.renderer_options['colorscheme'] = Colorscheme(self.colorscheme_config, self.colors_config)
+			self.renderer_options['theme_kwargs']['colorscheme'] = (
+				Colorscheme(self.colorscheme_config, self.colors_config))
 
 		if load_theme:
 			self._purge_configs('theme')

@@ -31,9 +31,11 @@ class Theme(object):
 	             pl,
 	             get_module_attr,
 	             top_theme,
+	             colorscheme,
 	             main_theme_config=None,
 	             run_once=False,
 	             shutdown_event=None):
+		self.colorscheme = colorscheme
 		self.dividers = theme_config['dividers']
 		self.dividers = dict((
 			(key, dict((k, u(v))
@@ -116,7 +118,15 @@ class Theme(object):
 				if mode not in segment['exclude_modes'] and (
 					not segment['include_modes'] or mode in segment['include_modes']
 				):
-					process_segment(self.pl, side, segment_info, parsed_segments, segment, mode)
+					process_segment(
+						self.pl,
+						side,
+						segment_info,
+						parsed_segments,
+						segment,
+						mode,
+						self.colorscheme,
+					)
 			for segment in parsed_segments:
 				segment['contents'] = segment['before'] + u(segment['contents'] if segment['contents'] is not None else '') + segment['after']
 				# Align segment contents
