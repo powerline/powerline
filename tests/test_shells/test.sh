@@ -248,7 +248,7 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 		if test $TEST_TYPE = daemon ; then
 			sh -c '
 				echo $$ > tests/shell/daemon_pid
-				$PYTHON ./scripts/powerline-daemon -s$ADDRESS -f &>tests/shell/daemon_log
+				$PYTHON ./scripts/powerline-daemon -s$ADDRESS -f >tests/shell/daemon_log 2>&1
 			' &
 		fi
 		echo "> Testing $TEST_TYPE"
@@ -332,7 +332,7 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 	done
 fi
 
-if ! $PYTHON scripts/powerline-daemon -s$ADDRESS &> tests/shell/daemon_log_2 ; then
+if ! $PYTHON scripts/powerline-daemon -s$ADDRESS > tests/shell/daemon_log_2 2>&1 ; then
 	echo "Daemon exited with status $?"
 	FAILED=1
 else
