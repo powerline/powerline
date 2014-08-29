@@ -25,6 +25,10 @@
 			"contents": "LN "
 		},
 
+		"time": {
+			"before": ""
+		},
+
 		"powerline.segments.common.network_load": {
 			"args": {
 				"recv_format": "DL {value:>8}",
@@ -49,9 +53,6 @@
 		},
 		"powerline.segments.common.uptime": {
 			"before": "UP  "
-		},
-		"powerline.segments.common.date": {
-			"before": ""
 		},
 		"powerline.segments.common.email_imap_alert": {
 			"before": "MAIL "

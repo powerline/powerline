@@ -7,11 +7,11 @@
 				"priority": 50
 			},
 			{
-				"function": "date",
-				"before": ""
+				"function": "date"
 			},
 			{
 				"function": "date",
+				"name": "time",
 				"args": {
 					"format": "%H:%M",
 					"istime": true

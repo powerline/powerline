@@ -24,6 +24,10 @@
 			"contents": "␤ "
 		},
 
+		"time": {
+			"before": "⌚ "
+		},
+
 		"powerline.segments.common.network_load": {
 			"args": {
 				"recv_format": "⬇ {value:>8}",
@@ -48,9 +52,6 @@
 		},
 		"powerline.segments.common.uptime": {
 			"before": "⇑  "
-		},
-		"powerline.segments.common.date": {
-			"before": "⌚ "
 		},
 		"powerline.segments.common.email_imap_alert": {
 			"before": "✉ "
