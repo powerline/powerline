@@ -44,7 +44,7 @@ def mergedicts_copy(d1, d2):
 	'''Recursively merge two dictionaries.
 
 	Dictionaries are not modified. Copying happens only if necessary. Assumes 
-	that first dictionary support .copy() method.
+	that first dictionary supports .copy() method.
 	'''
 	ret = d1.copy()
 	for k in d2:
