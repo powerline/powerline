@@ -82,14 +82,20 @@ segment_getters = {
 }
 
 
-def get_attr_func(contents_func, key, args):
+def get_attr_func(contents_func, key, args, is_space_func=False):
 	try:
 		func = getattr(contents_func, key)
 	except AttributeError:
 		return None
 	else:
-		if args is None:
-			return lambda: func()
+		if is_space_func:
+			def expand_func(pl, amount, segment):
+				try:
+					return func(pl=pl, amount=amount, segment=segment, **args)
+				except Exception as e:
+					pl.exception('Exception while computing segment expansion: {0}', str(e))
+					return segment['contents'] + (' ' * amount)
+			return expand_func
 		else:
 			return lambda pl, shutdown_event: func(pl=pl, shutdown_event=shutdown_event, **args)
 
@@ -297,7 +303,8 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, ge
 
 		if segment_type == 'function':
 			startup_func = get_attr_func(_contents_func, 'startup', args)
-			shutdown_func = get_attr_func(_contents_func, 'shutdown', None)
+			shutdown_func = getattr(_contents_func, 'shutdown', None)
+			expand_func = get_attr_func(_contents_func, 'expand', args, True)
 
 			if hasattr(_contents_func, 'powerline_requires_filesystem_watcher'):
 				create_watcher = lambda: create_file_watcher(pl, common_config['watcher'])
@@ -311,6 +318,7 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, ge
 			startup_func = None
 			shutdown_func = None
 			contents_func = None
+			expand_func = None
 
 		return {
 			'name': name or function_name,
@@ -330,7 +338,7 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, ge
 			'include_modes': segment.get('include_modes', []),
 			'width': segment.get('width'),
 			'align': segment.get('align', 'l'),
-			'expand': None,
+			'expand': expand_func,
 			'startup': startup_func,
 			'shutdown': shutdown_func,
 			'mode': None,

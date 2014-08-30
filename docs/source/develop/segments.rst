@@ -51,6 +51,8 @@ powerline:
     theme-specific values go directly to :ref:`top-level themes 
     <config-themes>`.
 
+.. _dev-segments-startup:
+
 ``startup``
     This attribute must be a callable which accepts the following keyword 
     arguments:
@@ -68,12 +70,37 @@ powerline:
     used (more specific: when :py:class:`powerline.Powerline` constructor 
     received true ``run_once`` argument).
 
+.. _dev-segments-shutdown:
+
 ``shutdown``
     This attribute must be a callable that accepts no arguments and shuts down 
     threads and frees any other resources allocated in ``startup`` method of the 
     segment in question.
 
     This function is not called when ``startup`` method is not called.
+
+.. _dev-segments-expand:
+
+``expand``
+    This attribute must be a callable that accepts the following keyword 
+    arguments:
+
+    * ``pl``: :py:class:`powerline.PowerlineLogger` instance which is to be used 
+      for logging.
+    * ``amount``: integer number representing amount of display cells result 
+      must occupy.
+
+      .. warning::
+         “Amount of display cells” is *not* number of Unicode codepoints, string 
+         length, or byte count. It is suggested that your function should look 
+         something like ``return (' ' * amount) + segment['contents']`` where 
+         ``' '`` may be replaced with anything that is known to occupy exactly 
+         one display cell.
+    * ``segment``: :ref:`segment dictionary <dev-segments-segment>`.
+    * Any arguments found in user configuration for the given segment (i.e. 
+      :ref:`args key <config-themes-seg-args>`).
+
+    It must return new value of :ref:`contents <dev-segments-seg-contents>` key.
 
 This callable object should may return either a string (``unicode`` in Python2 
 or ``str`` in Python3, *not* ``str`` in Python2 or ``bytes`` in Python3) object 
@@ -86,6 +113,8 @@ value:
         'contents': original_return,
         'highlight_group': [segment_name],
     }]
+
+.. _dev-segments-return:
 
 Returned list is a list of segments treated independently, except for 
 :ref:`draw_inner_divider key <dev-segments-draw_inner_divider>`.
@@ -157,6 +186,86 @@ Detailed description of used dictionary keys:
 
     No error occurs if segment has this key, but no used highlight groups use 
     gradient color.
+
+``_*``
+    Keys starting with underscore are reserved for powerline and must not be 
+    returned.
+
+``__*``
+    Keys starting with two underscores are reserved for the segment functions, 
+    specifically for :ref:`expand function <dev-segments-expand>`.
+
+.. _dev-segments-segment:
+
+Segment dictionary
+==================
+
+Segment dictionary contains the following keys:
+
+* All keys returned by segment function (if it was used).
+
+* All of the following keys:
+
+  ``name``
+    Segment name: value of the :ref:`name key <config-themes-seg-name>` or 
+    function name (last component of the :ref:`function key 
+    <config-themes-seg-function>`). May be ``None``.
+
+  ``type``
+    :ref:`Segment type <config-themes-seg-type>`. Always represents actual type 
+    and is never ``None``.
+
+  ``highlight_group``, ``divider_highlight_group``
+    Used highlight groups. May be ``None``.
+
+  .. _dev-segments-seg-around:
+
+  ``before``, ``after``
+    Value of :ref:`before <config-themes-seg-before>` or :ref:`after 
+    <config-themes-seg-after>` configuration options. May be ``None`` as well as 
+    an empty string.
+
+  ``contents_func``
+    Function used to get segment contents. May be ``None``.
+
+  .. _dev-segments-seg-contents:
+
+  ``contents``
+    Actual segment contents, excluding dividers and :ref:`before/after 
+    <dev-segments-seg-around>`. May be ``None``.
+
+  ``priority``
+    :ref:`Segment priority <config-themes-seg-priority>`. May be ``None`` for no 
+    priority (such segments are always shown).
+
+  ``draw_soft_divider``, ``draw_hard_divider``, ``draw_inner_divider``
+    :ref:`Divider control flags <dev-segments-draw_inner_divider>`.
+
+  ``side``
+    Segment side: ``right`` or ``left``.
+
+  ``exclude_modes``, ``include_modes``
+    :ref:`Mode display control lists <config-themes-seg-exclude_modes>`. May be 
+    empty, but may not be ``None``.
+
+  ``width``, ``align``
+    :ref:`Width and align options <config-themes-seg-align>`. May be ``None``.
+
+  ``expand``
+    Partially applied :ref:`expand function <dev-segments-expand>`. Accepts 
+    ``pl``, ``amount`` and ``segment`` positional parameters, keyword parameters 
+    from :ref:`args <config-themes-seg-args>` key were applied.
+
+  ``startup``
+    Partially applied :ref:`startup function <dev-segments-startup>`. Accepts 
+    ``pl`` and ``shutdown_event`` positional parameters, keyword parameters from 
+    :ref:`args <config-themes-seg-args>` key were applied.
+
+  ``shutdown``
+    :ref:`Shutdown function <dev-segments-shutdown>`. Accepts no argument.
+
+  ``mode``
+    :ref:`Segment-specific mode <dev-listers-mode>`. May be ``None``.
 
 Segments layout
 ===============

@@ -150,7 +150,7 @@ class Theme(object):
 			for segment in parsed_segments:
 				width = segment['width']
 				align = segment['align']
-				if width == 'auto':
+				if width == 'auto' and segment['expand'] is None:
 					segment['expand'] = expand_functions.get(align)
 					if segment['expand'] is None:
 						self.pl.error('Align argument must be “r”, “l” or “c”, not “{0}”', align)

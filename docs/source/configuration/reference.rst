@@ -369,6 +369,8 @@ ascii                       Theme without any unicode characters at all
 
     Each segment dictionary has the following options:
 
+    .. _config-themes-seg-type:
+
     ``type``
         The segment type. Can be one of ``function`` (default), ``string`` or 
         ``segments_list``:
@@ -439,9 +441,13 @@ ascii                       Theme without any unicode characters at all
     ``args``
         A dict of arguments to be passed to a ``function`` segment.
 
+    .. _config-themes-seg-align:
+
     ``align``
         Aligns the segments contents to the left (``l``), center (``c``) or 
-        right (``r``). Has no sense if ``width`` key was not specified.
+        right (``r``). Has no sense if ``width`` key was not specified or if 
+        segment provides its own function for ``auto`` ``width`` handling and 
+        does not care about this option.
 
     .. _config-themes-seg-width:
 
@@ -453,6 +459,8 @@ ascii                       Theme without any unicode characters at all
         equally among all the spacer segments. Spacers may have contents, 
         either returned by a function or a static string, and the contents 
         can be aligned with the ``align`` property.
+
+    .. _config-themes-seg-priority:
 
     ``priority``
         Optional segment priority. Segments with priority ``None`` (the default 
@@ -481,6 +489,8 @@ ascii                       Theme without any unicode characters at all
         Determines whether inner soft dividers are to be drawn for function 
         segments. Only applicable for functions returning multiple segments. 
         Defaults to ``False``.
+
+    .. _config-themes-seg-exclude_modes:
 
     ``exclude_modes``
         A list of modes where this segment will be excluded: The segment is 
