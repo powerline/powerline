@@ -7,6 +7,7 @@ from powerline.lib.monotonic import monotonic
 from powerline.lib.inotify import INotifyError
 from powerline.lib.path import realpath
 from powerline.lib.watcher.inotify import INotifyTreeWatcher, DirTooLarge, NoSuchDir, BaseDirChanged
+from powerline.lib.watcher.uv import UvTreeWatcher, UvNotFound
 
 
 class DummyTreeWatcher(object):
@@ -30,6 +31,8 @@ class TreeWatcher(object):
 	def get_watcher(self, path, ignore_event):
 		if self.watcher_type == 'inotify':
 			return INotifyTreeWatcher(path, ignore_event=ignore_event)
+		if self.watcher_type == 'uv':
+			return UvTreeWatcher(path, ignore_event=ignore_event)
 		if self.watcher_type == 'dummy':
 			return DummyTreeWatcher(path)
 		# FIXME
@@ -42,6 +45,10 @@ class TreeWatcher(object):
 				except (INotifyError, DirTooLarge) as e:
 					if not isinstance(e, INotifyError):
 						self.pl.warn('Failed to watch path: {0} with error: {1}'.format(path, e))
+			try:
+				return UvTreeWatcher(path, ignore_event=ignore_event)
+			except UvNotFound:
+				pass
 			return DummyTreeWatcher(path)
 		else:
 			raise ValueError('Unknown watcher type: {0}'.format(self.watcher_type))

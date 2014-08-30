@@ -6,6 +6,7 @@ import sys
 from powerline.lib.watcher.stat import StatFileWatcher
 from powerline.lib.watcher.inotify import INotifyFileWatcher
 from powerline.lib.watcher.tree import TreeWatcher
+from powerline.lib.watcher.uv import UvFileWatcher, UvNotFound
 from powerline.lib.inotify import INotifyError
 
 
@@ -39,6 +40,9 @@ def create_file_watcher(pl, watcher_type='auto', expire_time=10):
 		# Explicitly selected inotify watcher: do not catch INotifyError then.
 		pl.debug('Using requested inotify watcher', prefix='watcher')
 		return INotifyFileWatcher(expire_time=expire_time)
+	elif watcher_type == 'uv':
+		pl.debug('Using requested uv watcher', prefix='watcher')
+		return UvFileWatcher()
 
 	if sys.platform.startswith('linux'):
 		try:
@@ -46,6 +50,12 @@ def create_file_watcher(pl, watcher_type='auto', expire_time=10):
 			return INotifyFileWatcher(expire_time=expire_time)
 		except INotifyError:
 			pl.info('Failed to create inotify watcher', prefix='watcher')
+
+	try:
+		pl.debug('Using libuv-based watcher')
+		return UvFileWatcher()
+	except UvNotFound:
+		pl.debug('Failed to import pyuv')
 
 	pl.debug('Using stat-based watcher')
 	return StatFileWatcher()
