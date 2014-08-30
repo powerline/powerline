@@ -810,13 +810,11 @@ generic_keys = set((
 type_keys = {
 	'function': set(('function', 'args', 'draw_inner_divider')),
 	'string': set(('contents', 'type', 'highlight_group', 'divider_highlight_group')),
-	'filler': set(('type', 'highlight_group', 'divider_highlight_group')),
 	'segment_list': set(('function', 'segments', 'args', 'type')),
 }
 required_keys = {
 	'function': set(('function',)),
 	'string': set(()),
-	'filler': set(),
 	'segment_list': set(('function', 'segments',)),
 }
 highlight_keys = set(('highlight_group', 'name'))

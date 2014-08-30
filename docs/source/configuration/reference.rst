@@ -370,8 +370,8 @@ ascii                       Theme without any unicode characters at all
     Each segment dictionary has the following options:
 
     ``type``
-        The segment type. Can be one of ``function`` (default), ``string``, 
-        ``filler`` or ``segments_list``:
+        The segment type. Can be one of ``function`` (default), ``string`` or 
+        ``segments_list``:
 
         ``function``
             The segment contents is the return value of the function defined in 

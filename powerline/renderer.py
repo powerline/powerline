@@ -186,11 +186,11 @@ class Renderer(object):
 	def render(self, mode=None, width=None, side=None, line=0, output_raw=False, output_width=False, segment_info=None, matcher_info=None):
 		'''Render all segments.
 
-		When a width is provided, low-priority segments are dropped one at
-		a time until the line is shorter than the width, or only segments
-		with a negative priority are left. If one or more filler segments are
-		provided they will fill the remaining space until the desired width is
-		reached.
+		When a width is provided, low-priority segments are dropped one at 
+		a time until the line is shorter than the width, or only segments 
+		with a negative priority are left. If one or more segments with 
+		``"width": "auto"`` are provided they will fill the remaining space 
+		until the desired width is reached.
 
 		:param str mode:
 			Mode string. Affects contents (colors and the set of segments) of 

@@ -75,14 +75,9 @@ def get_string(data, segment):
 	return data['get_key'](False, segment, None, None, name, 'contents'), None, None, None, name
 
 
-def get_filler(data, segment):
-	return None, None, None, None, None
-
-
 segment_getters = {
 	'function': get_function,
 	'string': get_string,
-	'filler': get_filler,
 	'segment_list': get_function,
 }
 
