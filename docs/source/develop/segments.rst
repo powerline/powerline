@@ -102,6 +102,16 @@ powerline:
 
     It must return new value of :ref:`contents <dev-segments-seg-contents>` key.
 
+.. _dev-segments-truncate:
+
+``truncate``
+    Like :ref:`expand function <dev-segments-expand>`, but for truncating 
+    segments. Here ``amount`` means the number of display cells which must be 
+    freed.
+
+    This function is called for all segments before powerline starts purging 
+    them to free space.
+
 This callable object should may return either a string (``unicode`` in Python2 
 or ``str`` in Python3, *not* ``str`` in Python2 or ``bytes`` in Python3) object 
 or a list of dictionaries. String object is a short form of the following return 
@@ -251,10 +261,11 @@ Segment dictionary contains the following keys:
   ``width``, ``align``
     :ref:`Width and align options <config-themes-seg-align>`. May be ``None``.
 
-  ``expand``
-    Partially applied :ref:`expand function <dev-segments-expand>`. Accepts 
-    ``pl``, ``amount`` and ``segment`` positional parameters, keyword parameters 
-    from :ref:`args <config-themes-seg-args>` key were applied.
+  ``expand``, ``truncate``
+    Partially applied :ref:`expand <dev-segments-expand>` or :ref:`truncate 
+    <dev-segments-truncate>` function. Accepts ``pl``, ``amount`` and 
+    ``segment`` positional parameters, keyword parameters from :ref:`args 
+    <config-themes-seg-args>` key were applied.
 
   ``startup``
     Partially applied :ref:`startup function <dev-segments-startup>`. Accepts 

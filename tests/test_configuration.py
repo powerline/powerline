@@ -494,6 +494,25 @@ class TestSegmentAttributes(TestRender):
 		}
 		self.assertRenderEqual(p, '{56} ----pl,{6-}>>{--}', width=10)
 
+	@add_args
+	def test_truncate(self, p, config):
+		def m1(divider=',', **kwargs):
+			return divider.join(kwargs.keys()) + divider
+
+		def truncate(pl, amount, segment, **kwargs):
+			return segment['contents'][:-amount]
+
+		m1.truncate = truncate
+		sys.modules['bar'] = Args(m1=m1)
+		config['themes/test/default']['segments'] = {
+			'left': [
+				{
+					'function': 'bar.m1'
+				}
+			]
+		}
+		self.assertRenderEqual(p, '{56} p{6-}>>{--}', width=4)
+
 
 class TestSegmentData(TestRender):
 	@add_args

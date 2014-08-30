@@ -1,8 +1,11 @@
 # vim:fileencoding=utf-8:noet
 
-from powerline.theme import Theme
-from unicodedata import east_asian_width, combining
 import os
+
+from unicodedata import east_asian_width, combining
+from itertools import chain
+
+from powerline.theme import Theme
 
 try:
 	NBSP = unicode(' ', 'utf-8')
@@ -262,11 +265,17 @@ class Renderer(object):
 
 		# Create an ordered list of segments that can be dropped
 		segments_priority = sorted((segment for segment in segments if segment['priority'] is not None), key=lambda segment: segment['priority'], reverse=True)
-		for segment in segments_priority:
-			current_width = self._render_length(theme, segments, divider_widths)
-			if current_width <= width:
-				break
-			segments.remove(segment)
+		no_priority_segments = filter(lambda segment: segment['priority'] is None, segments)
+		current_width = self._render_length(theme, segments, divider_widths)
+		if current_width > width:
+			for segment in chain(segments_priority, no_priority_segments):
+				if segment['truncate'] is not None:
+					segment['contents'] = segment['truncate'](self.pl, current_width - width, segment)
+			for segment in segments_priority:
+				if current_width <= width:
+					break
+				segments.remove(segment)
+				current_width = self._render_length(theme, segments, divider_widths)
 
 		# Distribute the remaining space on spacer segments
 		segments_spacers = [segment for segment in segments if segment['expand'] is not None]
