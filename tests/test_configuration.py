@@ -94,7 +94,7 @@ config = {
 				highlighted_string('g', 'str2'),
 			],
 			'right': [
-				highlighted_string('f', 'str2', width='auto', align='right'),
+				highlighted_string('f', 'str2', width='auto', align='r'),
 			],
 		},
 	},
@@ -473,6 +473,45 @@ class TestSegmentAttributes(TestRender):
 			]
 		}
 		self.assertRenderEqual(p, '{56} pl;{6-}>>{--}')
+
+	@add_args
+	def test_expand(self, p, config):
+		def m1(divider=',', **kwargs):
+			return divider.join(kwargs.keys()) + divider
+
+		def expand(pl, amount, segment, **kwargs):
+			return ('-' * amount) + segment['contents']
+
+		m1.expand = expand
+		sys.modules['bar'] = Args(m1=m1)
+		config['themes/test/default']['segments'] = {
+			'left': [
+				{
+					'function': 'bar.m1',
+					'width': 'auto'
+				}
+			]
+		}
+		self.assertRenderEqual(p, '{56} ----pl,{6-}>>{--}', width=10)
+
+	@add_args
+	def test_truncate(self, p, config):
+		def m1(divider=',', **kwargs):
+			return divider.join(kwargs.keys()) + divider
+
+		def truncate(pl, amount, segment, **kwargs):
+			return segment['contents'][:-amount]
+
+		m1.truncate = truncate
+		sys.modules['bar'] = Args(m1=m1)
+		config['themes/test/default']['segments'] = {
+			'left': [
+				{
+					'function': 'bar.m1'
+				}
+			]
+		}
+		self.assertRenderEqual(p, '{56} p{6-}>>{--}', width=4)
 
 
 class TestSegmentData(TestRender):

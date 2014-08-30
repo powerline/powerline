@@ -36,8 +36,11 @@ Listers must return a sequence of pairs. First item in the pair must contain
 a ``segment_info`` dictionary specific to one of the listed entities.
 
 Second item must contain another dictionary: it will be used to modify the 
-resulting segment. In addition to usual keys that describe segment the following 
-keys may be present (it is advised that *only* the following keys will be used):
+resulting segment. In addition to :ref:`usual keys that describe segment 
+<dev-segments-segment>` the following keys may be present (it is advised that 
+*only* the following keys will be used):
+
+.. _dev-listers-mode:
 
 ``mode``
     Segment-specific mode. Used to alter segment highlighting.

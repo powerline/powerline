@@ -44,6 +44,7 @@ def urllib_read(query_url):
 	else:
 		raise NotImplementedError
 
+
 class Process(object):
 	def __init__(self, output, err):
 		self.output = output
