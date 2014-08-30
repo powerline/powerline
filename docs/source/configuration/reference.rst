@@ -441,7 +441,7 @@ ascii                       Theme without any unicode characters at all
 
     ``align``
         Aligns the segments contents to the left (``l``), center (``c``) or 
-        right (``r``).
+        right (``r``). Has no sense if ``width`` key was not specified.
 
     .. _config-themes-seg-width:
 
