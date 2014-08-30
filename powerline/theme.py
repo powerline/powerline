@@ -23,6 +23,26 @@ def new_empty_segment_line():
 	}
 
 
+def add_spaces_left(pl, amount, segment):
+	return (' ' * amount) + segment['contents']
+
+
+def add_spaces_right(pl, amount, segment):
+	return segment['contents'] + (' ' * amount)
+
+
+def add_spaces_center(pl, amount, segment):
+	amount, remainder = divmod(amount, 2)
+	return (' ' * (amount + remainder)) + segment['contents'] + (' ' * amount)
+
+
+expand_functions = {
+	'l': add_spaces_right,
+	'r': add_spaces_left,
+	'c': add_spaces_center,
+}
+
+
 class Theme(object):
 	def __init__(self,
 	             ext,
@@ -128,6 +148,13 @@ class Theme(object):
 						self.colorscheme,
 					)
 			for segment in parsed_segments:
+				width = segment['width']
+				align = segment['align']
+				if width == 'auto':
+					segment['expand'] = expand_functions.get(align)
+					if segment['expand'] is None:
+						self.pl.error('Align argument must be “r”, “l” or “c”, not “{0}”', align)
+
 				segment['contents'] = segment['before'] + u(segment['contents'] if segment['contents'] is not None else '') + segment['after']
 				# Align segment contents
 				if segment['width'] and segment['width'] != 'auto':

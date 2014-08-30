@@ -285,6 +285,7 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, ge
 				'include_modes': segment.get('include_modes', []),
 				'width': None,
 				'align': None,
+				'expand': None,
 				'startup': None,
 				'shutdown': None,
 				'mode': None,
@@ -292,8 +293,6 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, ge
 				'_rendered_hl': '',
 				'_len': None,
 				'_contents_len': None,
-				'_space_left': 0,
-				'_space_right': 0,
 			}
 
 		if segment_type == 'function':
@@ -331,6 +330,7 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, ge
 			'include_modes': segment.get('include_modes', []),
 			'width': segment.get('width'),
 			'align': segment.get('align', 'l'),
+			'expand': None,
 			'startup': startup_func,
 			'shutdown': shutdown_func,
 			'mode': None,
@@ -338,8 +338,6 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, ge
 			'_rendered_hl': '',
 			'_len': None,
 			'_contents_len': None,
-			'_space_left': 0,
-			'_space_right': 0,
 		}
 
 	return get

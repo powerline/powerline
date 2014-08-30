@@ -269,7 +269,7 @@ class Renderer(object):
 			segments.remove(segment)
 
 		# Distribute the remaining space on spacer segments
-		segments_spacers = [segment for segment in segments if segment['width'] == 'auto']
+		segments_spacers = [segment for segment in segments if segment['expand'] is not None]
 		if segments_spacers:
 			if not segments_priority:
 				# Update segment['_len'] and current_width if not already done 
@@ -278,15 +278,12 @@ class Renderer(object):
 				current_width = self._render_length(theme, segments, divider_widths)
 			distribute_len, distribute_len_remainder = divmod(width - current_width, len(segments_spacers))
 			for segment in segments_spacers:
-				if segment['align'] == 'l':
-					segment['_space_right'] += distribute_len
-				elif segment['align'] == 'r':
-					segment['_space_left'] += distribute_len
-				elif segment['align'] == 'c':
-					space_side, space_side_remainder = divmod(distribute_len, 2)
-					segment['_space_left'] += space_side + space_side_remainder
-					segment['_space_right'] += space_side
-			segments_spacers[0]['_space_right'] += distribute_len_remainder
+				segment['contents'] = (
+					segment['expand'](
+						self.pl,
+						distribute_len + (1 if distribute_len_remainder > 0 else 0),
+						segment))
+				distribute_len_remainder -= 1
 			# `_len` key is not needed anymore, but current_width should have an 
 			# actual value for various bindings.
 			current_width = width
@@ -321,7 +318,7 @@ class Renderer(object):
 			))
 
 			draw_divider = segment['draw_' + divider_type + '_divider']
-			segment_len += segment['_space_left'] + segment['_space_right'] + outer_padding
+			segment_len += outer_padding
 			if draw_divider:
 				segment_len += divider_widths[side][divider_type] + divider_spaces
 
@@ -363,30 +360,14 @@ class Renderer(object):
 			if draw_divider:
 				divider_raw = self.escape(theme.get_divider(side, divider_type))
 				if side == 'left':
-					contents_raw = (
-						outer_padding + (segment['_space_left'] * ' ')
-						+ contents_raw
-						+ ((divider_spaces + segment['_space_right']) * ' ')
-					)
+					contents_raw = outer_padding + contents_raw + (divider_spaces * ' ')
 				else:
-					contents_raw = (
-						((divider_spaces + segment['_space_left']) * ' ')
-						+ contents_raw
-						+ (segment['_space_right'] * ' ') + outer_padding
-					)
+					contents_raw = (divider_spaces * ' ') + contents_raw + outer_padding
 			else:
 				if side == 'left':
-					contents_raw = (
-						outer_padding + (segment['_space_left'] * ' ')
-						+ contents_raw
-						+ (segment['_space_right'] * ' ')
-					)
+					contents_raw = outer_padding + contents_raw
 				else:
-					contents_raw = (
-						(segment['_space_left'] * ' ')
-						+ contents_raw
-						+ (segment['_space_right'] * ' ') + outer_padding
-					)
+					contents_raw = contents_raw + outer_padding
 
 			# Replace spaces with no-break spaces
 			contents_raw = contents_raw.translate(self.np_character_translations)
