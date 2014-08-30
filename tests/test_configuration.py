@@ -94,7 +94,7 @@ config = {
 				highlighted_string('g', 'str2'),
 			],
 			'right': [
-				highlighted_string('f', 'str2', width='auto', align='right'),
+				highlighted_string('f', 'str2', width='auto', align='r'),
 			],
 		},
 	},
