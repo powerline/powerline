@@ -87,6 +87,7 @@ class TestFilesystemWatchers(TestCase):
 			clear_dir(INOTIFY_DIR)
 
 	def test_uv_file_watcher(self):
+		raise SkipTest('Uv watcher tests are not stable')
 		try:
 			w = create_file_watcher(pl=get_fallback_logger(), watcher_type='uv')
 		except UvNotFound:
@@ -136,6 +137,7 @@ class TestFilesystemWatchers(TestCase):
 			clear_dir(INOTIFY_DIR)
 
 	def test_uv_tree_watcher(self):
+		raise SkipTest('Uv watcher tests are not stable')
 		tw = create_tree_watcher(get_fallback_logger(), 'uv')
 		return self.do_test_tree_watcher(tw)
 
