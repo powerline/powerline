@@ -1,15 +1,18 @@
 # vim:fileencoding=utf-8:noet
-from __future__ import unicode_literals
+from __future__ import (unicode_literals, division, absolute_import, print_function)
 
-from powerline import Powerline
-from tests import TestCase
-from tests.lib.config_mock import select_renderer
-from shutil import rmtree
 import os
 import json
-from powerline.lib import mergedicts_copy as mdc
+
 from subprocess import check_call
 from operator import add
+from shutil import rmtree
+
+from powerline.lib import mergedicts_copy as mdc
+from powerline import Powerline
+
+from tests import TestCase
+from tests.lib.config_mock import select_renderer
 
 
 CONFIG_DIR = 'tests/config'

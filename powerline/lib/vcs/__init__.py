@@ -1,8 +1,9 @@
 # vim:fileencoding=utf-8:noet
-from __future__ import absolute_import
+from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 import os
 import errno
+
 from threading import Lock
 from collections import defaultdict
 
@@ -226,7 +227,7 @@ def guess(path, create_watcher):
 					continue
 				try:
 					if vcs not in globals():
-						globals()[vcs] = getattr(__import__('powerline.lib.vcs', fromlist=[vcs]), vcs)
+						globals()[vcs] = getattr(__import__(str('powerline.lib.vcs'), fromlist=[str(vcs)]), str(vcs))
 					return globals()[vcs].Repository(directory, create_watcher)
 				except:
 					pass

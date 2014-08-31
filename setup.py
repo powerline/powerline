@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 # vim:fileencoding=utf-8:noet
-from __future__ import unicode_literals
+from __future__ import (unicode_literals, division, absolute_import, print_function)
+
 import os
 import sys
 import subprocess
 import logging
 
 from setuptools import setup, find_packages
+
 
 CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
 try:

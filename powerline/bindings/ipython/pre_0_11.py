@@ -1,15 +1,16 @@
 # vim:fileencoding=utf-8:noet
+from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 import re
 
 from weakref import ref
 
-from powerline.ipython import IPythonPowerline, RewriteResult
-from powerline.lib.unicode import string
-
 from IPython.Prompts import BasePrompt
 from IPython.ipapi import get as get_ipython
 from IPython.ipapi import TryNext
+
+from powerline.ipython import IPythonPowerline, RewriteResult
+from powerline.lib.unicode import string
 
 
 class IPythonInfo(object):

@@ -1,8 +1,8 @@
 # vim:fileencoding=utf-8:noet
-
-from __future__ import absolute_import
+from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 import os
+
 from powerline.bindings.vim import vim_getbufoption
 
 

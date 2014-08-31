@@ -2,15 +2,19 @@
 
 '''Tests for shell.py parser'''
 
+from __future__ import (unicode_literals, division, absolute_import, print_function)
 
-from powerline.shell import get_argparser, finish_args
-from tests import TestCase
-from tests.lib import replace_attr
 import sys
+
 if sys.version_info < (3,):
 	from io import BytesIO as StrIO
 else:
-	from io import StringIO as StrIO  # NOQA
+	from io import StringIO as StrIO
+
+from powerline.shell import get_argparser, finish_args
+
+from tests import TestCase
+from tests.lib import replace_attr
 
 
 class TestParser(TestCase):

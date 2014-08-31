@@ -1,4 +1,5 @@
 # vim:fileencoding=utf-8:noet
+from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 import os
 
@@ -6,16 +7,10 @@ from unicodedata import east_asian_width, combining
 from itertools import chain
 
 from powerline.theme import Theme
+from powerline.lib.unicode import unichr
 
-try:
-	NBSP = unicode(' ', 'utf-8')
-except NameError:
-	NBSP = ' '
 
-try:
-	from __builtin__ import unichr as chr
-except ImportError:
-	pass
+NBSP = ' '
 
 
 def construct_returned_value(rendered_highlighted, segments, width, output_raw, output_width):
@@ -80,7 +75,7 @@ class Renderer(object):
 	See documentation of ``unicode.translate`` for details.
 	'''
 
-	np_character_translations = dict(((i, '^' + chr(i + 0x40)) for i in range(0x20)))
+	np_character_translations = dict(((i, '^' + unichr(i + 0x40)) for i in range(0x20)))
 	'''Non-printable character translations
 
 	These are used to transform characters in range 0x00—0x1F into ``^@``, 

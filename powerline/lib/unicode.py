@@ -1,5 +1,5 @@
 # vim:fileencoding=utf-8:noet
-
+from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 from locale import getpreferredencoding
 
@@ -8,6 +8,12 @@ try:
 	from __builtin__ import unicode
 except ImportError:
 	unicode = str  # NOQA
+
+
+try:
+	from __builtin__ import unichr
+except ImportError:
+	unichr = chr
 
 
 def u(s):

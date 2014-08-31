@@ -1,16 +1,14 @@
-# This module contains abstractions for the input stream. You don't have to
-# looks further, there are no pretty code.
-
-__all__ = ['Reader', 'ReaderError']
-
-from .error import MarkedError, Mark, NON_PRINTABLE
+# vim:fileencoding=utf-8:noet
+from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 import codecs
 
-try:
-	from __builtin__ import unicode
-except ImportError:
-	unicode = str  # NOQA
+from powerline.lint.markedjson.error import MarkedError, Mark, NON_PRINTABLE
+from powerline.lib.unicode import unicode
+
+
+# This module contains abstractions for the input stream. You don't have to
+# looks further, there are no pretty code.
 
 
 class ReaderError(MarkedError):

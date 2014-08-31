@@ -1,19 +1,16 @@
-__all__ = ['BaseConstructor', 'Constructor', 'ConstructorError']
-
-from .error import MarkedError
-from .nodes import *  # NOQA
-from .markedvalue import gen_marked_value
+# vim:fileencoding=utf-8:noet
+from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 import collections
 import types
 
 from functools import wraps
 
+from powerline.lint.markedjson.error import MarkedError
 
-try:
-	from __builtin__ import unicode
-except ImportError:
-	unicode = str  # NOQA
+from powerline.lint.markedjson import nodes
+from powerline.lint.markedjson.markedvalue import gen_marked_value
+from powerline.lib.unicode import unicode
 
 
 def marked(func):
@@ -94,7 +91,7 @@ class BaseConstructor:
 
 	@marked
 	def construct_scalar(self, node):
-		if not isinstance(node, ScalarNode):
+		if not isinstance(node, nodes.ScalarNode):
 			raise ConstructorError(
 				None, None,
 				"expected a scalar node, but found %s" % node.id,
@@ -103,7 +100,7 @@ class BaseConstructor:
 		return node.value
 
 	def construct_sequence(self, node, deep=False):
-		if not isinstance(node, SequenceNode):
+		if not isinstance(node, nodes.SequenceNode):
 			raise ConstructorError(
 				None, None,
 				"expected a sequence node, but found %s" % node.id,
@@ -116,7 +113,7 @@ class BaseConstructor:
 
 	@marked
 	def construct_mapping(self, node, deep=False):
-		if not isinstance(node, MappingNode):
+		if not isinstance(node, nodes.MappingNode):
 			raise ConstructorError(
 				None, None,
 				"expected a mapping node, but found %s" % node.id,
@@ -156,7 +153,7 @@ class BaseConstructor:
 
 class Constructor(BaseConstructor):
 	def construct_scalar(self, node):
-		if isinstance(node, MappingNode):
+		if isinstance(node, nodes.MappingNode):
 			for key_node, value_node in node.value:
 				if key_node.tag == 'tag:yaml.org,2002:value':
 					return self.construct_scalar(value_node)
@@ -169,13 +166,13 @@ class Constructor(BaseConstructor):
 			key_node, value_node = node.value[index]
 			if key_node.tag == 'tag:yaml.org,2002:merge':
 				del node.value[index]
-				if isinstance(value_node, MappingNode):
+				if isinstance(value_node, nodes.MappingNode):
 					self.flatten_mapping(value_node)
 					merge.extend(value_node.value)
-				elif isinstance(value_node, SequenceNode):
+				elif isinstance(value_node, nodes.SequenceNode):
 					submerge = []
 					for subnode in value_node.value:
-						if not isinstance(subnode, MappingNode):
+						if not isinstance(subnode, nodes.MappingNode):
 							raise ConstructorError(
 								"while constructing a mapping",
 								node.start_mark,
@@ -203,7 +200,7 @@ class Constructor(BaseConstructor):
 			node.value = merge + node.value
 
 	def construct_mapping(self, node, deep=False):
-		if isinstance(node, MappingNode):
+		if isinstance(node, nodes.MappingNode):
 			self.flatten_mapping(node)
 		return BaseConstructor.construct_mapping(self, node, deep=deep)
 

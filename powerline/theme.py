@@ -1,9 +1,10 @@
 # vim:fileencoding=utf-8:noet
-from __future__ import division
+from __future__ import (unicode_literals, division, absolute_import, print_function)
+
+import itertools
 
 from powerline.segment import gen_segment_getter, process_segment
 from powerline.lib.unicode import u
-import itertools
 
 
 def requires_segment_info(func):

@@ -1,6 +1,5 @@
 # vim:fileencoding=utf-8:noet
-
-from __future__ import unicode_literals, absolute_import, division
+from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 import os
 import sys
@@ -9,6 +8,7 @@ import socket
 
 from datetime import datetime
 from multiprocessing import cpu_count as _cpu_count
+from collections import namedtuple
 
 from powerline.lib import add_divider_highlight_group
 from powerline.lib.shell import asrun, run_cmd
@@ -20,7 +20,6 @@ from powerline.lib.humanize_bytes import humanize_bytes
 from powerline.lib.unicode import u
 from powerline.theme import requires_segment_info, requires_filesystem_watcher
 from powerline.segments import Segment, with_docstring
-from collections import namedtuple
 
 
 cpu_count = None

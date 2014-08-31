@@ -1,9 +1,10 @@
 # vim:fileencoding=utf-8:noet
-from __future__ import absolute_import, unicode_literals, division, print_function
+from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 import sys
 import os
 import re
+
 from io import StringIO
 
 from bzrlib import (workingtree, status, library_state, trace, ui)

@@ -1,6 +1,5 @@
 # vim:fileencoding=utf-8:noet
-
-from __future__ import division, absolute_import
+from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 try:
 	try:
@@ -13,11 +12,9 @@ try:
 			from time import CLOCK_MONOTONIC as CLOCK_ID  # NOQA
 
 		monotonic = lambda: clock_gettime(CLOCK_ID)
-
 	except ImportError:
 		# >=python-3.3
 		from time import monotonic  # NOQA
-
 except ImportError:
 	import ctypes
 	import sys

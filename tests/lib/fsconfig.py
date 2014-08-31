@@ -1,5 +1,5 @@
 # vim:fileencoding=utf-8:noet
-from __future__ import unicode_literals, absolute_import, division
+from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 import os
 import json

@@ -1,16 +1,15 @@
 # vim:fileencoding=utf-8:noet
-
-from __future__ import unicode_literals, absolute_import, division
+from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 import os
 import re
+
+from collections import defaultdict
 
 try:
 	import vim
 except ImportError:
 	vim = {}  # NOQA
-
-from collections import defaultdict
 
 from powerline.bindings.vim import (vim_get_func, getbufvar, vim_getbufoption,
                                     buffer_name, vim_getwinvar,

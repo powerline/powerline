@@ -1,12 +1,12 @@
 # vim:fileencoding=utf-8:noet
+from __future__ import (unicode_literals, division, absolute_import, print_function)
 
-from __future__ import absolute_import, unicode_literals, division, print_function
+import sys
+import os
 
 from subprocess import Popen, PIPE
 from locale import getlocale, getdefaultlocale, LC_MESSAGES
 from functools import partial
-import sys
-import os
 
 
 if sys.platform.startswith('win32'):

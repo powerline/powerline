@@ -1,7 +1,10 @@
 #!/usr/bin/env python
-from __future__ import division, print_function
+# vim:fileencoding=utf-8:noet
+from __future__ import (unicode_literals, division, absolute_import, print_function)
+
 import sys
 import os
+
 from colormath.color_objects import sRGBColor, LabColor
 from colormath.color_conversions import convert_color
 from colormath.color_diff import delta_e_cie2000

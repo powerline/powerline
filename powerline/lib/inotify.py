@@ -1,8 +1,5 @@
 # vim:fileencoding=utf-8:noet
-from __future__ import unicode_literals, absolute_import
-
-__copyright__ = '2013, Kovid Goyal <kovid at kovidgoyal.net>'
-__docformat__ = 'restructuredtext en'
+from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 import sys
 import os
@@ -11,6 +8,10 @@ import ctypes
 import struct
 
 from ctypes.util import find_library
+
+
+__copyright__ = '2013, Kovid Goyal <kovid at kovidgoyal.net>'
+__docformat__ = 'restructuredtext en'
 
 
 class INotifyError(Exception):

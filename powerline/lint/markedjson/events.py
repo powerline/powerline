@@ -1,6 +1,8 @@
+# vim:fileencoding=utf-8:noet
+from __future__ import (unicode_literals, division, absolute_import, print_function)
+
+
 # Abstract classes.
-
-
 class Event(object):
 	def __init__(self, start_mark=None, end_mark=None):
 		self.start_mark = start_mark
@@ -38,8 +40,6 @@ class CollectionEndEvent(Event):
 
 
 # Implementations.
-
-
 class StreamStartEvent(Event):
 	def __init__(self, start_mark=None, end_mark=None, encoding=None):
 		self.start_mark = start_mark

@@ -2,11 +2,14 @@
 
 '''Dynamic configuration files tests.'''
 
+from __future__ import (unicode_literals, division, absolute_import, print_function)
 
-import tests.vim as vim_module
 import sys
 import os
 import json
+
+import tests.vim as vim_module
+
 from tests.lib import Args, urllib_read, replace_attr
 from tests import TestCase
 

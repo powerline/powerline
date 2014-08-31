@@ -1,5 +1,5 @@
 # vim:fileencoding=utf-8:noet
-from __future__ import unicode_literals, absolute_import
+from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 import sys
 
@@ -11,8 +11,7 @@ from powerline.lib.inotify import INotifyError
 
 
 def create_file_watcher(pl, watcher_type='auto', expire_time=10):
-	'''
-	Create an object that can watch for changes to specified files
+	'''Create an object that can watch for changes to specified files
 
 	Use ``.__call__()`` method of the returned object to start watching the file 
 	or check whether file has changed since last call.

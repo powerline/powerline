@@ -1,10 +1,9 @@
 # vim:fileencoding=utf-8:noet
+from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 from copy import copy
-try:
-	from __builtin__ import unicode
-except ImportError:
-	unicode = str
+
+from powerline.lib.unicode import unicode
 
 
 DEFAULT_MODE_KEY = None

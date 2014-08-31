@@ -1,4 +1,5 @@
 # vim:fileencoding=utf-8:noet
+from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 import sys
 import codecs
@@ -7,6 +8,10 @@ try:
 	import vim
 except ImportError:
 	vim = {}
+
+if not hasattr(vim, 'bindeval'):
+	import json
+
 
 if hasattr(vim, 'bindeval'):
 	def vim_get_func(f, rettype=None):
@@ -19,8 +24,6 @@ if hasattr(vim, 'bindeval'):
 		except vim.error:
 			return None
 else:
-	import json
-
 	class VimFunc(object):
 		'''Evaluate a vim function using vim.eval().
 

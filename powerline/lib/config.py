@@ -1,14 +1,15 @@
 # vim:fileencoding=utf-8:noet
-
-from powerline.lib.threaded import MultiRunnedThread
-from powerline.lib.watcher import create_file_watcher
-from copy import deepcopy
-
-from threading import Event, Lock
-from collections import defaultdict
+from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 import json
 import codecs
+
+from copy import deepcopy
+from threading import Event, Lock
+from collections import defaultdict
+
+from powerline.lib.threaded import MultiRunnedThread
+from powerline.lib.watcher import create_file_watcher
 
 
 def open_file(path):

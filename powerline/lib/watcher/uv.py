@@ -1,14 +1,14 @@
 # vim:fileencoding=utf-8:noet
-from __future__ import (unicode_literals, absolute_import, print_function)
+from __future__ import (unicode_literals, division, absolute_import, print_function)
 
-from powerline.lib.path import realpath
+import os
 
 from collections import defaultdict
 from threading import RLock
 from functools import partial
 from threading import Thread
 
-import os
+from powerline.lib.path import realpath
 
 
 class UvNotFound(NotImplementedError):

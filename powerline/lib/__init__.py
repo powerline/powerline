@@ -1,6 +1,9 @@
 # vim:fileencoding=utf-8:noet
-from functools import wraps
+from __future__ import (unicode_literals, division, absolute_import, print_function)
+
 import json
+
+from functools import wraps
 
 
 REMOVE_THIS_KEY = object()
