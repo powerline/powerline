@@ -33,7 +33,7 @@ def ctrlp_stl_left_main(pl, focus, byfname, regex, prev, item, next, marked):
 		segments.append({
 			'contents': 'regex',
 			'highlight_group': ['ctrlp.regex', 'background'],
-			})
+		})
 
 	segments += [
 		{
@@ -62,7 +62,7 @@ def ctrlp_stl_left_main(pl, focus, byfname, regex, prev, item, next, marked):
 			'contents': marked,
 			'highlight_group': ['ctrlp.marked', 'background'],
 			'draw_inner_divider': True,
-			})
+		})
 
 	return segments
 
