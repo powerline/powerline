@@ -1,3 +1,11 @@
+# vim:fileencoding=utf-8:noet
+from __future__ import (unicode_literals, division, absolute_import, print_function)
+
+from powerline.lint.markedjson.error import MarkedError
+from powerline.lint.markedjson import tokens
+from powerline.lib.unicode import unicode
+
+
 # Scanner produces tokens of the following types:
 # STREAM-START
 # STREAM-END
@@ -14,20 +22,9 @@
 #
 # Read comments in the Scanner code for more details.
 
-__all__ = ['Scanner', 'ScannerError']
-
-from .error import MarkedError
-from .tokens import *  # NOQA
-
 
 class ScannerError(MarkedError):
 	pass
-
-
-try:
-	from __builtin__ import unicode
-except ImportError:
-	unicode = str  # NOQA
 
 
 class SimpleKey:
@@ -241,8 +238,7 @@ class Scanner:
 		mark = self.get_mark()
 
 		# Add STREAM-START.
-		self.tokens.append(StreamStartToken(mark, mark,
-			encoding=self.encoding))
+		self.tokens.append(tokens.StreamStartToken(mark, mark, encoding=self.encoding))
 
 	def fetch_stream_end(self):
 		# Reset simple keys.
@@ -254,19 +250,18 @@ class Scanner:
 		mark = self.get_mark()
 
 		# Add STREAM-END.
-		self.tokens.append(StreamEndToken(mark, mark))
+		self.tokens.append(tokens.StreamEndToken(mark, mark))
 
 		# The steam is finished.
 		self.done = True
 
 	def fetch_flow_sequence_start(self):
-		self.fetch_flow_collection_start(FlowSequenceStartToken)
+		self.fetch_flow_collection_start(tokens.FlowSequenceStartToken)
 
 	def fetch_flow_mapping_start(self):
-		self.fetch_flow_collection_start(FlowMappingStartToken)
+		self.fetch_flow_collection_start(tokens.FlowMappingStartToken)
 
 	def fetch_flow_collection_start(self, TokenClass):
-
 		# '[' and '{' may start a simple key.
 		self.save_possible_simple_key()
 
@@ -283,13 +278,12 @@ class Scanner:
 		self.tokens.append(TokenClass(start_mark, end_mark))
 
 	def fetch_flow_sequence_end(self):
-		self.fetch_flow_collection_end(FlowSequenceEndToken)
+		self.fetch_flow_collection_end(tokens.FlowSequenceEndToken)
 
 	def fetch_flow_mapping_end(self):
-		self.fetch_flow_collection_end(FlowMappingEndToken)
+		self.fetch_flow_collection_end(tokens.FlowMappingEndToken)
 
 	def fetch_flow_collection_end(self, TokenClass):
-
 		# Reset possible simple key on the current level.
 		self.remove_possible_simple_key()
 
@@ -312,7 +306,7 @@ class Scanner:
 			# Add KEY.
 			key = self.possible_simple_keys[self.flow_level]
 			del self.possible_simple_keys[self.flow_level]
-			self.tokens.insert(key.token_number - self.tokens_taken, KeyToken(key.mark, key.mark))
+			self.tokens.insert(key.token_number - self.tokens_taken, tokens.KeyToken(key.mark, key.mark))
 
 			# There cannot be two simple keys one after another.
 			self.allow_simple_key = False
@@ -321,10 +315,9 @@ class Scanner:
 		start_mark = self.get_mark()
 		self.forward()
 		end_mark = self.get_mark()
-		self.tokens.append(ValueToken(start_mark, end_mark))
+		self.tokens.append(tokens.ValueToken(start_mark, end_mark))
 
 	def fetch_flow_entry(self):
-
 		# Simple keys are allowed after ','.
 		self.allow_simple_key = True
 
@@ -335,7 +328,7 @@ class Scanner:
 		start_mark = self.get_mark()
 		self.forward()
 		end_mark = self.get_mark()
-		self.tokens.append(FlowEntryToken(start_mark, end_mark))
+		self.tokens.append(tokens.FlowEntryToken(start_mark, end_mark))
 
 	def fetch_double(self):
 		# A flow scalar could be a simple key.
@@ -385,7 +378,7 @@ class Scanner:
 			chunks.extend(self.scan_flow_scalar_non_spaces(start_mark))
 		self.forward()
 		end_mark = self.get_mark()
-		return ScalarToken(unicode().join(chunks), False, start_mark, end_mark, '"')
+		return tokens.ScalarToken(unicode().join(chunks), False, start_mark, end_mark, '"')
 
 	ESCAPE_REPLACEMENTS = {
 		'b': '\x08',
@@ -480,4 +473,4 @@ class Scanner:
 			chunks.append(self.prefix(length))
 			self.forward(length)
 		end_mark = self.get_mark()
-		return ScalarToken(''.join(chunks), True, start_mark, end_mark)
+		return tokens.ScalarToken(''.join(chunks), True, start_mark, end_mark)

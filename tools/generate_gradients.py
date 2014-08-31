@@ -1,21 +1,22 @@
 #!/usr/bin/env python
 # vim:fileencoding=utf-8:noet
+
 '''Gradients generator
 '''
-from __future__ import division, unicode_literals
+
+from __future__ import (unicode_literals, division, absolute_import, print_function)
+
 import sys
 import json
-from powerline.colorscheme import cterm_to_hex
-from itertools import groupby
 import argparse
+
+from itertools import groupby
+
 from colormath.color_objects import sRGBColor, LabColor
 from colormath.color_conversions import convert_color
 from colormath.color_diff import delta_e_cie2000
 
-try:
-	from __builtin__ import unicode
-except ImportError:
-	unicode = str  # NOQA
+from powerline.colorscheme import cterm_to_hex
 
 
 def num2(s):

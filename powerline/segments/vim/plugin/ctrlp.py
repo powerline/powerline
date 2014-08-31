@@ -1,9 +1,10 @@
 # vim:fileencoding=utf-8:noet
+from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 try:
 	import vim
 except ImportError:
-	vim = object()  # NOQA
+	vim = object()
 
 from powerline.bindings.vim import getbufvar
 from powerline.segments.vim import window_cached
@@ -33,7 +34,7 @@ def ctrlp_stl_left_main(pl, focus, byfname, regex, prev, item, next, marked):
 		segments.append({
 			'contents': 'regex',
 			'highlight_group': ['ctrlp.regex', 'background'],
-			})
+		})
 
 	segments += [
 		{
@@ -62,7 +63,7 @@ def ctrlp_stl_left_main(pl, focus, byfname, regex, prev, item, next, marked):
 			'contents': marked,
 			'highlight_group': ['ctrlp.marked', 'background'],
 			'draw_inner_divider': True,
-			})
+		})
 
 	return segments
 

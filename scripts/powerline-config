@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # vim:fileencoding=utf-8:noet
+
 '''Script used to obtain powerline configuration'''
+
+from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 import argparse
 
@@ -10,7 +13,7 @@ except ImportError:
 	import sys
 	import os
 	sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(os.path.realpath(__file__)))))
-	import powerline.bindings.config as config  # NOQA
+	import powerline.bindings.config as config
 
 
 TMUX_ACTIONS = {

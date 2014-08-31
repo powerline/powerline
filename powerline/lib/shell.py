@@ -1,12 +1,12 @@
 # vim:fileencoding=utf-8:noet
+from __future__ import (unicode_literals, division, absolute_import, print_function)
 
-from __future__ import absolute_import, unicode_literals, division, print_function
+import sys
+import os
 
 from subprocess import Popen, PIPE
 from locale import getlocale, getdefaultlocale, LC_MESSAGES
 from functools import partial
-import sys
-import os
 
 
 if sys.platform.startswith('win32'):
@@ -68,7 +68,7 @@ try:
 except ImportError:
 	# shutil.which was added in python-3.3. Here is what was added:
 	# Lib/shutil.py, commit 5abe28a9c8fe701ba19b1db5190863384e96c798
-	def which(cmd, mode=os.F_OK | os.X_OK, path=None):  # NOQA
+	def which(cmd, mode=os.F_OK | os.X_OK, path=None):
 		"""Given a command, mode, and a PATH string, return the path which
 		conforms to the given mode on the PATH, or None if there is no such
 		file.

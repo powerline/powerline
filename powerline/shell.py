@@ -1,4 +1,6 @@
 # vim:fileencoding=utf-8:noet
+# WARNING: using unicode_literals causes errors in argparse
+from __future__ import (division, absolute_import, print_function)
 
 from powerline import Powerline
 from powerline.lib import mergedicts, parsedotval

@@ -1,14 +1,16 @@
 #!/usr/bin/env python
 # vim:fileencoding=utf-8:noet
-from __future__ import print_function
-
-from powerline import Powerline
-from powerline.lib.monotonic import monotonic
+from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 import sys
 import time
-import i3
+
 from threading import Lock
+
+import i3
+
+from powerline import Powerline
+from powerline.lib.monotonic import monotonic
 
 
 if __name__ == '__main__':

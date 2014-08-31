@@ -1,5 +1,5 @@
 # vim:fileencoding=utf-8:noet
-from __future__ import absolute_import
+from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 import sys
 
@@ -26,7 +26,7 @@ class Segment(object):
 		def argspecobjs(self):
 			yield '__call__', self.__call__
 	else:
-		def argspecobjs(self):  # NOQA
+		def argspecobjs(self):
 			yield '__call__', self
 
 	argspecobjs.__doc__ = (

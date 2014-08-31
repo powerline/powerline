@@ -1,14 +1,13 @@
 # vim:fileencoding=utf-8:noet
+from __future__ import (unicode_literals, division, absolute_import, print_function)
 
-from __future__ import unicode_literals, absolute_import, division
+from powerline.theme import requires_segment_info
+from powerline.bindings.vim import (current_tabpage, list_tabpages, vim_getbufoption)
 
 try:
 	import vim
 except ImportError:
-	vim = {}  # NOQA
-
-from powerline.theme import requires_segment_info
-from powerline.bindings.vim import (current_tabpage, list_tabpages, vim_getbufoption)
+	vim = {}
 
 
 def tabpage_updated_segment_info(segment_info, tabpage, mode):

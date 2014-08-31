@@ -17,26 +17,29 @@ Python package
 
    .
 
-.. note::
-    In case you want or have to use ``powerline.sh`` socat-based client you 
-    should also install GNU env named ``genv``. This may be achieved by running 
-    ``brew install coreutils``.
+   .. note::
+      In case you want or have to use ``powerline.sh`` socat-based client you 
+      should also install GNU env named ``genv``. This may be achieved by 
+      running ``brew install coreutils``.
 
 2. Install Powerline using the following command::
 
        pip install --user git+git://github.com/Lokaltog/powerline
 
-.. warning:: When using ``brew install`` to install Python one must not supply
-   ``--user`` flag to ``pip``.
+   .. warning::
+      When using ``brew install`` to install Python one must not supply
+      ``--user`` flag to ``pip``.
 
-.. note:: You need to use the GitHub URI when installing Powerline! This 
-   project is currently unavailable on the PyPI due to a naming conflict 
-   with an unrelated project.
+   .. note::
+      You need to use the GitHub URI when installing Powerline! This project is 
+      currently unavailable on the PyPI due to a naming conflict with an 
+      unrelated project.
 
-.. note:: If you are powerline developer you should be aware that ``pip install 
-   --editable`` does not currently fully work. If you install powerline this way 
-   you will be missing ``powerline`` executable and need to symlink it. It will 
-   be located in ``scripts/powerline``.
+   .. note::
+      If you are powerline developer you should be aware that ``pip install 
+      --editable`` does not currently fully work. If you install powerline this 
+      way you will be missing ``powerline`` executable and need to symlink it. It 
+      will be located in ``scripts/powerline``.
 
 Vim installation
 ================

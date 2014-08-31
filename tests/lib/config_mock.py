@@ -1,13 +1,18 @@
 # vim:fileencoding=utf-8:noet
+from __future__ import (unicode_literals, division, absolute_import, print_function)
+
+import os
+
 from threading import Lock
-from powerline.renderer import Renderer
-from powerline.lib.config import ConfigLoader
-from powerline import Powerline
-from tests.lib import Args, replace_attr
 from copy import deepcopy
 from time import sleep
 from functools import wraps
-import os
+
+from powerline.renderer import Renderer
+from powerline.lib.config import ConfigLoader
+from powerline import Powerline
+
+from tests.lib import Args, replace_attr
 
 
 class TestHelpers(object):

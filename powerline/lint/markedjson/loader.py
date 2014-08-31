@@ -1,12 +1,13 @@
-__all__ = ['Loader']
+# vim:fileencoding=utf-8:noet
+from __future__ import (unicode_literals, division, absolute_import, print_function)
 
-from .reader import Reader
-from .scanner import Scanner
-from .parser import Parser
-from .composer import Composer
-from .constructor import Constructor
-from .resolver import Resolver
-from .error import echoerr
+from powerline.lint.markedjson.reader import Reader
+from powerline.lint.markedjson.scanner import Scanner
+from powerline.lint.markedjson.parser import Parser
+from powerline.lint.markedjson.composer import Composer
+from powerline.lint.markedjson.constructor import Constructor
+from powerline.lint.markedjson.resolver import Resolver
+from powerline.lint.markedjson.error import echoerr
 
 
 class Loader(Reader, Scanner, Parser, Composer, Constructor, Resolver):

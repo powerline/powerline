@@ -1,6 +1,5 @@
 # vim:fileencoding=utf-8:noet
-
-from __future__ import absolute_import
+from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 from threading import Thread, Lock, Event
 from types import MethodType

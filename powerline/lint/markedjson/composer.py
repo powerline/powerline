@@ -1,8 +1,12 @@
-__all__ = ['Composer', 'ComposerError']
+# vim:fileencoding=utf-8:noet
+from __future__ import (unicode_literals, division, absolute_import, print_function)
 
-from .error import MarkedError
-from .events import *  # NOQA
-from .nodes import *  # NOQA
+from powerline.lint.markedjson import nodes
+from powerline.lint.markedjson import events
+from powerline.lint.markedjson.error import MarkedError
+
+
+__all__ = ['Composer', 'ComposerError']
 
 
 class ComposerError(MarkedError):
@@ -15,15 +19,15 @@ class Composer:
 
 	def check_node(self):
 		# Drop the STREAM-START event.
-		if self.check_event(StreamStartEvent):
+		if self.check_event(events.StreamStartEvent):
 			self.get_event()
 
 		# If there are more documents available?
-		return not self.check_event(StreamEndEvent)
+		return not self.check_event(events.StreamEndEvent)
 
 	def get_node(self):
 		# Get the root node of the next document.
-		if not self.check_event(StreamEndEvent):
+		if not self.check_event(events.StreamEndEvent):
 			return self.compose_document()
 
 	def get_single_node(self):
@@ -32,11 +36,11 @@ class Composer:
 
 		# Compose a document if the stream is not empty.
 		document = None
-		if not self.check_event(StreamEndEvent):
+		if not self.check_event(events.StreamEndEvent):
 			document = self.compose_document()
 
 		# Ensure that the stream contains no more documents.
-		if not self.check_event(StreamEndEvent):
+		if not self.check_event(events.StreamEndEvent):
 			event = self.get_event()
 			raise ComposerError(
 				"expected a single document in the stream",
@@ -64,11 +68,11 @@ class Composer:
 
 	def compose_node(self, parent, index):
 		self.descend_resolver(parent, index)
-		if self.check_event(ScalarEvent):
+		if self.check_event(events.ScalarEvent):
 			node = self.compose_scalar_node()
-		elif self.check_event(SequenceStartEvent):
+		elif self.check_event(events.SequenceStartEvent):
 			node = self.compose_sequence_node()
-		elif self.check_event(MappingStartEvent):
+		elif self.check_event(events.MappingStartEvent):
 			node = self.compose_mapping_node()
 		self.ascend_resolver()
 		return node
@@ -77,18 +81,18 @@ class Composer:
 		event = self.get_event()
 		tag = event.tag
 		if tag is None or tag == '!':
-			tag = self.resolve(ScalarNode, event.value, event.implicit, event.start_mark)
-		node = ScalarNode(tag, event.value, event.start_mark, event.end_mark, style=event.style)
+			tag = self.resolve(nodes.ScalarNode, event.value, event.implicit, event.start_mark)
+		node = nodes.ScalarNode(tag, event.value, event.start_mark, event.end_mark, style=event.style)
 		return node
 
 	def compose_sequence_node(self):
 		start_event = self.get_event()
 		tag = start_event.tag
 		if tag is None or tag == '!':
-			tag = self.resolve(SequenceNode, None, start_event.implicit)
-		node = SequenceNode(tag, [], start_event.start_mark, None, flow_style=start_event.flow_style)
+			tag = self.resolve(nodes.SequenceNode, None, start_event.implicit)
+		node = nodes.SequenceNode(tag, [], start_event.start_mark, None, flow_style=start_event.flow_style)
 		index = 0
-		while not self.check_event(SequenceEndEvent):
+		while not self.check_event(events.SequenceEndEvent):
 			node.value.append(self.compose_node(node, index))
 			index += 1
 		end_event = self.get_event()
@@ -99,9 +103,9 @@ class Composer:
 		start_event = self.get_event()
 		tag = start_event.tag
 		if tag is None or tag == '!':
-			tag = self.resolve(MappingNode, None, start_event.implicit)
-		node = MappingNode(tag, [], start_event.start_mark, None, flow_style=start_event.flow_style)
-		while not self.check_event(MappingEndEvent):
+			tag = self.resolve(nodes.MappingNode, None, start_event.implicit)
+		node = nodes.MappingNode(tag, [], start_event.start_mark, None, flow_style=start_event.flow_style)
+		while not self.check_event(events.MappingEndEvent):
 			# key_event = self.peek_event()
 			item_key = self.compose_node(node, None)
 			# if item_key in node.value:

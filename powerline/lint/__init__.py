@@ -1,4 +1,5 @@
 # vim:fileencoding=utf-8:noet
+from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 import itertools
 import sys
@@ -560,8 +561,8 @@ def check_top_theme(theme, data, context, echoerr):
 	return True, False, False
 
 
-divider_spec = Spec().type(unicode).len('le', 3,
-					lambda value: 'Divider {0!r} is too large!'.format(value)).copy
+divider_spec = Spec().type(unicode).len(
+	'le', 3, (lambda value: 'Divider {0!r} is too large!'.format(value))).copy
 ext_theme_spec = Spec().type(unicode).func(lambda *args: check_config('themes', *args)).copy
 top_theme_spec = Spec().type(unicode).func(check_top_theme).copy
 ext_spec = Spec(

@@ -1,20 +1,15 @@
 # vim:fileencoding=utf-8:noet
+from __future__ import (unicode_literals, division, absolute_import, print_function)
 
-from __future__ import absolute_import, unicode_literals
+import sys
+
+import vim
 
 from powerline.bindings.vim import vim_get_func, vim_getoption, environ, current_tabpage
 from powerline.renderer import Renderer
 from powerline.colorscheme import ATTR_BOLD, ATTR_ITALIC, ATTR_UNDERLINE
 from powerline.theme import Theme
-
-import vim
-import sys
-
-
-try:
-	from __builtin__ import unichr as chr
-except ImportError:
-	pass
+from powerline.lib.unicode import unichr
 
 
 vim_mode = vim_get_func('mode', rettype=str)
@@ -23,8 +18,8 @@ if int(vim.eval('v:version')) >= 702:
 	vim_mode = lambda: _vim_mode(1)
 
 mode_translations = {
-	chr(ord('V') - 0x40): '^V',
-	chr(ord('S') - 0x40): '^S',
+	unichr(ord('V') - 0x40): '^V',
+	unichr(ord('S') - 0x40): '^S',
 }
 
 
@@ -81,7 +76,7 @@ class VimRenderer(Renderer):
 				# renderer
 				return vim.strwidth(string.encode('utf-8'))
 		else:
-			@staticmethod  # NOQA
+			@staticmethod
 			def strwidth(string):
 				return vim.strwidth(string)
 

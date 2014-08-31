@@ -1,4 +1,5 @@
 # vim:fileencoding=utf-8:noet
+from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 import sys
 import codecs
@@ -7,6 +8,10 @@ try:
 	import vim
 except ImportError:
 	vim = {}
+
+if not hasattr(vim, 'bindeval'):
+	import json
+
 
 if hasattr(vim, 'bindeval'):
 	def vim_get_func(f, rettype=None):
@@ -19,8 +24,6 @@ if hasattr(vim, 'bindeval'):
 		except vim.error:
 			return None
 else:
-	import json
-
 	class VimFunc(object):
 		'''Evaluate a vim function using vim.eval().
 
@@ -73,14 +76,14 @@ else:
 
 	_vim_exists = vim_get_func('exists', rettype=int)
 
-	def vim_getvar(varname):  # NOQA
+	def vim_getvar(varname):
 		varname = 'g:' + varname
 		if _vim_exists(varname):
 			return vim.eval(varname)
 		else:
 			raise KeyError(varname)
 
-	def bufvar_exists(buffer, varname):  # NOQA
+	def bufvar_exists(buffer, varname):
 		if not buffer or buffer.number == vim.current.buffer.number:
 			return int(vim.eval('exists("b:{0}")'.format(varname)))
 		else:
@@ -88,7 +91,7 @@ else:
 				'has_key(getbufvar({0}, ""), {1})'.format(buffer.number, varname)
 			))
 
-	def vim_getwinvar(segment_info, varname):  # NOQA
+	def vim_getwinvar(segment_info, varname):
 		result = vim.eval('getwinvar({0}, "{1}")'.format(segment_info['winnr'], varname))
 		if result == '':
 			if not int(vim.eval('has_key(getwinvar({0}, ""), "{1}")'.format(segment_info['winnr'], varname))):
@@ -122,13 +125,13 @@ if hasattr(vim, 'options'):
 	def vim_setoption(option, value):
 		vim.options[str(option)] = value
 else:
-	def vim_getbufoption(info, option):  # NOQA
+	def vim_getbufoption(info, option):
 		return getbufvar(info['bufnr'], '&' + option)
 
-	def vim_getoption(option):  # NOQA
+	def vim_getoption(option):
 		return vim.eval('&g:' + option)
 
-	def vim_setoption(option, value):  # NOQA
+	def vim_setoption(option, value):
 		vim.command('let &g:{option} = {value}'.format(
 			option=option, value=json.encode(value)))
 
@@ -205,10 +208,10 @@ else:
 	def _last_tab_nr():
 		return int(vim.eval('tabpagenr("$")'))
 
-	def current_tabpage():  # NOQA
+	def current_tabpage():
 		return Tabpage(int(vim.eval('tabpagenr()')))
 
-	def list_tabpages():  # NOQA
+	def list_tabpages():
 		return [Tabpage(nr) for nr in range(1, _last_tab_nr() + 1)]
 
 	class TabBufSegmentInfo(dict):
@@ -258,7 +261,7 @@ if sys.version_info < (3,):
 else:
 	vim_bufname = vim_get_func('bufname')
 
-	def buffer_name(buf):  # NOQA
+	def buffer_name(buf):
 		try:
 			name = buf.name
 		except UnicodeDecodeError:

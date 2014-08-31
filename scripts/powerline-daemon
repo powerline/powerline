@@ -6,6 +6,7 @@ import socket
 import os
 import errno
 import sys
+
 from argparse import ArgumentParser
 from select import select
 from signal import signal, SIGTERM
@@ -246,7 +247,7 @@ def daemonize(stdin=os.devnull, stdout=os.devnull, stderr=os.devnull):
 			# exit first parent
 			sys.exit(0)
 	except OSError as e:
-		print ("fork #1 failed: %d (%s)" % (e.errno, e.strerror), file=sys.stderr)
+		sys.stderr.write("fork #1 failed: %d (%s)\n" % (e.errno, e.strerror))
 		sys.exit(1)
 
 	# decouple from parent environment
@@ -261,7 +262,7 @@ def daemonize(stdin=os.devnull, stdout=os.devnull, stderr=os.devnull):
 			# exit from second parent
 			sys.exit(0)
 	except OSError as e:
-		print ("fork #2 failed: %d (%s)" % (e.errno, e.strerror), file=sys.stderr)
+		sys.stderr.write("fork #2 failed: %d (%s)\n" % (e.errno, e.strerror))
 		sys.exit(1)
 
 	# Redirect standard file descriptors.
@@ -399,16 +400,18 @@ def main():
 		# Create a locked pid file containing the daemon's PID
 		if lockpidfile() is None:
 			if not args.quiet:
-				print ('The daemon is already running. Use %s -k to kill it.' % os.path.basename(sys.argv[0]),
-						file=sys.stderr)
+				sys.stderr.write(
+					'The daemon is already running. Use %s -k to kill it.\n' % (
+						os.path.basename(sys.argv[0])))
 			raise SystemExit(1)
 
 	# Bind to address or bail if we cannot bind
 	sock = check_existing()
 	if sock is None:
 		if not args.quiet:
-			print ('The daemon is already running. Use %s -k to kill it.' % os.path.basename(sys.argv[0]),
-					file=sys.stderr)
+			sys.stderr.write(
+				'The daemon is already running. Use %s -k to kill it.\n' % (
+					os.path.basename(sys.argv[0])))
 		raise SystemExit(1)
 
 	if args.foreground:

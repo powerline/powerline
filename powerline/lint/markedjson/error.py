@@ -1,13 +1,10 @@
-__all__ = ['Mark', 'MarkedError', 'echoerr', 'NON_PRINTABLE']
-
+# vim:fileencoding=utf-8:noet
+from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 import sys
 import re
 
-try:
-	from __builtin__ import unichr
-except ImportError:
-	unichr = chr  # NOQA
+from powerline.lib.unicode import unichr
 
 
 NON_PRINTABLE = re.compile('[^\t\n\x20-\x7E' + unichr(0x85) + (unichr(0xA0) + '-' + unichr(0xD7FF)) + (unichr(0xE000) + '-' + unichr(0xFFFD)) + ']')

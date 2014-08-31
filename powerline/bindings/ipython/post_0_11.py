@@ -1,11 +1,12 @@
 # vim:fileencoding=utf-8:noet
+from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 from weakref import ref
 
-from powerline.ipython import IPythonPowerline, RewriteResult
-
 from IPython.core.prompts import PromptManager
 from IPython.core.magic import Magics, magics_class, line_magic
+
+from powerline.ipython import IPythonPowerline, RewriteResult
 
 
 @magics_class

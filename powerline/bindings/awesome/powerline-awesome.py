@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 # vim:fileencoding=utf-8:noet
+from __future__ import (unicode_literals, division, absolute_import, print_function)
+
+import sys
+
+from time import sleep
+from subprocess import Popen, PIPE
 
 from powerline import Powerline
-import sys
-from time import sleep
 from powerline.lib.monotonic import monotonic
-from subprocess import Popen, PIPE
 
 powerline = Powerline('wm', renderer_module='pango_markup')
 powerline.update_renderer()

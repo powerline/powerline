@@ -67,6 +67,65 @@ Programming style
   documentation and commit messages.
 * It is allowed to have too long lines. It is advised though to avoid lines 
   wider then a hundred of characters.
+* Imports have the following structure:
+
+  1. Shebang and modeline in a form
+
+     .. code-block:: python
+
+         #!/usr/bin/env python
+         # vim:fileencoding=utf-8:noet
+
+     . Modeline is required, shebang is not. If shebang is present file must end 
+     with
+
+     .. code-block:: python
+
+        if __name__ == '__main__':
+            # Actual script here
+
+  2. Module docstring.
+  3. ``__future__`` import exactly in a form
+
+     .. code-block:: python
+
+         from __future__ import (unicode_literals, division, absolute_import, print_function)
+
+     (powerline.shell is the only exception due to problems with argparse). It 
+     is not separated by newline with shebang and modeline, but is with 
+     docstring.
+  4. Standard python library imports in a form ``import X``.
+  5. Standard python library imports in a form ``from X import Y``.
+  6. Third-party (non-python and non-powerline) library imports in a form 
+     ``import X``.
+  7. Third-party library imports in a form ``from X import Y``.
+  8. Powerline non-test imports in a form ``from powerline.X import Y``.
+  9. Powerline test imports in a form ``import tests.vim as vim_module``.
+  10. Powerline test imports in a form ``from tests.X import Y``.
+
+  Each entry is separated by newline from another entry. Any entry except for 
+  the first and third ones is optional. Example with all entries:
+
+  .. code-block:: python
+
+    #!/usr/bin/env python
+    # vim:fileencoding=utf-8:noet
+
+    '''Powerline super module'''
+
+    import sys
+
+    from argparse import ArgumentParser
+
+    import psutil
+
+    from colormath.color_diff import delta_e_cie2000
+
+    from powerline.lib.unicode import u
+
+    import tests.vim as vim_module
+
+    from tests import TestCase
 
 Submitting changes
 ==================

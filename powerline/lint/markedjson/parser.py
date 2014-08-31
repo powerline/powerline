@@ -1,8 +1,9 @@
-__all__ = ['Parser', 'ParserError']
+# vim:fileencoding=utf-8:noet
+from __future__ import (unicode_literals, division, absolute_import, print_function)
 
-from .error import MarkedError
-from .tokens import *  # NOQA
-from .events import *  # NOQA
+from powerline.lint.markedjson.error import MarkedError
+from powerline.lint.markedjson import tokens
+from powerline.lint.markedjson import events
 
 
 class ParserError(MarkedError):
@@ -58,7 +59,7 @@ class Parser:
 	def parse_stream_start(self):
 		# Parse the stream start.
 		token = self.get_token()
-		event = StreamStartEvent(token.start_mark, token.end_mark, encoding=token.encoding)
+		event = events.StreamStartEvent(token.start_mark, token.end_mark, encoding=token.encoding)
 
 		# Prepare the next state.
 		self.state = self.parse_implicit_document_start
@@ -67,10 +68,10 @@ class Parser:
 
 	def parse_implicit_document_start(self):
 		# Parse an implicit document.
-		if not self.check_token(StreamEndToken):
+		if not self.check_token(tokens.StreamEndToken):
 			token = self.peek_token()
 			start_mark = end_mark = token.start_mark
-			event = DocumentStartEvent(start_mark, end_mark, explicit=False)
+			event = events.DocumentStartEvent(start_mark, end_mark, explicit=False)
 
 			# Prepare the next state.
 			self.states.append(self.parse_document_end)
@@ -83,17 +84,17 @@ class Parser:
 
 	def parse_document_start(self):
 		# Parse an explicit document.
-		if not self.check_token(StreamEndToken):
+		if not self.check_token(tokens.StreamEndToken):
 			token = self.peek_token()
 			self.echoerr(
 				None, None,
 				("expected '<stream end>', but found %r" % token.id), token.start_mark
 			)
-			return StreamEndEvent(token.start_mark, token.end_mark)
+			return events.StreamEndEvent(token.start_mark, token.end_mark)
 		else:
 			# Parse the end of the stream.
 			token = self.get_token()
-			event = StreamEndEvent(token.start_mark, token.end_mark)
+			event = events.StreamEndEvent(token.start_mark, token.end_mark)
 			assert not self.states
 			assert not self.marks
 			self.state = None
@@ -104,7 +105,7 @@ class Parser:
 		token = self.peek_token()
 		start_mark = end_mark = token.start_mark
 		explicit = False
-		event = DocumentEndEvent(start_mark, end_mark, explicit=explicit)
+		event = events.DocumentEndEvent(start_mark, end_mark, explicit=explicit)
 
 		# Prepare the next state.
 		self.state = self.parse_document_start
@@ -120,22 +121,22 @@ class Parser:
 			start_mark = end_mark = self.peek_token().start_mark
 		event = None
 		implicit = True
-		if self.check_token(ScalarToken):
+		if self.check_token(tokens.ScalarToken):
 			token = self.get_token()
 			end_mark = token.end_mark
 			if token.plain:
 				implicit = (True, False)
 			else:
 				implicit = (False, True)
-			event = ScalarEvent(implicit, token.value, start_mark, end_mark, style=token.style)
+			event = events.ScalarEvent(implicit, token.value, start_mark, end_mark, style=token.style)
 			self.state = self.states.pop()
-		elif self.check_token(FlowSequenceStartToken):
+		elif self.check_token(tokens.FlowSequenceStartToken):
 			end_mark = self.peek_token().end_mark
-			event = SequenceStartEvent(implicit, start_mark, end_mark, flow_style=True)
+			event = events.SequenceStartEvent(implicit, start_mark, end_mark, flow_style=True)
 			self.state = self.parse_flow_sequence_first_entry
-		elif self.check_token(FlowMappingStartToken):
+		elif self.check_token(tokens.FlowMappingStartToken):
 			end_mark = self.peek_token().end_mark
-			event = MappingStartEvent(implicit, start_mark, end_mark, flow_style=True)
+			event = events.MappingStartEvent(implicit, start_mark, end_mark, flow_style=True)
 			self.state = self.parse_flow_mapping_first_key
 		else:
 			token = self.peek_token()
@@ -152,11 +153,11 @@ class Parser:
 		return self.parse_flow_sequence_entry(first=True)
 
 	def parse_flow_sequence_entry(self, first=False):
-		if not self.check_token(FlowSequenceEndToken):
+		if not self.check_token(tokens.FlowSequenceEndToken):
 			if not first:
-				if self.check_token(FlowEntryToken):
+				if self.check_token(tokens.FlowEntryToken):
 					self.get_token()
-					if self.check_token(FlowSequenceEndToken):
+					if self.check_token(tokens.FlowSequenceEndToken):
 						token = self.peek_token()
 						self.echoerr(
 							"While parsing a flow sequence", self.marks[-1],
@@ -169,11 +170,11 @@ class Parser:
 						("expected ',' or ']', but got %r" % token.id), token.start_mark
 					)
 
-			if not self.check_token(FlowSequenceEndToken):
+			if not self.check_token(tokens.FlowSequenceEndToken):
 				self.states.append(self.parse_flow_sequence_entry)
 				return self.parse_node()
 		token = self.get_token()
-		event = SequenceEndEvent(token.start_mark, token.end_mark)
+		event = events.SequenceEndEvent(token.start_mark, token.end_mark)
 		self.state = self.states.pop()
 		self.marks.pop()
 		return event
@@ -181,7 +182,7 @@ class Parser:
 	def parse_flow_sequence_entry_mapping_end(self):
 		self.state = self.parse_flow_sequence_entry
 		token = self.peek_token()
-		return MappingEndEvent(token.start_mark, token.start_mark)
+		return events.MappingEndEvent(token.start_mark, token.start_mark)
 
 	def parse_flow_mapping_first_key(self):
 		token = self.get_token()
@@ -189,11 +190,11 @@ class Parser:
 		return self.parse_flow_mapping_key(first=True)
 
 	def parse_flow_mapping_key(self, first=False):
-		if not self.check_token(FlowMappingEndToken):
+		if not self.check_token(tokens.FlowMappingEndToken):
 			if not first:
-				if self.check_token(FlowEntryToken):
+				if self.check_token(tokens.FlowEntryToken):
 					self.get_token()
-					if self.check_token(FlowMappingEndToken):
+					if self.check_token(tokens.FlowMappingEndToken):
 						token = self.peek_token()
 						self.echoerr(
 							"While parsing a flow mapping", self.marks[-1],
@@ -205,9 +206,9 @@ class Parser:
 						"while parsing a flow mapping", self.marks[-1],
 						("expected ',' or '}', but got %r" % token.id), token.start_mark
 					)
-			if self.check_token(KeyToken):
+			if self.check_token(tokens.KeyToken):
 				token = self.get_token()
-				if not self.check_token(ValueToken, FlowEntryToken, FlowMappingEndToken):
+				if not self.check_token(tokens.ValueToken, tokens.FlowEntryToken, tokens.FlowMappingEndToken):
 					self.states.append(self.parse_flow_mapping_value)
 					return self.parse_node()
 				else:
@@ -216,12 +217,12 @@ class Parser:
 						"while parsing a flow mapping", self.marks[-1],
 						("expected value, but got %r" % token.id), token.start_mark
 					)
-			elif not self.check_token(FlowMappingEndToken):
+			elif not self.check_token(tokens.FlowMappingEndToken):
 				token = self.peek_token()
-				expect_key = self.check_token(ValueToken, FlowEntryToken)
+				expect_key = self.check_token(tokens.ValueToken, tokens.FlowEntryToken)
 				if not expect_key:
 					self.get_token()
-					expect_key = self.check_token(ValueToken)
+					expect_key = self.check_token(tokens.ValueToken)
 
 				if expect_key:
 					raise ParserError(
@@ -235,15 +236,15 @@ class Parser:
 						("expected ':', but got %r" % token.id), token.start_mark
 					)
 		token = self.get_token()
-		event = MappingEndEvent(token.start_mark, token.end_mark)
+		event = events.MappingEndEvent(token.start_mark, token.end_mark)
 		self.state = self.states.pop()
 		self.marks.pop()
 		return event
 
 	def parse_flow_mapping_value(self):
-		if self.check_token(ValueToken):
+		if self.check_token(tokens.ValueToken):
 			token = self.get_token()
-			if not self.check_token(FlowEntryToken, FlowMappingEndToken):
+			if not self.check_token(tokens.FlowEntryToken, tokens.FlowMappingEndToken):
 				self.states.append(self.parse_flow_mapping_key)
 				return self.parse_node()
 

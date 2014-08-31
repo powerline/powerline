@@ -1,9 +1,10 @@
-__all__ = ['BaseResolver', 'Resolver']
-
-from .error import MarkedError
-from .nodes import *  # NOQA
+# vim:fileencoding=utf-8:noet
+from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 import re
+
+from powerline.lint.markedjson.error import MarkedError
+from powerline.lint.markedjson import nodes
 
 
 class ResolverError(MarkedError):
@@ -73,7 +74,7 @@ class BaseResolver:
 			and current_index is None):
 			return
 		if isinstance(index_check, str):
-			if not (isinstance(current_index, ScalarNode) and index_check == current_index.value):
+			if not (isinstance(current_index, nodes.ScalarNode) and index_check == current_index.value):
 				return
 		elif isinstance(index_check, int) and not isinstance(index_check, bool):
 			if index_check != current_index:
@@ -81,7 +82,7 @@ class BaseResolver:
 		return True
 
 	def resolve(self, kind, value, implicit, mark=None):
-		if kind is ScalarNode and implicit[0]:
+		if kind is nodes.ScalarNode and implicit[0]:
 			if value == '':
 				resolvers = self.yaml_implicit_resolvers.get('', [])
 			else:
@@ -97,11 +98,11 @@ class BaseResolver:
 					mark
 				)
 				return self.DEFAULT_SCALAR_TAG
-		if kind is ScalarNode:
+		if kind is nodes.ScalarNode:
 			return self.DEFAULT_SCALAR_TAG
-		elif kind is SequenceNode:
+		elif kind is nodes.SequenceNode:
 			return self.DEFAULT_SEQUENCE_TAG
-		elif kind is MappingNode:
+		elif kind is nodes.MappingNode:
 			return self.DEFAULT_MAPPING_TAG
 
 
@@ -110,21 +111,21 @@ class Resolver(BaseResolver):
 
 
 Resolver.add_implicit_resolver(
-		'tag:yaml.org,2002:bool',
-		re.compile(r'''^(?:true|false)$''', re.X),
-		list('yYnNtTfFoO'))
+	'tag:yaml.org,2002:bool',
+	re.compile(r'''^(?:true|false)$''', re.X),
+	list('yYnNtTfFoO'))
 
 Resolver.add_implicit_resolver(
-		'tag:yaml.org,2002:float',
-		re.compile(r'^-?(?:0|[1-9]\d*)(?=[.eE])(?:\.\d+)?(?:[eE][-+]?\d+)?$', re.X),
-		list('-0123456789'))
+	'tag:yaml.org,2002:float',
+	re.compile(r'^-?(?:0|[1-9]\d*)(?=[.eE])(?:\.\d+)?(?:[eE][-+]?\d+)?$', re.X),
+	list('-0123456789'))
 
 Resolver.add_implicit_resolver(
-		'tag:yaml.org,2002:int',
-		re.compile(r'^(?:0|-?[1-9]\d*)$', re.X),
-		list('-0123456789'))
+	'tag:yaml.org,2002:int',
+	re.compile(r'^(?:0|-?[1-9]\d*)$', re.X),
+	list('-0123456789'))
 
 Resolver.add_implicit_resolver(
-		'tag:yaml.org,2002:null',
-		re.compile(r'^null$', re.X),
-		['n'])
+	'tag:yaml.org,2002:null',
+	re.compile(r'^null$', re.X),
+	['n'])

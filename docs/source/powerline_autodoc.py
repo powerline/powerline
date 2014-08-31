@@ -1,13 +1,13 @@
 # vim:fileencoding=utf-8:noet
-from sphinx.ext import autodoc
+from __future__ import (unicode_literals, division, absolute_import, print_function)
+
 from inspect import formatargspec
+
+from sphinx.ext import autodoc
+
 from powerline.lint.inspect import getconfigargspec
 from powerline.segments import Segment
-
-try:
-	from __builtin__ import unicode
-except ImportError:
-	unicode = lambda s, enc: s  # NOQA
+from powerline.lib.unicode import unicode
 
 
 def formatvalue(val):

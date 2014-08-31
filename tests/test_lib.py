@@ -1,5 +1,5 @@
 # vim:fileencoding=utf-8:noet
-from __future__ import division
+from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 import threading
 import os
@@ -385,7 +385,7 @@ class TestLib(TestCase):
 			return str(kwargs)
 		func = add_divider_highlight_group('hl_group')(decorated_function_name)
 		self.assertEqual(func.__name__, 'decorated_function_name')
-		self.assertEqual(func(kw={}), [{'contents': repr({'kw': {}}), 'divider_highlight_group': 'hl_group'}])
+		self.assertEqual(func(kw={}), [{'contents': repr({str('kw'): {}}), 'divider_highlight_group': 'hl_group'}])
 
 	def test_humanize_bytes(self):
 		self.assertEqual(humanize_bytes(0), '0 B')
