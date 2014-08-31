@@ -35,6 +35,6 @@ class memoize(object):
 				cached = self.cache[key] = {
 					'result': func(**kwargs),
 					'time': monotonic(),
-					}
+				}
 			return cached['result']
 		return decorated_function
