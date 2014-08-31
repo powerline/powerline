@@ -264,32 +264,25 @@ class Constructor(BaseConstructor):
 
 
 Constructor.add_constructor(
-		'tag:yaml.org,2002:null',
-		Constructor.construct_yaml_null)
+	'tag:yaml.org,2002:null', Constructor.construct_yaml_null)
 
 Constructor.add_constructor(
-		'tag:yaml.org,2002:bool',
-		Constructor.construct_yaml_bool)
+	'tag:yaml.org,2002:bool', Constructor.construct_yaml_bool)
 
 Constructor.add_constructor(
-		'tag:yaml.org,2002:int',
-		Constructor.construct_yaml_int)
+	'tag:yaml.org,2002:int', Constructor.construct_yaml_int)
 
 Constructor.add_constructor(
-		'tag:yaml.org,2002:float',
-		Constructor.construct_yaml_float)
+	'tag:yaml.org,2002:float', Constructor.construct_yaml_float)
 
 Constructor.add_constructor(
-		'tag:yaml.org,2002:str',
-		Constructor.construct_yaml_str)
+	'tag:yaml.org,2002:str', Constructor.construct_yaml_str)
 
 Constructor.add_constructor(
-		'tag:yaml.org,2002:seq',
-		Constructor.construct_yaml_seq)
+	'tag:yaml.org,2002:seq', Constructor.construct_yaml_seq)
 
 Constructor.add_constructor(
-		'tag:yaml.org,2002:map',
-		Constructor.construct_yaml_map)
+	'tag:yaml.org,2002:map', Constructor.construct_yaml_map)
 
-Constructor.add_constructor(None,
-		Constructor.construct_undefined)
+Constructor.add_constructor(
+	None, Constructor.construct_undefined)

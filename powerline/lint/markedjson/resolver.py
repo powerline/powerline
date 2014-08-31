@@ -110,21 +110,21 @@ class Resolver(BaseResolver):
 
 
 Resolver.add_implicit_resolver(
-		'tag:yaml.org,2002:bool',
-		re.compile(r'''^(?:true|false)$''', re.X),
-		list('yYnNtTfFoO'))
+	'tag:yaml.org,2002:bool',
+	re.compile(r'''^(?:true|false)$''', re.X),
+	list('yYnNtTfFoO'))
 
 Resolver.add_implicit_resolver(
-		'tag:yaml.org,2002:float',
-		re.compile(r'^-?(?:0|[1-9]\d*)(?=[.eE])(?:\.\d+)?(?:[eE][-+]?\d+)?$', re.X),
-		list('-0123456789'))
+	'tag:yaml.org,2002:float',
+	re.compile(r'^-?(?:0|[1-9]\d*)(?=[.eE])(?:\.\d+)?(?:[eE][-+]?\d+)?$', re.X),
+	list('-0123456789'))
 
 Resolver.add_implicit_resolver(
-		'tag:yaml.org,2002:int',
-		re.compile(r'^(?:0|-?[1-9]\d*)$', re.X),
-		list('-0123456789'))
+	'tag:yaml.org,2002:int',
+	re.compile(r'^(?:0|-?[1-9]\d*)$', re.X),
+	list('-0123456789'))
 
 Resolver.add_implicit_resolver(
-		'tag:yaml.org,2002:null',
-		re.compile(r'^null$', re.X),
-		['n'])
+	'tag:yaml.org,2002:null',
+	re.compile(r'^null$', re.X),
+	['n'])
