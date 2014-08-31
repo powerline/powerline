@@ -7,7 +7,7 @@ from locale import getpreferredencoding
 try:
 	from __builtin__ import unicode
 except ImportError:
-	unicode = str  # NOQA
+	unicode = str
 
 
 try:

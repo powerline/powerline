@@ -14,7 +14,7 @@ try:
 	from powerline.shell import ShellPowerline, get_argparser, finish_args, write_output
 except ImportError:
 	sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(os.path.realpath(__file__)))))
-	from powerline.shell import ShellPowerline, get_argparser, finish_args, write_output  # NOQA
+	from powerline.shell import ShellPowerline, get_argparser, finish_args, write_output
 
 
 if sys.version_info < (3,):

@@ -6,7 +6,7 @@ import os
 try:
 	import vim
 except ImportError:
-	vim = object()  # NOQA
+	vim = object()
 else:
 	vim.command('''
 	function! Powerline_plugin_ctrlp_main(...)

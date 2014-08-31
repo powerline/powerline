@@ -68,7 +68,7 @@ try:
 except ImportError:
 	# shutil.which was added in python-3.3. Here is what was added:
 	# Lib/shutil.py, commit 5abe28a9c8fe701ba19b1db5190863384e96c798
-	def which(cmd, mode=os.F_OK | os.X_OK, path=None):  # NOQA
+	def which(cmd, mode=os.F_OK | os.X_OK, path=None):
 		"""Given a command, mode, and a PATH string, return the path which
 		conforms to the given mode on the PATH, or None if there is no such
 		file.

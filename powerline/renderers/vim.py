@@ -76,7 +76,7 @@ class VimRenderer(Renderer):
 				# renderer
 				return vim.strwidth(string.encode('utf-8'))
 		else:
-			@staticmethod  # NOQA
+			@staticmethod
 			def strwidth(string):
 				return vim.strwidth(string)
 

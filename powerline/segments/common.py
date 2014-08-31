@@ -675,23 +675,23 @@ try:
 				'highlight_group': ['cpu_load_percent_gradient', 'cpu_load_percent'],
 			}]
 except ImportError:
-	def _get_bytes(interface):  # NOQA
+	def _get_bytes(interface):
 		with open('/sys/class/net/{interface}/statistics/rx_bytes'.format(interface=interface), 'rb') as file_obj:
 			rx = int(file_obj.read())
 		with open('/sys/class/net/{interface}/statistics/tx_bytes'.format(interface=interface), 'rb') as file_obj:
 			tx = int(file_obj.read())
 		return (rx, tx)
 
-	def _get_interfaces():  # NOQA
+	def _get_interfaces():
 		for interface in os.listdir('/sys/class/net'):
 			x = _get_bytes(interface)
 			if x is not None:
 				yield interface, x[0], x[1]
 
-	def _get_user(segment_info):  # NOQA
+	def _get_user(segment_info):
 		return segment_info['environ'].get('USER', None)
 
-	class CPULoadPercentSegment(ThreadedSegment):  # NOQA
+	class CPULoadPercentSegment(ThreadedSegment):
 		interval = 1
 
 		@staticmethod
@@ -763,12 +763,12 @@ if os.path.exists('/proc/uptime'):
 elif 'psutil' in globals():
 	from time import time
 
-	def _get_uptime():  # NOQA
+	def _get_uptime():
 		# psutil.BOOT_TIME is not subject to clock adjustments, but time() is.
 		# Thus it is a fallback to /proc/uptime reading and not the reverse.
 		return int(time() - psutil.BOOT_TIME)
 else:
-	def _get_uptime():  # NOQA
+	def _get_uptime():
 		raise NotImplementedError
 
 
@@ -1198,14 +1198,14 @@ class NowPlayingSegment(Segment):
 		}
 
 	try:
-		__import__('dbus')  # NOQA
+		__import__('dbus')
 	except ImportError:
 		if sys.platform.startswith('darwin'):
 			player_spotify = player_spotify_apple_script
 		else:
-			player_spotify = player_spotify_dbus  # NOQA
+			player_spotify = player_spotify_dbus
 	else:
-		player_spotify = player_spotify_dbus  # NOQA
+		player_spotify = player_spotify_dbus
 
 	def player_rhythmbox(self, pl):
 		now_playing = run_cmd(pl, ['rhythmbox-client', '--no-start', '--no-present', '--print-playing-format', '%at\n%aa\n%tt\n%te\n%td'])

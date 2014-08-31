@@ -4,7 +4,7 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 try:
 	import vim
 except ImportError:
-	vim = object()  # NOQA
+	vim = object()
 
 from powerline.bindings.vim import getbufvar
 from powerline.segments.vim import window_cached

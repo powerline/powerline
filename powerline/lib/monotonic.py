@@ -9,12 +9,12 @@ try:
 			# >={kernel}-sources-2.6.28
 			from time import CLOCK_MONOTONIC_RAW as CLOCK_ID
 		except ImportError:
-			from time import CLOCK_MONOTONIC as CLOCK_ID  # NOQA
+			from time import CLOCK_MONOTONIC as CLOCK_ID
 
 		monotonic = lambda: clock_gettime(CLOCK_ID)
 	except ImportError:
 		# >=python-3.3
-		from time import monotonic  # NOQA
+		from time import monotonic
 except ImportError:
 	import ctypes
 	import sys
@@ -25,7 +25,7 @@ except ImportError:
 			GetTickCount64 = ctypes.windll.kernel32.GetTickCount64
 			GetTickCount64.restype = ctypes.c_ulonglong
 
-			def monotonic():  # NOQA
+			def monotonic():
 				return GetTickCount64() / 1000
 
 		elif sys.platform == 'darwin':
@@ -61,7 +61,7 @@ except ImportError:
 			timebase = mach_timebase_info()
 			factor = timebase[0] / timebase[1] * 1e-9
 
-			def monotonic():  # NOQA
+			def monotonic():
 				return mach_absolute_time() * factor
 		else:
 			# linux only (no librt on OS X)
@@ -90,7 +90,7 @@ except ImportError:
 			else:
 				raise OSError
 
-			def monotonic():  # NOQA
+			def monotonic():
 				if clock_gettime(CLOCK_MONOTONIC, ctypes.pointer(tspec)) != 0:
 					errno_ = ctypes.get_errno()
 					raise OSError(errno_, os.strerror(errno_))

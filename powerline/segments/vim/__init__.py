@@ -9,7 +9,7 @@ from collections import defaultdict
 try:
 	import vim
 except ImportError:
-	vim = {}  # NOQA
+	vim = {}
 
 from powerline.bindings.vim import (vim_get_func, getbufvar, vim_getbufoption,
                                     buffer_name, vim_getwinvar,

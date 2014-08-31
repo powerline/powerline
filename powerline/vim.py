@@ -214,7 +214,7 @@ class VimPowerline(Powerline):
 		_vim_getwinvar = staticmethod(vim_get_func('getwinvar'))
 		_vim_setwinvar = staticmethod(vim_get_func('setwinvar'))
 
-		def win_idx(self, window_id):  # NOQA
+		def win_idx(self, window_id):
 			r = None
 			for winnr, window in zip(count(1), vim.windows):
 				curwindow_id = self._vim_getwinvar(winnr, 'powerline_window_id')

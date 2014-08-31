@@ -26,7 +26,7 @@ class Segment(object):
 		def argspecobjs(self):
 			yield '__call__', self.__call__
 	else:
-		def argspecobjs(self):  # NOQA
+		def argspecobjs(self):
 			yield '__call__', self
 
 	argspecobjs.__doc__ = (
