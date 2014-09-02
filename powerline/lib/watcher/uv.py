@@ -129,6 +129,7 @@ class UvFileWatcher(UvWatcher):
 		if path not in self.watches:
 			self.watch(path)
 			return True
+		return False
 
 
 class UvTreeWatcher(UvWatcher):
