@@ -87,6 +87,10 @@ class UvWatcher(object):
 				return
 		watch.close(partial(self._stopped_watching, path))
 
+	def is_watching(self, path):
+		with self.lock:
+			return path in self.watches
+
 	def __del__(self):
 		try:
 			lock = self.lock
