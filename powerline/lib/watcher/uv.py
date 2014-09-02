@@ -63,6 +63,7 @@ class UvWatcher(object):
 		self.loop = start_uv_thread()
 
 	def watch(self, path):
+		path = realpath(path)
 		with self.lock:
 			if path not in self.watches:
 				try:
@@ -80,6 +81,7 @@ class UvWatcher(object):
 						raise
 
 	def unwatch(self, path):
+		path = realpath(path)
 		with self.lock:
 			try:
 				watch = self.watches.pop(path)
@@ -89,7 +91,7 @@ class UvWatcher(object):
 
 	def is_watching(self, path):
 		with self.lock:
-			return path in self.watches
+			return realpath(path) in self.watches
 
 	def __del__(self):
 		try:
@@ -119,6 +121,7 @@ class UvFileWatcher(UvWatcher):
 		self.events.pop(path, None)
 
 	def __call__(self, path):
+		path = realpath(path)
 		with self.lock:
 			events = self.events.pop(path, None)
 		if events:
@@ -139,7 +142,7 @@ class UvTreeWatcher(UvWatcher):
 		self.watch_directory(self.basedir)
 
 	def watch_directory(self, path):
-		os.path.walk(path, self.watch_one_directory, None)
+		os.path.walk(realpath(path), self.watch_one_directory, None)
 
 	def watch_one_directory(self, arg, dirname, fnames):
 		try:
