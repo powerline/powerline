@@ -101,7 +101,7 @@ class INotifyFileWatcher(INotify):
 				self.watches[path] = wd
 				self.modified[path] = False
 
-	def is_watched(self, path):
+	def is_watching(self, path):
 		with self.lock:
 			return realpath(path) in self.watches
 
