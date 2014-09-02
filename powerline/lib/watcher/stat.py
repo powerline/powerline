@@ -23,7 +23,7 @@ class StatFileWatcher(object):
 		with self.lock:
 			self.watches.pop(path, None)
 
-	def is_watched(self, path):
+	def is_watching(self, path):
 		with self.lock:
 			return realpath(path) in self.watches
 

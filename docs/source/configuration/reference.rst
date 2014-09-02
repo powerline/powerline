@@ -45,6 +45,7 @@ Common configuration is a subdictionary that is a value of ``common`` key in
     auto     Selects most performant watcher.
     inotify  Select inotify watcher. Linux only.
     stat     Select stat-based polling watcher.
+    uv       Select libuv-based watcher.
     =======  ===================================
 
     Default is ``auto``.

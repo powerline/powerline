@@ -18,16 +18,17 @@ def create_file_watcher(pl, watcher_type='auto', expire_time=10):
 
 	Use ``.unwatch()`` method of the returned object to stop watching the file.
 
-	Uses inotify if available, otherwise tracks mtimes. expire_time is the 
-	number of minutes after the last query for a given path for the inotify 
-	watch for that path to be automatically removed. This conserves kernel 
-	resources.
+	Uses inotify if available, then pyuv, otherwise tracks mtimes. expire_time 
+	is the number of minutes after the last query for a given path for the 
+	inotify watch for that path to be automatically removed. This conserves 
+	kernel resources.
 
 	:param PowerlineLogger pl:
 		Logger.
-	:param str watcher_type:
-		One of ``inotify`` (linux only), ``stat``, ``auto``. Determines what 
-		watcher will be used. ``auto`` will use ``inotify`` if available.
+	:param str watcher_type
+		One of ``inotify`` (linux only), ``uv``, ``stat``, ``auto``. Determines 
+		what watcher will be used. ``auto`` will use ``inotify`` if available, 
+		then ``libuv`` and then fall back to ``stat``.
 	:param int expire_time:
 		Number of minutes since last ``.__call__()`` before inotify watcher will 
 		stop watching given file.
@@ -67,7 +68,7 @@ def create_tree_watcher(pl, watcher_type='auto', expire_time=10):
 		Logger.
 	:param str watcher_type:
 		Watcher type. Currently the only supported types are ``inotify`` (linux 
-		only), ``dummy`` and ``auto``.
+		only), ``uv``, ``dummy`` and ``auto``.
 	:param int expire_time:
 		Number of minutes since last ``.__call__()`` before inotify watcher will 
 		stop watching given file.

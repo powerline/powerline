@@ -141,6 +141,40 @@ class TestFilesystemWatchers(TestCase):
 		tw = create_tree_watcher(get_fallback_logger(), 'uv')
 		return self.do_test_tree_watcher(tw)
 
+	def test_inotify_file_watcher_is_watching(self):
+		try:
+			w = create_file_watcher(pl=get_fallback_logger(), watcher_type='inotify')
+		except INotifyError:
+			raise SkipTest('INotify is not available')
+		return self.do_test_file_watcher_is_watching(w)
+
+	def test_stat_file_watcher_is_watching(self):
+		w = create_file_watcher(pl=get_fallback_logger(), watcher_type='stat')
+		return self.do_test_file_watcher_is_watching(w)
+
+	def test_uv_file_watcher_is_watching(self):
+		try:
+			w = create_file_watcher(pl=get_fallback_logger(), watcher_type='uv')
+		except UvNotFound:
+			raise SkipTest('Pyuv is not available')
+		return self.do_test_file_watcher_is_watching(w)
+
+	def do_test_file_watcher_is_watching(self, w):
+		try:
+			f1, f2, f3 = map(lambda x: os.path.join(INOTIFY_DIR, 'file%d' % x), (1, 2, 3))
+			with open(f1, 'wb'):
+				with open(f2, 'wb'):
+					with open(f3, 'wb'):
+						pass
+			ne = os.path.join(INOTIFY_DIR, 'notexists')
+			self.assertRaises(OSError, w, ne)
+			self.assertTrue(w(f1))
+			self.assertFalse(w.is_watching(ne))
+			self.assertTrue(w.is_watching(f1))
+			self.assertFalse(w.is_watching(f2))
+		finally:
+			clear_dir(INOTIFY_DIR)
+
 
 old_cwd = None
 

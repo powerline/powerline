@@ -53,7 +53,7 @@ def get_branch_name(directory, config_file, get_func, create_watcher):
 	with branch_lock:
 		# Check if the repo directory was moved/deleted
 		fw = branch_watcher(create_watcher)
-		is_watched = fw.is_watched(directory)
+		is_watched = fw.is_watching(directory)
 		try:
 			changed = fw(directory)
 		except OSError as e:
