@@ -11,7 +11,7 @@ import tests.vim as vim_module
 
 from tests import TestCase
 from tests.lib.config_mock import get_powerline, get_powerline_raw, swap_attributes
-from tests.lib import Args
+from tests.lib import Args, replace_item
 
 
 def highlighted_string(s, group, **kwargs):
@@ -438,7 +438,6 @@ class TestSegmentAttributes(TestRender):
 	def test_no_attributes(self, p, config):
 		def m1(divider=',', **kwargs):
 			return divider.join(kwargs.keys()) + divider
-		sys.modules['bar'] = Args(m1=m1)
 		config['themes/test/default']['segments'] = {
 			'left': [
 				{
@@ -446,7 +445,8 @@ class TestSegmentAttributes(TestRender):
 				}
 			]
 		}
-		self.assertRenderEqual(p, '{56} pl,{6-}>>{--}')
+		with replace_item(sys.modules, 'bar', Args(m1=m1)):
+			self.assertRenderEqual(p, '{56} pl,{6-}>>{--}')
 
 	@add_args
 	def test_segment_datas(self, p, config):
@@ -464,7 +464,6 @@ class TestSegmentAttributes(TestRender):
 				}
 			}
 		}
-		sys.modules['bar'] = Args(m1=m1)
 		config['themes/test/default']['segments'] = {
 			'left': [
 				{
@@ -472,7 +471,8 @@ class TestSegmentAttributes(TestRender):
 				}
 			]
 		}
-		self.assertRenderEqual(p, '{56} pl;{6-}>>{--}')
+		with replace_item(sys.modules, 'bar', Args(m1=m1)):
+			self.assertRenderEqual(p, '{56} pl;{6-}>>{--}')
 
 	@add_args
 	def test_expand(self, p, config):
@@ -483,7 +483,6 @@ class TestSegmentAttributes(TestRender):
 			return ('-' * amount) + segment['contents']
 
 		m1.expand = expand
-		sys.modules['bar'] = Args(m1=m1)
 		config['themes/test/default']['segments'] = {
 			'left': [
 				{
@@ -492,7 +491,8 @@ class TestSegmentAttributes(TestRender):
 				}
 			]
 		}
-		self.assertRenderEqual(p, '{56} ----pl,{6-}>>{--}', width=10)
+		with replace_item(sys.modules, 'bar', Args(m1=m1)):
+			self.assertRenderEqual(p, '{56} ----pl,{6-}>>{--}', width=10)
 
 	@add_args
 	def test_truncate(self, p, config):
@@ -503,7 +503,6 @@ class TestSegmentAttributes(TestRender):
 			return segment['contents'][:-amount]
 
 		m1.truncate = truncate
-		sys.modules['bar'] = Args(m1=m1)
 		config['themes/test/default']['segments'] = {
 			'left': [
 				{
@@ -511,7 +510,8 @@ class TestSegmentAttributes(TestRender):
 				}
 			]
 		}
-		self.assertRenderEqual(p, '{56} p{6-}>>{--}', width=4)
+		with replace_item(sys.modules, 'bar', Args(m1=m1)):
+			self.assertRenderEqual(p, '{56} p{6-}>>{--}', width=4)
 
 
 class TestSegmentData(TestRender):
