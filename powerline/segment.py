@@ -114,7 +114,7 @@ def process_segment_lister(pl, segment_info, parsed_segments, side, mode, colors
 			if subsegment_update:
 				subsegment = subsegment.copy()
 				subsegment.update(subsegment_update)
-				if subsegment_update['priority_multiplier'] and subsegment['priority']:
+				if 'priority_multiplier' in subsegment_update and subsegment['priority']:
 					subsegment['priority'] *= subsegment_update['priority_multiplier']
 
 			process_segment(
