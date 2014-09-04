@@ -102,6 +102,11 @@ def get_attr_func(contents_func, key, args, is_space_func=False):
 
 def process_segment_lister(pl, segment_info, parsed_segments, side, mode, colorscheme,
 	                       lister, subsegments, patcher_args):
+	subsegments = [
+		subsegment
+		for subsegment in subsegments
+		if subsegment['display_condition'](pl, segment_info, mode)
+	]
 	for subsegment_info, subsegment_update in lister(pl=pl, segment_info=segment_info, **patcher_args):
 		draw_inner_divider = subsegment_update.pop('draw_inner_divider', False)
 		old_pslen = len(parsed_segments)
@@ -112,17 +117,13 @@ def process_segment_lister(pl, segment_info, parsed_segments, side, mode, colors
 				if subsegment_update['priority_multiplier'] and subsegment['priority']:
 					subsegment['priority'] *= subsegment_update['priority_multiplier']
 
-			subsegment_mode = subsegment_update.get('mode')
-			if subsegment_mode and not subsegment['display_condition'](pl, segment_info, subsegment_mode):
-				continue
-
 			process_segment(
 				pl,
 				side,
 				subsegment_info,
 				parsed_segments,
 				subsegment,
-				subsegment_mode or mode,
+				subsegment_update.get('mode', mode),
 				colorscheme,
 			)
 		new_pslen = len(parsed_segments)
