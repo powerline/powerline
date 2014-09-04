@@ -493,13 +493,14 @@ ascii                       Theme without any unicode characters at all
 
     .. _config-themes-seg-exclude_modes:
 
-    ``exclude_modes``
-        A list of modes where this segment will be excluded: the segment is 
-        included in all modes, *except* for the modes in this list.
-
-    ``include_modes``
-        A list of modes where this segment will be included: the segment is 
-        *not* included in any modes, *except* for the modes in this list.
+    ``exclude_modes``, ``include_modes``
+        A list of modes where this segment will be excluded: the segment is not 
+        included or is included in all modes, *except* for the modes in one of 
+        these lists respectively. If ``exclude_modes`` is not present then it 
+        acts like an empty list (segment is not excluded from any modes). 
+        Without ``include_modes`` it acts like a list with all possible modes 
+        (segment is included in all modes). When there are both 
+        ``exclude_modes`` overrides ``include_modes``.
 
     .. _config-themes-seg-display:
 
