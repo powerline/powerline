@@ -494,11 +494,11 @@ ascii                       Theme without any unicode characters at all
     .. _config-themes-seg-exclude_modes:
 
     ``exclude_modes``
-        A list of modes where this segment will be excluded: The segment is 
+        A list of modes where this segment will be excluded: the segment is 
         included in all modes, *except* for the modes in this list.
 
     ``include_modes``
-        A list of modes where this segment will be included: The segment is 
+        A list of modes where this segment will be included: the segment is 
         *not* included in any modes, *except* for the modes in this list.
 
     .. _config-themes-seg-display:
