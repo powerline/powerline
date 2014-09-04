@@ -684,13 +684,13 @@ class TestVim(TestCase):
 				winnr = window.number
 				self.assertEqual(powerline.render(window, window_id, winnr), '%#Pl_5_12583104_6_32896_NONE#\xa0\u201cbar\u201d%#Pl_6_32896_NONE_None_NONE#>>')
 
+	@classmethod
+	def setUpClass(cls):
+		sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'path')))
 
-def setUpModule():
-	sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'path')))
-
-
-def tearDownModule():
-	sys.path.pop(0)
+	@classmethod
+	def tearDownClass(cls):
+		sys.path.pop(0)
 
 
 if __name__ == '__main__':

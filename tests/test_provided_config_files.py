@@ -18,7 +18,7 @@ VBLOCK = chr(ord('V') - 0x40)
 SBLOCK = chr(ord('S') - 0x40)
 
 
-class TestConfig(TestCase):
+class TestVimConfig(TestCase):
 	def test_vim(self):
 		from powerline.vim import VimPowerline
 		cfg_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'powerline', 'config_files')
@@ -76,6 +76,16 @@ class TestConfig(TestCase):
 						finally:
 							vim_module._start_mode('n')
 
+	@classmethod
+	def setUpClass(cls):
+		sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'path')))
+
+	@classmethod
+	def tearDownClass(cls):
+		sys.path.pop(0)
+
+
+class TestConfig(TestCase):
 	def test_tmux(self):
 		from powerline.segments import common
 		from imp import reload
@@ -151,10 +161,7 @@ def setUpModule():
 	saved_get_config_paths = powerline.get_config_paths
 	path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'powerline', 'config_files')
 	powerline.get_config_paths = lambda: [path]
-	sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'path')))
 	old_cwd = os.getcwd()
-	from powerline.segments import vim
-	globals()['vim'] = vim
 
 
 def tearDownModule():
@@ -164,7 +171,6 @@ def tearDownModule():
 	powerline.get_config_paths = saved_get_config_paths
 	os.chdir(old_cwd)
 	old_cwd = None
-	sys.path.pop(0)
 
 
 if __name__ == '__main__':
