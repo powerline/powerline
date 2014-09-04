@@ -234,7 +234,8 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, ge
 		try:
 			get_segment_info = segment_getters[segment_type]
 		except KeyError:
-			raise TypeError('Unknown segment type: {0}'.format(segment_type))
+			pl.error('Unknown segment type: {0}', segment_type)
+			return None
 
 		try:
 			contents, _contents_func, module, function_name, name = get_segment_info(data, segment)
