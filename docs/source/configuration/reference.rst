@@ -380,6 +380,9 @@ ascii                       Theme without any unicode characters at all
             The segment contents is the return value of the function defined in 
             the :ref:`function option <config-themes-seg-function>`.
 
+            List of function segments is available in :ref:`Segment reference 
+            <config-segments>` section.
+
         ``string``
             A static string segment where the contents is defined in the 
             :ref:`contents option <config-themes-seg-contents>`, and the 
@@ -391,6 +394,9 @@ ascii                       Theme without any unicode characters at all
             <config-themes-seg-function>`, :ref:`segments 
             <config-themes-seg-segments>` and :ref:`args 
             <config-themes-seg-args>` options.
+
+            List of lister segments is available in :ref:`Lister reference 
+            <config-lister>` section.
 
     .. _config-themes-seg-name:
 
