@@ -53,7 +53,7 @@ else:
 	can_use_scripts = False
 
 setup(
-	name='Powerline',
+	name='powerline-status',
 	version='beta',
 	description='The ultimate statusline/prompt utility.',
 	long_description=README,
