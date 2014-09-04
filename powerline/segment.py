@@ -258,7 +258,11 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, ge
 			highlight_group = segment.get('highlight_group') or name
 
 		if segment_type in ('function', 'segment_list'):
-			args = dict(((str(k), v) for k, v in get_key(True, segment, module, function_name, name, 'args', {}).items()))
+			args = dict((
+				(str(k), v)
+				for k, v in
+				get_key(True, segment, module, function_name, name, 'args', {}).items()
+			))
 
 		if segment_type == 'segment_list':
 			# Handle startup and shutdown of _contents_func?
