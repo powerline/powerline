@@ -321,8 +321,11 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, ge
 		if segment_type == 'segment_list':
 			# Handle startup and shutdown of _contents_func?
 			subsegments = [
-				get(subsegment, side)
-				for subsegment in segment['segments']
+				subsegment
+				for subsegment in (
+					get(subsegment, side)
+					for subsegment in segment['segments']
+				) if subsegment
 			]
 			return {
 				'name': name or function_name,
