@@ -31,6 +31,8 @@ class VimPowerline(Powerline):
 		self.pyeval = pyeval
 		self.window_statusline = '%!' + pyeval + '(\'powerline.statusline({0})\')'
 
+	default_log_stream = sys.stdout
+
 	def add_local_theme(self, key, config):
 		'''Add local themes at runtime (during vim session).
 

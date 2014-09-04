@@ -103,7 +103,7 @@ class PowerlineLogger(object):
 _fallback_logger = None
 
 
-def get_fallback_logger():
+def get_fallback_logger(stream=None):
 	global _fallback_logger
 	if _fallback_logger:
 		return _fallback_logger
@@ -112,7 +112,7 @@ def get_fallback_logger():
 	formatter = logging.Formatter(log_format)
 
 	level = logging.WARNING
-	handler = logging.StreamHandler()
+	handler = logging.StreamHandler(stream)
 	handler.setLevel(level)
 	handler.setFormatter(formatter)
 
@@ -195,7 +195,7 @@ def load_config(cfg_path, find_config_files, config_loader, loader_callback=None
 	return ret
 
 
-def _get_log_handler(common_config):
+def _get_log_handler(common_config, stream=None):
 	'''Get log handler.
 
 	:param dict common_config:
@@ -211,17 +211,17 @@ def _get_log_handler(common_config):
 			os.mkdir(log_dir)
 		return logging.FileHandler(log_file)
 	else:
-		return logging.StreamHandler()
+		return logging.StreamHandler(stream)
 
 
-def create_logger(common_config):
+def create_logger(common_config, stream=None):
 	'''Create logger according to provided configuration
 	'''
 	log_format = common_config['log_format']
 	formatter = logging.Formatter(log_format)
 
 	level = getattr(logging, common_config['log_level'])
-	handler = _get_log_handler(common_config)
+	handler = _get_log_handler(common_config, stream)
 	handler.setLevel(level)
 	handler.setFormatter(formatter)
 
@@ -456,7 +456,7 @@ class Powerline(object):
 				self.import_paths = self.common_config['paths']
 
 				if not self.logger:
-					self.logger = create_logger(self.common_config)
+					self.logger = create_logger(self.common_config, self.default_log_stream)
 
 				if not self.pl:
 					self.pl = PowerlineLogger(self.use_daemon_threads, self.logger, self.ext)
@@ -561,6 +561,14 @@ class Powerline(object):
 					raise
 			else:
 				self.renderer = renderer
+
+	default_log_stream = sys.stdout
+	'''Default stream for default log handler
+
+	Usually it is ``sys.stderr``, but there is sometimes a reason to prefer 
+	``sys.stdout`` or a custom file-like object. It is not supposed to be used 
+	to write to some file.
+	'''
 
 	def setup_components(self, components):
 		'''Run component-specific setup
@@ -847,7 +855,7 @@ class Powerline(object):
 		if 'prefix' not in kwargs:
 			kwargs['prefix'] = 'powerline'
 		exception = kwargs.pop('exception', None)
-		pl = getattr(self, 'pl', None) or get_fallback_logger()
+		pl = getattr(self, 'pl', None) or get_fallback_logger(self.default_log_stream)
 		if exception:
 			try:
 				reraise(exception)
