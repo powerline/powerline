@@ -135,7 +135,6 @@ class Theme(object):
 		for side in [side] if side else ['left', 'right']:
 			parsed_segments = []
 			for segment in self.segments[line][side]:
-				# No segment-local modes at this point
 				if segment['display_condition'](self.pl, segment_info, mode):
 					process_segment(
 						self.pl,

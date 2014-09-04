@@ -30,48 +30,12 @@
 		"attached_clients":         { "fg": "gray8", "bg": "gray2", "attr": [] },
 		"error":                    { "fg": "brightestred", "bg": "darkred", "attr": ["bold"] },
 		"warning":                  { "fg": "brightyellow", "bg": "darkorange", "attr": ["bold"] },
-		"current_tag":              { "fg": "gray9", "bg": "gray2", "attr": [] }
+		"current_tag":              { "fg": "gray9", "bg": "gray2", "attr": [] },
+
+		"tab_nc:modified_indicator": { "fg": "brightyellow", "bg": "gray2", "attr": ["bold"] }
 	},
 	"mode_translations": {
 		"nc": {
-			"colors": {
-				"brightyellow": "darkorange",
-				"brightestred": "darkred",
-				"gray0": "gray0",
-				"gray1": "gray0",
-				"gray2": "gray0",
-				"gray3": "gray1",
-				"gray4": "gray1",
-				"gray5": "gray1",
-				"gray6": "gray1",
-				"gray7": "gray4",
-				"gray8": "gray4",
-				"gray9": "gray4",
-				"gray10": "gray5",
-				"white": "gray6",
-				"dark_green_gray": "gray5"
-			}
-		},
-		"tab_nc": {
-			"colors": {
-				"brightyellow": "darkorange",
-				"brightestred": "darkred",
-				"gray0": "gray0",
-				"gray1": "gray0",
-				"gray2": "gray0",
-				"gray3": "gray1",
-				"gray4": "gray1",
-				"gray5": "gray1",
-				"gray6": "gray1",
-				"gray7": "gray4",
-				"gray8": "gray4",
-				"gray9": "gray4",
-				"gray10": "gray5",
-				"white": "gray6",
-				"dark_green_gray": "gray5"
-			}
-		},
-		"buf_nc": {
 			"colors": {
 				"brightyellow": "darkorange",
 				"brightestred": "darkred",

@@ -40,11 +40,6 @@ resulting segment. In addition to :ref:`usual keys that describe segment
 <dev-segments-segment>` the following keys may be present (it is advised that 
 *only* the following keys will be used):
 
-.. _dev-listers-mode:
-
-``mode``
-    Segment-specific mode. Used to alter segment highlighting.
-
 ``priority_multiplier``
     Value (usually a ``float``) used to multiply segment priority. It is useful 
     for finer-grained controlling which segments disappear first: e.g. when 

@@ -123,7 +123,7 @@ def process_segment_lister(pl, segment_info, parsed_segments, side, mode, colors
 				subsegment_info,
 				parsed_segments,
 				subsegment,
-				subsegment_update.get('mode', mode),
+				mode,
 				colorscheme,
 			)
 		new_pslen = len(parsed_segments)
@@ -133,17 +133,23 @@ def process_segment_lister(pl, segment_info, parsed_segments, side, mode, colors
 	return None
 
 
-def set_segment_highlighting(pl, colorscheme, segment):
+def set_segment_highlighting(pl, colorscheme, segment, mode):
+	try:
+		highlight_group_prefix = segment['highlight_group_prefix']
+	except KeyError:
+		hl_groups = lambda hlgs: hlgs
+	else:
+		hl_groups = lambda hlgs: [highlight_group_prefix + ':' + hlg for hlg in hlgs] + hlgs
 	try:
 		segment['highlight'] = colorscheme.get_highlighting(
-			segment['highlight_group'],
-			segment['mode'],
+			hl_groups(segment['highlight_group']),
+			mode,
 			segment.get('gradient_level')
 		)
 		if segment['divider_highlight_group']:
 			segment['divider_highlight'] = colorscheme.get_highlighting(
-				(segment['divider_highlight_group'],),
-				segment['mode']
+				hl_groups([segment['divider_highlight_group']]),
+				mode
 			)
 		else:
 			segment['divider_highlight'] = None
@@ -156,7 +162,6 @@ def set_segment_highlighting(pl, colorscheme, segment):
 
 def process_segment(pl, side, segment_info, parsed_segments, segment, mode, colorscheme):
 	segment = segment.copy()
-	segment['mode'] = mode
 	pl.prefix = segment['name']
 	if segment['type'] in ('function', 'segment_list'):
 		try:
@@ -202,14 +207,14 @@ def process_segment(pl, side, segment_info, parsed_segments, segment, mode, colo
 				if draw_inner_divider is not None:
 					segment_copy['draw_soft_divider'] = draw_inner_divider
 				draw_inner_divider = segment_copy.pop('draw_inner_divider', None)
-				if set_segment_highlighting(pl, colorscheme, segment_copy):
+				if set_segment_highlighting(pl, colorscheme, segment_copy, mode):
 					append(segment_copy)
 		else:
 			segment['contents'] = contents
-			if set_segment_highlighting(pl, colorscheme, segment):
+			if set_segment_highlighting(pl, colorscheme, segment, mode):
 				parsed_segments.append(segment)
 	elif segment['width'] == 'auto' or (segment['type'] == 'string' and segment['contents'] is not None):
-		if set_segment_highlighting(pl, colorscheme, segment):
+		if set_segment_highlighting(pl, colorscheme, segment, mode):
 			parsed_segments.append(segment)
 
 
@@ -356,7 +361,6 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, ge
 				'truncate': None,
 				'startup': None,
 				'shutdown': None,
-				'mode': None,
 				'_rendered_raw': '',
 				'_rendered_hl': '',
 				'_len': None,
@@ -405,7 +409,6 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, ge
 			'truncate': truncate_func,
 			'startup': startup_func,
 			'shutdown': shutdown_func,
-			'mode': None,
 			'_rendered_raw': '',
 			'_rendered_hl': '',
 			'_len': None,

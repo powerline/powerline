@@ -228,6 +228,12 @@ Segment dictionary contains the following keys:
   ``highlight_group``, ``divider_highlight_group``
     Used highlight groups. May be ``None``.
 
+  ``highlight_group_prefix``
+    If this key is present then given prefix will be prepended to each highlight 
+    group (both regular and divider) used by this segment in a form 
+    ``{prefix}:{group}`` (note the colon). This key is mostly useful for 
+    :ref:`segment listers <dev-listers>`.
+
   .. _dev-segments-seg-around:
 
   ``before``, ``after``
@@ -280,9 +286,6 @@ Segment dictionary contains the following keys:
 
   ``shutdown``
     :ref:`Shutdown function <dev-segments-shutdown>`. Accepts no argument.
-
-  ``mode``
-    :ref:`Segment-specific mode <dev-listers-mode>`. May be ``None``.
 
 Segments layout
 ===============
