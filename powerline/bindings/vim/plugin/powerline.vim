@@ -125,6 +125,7 @@ finally
 		call s:rcmd("			real_powerline_dir = os.path.realpath(powerline_dir)")
 		call s:rcmd("			real_this_dir = os.path.realpath(this_dir)")
 		call s:rcmd("			this_dir_par = os.path.dirname(real_this_dir)")
+		call s:rcmd("			powerline_appended_path = globals().get('powerline_appended_path')")
 		call s:rcmd("			if powerline_appended_path is not None and this_dir_par != powerline_appended_path:")
 		call s:rcmd("				print('Check your installation: this script is symlinked somewhere')")
 		call s:rcmd("				print('where powerline is not present: {0!r} != {1!r}.'.format(")
