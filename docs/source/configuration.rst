@@ -134,4 +134,5 @@ References
    configuration/reference
    configuration/segments
    configuration/listers
+   configuration/selectors
    configuration/local

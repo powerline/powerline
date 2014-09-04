@@ -110,11 +110,3 @@ def bufferlister(pl, segment_info, show_unlisted=False, **kwargs):
 			or int(vim_getbufoption(buf_segment_info, 'buflisted'))
 		)
 	)
-
-
-@requires_segment_info
-def tabbuflister(**kwargs):
-	if len(list_tabpages()) == 1:
-		return bufferlister(**kwargs)
-	else:
-		return tablister(**kwargs)
