@@ -9,6 +9,7 @@ import logging
 
 from collections import defaultdict
 from copy import copy
+from functools import partial
 
 from powerline.lint.markedjson import load
 from powerline import generate_config_finder, get_config_paths, load_config
@@ -478,18 +479,18 @@ def check_matcher_func(ext, match_name, data, context, echoerr):
 			echoerr(context='Error while loading matcher functions',
 			        problem='failed to load module {0}'.format(match_module),
 			        problem_mark=match_name.mark)
-			return True, True
+			return True, False, True
 		except AttributeError:
 			echoerr(context='Error while loading matcher functions',
 			        problem='failed to load matcher function {0}'.format(match_function),
 			        problem_mark=match_name.mark)
-			return True, True
+			return True, False, True
 
 	if not callable(func):
 		echoerr(context='Error while loading matcher functions',
 		        problem='loaded "function" {0} is not callable'.format(match_function),
 		        problem_mark=match_name.mark)
-		return True, True
+		return True, False, True
 
 	if hasattr(func, 'func_code') and hasattr(func.func_code, 'co_argcount'):
 		if func.func_code.co_argcount != 1:
@@ -502,7 +503,7 @@ def check_matcher_func(ext, match_name, data, context, echoerr):
 				problem_mark=match_name.mark
 			)
 
-	return True, False
+	return True, False, False
 
 
 def check_ext(ext, data, context, echoerr):
@@ -561,6 +562,9 @@ def check_top_theme(theme, data, context, echoerr):
 	return True, False, False
 
 
+function_name_re = '^(\w+\.)*[a-zA-Z_]\w*$'
+
+
 divider_spec = Spec().type(unicode).len(
 	'le', 3, (lambda value: 'Divider {0!r} is too large!'.format(value))).copy
 ext_theme_spec = Spec().type(unicode).func(lambda *args: check_config('themes', *args)).copy
@@ -608,7 +612,8 @@ main_spec = (Spec(
 			local_themes=Spec(
 				__tabline__=ext_theme_spec(),
 			).unknown_spec(
-				lambda *args: check_matcher_func('vim', *args), ext_theme_spec()
+				Spec().re(function_name_re).func(partial(check_matcher_func, 'vim')),
+				ext_theme_spec()
 			),
 		).optional(),
 		ipython=ext_spec().update(
@@ -801,6 +806,7 @@ shell_colorscheme_spec = (Spec(
 
 generic_keys = set((
 	'exclude_modes', 'include_modes',
+	'exclude_function', 'include_function',
 	'width', 'align',
 	'name',
 	'draw_soft_divider', 'draw_hard_divider',
@@ -935,7 +941,7 @@ def check_full_segment_data(segment, data, context, echoerr):
 	return check_key_compatibility(segment_copy, data, context, echoerr)
 
 
-def import_segment(name, data, context, echoerr, module):
+def import_function(function_type, name, data, context, echoerr, module):
 	context_has_marks(context)
 	havemarks(name, module)
 
@@ -949,7 +955,7 @@ def import_segment(name, data, context, echoerr, module):
 			        problem_mark=module.mark)
 			return None
 		except AttributeError:
-			echoerr(context='Error while loading segment function (key {key})'.format(key=context_key(context)),
+			echoerr(context='Error while loading {0} function (key {key})'.format(function_type, key=context_key(context)),
 			        problem='failed to load function {0} from module {1}'.format(name, module),
 			        problem_mark=name.mark)
 			return None
@@ -962,6 +968,10 @@ def import_segment(name, data, context, echoerr, module):
 		return None
 
 	return func
+
+
+def import_segment(*args, **kwargs):
+	return import_function('segment', *args, **kwargs)
 
 
 def check_segment_function(function_name, data, context, echoerr):
@@ -1334,6 +1344,17 @@ def get_all_possible_functions(data, context, echoerr):
 									yield func
 
 
+def check_exinclude_function(name, data, context, echoerr):
+	ext = data['ext']
+	module, name = name.rpartition('.')[::2]
+	if not module:
+		module = MarkedUnicode('powerline.selectors.' + ext, None)
+	func = import_function('selector', name, data, context, echoerr, module=module)
+	if not func:
+		return True, False, True
+	return True, False, False
+
+
 args_spec = Spec(
 	pl=Spec().error('pl object must be set by powerline').optional(),
 	segment_info=Spec().error('Segment info dictionary must be set by powerline').optional(),
@@ -1341,12 +1362,15 @@ args_spec = Spec(
 highlight_group_spec = Spec().type(unicode).copy
 segment_module_spec = Spec().type(unicode).func(check_segment_module).optional().copy
 sub_segments_spec = Spec()
+exinclude_spec = Spec().re(function_name_re).func(check_exinclude_function).copy
 segment_spec = Spec(
 	type=Spec().oneof(type_keys).optional(),
 	name=Spec().re('^[a-zA-Z_]\w*$').optional(),
-	function=Spec().re('^(\w+\.)*[a-zA-Z_]\w*$').func(check_segment_function).optional(),
+	function=Spec().re(function_name_re).func(check_segment_function).optional(),
 	exclude_modes=Spec().list(vim_mode_spec()).optional(),
 	include_modes=Spec().list(vim_mode_spec()).optional(),
+	exclude_function=exinclude_spec().optional(),
+	include_function=exinclude_spec().optional(),
 	draw_hard_divider=Spec().type(bool).optional(),
 	draw_soft_divider=Spec().type(bool).optional(),
 	draw_inner_divider=Spec().type(bool).optional(),

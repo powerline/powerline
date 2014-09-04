@@ -508,6 +508,23 @@ ascii                       Theme without any unicode characters at all
         (segment is included in all modes). When there are both 
         ``exclude_modes`` overrides ``include_modes``.
 
+    .. _config-themes-seg-exclude_function:
+
+    ``exclude_function``, ``include_function``
+        Function name in a form ``{name}`` or ``{module}.{name}`` (in the first 
+        form ``{module}`` defaults to ``powerline.selectors.{ext}``). Determines 
+        under which condition specific segment will be included or excluded. By 
+        default segment is always included and never excluded. 
+        ``exclude_function`` overrides ``include_function``.
+
+        .. note::
+            Options :ref:`exclude_/include_modes 
+            <config-themes-seg-exclude_modes>` complement 
+            ``exclude_/include_functions``: segment will be included if it is 
+            included by either ``include_mode`` or ``include_function`` and will 
+            be excluded if it is excluded by either ``exclude_mode`` or 
+            ``exclude_function``.
+
     .. _config-themes-seg-display:
 
     ``display``

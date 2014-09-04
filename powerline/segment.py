@@ -113,13 +113,7 @@ def process_segment_lister(pl, segment_info, parsed_segments, side, mode, colors
 					subsegment['priority'] *= subsegment_update['priority_multiplier']
 
 			subsegment_mode = subsegment_update.get('mode')
-			if subsegment_mode and (
-				subsegment_mode in subsegment['exclude_modes']
-				or (
-					subsegment['include_modes']
-					and subsegment_mode not in subsegment['include_modes']
-				)
-			):
+			if subsegment_mode and not subsegment['display_condition'](pl, segment_info, subsegment_mode):
 				continue
 
 			process_segment(
@@ -218,6 +212,9 @@ def process_segment(pl, side, segment_info, parsed_segments, segment, mode, colo
 			parsed_segments.append(segment)
 
 
+always_true = lambda pl, segment_info, mode: True
+
+
 def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, get_module_attr, top_theme):
 	data = {
 		'default_module': default_module or 'powerline.segments.' + ext,
@@ -228,6 +225,60 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, ge
 	def get_key(merge, segment, module, function_name, name, key, default=None):
 		return get_segment_key(merge, segment, theme_configs, data['segment_data'], key, function_name, name, module, default)
 	data['get_key'] = get_key
+
+	def get_selector(function_name):
+		if '.' in function_name:
+			module, function_name = function_name.rpartition('.')[::2]
+		else:
+			module = 'powerline.selectors.' + ext
+		function = get_module_attr(module, function_name, prefix='segment_generator/selector_function')
+		if not function:
+			pl.error('Failed to get segment selector, ignoring it')
+		return function
+
+	def get_segment_selector(segment, selector_type):
+		try:
+			function_name = segment[selector_type + '_function']
+		except KeyError:
+			function = None
+		else:
+			function = get_selector(function_name)
+		try:
+			modes = segment[selector_type + '_modes']
+		except KeyError:
+			modes = None
+
+		if modes:
+			if function:
+				return lambda pl, segment_info, mode: (
+					mode in modes
+					or function(pl=pl, segment_info=segment_info, mode=mode)
+				)
+			else:
+				return lambda pl, segment_info, mode: mode in modes
+		else:
+			if function:
+				return lambda pl, segment_info, mode: (
+					function(pl=pl, segment_info=segment_info, mode=mode)
+				)
+			else:
+				return None
+
+	def gen_display_condition(segment):
+		include_function = get_segment_selector(segment, 'include')
+		exclude_function = get_segment_selector(segment, 'exclude')
+		if include_function:
+			if exclude_function:
+				return lambda *args: (
+					include_function(*args)
+					and not exclude_function(*args))
+			else:
+				return include_function
+		else:
+			if exclude_function:
+				return lambda *args: not exclude_function(*args)
+			else:
+				return always_true
 
 	def get(segment, side):
 		segment_type = segment.get('type', 'function')
@@ -265,6 +316,8 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, ge
 				get_key(True, segment, module, function_name, name, 'args', {}).items()
 			))
 
+		display_condition = gen_display_condition(segment)
+
 		if segment_type == 'segment_list':
 			# Handle startup and shutdown of _contents_func?
 			subsegments = [
@@ -292,8 +345,7 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, ge
 				'draw_hard_divider': None,
 				'draw_inner_divider': None,
 				'side': side,
-				'exclude_modes': segment.get('exclude_modes', []),
-				'include_modes': segment.get('include_modes', []),
+				'display_condition': display_condition,
 				'width': None,
 				'align': None,
 				'expand': None,
@@ -342,8 +394,7 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, ge
 			'draw_soft_divider': segment.get('draw_soft_divider', True),
 			'draw_inner_divider': segment.get('draw_inner_divider', False),
 			'side': side,
-			'exclude_modes': segment.get('exclude_modes', []),
-			'include_modes': segment.get('include_modes', []),
+			'display_condition': display_condition,
 			'width': segment.get('width'),
 			'align': segment.get('align', 'l'),
 			'expand': expand_func,

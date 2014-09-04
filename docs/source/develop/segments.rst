@@ -254,9 +254,15 @@ Segment dictionary contains the following keys:
   ``side``
     Segment side: ``right`` or ``left``.
 
-  ``exclude_modes``, ``include_modes``
-    :ref:`Mode display control lists <config-themes-seg-exclude_modes>`. May be 
-    empty, but may not be ``None``.
+  ``display_condition```
+    Contains function that takes three position parameters: 
+    :py:class:`powerline.PowerlineLogger` instance, :ref:`segment_info 
+    <dev-segments-info>` dictionary and current mode and returns either ``True`` 
+    or ``False`` to indicate whether particular segment should be processed.
+
+    This key is constructed based on :ref:`exclude_/include_modes keys 
+    <config-themes-seg-exclude_modes>` and :ref:`exclude_/include_function keys 
+    <config-themes-seg-exclude_function>`.
 
   ``width``, ``align``
     :ref:`Width and align options <config-themes-seg-align>`. May be ``None``.

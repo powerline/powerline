@@ -136,9 +136,7 @@ class Theme(object):
 			parsed_segments = []
 			for segment in self.segments[line][side]:
 				# No segment-local modes at this point
-				if mode not in segment['exclude_modes'] and (
-					not segment['include_modes'] or mode in segment['include_modes']
-				):
+				if segment['display_condition'](self.pl, segment_info, mode):
 					process_segment(
 						self.pl,
 						side,
