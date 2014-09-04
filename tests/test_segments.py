@@ -30,7 +30,7 @@ class TestShell(TestCase):
 		pl = Pl()
 		segment_info = {'args': Args(last_exit_code=10)}
 		self.assertEqual(shell.last_status(pl=pl, segment_info=segment_info), [
-			{'contents': '10', 'highlight_group': 'exit_fail'}
+			{'contents': '10', 'highlight_group': ['exit_fail']}
 		])
 		segment_info['args'].last_exit_code = 0
 		self.assertEqual(shell.last_status(pl=pl, segment_info=segment_info), None)
@@ -45,9 +45,9 @@ class TestShell(TestCase):
 		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info), None)
 		segment_info['args'].last_pipe_status = [0, 2, 0]
 		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info), [
-			{'contents': '0', 'highlight_group': 'exit_success', 'draw_inner_divider': True},
-			{'contents': '2', 'highlight_group': 'exit_fail', 'draw_inner_divider': True},
-			{'contents': '0', 'highlight_group': 'exit_success', 'draw_inner_divider': True}
+			{'contents': '0', 'highlight_group': ['exit_success'], 'draw_inner_divider': True},
+			{'contents': '2', 'highlight_group': ['exit_fail'], 'draw_inner_divider': True},
+			{'contents': '0', 'highlight_group': ['exit_success'], 'draw_inner_divider': True}
 		])
 
 	def test_jobnum(self):
@@ -335,10 +335,10 @@ class TestCommon(TestCase):
 				with replace_attr(common, 'psutil', new_psutil):
 					with replace_attr(common, '_geteuid', lambda: 5):
 						self.assertEqual(common.user(pl=pl, segment_info=segment_info), [
-							{'contents': 'def', 'highlight_group': 'user'}
+							{'contents': 'def', 'highlight_group': ['user']}
 						])
 						self.assertEqual(common.user(pl=pl, segment_info=segment_info, hide_user='abc'), [
-							{'contents': 'def', 'highlight_group': 'user'}
+							{'contents': 'def', 'highlight_group': ['user']}
 						])
 						self.assertEqual(common.user(pl=pl, segment_info=segment_info, hide_user='def'), None)
 					with replace_attr(common, '_geteuid', lambda: 0):

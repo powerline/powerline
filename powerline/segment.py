@@ -142,7 +142,7 @@ def set_segment_highlighting(pl, colorscheme, segment):
 		)
 		if segment['divider_highlight_group']:
 			segment['divider_highlight'] = colorscheme.get_highlighting(
-				segment['divider_highlight_group'],
+				(segment['divider_highlight_group'],),
 				segment['mode']
 			)
 		else:

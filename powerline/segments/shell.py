@@ -29,7 +29,7 @@ def last_status(pl, segment_info):
 	'''
 	if not segment_info['args'].last_exit_code:
 		return None
-	return [{'contents': str(segment_info['args'].last_exit_code), 'highlight_group': 'exit_fail'}]
+	return [{'contents': str(segment_info['args'].last_exit_code), 'highlight_group': ['exit_fail']}]
 
 
 @requires_segment_info
@@ -40,8 +40,14 @@ def last_pipe_status(pl, segment_info):
 	'''
 	last_pipe_status = segment_info['args'].last_pipe_status
 	if any(last_pipe_status):
-		return [{'contents': str(status), 'highlight_group': 'exit_fail' if status else 'exit_success', 'draw_inner_divider': True}
-			for status in last_pipe_status]
+		return [
+			{
+				'contents': str(status),
+				'highlight_group': ['exit_fail' if status else 'exit_success'],
+				'draw_inner_divider': True
+			}
+			for status in last_pipe_status
+		]
 	else:
 		return None
 

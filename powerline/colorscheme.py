@@ -32,14 +32,6 @@ def pick_gradient_value(grad_list, gradient_level):
 	return grad_list[int(round(gradient_level * (len(grad_list) - 1) / 100))]
 
 
-def hl_iter(value):
-	if type(value) is list:
-		for v in value:
-			yield v
-	else:
-		yield value
-
-
 class Colorscheme(object):
 	def __init__(self, colorscheme_config, colors_config):
 		'''Initialize a colorscheme.'''
@@ -105,12 +97,12 @@ class Colorscheme(object):
 
 	def get_highlighting(self, groups, mode, gradient_level=None):
 		trans = self.translations.get(mode, {})
-		for group in hl_iter(groups):
+		for group in groups:
 			group_props = self.get_group_props(mode, trans, group)
 			if group_props:
 				break
 		else:
-			raise KeyError('Highlighting groups not found in colorscheme: ' + ', '.join(hl_iter(groups)))
+			raise KeyError('Highlighting groups not found in colorscheme: ' + ', '.join(groups))
 
 		if gradient_level is None:
 			pick_color = self.colors.__getitem__
