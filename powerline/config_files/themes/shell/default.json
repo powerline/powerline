@@ -1,0 +1,40 @@
+{
+	"default_module": "powerline.segments.common",
+	"segments": {
+		"left": [
+			{
+				"function": "powerline.segments.shell.mode"
+			},
+			{
+				"function": "hostname",
+				"priority": 10
+			},
+			{
+				"function": "user",
+				"priority": 30
+			},
+			{
+				"function": "virtualenv",
+				"priority": 50
+			},
+			{
+				"function": "powerline.segments.shell.cwd",
+				"priority": 10
+			},
+			{
+				"function": "powerline.segments.shell.jobnum",
+				"priority": 20
+			}
+		],
+		"right": [
+			{
+				"function": "powerline.segments.shell.last_pipe_status",
+				"priority": 10
+			},
+			{
+				"function": "branch",
+				"priority": 40
+			}
+		]
+	}
+}

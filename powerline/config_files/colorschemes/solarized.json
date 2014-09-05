@@ -1,0 +1,18 @@
+{
+	"name": "Solarized dark",
+	"groups": {
+		"background":         { "fg": "solarized:base3", "bg": "solarized:base02", "attr": [] },
+		"user":               { "fg": "solarized:base3", "bg": "solarized:blue", "attr": ["bold"] },
+		"superuser":          { "fg": "solarized:base3", "bg": "solarized:red", "attr": ["bold"] },
+		"virtualenv":         { "fg": "solarized:base3", "bg": "solarized:green", "attr": [] },
+		"branch":             { "fg": "solarized:base1", "bg": "solarized:base02", "attr": [] },
+		"branch_dirty":       { "fg": "solarized:yellow", "bg": "solarized:base02", "attr": [] },
+		"branch_clean":       { "fg": "solarized:base1", "bg": "solarized:base02", "attr": [] },
+		"cwd":                { "fg": "solarized:base2", "bg": "solarized:base01", "attr": [] },
+		"cwd:current_folder": { "fg": "solarized:base3", "bg": "solarized:base01", "attr": ["bold"] },
+		"cwd:divider":        { "fg": "solarized:base1", "bg": "solarized:base01", "attr": [] },
+		"hostname":           { "fg": "solarized:base3", "bg": "solarized:base01", "attr": [] },
+		"environment":        { "fg": "solarized:base3", "bg": "solarized:green", "attr": [] },
+		"attached_clients":   { "fg": "solarized:base3", "bg": "solarized:green", "attr": [] }
+	}
+}

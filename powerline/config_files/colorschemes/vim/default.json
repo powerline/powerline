@@ -1,0 +1,100 @@
+{
+	"name": "Default color scheme",
+	"groups": {
+		"information:unimportant":  { "fg": "gray8", "bg": "gray2", "attr": [] },
+		"information:additional":   { "fg": "gray9", "bg": "gray4", "attr": [] },
+		"background":               { "fg": "white", "bg": "gray2", "attr": [] },
+		"background:divider":       { "fg": "gray6", "bg": "gray2", "attr": [] },
+		"mode":                     { "fg": "darkestgreen", "bg": "brightgreen", "attr": ["bold"] },
+		"visual_range":             { "fg": "brightestorange", "bg": "darkorange", "attr": ["bold"] },
+		"modified_indicator":       { "fg": "brightyellow", "bg": "gray4", "attr": ["bold"] },
+		"paste_indicator":          { "fg": "white", "bg": "mediumorange", "attr": ["bold"] },
+		"readonly_indicator":       { "fg": "brightestred", "bg": "gray4", "attr": [] },
+		"branch_dirty":             { "fg": "brightyellow", "bg": "gray4", "attr": [] },
+		"branch:divider":           { "fg": "gray7", "bg": "gray4", "attr": [] },
+		"file_name":                { "fg": "white", "bg": "gray4", "attr": ["bold"] },
+		"window_title":             { "fg": "white", "bg": "gray4", "attr": [] },
+		"file_name_no_file":        { "fg": "gray9", "bg": "gray4", "attr": ["bold"] },
+		"file_vcs_status":          { "fg": "brightestred", "bg": "gray4", "attr": [] },
+		"file_vcs_status_M":        { "fg": "brightyellow", "bg": "gray4", "attr": [] },
+		"file_vcs_status_A":        { "fg": "brightgreen", "bg": "gray4", "attr": [] },
+		"line_percent":             { "fg": "gray9", "bg": "gray4", "attr": [] },
+		"line_percent_gradient":    { "fg": "dark_green_gray", "bg": "gray4", "attr": [] },
+		"position":                 { "fg": "gray9", "bg": "gray4", "attr": [] },
+		"position_gradient":        { "fg": "green_yellow_red", "bg": "gray4", "attr": [] },
+		"line_current":             { "fg": "gray1", "bg": "gray10", "attr": ["bold"] },
+		"line_current_symbol":      { "fg": "gray1", "bg": "gray10", "attr": [] },
+		"virtcol_current_gradient": { "fg": "dark_GREEN_Orange_red", "bg": "gray10", "attr": [] },
+		"col_current":              { "fg": "gray6", "bg": "gray10", "attr": [] },
+		"modified_buffers":         { "fg": "brightyellow", "bg": "gray2", "attr": [] },
+		"attached_clients":         { "fg": "gray8", "bg": "gray2", "attr": [] },
+		"error":                    { "fg": "brightestred", "bg": "darkred", "attr": ["bold"] },
+		"warning":                  { "fg": "brightyellow", "bg": "darkorange", "attr": ["bold"] },
+		"current_tag":              { "fg": "gray9", "bg": "gray2", "attr": [] },
+
+		"tab_nc:modified_indicator": { "fg": "brightyellow", "bg": "gray2", "attr": ["bold"] }
+	},
+	"mode_translations": {
+		"nc": {
+			"colors": {
+				"brightyellow": "darkorange",
+				"brightestred": "darkred",
+				"gray0": "gray0",
+				"gray1": "gray0",
+				"gray2": "gray0",
+				"gray3": "gray1",
+				"gray4": "gray1",
+				"gray5": "gray1",
+				"gray6": "gray1",
+				"gray7": "gray4",
+				"gray8": "gray4",
+				"gray9": "gray4",
+				"gray10": "gray5",
+				"white": "gray6",
+				"dark_green_gray": "gray5"
+			}
+		},
+		"i": {
+			"colors": {
+				"gray0": "darkestblue",
+				"gray1": "darkestblue",
+				"gray2": "darkestblue",
+				"gray3": "darkblue",
+				"gray4": "darkblue",
+				"gray5": "darkestcyan",
+				"gray6": "darkestcyan",
+				"gray7": "darkestcyan",
+				"gray8": "mediumcyan",
+				"gray9": "mediumcyan",
+				"gray10": "mediumcyan",
+				"green_yellow_red": "gray5",
+				"dark_green_gray": "light_green_gray"
+			},
+			"groups": {
+				"mode":               { "fg": "darkestcyan", "bg": "white", "attr": ["bold"] },
+				"background:divider": { "fg": "darkcyan", "bg": "darkestblue", "attr": [] },
+				"branch:divider":     { "fg": "darkcyan", "bg": "darkblue", "attr": [] }
+			}
+		},
+		"v": {
+			"groups": {
+				"mode": { "fg": "darkorange", "bg": "brightestorange", "attr": ["bold"] }
+			}
+		},
+		"V": {
+			"groups": {
+				"mode": { "fg": "darkorange", "bg": "brightestorange", "attr": ["bold"] }
+			}
+		},
+		"^V": {
+			"groups": {
+				"mode": { "fg": "darkorange", "bg": "brightestorange", "attr": ["bold"] }
+			}
+		},
+		"R": {
+			"groups": {
+				"mode": { "fg": "white", "bg": "brightred", "attr": ["bold"] }
+			}
+		}
+	}
+}

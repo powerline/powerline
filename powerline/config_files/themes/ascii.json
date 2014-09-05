@@ -1,0 +1,134 @@
+{
+	"use_non_breaking_spaces": false,
+	"dividers": {
+		"left": {
+			"hard": " ",
+			"soft": "| "
+		},
+		"right": {
+			"hard": " ",
+			"soft": " |"
+		}
+	},
+	"spaces": 1,
+	"segment_data": {
+		"branch": {
+			"before": "BR "
+		},
+		"cwd": {
+			"args": {
+				"ellipsis": "..."
+			}
+		},
+
+		"line_current_symbol": {
+			"contents": "LN "
+		},
+
+		"time": {
+			"before": ""
+		},
+
+		"powerline.segments.common.network_load": {
+			"args": {
+				"recv_format": "DL {value:>8}",
+				"sent_format": "UL {value:>8}"
+			}
+		},
+		"powerline.segments.common.now_playing": {
+			"args": {
+				"state_symbols": {
+					"fallback": "",
+					"play":     ">",
+					"pause":    "~",
+					"stop":     "X"
+				}
+			}
+		},
+		"powerline.segments.common.battery": {
+			"args": {
+				"full_heart": "O",
+				"empty_heart": "O"
+			}
+		},
+		"powerline.segments.common.uptime": {
+			"before": "UP  "
+		},
+		"powerline.segments.common.email_imap_alert": {
+			"before": "MAIL "
+		},
+		"powerline.segments.common.virtualenv": {
+			"before": "(e) "
+		},
+		"powerline.segments.common.hostname": {
+			"before": "H "
+		},
+		"powerline.segments.common.weather": {
+			"args": {
+				"icons": {
+					"day":           "DAY",
+					"blustery":      "WIND",
+					"rainy":         "RAIN",
+					"cloudy":        "CLOUDS",
+					"snowy":         "SNOW",
+					"stormy":        "STORM",
+					"foggy":         "FOG",
+					"sunny":         "SUN",
+					"night":         "NIGHT",
+					"windy":         "WINDY",
+					"not_available": "NA",
+					"unknown":       "UKN"
+				},
+				"temp_format": "{temp:.0f} C"
+			}
+		},
+		"powerline.segments.common.fuzzy_time": {
+			"args": {
+				"unicode_text": false
+			}
+		},
+
+		"powerline.segments.vim.mode": {
+			"args": {
+				"override": {
+					"n":  "NORMAL",
+					"no": "N-OPER",
+					"v":  "VISUAL",
+					"V":  "V-LINE",
+					"^V": "V-BLCK",
+					"s":  "SELECT",
+					"S":  "S-LINE",
+					"^S": "S-BLCK",
+					"i":  "INSERT",
+					"R":  "REPLACE",
+					"Rv": "V-RPLCE",
+					"c":  "COMMND",
+					"cv": "VIM EX",
+					"ce": "EX",
+					"r":  "PROMPT",
+					"rm": "MORE",
+					"r?": "CONFIRM",
+					"!":  "SHELL"
+				}
+			}
+		},
+		"powerline.segments.vim.visual_range": {
+			"args": {
+				"CTRL_V_text": "{rows} x {vcols}",
+				"v_text_oneline": "C:{vcols}",
+				"v_text_multiline": "L:{rows}",
+				"V_text": "L:{rows}"
+			}
+		},
+		"powerline.segments.vim.readonly_indicator": {
+			"args": {
+				"text": "RO"
+			}
+		},
+		"powerline.segments.vim.modified_indicator": {
+			"args": {
+				"text": "+"
+			}
+		}
+	}
+}

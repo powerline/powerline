@@ -1,0 +1,31 @@
+{
+	"groups": {
+		"branch_clean":     "branch",
+		"environment":      "information:unimportant",
+		"file_size":        "information:unimportant",
+		"file_format":      "information:unimportant",
+		"file_encoding":    "file_format",
+		"file_type":        "file_format",
+		"branch":           "information:additional",
+		"file_scheme":      "file_name",
+		"file_directory":   "information:additional",
+		"file_name_empty":  "file_directory",
+		"line_percent":     "information:additional",
+		"line_count":       "line_current",
+		"position":         "information:additional",
+		"single_tab":       "line_current",
+		"many_tabs":        "line_current",
+		"bufnr":            "file_directory",
+		"winnr":            "information:unimportant",
+		"tabnr":            "file_directory",
+
+		"tab_nc:file_directory": "information:unimportant",
+		"tab_nc:file_name":      "tab_nc:file_directory",
+		"tab_nc:tabnr":          "tab_nc:file_directory",
+
+		"buf_nc:file_directory":     "tab_nc:file_directory",
+		"buf_nc:file_name":          "tab_nc:file_name",
+		"buf_nc:bufnr":              "tab_nc:tabnr",
+		"buf_nc:modified_indicator": "tab_nc:modified_indicator"
+	}
+}

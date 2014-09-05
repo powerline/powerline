@@ -1,0 +1,66 @@
+#!/usr/bin/env python
+# vim:fileencoding=utf-8:noet
+
+'''Script used to obtain powerline configuration'''
+
+from __future__ import (unicode_literals, division, absolute_import, print_function)
+
+import argparse
+
+try:
+	import powerline.bindings.config as config
+except ImportError:
+	import sys
+	import os
+	sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(os.path.realpath(__file__)))))
+	import powerline.bindings.config as config
+
+
+TMUX_ACTIONS = {
+	'source': config.source_tmux_files,
+}
+
+
+SHELL_ACTIONS = {
+	'command': config.shell_command,
+	'uses': config.uses,
+}
+
+
+if __name__ == '__main__':
+	parser = argparse.ArgumentParser(description=__doc__)
+	subparsers = parser.add_subparsers()
+	tmux_parser = subparsers.add_parser('tmux', help='Tmux-specific commands')
+	tmux_parser.add_argument(
+		'function',
+		choices=tuple(TMUX_ACTIONS.values()),
+		metavar='action',
+		type=(lambda v: TMUX_ACTIONS.get(v)),
+		help='If action is "source" then version-specific tmux configuration files are sourced.'
+	)
+
+	shell_parser = subparsers.add_parser('shell', help='Shell-specific commands')
+	shell_parser.add_argument(
+		'function',
+		choices=tuple(SHELL_ACTIONS.values()),
+		type=(lambda v: SHELL_ACTIONS.get(v)),
+		metavar='action',
+		help='If action is "command" then preferred powerline command is output, if it is “uses” then powerline-config script will exit with 1 if specified component is disabled and 0 otherwise.',
+	)
+	shell_parser.add_argument(
+		'component',
+		nargs='?',
+		choices=('tmux', 'prompt'),
+		metavar='component',
+	)
+	shell_parser.add_argument(
+		'-s', '--shell',
+		nargs='?',
+		help='Shell for which query is run',
+	)
+
+	args = parser.parse_args()
+
+	pl = config.create_powerline_logger(args)
+
+	args.function(pl, args)

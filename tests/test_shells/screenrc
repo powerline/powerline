@@ -1,0 +1,3 @@
+width  1024
+height    1
+logfile "tests/shell/${SH}.${TEST_TYPE}.${TEST_CLIENT}.full.log"

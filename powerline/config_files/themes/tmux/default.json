@@ -1,0 +1,29 @@
+{
+	"default_module": "powerline.segments.common",
+	"segments": {
+		"right": [
+			{
+				"function": "uptime",
+				"priority": 50
+			},
+			{
+				"function": "system_load",
+				"priority": 50
+			},
+			{
+				"function": "date"
+			},
+			{
+				"function": "date",
+				"name": "time",
+				"args": {
+					"format": "%H:%M",
+					"istime": true
+				}
+			},
+			{
+				"function": "hostname"
+			}
+		]
+	}
+}
