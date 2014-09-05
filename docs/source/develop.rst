@@ -10,3 +10,4 @@ Developer guide
    develop/listers
    develop/local-themes
    develop/extensions
+   develop/tips-and-tricks
