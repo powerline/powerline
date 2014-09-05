@@ -792,7 +792,7 @@ def uptime(pl, days_format='{days:d}d', hours_format=' {hours:d}h', minutes_form
 	try:
 		seconds = _get_uptime()
 	except NotImplementedError:
-		pl.warn('Unable to get uptime. You should install psutil package')
+		pl.warn('Unable to get uptime. You should install python-psutil package')
 		return None
 	minutes, seconds = divmod(seconds, 60)
 	hours, minutes = divmod(minutes, 60)
