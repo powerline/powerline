@@ -380,6 +380,9 @@ ascii                       Theme without any unicode characters at all
             The segment contents is the return value of the function defined in 
             the :ref:`function option <config-themes-seg-function>`.
 
+            List of function segments is available in :ref:`Segment reference 
+            <config-segments>` section.
+
         ``string``
             A static string segment where the contents is defined in the 
             :ref:`contents option <config-themes-seg-contents>`, and the 
@@ -391,6 +394,9 @@ ascii                       Theme without any unicode characters at all
             <config-themes-seg-function>`, :ref:`segments 
             <config-themes-seg-segments>` and :ref:`args 
             <config-themes-seg-args>` options.
+
+            List of lister segments is available in :ref:`Lister reference 
+            <config-lister>` section.
 
     .. _config-themes-seg-name:
 
@@ -493,13 +499,31 @@ ascii                       Theme without any unicode characters at all
 
     .. _config-themes-seg-exclude_modes:
 
-    ``exclude_modes``
-        A list of modes where this segment will be excluded: The segment is 
-        included in all modes, *except* for the modes in this list.
+    ``exclude_modes``, ``include_modes``
+        A list of modes where this segment will be excluded: the segment is not 
+        included or is included in all modes, *except* for the modes in one of 
+        these lists respectively. If ``exclude_modes`` is not present then it 
+        acts like an empty list (segment is not excluded from any modes). 
+        Without ``include_modes`` it acts like a list with all possible modes 
+        (segment is included in all modes). When there are both 
+        ``exclude_modes`` overrides ``include_modes``.
 
-    ``include_modes``
-        A list of modes where this segment will be included: The segment is 
-        *not* included in any modes, *except* for the modes in this list.
+    .. _config-themes-seg-exclude_function:
+
+    ``exclude_function``, ``include_function``
+        Function name in a form ``{name}`` or ``{module}.{name}`` (in the first 
+        form ``{module}`` defaults to ``powerline.selectors.{ext}``). Determines 
+        under which condition specific segment will be included or excluded. By 
+        default segment is always included and never excluded. 
+        ``exclude_function`` overrides ``include_function``.
+
+        .. note::
+            Options :ref:`exclude_/include_modes 
+            <config-themes-seg-exclude_modes>` complement 
+            ``exclude_/include_functions``: segment will be included if it is 
+            included by either ``include_mode`` or ``include_function`` and will 
+            be excluded if it is excluded by either ``exclude_mode`` or 
+            ``exclude_function``.
 
     .. _config-themes-seg-display:
 

@@ -10,7 +10,7 @@ except ImportError:
 	vim = {}
 
 
-def tabpage_updated_segment_info(segment_info, tabpage, mode):
+def tabpage_updated_segment_info(segment_info, tabpage):
 	segment_info = segment_info.copy()
 	window = tabpage.window
 	buffer = window.buffer
@@ -22,7 +22,6 @@ def tabpage_updated_segment_info(segment_info, tabpage, mode):
 		window_id=int(window.vars.get('powerline_window_id', -1)),
 		buffer=buffer,
 		bufnr=buffer.number,
-		mode=mode,
 	)
 	return segment_info
 
@@ -35,8 +34,7 @@ def tablister(pl, segment_info, **kwargs):
 	``winnr``, ``window_id``, ``buffer`` and ``bufnr`` keys set to tab-local 
 	ones and additional ``tabpage`` and ``tabnr`` keys.
 
-	Sets segment ``mode`` to either ``tab`` (for current tab page) or ``tab_nc`` 
-	(for all other tab pages).
+	Adds either ``tab:`` or ``tab_nc:`` prefix to all segment highlight groups.
 
 	Works best with vim-7.4 or later: earlier versions miss tabpage object and 
 	thus window objects are not available as well.
@@ -49,15 +47,15 @@ def tablister(pl, segment_info, **kwargs):
 		return dct
 
 	return (
-		(lambda tabpage, mode: (
-			tabpage_updated_segment_info(segment_info, tabpage, mode),
-			add_multiplier(tabpage, {'mode': mode})
+		(lambda tabpage, prefix: (
+			tabpage_updated_segment_info(segment_info, tabpage),
+			add_multiplier(tabpage, {'highlight_group_prefix': prefix})
 		))(tabpage, 'tab' if tabpage == cur_tabpage else 'tab_nc')
 		for tabpage in list_tabpages()
 	)
 
 
-def buffer_updated_segment_info(segment_info, buffer, mode):
+def buffer_updated_segment_info(segment_info, buffer):
 	segment_info = segment_info.copy()
 	segment_info.update(
 		window=None,
@@ -65,7 +63,6 @@ def buffer_updated_segment_info(segment_info, buffer, mode):
 		window_id=None,
 		buffer=buffer,
 		bufnr=buffer.number,
-		mode=mode,
 	)
 	return segment_info
 
@@ -78,8 +75,7 @@ def bufferlister(pl, segment_info, show_unlisted=False, **kwargs):
 	and ``bufnr`` keys set to buffer-specific ones, ``window``, ``winnr`` and 
 	``window_id`` keys set to None.
 
-	Sets segment ``mode`` to either ``buf`` (for current buffer) or ``buf_nc`` 
-	(for all other buffers).
+	Adds either ``buf:`` or ``buf_nc:`` prefix to all segment highlight groups.
 
 	:param bool show_unlisted:
 		True if unlisted buffers should be shown as well. Current buffer is 
@@ -95,12 +91,14 @@ def bufferlister(pl, segment_info, show_unlisted=False, **kwargs):
 	return (
 		(
 			buf_segment_info,
-			add_multiplier(buf_segment_info['buffer'], {'mode': buf_segment_info['mode']})
+			add_multiplier(buf_segment_info['buffer'], {'highlight_group_prefix': prefix})
 		)
-		for buf_segment_info in (
-			buffer_updated_segment_info(
-				segment_info,
-				buffer,
+		for buf_segment_info, prefix in (
+			(
+				buffer_updated_segment_info(
+					segment_info,
+					buffer
+				),
 				('buf' if buffer is cur_buffer else 'buf_nc')
 			)
 			for buffer in vim.buffers
@@ -110,11 +108,3 @@ def bufferlister(pl, segment_info, show_unlisted=False, **kwargs):
 			or int(vim_getbufoption(buf_segment_info, 'buflisted'))
 		)
 	)
-
-
-@requires_segment_info
-def tabbuflister(**kwargs):
-	if len(list_tabpages()) == 1:
-		return bufferlister(**kwargs)
-	else:
-		return tablister(**kwargs)

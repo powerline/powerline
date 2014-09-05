@@ -1,3 +1,5 @@
+.. _config-listers:
+
 ****************
 Lister reference
 ****************

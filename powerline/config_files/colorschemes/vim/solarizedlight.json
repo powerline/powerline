@@ -43,26 +43,6 @@
 				"solarized:base03": "solarized:base1"
 			}
 		},
-		"tab_nc": {
-			"colors": {
-				"solarized:base2": "solarized:base01",
-				"solarized:base0": "solarized:base01",
-				"solarized:base00": "solarized:base2",
-				"solarized:base1": "solarized:base0",
-				"solarized:base02": "solarized:base00",
-				"solarized:base03": "solarized:base1"
-			}
-		},
-		"buf_nc": {
-			"colors": {
-				"solarized:base2": "solarized:base01",
-				"solarized:base0": "solarized:base01",
-				"solarized:base00": "solarized:base2",
-				"solarized:base1": "solarized:base0",
-				"solarized:base02": "solarized:base00",
-				"solarized:base03": "solarized:base1"
-			}
-		},
 		"i": {
 			"groups": {
 				"background":             { "fg": "solarized:base03", "bg": "solarized:base2", "attr": [] },

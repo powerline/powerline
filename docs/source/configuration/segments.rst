@@ -1,3 +1,5 @@
+.. _config-segments:
+
 *****************
 Segment reference
 *****************

@@ -750,7 +750,7 @@ def user(pl, segment_info=None, hide_user=None):
 	euid = _geteuid()
 	return [{
 		'contents': username,
-		'highlight_group': 'user' if euid != 0 else ['superuser', 'user'],
+		'highlight_group': ['user'] if euid != 0 else ['superuser', 'user'],
 	}]
 if 'psutil' not in globals():
 	user = requires_segment_info(user)
@@ -966,7 +966,7 @@ class EmailIMAPSegment(KwThreadedSegment):
 		elif type(unread_count) != int or not max_msgs:
 			return [{
 				'contents': str(unread_count),
-				'highlight_group': 'email_alert',
+				'highlight_group': ['email_alert'],
 			}]
 		else:
 			return [{

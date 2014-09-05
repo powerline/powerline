@@ -14,7 +14,6 @@ except ImportError:
 from powerline.bindings.vim import (vim_get_func, getbufvar, vim_getbufoption,
                                     buffer_name, vim_getwinvar,
                                     register_buffer_cache, current_tabpage,
-                                    list_tabpages,
                                     list_tabpage_buffers_segment_info)
 from powerline.theme import requires_segment_info, requires_filesystem_watcher
 from powerline.lib import add_divider_highlight_group
@@ -585,7 +584,7 @@ def trailing_whitespace(pl, segment_info):
 
 
 @requires_segment_info
-def tabnr(pl, segment_info, show_current=False):
+def tabnr(pl, segment_info, show_current=True):
 	'''Show tabpage number
 
 	:param bool show_current:
@@ -601,7 +600,7 @@ def tabnr(pl, segment_info, show_current=False):
 
 
 @requires_segment_info
-def bufnr(pl, segment_info, show_current=False):
+def bufnr(pl, segment_info, show_current=True):
 	'''Show buffer number
 
 	:param bool show_current:
@@ -613,7 +612,7 @@ def bufnr(pl, segment_info, show_current=False):
 
 
 @requires_segment_info
-def winnr(pl, segment_info, show_current=False):
+def winnr(pl, segment_info, show_current=True):
 	'''Show window number
 
 	:param bool show_current:
@@ -622,29 +621,3 @@ def winnr(pl, segment_info, show_current=False):
 	winnr = segment_info['winnr']
 	if show_current or winnr != vim.current.window.number:
 		return str(winnr)
-
-
-def single_tab(pl, single_text='Bufs', multiple_text='Tabs'):
-	'''Show one text if there is only one tab and another if there are many
-
-	Mostly useful for tabline to indicate what kind of data is shown there.
-
-	:param str single_text:
-		Text displayed when there is only one tabpage. May be None if you do not 
-		want to display anything.
-	:param str multiple_text:
-		Text displayed when there is more then one tabpage. May be None if you 
-		do not want to display anything.
-
-	Highlight groups used: ``single_tab``, ``many_tabs``.
-	'''
-	if len(list_tabpages()) == 1:
-		return single_text and [{
-			'contents': single_text,
-			'highlight_group': ['single_tab'],
-		}]
-	else:
-		return multiple_text and [{
-			'contents': multiple_text,
-			'highlight_group': ['many_tabs'],
-		}]

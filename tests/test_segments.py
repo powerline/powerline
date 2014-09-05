@@ -15,9 +15,6 @@ from tests.lib import Args, urllib_read, replace_attr, new_module, replace_modul
 from tests import TestCase, SkipTest
 
 
-vim = None
-
-
 def get_dummy_guess(**kwargs):
 	if 'directory' in kwargs:
 		def guess(path, create_watcher):
@@ -33,7 +30,7 @@ class TestShell(TestCase):
 		pl = Pl()
 		segment_info = {'args': Args(last_exit_code=10)}
 		self.assertEqual(shell.last_status(pl=pl, segment_info=segment_info), [
-			{'contents': '10', 'highlight_group': 'exit_fail'}
+			{'contents': '10', 'highlight_group': ['exit_fail']}
 		])
 		segment_info['args'].last_exit_code = 0
 		self.assertEqual(shell.last_status(pl=pl, segment_info=segment_info), None)
@@ -48,9 +45,9 @@ class TestShell(TestCase):
 		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info), None)
 		segment_info['args'].last_pipe_status = [0, 2, 0]
 		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info), [
-			{'contents': '0', 'highlight_group': 'exit_success', 'draw_inner_divider': True},
-			{'contents': '2', 'highlight_group': 'exit_fail', 'draw_inner_divider': True},
-			{'contents': '0', 'highlight_group': 'exit_success', 'draw_inner_divider': True}
+			{'contents': '0', 'highlight_group': ['exit_success'], 'draw_inner_divider': True},
+			{'contents': '2', 'highlight_group': ['exit_fail'], 'draw_inner_divider': True},
+			{'contents': '0', 'highlight_group': ['exit_success'], 'draw_inner_divider': True}
 		])
 
 	def test_jobnum(self):
@@ -338,10 +335,10 @@ class TestCommon(TestCase):
 				with replace_attr(common, 'psutil', new_psutil):
 					with replace_attr(common, '_geteuid', lambda: 5):
 						self.assertEqual(common.user(pl=pl, segment_info=segment_info), [
-							{'contents': 'def', 'highlight_group': 'user'}
+							{'contents': 'def', 'highlight_group': ['user']}
 						])
 						self.assertEqual(common.user(pl=pl, segment_info=segment_info, hide_user='abc'), [
-							{'contents': 'def', 'highlight_group': 'user'}
+							{'contents': 'def', 'highlight_group': ['user']}
 						])
 						self.assertEqual(common.user(pl=pl, segment_info=segment_info, hide_user='def'), None)
 					with replace_attr(common, '_geteuid', lambda: 0):
@@ -781,18 +778,18 @@ class TestVim(TestCase):
 	def test_mode(self):
 		pl = Pl()
 		segment_info = vim_module._get_segment_info()
-		self.assertEqual(vim.mode(pl=pl, segment_info=segment_info), 'NORMAL')
-		self.assertEqual(vim.mode(pl=pl, segment_info=segment_info, override={'i': 'INS'}), 'NORMAL')
-		self.assertEqual(vim.mode(pl=pl, segment_info=segment_info, override={'n': 'NORM'}), 'NORM')
+		self.assertEqual(self.vim.mode(pl=pl, segment_info=segment_info), 'NORMAL')
+		self.assertEqual(self.vim.mode(pl=pl, segment_info=segment_info, override={'i': 'INS'}), 'NORMAL')
+		self.assertEqual(self.vim.mode(pl=pl, segment_info=segment_info, override={'n': 'NORM'}), 'NORM')
 		with vim_module._with('mode', 'i') as segment_info:
-			self.assertEqual(vim.mode(pl=pl, segment_info=segment_info), 'INSERT')
+			self.assertEqual(self.vim.mode(pl=pl, segment_info=segment_info), 'INSERT')
 		with vim_module._with('mode', chr(ord('V') - 0x40)) as segment_info:
-			self.assertEqual(vim.mode(pl=pl, segment_info=segment_info), 'V-BLCK')
-			self.assertEqual(vim.mode(pl=pl, segment_info=segment_info, override={'^V': 'VBLK'}), 'VBLK')
+			self.assertEqual(self.vim.mode(pl=pl, segment_info=segment_info), 'V-BLCK')
+			self.assertEqual(self.vim.mode(pl=pl, segment_info=segment_info, override={'^V': 'VBLK'}), 'VBLK')
 
 	def test_visual_range(self):
 		pl = Pl()
-		vr = partial(vim.visual_range, pl=pl)
+		vr = partial(self.vim.visual_range, pl=pl)
 		vim_module.current.window.cursor = [0, 0]
 		try:
 			with vim_module._with('mode', 'i') as segment_info:
@@ -839,116 +836,116 @@ class TestVim(TestCase):
 	def test_modified_indicator(self):
 		pl = Pl()
 		segment_info = vim_module._get_segment_info()
-		self.assertEqual(vim.modified_indicator(pl=pl, segment_info=segment_info), None)
+		self.assertEqual(self.vim.modified_indicator(pl=pl, segment_info=segment_info), None)
 		segment_info['buffer'][0] = 'abc'
 		try:
-			self.assertEqual(vim.modified_indicator(pl=pl, segment_info=segment_info), '+')
-			self.assertEqual(vim.modified_indicator(pl=pl, segment_info=segment_info, text='-'), '-')
+			self.assertEqual(self.vim.modified_indicator(pl=pl, segment_info=segment_info), '+')
+			self.assertEqual(self.vim.modified_indicator(pl=pl, segment_info=segment_info, text='-'), '-')
 		finally:
 			vim_module._bw(segment_info['bufnr'])
 
 	def test_paste_indicator(self):
 		pl = Pl()
 		segment_info = vim_module._get_segment_info()
-		self.assertEqual(vim.paste_indicator(pl=pl, segment_info=segment_info), None)
+		self.assertEqual(self.vim.paste_indicator(pl=pl, segment_info=segment_info), None)
 		with vim_module._with('options', paste=1):
-			self.assertEqual(vim.paste_indicator(pl=pl, segment_info=segment_info), 'PASTE')
-			self.assertEqual(vim.paste_indicator(pl=pl, segment_info=segment_info, text='P'), 'P')
+			self.assertEqual(self.vim.paste_indicator(pl=pl, segment_info=segment_info), 'PASTE')
+			self.assertEqual(self.vim.paste_indicator(pl=pl, segment_info=segment_info, text='P'), 'P')
 
 	def test_readonly_indicator(self):
 		pl = Pl()
 		segment_info = vim_module._get_segment_info()
-		self.assertEqual(vim.readonly_indicator(pl=pl, segment_info=segment_info), None)
+		self.assertEqual(self.vim.readonly_indicator(pl=pl, segment_info=segment_info), None)
 		with vim_module._with('bufoptions', readonly=1):
-			self.assertEqual(vim.readonly_indicator(pl=pl, segment_info=segment_info), 'RO')
-			self.assertEqual(vim.readonly_indicator(pl=pl, segment_info=segment_info, text='L'), 'L')
+			self.assertEqual(self.vim.readonly_indicator(pl=pl, segment_info=segment_info), 'RO')
+			self.assertEqual(self.vim.readonly_indicator(pl=pl, segment_info=segment_info, text='L'), 'L')
 
 	def test_file_scheme(self):
 		pl = Pl()
 		segment_info = vim_module._get_segment_info()
-		self.assertEqual(vim.file_scheme(pl=pl, segment_info=segment_info), None)
+		self.assertEqual(self.vim.file_scheme(pl=pl, segment_info=segment_info), None)
 		with vim_module._with('buffer', '/tmp/’’/abc') as segment_info:
-			self.assertEqual(vim.file_scheme(pl=pl, segment_info=segment_info), None)
+			self.assertEqual(self.vim.file_scheme(pl=pl, segment_info=segment_info), None)
 		with vim_module._with('buffer', 'zipfile:/tmp/abc.zip::abc/abc.vim') as segment_info:
-			self.assertEqual(vim.file_scheme(pl=pl, segment_info=segment_info), 'zipfile')
+			self.assertEqual(self.vim.file_scheme(pl=pl, segment_info=segment_info), 'zipfile')
 
 	def test_file_directory(self):
 		pl = Pl()
 		segment_info = vim_module._get_segment_info()
-		self.assertEqual(vim.file_directory(pl=pl, segment_info=segment_info), None)
+		self.assertEqual(self.vim.file_directory(pl=pl, segment_info=segment_info), None)
 		with replace_env('HOME', '/home/foo', os.environ):
 			with vim_module._with('buffer', '/tmp/’’/abc') as segment_info:
-				self.assertEqual(vim.file_directory(pl=pl, segment_info=segment_info), '/tmp/’’/')
+				self.assertEqual(self.vim.file_directory(pl=pl, segment_info=segment_info), '/tmp/’’/')
 			with vim_module._with('buffer', b'/tmp/\xFF\xFF/abc') as segment_info:
-				self.assertEqual(vim.file_directory(pl=pl, segment_info=segment_info), '/tmp/<ff><ff>/')
+				self.assertEqual(self.vim.file_directory(pl=pl, segment_info=segment_info), '/tmp/<ff><ff>/')
 			with vim_module._with('buffer', '/tmp/abc') as segment_info:
-				self.assertEqual(vim.file_directory(pl=pl, segment_info=segment_info), '/tmp/')
+				self.assertEqual(self.vim.file_directory(pl=pl, segment_info=segment_info), '/tmp/')
 				os.environ['HOME'] = '/tmp'
-				self.assertEqual(vim.file_directory(pl=pl, segment_info=segment_info), '~/')
+				self.assertEqual(self.vim.file_directory(pl=pl, segment_info=segment_info), '~/')
 			with vim_module._with('buffer', 'zipfile:/tmp/abc.zip::abc/abc.vim') as segment_info:
-				self.assertEqual(vim.file_directory(pl=pl, segment_info=segment_info, remove_scheme=False), 'zipfile:/tmp/abc.zip::abc/')
-				self.assertEqual(vim.file_directory(pl=pl, segment_info=segment_info, remove_scheme=True), '/tmp/abc.zip::abc/')
-				self.assertEqual(vim.file_directory(pl=pl, segment_info=segment_info), '/tmp/abc.zip::abc/')
+				self.assertEqual(self.vim.file_directory(pl=pl, segment_info=segment_info, remove_scheme=False), 'zipfile:/tmp/abc.zip::abc/')
+				self.assertEqual(self.vim.file_directory(pl=pl, segment_info=segment_info, remove_scheme=True), '/tmp/abc.zip::abc/')
+				self.assertEqual(self.vim.file_directory(pl=pl, segment_info=segment_info), '/tmp/abc.zip::abc/')
 				os.environ['HOME'] = '/tmp'
-				self.assertEqual(vim.file_directory(pl=pl, segment_info=segment_info, remove_scheme=False), 'zipfile:/tmp/abc.zip::abc/')
-				self.assertEqual(vim.file_directory(pl=pl, segment_info=segment_info, remove_scheme=True), '/tmp/abc.zip::abc/')
-				self.assertEqual(vim.file_directory(pl=pl, segment_info=segment_info), '/tmp/abc.zip::abc/')
+				self.assertEqual(self.vim.file_directory(pl=pl, segment_info=segment_info, remove_scheme=False), 'zipfile:/tmp/abc.zip::abc/')
+				self.assertEqual(self.vim.file_directory(pl=pl, segment_info=segment_info, remove_scheme=True), '/tmp/abc.zip::abc/')
+				self.assertEqual(self.vim.file_directory(pl=pl, segment_info=segment_info), '/tmp/abc.zip::abc/')
 
 	def test_file_name(self):
 		pl = Pl()
 		segment_info = vim_module._get_segment_info()
-		self.assertEqual(vim.file_name(pl=pl, segment_info=segment_info), None)
-		self.assertEqual(vim.file_name(pl=pl, segment_info=segment_info, display_no_file=True), [
+		self.assertEqual(self.vim.file_name(pl=pl, segment_info=segment_info), None)
+		self.assertEqual(self.vim.file_name(pl=pl, segment_info=segment_info, display_no_file=True), [
 			{'contents': '[No file]', 'highlight_group': ['file_name_no_file', 'file_name']}
 		])
-		self.assertEqual(vim.file_name(pl=pl, segment_info=segment_info, display_no_file=True, no_file_text='X'), [
+		self.assertEqual(self.vim.file_name(pl=pl, segment_info=segment_info, display_no_file=True, no_file_text='X'), [
 			{'contents': 'X', 'highlight_group': ['file_name_no_file', 'file_name']}
 		])
 		with vim_module._with('buffer', '/tmp/abc') as segment_info:
-			self.assertEqual(vim.file_name(pl=pl, segment_info=segment_info), 'abc')
+			self.assertEqual(self.vim.file_name(pl=pl, segment_info=segment_info), 'abc')
 		with vim_module._with('buffer', '/tmp/’’') as segment_info:
-			self.assertEqual(vim.file_name(pl=pl, segment_info=segment_info), '’’')
+			self.assertEqual(self.vim.file_name(pl=pl, segment_info=segment_info), '’’')
 		with vim_module._with('buffer', b'/tmp/\xFF\xFF') as segment_info:
-			self.assertEqual(vim.file_name(pl=pl, segment_info=segment_info), '<ff><ff>')
+			self.assertEqual(self.vim.file_name(pl=pl, segment_info=segment_info), '<ff><ff>')
 
 	def test_file_size(self):
 		pl = Pl()
 		segment_info = vim_module._get_segment_info()
-		self.assertEqual(vim.file_size(pl=pl, segment_info=segment_info), '0 B')
+		self.assertEqual(self.vim.file_size(pl=pl, segment_info=segment_info), '0 B')
 		with vim_module._with('buffer', os.path.join(os.path.dirname(__file__), 'empty')) as segment_info:
-			self.assertEqual(vim.file_size(pl=pl, segment_info=segment_info), '0 B')
+			self.assertEqual(self.vim.file_size(pl=pl, segment_info=segment_info), '0 B')
 
 	def test_file_opts(self):
 		pl = Pl()
 		segment_info = vim_module._get_segment_info()
-		self.assertEqual(vim.file_format(pl=pl, segment_info=segment_info), [
+		self.assertEqual(self.vim.file_format(pl=pl, segment_info=segment_info), [
 			{'divider_highlight_group': 'background:divider', 'contents': 'unix'}
 		])
-		self.assertEqual(vim.file_encoding(pl=pl, segment_info=segment_info), [
+		self.assertEqual(self.vim.file_encoding(pl=pl, segment_info=segment_info), [
 			{'divider_highlight_group': 'background:divider', 'contents': 'utf-8'}
 		])
-		self.assertEqual(vim.file_type(pl=pl, segment_info=segment_info), None)
+		self.assertEqual(self.vim.file_type(pl=pl, segment_info=segment_info), None)
 		with vim_module._with('bufoptions', filetype='python'):
-			self.assertEqual(vim.file_type(pl=pl, segment_info=segment_info), [
+			self.assertEqual(self.vim.file_type(pl=pl, segment_info=segment_info), [
 				{'divider_highlight_group': 'background:divider', 'contents': 'python'}
 			])
 
 	def test_window_title(self):
 		pl = Pl()
 		segment_info = vim_module._get_segment_info()
-		self.assertEqual(vim.window_title(pl=pl, segment_info=segment_info), None)
+		self.assertEqual(self.vim.window_title(pl=pl, segment_info=segment_info), None)
 		with vim_module._with('wvars', quickfix_title='Abc'):
-			self.assertEqual(vim.window_title(pl=pl, segment_info=segment_info), 'Abc')
+			self.assertEqual(self.vim.window_title(pl=pl, segment_info=segment_info), 'Abc')
 
 	def test_line_percent(self):
 		pl = Pl()
 		segment_info = vim_module._get_segment_info()
 		segment_info['buffer'][0:-1] = [str(i) for i in range(100)]
 		try:
-			self.assertEqual(vim.line_percent(pl=pl, segment_info=segment_info), '1')
+			self.assertEqual(self.vim.line_percent(pl=pl, segment_info=segment_info), '1')
 			vim_module._set_cursor(50, 0)
-			self.assertEqual(vim.line_percent(pl=pl, segment_info=segment_info), '50')
-			self.assertEqual(vim.line_percent(pl=pl, segment_info=segment_info, gradient=True), [
+			self.assertEqual(self.vim.line_percent(pl=pl, segment_info=segment_info), '50')
+			self.assertEqual(self.vim.line_percent(pl=pl, segment_info=segment_info, gradient=True), [
 				{'contents': '50', 'highlight_group': ['line_percent_gradient', 'line_percent'], 'gradient_level': 50 * 100.0 / 101}
 			])
 		finally:
@@ -959,9 +956,9 @@ class TestVim(TestCase):
 		segment_info = vim_module._get_segment_info()
 		segment_info['buffer'][0:-1] = [str(i) for i in range(99)]
 		try:
-			self.assertEqual(vim.line_count(pl=pl, segment_info=segment_info), '100')
+			self.assertEqual(self.vim.line_count(pl=pl, segment_info=segment_info), '100')
 			vim_module._set_cursor(50, 0)
-			self.assertEqual(vim.line_count(pl=pl, segment_info=segment_info), '100')
+			self.assertEqual(self.vim.line_count(pl=pl, segment_info=segment_info), '100')
 		finally:
 			vim_module._bw(segment_info['bufnr'])
 
@@ -971,18 +968,18 @@ class TestVim(TestCase):
 		try:
 			segment_info['buffer'][0:-1] = [str(i) for i in range(99)]
 			vim_module._set_cursor(49, 0)
-			self.assertEqual(vim.position(pl=pl, segment_info=segment_info), '50%')
-			self.assertEqual(vim.position(pl=pl, segment_info=segment_info, gradient=True), [
+			self.assertEqual(self.vim.position(pl=pl, segment_info=segment_info), '50%')
+			self.assertEqual(self.vim.position(pl=pl, segment_info=segment_info, gradient=True), [
 				{'contents': '50%', 'highlight_group': ['position_gradient', 'position'], 'gradient_level': 50.0}
 			])
 			vim_module._set_cursor(0, 0)
-			self.assertEqual(vim.position(pl=pl, segment_info=segment_info), 'Top')
+			self.assertEqual(self.vim.position(pl=pl, segment_info=segment_info), 'Top')
 			vim_module._set_cursor(97, 0)
-			self.assertEqual(vim.position(pl=pl, segment_info=segment_info, position_strings={'top': 'Comienzo', 'bottom': 'Final', 'all': 'Todo'}), 'Final')
+			self.assertEqual(self.vim.position(pl=pl, segment_info=segment_info, position_strings={'top': 'Comienzo', 'bottom': 'Final', 'all': 'Todo'}), 'Final')
 			segment_info['buffer'][0:-1] = [str(i) for i in range(2)]
 			vim_module._set_cursor(0, 0)
-			self.assertEqual(vim.position(pl=pl, segment_info=segment_info, position_strings={'top': 'Comienzo', 'bottom': 'Final', 'all': 'Todo'}), 'Todo')
-			self.assertEqual(vim.position(pl=pl, segment_info=segment_info, gradient=True), [
+			self.assertEqual(self.vim.position(pl=pl, segment_info=segment_info, position_strings={'top': 'Comienzo', 'bottom': 'Final', 'all': 'Todo'}), 'Todo')
+			self.assertEqual(self.vim.position(pl=pl, segment_info=segment_info, gradient=True), [
 				{'contents': 'All', 'highlight_group': ['position_gradient', 'position'], 'gradient_level': 0.0}
 			])
 		finally:
@@ -991,34 +988,34 @@ class TestVim(TestCase):
 	def test_cursor_current(self):
 		pl = Pl()
 		segment_info = vim_module._get_segment_info()
-		self.assertEqual(vim.line_current(pl=pl, segment_info=segment_info), '1')
-		self.assertEqual(vim.col_current(pl=pl, segment_info=segment_info), '1')
-		self.assertEqual(vim.virtcol_current(pl=pl, segment_info=segment_info), [{
+		self.assertEqual(self.vim.line_current(pl=pl, segment_info=segment_info), '1')
+		self.assertEqual(self.vim.col_current(pl=pl, segment_info=segment_info), '1')
+		self.assertEqual(self.vim.virtcol_current(pl=pl, segment_info=segment_info), [{
 			'highlight_group': ['virtcol_current_gradient', 'virtcol_current', 'col_current'], 'contents': '1', 'gradient_level': 100.0 / 80,
 		}])
-		self.assertEqual(vim.virtcol_current(pl=pl, segment_info=segment_info, gradient=False), [{
+		self.assertEqual(self.vim.virtcol_current(pl=pl, segment_info=segment_info, gradient=False), [{
 			'highlight_group': ['virtcol_current', 'col_current'], 'contents': '1',
 		}])
 
 	def test_modified_buffers(self):
 		pl = Pl()
-		self.assertEqual(vim.modified_buffers(pl=pl), None)
+		self.assertEqual(self.vim.modified_buffers(pl=pl), None)
 
 	def test_branch(self):
 		pl = Pl()
 		create_watcher = get_fallback_create_watcher()
-		branch = partial(vim.branch, pl=pl, create_watcher=create_watcher)
+		branch = partial(self.vim.branch, pl=pl, create_watcher=create_watcher)
 		with vim_module._with('buffer', '/foo') as segment_info:
-			with replace_attr(vim, 'guess', get_dummy_guess(status=lambda: None)):
-				with replace_attr(vim, 'tree_status', lambda repo, pl: None):
+			with replace_attr(self.vim, 'guess', get_dummy_guess(status=lambda: None)):
+				with replace_attr(self.vim, 'tree_status', lambda repo, pl: None):
 					self.assertEqual(branch(segment_info=segment_info, status_colors=False), [
 						{'divider_highlight_group': 'branch:divider', 'highlight_group': ['branch'], 'contents': 'foo'}
 					])
 					self.assertEqual(branch(segment_info=segment_info, status_colors=True), [
 						{'divider_highlight_group': 'branch:divider', 'highlight_group': ['branch_clean', 'branch'], 'contents': 'foo'}
 					])
-			with replace_attr(vim, 'guess', get_dummy_guess(status=lambda: 'DU')):
-				with replace_attr(vim, 'tree_status', lambda repo, pl: 'DU'):
+			with replace_attr(self.vim, 'guess', get_dummy_guess(status=lambda: 'DU')):
+				with replace_attr(self.vim, 'tree_status', lambda repo, pl: 'DU'):
 					self.assertEqual(branch(segment_info=segment_info, status_colors=False), [
 						{'divider_highlight_group': 'branch:divider', 'highlight_group': ['branch'], 'contents': 'foo'}
 					])
@@ -1029,23 +1026,23 @@ class TestVim(TestCase):
 	def test_file_vcs_status(self):
 		pl = Pl()
 		create_watcher = get_fallback_create_watcher()
-		file_vcs_status = partial(vim.file_vcs_status, pl=pl, create_watcher=create_watcher)
+		file_vcs_status = partial(self.vim.file_vcs_status, pl=pl, create_watcher=create_watcher)
 		with vim_module._with('buffer', '/foo') as segment_info:
-			with replace_attr(vim, 'guess', get_dummy_guess(status=lambda file: 'M')):
+			with replace_attr(self.vim, 'guess', get_dummy_guess(status=lambda file: 'M')):
 				self.assertEqual(file_vcs_status(segment_info=segment_info), [
 					{'highlight_group': ['file_vcs_status_M', 'file_vcs_status'], 'contents': 'M'}
 				])
-			with replace_attr(vim, 'guess', get_dummy_guess(status=lambda file: None)):
+			with replace_attr(self.vim, 'guess', get_dummy_guess(status=lambda file: None)):
 				self.assertEqual(file_vcs_status(segment_info=segment_info), None)
 		with vim_module._with('buffer', '/bar') as segment_info:
 			with vim_module._with('bufoptions', buftype='nofile'):
-				with replace_attr(vim, 'guess', get_dummy_guess(status=lambda file: 'M')):
+				with replace_attr(self.vim, 'guess', get_dummy_guess(status=lambda file: 'M')):
 					self.assertEqual(file_vcs_status(segment_info=segment_info), None)
 
 	def test_trailing_whitespace(self):
 		pl = Pl()
 		with vim_module._with('buffer', 'tws') as segment_info:
-			trailing_whitespace = partial(vim.trailing_whitespace, pl=pl, segment_info=segment_info)
+			trailing_whitespace = partial(self.vim.trailing_whitespace, pl=pl, segment_info=segment_info)
 			self.assertEqual(trailing_whitespace(), None)
 			self.assertEqual(trailing_whitespace(), None)
 			vim_module.current.buffer[0] = ' '
@@ -1064,56 +1061,53 @@ class TestVim(TestCase):
 	def test_tabnr(self):
 		pl = Pl()
 		segment_info = vim_module._get_segment_info()
-		self.assertEqual(vim.tabnr(pl=pl, segment_info=segment_info, show_current=True), '1')
-		self.assertEqual(vim.tabnr(pl=pl, segment_info=segment_info, show_current=False), None)
+		self.assertEqual(self.vim.tabnr(pl=pl, segment_info=segment_info, show_current=True), '1')
+		self.assertEqual(self.vim.tabnr(pl=pl, segment_info=segment_info, show_current=False), None)
 
 	def test_bufnr(self):
 		pl = Pl()
 		segment_info = vim_module._get_segment_info()
-		self.assertEqual(vim.bufnr(pl=pl, segment_info=segment_info, show_current=True), str(segment_info['bufnr']))
-		self.assertEqual(vim.bufnr(pl=pl, segment_info=segment_info, show_current=False), None)
+		self.assertEqual(self.vim.bufnr(pl=pl, segment_info=segment_info, show_current=True), str(segment_info['bufnr']))
+		self.assertEqual(self.vim.bufnr(pl=pl, segment_info=segment_info, show_current=False), None)
 
 	def test_winnr(self):
 		pl = Pl()
 		segment_info = vim_module._get_segment_info()
-		self.assertEqual(vim.winnr(pl=pl, segment_info=segment_info, show_current=True), str(segment_info['winnr']))
-		self.assertEqual(vim.winnr(pl=pl, segment_info=segment_info, show_current=False), None)
-
-	def test_single_tab(self):
-		pl = Pl()
-		single_tab = partial(vim.single_tab, pl=pl)
-		with vim_module._with('tabpage'):
-			self.assertEqual(single_tab(), [{'highlight_group': ['many_tabs'], 'contents': 'Tabs'}])
-			self.assertEqual(single_tab(single_text='s', multiple_text='m'), [{'highlight_group': ['many_tabs'], 'contents': 'm'}])
-			self.assertEqual(single_tab(multiple_text='m'), [{'highlight_group': ['many_tabs'], 'contents': 'm'}])
-			self.assertEqual(single_tab(single_text='s'), [{'highlight_group': ['many_tabs'], 'contents': 'Tabs'}])
-		self.assertEqual(single_tab(), [{'highlight_group': ['single_tab'], 'contents': 'Bufs'}])
-		self.assertEqual(single_tab(single_text='s', multiple_text='m'), [{'highlight_group': ['single_tab'], 'contents': 's'}])
-		self.assertEqual(single_tab(multiple_text='m'), [{'highlight_group': ['single_tab'], 'contents': 'Bufs'}])
-		self.assertEqual(single_tab(single_text='s'), [{'highlight_group': ['single_tab'], 'contents': 's'}])
+		self.assertEqual(self.vim.winnr(pl=pl, segment_info=segment_info, show_current=True), str(segment_info['winnr']))
+		self.assertEqual(self.vim.winnr(pl=pl, segment_info=segment_info, show_current=False), None)
 
 	def test_segment_info(self):
 		pl = Pl()
 		with vim_module._with('tabpage'):
 			with vim_module._with('buffer', '1') as segment_info:
-				self.assertEqual(vim.tab_modified_indicator(pl=pl, segment_info=segment_info), None)
+				self.assertEqual(self.vim.tab_modified_indicator(pl=pl, segment_info=segment_info), None)
 				vim_module.current.buffer[0] = ' '
-				self.assertEqual(vim.tab_modified_indicator(pl=pl, segment_info=segment_info), [{
+				self.assertEqual(self.vim.tab_modified_indicator(pl=pl, segment_info=segment_info), [{
 					'contents': '+',
 					'highlight_group': ['tab_modified_indicator', 'modified_indicator'],
 				}])
 				vim_module._undo()
-				self.assertEqual(vim.tab_modified_indicator(pl=pl, segment_info=segment_info), None)
+				self.assertEqual(self.vim.tab_modified_indicator(pl=pl, segment_info=segment_info), None)
 				old_buffer = vim_module.current.buffer
 				vim_module._new('2')
 				segment_info = vim_module._get_segment_info()
-				self.assertEqual(vim.tab_modified_indicator(pl=pl, segment_info=segment_info), None)
+				self.assertEqual(self.vim.tab_modified_indicator(pl=pl, segment_info=segment_info), None)
 				old_buffer[0] = ' '
-				self.assertEqual(vim.modified_indicator(pl=pl, segment_info=segment_info), None)
-				self.assertEqual(vim.tab_modified_indicator(pl=pl, segment_info=segment_info), [{
+				self.assertEqual(self.vim.modified_indicator(pl=pl, segment_info=segment_info), None)
+				self.assertEqual(self.vim.tab_modified_indicator(pl=pl, segment_info=segment_info), [{
 					'contents': '+',
 					'highlight_group': ['tab_modified_indicator', 'modified_indicator'],
 				}])
+
+	@classmethod
+	def setUpClass(cls):
+		sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'path')))
+		from powerline.segments import vim
+		cls.vim = vim
+
+	@classmethod
+	def tearDownClass(cls):
+		sys.path.pop(0)
 
 
 old_cwd = None
@@ -1122,18 +1116,14 @@ old_cwd = None
 def setUpModule():
 	global old_cwd
 	global __file__
-	sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'path')))
 	old_cwd = os.getcwd()
 	__file__ = os.path.abspath(__file__)
 	os.chdir(os.path.dirname(__file__))
-	from powerline.segments import vim
-	globals()['vim'] = vim
 
 
 def tearDownModule():
 	global old_cwd
 	os.chdir(old_cwd)
-	sys.path.pop(0)
 
 
 if __name__ == '__main__':

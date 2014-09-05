@@ -11,7 +11,7 @@ import tests.vim as vim_module
 
 from tests import TestCase
 from tests.lib.config_mock import get_powerline, get_powerline_raw, swap_attributes
-from tests.lib import Args
+from tests.lib import Args, replace_item
 
 
 def highlighted_string(s, group, **kwargs):
@@ -389,7 +389,7 @@ class TestThemeHierarchy(TestRender):
 		])
 
 
-class TestModes(TestRender):
+class TestDisplayCondition(TestRender):
 	@add_args
 	def test_include_modes(self, p, config):
 		config['themes/test/default']['segments'] = {
@@ -432,13 +432,93 @@ class TestModes(TestRender):
 		self.assertRenderEqual(p, '{56} s1{6-}>>{--}', mode='m2')
 		self.assertRenderEqual(p, '{56} s2{6-}>>{--}', mode='m3')
 
+	@add_args
+	def test_exinclude_function_nonexistent_module(self, p, config):
+		config['themes/test/default']['segments'] = {
+			'left': [
+				highlighted_string('s1', 'g1', exclude_function='xxx_nonexistent_module.foo'),
+				highlighted_string('s2', 'g1', exclude_function='xxx_nonexistent_module.foo', include_function='xxx_nonexistent_module.bar'),
+				highlighted_string('s3', 'g1', include_function='xxx_nonexistent_module.bar'),
+			]
+		}
+		self.assertRenderEqual(p, '{56} s1{56}>{56}s2{56}>{56}s3{6-}>>{--}')
+
+	@add_args
+	def test_exinclude_function(self, p, config):
+		config['themes/test/default']['segments'] = {
+			'left': [
+				highlighted_string('s1', 'g1', exclude_function='mod.foo'),
+				highlighted_string('s2', 'g1', exclude_function='mod.foo', include_function='mod.bar'),
+				highlighted_string('s3', 'g1', include_function='mod.bar'),
+			]
+		}
+		launched = set()
+		fool = [None]
+		barl = [None]
+
+		def foo(*args, **kwargs):
+			launched.add('foo')
+			self.assertEqual(set(kwargs.keys()), set(('pl', 'segment_info', 'mode')))
+			self.assertEqual(args, ())
+			return fool[0]
+
+		def bar(*args, **kwargs):
+			launched.add('bar')
+			self.assertEqual(set(kwargs.keys()), set(('pl', 'segment_info', 'mode')))
+			self.assertEqual(args, ())
+			return barl[0]
+
+		with replace_item(sys.modules, 'mod', Args(foo=foo, bar=bar)):
+			fool[0] = True
+			barl[0] = True
+			self.assertRenderEqual(p, '{56} s3{6-}>>{--}')
+			self.assertEqual(launched, set(('foo', 'bar')))
+
+			fool[0] = False
+			barl[0] = True
+			self.assertRenderEqual(p, '{56} s1{56}>{56}s2{56}>{56}s3{6-}>>{--}')
+			self.assertEqual(launched, set(('foo', 'bar')))
+
+			fool[0] = False
+			barl[0] = False
+			self.assertRenderEqual(p, '{56} s1{6-}>>{--}')
+			self.assertEqual(launched, set(('foo', 'bar')))
+
+			fool[0] = True
+			barl[0] = False
+			self.assertRenderEqual(p, '{--}')
+			self.assertEqual(launched, set(('foo', 'bar')))
+
+	@add_args
+	def test_exinclude_modes_override_functions(self, p, config):
+		config['themes/test/default']['segments'] = {
+			'left': [
+				highlighted_string('s1', 'g1', exclude_function='mod.foo', exclude_modes=['m2']),
+				highlighted_string('s2', 'g1', exclude_function='mod.foo', include_modes=['m2']),
+				highlighted_string('s3', 'g1', include_function='mod.foo', exclude_modes=['m2']),
+				highlighted_string('s4', 'g1', include_function='mod.foo', include_modes=['m2']),
+			]
+		}
+		fool = [None]
+
+		def foo(*args, **kwargs):
+			return fool[0]
+
+		with replace_item(sys.modules, 'mod', Args(foo=foo)):
+			fool[0] = True
+			self.assertRenderEqual(p, '{56} s4{6-}>>{--}', mode='m2')
+			self.assertRenderEqual(p, '{56} s3{56}>{56}s4{6-}>>{--}', mode='m1')
+
+			fool[0] = False
+			self.assertRenderEqual(p, '{56} s2{56}>{56}s4{6-}>>{--}', mode='m2')
+			self.assertRenderEqual(p, '{56} s1{6-}>>{--}', mode='m1')
+
 
 class TestSegmentAttributes(TestRender):
 	@add_args
 	def test_no_attributes(self, p, config):
 		def m1(divider=',', **kwargs):
 			return divider.join(kwargs.keys()) + divider
-		sys.modules['bar'] = Args(m1=m1)
 		config['themes/test/default']['segments'] = {
 			'left': [
 				{
@@ -446,7 +526,8 @@ class TestSegmentAttributes(TestRender):
 				}
 			]
 		}
-		self.assertRenderEqual(p, '{56} pl,{6-}>>{--}')
+		with replace_item(sys.modules, 'bar', Args(m1=m1)):
+			self.assertRenderEqual(p, '{56} pl,{6-}>>{--}')
 
 	@add_args
 	def test_segment_datas(self, p, config):
@@ -464,7 +545,6 @@ class TestSegmentAttributes(TestRender):
 				}
 			}
 		}
-		sys.modules['bar'] = Args(m1=m1)
 		config['themes/test/default']['segments'] = {
 			'left': [
 				{
@@ -472,7 +552,8 @@ class TestSegmentAttributes(TestRender):
 				}
 			]
 		}
-		self.assertRenderEqual(p, '{56} pl;{6-}>>{--}')
+		with replace_item(sys.modules, 'bar', Args(m1=m1)):
+			self.assertRenderEqual(p, '{56} pl;{6-}>>{--}')
 
 	@add_args
 	def test_expand(self, p, config):
@@ -483,7 +564,6 @@ class TestSegmentAttributes(TestRender):
 			return ('-' * amount) + segment['contents']
 
 		m1.expand = expand
-		sys.modules['bar'] = Args(m1=m1)
 		config['themes/test/default']['segments'] = {
 			'left': [
 				{
@@ -492,7 +572,8 @@ class TestSegmentAttributes(TestRender):
 				}
 			]
 		}
-		self.assertRenderEqual(p, '{56} ----pl,{6-}>>{--}', width=10)
+		with replace_item(sys.modules, 'bar', Args(m1=m1)):
+			self.assertRenderEqual(p, '{56} ----pl,{6-}>>{--}', width=10)
 
 	@add_args
 	def test_truncate(self, p, config):
@@ -503,7 +584,6 @@ class TestSegmentAttributes(TestRender):
 			return segment['contents'][:-amount]
 
 		m1.truncate = truncate
-		sys.modules['bar'] = Args(m1=m1)
 		config['themes/test/default']['segments'] = {
 			'left': [
 				{
@@ -511,7 +591,8 @@ class TestSegmentAttributes(TestRender):
 				}
 			]
 		}
-		self.assertRenderEqual(p, '{56} p{6-}>>{--}', width=4)
+		with replace_item(sys.modules, 'bar', Args(m1=m1)):
+			self.assertRenderEqual(p, '{56} p{6-}>>{--}', width=4)
 
 
 class TestSegmentData(TestRender):
@@ -603,13 +684,13 @@ class TestVim(TestCase):
 				winnr = window.number
 				self.assertEqual(powerline.render(window, window_id, winnr), '%#Pl_5_12583104_6_32896_NONE#\xa0\u201cbar\u201d%#Pl_6_32896_NONE_None_NONE#>>')
 
+	@classmethod
+	def setUpClass(cls):
+		sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'path')))
 
-def setUpModule():
-	sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'path')))
-
-
-def tearDownModule():
-	sys.path.pop(0)
+	@classmethod
+	def tearDownClass(cls):
+		sys.path.pop(0)
 
 
 if __name__ == '__main__':

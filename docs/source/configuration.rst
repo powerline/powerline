@@ -108,7 +108,7 @@ segments that you may want to customize right away:
     The weather segment will try to find your location using a GeoIP lookup, 
     so unless you're on a VPN you probably won't have to change the location 
     query.
-   
+
     If you want to change the location query or the temperature unit you'll 
     have to update the segment arguments. Open a theme file, scroll down to 
     the weather segment and update it to include unit/location query 
@@ -134,4 +134,5 @@ References
    configuration/reference
    configuration/segments
    configuration/listers
+   configuration/selectors
    configuration/local

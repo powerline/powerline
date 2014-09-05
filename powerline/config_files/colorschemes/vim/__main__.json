@@ -17,6 +17,15 @@
 		"many_tabs":        "line_current",
 		"bufnr":            "file_directory",
 		"winnr":            "information:unimportant",
-		"tabnr":            "file_directory"
+		"tabnr":            "file_directory",
+
+		"tab_nc:file_directory": "information:unimportant",
+		"tab_nc:file_name":      "tab_nc:file_directory",
+		"tab_nc:tabnr":          "tab_nc:file_directory",
+
+		"buf_nc:file_directory":     "tab_nc:file_directory",
+		"buf_nc:file_name":          "tab_nc:file_name",
+		"buf_nc:bufnr":              "tab_nc:tabnr",
+		"buf_nc:modified_indicator": "tab_nc:modified_indicator"
 	}
 }
