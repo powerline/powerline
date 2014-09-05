@@ -33,16 +33,22 @@ Pip installation
 
 This project is currently unavailable from PyPI due to a naming conflict with an 
 unrelated project, thus you will have to use the following command to install 
-powerline with ``pip``::
+powerline with ``pip``:
+
+.. code-block:: sh
 
     pip install --user git+git://github.com/Lokaltog/powerline
 
-. You may also choose to clone powerline repository somewhere and use::
+. You may also choose to clone powerline repository somewhere and use
+
+.. code-block:: sh
 
     pip install -e --user {path_to_powerline}
 
 , but note that in this case ``pip`` will not install ``powerline`` executable 
-and you will have to do something like::
+and you will have to do something like
+
+.. code-block:: sh
 
     ln -s {path_to_powerline}/scripts/powerline ~/.local/bin
 
@@ -53,6 +59,12 @@ and you will have to do something like::
     (``git+ssh://git@github.com/Lokaltog/powerline``) and ``https`` 
     (``git+https://github.com/Lokaltog/powerline``) protocols. ``git`` protocol 
     should be the fastest, but least secure one though.
+
+To install release version uploaded to PyPI use
+
+.. code-block:: sh
+
+   pip install powerline-status
 
 Fonts installation
 ==================
