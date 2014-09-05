@@ -584,7 +584,7 @@ def trailing_whitespace(pl, segment_info):
 
 
 @requires_segment_info
-def tabnr(pl, segment_info, show_current=False):
+def tabnr(pl, segment_info, show_current=True):
 	'''Show tabpage number
 
 	:param bool show_current:
@@ -600,7 +600,7 @@ def tabnr(pl, segment_info, show_current=False):
 
 
 @requires_segment_info
-def bufnr(pl, segment_info, show_current=False):
+def bufnr(pl, segment_info, show_current=True):
 	'''Show buffer number
 
 	:param bool show_current:
@@ -612,7 +612,7 @@ def bufnr(pl, segment_info, show_current=False):
 
 
 @requires_segment_info
-def winnr(pl, segment_info, show_current=False):
+def winnr(pl, segment_info, show_current=True):
 	'''Show window number
 
 	:param bool show_current:
