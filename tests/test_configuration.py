@@ -646,7 +646,7 @@ class TestVim(TestCase):
 		from powerline.vim import VimPowerline
 		import powerline as powerline_module
 		import vim
-		vim.vars['powerline_config_path'] = '/'
+		vim.vars['powerline_config_paths'] = ['/']
 		with swap_attributes(config, powerline_module):
 			with vim_module._with('environ', TEST='abc'):
 				with get_powerline_raw(config, VimPowerline) as powerline:

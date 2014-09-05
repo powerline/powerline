@@ -58,7 +58,7 @@ class TestVimConfig(TestCase):
 				with vim_module._with('bufname', '/tmp/foo.txt'):
 					out = powerline.render(vim_module.current.window, 1, vim_module.current.window.number, is_tabline=True)
 					outputs[out] = (-1, (None, None), 'tab')
-					with vim_module._with('globals', powerline_config_path=cfg_path):
+					with vim_module._with('globals', powerline_config_paths=[cfg_path]):
 						exclude = set(('no', 'v', 'V', VBLOCK, 's', 'S', SBLOCK, 'R', 'Rv', 'c', 'cv', 'ce', 'r', 'rm', 'r?', '!'))
 						try:
 							for mode in ['n', 'nc', 'no', 'v', 'V', VBLOCK, 's', 'S', SBLOCK, 'i', 'R', 'Rv', 'c', 'cv', 'ce', 'r', 'rm', 'r?', '!']:

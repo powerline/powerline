@@ -119,7 +119,7 @@ class VimPowerline(Powerline):
 
 	def get_config_paths(self):
 		try:
-			return [vim_getvar('powerline_config_path')]
+			return vim_getvar('powerline_config_paths')
 		except KeyError:
 			return super(VimPowerline, self).get_config_paths()
 
