@@ -266,20 +266,32 @@ class Renderer(object):
 			for segment in chain(segments_priority, no_priority_segments):
 				if segment['truncate'] is not None:
 					segment['contents'] = segment['truncate'](self.pl, current_width - width, segment)
-			for segment in segments_priority:
-				if current_width <= width:
-					break
-				segments.remove(segment)
+
+			segments_priority = iter(segments_priority)
+			if current_width > width and len(segments) > 100:
+				# When there are too many segments use faster, but less correct 
+				# algorythm for width computation
+				diff = current_width - width
+				for segment in segments_priority:
+					segments.remove(segment)
+					diff -= segment['_len']
+					if diff <= 0:
+						break
 				current_width = self._render_length(theme, segments, divider_widths)
+			if current_width > width:
+				# When there are not too much use more precise, but much slower 
+				# width computation. It also finishes computations in case 
+				# previous variant did not free enough space.
+				for segment in segments_priority:
+					segments.remove(segment)
+					current_width = self._render_length(theme, segments, divider_widths)
+					if current_width <= width:
+						break
+		del segments_priority
 
 		# Distribute the remaining space on spacer segments
 		segments_spacers = [segment for segment in segments if segment['expand'] is not None]
 		if segments_spacers:
-			if not segments_priority:
-				# Update segment['_len'] and current_width if not already done 
-				# (is not done in shells where there is nothing to remove 
-				# because “priority” key is not specified)
-				current_width = self._render_length(theme, segments, divider_widths)
 			distribute_len, distribute_len_remainder = divmod(width - current_width, len(segments_spacers))
 			for segment in segments_spacers:
 				segment['contents'] = (
