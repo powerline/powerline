@@ -360,50 +360,46 @@ class Renderer(object):
 			contents_highlighted = ''
 			draw_divider = segment['draw_' + divider_type + '_divider']
 
-			# Pad segments first
+			contents_raw = contents_raw.translate(self.np_character_translations)
+
+			# XXX Make sure self.hl() calls are called in the same order 
+			# segments are displayed. This is needed for Vim renderer to work.
 			if draw_divider:
 				divider_raw = self.escape(theme.get_divider(side, divider_type))
 				if side == 'left':
 					contents_raw = outer_padding + contents_raw + (divider_spaces * ' ')
 				else:
 					contents_raw = (divider_spaces * ' ') + contents_raw + outer_padding
+
+				if divider_type == 'soft':
+					divider_highlight_group_key = 'highlight' if segment['divider_highlight_group'] is None else 'divider_highlight'
+					divider_fg = segment[divider_highlight_group_key]['fg']
+					divider_bg = segment[divider_highlight_group_key]['bg']
+				else:
+					divider_fg = segment['highlight']['bg']
+					divider_bg = compare_segment['highlight']['bg']
+
+				if side == 'left':
+					if render_highlighted:
+						contents_highlighted = self.hl(self.escape(contents_raw), **segment['highlight'])
+						divider_highlighted = self.hl(divider_raw, divider_fg, divider_bg, False)
+					segment['_rendered_raw'] = contents_raw + divider_raw
+					segment['_rendered_hl'] = contents_highlighted + divider_highlighted
+				else:
+					if render_highlighted:
+						divider_highlighted = self.hl(divider_raw, divider_fg, divider_bg, False)
+						contents_highlighted = self.hl(self.escape(contents_raw), **segment['highlight'])
+					segment['_rendered_raw'] = divider_raw + contents_raw
+					segment['_rendered_hl'] = divider_highlighted + contents_highlighted
 			else:
 				if side == 'left':
 					contents_raw = outer_padding + contents_raw
 				else:
 					contents_raw = contents_raw + outer_padding
 
-			# Replace spaces with no-break spaces
-			contents_raw = contents_raw.translate(self.np_character_translations)
-
-			# Apply highlighting to padded dividers and contents
-			if render_highlighted:
-				if draw_divider:
-					if divider_type == 'soft':
-						divider_highlight_group_key = 'highlight' if segment['divider_highlight_group'] is None else 'divider_highlight'
-						divider_fg = segment[divider_highlight_group_key]['fg']
-						divider_bg = segment[divider_highlight_group_key]['bg']
-					else:
-						divider_fg = segment['highlight']['bg']
-						divider_bg = compare_segment['highlight']['bg']
-					divider_highlighted = self.hl(divider_raw, divider_fg, divider_bg, False)
 				contents_highlighted = self.hl(self.escape(contents_raw), **segment['highlight'])
-
-			# Append padded raw and highlighted segments to the rendered segment variables
-			if draw_divider:
-				if side == 'left':
-					segment['_rendered_raw'] = contents_raw + divider_raw
-					segment['_rendered_hl'] = contents_highlighted + divider_highlighted
-				else:
-					segment['_rendered_raw'] = divider_raw + contents_raw
-					segment['_rendered_hl'] = divider_highlighted + contents_highlighted
-			else:
-				if side == 'left':
-					segment['_rendered_raw'] = contents_raw
-					segment['_rendered_hl'] = contents_highlighted
-				else:
-					segment['_rendered_raw'] = contents_raw
-					segment['_rendered_hl'] = contents_highlighted
+				segment['_rendered_raw'] = contents_raw
+				segment['_rendered_hl'] = contents_highlighted
 			yield segment
 
 	def escape(self, string):

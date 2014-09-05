@@ -40,6 +40,7 @@ class VimRenderer(Renderer):
 				kwargs['ambigious'] = 2
 		super(VimRenderer, self).__init__(*args, **kwargs)
 		self.hl_groups = {}
+		self.prev_highlight = None
 
 	def shutdown(self):
 		self.theme.shutdown()
@@ -126,7 +127,15 @@ class VimRenderer(Renderer):
 		False, the argument is reset to the terminal defaults. If an argument
 		is a valid color or attribute, it's added to the vim highlight group.
 		'''
-		# We don't need to explicitly reset attributes in vim, so skip those calls
+		# In order not to hit E541 two consequent identical highlighting 
+		# specifiers may be squashed into one.
+		attr = attr or 0  # Normalize `attr`
+		if (fg, bg, attr) == self.prev_highlight:
+			return ''
+		self.prev_highlight = (fg, bg, attr)
+
+		# We don't need to explicitly reset attributes in vim, so skip those 
+		# calls
 		if not attr and not bg and not fg:
 			return ''
 
