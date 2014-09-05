@@ -54,6 +54,12 @@ and you will have to do something like::
     (``git+https://github.com/Lokaltog/powerline``) protocols. ``git`` protocol 
     should be the fastest, but least secure one though.
 
+To install release version uploaded to PyPI use
+
+.. code-block::
+
+   pip install powerline-status
+
 Fonts installation
 ==================
 
