@@ -22,10 +22,10 @@ Vim configuration can be overridden using the following options:
     redefine some value (e.g. segment) in list, only the whole list itself: only 
     dictionaries are merged recursively.
 
-``g:powerline_config_path``
-    Path (must be expanded, ``~`` shortcut is not supported). Points to the 
-    directory which will be searched for configuration. When this option is 
-    present, none of the other locations are searched.
+``g:powerline_config_paths``
+    Paths list (each path must be expanded, ``~`` shortcut is not supported). 
+    Points to the list of directories which will be searched for configuration. 
+    When this option is present, none of the other locations are searched.
 
 ``g:powerline_no_python_error``
     If this variable is set to a true value it will prevent Powerline from reporting 
