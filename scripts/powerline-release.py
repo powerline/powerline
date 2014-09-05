@@ -13,8 +13,8 @@ def parse_version(s):
 	if s == ('+' * len(s)):
 		try:
 			last_version = next(iter(sorted([
-				tuple(map(int, tag[len('release-'):].split('.')))
-				for tag in check_output(['git', 'tag', '-l', 'release-*']).split('\n')[:-1]
+				tuple(map(int, tag.split('.')))
+				for tag in check_output(['git', 'tag', '-l', '[0-9]*.*']).split('\n')[:-1]
 			], reverse=True)))
 		except StopIteration:
 			raise ValueError('No existing versions found')
@@ -63,7 +63,9 @@ def create_release(version, rev):
 	check_call(['git', 'add', 'setup.py'])
 
 	check_call(['git', 'commit'])
-	check_call(['git', 'tag', '-m', 'Release ' + version_string, '-a', 'release-' + version_string])
+	check_call(['git', 'tag', '-m', 'Release ' + version_string, '-a', version_string])
+	check_call(['git', 'push', 'upstream', 'master'])
+	check_call(['git', 'push', 'upstream', version_string])
 	check_call(['python', 'setup.py', 'sdist', 'upload'])
 	check_call(['python', 'setup.py', 'upload_docs'])
 
