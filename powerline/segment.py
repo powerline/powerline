@@ -311,7 +311,7 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, ge
 				pass
 
 		if segment_type == 'function':
-			highlight_group = [module + '.' + function_name, function_name]
+			highlight_group = [function_name]
 		else:
 			highlight_group = segment.get('highlight_group') or name
 
