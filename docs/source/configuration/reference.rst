@@ -396,7 +396,7 @@ ascii                       Theme without any unicode characters at all
             <config-themes-seg-args>` options.
 
             List of lister segments is available in :ref:`Lister reference 
-            <config-lister>` section.
+            <config-listers>` section.
 
     .. _config-themes-seg-name:
 
