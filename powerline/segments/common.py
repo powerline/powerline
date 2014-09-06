@@ -342,7 +342,7 @@ else:
 internal_ip = with_docstring(internal_ip,
 '''Return internal IP address
 
-Requires ``netifaces`` package to work properly.
+Requires ``netifaces`` module to work properly.
 
 :param str interface:
 	Interface on which IP will be checked. Use ``detect`` to automatically 
@@ -708,7 +708,7 @@ except ImportError:
 
 		@staticmethod
 		def render(cpu_percent, pl, format='{0:.0f}%', **kwargs):
-			pl.warn('psutil package is not installed, thus CPU load is not available')
+			pl.warn('Module “psutil” is not installed, thus CPU load is not available')
 			return None
 
 
@@ -792,7 +792,7 @@ def uptime(pl, days_format='{days:d}d', hours_format=' {hours:d}h', minutes_form
 	try:
 		seconds = _get_uptime()
 	except NotImplementedError:
-		pl.warn('Unable to get uptime. You should install psutil package')
+		pl.warn('Unable to get uptime. You should install psutil module')
 		return None
 	minutes, seconds = divmod(seconds, 60)
 	hours, minutes = divmod(minutes, 60)
@@ -1111,7 +1111,7 @@ class NowPlayingSegment(Segment):
 		try:
 			import dbus
 		except ImportError:
-			pl.exception('Could not add {0} segment: requires python-dbus', player_name)
+			pl.exception('Could not add {0} segment: requires dbus module', player_name)
 			return
 		bus = dbus.SessionBus()
 		try:

@@ -86,7 +86,7 @@ finally
 	if !exists('s:launched')
 		unlet s:pystr
 		echohl ErrorMsg
-			echomsg 'An error occurred while importing powerline package.'
+			echomsg 'An error occurred while importing powerline module.'
 			echomsg 'This could be caused by invalid sys.path setting,'
 			echomsg 'or by an incompatible Python version (powerline requires'
 			echomsg 'Python 2.6, 2.7 or 3.2 and later to work). Please consult'
