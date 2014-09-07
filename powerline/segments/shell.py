@@ -4,6 +4,7 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 from powerline.theme import requires_segment_info
 from powerline.segments import with_docstring
 from powerline.segments.common import CwdSegment
+from powerline.lib.unicode import out_u
 
 
 @requires_segment_info
@@ -136,7 +137,7 @@ class ShellCwdSegment(CwdSegment):
 	def get_shortened_path(self, pl, segment_info, use_shortened_path=True, **kwargs):
 		if use_shortened_path:
 			try:
-				return segment_info['shortened_path']
+				return out_u(segment_info['shortened_path'])
 			except KeyError:
 				pass
 		return super(ShellCwdSegment, self).get_shortened_path(pl, segment_info, **kwargs)
