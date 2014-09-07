@@ -17,7 +17,7 @@ from powerline.lib.vcs import guess, tree_status
 from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment
 from powerline.lib.monotonic import monotonic
 from powerline.lib.humanize_bytes import humanize_bytes
-from powerline.lib.unicode import u
+from powerline.lib.unicode import out_u
 from powerline.theme import requires_segment_info, requires_filesystem_watcher
 from powerline.segments import Segment, with_docstring
 
@@ -94,7 +94,7 @@ class CwdSegment(Segment):
 
 	def get_shortened_path(self, pl, segment_info, shorten_home=True, **kwargs):
 		try:
-			path = u(segment_info['getcwd']())
+			path = out_u(segment_info['getcwd']())
 		except OSError as e:
 			if e.errno == 2:
 				# user most probably deleted the directory
@@ -106,7 +106,7 @@ class CwdSegment(Segment):
 		if shorten_home:
 			home = segment_info['home']
 			if home:
-				home = u(home)
+				home = out_u(home)
 				if path.startswith(home):
 					path = '~' + path[len(home):]
 		return path
@@ -1123,12 +1123,12 @@ class NowPlayingSegment(Segment):
 			return
 		if not info:
 			return
-		album = u(info.get('xesam:album'))
-		title = u(info.get('xesam:title'))
+		album = out_u(info.get('xesam:album'))
+		title = out_u(info.get('xesam:title'))
 		artist = info.get('xesam:artist')
 		state = self._convert_state(status)
 		if artist:
-			artist = u(artist[0])
+			artist = out_u(artist[0])
 		return {
 			'state': state,
 			'album': album,
