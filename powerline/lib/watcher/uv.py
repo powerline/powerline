@@ -7,6 +7,7 @@ from collections import defaultdict
 from threading import RLock
 from functools import partial
 from threading import Thread
+from errno import ENOENT
 
 from powerline.lib.path import realpath
 
@@ -76,7 +77,7 @@ class UvWatcher(object):
 				except pyuv.error.FSEventError as e:
 					code = e.args[0]
 					if code == pyuv.errno.UV_ENOENT:
-						raise OSError('No such file or directory: ' + path)
+						raise OSError(ENOENT, 'No such file or directory: ' + path)
 					else:
 						raise
 
