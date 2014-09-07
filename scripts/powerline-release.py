@@ -39,13 +39,7 @@ def parse_version(s):
 		return tuple(map(int, s.split('.')))
 
 
-p = argparse.ArgumentParser(description='Powerline release script')
-p.add_argument('-v', '--version', type=parse_version, metavar='VERSION', help='Use given version for the release. If version contains only `+\' signs then it will increase latest version number: one `+\' increases major version number (e.g. 1.2.3 -> 2.0), `++\' increases minor version number (e.g. 1.2.3 -> 1.3), `+++\' increases patch level (e.g. 1.2.3 -> 1.2.4). Defaults to `+++\'', default='+++')
-p.add_argument('-r', '--rev', metavar='COMMIT', help='Use given revision for the release. Defaults to `develop\'.', default='develop')
-
-
-def create_release(version, rev):
-	version_string = '.'.join((str(v) for v in version))
+def merge(version_string, rev):
 	check_call(['git', 'checkout', 'master'])
 	check_call(['git', 'merge', '--no-ff', '--no-commit', '--log', rev])
 
@@ -64,12 +58,38 @@ def create_release(version, rev):
 
 	check_call(['git', 'commit'])
 	check_call(['git', 'tag', '-m', 'Release ' + version_string, '-a', version_string])
+
+
+def push(version_string, rev):
 	check_call(['git', 'push', 'upstream', 'master'])
 	check_call(['git', 'push', 'upstream', version_string])
+
+
+def upload(*args):
 	check_call(['python', 'setup.py', 'sdist', 'upload'])
 	check_call(['python', 'setup.py', 'upload_docs'])
 
 
+stages = (
+	('merge', merge),
+	('push', push),
+	('upload', upload),
+)
+
+
+def create_release(version, rev, run_stages=None):
+	version_string = '.'.join((str(v) for v in version))
+	for stname, stfunc in stages:
+		if run_stages is None or stname in run_stages:
+			stfunc(version_string, rev)
+
+
+p = argparse.ArgumentParser(description='Powerline release script')
+p.add_argument('-v', '--version', type=parse_version, metavar='VERSION', help='Use given version for the release. If version contains only `+\' signs then it will increase latest version number: one `+\' increases major version number (e.g. 1.2.3 -> 2.0), `++\' increases minor version number (e.g. 1.2.3 -> 1.3), `+++\' increases patch level (e.g. 1.2.3 -> 1.2.4). Defaults to `+++\'', default='+++')
+p.add_argument('-r', '--rev', metavar='COMMIT', help='Use given revision for the release. Defaults to `develop\'.', default='develop')
+p.add_argument('-s', '--stages', action='append', metavar='STAGE', help='Only run one of the given stages (default to all).', choices=tuple((stname for stname, stfunc in stages)))
+
+
 if __name__ == '__main__':
 	args = p.parse_args()
-	create_release(args.version, args.rev)
+	create_release(args.version, args.rev, args.stages)
