@@ -6,6 +6,7 @@ import os
 
 from time import sleep
 from functools import partial
+from errno import ENOENT
 
 from powerline.lib.watcher import create_file_watcher, create_tree_watcher, INotifyError
 from powerline.lib.watcher.uv import UvNotFound
@@ -168,6 +169,10 @@ class TestFilesystemWatchers(TestCase):
 						pass
 			ne = os.path.join(INOTIFY_DIR, 'notexists')
 			self.assertRaises(OSError, w, ne)
+			try:
+				w(ne)
+			except OSError as e:
+				self.assertEqual(e.errno, ENOENT)
 			self.assertTrue(w(f1))
 			self.assertFalse(w.is_watching(ne))
 			self.assertTrue(w.is_watching(f1))
