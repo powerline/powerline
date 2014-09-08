@@ -74,6 +74,7 @@ def render(args, environ, cwd):
 		args.renderer_module,
 		tuple(args.config) if args.config else None,
 		tuple(args.theme_option) if args.theme_option else None,
+		tuple(args.config_path) if args.config_path else None,
 	)
 	finish_args(args)
 	powerline = None
