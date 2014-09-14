@@ -470,10 +470,13 @@ def modified_buffers(pl, text='+ ', join_str=','):
 	:param str join_str:
 		string to use for joining the modified buffer list
 	'''
-	buffer_len = vim_funcs['bufnr']('$')
-	buffer_mod = [str(bufnr) for bufnr in range(1, buffer_len + 1) if int(getbufvar(bufnr, '&modified') or 0)]
-	if buffer_mod:
-		return text + join_str.join(buffer_mod)
+	buffer_mod_text = join_str.join((
+		str(buffer.number)
+		for buffer in vim.buffers
+		if int(vim_getbufoption({'buffer': buffer, 'bufnr': buffer.number}, 'modified'))
+	))
+	if buffer_mod_text:
+		return text + buffer_mod_text
 	return None
 
 
