@@ -7,7 +7,7 @@ import codecs
 try:
 	import vim
 except ImportError:
-	vim = {}
+	vim = object()
 
 from powerline.lib.unicode import unicode
 
@@ -98,12 +98,12 @@ if hasattr(vim, 'bindeval'):
 			return rettype_func[rettype](func)
 else:
 	rettype_eval = {
-		None: vim.eval,
+		None: getattr(vim, 'eval', None),
 		'int': lambda expr: int(vim.eval(expr)),
-		'str': vim.eval,
 		'bytes': eval_bytes,
 		'unicode': eval_unicode,
 	}
+	rettype_eval['str'] = rettype_eval[None]
 
 	class VimFunc(object):
 		'''Evaluate a vim function using vim.eval().
@@ -122,6 +122,10 @@ else:
 			))) + b')')
 
 	vim_get_func = VimFunc
+
+
+if type(vim) is object:
+	vim_get_func = lambda *args, **kwargs: None
 
 
 _getbufvar = vim_get_func('getbufvar')
