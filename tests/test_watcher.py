@@ -167,6 +167,8 @@ class TestFilesystemWatchers(TestCase):
 					raise SkipTest('No tree watcher available')
 			except UvNotFound:
 				raise SkipTest('Pyuv is not available')
+			except INotifyError:
+				raise SkipTest('INotify is not available')
 			self.assertTrue(tw(inotify_dir))
 			self.assertFalse(tw(inotify_dir))
 			changed = partial(self.do_test_for_change, tw, inotify_dir)
