@@ -28,13 +28,11 @@ except ImportError:
 
 
 vim_funcs = {
-	'virtcol': vim_get_func('virtcol', rettype=int),
+	'virtcol': vim_get_func('virtcol', rettype='int'),
 	'getpos': vim_get_func('getpos'),
-	'fnamemodify': vim_get_func('fnamemodify'),
-	'expand': vim_get_func('expand'),
-	'bufnr': vim_get_func('bufnr', rettype=int),
-	'line2byte': vim_get_func('line2byte', rettype=int),
-	'line': vim_get_func('line', rettype=int),
+	'fnamemodify': vim_get_func('fnamemodify', rettype='bytes'),
+	'line2byte': vim_get_func('line2byte', rettype='int'),
+	'line': vim_get_func('line', rettype='int'),
 }
 
 vim_modes = {

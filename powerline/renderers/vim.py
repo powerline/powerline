@@ -12,7 +12,7 @@ from powerline.theme import Theme
 from powerline.lib.unicode import unichr, register_strwidth_error
 
 
-vim_mode = vim_get_func('mode', rettype=str)
+vim_mode = vim_get_func('mode', rettype='unicode')
 if int(vim.eval('v:version')) >= 702:
 	_vim_mode = vim_mode
 	vim_mode = lambda: _vim_mode(1)

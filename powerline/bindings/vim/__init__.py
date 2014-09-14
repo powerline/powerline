@@ -34,48 +34,92 @@ def python_to_vim(o):
 	return python_to_vim_types[type(o)](o)
 
 
+if sys.version_info < (3,):
+	def str_to_bytes(s):
+		return s
+
+	def unicode_eval(expr):
+		ret = vim.eval(expr)
+		return ret.decode(vim_encoding, 'powerline_vim_strtrans_error')
+else:
+	def str_to_bytes(s):
+		return s.encode(vim_encoding)
+
+	def unicode_eval(expr):
+		return vim.eval(expr)
+
+
+def safe_bytes_eval(expr):
+	return bytes(bytearray((
+		int(chunk) for chunk in (
+			vim.eval(
+				b'substitute(' + expr + b', ' +
+				b'\'^.*$\', \'\\=join(map(range(len(submatch(0))), ' +
+				b'"char2nr(submatch(0)[v:val])"))\', "")'
+			).split()
+		)
+	)))
+
+
+def eval_bytes(expr):
+	try:
+		return str_to_bytes(vim.eval(expr))
+	except UnicodeDecodeError:
+		return safe_bytes_eval(expr)
+
+
+def eval_unicode(expr):
+	try:
+		return unicode_eval(expr)
+	except UnicodeDecodeError:
+		return safe_bytes_eval(expr).decode(vim_encoding, 'powerline_vim_strtrans_error')
+
+
 if hasattr(vim, 'bindeval'):
+	rettype_func = {
+		None: lambda f: f,
+		'unicode': (
+			lambda f: (
+				lambda *args, **kwargs: (
+					f(*args, **kwargs).decode(
+						vim_encoding, 'powerline_vim_strtrans_error'
+					))))
+	}
+	rettype_func['int'] = rettype_func['bytes'] = rettype_func[None]
+	rettype_func['str'] = rettype_func['bytes'] if str is bytes else rettype_func['unicode']
+
 	def vim_get_func(f, rettype=None):
 		'''Return a vim function binding.'''
 		try:
 			func = vim.bindeval('function("' + f + '")')
-			if sys.version_info >= (3,) and rettype is str:
-				return (lambda *args, **kwargs: func(*args, **kwargs).decode(
-					vim_encoding, errors='powerline_vim_strtrans_error'))
-			return func
 		except vim.error:
 			return None
+		else:
+			return rettype_func[rettype](func)
 else:
+	rettype_eval = {
+		None: vim.eval,
+		'int': lambda expr: int(vim.eval(expr)),
+		'str': vim.eval,
+		'bytes': eval_bytes,
+		'unicode': eval_unicode,
+	}
+
 	class VimFunc(object):
 		'''Evaluate a vim function using vim.eval().
 
 		This is a fallback class for older vim versions.
 		'''
-		__slots__ = ('f', 'rettype')
+		__slots__ = ('f', 'eval')
 
 		def __init__(self, f, rettype=None):
 			self.f = f.encode('utf-8')
-			self.rettype = rettype
+			self.eval = rettype_eval[rettype]
 
 		def __call__(self, *args):
-			expr = self.f + b'(' + (b','.join((
+			return self.eval(self.f + b'(' + (b','.join((
 				python_to_vim(o) for o in args
-			))) + b')'
-			try:
-				r = vim.eval(expr)
-			except UnicodeDecodeError:
-				r = bytes(bytearray((
-					int(chunk) for chunk in (
-						vim.eval(
-							b'substitute(' + expr + b', ' +
-							b'\'^.*$\', \'\\=join(map(range(len(submatch(0))), ' +
-							b'"char2nr(submatch(0)[v:val])"))\', "")'
-						).split()
-					)
-				)))
-			if self.rettype:
-				return self.rettype(r)
-			return r
+			))) + b')')
 
 	vim_get_func = VimFunc
 
@@ -110,7 +154,7 @@ else:
 		list: (lambda value: [_vim_to_python(i) for i in value]),
 	}
 
-	_vim_exists = vim_get_func('exists', rettype=int)
+	_vim_exists = vim_get_func('exists', rettype='int')
 
 	def vim_getvar(varname):
 		varname = 'g:' + varname
@@ -295,7 +339,7 @@ if sys.version_info < (3,):
 	def buffer_name(segment_info):
 		return segment_info['buffer'].name
 else:
-	vim_bufname = vim_get_func('bufname')
+	vim_bufname = vim_get_func('bufname', rettype='bytes')
 
 	def buffer_name(segment_info):
 		try:
@@ -306,15 +350,13 @@ else:
 			return name.encode(segment_info['encoding']) if name else None
 
 
-vim_strtrans = vim_get_func('strtrans')
+vim_strtrans = vim_get_func('strtrans', rettype='unicode')
 
 
 def powerline_vim_strtrans_error(e):
 	if not isinstance(e, UnicodeDecodeError):
 		raise NotImplementedError
-	# Assuming &encoding is utf-8 strtrans should not return anything but ASCII 
-	# under current circumstances
-	text = vim_strtrans(e.object[e.start:e.end]).decode()
+	text = vim_strtrans(e.object[e.start:e.end])
 	return (text, e.end)
 
 
