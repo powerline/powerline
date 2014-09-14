@@ -8,6 +8,7 @@ from threading import Lock
 from collections import defaultdict
 
 from powerline.lib.watcher import create_tree_watcher
+from powerline.lib.unicode import out_u
 
 
 def generate_directories(path):
@@ -75,10 +76,10 @@ def get_branch_name(directory, config_file, get_func, create_watcher):
 					raise
 				# Config file does not exist (happens for mercurial)
 				if config_file not in branch_name_cache:
-					branch_name_cache[config_file] = get_func(directory, config_file)
+					branch_name_cache[config_file] = out_u(get_func(directory, config_file))
 		if changed:
 			# Config file has changed or was not tracked
-			branch_name_cache[config_file] = get_func(directory, config_file)
+			branch_name_cache[config_file] = out_u(get_func(directory, config_file))
 		return branch_name_cache[config_file]
 
 
@@ -218,9 +219,15 @@ vcs_props = (
 )
 
 
+vcs_props_bytes = [
+	(vcs, vcs_dir.encode('ascii'), check)
+	for vcs, vcs_dir, check in vcs_props
+]
+
+
 def guess(path, create_watcher):
 	for directory in generate_directories(path):
-		for vcs, vcs_dir, check in vcs_props:
+		for vcs, vcs_dir, check in (vcs_props_bytes if isinstance(path, bytes) else vcs_props):
 			repo_dir = os.path.join(directory, vcs_dir)
 			if check(repo_dir):
 				if os.path.isdir(repo_dir) and not os.access(repo_dir, os.X_OK):

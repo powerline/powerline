@@ -9,6 +9,7 @@ from locale import getpreferredencoding
 
 from powerline.lib.vcs import get_branch_name, get_file_status
 from powerline.lib.shell import readlines
+from powerline.lib.path import join
 
 
 _ref_pat = re.compile(br'ref:\s*refs/heads/(.+)')
@@ -27,15 +28,17 @@ def branch_name_from_config_file(directory, config_file):
 
 
 def git_directory(directory):
-	path = os.path.join(directory, '.git')
+	path = join(directory, '.git')
 	if os.path.isfile(path):
 		with open(path, 'rb') as f:
 			raw = f.read()
 			if not raw.startswith(b'gitdir: '):
 				raise IOError('invalid gitfile format')
-			raw = raw[8:].decode(sys.getfilesystemencoding() or 'utf-8')
-			if raw[-1] == '\n':
+			raw = raw[8:]
+			if raw[-1:] == b'\n':
 				raw = raw[:-1]
+			if not isinstance(path, bytes):
+				raw = raw.decode(sys.getfilesystemencoding() or 'utf-8')
 			if not raw:
 				raise IOError('no path in gitfile')
 			return os.path.abspath(os.path.join(directory, raw))
@@ -71,18 +74,18 @@ class GitRepository(object):
 			# for some reason I cannot be bothered to figure out.
 			return get_file_status(
 				directory=self.directory,
-				dirstate_file=os.path.join(gitd, 'index'),
+				dirstate_file=join(gitd, 'index'),
 				file_path=path,
 				ignore_file_name='.gitignore',
 				get_func=self.do_status,
 				create_watcher=self.create_watcher,
-				extra_ignore_files=tuple(os.path.join(gitd, x) for x in ('logs/HEAD', 'info/exclude')),
+				extra_ignore_files=tuple(join(gitd, x) for x in ('logs/HEAD', 'info/exclude')),
 			)
 		return self.do_status(self.directory, path)
 
 	def branch(self):
 		directory = git_directory(self.directory)
-		head = os.path.join(directory, 'HEAD')
+		head = join(directory, 'HEAD')
 		return get_branch_name(
 			directory=directory,
 			config_file=head,

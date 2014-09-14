@@ -8,6 +8,7 @@ from locale import getpreferredencoding
 from mercurial import hg, ui, match
 
 from powerline.lib.vcs import get_branch_name, get_file_status
+from powerline.lib.path import join
 
 
 def branch_name_from_config_file(directory, config_file):
@@ -52,7 +53,7 @@ class Repository(object):
 		if path:
 			return get_file_status(
 				directory=self.directory,
-				dirstate_file=os.path.join(self.directory, '.hg', 'dirstate'),
+				dirstate_file=join(self.directory, '.hg', 'dirstate'),
 				file_path=path,
 				ignore_file_name='.hgignore',
 				get_func=self.do_status,
@@ -77,7 +78,7 @@ class Repository(object):
 			return self.repo_statuses_str[resulting_status]
 
 	def branch(self):
-		config_file = os.path.join(self.directory, '.hg', 'branch')
+		config_file = join(self.directory, '.hg', 'branch')
 		return get_branch_name(
 			directory=self.directory,
 			config_file=config_file,
