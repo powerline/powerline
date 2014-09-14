@@ -9,14 +9,29 @@ try:
 except ImportError:
 	vim = {}
 
-if not hasattr(vim, 'bindeval'):
-	import json
+from powerline.lib.unicode import unicode
 
 
 try:
 	vim_encoding = vim.eval('&encoding')
 except AttributeError:
 	vim_encoding = 'utf-8'
+
+
+python_to_vim_types = {
+	unicode: (
+		lambda o: b'\'' + (o.translate({
+			ord('\''): '\'\'',
+		}).encode(vim_encoding)) + b'\''
+	),
+	bytes: (lambda o: b'\'' + o.replace(b'\'', b'\'\'') + b'\''),
+	int: (str if str is bytes else (lambda o: unicode(o).encode('ascii'))),
+}
+python_to_vim_types[float] = python_to_vim_types[int]
+
+
+def python_to_vim(o):
+	return python_to_vim_types[type(o)](o)
 
 
 if hasattr(vim, 'bindeval'):
@@ -39,11 +54,25 @@ else:
 		__slots__ = ('f', 'rettype')
 
 		def __init__(self, f, rettype=None):
-			self.f = f
+			self.f = f.encode('utf-8')
 			self.rettype = rettype
 
 		def __call__(self, *args):
-			r = vim.eval(self.f + '(' + json.dumps(args)[1:-1] + ')')
+			expr = self.f + b'(' + (b','.join((
+				python_to_vim(o) for o in args
+			))) + b')'
+			try:
+				r = vim.eval(expr)
+			except UnicodeDecodeError:
+				r = bytes(bytearray((
+					int(chunk) for chunk in (
+						vim.eval(
+							b'substitute(' + expr + b', ' +
+							b'\'^.*$\', \'\\=join(map(range(len(submatch(0))), ' +
+							b'"char2nr(submatch(0)[v:val])"))\', "")'
+						).split()
+					)
+				)))
 			if self.rettype:
 				return self.rettype(r)
 			return r
@@ -140,7 +169,7 @@ else:
 
 	def vim_setoption(option, value):
 		vim.command('let &g:{option} = {value}'.format(
-			option=option, value=json.encode(value)))
+			option=option, value=python_to_vim(value)))
 
 
 if hasattr(vim, 'tabpages'):
