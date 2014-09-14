@@ -489,7 +489,7 @@ def branch(pl, segment_info, create_watcher, status_colors=False):
 
 	Divider highlight group used: ``branch:divider``.
 	'''
-	name = segment_info['buffer'].name
+	name = buffer_name(segment_info)
 	skip = not (name and (not vim_getbufoption(segment_info, 'buftype')))
 	if not skip:
 		repo = guess(path=name, create_watcher=create_watcher)
@@ -513,7 +513,7 @@ def file_vcs_status(pl, segment_info, create_watcher):
 
 	Highlight groups used: ``file_vcs_status``.
 	'''
-	name = segment_info['buffer'].name
+	name = buffer_name(segment_info)
 	skip = not (name and (not vim_getbufoption(segment_info, 'buftype')))
 	if not skip:
 		repo = guess(path=name, create_watcher=create_watcher)
