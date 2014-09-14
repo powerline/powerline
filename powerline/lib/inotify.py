@@ -174,7 +174,7 @@ class INotify(object):
 			pos += self.hdr.size
 			name = None
 			if get_name:
-				name = raw[pos:pos + name_len].rstrip(b'\0').decode(self.fenc)
+				name = raw[pos:pos + name_len].rstrip(b'\0')
 			pos += name_len
 			self.process_event(wd, mask, cookie, name)
 

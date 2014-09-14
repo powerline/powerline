@@ -247,6 +247,8 @@ class INotifyTreeWatcher(INotify):
 			if mask & self.CREATE:
 				# A new sub-directory might have been created, monitor it.
 				try:
+					if not isinstance(path, bytes):
+						name = name.decode(self.fenc)
 					self.add_watch(os.path.join(path, name))
 				except OSError as e:
 					if e.errno == errno.ENOENT:
