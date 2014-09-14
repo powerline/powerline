@@ -154,9 +154,10 @@ class UvTreeWatcher(UvWatcher):
 		self.watch_directory(self.basedir)
 
 	def watch_directory(self, path):
-		os.path.walk(normpath(path, self.fenc), self.watch_one_directory, None)
+		for root, dirs, files in os.walk(normpath(path, self.fenc)):
+			self.watch_one_directory(root)
 
-	def watch_one_directory(self, arg, dirname, fnames):
+	def watch_one_directory(self, dirname):
 		try:
 			self.watch(dirname)
 		except OSError:
