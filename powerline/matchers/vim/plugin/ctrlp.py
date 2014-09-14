@@ -3,10 +3,13 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 
 import os
 
+from powerline.bindings.vim import buffer_name
+
+
 try:
 	import vim
 except ImportError:
-	vim = object()
+	pass
 else:
 	vim.command('''
 	function! Powerline_plugin_ctrlp_main(...)
@@ -26,5 +29,5 @@ else:
 
 
 def ctrlp(matcher_info):
-	name = matcher_info['buffer'].name
-	return name and os.path.basename(name) == 'ControlP'
+	name = buffer_name(matcher_info)
+	return name and os.path.basename(name) == b'ControlP'
