@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.abspath(os.getcwd()))
 extensions = ['powerline_autodoc', 'sphinx.ext.todo', 'sphinx.ext.coverage', 'sphinx.ext.viewcode']
 source_suffix = '.rst'
 master_doc = 'index'
-project = u'Powerline'
+project = 'Powerline'
 version = 'beta'
 release = 'beta'
 exclude_patterns = ['_build']

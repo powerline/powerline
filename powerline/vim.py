@@ -2,6 +2,7 @@
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 import sys
+import json
 
 from itertools import count
 
@@ -10,9 +11,6 @@ import vim
 from powerline.bindings.vim import vim_get_func, vim_getvar
 from powerline import Powerline, FailedUnicode
 from powerline.lib import mergedicts
-
-if not hasattr(vim, 'bindeval'):
-	import json
 
 
 def _override_from(config, override_varname):
@@ -134,7 +132,7 @@ class VimPowerline(Powerline):
 		set_pycmd(pycmd)
 
 		# pyeval() and vim.bindeval were both introduced in one patch
-		if not hasattr(vim, 'bindeval') and can_replace_pyeval:
+		if (not hasattr(vim, 'bindeval') and can_replace_pyeval) or pyeval == 'PowerlinePyeval':
 			vim.command(('''
 				function! PowerlinePyeval(e)
 					{pycmd} powerline.do_pyeval()
@@ -148,23 +146,30 @@ class VimPowerline(Powerline):
 		self.update_renderer()
 		__main__.powerline = self
 
-		if (
-			bool(int(vim.eval("has('gui_running') && argc() == 0")))
-			and not vim.current.buffer.name
-			and len(vim.windows) == 1
-		):
-			# Hack to show startup screen. Problems in GUI:
-			# - Defining local value of &statusline option while computing global
-			#   value purges startup screen.
-			# - Defining highlight group while computing statusline purges startup
-			#   screen.
-			# This hack removes the “while computing statusline” part: both things 
-			# are defined, but they are defined right now.
-			#
-			# The above condition disables this hack if no GUI is running, Vim did 
-			# not open any files and there is only one window. Without GUI 
-			# everything works, in other cases startup screen is not shown.
-			self.new_window()
+		try:
+			if (
+				bool(int(vim.eval("has('gui_running') && argc() == 0")))
+				and not vim.current.buffer.name
+				and len(vim.windows) == 1
+			):
+				# Hack to show startup screen. Problems in GUI:
+				# - Defining local value of &statusline option while computing
+				#   global value purges startup screen.
+				# - Defining highlight group while computing statusline purges
+				#   startup screen.
+				# This hack removes the “while computing statusline” part: both 
+				# things are defined, but they are defined right now.
+				#
+				# The above condition disables this hack if no GUI is running, 
+				# Vim did not open any files and there is only one window. 
+				# Without GUI everything works, in other cases startup screen is 
+				# not shown.
+				self.new_window()
+		except UnicodeDecodeError:
+			# vim.current.buffer.name may raise UnicodeDecodeError when using 
+			# Python-3*. Fortunately, this means that current buffer is not 
+			# empty buffer, so the above condition should be False.
+			pass
 
 		# Cannot have this in one line due to weird newline handling (in :execute 
 		# context newline is considered part of the command in just the same cases 
@@ -245,14 +250,15 @@ class VimPowerline(Powerline):
 	def new_window(self):
 		return self.render(*self.win_idx(None))
 
-	if not hasattr(vim, 'bindeval'):
-		# Method for PowerlinePyeval function. Is here to reduce the number of 
-		# requirements to __main__ globals to just one powerline object 
-		# (previously it required as well vim and json)
-		@staticmethod
-		def do_pyeval():
-			import __main__
-			vim.command('return ' + json.dumps(eval(vim.eval('a:e'), __main__.__dict__)))
+	@staticmethod
+	def do_pyeval():
+		'''Evaluate python string passed to PowerlinePyeval
+
+		Is here to reduce the number of requirements to __main__ globals to just 
+		one powerline object (previously it required as well vim and json).
+		'''
+		import __main__
+		vim.command('return ' + json.dumps(eval(vim.eval('a:e'), __main__.__dict__)))
 
 	def setup_components(self, components):
 		if components is None:

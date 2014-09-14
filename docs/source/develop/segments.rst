@@ -371,6 +371,10 @@ Vim ``segment_info`` argument is a dictionary with the following keys:
 ``mode``
     Current mode.
 
+``encoding``
+    Value of ``&encoding`` from the time when powerline was initialized. It 
+    should be used to convert return values.
+
 .. note::
     Your segment generally should not assume that it is run for the current 
     window, current buffer or current tabpage. “Current window” and “current 

@@ -4,6 +4,7 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 import atexit
 
 from weakref import WeakValueDictionary, ref
+from locale import getpreferredencoding
 
 import zsh
 
@@ -65,7 +66,7 @@ class Args(object):
 
 def string(s):
 	if type(s) is bytes:
-		return s.decode('utf-8', 'replace')
+		return s.decode(getpreferredencoding(), 'replace')
 	else:
 		return str(s)
 
@@ -154,9 +155,9 @@ class Prompt(object):
 		)
 		if type(r) is not str:
 			if type(r) is bytes:
-				return r.decode('utf-8')
+				return r.decode(getpreferredencoding(), 'replace')
 			else:
-				return r.encode('utf-8')
+				return r.encode(getpreferredencoding(), 'replace')
 		return r
 
 	def __del__(self):

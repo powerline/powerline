@@ -52,6 +52,23 @@ def powerline_decode_error(e):
 codecs.register_error('powerline_decode_error', powerline_decode_error)
 
 
+last_swe_idx = 0
+
+
+def register_strwidth_error(strwidth):
+	global last_swe_idx
+	last_swe_idx += 1
+
+	def powerline_encode_strwidth_error(e):
+		if not isinstance(e, UnicodeEncodeError):
+			raise NotImplementedError
+		return ('?' * strwidth(e.object[e.start:e.end]), e.end)
+
+	ename = 'powerline_encode_strwidth_error_{0}'.format(last_swe_idx)
+	codecs.register_error(ename, powerline_encode_strwidth_error)
+	return ename
+
+
 def out_u(s):
 	'''Return unicode string suitable for displaying
 

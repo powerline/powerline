@@ -123,8 +123,6 @@ class INotify(object):
 		self._buf = ctypes.create_string_buffer(5000)
 		self.fenc = sys.getfilesystemencoding() or 'utf-8'
 		self.hdr = struct.Struct(b'iIII')
-		if self.fenc == 'ascii':
-			self.fenc = 'utf-8'
 		# We keep a reference to os to prevent it from being deleted
 		# during interpreter shutdown, which would lead to errors in the
 		# __del__ method
@@ -176,7 +174,7 @@ class INotify(object):
 			pos += self.hdr.size
 			name = None
 			if get_name:
-				name = raw[pos:pos + name_len].rstrip(b'\0').decode(self.fenc)
+				name = raw[pos:pos + name_len].rstrip(b'\0')
 			pos += name_len
 			self.process_event(wd, mask, cookie, name)
 

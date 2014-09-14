@@ -8,6 +8,7 @@ from functools import partial
 
 from powerline.segments import shell, tmux, common
 from powerline.lib.vcs import get_fallback_create_watcher
+from powerline.lib.unicode import out_u
 
 import tests.vim as vim_module
 
@@ -18,10 +19,10 @@ from tests import TestCase, SkipTest
 def get_dummy_guess(**kwargs):
 	if 'directory' in kwargs:
 		def guess(path, create_watcher):
-			return Args(branch=lambda: os.path.basename(path), **kwargs)
+			return Args(branch=lambda: out_u(os.path.basename(path)), **kwargs)
 	else:
 		def guess(path, create_watcher):
-			return Args(branch=lambda: os.path.basename(path), directory=path, **kwargs)
+			return Args(branch=lambda: out_u(os.path.basename(path)), directory=path, **kwargs)
 	return guess
 
 
