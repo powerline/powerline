@@ -132,7 +132,10 @@ _getbufvar = vim_get_func('getbufvar')
 if hasattr(vim, 'vvars') and vim.vvars['version'] > 703:
 	_vim_to_python_types = {
 		getattr(vim, 'Dictionary', None) or type(vim.bindeval('{}')):
-			lambda value: dict(((key, _vim_to_python(value[key])) for key in value.keys())),
+			lambda value: dict((
+				(_vim_to_python(k), _vim_to_python(v))
+				for k, v in value.items()
+			)),
 		getattr(vim, 'List', None) or type(vim.bindeval('[]')):
 			lambda value: [_vim_to_python(item) for item in value],
 		getattr(vim, 'Function', None) or type(vim.bindeval('function("mode")')):
