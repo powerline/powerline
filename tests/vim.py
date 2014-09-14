@@ -651,6 +651,7 @@ def _get_segment_info():
 		'tabnr': tabpage.number,
 		'window_id': window._window_id,
 		'mode': mode,
+		'encoding': options['encoding'],
 	}
 
 

@@ -5,6 +5,8 @@ import os
 import sys
 import re
 
+from locale import getpreferredencoding
+
 from powerline.lib.vcs import get_branch_name, get_file_status
 from powerline.lib.shell import readlines
 
@@ -20,7 +22,7 @@ def branch_name_from_config_file(directory, config_file):
 		return os.path.basename(directory)
 	m = _ref_pat.match(raw)
 	if m is not None:
-		return m.group(1).decode('utf-8', 'replace')
+		return m.group(1).decode(getpreferredencoding(), 'replace')
 	return raw[:7]
 
 

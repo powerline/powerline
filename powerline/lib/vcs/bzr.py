@@ -6,6 +6,7 @@ import os
 import re
 
 from io import StringIO
+from locale import getpreferredencoding
 
 from bzrlib import (workingtree, status, library_state, trace, ui)
 
@@ -15,7 +16,7 @@ from powerline.lib.vcs import get_branch_name, get_file_status
 class CoerceIO(StringIO):
 	def write(self, arg):
 		if isinstance(arg, bytes):
-			arg = arg.decode('utf-8', 'replace')
+			arg = arg.decode(getpreferredencoding(), 'replace')
 		return super(CoerceIO, self).write(arg)
 
 
@@ -29,7 +30,7 @@ def branch_name_from_config_file(directory, config_file):
 			for line in f:
 				m = nick_pat.match(line)
 				if m is not None:
-					ans = m.group(1).strip().decode('utf-8', 'replace')
+					ans = m.group(1).strip().decode(getpreferredencoding(), 'replace')
 					break
 	except Exception:
 		pass

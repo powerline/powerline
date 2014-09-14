@@ -225,7 +225,7 @@ def file_scheme(pl, segment_info):
 		name will look like :file:`zipfile:/path/to/archive.zip::file.txt`. 
 		``file_scheme`` segment will catch ``zipfile`` part here.
 	'''
-	name = buffer_name(segment_info['buffer'])
+	name = buffer_name(segment_info)
 	if not name:
 		return None
 	match = SCHEME_RE.match(name)
@@ -254,7 +254,7 @@ def file_directory(pl, segment_info, remove_scheme=True, shorten_user=True, shor
 		Shorten all directories in :file:`/home/` to :file:`~user/` instead of 
 		:file:`/home/user/`. Does not work for files with scheme present.
 	'''
-	name = buffer_name(segment_info['buffer'])
+	name = buffer_name(segment_info)
 	if not name:
 		return None
 	match = SCHEME_RE.match(name)
@@ -271,7 +271,7 @@ def file_directory(pl, segment_info, remove_scheme=True, shorten_user=True, shor
 			return None
 		if shorten_home and file_directory.startswith('/home/'):
 			file_directory = b'~' + file_directory[6:]
-	file_directory = file_directory.decode('utf-8', 'powerline_vim_strtrans_error')
+	file_directory = file_directory.decode(segment_info['encoding'], 'powerline_vim_strtrans_error')
 	return file_directory + os.sep
 
 
@@ -286,7 +286,7 @@ def file_name(pl, segment_info, display_no_file=False, no_file_text='[No file]')
 
 	Highlight groups used: ``file_name_no_file`` or ``file_name``, ``file_name``.
 	'''
-	name = buffer_name(segment_info['buffer'])
+	name = buffer_name(segment_info)
 	if not name:
 		if display_no_file:
 			return [{
@@ -295,7 +295,7 @@ def file_name(pl, segment_info, display_no_file=False, no_file_text='[No file]')
 			}]
 		else:
 			return None
-	return os.path.basename(name).decode('utf-8', 'powerline_vim_strtrans_error')
+	return os.path.basename(name).decode(segment_info['encoding'], 'powerline_vim_strtrans_error')
 
 
 @window_cached

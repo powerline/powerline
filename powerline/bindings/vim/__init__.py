@@ -13,13 +13,20 @@ if not hasattr(vim, 'bindeval'):
 	import json
 
 
+try:
+	vim_encoding = vim.eval('&encoding')
+except AttributeError:
+	vim_encoding = 'utf-8'
+
+
 if hasattr(vim, 'bindeval'):
 	def vim_get_func(f, rettype=None):
 		'''Return a vim function binding.'''
 		try:
 			func = vim.bindeval('function("' + f + '")')
 			if sys.version_info >= (3,) and rettype is str:
-				return (lambda *args, **kwargs: func(*args, **kwargs).decode('utf-8', errors='replace'))
+				return (lambda *args, **kwargs: func(*args, **kwargs).decode(
+					vim_encoding, errors='powerline_vim_strtrans_error'))
 			return func
 		except vim.error:
 			return None
@@ -102,7 +109,7 @@ else:
 if sys.version_info < (3,):
 	getbufvar = _getbufvar
 else:
-	_vim_to_python_types[bytes] = lambda value: value.decode('utf-8')
+	_vim_to_python_types[bytes] = lambda value: value.decode(vim_encoding)
 
 	def getbufvar(*args):
 		return _vim_to_python(_getbufvar(*args))
@@ -256,18 +263,18 @@ class VimEnviron(object):
 
 
 if sys.version_info < (3,):
-	def buffer_name(buf):
-		return buf.name
+	def buffer_name(segment_info):
+		return segment_info['buffer'].name
 else:
 	vim_bufname = vim_get_func('bufname')
 
-	def buffer_name(buf):
+	def buffer_name(segment_info):
 		try:
-			name = buf.name
+			name = segment_info['buffer'].name
 		except UnicodeDecodeError:
-			return vim_bufname(buf.number)
+			return vim_bufname(segment_info['bufnr'])
 		else:
-			return name.encode('utf-8') if name else None
+			return name.encode(segment_info['encoding']) if name else None
 
 
 vim_strtrans = vim_get_func('strtrans')
