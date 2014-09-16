@@ -26,5 +26,5 @@ def current_tag(pl, flags='s'):
 		.. _`official documentation`: https://github.com/majutsushi/tagbar/blob/master/doc/tagbar.txt
 	'''
 	if not int(vim.eval('exists(":Tagbar")')):
-		return
+		return None
 	return vim.eval('tagbar#currenttag("%s", "", "{0}")'.format(flags))
