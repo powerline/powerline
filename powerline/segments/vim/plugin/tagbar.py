@@ -14,16 +14,16 @@ def current_tag(pl, flags='s'):
 	'''Return tag that is near the cursor.
 
 	:param str flags:
-		Specifies additional properties of the displayed tag.  
-		Supported values:
+		Specifies additional properties of the displayed tag. Supported values:
 
 		* s - display complete signature
 		* f - display the full hierarchy of the tag
 		* p - display the raw prototype
 
-		More info at `official doc
-		<https://github.com/majutsushi/tagbar/blob/master/doc/tagbar.txt>`_
-		(search for 'tagbar#currenttag').
+		More info in the `official documentation`_ (search for 
+		“tagbar#currenttag”).
+
+		.. _`official documentation`: https://github.com/majutsushi/tagbar/blob/master/doc/tagbar.txt
 	'''
 	if not int(vim.eval('exists(":Tagbar")')):
 		return
