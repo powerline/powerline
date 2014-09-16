@@ -12,6 +12,9 @@ try:
 except ImportError:
 	from os import environ
 
+# XXX Hack for importing powerline modules to work.
+sys.path.pop(0)
+
 try:
 	from powerline.lib.encoding import get_preferred_output_encoding
 except ImportError:
