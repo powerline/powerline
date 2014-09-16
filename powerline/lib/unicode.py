@@ -4,7 +4,7 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 import sys
 import codecs
 
-from locale import getpreferredencoding
+from powerline.lib.encoding import get_preferred_output_encoding
 
 
 try:
@@ -72,14 +72,14 @@ def register_strwidth_error(strwidth):
 def out_u(s):
 	'''Return unicode string suitable for displaying
 
-	Unlike other functions assumes getpreferredencoding() first. Unlike u() does 
-	not throw exceptions for invalid unicode strings. Unlike safe_unicode() does 
-	throw an exception if object is not a string.
+	Unlike other functions assumes get_preferred_output_encoding() first. Unlike 
+	u() does not throw exceptions for invalid unicode strings. Unlike 
+	safe_unicode() does throw an exception if object is not a string.
 	'''
 	if isinstance(s, unicode):
 		return s
 	elif isinstance(s, bytes):
-		return unicode(s, getpreferredencoding(), 'powerline_decode_error')
+		return unicode(s, get_preferred_output_encoding(), 'powerline_decode_error')
 	else:
 		raise TypeError('Expected unicode or bytes instance, got {0}'.format(repr(type(s))))
 
@@ -92,7 +92,7 @@ def safe_unicode(s):
 	* UTF-8 string
 	* Object with __str__() or __repr__() method that returns UTF-8 string or 
 	  unicode object (depending on python version)
-	* String in locale.getpreferredencoding() encoding
+	* String in powerline.lib.encoding.get_preferred_output_encoding() encoding
 	* If everything failed use safe_unicode on last exception with which 
 	  everything failed
 	'''
@@ -105,7 +105,7 @@ def safe_unicode(s):
 			except TypeError:
 				return unicode(str(s), 'utf-8')
 			except UnicodeDecodeError:
-				return unicode(s, getpreferredencoding())
+				return unicode(s, get_preferred_output_encoding())
 	except Exception as e:
 		return safe_unicode(e)
 

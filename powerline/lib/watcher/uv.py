@@ -2,7 +2,6 @@
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 import os
-import sys
 
 from collections import defaultdict
 from threading import RLock
@@ -11,6 +10,7 @@ from threading import Thread
 from errno import ENOENT
 
 from powerline.lib.path import realpath
+from powerline.lib.encoding import get_preferred_file_name_encoding
 
 
 class UvNotFound(NotImplementedError):
@@ -71,7 +71,7 @@ class UvWatcher(object):
 		self.watches = {}
 		self.lock = RLock()
 		self.loop = start_uv_thread()
-		self.fenc = sys.getfilesystemencoding() or 'utf-8'
+		self.fenc = get_preferred_file_name_encoding()
 
 	def watch(self, path):
 		path = normpath(path, self.fenc)

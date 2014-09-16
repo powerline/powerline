@@ -5,18 +5,15 @@ import sys
 import os
 
 from subprocess import Popen, PIPE
-from locale import getlocale, getdefaultlocale, LC_MESSAGES
 from functools import partial
+
+from powerline.lib.encoding import get_preferred_input_encoding
 
 
 if sys.platform.startswith('win32'):
 	# Prevent windows from launching consoles when calling commands
 	# http://msdn.microsoft.com/en-us/library/windows/desktop/ms684863(v=vs.85).aspx
 	Popen = partial(Popen, creationflags=0x08000000)
-
-
-def _get_shell_encoding():
-	return getlocale(LC_MESSAGES)[1] or getdefaultlocale()[1] or 'utf-8'
 
 
 def run_cmd(pl, cmd, stdin=None):
@@ -38,7 +35,7 @@ def run_cmd(pl, cmd, stdin=None):
 		return None
 	else:
 		stdout, err = p.communicate(stdin)
-		stdout = stdout.decode(_get_shell_encoding())
+		stdout = stdout.decode(get_preferred_input_encoding())
 	return stdout.strip()
 
 
@@ -56,7 +53,7 @@ def readlines(cmd, cwd):
 		Working directory of the command which will be run.
 	'''
 	p = Popen(cmd, shell=False, stdout=PIPE, stderr=PIPE, cwd=cwd)
-	encoding = _get_shell_encoding()
+	encoding = get_preferred_input_encoding()
 	p.stderr.close()
 	with p.stdout:
 		for line in p.stdout:

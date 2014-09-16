@@ -7,12 +7,16 @@ import socket
 import errno
 import os
 
-from locale import getpreferredencoding
-
 try:
 	from posix import environ
 except ImportError:
 	from os import environ
+
+try:
+	from powerline.lib.encoding import get_preferred_output_encoding
+except ImportError:
+	sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(os.path.realpath(__file__)))))
+	from powerline.lib.encoding import get_preferred_output_encoding
 
 
 if len(sys.argv) < 2:
@@ -51,7 +55,7 @@ except Exception:
 	args = ['powerline-render'] + sys.argv[1:]
 	os.execvp('powerline-render', args)
 
-fenc = getpreferredencoding() or 'utf-8'
+fenc = get_preferred_output_encoding()
 
 
 def tobytes(s):

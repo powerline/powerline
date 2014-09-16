@@ -3,19 +3,18 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 
 import os
 
-from locale import getpreferredencoding
-
 from mercurial import hg, ui, match
 
 from powerline.lib.vcs import get_branch_name, get_file_status
 from powerline.lib.path import join
+from powerline.lib.encoding import get_preferred_file_contents_encoding
 
 
 def branch_name_from_config_file(directory, config_file):
 	try:
 		with open(config_file, 'rb') as f:
 			raw = f.read()
-		return raw.decode(getpreferredencoding(), 'replace').strip()
+		return raw.decode(get_preferred_file_contents_encoding(), 'replace').strip()
 	except Exception:
 		return 'default'
 

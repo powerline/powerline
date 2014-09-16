@@ -5,18 +5,18 @@ import os
 import re
 
 from io import StringIO
-from locale import getpreferredencoding
 
 from bzrlib import (workingtree, status, library_state, trace, ui)
 
 from powerline.lib.vcs import get_branch_name, get_file_status
 from powerline.lib.path import join
+from powerline.lib.encoding import get_preferred_file_contents_encoding
 
 
 class CoerceIO(StringIO):
 	def write(self, arg):
 		if isinstance(arg, bytes):
-			arg = arg.decode(getpreferredencoding(), 'replace')
+			arg = arg.decode(get_preferred_file_contents_encoding(), 'replace')
 		return super(CoerceIO, self).write(arg)
 
 
@@ -30,7 +30,7 @@ def branch_name_from_config_file(directory, config_file):
 			for line in f:
 				m = nick_pat.match(line)
 				if m is not None:
-					ans = m.group(1).strip().decode(getpreferredencoding(), 'replace')
+					ans = m.group(1).strip().decode(get_preferred_file_contents_encoding(), 'replace')
 					break
 	except Exception:
 		pass

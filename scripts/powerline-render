@@ -8,13 +8,13 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 import sys
 import os
 
-from locale import getpreferredencoding
-
 try:
 	from powerline.shell import ShellPowerline, get_argparser, finish_args, write_output
 except ImportError:
 	sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(os.path.realpath(__file__)))))
 	from powerline.shell import ShellPowerline, get_argparser, finish_args, write_output
+
+from powerline.lib.unicode import get_preferred_output_encoding
 
 
 if sys.version_info < (3,):
@@ -28,4 +28,4 @@ if __name__ == '__main__':
 	finish_args(args)
 	powerline = ShellPowerline(args, run_once=True)
 	segment_info = {'args': args, 'environ': os.environ}
-	write_output(args, powerline, segment_info, write, getpreferredencoding())
+	write_output(args, powerline, segment_info, write, get_preferred_output_encoding())
