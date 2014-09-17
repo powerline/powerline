@@ -9,6 +9,8 @@ import struct
 
 from ctypes.util import find_library
 
+from powerline.lib.encoding import get_preferred_file_name_encoding
+
 
 __copyright__ = '2013, Kovid Goyal <kovid at kovidgoyal.net>'
 __docformat__ = 'restructuredtext en'
@@ -121,7 +123,7 @@ class INotify(object):
 			raise INotifyError(os.strerror(ctypes.get_errno()))
 
 		self._buf = ctypes.create_string_buffer(5000)
-		self.fenc = sys.getfilesystemencoding() or 'utf-8'
+		self.fenc = get_preferred_file_name_encoding()
 		self.hdr = struct.Struct(b'iIII')
 		# We keep a reference to os to prevent it from being deleted
 		# during interpreter shutdown, which would lead to errors in the

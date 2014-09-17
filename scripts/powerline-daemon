@@ -12,11 +12,11 @@ from select import select
 from signal import signal, SIGTERM
 from time import sleep
 from functools import partial
-from locale import getpreferredencoding
 from io import BytesIO
 
 from powerline.shell import get_argparser, finish_args, ShellPowerline, write_output
 from powerline.lib.monotonic import monotonic
+from powerline.lib.encoding import get_preferred_output_encoding
 
 
 is_daemon = False
@@ -144,7 +144,7 @@ def do_write(conn, result):
 		pass
 
 
-encoding = getpreferredencoding() or 'UTF-8'
+encoding = get_preferred_output_encoding()
 
 
 def safe_bytes(o, encoding=encoding):

@@ -5,7 +5,6 @@ import os
 import sys
 import logging
 
-from locale import getpreferredencoding
 from threading import Lock, Event
 
 from powerline.colorscheme import Colorscheme
@@ -13,6 +12,7 @@ from powerline.lib.config import ConfigLoader
 from powerline.lib.unicode import safe_unicode, FailedUnicode
 from powerline.config import DEFAULT_SYSTEM_CONFIG_DIR
 from powerline.lib import mergedicts
+from powerline.lib.encoding import get_preferred_output_encoding
 
 
 def _config_loader_condition(path):
@@ -413,7 +413,7 @@ class Powerline(object):
 		self.setup_kwargs = {}
 		self.imported_modules = set()
 
-	get_encoding = staticmethod(getpreferredencoding)
+	get_encoding = staticmethod(get_preferred_output_encoding)
 	'''Get encoding used by the current application
 
 	Usually returns encoding of the current locale.

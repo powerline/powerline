@@ -4,13 +4,14 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 import atexit
 
 from weakref import WeakValueDictionary, ref
-from locale import getpreferredencoding
 
 import zsh
 
 from powerline.shell import ShellPowerline
 from powerline.lib import parsedotval
 from powerline.lib.unicode import unicode
+from powerline.lib.encoding import (get_preferred_output_encoding,
+                                    get_preferred_environment_encoding)
 
 
 used_powerlines = WeakValueDictionary()
@@ -66,7 +67,7 @@ class Args(object):
 
 def string(s):
 	if type(s) is bytes:
-		return s.decode(getpreferredencoding(), 'replace')
+		return s.decode(get_preferred_environment_encoding(), 'replace')
 	else:
 		return str(s)
 
@@ -155,9 +156,9 @@ class Prompt(object):
 		)
 		if type(r) is not str:
 			if type(r) is bytes:
-				return r.decode(getpreferredencoding(), 'replace')
+				return r.decode(get_preferred_output_encoding(), 'replace')
 			else:
-				return r.encode(getpreferredencoding(), 'replace')
+				return r.encode(get_preferred_output_encoding(), 'replace')
 		return r
 
 	def __del__(self):

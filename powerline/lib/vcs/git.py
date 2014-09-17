@@ -2,14 +2,13 @@
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 import os
-import sys
 import re
-
-from locale import getpreferredencoding
 
 from powerline.lib.vcs import get_branch_name, get_file_status
 from powerline.lib.shell import readlines
 from powerline.lib.path import join
+from powerline.lib.encoding import (get_preferred_file_name_encoding,
+                                    get_preferred_file_contents_encoding)
 
 
 _ref_pat = re.compile(br'ref:\s*refs/heads/(.+)')
@@ -23,7 +22,7 @@ def branch_name_from_config_file(directory, config_file):
 		return os.path.basename(directory)
 	m = _ref_pat.match(raw)
 	if m is not None:
-		return m.group(1).decode(getpreferredencoding(), 'replace')
+		return m.group(1).decode(get_preferred_file_contents_encoding(), 'replace')
 	return raw[:7]
 
 
@@ -38,7 +37,7 @@ def git_directory(directory):
 			if raw[-1:] == b'\n':
 				raw = raw[:-1]
 			if not isinstance(path, bytes):
-				raw = raw.decode(sys.getfilesystemencoding() or 'utf-8')
+				raw = raw.decode(get_preferred_file_name_encoding())
 			if not raw:
 				raise IOError('no path in gitfile')
 			return os.path.abspath(os.path.join(directory, raw))
