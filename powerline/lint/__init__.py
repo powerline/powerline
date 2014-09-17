@@ -1465,7 +1465,7 @@ def generate_json_config_loader(lhadproblem):
 	return load_json_config
 
 
-def check(paths=None, debug=False):
+def check(paths=None, debug=False, echoerr=echoerr):
 	search_paths = paths or get_config_paths()
 	find_config_files = generate_config_finder(lambda: search_paths)
 
@@ -1507,7 +1507,7 @@ def check(paths=None, debug=False):
 						paths['top_' + typ].append(extpath)
 			else:
 				hadproblem = True
-				sys.stderr.write('Path {0} is supposed to be a directory, but it is not\n'.format(d))
+				ee(problem='Path {0} is supposed to be a directory, but it is not'.format(d))
 
 	hadproblem = False
 
@@ -1522,7 +1522,7 @@ def check(paths=None, debug=False):
 							lists[typ].add(name)
 							if name.startswith('__') or name.endswith('__'):
 								hadproblem = True
-								sys.stderr.write('File name is not supposed to start or end with “__”: {0}'.format(
+								ee(problem='File name is not supposed to start or end with “__”: {0}'.format(
 									os.path.join(d, subp)
 								))
 						configs[typ][ext][name] = os.path.join(d, subp)
@@ -1536,7 +1536,7 @@ def check(paths=None, debug=False):
 		for ext in diff:
 			typ = 'colorschemes' if ext in configs['themes'] else 'themes'
 			if not configs['top_' + typ] or typ == 'themes':
-				sys.stderr.write('{0} extension {1} not present in {2}\n'.format(
+				ee(problem='{0} extension {1} not present in {2}'.format(
 					ext,
 					'configuration' if (ext in paths['themes'] and ext in paths['colorschemes']) else 'directory',
 					typ,
@@ -1546,11 +1546,11 @@ def check(paths=None, debug=False):
 		main_config = load_config('config', find_config_files, config_loader)
 	except IOError:
 		main_config = {}
-		sys.stderr.write('\nConfiguration file not found: config.json\n')
+		ee(problem='Configuration file not found: config.json')
 		hadproblem = True
 	except MarkedError as e:
 		main_config = {}
-		sys.stderr.write(str(e) + '\n')
+		ee(problem=str(e))
 		hadproblem = True
 	else:
 		if main_spec.match(
@@ -1567,11 +1567,11 @@ def check(paths=None, debug=False):
 		colors_config = load_config('colors', find_config_files, config_loader)
 	except IOError:
 		colors_config = {}
-		sys.stderr.write('\nConfiguration file not found: colors.json\n')
+		ee(problem='Configuration file not found: colors.json')
 		hadproblem = True
 	except MarkedError as e:
 		colors_config = {}
-		sys.stderr.write(str(e) + '\n')
+		ee(problem=str(e))
 		hadproblem = True
 	else:
 		if colors_spec.match(colors_config, context=init_context(colors_config), echoerr=ee)[1]:
@@ -1592,7 +1592,7 @@ def check(paths=None, debug=False):
 			try:
 				config, lhadproblem = load(config_file_fp)
 			except MarkedError as e:
-				sys.stderr.write(str(e) + '\n')
+				ee(problem=str(e))
 				hadproblem = True
 				continue
 		if lhadproblem:
@@ -1609,7 +1609,7 @@ def check(paths=None, debug=False):
 				try:
 					config, lhadproblem = load(config_file_fp)
 				except MarkedError as e:
-					sys.stderr.write(str(e) + '\n')
+					ee(problem=str(e))
 					hadproblem = True
 					continue
 			if lhadproblem:
@@ -1662,7 +1662,7 @@ def check(paths=None, debug=False):
 				try:
 					config, lhadproblem = load(config_file_fp)
 				except MarkedError as e:
-					sys.stderr.write(str(e) + '\n')
+					ee(problem=str(e))
 					hadproblem = True
 					continue
 			if lhadproblem:
@@ -1675,7 +1675,7 @@ def check(paths=None, debug=False):
 			try:
 				config, lhadproblem = load(config_file_fp)
 			except MarkedError as e:
-				sys.stderr.write(str(e) + '\n')
+				ee(problem=str(e))
 				hadproblem = True
 				continue
 			if lhadproblem:
