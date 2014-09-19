@@ -290,6 +290,24 @@ theme_spec = common_theme_spec().update(
 
 
 def check(paths=None, debug=False, echoerr=echoerr, require_ext=None):
+	'''Check configuration sanity
+
+	:param list paths:
+		Paths from which configuration should be loaded.
+	:param bool debug:
+		Determines whether some information useful for debugging linter should 
+		be output.
+	:param function echoerr:
+		Function that will be used to echo the error(s). Should accept four 
+		optional keyword parameters: ``problem`` and ``problem_mark``, and 
+		``context`` and ``context_mark``.
+	:param str require_ext:
+		Require configuration for some extension to be present.
+
+	:return:
+		``False`` if user configuration seems to be completely sane and ``True`` 
+		if some problems were found.
+	'''
 	search_paths = paths or get_config_paths()
 	find_config_files = generate_config_finder(lambda: search_paths)
 
