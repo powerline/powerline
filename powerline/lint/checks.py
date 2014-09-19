@@ -10,7 +10,7 @@ from powerline.lib.unicode import unicode
 from powerline.lint.markedjson.markedvalue import MarkedUnicode
 from powerline.lint.markedjson.error import DelayedEchoErr, Mark
 from powerline.lint.selfcheck import havemarks
-from powerline.lint.context import list_sep, list_themes, new_context_item
+from powerline.lint.context import list_sep, list_themes
 from powerline.lint.imp import WithPath, import_function, import_segment
 from powerline.lint.spec import Spec
 from powerline.lint.inspect import getconfigargspec
@@ -627,7 +627,7 @@ def check_args_variant(func, args, data, context, echoerr):
 				args[key],
 				args.mark,
 				data,
-				context + new_context_item(key, args),
+				context.enter_key(args, key),
 				echoerr
 			)
 			if khadproblem:

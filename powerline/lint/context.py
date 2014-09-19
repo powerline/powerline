@@ -55,3 +55,6 @@ class Context(tuple):
 	@property
 	def key(self):
 		return key_sep.join((c[0] for c in self))
+
+	def enter_key(self, value, key):
+		return self + ((value.keydict[key], value[key]),)

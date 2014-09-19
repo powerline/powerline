@@ -10,7 +10,7 @@ from powerline.lib.unicode import unicode
 from powerline.lint.markedjson.error import echoerr, DelayedEchoErr
 from powerline.lint.markedjson.markedvalue import MarkedUnicode
 from powerline.lint.selfcheck import havemarks
-from powerline.lint.context import list_sep, new_context_item
+from powerline.lint.context import list_sep
 
 
 class Spec(object):
@@ -322,7 +322,7 @@ class Spec(object):
 							value[key],
 							value.mark,
 							data,
-							context + new_context_item(key, value),
+							context.enter_key(value, key),
 							echoerr
 						)
 						if mhadproblem:
@@ -353,7 +353,7 @@ class Spec(object):
 									value[key],
 									value.mark,
 									data,
-									context + new_context_item(key, value),
+									context.enter_key(value, key),
 									echoerr
 								)
 								if vhadproblem:
