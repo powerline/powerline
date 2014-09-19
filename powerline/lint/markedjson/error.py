@@ -68,8 +68,9 @@ class Mark:
 
 
 def echoerr(*args, **kwargs):
-	sys.stderr.write('\n')
-	sys.stderr.write(format_error(*args, **kwargs) + '\n')
+	stream = kwargs.pop('stream', sys.stderr)
+	stream.write('\n')
+	stream.write(format_error(*args, **kwargs) + '\n')
 
 
 def format_error(context=None, context_mark=None, problem=None, problem_mark=None, note=None):

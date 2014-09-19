@@ -383,6 +383,10 @@ class Spec(object):
 		self.isoptional = True
 		return self
 
+	def required(self):
+		self.isoptional = False
+		return self
+
 	def match_checks(self, *args):
 		hadproblem = False
 		for check in self.checks:
@@ -450,6 +454,12 @@ class Spec(object):
 								        problem=self.ufailmsg(key),
 								        problem_mark=key.mark)
 		return True, hadproblem
+
+	def __getitem__(self, key):
+		return self.specs[self.keys[key]]
+
+	def __setitem__(self, key, value):
+		return self.update(**{key : value})
 
 
 class WithPath(object):
@@ -1465,7 +1475,7 @@ def generate_json_config_loader(lhadproblem):
 	return load_json_config
 
 
-def check(paths=None, debug=False, echoerr=echoerr):
+def check(paths=None, debug=False, echoerr=echoerr, require_ext=None):
 	search_paths = paths or get_config_paths()
 	find_config_files = generate_config_finder(lambda: search_paths)
 
@@ -1474,6 +1484,15 @@ def check(paths=None, debug=False, echoerr=echoerr):
 	logger.addHandler(logging.StreamHandler())
 
 	ee = EchoErr(echoerr, logger)
+
+	if require_ext:
+		used_main_spec = main_spec.copy()
+		try:
+			used_main_spec['ext'][require_ext].required()
+		except KeyError:
+			used_main_spec['ext'][require_ext] = ext_spec()
+	else:
+		used_main_spec = main_spec
 
 	lhadproblem = [False]
 	load_json_config = generate_json_config_loader(lhadproblem)
@@ -1553,7 +1572,7 @@ def check(paths=None, debug=False, echoerr=echoerr):
 		ee(problem=str(e))
 		hadproblem = True
 	else:
-		if main_spec.match(
+		if used_main_spec.match(
 			main_config,
 			data={'configs': configs, 'lists': lists},
 			context=init_context(main_config),
