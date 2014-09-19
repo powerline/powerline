@@ -8,7 +8,6 @@ from copy import copy
 
 from powerline.lib.unicode import unicode
 from powerline.lint.markedjson.error import echoerr, DelayedEchoErr
-from powerline.lint.markedjson.markedvalue import MarkedUnicode
 from powerline.lint.selfcheck import havemarks
 from powerline.lint.context import list_sep
 
@@ -108,7 +107,7 @@ class Spec(object):
 					item,
 					value.mark,
 					data,
-					context + ((MarkedUnicode('list item ' + unicode(i), item.mark), item),),
+					context.enter_item('list item ' + unicode(i), item),
 					echoerr
 				)
 			else:
@@ -149,7 +148,7 @@ class Spec(object):
 				item,
 				value.mark,
 				data,
-				context + ((MarkedUnicode('tuple item ' + unicode(i), item.mark), item),),
+				context.enter_item('tuple item ' + unicode(i), item),
 				echoerr
 			)
 			if ihadproblem:

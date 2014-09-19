@@ -58,3 +58,6 @@ class Context(tuple):
 
 	def enter_key(self, value, key):
 		return self + ((value.keydict[key], value[key]),)
+
+	def enter_item(self, name, item):
+		return self + ((MarkedUnicode(name, item.mark), item),)
