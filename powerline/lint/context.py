@@ -17,10 +17,6 @@ key_sep = JStr('/')
 list_sep = JStr(', ')
 
 
-def new_context_item(key, value):
-	return ((value.keydict[key], value[key]),)
-
-
 def list_themes(data, context):
 	theme_type = data['theme_type']
 	ext = data['ext']
