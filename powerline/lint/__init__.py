@@ -28,6 +28,16 @@ def open_file(path):
 	return open(path, 'rb')
 
 
+def generate_json_config_loader(lhadproblem):
+	def load_json_config(config_file_path, load=load, open_file=open_file):
+		with open_file(config_file_path) as config_file_fp:
+			r, hadproblem = load(config_file_fp)
+			if hadproblem:
+				lhadproblem[0] = True
+			return r
+	return load_json_config
+
+
 function_name_re = '^(\w+\.)*[a-zA-Z_]\w*$'
 
 
@@ -277,16 +287,6 @@ theme_spec = common_theme_spec().update(
 	).optional().context_message('Error while loading segment data (key {key})'),
 	segments=segdict_spec().update(above=Spec().list(segdict_spec()).optional()),
 )
-
-
-def generate_json_config_loader(lhadproblem):
-	def load_json_config(config_file_path, load=load, open_file=open_file):
-		with open_file(config_file_path) as config_file_fp:
-			r, hadproblem = load(config_file_fp)
-			if hadproblem:
-				lhadproblem[0] = True
-			return r
-	return load_json_config
 
 
 def check(paths=None, debug=False, echoerr=echoerr, require_ext=None):
