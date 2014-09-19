@@ -14,9 +14,3 @@ def havemarks(*args, **kwargs):
 				havemarks(key, val, origin=(origin + '[' + unicode(i) + ']/' + unicode(key)))
 		elif isinstance(v, list):
 			havemarks(*v, origin=(origin + '[' + unicode(i) + ']'))
-
-
-def context_has_marks(context):
-	for i, v in enumerate(context):
-		havemarks(v[0], origin='context key')
-		havemarks(v[1], origin='context val')

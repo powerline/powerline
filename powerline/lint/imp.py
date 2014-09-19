@@ -3,8 +3,7 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 
 import sys
 
-from powerline.lint.selfcheck import havemarks, context_has_marks
-from powerline.lint.context import context_key
+from powerline.lint.selfcheck import havemarks
 
 
 class WithPath(object):
@@ -20,26 +19,25 @@ class WithPath(object):
 
 
 def import_function(function_type, name, data, context, echoerr, module):
-	context_has_marks(context)
 	havemarks(name, module)
 
 	with WithPath(data['import_paths']):
 		try:
 			func = getattr(__import__(str(module), fromlist=[str(name)]), str(name))
 		except ImportError:
-			echoerr(context='Error while checking segments (key {key})'.format(key=context_key(context)),
+			echoerr(context='Error while checking segments (key {key})'.format(key=context.key),
 			        context_mark=name.mark,
 			        problem='failed to import module {0}'.format(module),
 			        problem_mark=module.mark)
 			return None
 		except AttributeError:
-			echoerr(context='Error while loading {0} function (key {key})'.format(function_type, key=context_key(context)),
+			echoerr(context='Error while loading {0} function (key {key})'.format(function_type, key=context.key),
 			        problem='failed to load function {0} from module {1}'.format(name, module),
 			        problem_mark=name.mark)
 			return None
 
 	if not callable(func):
-		echoerr(context='Error while checking segments (key {key})'.format(key=context_key(context)),
+		echoerr(context='Error while checking segments (key {key})'.format(key=context.key),
 		        context_mark=name.mark,
 		        problem='imported "function" {0} from module {1} is not callable'.format(name, module),
 		        problem_mark=module.mark)

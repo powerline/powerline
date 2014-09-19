@@ -5,6 +5,7 @@ import itertools
 
 from powerline.lib.unicode import unicode
 from powerline.lint.markedjson.markedvalue import MarkedUnicode
+from powerline.lint.selfcheck import havemarks
 
 
 class JStr(unicode):
@@ -14,14 +15,6 @@ class JStr(unicode):
 
 key_sep = JStr('/')
 list_sep = JStr(', ')
-
-
-def context_key(context):
-	return key_sep.join((c[0] for c in context))
-
-
-def init_context(config):
-	return ((MarkedUnicode('', config.mark), config),)
 
 
 def new_context_item(key, value):
@@ -42,3 +35,23 @@ def list_themes(data, context):
 		return [(ext, theme) for theme in data['ext_theme_configs'].values()]
 	else:
 		return [(ext, context[0][1])]
+
+
+class Context(tuple):
+	def __new__(cls, base, other=None):
+		if other is not None:
+			return tuple.__new__(cls, tuple.__add__(base, other))
+		else:
+			return tuple.__new__(cls, ((MarkedUnicode('', base.mark), base),))
+
+	def __add__(self, arg):
+		assert(len(arg) == 1)
+		assert(type(arg) is tuple)
+		assert(len(arg[0]) == 2)
+		assert(type(arg[0]) is tuple)
+		havemarks(arg[0][0], arg[0][1])
+		return Context.__new__(Context, self, arg)
+
+	@property
+	def key(self):
+		return key_sep.join((c[0] for c in self))

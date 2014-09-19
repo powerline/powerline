@@ -9,8 +9,8 @@ from powerline.lib.threaded import ThreadedSegment
 from powerline.lib.unicode import unicode
 from powerline.lint.markedjson.markedvalue import MarkedUnicode
 from powerline.lint.markedjson.error import DelayedEchoErr, Mark
-from powerline.lint.selfcheck import havemarks, context_has_marks
-from powerline.lint.context import context_key, list_sep, list_themes, new_context_item
+from powerline.lint.selfcheck import havemarks
+from powerline.lint.context import list_sep, list_themes, new_context_item
 from powerline.lint.imp import WithPath, import_function, import_segment
 from powerline.lint.spec import Spec
 from powerline.lint.inspect import getconfigargspec
@@ -112,7 +112,6 @@ def check_ext(ext, data, context, echoerr):
 
 
 def check_config(d, theme, data, context, echoerr):
-	context_has_marks(context)
 	if len(context) == 4:
 		ext = context[-2][0]
 	else:
@@ -135,10 +134,9 @@ def check_config(d, theme, data, context, echoerr):
 
 
 def check_top_theme(theme, data, context, echoerr):
-	context_has_marks(context)
 	havemarks(theme)
 	if theme not in data['configs']['top_themes']:
-		echoerr(context='Error while checking extension configuration (key {key})'.format(key=context_key(context)),
+		echoerr(context='Error while checking extension configuration (key {key})'.format(key=context.key),
 		        context_mark=context[-2][0].mark,
 		        problem='failed to find top theme {0}'.format(theme),
 		        problem_mark=theme.mark)
@@ -152,7 +150,7 @@ def check_color(color, data, context, echoerr):
 		and color not in data['colors_config'].get('gradients', {})):
 		echoerr(
 			context='Error while checking highlight group in colorscheme (key {key})'.format(
-				key=context_key(context)),
+				key=context.key),
 			problem='found unexistent color or gradient {0}'.format(color),
 			problem_mark=color.mark
 		)
@@ -228,7 +226,7 @@ def check_group(group, data, context, echoerr):
 		if not_found:
 			new_echoerr(
 				context='Error while checking group definition in colorscheme (key {key})'.format(
-					key=context_key(context)),
+					key=context.key),
 				problem='name {0} is not present in {1} {2} colorschemes: {3}'.format(
 					group, tofind, ext, ', '.join(not_found)),
 				problem_mark=group.mark
@@ -238,13 +236,12 @@ def check_group(group, data, context, echoerr):
 
 
 def check_key_compatibility(segment, data, context, echoerr):
-	context_has_marks(context)
 	havemarks(segment)
 	segment_type = segment.get('type', MarkedUnicode('function', None))
 	havemarks(segment_type)
 
 	if segment_type not in type_keys:
-		echoerr(context='Error while checking segments (key {key})'.format(key=context_key(context)),
+		echoerr(context='Error while checking segments (key {key})'.format(key=context.key),
 		        problem='found segment with unknown type {0}'.format(segment_type),
 		        problem_mark=segment_type.mark)
 		return False, False, True
@@ -255,7 +252,7 @@ def check_key_compatibility(segment, data, context, echoerr):
 	if not ((keys - generic_keys) < type_keys[segment_type]):
 		unknown_keys = keys - generic_keys - type_keys[segment_type]
 		echoerr(
-			context='Error while checking segments (key {key})'.format(key=context_key(context)),
+			context='Error while checking segments (key {key})'.format(key=context.key),
 			context_mark=context[-1][1].mark,
 			problem='found keys not used with the current segment type: {0}'.format(
 				list_sep.join(unknown_keys)),
@@ -266,7 +263,7 @@ def check_key_compatibility(segment, data, context, echoerr):
 	if not (keys >= required_keys[segment_type]):
 		missing_keys = required_keys[segment_type] - keys
 		echoerr(
-			context='Error while checking segments (key {key})'.format(key=context_key(context)),
+			context='Error while checking segments (key {key})'.format(key=context.key),
 			context_mark=context[-1][1].mark,
 			problem='found missing required keys: {0}'.format(
 				list_sep.join(missing_keys))
@@ -275,7 +272,7 @@ def check_key_compatibility(segment, data, context, echoerr):
 
 	if not (segment_type == 'function' or (keys & highlight_keys)):
 		echoerr(
-			context='Error while checking segments (key {key})'.format(key=context_key(context)),
+			context='Error while checking segments (key {key})'.format(key=context.key),
 			context_mark=context[-1][1].mark,
 			problem=(
 				'found missing keys required to determine highlight group. '
@@ -295,7 +292,7 @@ def check_segment_module(module, data, context, echoerr):
 		except ImportError as e:
 			if echoerr.logger.level >= logging.DEBUG:
 				echoerr.logger.exception(e)
-			echoerr(context='Error while checking segments (key {key})'.format(key=context_key(context)),
+			echoerr(context='Error while checking segments (key {key})'.format(key=context.key),
 			        problem='failed to import module {0}'.format(module),
 			        problem_mark=module.mark)
 			return True, False, True
@@ -382,7 +379,7 @@ def check_segment_function(function_name, data, context, echoerr):
 			r = hl_exists(divider_hl_group, data, context, echoerr, allow_gradients=True)
 			if r:
 				echoerr(
-					context='Error while checking theme (key {key})'.format(key=context_key(context)),
+					context='Error while checking theme (key {key})'.format(key=context.key),
 					problem=(
 						'found highlight group {0} not defined in the following colorschemes: {1}\n'
 						'(Group name was obtained from function documentation.)'
@@ -421,7 +418,7 @@ def check_segment_function(function_name, data, context, echoerr):
 				]
 				if all(rs):
 					echoerr(
-						context='Error while checking theme (key {key})'.format(key=context_key(context)),
+						context='Error while checking theme (key {key})'.format(key=context.key),
 						problem=(
 							'found highlight groups list ({0}) with all groups not defined in some colorschemes\n'
 							'(Group names were taken from function documentation.)'
@@ -430,7 +427,7 @@ def check_segment_function(function_name, data, context, echoerr):
 					)
 					for r, h in zip(rs, required_pack):
 						echoerr(
-							context='Error while checking theme (key {key})'.format(key=context_key(context)),
+							context='Error while checking theme (key {key})'.format(key=context.key),
 							problem='found highlight group {0} not defined in the following colorschemes: {1}'.format(
 								h[0], list_sep.join(r))
 						)
@@ -439,7 +436,7 @@ def check_segment_function(function_name, data, context, echoerr):
 			r = hl_exists(function_name, data, context, echoerr, allow_gradients=True)
 			if r:
 				echoerr(
-					context='Error while checking theme (key {key})'.format(key=context_key(context)),
+					context='Error while checking theme (key {key})'.format(key=context.key),
 					problem=(
 						'found highlight group {0} not defined in the following colorschemes: {1}\n'
 						'(If not specified otherwise in documentation, '
@@ -463,7 +460,7 @@ def check_segment_function(function_name, data, context, echoerr):
 				and function_name not in data['ext_theme_configs'].get('__main__', {}).get('segment_data', {})
 				and not any(((function_name in theme.get('segment_data', {})) for theme in data['top_themes'].values()))
 			):
-				echoerr(context='Error while checking segments (key {key})'.format(key=context_key(context)),
+				echoerr(context='Error while checking segments (key {key})'.format(key=context.key),
 				        problem='found useless use of name key (such name is not present in theme/segment_data)',
 				        problem_mark=function_name.mark)
 
@@ -501,7 +498,7 @@ def hl_exists(hl_group, data, context, echoerr, allow_gradients=False):
 				if allow_gradients is False and not hascolor and hasgradient:
 					echoerr(
 						context='Error while checking highlight group in theme (key {key})'.format(
-							key=context_key(context)),
+							key=context.key),
 						context_mark=hl_group.mark,
 						problem='group {0} is using gradient {1} instead of a color'.format(hl_group, color),
 						problem_mark=color.mark
@@ -511,7 +508,7 @@ def hl_exists(hl_group, data, context, echoerr, allow_gradients=False):
 			if allow_gradients == 'force' and not hadgradient:
 				echoerr(
 					context='Error while checking highlight group in theme (key {key})'.format(
-						key=context_key(context)),
+						key=context.key),
 					context_mark=hl_group.mark,
 					problem='group {0} should have at least one gradient color, but it has no'.format(hl_group),
 					problem_mark=group_config.mark
@@ -525,7 +522,7 @@ def check_highlight_group(hl_group, data, context, echoerr):
 	r = hl_exists(hl_group, data, context, echoerr)
 	if r:
 		echoerr(
-			context='Error while checking theme (key {key})'.format(key=context_key(context)),
+			context='Error while checking theme (key {key})'.format(key=context.key),
 			problem='found highlight group {0} not defined in the following colorschemes: {1}'.format(
 				hl_group, list_sep.join(r)),
 			problem_mark=hl_group.mark
@@ -539,14 +536,14 @@ def check_highlight_groups(hl_groups, data, context, echoerr):
 	rs = [hl_exists(hl_group, data, context, echoerr) for hl_group in hl_groups]
 	if all(rs):
 		echoerr(
-			context='Error while checking theme (key {key})'.format(key=context_key(context)),
+			context='Error while checking theme (key {key})'.format(key=context.key),
 			problem='found highlight groups list ({0}) with all groups not defined in some colorschemes'.format(
 				list_sep.join((unicode(h) for h in hl_groups))),
 			problem_mark=hl_groups.mark
 		)
 		for r, hl_group in zip(rs, hl_groups):
 			echoerr(
-				context='Error while checking theme (key {key})'.format(key=context_key(context)),
+				context='Error while checking theme (key {key})'.format(key=context.key),
 				problem='found highlight group {0} not defined in the following colorschemes: {1}'.format(
 					hl_group, list_sep.join(r)),
 				problem_mark=hl_group.mark
@@ -611,14 +608,14 @@ def check_args_variant(func, args, data, context, echoerr):
 
 	if required_args - present_args:
 		echoerr(
-			context='Error while checking segment arguments (key {key})'.format(key=context_key(context)),
+			context='Error while checking segment arguments (key {key})'.format(key=context.key),
 			context_mark=args.mark,
 			problem='some of the required keys are missing: {0}'.format(list_sep.join(required_args - present_args))
 		)
 		hadproblem = True
 
 	if not all_args >= present_args:
-		echoerr(context='Error while checking segment arguments (key {key})'.format(key=context_key(context)),
+		echoerr(context='Error while checking segment arguments (key {key})'.format(key=context.key),
 		        context_mark=args.mark,
 		        problem='found unknown keys: {0}'.format(list_sep.join(present_args - all_args)),
 		        problem_mark=next(iter(present_args - all_args)).mark)
@@ -642,7 +639,6 @@ def check_args_variant(func, args, data, context, echoerr):
 
 
 def check_args(get_functions, args, data, context, echoerr):
-	context_has_marks(context)
 	new_echoerr = DelayedEchoErr(echoerr)
 	count = 0
 	hadproblem = False
@@ -657,7 +653,7 @@ def check_args(get_functions, args, data, context, echoerr):
 		if new_echoerr:
 			new_echoerr.echo_all()
 		else:
-			echoerr(context='Error while checking segment arguments (key {key})'.format(key=context_key(context)),
+			echoerr(context='Error while checking segment arguments (key {key})'.format(key=context.key),
 			        context_mark=context[-2][1].mark,
 			        problem='no suitable segments found')
 

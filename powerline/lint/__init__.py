@@ -21,7 +21,7 @@ from powerline.lint.checks import (check_matcher_func, check_ext, check_config, 
                                    check_highlight_groups, check_highlight_group, check_full_segment_data,
                                    get_all_possible_functions, check_segment_data_key)
 from powerline.lint.spec import Spec
-from powerline.lint.context import init_context
+from powerline.lint.context import Context
 
 
 def open_file(path):
@@ -389,7 +389,7 @@ def check(paths=None, debug=False, echoerr=echoerr, require_ext=None):
 		if used_main_spec.match(
 			main_config,
 			data={'configs': configs, 'lists': lists},
-			context=init_context(main_config),
+			context=Context(main_config),
 			echoerr=ee
 		)[1]:
 			hadproblem = True
@@ -407,7 +407,7 @@ def check(paths=None, debug=False, echoerr=echoerr, require_ext=None):
 		ee(problem=str(e))
 		hadproblem = True
 	else:
-		if colors_spec.match(colors_config, context=init_context(colors_config), echoerr=ee)[1]:
+		if colors_spec.match(colors_config, context=Context(colors_config), echoerr=ee)[1]:
 			hadproblem = True
 
 	if lhadproblem[0]:
@@ -432,7 +432,7 @@ def check(paths=None, debug=False, echoerr=echoerr, require_ext=None):
 			hadproblem = True
 		top_colorscheme_configs[colorscheme] = config
 		data['colorscheme'] = colorscheme
-		if top_colorscheme_spec.match(config, context=init_context(config), data=data, echoerr=ee)[1]:
+		if top_colorscheme_spec.match(config, context=Context(config), data=data, echoerr=ee)[1]:
 			hadproblem = True
 
 	ext_colorscheme_configs = defaultdict(lambda: {})
@@ -464,7 +464,7 @@ def check(paths=None, debug=False, echoerr=echoerr, require_ext=None):
 				spec = shell_colorscheme_spec
 			else:
 				spec = colorscheme_spec
-			if spec.match(config, context=init_context(config), data=data, echoerr=ee)[1]:
+			if spec.match(config, context=Context(config), data=data, echoerr=ee)[1]:
 				hadproblem = True
 
 	colorscheme_configs = {}
@@ -533,7 +533,7 @@ def check(paths=None, debug=False, echoerr=echoerr, require_ext=None):
 			else:
 				data['theme_type'] = 'regular'
 				spec = theme_spec
-			if spec.match(config, context=init_context(config), data=data, echoerr=ee)[1]:
+			if spec.match(config, context=Context(config), data=data, echoerr=ee)[1]:
 				hadproblem = True
 
 	for top_theme, config in top_theme_configs.items():
@@ -548,7 +548,7 @@ def check(paths=None, debug=False, echoerr=echoerr, require_ext=None):
 		}
 		data['theme_type'] = 'top'
 		data['theme'] = top_theme
-		if top_theme_spec.match(config, context=init_context(config), data=data, echoerr=ee)[1]:
+		if top_theme_spec.match(config, context=Context(config), data=data, echoerr=ee)[1]:
 			hadproblem = True
 
 	return hadproblem

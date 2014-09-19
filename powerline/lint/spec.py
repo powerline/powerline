@@ -10,7 +10,7 @@ from powerline.lib.unicode import unicode
 from powerline.lint.markedjson.error import echoerr, DelayedEchoErr
 from powerline.lint.markedjson.markedvalue import MarkedUnicode
 from powerline.lint.selfcheck import havemarks
-from powerline.lint.context import context_key, list_sep, new_context_item
+from powerline.lint.context import list_sep, new_context_item
 
 
 class Spec(object):
@@ -74,7 +74,7 @@ class Spec(object):
 		havemarks(value)
 		if type(value.value) not in types:
 			echoerr(
-				context=self.cmsg.format(key=context_key(context)),
+				context=self.cmsg.format(key=context.key),
 				context_mark=context_mark,
 				problem='{0!r} must be a {1} instance, not {2}'.format(
 					value,
@@ -90,7 +90,7 @@ class Spec(object):
 		havemarks(value)
 		proceed, echo, hadproblem = func(value, data, context, echoerr)
 		if echo and hadproblem:
-			echoerr(context=self.cmsg.format(key=context_key(context)),
+			echoerr(context=self.cmsg.format(key=context.key),
 			        context_mark=context_mark,
 			        problem=msg_func(value),
 			        problem_mark=value.mark)
@@ -114,7 +114,7 @@ class Spec(object):
 			else:
 				proceed, echo, fhadproblem = item_func(item, data, context, echoerr)
 				if echo and fhadproblem:
-					echoerr(context=self.cmsg.format(key=context_key(context) + '/list item ' + unicode(i)),
+					echoerr(context=self.cmsg.format(key=context.key + '/list item ' + unicode(i)),
 					        context_mark=value.mark,
 					        problem=msg_func(item),
 					        problem_mark=item.mark)
@@ -332,7 +332,7 @@ class Spec(object):
 					else:
 						if not valspec.isoptional:
 							hadproblem = True
-							echoerr(context=self.cmsg.format(key=context_key(context)),
+							echoerr(context=self.cmsg.format(key=context.key),
 							        context_mark=None,
 							        problem='required key is missing: {0}'.format(key),
 							        problem_mark=value.mark)
@@ -362,7 +362,7 @@ class Spec(object):
 						else:
 							hadproblem = True
 							if self.ufailmsg:
-								echoerr(context=self.cmsg.format(key=context_key(context)),
+								echoerr(context=self.cmsg.format(key=context.key),
 								        context_mark=None,
 								        problem=self.ufailmsg(key),
 								        problem_mark=key.mark)
