@@ -9,7 +9,6 @@ from copy import copy
 from powerline.lib.unicode import unicode
 from powerline.lint.markedjson.error import echoerr, DelayedEchoErr
 from powerline.lint.selfcheck import havemarks
-from powerline.lint.context import list_sep
 
 
 class Spec(object):
@@ -77,7 +76,7 @@ class Spec(object):
 				context_mark=context_mark,
 				problem='{0!r} must be a {1} instance, not {2}'.format(
 					value,
-					list_sep.join((t.__name__ for t in types)),
+					', '.join((t.__name__ for t in types)),
 					type(value.value).__name__
 				),
 				problem_mark=value.mark

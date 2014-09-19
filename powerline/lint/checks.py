@@ -10,10 +10,13 @@ from powerline.lib.unicode import unicode
 from powerline.lint.markedjson.markedvalue import MarkedUnicode
 from powerline.lint.markedjson.error import DelayedEchoErr, Mark
 from powerline.lint.selfcheck import havemarks
-from powerline.lint.context import list_sep, list_themes
+from powerline.lint.context import JStr, list_themes
 from powerline.lint.imp import WithPath, import_function, import_segment
 from powerline.lint.spec import Spec
 from powerline.lint.inspect import getconfigargspec
+
+
+list_sep = JStr(', ')
 
 
 generic_keys = set((

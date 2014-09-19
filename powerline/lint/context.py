@@ -14,7 +14,6 @@ class JStr(unicode):
 
 
 key_sep = JStr('/')
-list_sep = JStr(', ')
 
 
 def list_themes(data, context):
