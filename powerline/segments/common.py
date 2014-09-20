@@ -468,9 +468,10 @@ class WeatherSegment(KwThreadedSegment):
 				location_data = json.loads(urllib_read('http://freegeoip.net/json/'))
 				location = ','.join((
 					location_data['city'],
-					location_data['region_code'],
+					location_data['region_name'],
 					location_data['country_code']
 				))
+				self.info('Location returned by freegeoip is {0}', location)
 			else:
 				location = location_query
 			query_data = {
