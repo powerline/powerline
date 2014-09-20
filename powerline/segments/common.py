@@ -5,6 +5,7 @@ import os
 import sys
 import re
 import socket
+import json
 
 from datetime import datetime
 from multiprocessing import cpu_count as _cpu_count
@@ -450,36 +451,41 @@ temp_units = {
 }
 
 
-class WeatherSegment(ThreadedSegment):
+class WeatherSegment(KwThreadedSegment):
 	interval = 600
+	default_location = None
+	location_urls = {}
 
-	def set_state(self, location_query=None, **kwargs):
-		self.location = location_query
-		self.url = None
-		super(WeatherSegment, self).set_state(**kwargs)
+	@staticmethod
+	def key(location_query=None, **kwargs):
+		return location_query
 
-	def update(self, old_weather):
-		import json
-
-		if not self.url:
-			# Do not lock attribute assignments in this branch: they are used
-			# only in .update()
-			if not self.location:
+	def get_request_url(self, location_query):
+		try:
+			return self.location_urls[location_query]
+		except KeyError:
+			if location_query is None:
 				location_data = json.loads(urllib_read('http://freegeoip.net/json/'))
-				self.location = ','.join((
+				location = ','.join((
 					location_data['city'],
 					location_data['region_code'],
 					location_data['country_code']
 				))
+			else:
+				location = location_query
 			query_data = {
 				'q':
 				'use "https://raw.githubusercontent.com/yql/yql-tables/master/weather/weather.bylocation.xml" as we;'
-				'select * from we where location="{0}" and unit="c"'.format(self.location).encode('utf-8'),
+				'select * from we where location="{0}" and unit="c"'.format(location).encode('utf-8'),
 				'format': 'json',
 			}
-			self.url = 'http://query.yahooapis.com/v1/public/yql?' + urllib_urlencode(query_data)
+			self.location_urls[location_query] = url = (
+				'http://query.yahooapis.com/v1/public/yql?' + urllib_urlencode(query_data))
+			return url
 
-		raw_response = urllib_read(self.url)
+	def compute_state(self, location_query):
+		url = self.get_request_url(location_query)
+		raw_response = urllib_read(url)
 		if not raw_response:
 			self.error('Failed to get response')
 			return
@@ -500,7 +506,7 @@ class WeatherSegment(ThreadedSegment):
 
 		return (temp, icon_names)
 
-	def render(self, weather, icons=None, unit='C', temp_format=None, temp_coldest=-30, temp_hottest=40, **kwargs):
+	def render_one(self, weather, icons=None, unit='C', temp_format=None, temp_coldest=-30, temp_hottest=40, **kwargs):
 		if not weather:
 			return None
 
