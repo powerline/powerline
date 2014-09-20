@@ -70,7 +70,7 @@ class GitRepository(object):
 		if path:
 			gitd = git_directory(self.directory)
 			# We need HEAD as without it using fugitive to commit causes the
-			# current file's status (and only the current file) to not be updated
+			# current file’s status (and only the current file) to not be updated
 			# for some reason I cannot be bothered to figure out.
 			return get_file_status(
 				directory=self.directory,

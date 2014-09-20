@@ -102,7 +102,7 @@ class ThreadedSegment(Segment, MultiRunnedThread):
 	def shutdown(self):
 		self.shutdown_event.set()
 		if self.daemon and self.is_alive():
-			# Give the worker thread a chance to shutdown, but don't block for 
+			# Give the worker thread a chance to shutdown, but don’t block for 
 			# too long
 			self.join(0.01)
 

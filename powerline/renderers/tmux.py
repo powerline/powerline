@@ -13,7 +13,7 @@ class TmuxRenderer(Renderer):
 
 	def hlstyle(self, fg=None, bg=None, attr=None):
 		'''Highlight a segment.'''
-		# We don't need to explicitly reset attributes, so skip those calls
+		# We don’t need to explicitly reset attributes, so skip those calls
 		if not attr and not bg and not fg:
 			return ''
 		tmux_attr = []

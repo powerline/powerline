@@ -128,7 +128,7 @@ class VimRenderer(Renderer):
 
 		If an argument is None, the argument is ignored. If an argument is
 		False, the argument is reset to the terminal defaults. If an argument
-		is a valid color or attribute, it's added to the vim highlight group.
+		is a valid color or attribute, it’s added to the vim highlight group.
 		'''
 		# In order not to hit E541 two consequent identical highlighting 
 		# specifiers may be squashed into one.
@@ -137,7 +137,7 @@ class VimRenderer(Renderer):
 			return ''
 		self.prev_highlight = (fg, bg, attr)
 
-		# We don't need to explicitly reset attributes in vim, so skip those 
+		# We don’t need to explicitly reset attributes in vim, so skip those 
 		# calls
 		if not attr and not bg and not fg:
 			return ''

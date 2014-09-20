@@ -398,7 +398,7 @@ def main():
 		daemonize()
 
 	if use_filesystem:
-		# Create a locked pid file containing the daemon's PID
+		# Create a locked pid file containing the daemon’s PID
 		if lockpidfile() is None:
 			if not args.quiet:
 				sys.stderr.write(

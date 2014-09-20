@@ -175,7 +175,7 @@ class Scanner:
 		if self.check_plain():
 			return self.fetch_plain()
 
-		# No? It's an error. Let's produce a nice error message.
+		# No? It’s an error. Let’s produce a nice error message.
 		raise ScannerError(
 			"while scanning for the next token", None,
 			"found character %r that cannot start any token" % ch,
@@ -186,7 +186,7 @@ class Scanner:
 
 	def next_possible_simple_key(self):
 		# Return the number of the nearest possible simple key. Actually we
-		# don't need to loop through the whole dictionary. We may replace it
+		# don’t need to loop through the whole dictionary. We may replace it
 		# with the following code:
 		# 	if not self.possible_simple_keys:
 		# 		return None
@@ -211,11 +211,11 @@ class Scanner:
 				del self.possible_simple_keys[level]
 
 	def save_possible_simple_key(self):
-		# The next token may start a simple key. We check if it's possible
+		# The next token may start a simple key. We check if it’s possible
 		# and save its position. This function is called for
 		# 	SCALAR(flow), '[', and '{'.
 
-		# The next token might be a simple key. Let's save it's number and
+		# The next token might be a simple key. Let’s save it’s number and
 		# position.
 		if self.allow_simple_key:
 			self.remove_possible_simple_key()
@@ -364,7 +364,7 @@ class Scanner:
 	def scan_flow_scalar(self):
 		# See the specification for details.
 		# Note that we loose indentation rules for quoted scalars. Quoted
-		# scalars don't need to adhere indentation because " and ' clearly
+		# scalars don’t need to adhere indentation because " and ' clearly
 		# mark the beginning and the end of them. Therefore we are less
 		# restrictive then the specification requires. We only need to check
 		# that document separators are not included in scalars.

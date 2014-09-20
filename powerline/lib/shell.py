@@ -85,7 +85,7 @@ except ImportError:
 				and not os.path.isdir(fn)
 			)
 
-		# If we're given a path with a directory part, look it up directly rather
+		# If we’re given a path with a directory part, look it up directly rather
 		# than referring to PATH directories. This includes checking relative to the
 		# current directory, e.g. ./script
 		if os.path.dirname(cmd):
@@ -115,7 +115,7 @@ except ImportError:
 			else:
 				files = [cmd + ext for ext in pathext]
 		else:
-			# On other platforms you don't have things like PATHEXT to tell you
+			# On other platforms you don’t have things like PATHEXT to tell you
 			# what file suffixes are executable, so just pass on cmd as-is.
 			files = [cmd]
 

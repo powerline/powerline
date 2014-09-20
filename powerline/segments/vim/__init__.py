@@ -304,7 +304,7 @@ def file_size(pl, suffix='B', si_prefix=False):
 		string appended to the file size
 	:param bool si_prefix:
 		use SI prefix, e.g. MB instead of MiB
-	:return: file size or None if the file isn't saved or if the size is too big to fit in a number
+	:return: file size or None if the file isn’t saved or if the size is too big to fit in a number
 	'''
 	# Note: returns file size in &encoding, not in &fileencoding. But returned 
 	# size is updated immediately; and it is valid for any buffer

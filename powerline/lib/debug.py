@@ -66,7 +66,7 @@ def print_cycles(objects, outstream=sys.stdout, show_progress=False):
 
 		referents = gc.get_referents(obj)
 		for referent in referents:
-			# If we've found our way back to the start, this is
+			# If we’ve found our way back to the start, this is
 			# a cycle, so print it out
 			if referent is start:
 				try:
@@ -78,13 +78,13 @@ def print_cycles(objects, outstream=sys.stdout, show_progress=False):
 						outstream.write('Cyclic reference: %i\n' % id(referent))
 				print_path(current_path)
 
-			# Don't go back through the original list of objects, or
+			# Don’t go back through the original list of objects, or
 			# through temporary references to the object, since those
 			# are just an artifact of the cycle detector itself.
 			elif referent is objects or isinstance(referent, FrameType): 
 				continue
 
-			# We haven't seen this object before, so recurse
+			# We haven’t seen this object before, so recurse
 			elif id(referent) not in all:
 				recurse(referent, start, all, current_path + (obj,))
 

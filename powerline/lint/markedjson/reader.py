@@ -7,7 +7,7 @@ from powerline.lint.markedjson.error import MarkedError, Mark, NON_PRINTABLE
 from powerline.lib.unicode import unicode
 
 
-# This module contains abstractions for the input stream. You don't have to
+# This module contains abstractions for the input stream. You don’t have to
 # looks further, there are no pretty code.
 
 
@@ -24,7 +24,7 @@ class Reader(object):
 	# Reader accepts
 	#  - a file-like object with its `read` method returning `str`,
 
-	# Yeah, it's ugly and slow.
+	# Yeah, it’s ugly and slow.
 	def __init__(self, stream):
 		self.name = None
 		self.stream = None
