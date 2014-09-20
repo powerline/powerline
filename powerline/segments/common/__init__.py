@@ -2,6 +2,10 @@
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 
+# DEPRECATED MODULE. Do not add any segments below. Do not remove existing 
+# segments as well until next major release.
+
+
 from powerline.segments.common.vcs import branch  # NOQA
 from powerline.segments.common.sys import cpu_load_percent  # NOQA
 from powerline.segments.common.sys import uptime  # NOQA
