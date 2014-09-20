@@ -9,6 +9,7 @@ from powerline.lib.shell import readlines
 from powerline.lib.path import join
 from powerline.lib.encoding import (get_preferred_file_name_encoding,
                                     get_preferred_file_contents_encoding)
+from powerline.lib.shell import which
 
 
 _ref_pat = re.compile(br'ref:\s*refs/heads/(.+)')
@@ -155,6 +156,11 @@ try:
 				return r if r != '   ' else None
 except ImportError:
 	class Repository(GitRepository):
+		def __init__(self, *args, **kwargs):
+			if not which('git'):
+				raise OSError('git executable is not available')
+			super(Repository, self).__init__(*args, **kwargs)
+
 		@staticmethod
 		def ignore_event(path, name):
 			# Ignore changes to the index.lock file, since they happen 
