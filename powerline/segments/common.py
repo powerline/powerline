@@ -53,11 +53,16 @@ def hostname(pl, segment_info, only_if_ssh=False, exclude_domain=False):
 
 @requires_filesystem_watcher
 @requires_segment_info
-def branch(pl, segment_info, create_watcher, status_colors=False):
+def branch(pl, segment_info, create_watcher, status_colors=False, untracked_dirty=True):
 	'''Return the current VCS branch.
 
 	:param bool status_colors:
 		determines whether repository status will be used to determine highlighting. Default: False.
+
+	:param bool untracked_dirty:
+		determines if untracked files will mark repository as dirty. 
+		Applies only if status_colors is True.
+		Default: True.
 
 	Highlight groups used: ``branch_clean``, ``branch_dirty``, ``branch``.
 	'''
@@ -72,7 +77,8 @@ def branch(pl, segment_info, create_watcher, status_colors=False):
 			except Exception as e:
 				pl.exception('Failed to compute tree status: {0}', str(e))
 				status = '?'
-			scol.insert(0, 'branch_dirty' if status and status.strip() else 'branch_clean')
+			bs = status and status.strip() and not (status.strip() == 'U' and untracked_dirty == False)
+			scol.insert(0, 'branch_dirty' if bs else 'branch_clean')
 		return [{
 			'contents': branch,
 			'highlight_group': scol,
