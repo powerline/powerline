@@ -558,6 +558,17 @@ class TestCommon(TestCase):
 				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_condition_partly_cloudy_day', 'weather_condition_cloudy', 'weather_conditions', 'weather'], 'contents': 'CLOUDS '},
 				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '-9.0e+00C', 'gradient_level': 30.0}
 			])
+		with replace_attr(common, 'urllib_read', urllib_read):
+			common.weather.startup(pl=pl, location_query='Meppen,06,DE')
+			self.assertEqual(common.weather(pl=pl), [
+				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_condition_partly_cloudy_day', 'weather_condition_cloudy', 'weather_conditions', 'weather'], 'contents': 'CLOUDS '},
+				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '-9°C', 'gradient_level': 30.0}
+			])
+			self.assertEqual(common.weather(pl=pl, location_query='Moscow,RU'), [
+				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_condition_partly_cloudy_day', 'weather_condition_cloudy', 'weather_conditions', 'weather'], 'contents': 'CLOUDS '},
+				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '19°C', 'gradient_level': 70.0}
+			])
+			common.weather.shutdown()
 
 	def test_system_load(self):
 		pl = Pl()
