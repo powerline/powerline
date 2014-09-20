@@ -148,7 +148,7 @@ class VimPowerline(Powerline):
 
 		try:
 			if (
-				bool(int(vim.eval("has('gui_running') && argc() == 0")))
+				bool(int(vim.eval('has(\'gui_running\') && argc() == 0')))
 				and not vim.current.buffer.name
 				and len(vim.windows) == 1
 			):

@@ -382,7 +382,7 @@ class Spec(object):
 		:param function msg_func:
 			Function that should accept checked value and return message that 
 			describes the problem with this value. Default value will emit 
-			something like “length of ["foo", "bar"] is not greater then 10”.
+			something like “length of ['foo', 'bar'] is not greater then 10”.
 
 		:return: self.
 		'''
@@ -560,7 +560,7 @@ class Spec(object):
 		:param function msg_func:
 			Function that should accept checked value and return message that 
 			describes the problem with this value. Default value will emit 
-			something like “"xyz" must be one of {"abc", "def", "ghi"}”.
+			something like “"xyz" must be one of {'abc', 'def', 'ghi'}”.
 
 		:return: self.
 		'''

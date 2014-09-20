@@ -101,7 +101,7 @@ class CwdSegment(Segment):
 				# user most probably deleted the directory
 				# this happens when removing files from Mercurial repos for example
 				pl.warn('Current directory not found')
-				return "[not found]"
+				return '[not found]'
 			else:
 				raise
 		if shorten_home:

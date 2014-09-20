@@ -41,13 +41,13 @@ class Repository(object):
 
 		Without file argument: returns status of the repository:
 
-		:"D?": dirty (tracked modified files: added, removed, deleted, modified),
-		:"?U": untracked-dirty (added, but not tracked files)
+		:'D?': dirty (tracked modified files: added, removed, deleted, modified),
+		:'?U': untracked-dirty (added, but not tracked files)
 		:None: clean (status is empty)
 
-		With file argument: returns status of this file: "M"odified, "A"dded,
-		"R"emoved, "D"eleted (removed from filesystem, but still tracked),
-		"U"nknown, "I"gnored, (None)Clean.
+		With file argument: returns status of this file: `M`odified, `A`dded,
+		`R`emoved, `D`eleted (removed from filesystem, but still tracked),
+		`U`nknown, `I`gnored, (None)Clean.
 		'''
 		if path:
 			return get_file_status(

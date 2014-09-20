@@ -94,7 +94,7 @@ class BaseConstructor:
 		if not isinstance(node, nodes.ScalarNode):
 			raise ConstructorError(
 				None, None,
-				"expected a scalar node, but found %s" % node.id,
+				'expected a scalar node, but found %s' % node.id,
 				node.start_mark
 			)
 		return node.value
@@ -103,7 +103,7 @@ class BaseConstructor:
 		if not isinstance(node, nodes.SequenceNode):
 			raise ConstructorError(
 				None, None,
-				"expected a sequence node, but found %s" % node.id,
+				'expected a sequence node, but found %s' % node.id,
 				node.start_mark
 			)
 		return [

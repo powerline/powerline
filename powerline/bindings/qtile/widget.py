@@ -8,7 +8,7 @@ from powerline import Powerline as PowerlineCore
 
 
 class Powerline(base._TextBox):
-	def __init__(self, timeout=2, text=" ", width=bar.CALCULATED, **config):
+	def __init__(self, timeout=2, text=' ', width=bar.CALCULATED, **config):
 		base._TextBox.__init__(self, text, width, **config)
 		self.timeout_add(timeout, self.update)
 		self.powerline = PowerlineCore(ext='wm', renderer_module='pango_markup')

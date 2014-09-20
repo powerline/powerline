@@ -24,25 +24,25 @@ def print_cycles(objects, outstream=sys.stdout, show_progress=False):
 	'''
 	def print_path(path):
 		for i, step in enumerate(path):
-			# next "wraps around"
+			# next “wraps around”
 			next = path[(i + 1) % len(path)]
 
-			outstream.write("	%s -- " % str(type(step)))
+			outstream.write('	%s -- ' % str(type(step)))
 			written = False
 			if isinstance(step, dict):
 				for key, val in step.items():
 					if val is next:
-						outstream.write("[%s]" % repr(key))
+						outstream.write('[%s]' % repr(key))
 						written = True
 						break
 					if key is next:
-						outstream.write("[key] = %s" % repr(val))
+						outstream.write('[key] = %s' % repr(val))
 						written = True
 						break
 			elif isinstance(step, (list, tuple)):
 				for i, item in enumerate(step):
 					if item is next:
-						outstream.write("[%d]" % i)
+						outstream.write('[%d]' % i)
 						written = True
 			elif getattr(type(step), '__getattribute__', None) in (object.__getattribute__, type.__getattribute__):
 				for attr in chain(dir(step), getattr(step, '__dict__', ())):
@@ -55,12 +55,12 @@ def print_cycles(objects, outstream=sys.stdout, show_progress=False):
 						break
 			if not written:
 				outstream.write(repr(step))
-			outstream.write(" ->\n")
-		outstream.write("\n")
+			outstream.write(' ->\n')
+		outstream.write('\n')
 
 	def recurse(obj, start, all, current_path):
 		if show_progress:
-			outstream.write("%d\r" % len(all))
+			outstream.write('%d\r' % len(all))
 
 		all[id(obj)] = None
 

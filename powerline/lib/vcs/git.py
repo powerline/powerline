@@ -64,7 +64,7 @@ class GitRepository(object):
 		:None: repository clean
 
 		With file argument: returns status of this file. Output is
-		equivalent to the first two columns of "git status --porcelain"
+		equivalent to the first two columns of ``git status --porcelain``
 		(except for merge statuses as they are not supported by libgit2).
 		'''
 		if path:

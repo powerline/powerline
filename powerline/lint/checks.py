@@ -75,7 +75,7 @@ def check_matcher_func(ext, match_name, data, context, echoerr):
 
 	if not callable(func):
 		echoerr(context='Error while loading matcher functions',
-		        problem='loaded "function" {0} is not callable'.format(match_function),
+		        problem='loaded “function” {0} is not callable'.format(match_function),
 		        problem_mark=match_name.mark)
 		return True, False, True
 

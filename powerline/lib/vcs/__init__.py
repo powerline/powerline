@@ -252,7 +252,7 @@ def debug():
 	'''Test run guess(), repo.branch() and repo.status()
 
 	To use::
-		python -c "from powerline.lib.vcs import debug; debug()" some_file_to_watch.
+		python -c 'from powerline.lib.vcs import debug; debug()' some_file_to_watch.
 	'''
 	import sys
 	dest = sys.argv[-1]
