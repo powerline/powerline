@@ -41,7 +41,7 @@ Features
   user configuration across all of Powerline’s supported applications.
 * **Fast and lightweight, with daemon support for even better performance.**
   Although the code base spans a couple of thousand lines of code with no 
-  goal of "less than X lines of code", the main focus is on good performance 
+  goal of “less than X lines of code”, the main focus is on good performance 
   and as little code as possible while still providing a rich set of 
   features. The new daemon also ensures that only one Python instance is 
   launched for prompts and statuslines, which provides excellent 

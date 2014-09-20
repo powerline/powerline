@@ -15,8 +15,8 @@ I can’t see any fancy symbols, what’s wrong?
 The colors look weird in the default OS X Terminal app!
 -------------------------------------------------------
 
-* The arrows may have the wrong colors if you have changed the "minimum 
-  contrast" slider in the color tab of  your OS X settings.
+* The arrows may have the wrong colors if you have changed the “minimum 
+  contrast” slider in the color tab of your OS X settings.
 * The default OS X Terminal app is known to have some issues with the 
   Powerline colors. Please use another terminal emulator. iTerm2 should work 
   fine.
@@ -24,8 +24,8 @@ The colors look weird in the default OS X Terminal app!
 The colors look weird in iTerm2!
 --------------------------------
 
-* The arrows may have the wrong colors if you have changed the "minimum 
-  contrast" slider in the color tab of  your OS X settings.
+* The arrows may have the wrong colors if you have changed the “minimum 
+  contrast” slider in the color tab of your OS X settings.
 * Please disable background transparency to resolve this issue.
 
 Statusline is getting wrapped to the next line in iTerm2

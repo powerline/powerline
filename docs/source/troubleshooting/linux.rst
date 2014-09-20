@@ -14,7 +14,7 @@ I can’t see any fancy symbols, what’s wrong?
 * If you’re using rxvt-unicode, make sure that it’s compiled with the 
   ``--enable-unicode3`` flag.
 
-The fancy symbols look a bit blurry or "off"!
+The fancy symbols look a bit blurry or “off”!
 ---------------------------------------------
 
 * Make sure that you have patched all variants of your font (i.e. both the 
