@@ -36,7 +36,7 @@ _powerline_init_tmux_support() {
 		}
 
 		chpwd_functions+=( _powerline_tmux_set_pwd )
-		trap "_powerline_tmux_set_columns" SIGWINCH
+		trap '_powerline_tmux_set_columns' SIGWINCH
 		_powerline_tmux_set_columns
 		_powerline_tmux_set_pwd
 	fi
@@ -111,7 +111,7 @@ _powerline_setup_prompt() {
 	emulate -L zsh
 
 	for f in "${precmd_functions[@]}"; do
-		if [[ "$f" = "_powerline_set_jobnum" ]]; then
+		if [[ "$f" = '_powerline_set_jobnum' ]]; then
 			return
 		fi
 	done

@@ -43,9 +43,9 @@ class Composer:
 		if not self.check_event(events.StreamEndEvent):
 			event = self.get_event()
 			raise ComposerError(
-				"expected a single document in the stream",
+				'expected a single document in the stream',
 				document.start_mark,
-				"but found another document",
+				'but found another document',
 				event.start_mark
 			)
 
@@ -109,8 +109,8 @@ class Composer:
 			# key_event = self.peek_event()
 			item_key = self.compose_node(node, None)
 			# if item_key in node.value:
-			# 	 raise ComposerError("while composing a mapping", start_event.start_mark,
-			# 			 "found duplicate key", key_event.start_mark)
+			# 	 raise ComposerError('while composing a mapping', start_event.start_mark,
+			# 			 'found duplicate key', key_event.start_mark)
 			item_value = self.compose_node(node, item_key)
 			# node.value[item_key] = item_value
 			node.value.append((item_key, item_value))

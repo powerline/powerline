@@ -25,7 +25,7 @@ directory:
 
    set rtp+={repository_root}/powerline/bindings/vim
 
-If you're using pathogen and don't want Powerline functionality in any other 
+If you’re using pathogen and don’t want Powerline functionality in any other 
 applications, simply add Powerline as a bundle and point the path above to the 
 Powerline bundle directory, e.g. 
 ``~/.vim/bundle/powerline/powerline/bindings/vim``.

@@ -39,7 +39,7 @@ class SimpleKey:
 
 class Scanner:
 	def __init__(self):
-		"""Initialize the scanner."""
+		'''Initialize the scanner.'''
 		# It is assumed that Scanner and Reader will have a common descendant.
 		# Reader do the dirty work of checking for BOM and converting the
 		# input data to Unicode. It also adds NUL to the end.
@@ -168,17 +168,17 @@ class Scanner:
 			return self.fetch_value()
 
 		# Is it a double quoted scalar?
-		if ch == '\"':
+		if ch == '"':
 			return self.fetch_double()
 
 		# It must be a plain scalar then.
 		if self.check_plain():
 			return self.fetch_plain()
 
-		# No? It's an error. Let's produce a nice error message.
+		# No? It’s an error. Let’s produce a nice error message.
 		raise ScannerError(
-			"while scanning for the next token", None,
-			"found character %r that cannot start any token" % ch,
+			'while scanning for the next token', None,
+			'found character %r that cannot start any token' % ch,
 			self.get_mark()
 		)
 
@@ -186,7 +186,7 @@ class Scanner:
 
 	def next_possible_simple_key(self):
 		# Return the number of the nearest possible simple key. Actually we
-		# don't need to loop through the whole dictionary. We may replace it
+		# don’t need to loop through the whole dictionary. We may replace it
 		# with the following code:
 		# 	if not self.possible_simple_keys:
 		# 		return None
@@ -211,11 +211,11 @@ class Scanner:
 				del self.possible_simple_keys[level]
 
 	def save_possible_simple_key(self):
-		# The next token may start a simple key. We check if it's possible
+		# The next token may start a simple key. We check if it’s possible
 		# and save its position. This function is called for
 		# 	SCALAR(flow), '[', and '{'.
 
-		# The next token might be a simple key. Let's save it's number and
+		# The next token might be a simple key. Let’s save it’s number and
 		# position.
 		if self.allow_simple_key:
 			self.remove_possible_simple_key()
@@ -364,7 +364,7 @@ class Scanner:
 	def scan_flow_scalar(self):
 		# See the specification for details.
 		# Note that we loose indentation rules for quoted scalars. Quoted
-		# scalars don't need to adhere indentation because " and ' clearly
+		# scalars don’t need to adhere indentation because " and ' clearly
 		# mark the beginning and the end of them. Therefore we are less
 		# restrictive then the specification requires. We only need to check
 		# that document separators are not included in scalars.
@@ -386,7 +386,7 @@ class Scanner:
 		'n': '\x0A',
 		'f': '\x0C',
 		'r': '\x0D',
-		'\"': '\"',
+		'"': '\"',
 		'\\': '\\',
 	}
 
@@ -417,8 +417,8 @@ class Scanner:
 					for k in range(length):
 						if self.peek(k) not in '0123456789ABCDEFabcdef':
 							raise ScannerError(
-								"while scanning a double-quoted scalar", start_mark,
-								"expected escape sequence of %d hexdecimal numbers, but found %r" % (
+								'while scanning a double-quoted scalar', start_mark,
+								'expected escape sequence of %d hexdecimal numbers, but found %r' % (
 									length, self.peek(k)),
 								self.get_mark()
 							)
@@ -427,8 +427,8 @@ class Scanner:
 					self.forward(length)
 				else:
 					raise ScannerError(
-						"while scanning a double-quoted scalar", start_mark,
-						("found unknown escape character %r" % ch), self.get_mark()
+						'while scanning a double-quoted scalar', start_mark,
+						('found unknown escape character %r' % ch), self.get_mark()
 					)
 			else:
 				return chunks
@@ -444,13 +444,13 @@ class Scanner:
 		ch = self.peek()
 		if ch == '\0':
 			raise ScannerError(
-				"while scanning a quoted scalar", start_mark,
-				"found unexpected end of stream", self.get_mark()
+				'while scanning a quoted scalar', start_mark,
+				'found unexpected end of stream', self.get_mark()
 			)
 		elif ch == '\n':
 			raise ScannerError(
-				"while scanning a quoted scalar", start_mark,
-				"found unexpected line end", self.get_mark()
+				'while scanning a quoted scalar', start_mark,
+				'found unexpected line end', self.get_mark()
 			)
 		else:
 			chunks.append(whitespaces)

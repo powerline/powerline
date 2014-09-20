@@ -33,7 +33,7 @@ class TestVimConfig(TestCase):
 		)
 		with open(os.path.join(cfg_path, 'config.json'), 'r') as f:
 			local_themes_raw = json.load(f)['ext']['vim']['local_themes']
-			# Don't run tests on external/plugin segments
+			# Don’t run tests on external/plugin segments
 			local_themes = dict((k, v) for (k, v) in local_themes_raw.items())
 			self.assertEqual(len(buffers), len(local_themes) - 1)
 		outputs = {}

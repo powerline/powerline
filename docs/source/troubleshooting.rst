@@ -13,14 +13,14 @@ System-specific issues
 Common issues
 =============
 
-I'm using tmux and Powerline looks like crap, what's wrong?
+I’m using tmux and Powerline looks like crap, what’s wrong?
 -----------------------------------------------------------
 
 * You need to tell tmux that it has 256-color capabilities. Add this to your 
   :file:`.tmux.conf` to solve this issue::
 
     set -g default-terminal "screen-256color"
-* If you're using iTerm2, make sure that you have enabled the setting 
+* If you’re using iTerm2, make sure that you have enabled the setting 
   :guilabel:`Set locale variables automatically` in :menuselection:`Profiles --> 
   Terminal --> Environment`.
 * Make sure tmux knows that terminal it is running in support 256 colors. You 

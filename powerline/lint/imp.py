@@ -39,7 +39,7 @@ def import_function(function_type, name, data, context, echoerr, module):
 	if not callable(func):
 		echoerr(context='Error while checking segments (key {key})'.format(key=context.key),
 		        context_mark=name.mark,
-		        problem='imported "function" {0} from module {1} is not callable'.format(name, module),
+		        problem='imported “function” {0} from module {1} is not callable'.format(name, module),
 		        problem_mark=module.mark)
 		return None
 

@@ -133,8 +133,8 @@ def visual_range(pl, segment_info, CTRL_V_text='{rows} x {vcols}', v_text_onelin
 	vcols      Number of virtual columns in the selection
 	=========  =============================================================
 	'''
-	sline, scol, soff = [int(v) for v in vim_funcs['getpos']("v")[1:]]
-	eline, ecol, eoff = [int(v) for v in vim_funcs['getpos'](".")[1:]]
+	sline, scol, soff = [int(v) for v in vim_funcs['getpos']('v')[1:]]
+	eline, ecol, eoff = [int(v) for v in vim_funcs['getpos']('.')[1:]]
 	svcol = vim_funcs['virtcol']([sline, scol, soff])
 	evcol = vim_funcs['virtcol']([eline, ecol, eoff])
 	rows = abs(eline - sline) + 1
@@ -304,7 +304,7 @@ def file_size(pl, suffix='B', si_prefix=False):
 		string appended to the file size
 	:param bool si_prefix:
 		use SI prefix, e.g. MB instead of MiB
-	:return: file size or None if the file isn't saved or if the size is too big to fit in a number
+	:return: file size or None if the file isn’t saved or if the size is too big to fit in a number
 	'''
 	# Note: returns file size in &encoding, not in &fileencoding. But returned 
 	# size is updated immediately; and it is valid for any buffer

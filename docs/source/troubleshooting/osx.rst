@@ -2,21 +2,21 @@
 Troubleshooting on OS X
 ***********************
 
-I can't see any fancy symbols, what's wrong?
+I can’t see any fancy symbols, what’s wrong?
 --------------------------------------------
 
-* If you're using iTerm2, please update to `this revision 
+* If you’re using iTerm2, please update to `this revision 
   <https://github.com/gnachman/iTerm2/commit/8e3ad6dabf83c60b8cf4a3e3327c596401744af6>`_ 
   or newer.
 * You need to set your ``LANG`` and ``LC_*`` environment variables to 
-  a UTF-8 locale (e.g. ``LANG=en_US.utf8``). Consult your Linux distro's 
+  a UTF-8 locale (e.g. ``LANG=en_US.utf8``). Consult your Linux distro’s 
   documentation for information about setting these variables correctly.
 
 The colors look weird in the default OS X Terminal app!
 -------------------------------------------------------
 
-* The arrows may have the wrong colors if you have changed the "minimum 
-  contrast" slider in the color tab of  your OS X settings.
+* The arrows may have the wrong colors if you have changed the “minimum 
+  contrast” slider in the color tab of your OS X settings.
 * The default OS X Terminal app is known to have some issues with the 
   Powerline colors. Please use another terminal emulator. iTerm2 should work 
   fine.
@@ -24,8 +24,8 @@ The colors look weird in the default OS X Terminal app!
 The colors look weird in iTerm2!
 --------------------------------
 
-* The arrows may have the wrong colors if you have changed the "minimum 
-  contrast" slider in the color tab of  your OS X settings.
+* The arrows may have the wrong colors if you have changed the “minimum 
+  contrast” slider in the color tab of your OS X settings.
 * Please disable background transparency to resolve this issue.
 
 Statusline is getting wrapped to the next line in iTerm2

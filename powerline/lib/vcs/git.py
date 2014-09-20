@@ -64,13 +64,13 @@ class GitRepository(object):
 		:None: repository clean
 
 		With file argument: returns status of this file. Output is
-		equivalent to the first two columns of "git status --porcelain"
+		equivalent to the first two columns of ``git status --porcelain``
 		(except for merge statuses as they are not supported by libgit2).
 		'''
 		if path:
 			gitd = git_directory(self.directory)
 			# We need HEAD as without it using fugitive to commit causes the
-			# current file's status (and only the current file) to not be updated
+			# current file’s status (and only the current file) to not be updated
 			# for some reason I cannot be bothered to figure out.
 			return get_file_status(
 				directory=self.directory,

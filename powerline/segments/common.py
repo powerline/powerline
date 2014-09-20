@@ -101,7 +101,7 @@ class CwdSegment(Segment):
 				# user most probably deleted the directory
 				# this happens when removing files from Mercurial repos for example
 				pl.warn('Current directory not found')
-				return "[not found]"
+				return '[not found]'
 			else:
 				raise
 		if shorten_home:
@@ -549,7 +549,7 @@ weather = with_docstring(WeatherSegment(),
 '''Return weather from Yahoo! Weather.
 
 Uses GeoIP lookup from http://freegeoip.net/ to automatically determine
-your current location. This should be changed if you're in a VPN or if your
+your current location. This should be changed if you’re in a VPN or if your
 IP address is registered at another location.
 
 Returns a list of colorized icon and temperature segments depending on
@@ -1060,7 +1060,7 @@ class NowPlayingSegment(Segment):
 			set ..
 			set n
 
-		For the information we are looking for we don't really care if we're on
+		For the information we are looking for we don’t really care if we’re on
 		the tag level or the set level. The dictionary comprehension in this
 		method takes anything in ignore_levels and brings the key inside that
 		to the first level of the dictionary.

@@ -248,7 +248,7 @@ class Renderer(object):
 		current_width = 0
 
 		if not width:
-			# No width specified, so we don't need to crop or pad anything
+			# No width specified, so we don’t need to crop or pad anything
 			if output_width:
 				current_width = self._render_length(theme, segments, self.compute_divider_widths(theme))
 			return construct_returned_value(''.join([

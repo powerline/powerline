@@ -57,10 +57,10 @@ class Mark:
 
 	def __str__(self):
 		snippet = self.get_snippet()
-		where = ("  in \"%s\", line %d, column %d" % (
+		where = ('  in "%s", line %d, column %d' % (
 			self.name, self.line + 1, self.column + 1))
 		if snippet is not None:
-			where += ":\n" + snippet
+			where += ':\n' + snippet
 		if type(where) is str:
 			return where
 		else:

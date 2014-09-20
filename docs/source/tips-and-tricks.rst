@@ -47,7 +47,7 @@ In the ``~/.Xdefaults`` add the following::
 I noticed that Source Code Pro has the glyphs there already, but the pixel size 
 of the fonts play a role in whether or not the > or the < separators showing up 
 or not. Using font size 12, glyphs on the right hand side of the powerline are 
-present, but the ones on the left don't. Pixel size 14, brings the reverse 
+present, but the ones on the left don’t. Pixel size 14, brings the reverse 
 problem. Font size 13 seems to work just fine.
 
 Reloading powerline after update
