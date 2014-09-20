@@ -1,16 +1,15 @@
 {
-	"default_module": "powerline.segments.common",
 	"segments": {
 		"right": [
 			{
-				"function": "weather",
+				"function": "powerline.segments.common.wthr.weather",
 				"priority": 50
 			},
 			{
-				"function": "date"
+				"function": "powerline.segments.common.time.date"
 			},
 			{
-				"function": "date",
+				"function": "powerline.segments.common.time.date",
 				"name": "time",
 				"args": {
 					"format": "%H:%M",
@@ -18,7 +17,7 @@
 				}
 			},
 			{
-				"function": "email_imap_alert",
+				"function": "powerline.segments.common.mail.email_imap_alert",
 				"priority": 10,
 				"args": {
 					"username": "",

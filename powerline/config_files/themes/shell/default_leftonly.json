@@ -1,21 +1,20 @@
 {
-	"default_module": "powerline.segments.common",
 	"segments": {
 		"left": [
 			{
-				"function": "hostname",
+				"function": "powerline.segments.common.net.hostname",
 				"priority": 10
 			},
 			{
-				"function": "user",
+				"function": "powerline.segments.common.env.user",
 				"priority": 30
 			},
 			{
-				"function": "virtualenv",
+				"function": "powerline.segments.common.env.virtualenv",
 				"priority": 50
 			},
 			{
-				"function": "branch",
+				"function": "powerline.segments.common.vcs.branch",
 				"priority": 40
 			},
 			{

@@ -21,6 +21,12 @@ class WithPath(object):
 def import_function(function_type, name, data, context, echoerr, module):
 	havemarks(name, module)
 
+	if module == 'powerline.segments.common':
+		echoerr(context='Warning while checking segments (key {key})'.format(key=context.key),
+		        context_mark=name.mark,
+		        problem='module {0} is deprecated'.format(module),
+		        problem_mark=module.mark)
+
 	with WithPath(data['import_paths']):
 		try:
 			func = getattr(__import__(str(module), fromlist=[str(name)]), str(name))
