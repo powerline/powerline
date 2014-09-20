@@ -183,6 +183,7 @@ mkdir tests/shell/path
 ln -s "$(which "${PYTHON}")" tests/shell/path/python
 ln -s "$(which screen)" tests/shell/path
 ln -s "$(which env)" tests/shell/path
+ln -s "$(which git)" tests/shell/path
 ln -s "$(which sleep)" tests/shell/path
 ln -s "$(which cat)" tests/shell/path
 ln -s "$(which false)" tests/shell/path
