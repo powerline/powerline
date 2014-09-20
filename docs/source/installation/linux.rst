@@ -10,7 +10,7 @@ automatically do most of the configuration for you.
 * `Arch Linux (AUR), Python 3 version <https://aur.archlinux.org/packages/python-powerline-git/>`_
 * Gentoo Live ebuild in `raiagent <https://github.com/leycec/raiagent>`_ overlay
 
-If you're running a distribution without an official package you'll have to 
+If you’re running a distribution without an official package you’ll have to 
 follow the installation guide below:
 
 1. Install Python 3.2+ or Python 2.6+ with ``pip``. This step is 
@@ -34,8 +34,8 @@ Fonts installation
 Fontconfig
 ----------
 
-This method only works on Linux. It's the recommended method if your 
-terminal emulator supports it as you don't have to patch any fonts, and it 
+This method only works on Linux. It’s the recommended method if your 
+terminal emulator supports it as you don’t have to patch any fonts, and it 
 generally works well with any coding font.
 
 #. Download the latest version of the symbol font and fontconfig file::
@@ -54,16 +54,16 @@ generally works well with any coding font.
       fc-cache -vf ~/.fonts/
 
 #. Install the fontconfig file. For newer versions of fontconfig the config 
-   path is ``~/.config/fontconfig/conf.d/``, for older versions it's  
+   path is ``~/.config/fontconfig/conf.d/``, for older versions it’s  
    ``~/.fonts.conf.d/``::
 
       mv 10-powerline-symbols.conf ~/.config/fontconfig/conf.d/
 
-If you can't see the custom symbols, please close all instances of your 
+If you can’t see the custom symbols, please close all instances of your 
 terminal emulator. You may need to restart X for the changes to take
 effect.
 
-If you *still* can't see the custom symbols, double-check that you have 
+If you *still* can’t see the custom symbols, double-check that you have 
 installed the font to a valid X font path, and that you have installed the 
 fontconfig file to a valid fontconfig path. Alternatively try to install 
 a :ref:`patched font <installation-patched-fonts>`.
@@ -87,9 +87,9 @@ After installing the patched font you need to update Gvim or your terminal
 emulator to use the patched font. The correct font usually ends with *for 
 Powerline*.
 
-If you can't see the custom symbols, please close all instances of your 
+If you can’t see the custom symbols, please close all instances of your 
 terminal emulator. You may need to restart X for the changes to take
 effect.
 
-If you *still* can't see the custom symbols, double-check that you have 
+If you *still* can’t see the custom symbols, double-check that you have 
 installed the font to a valid X font path.

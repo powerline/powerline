@@ -90,8 +90,8 @@ Patched fonts
 This method is the fallback method and works for every terminal, with the 
 exception of :ref:`rxvt-unicode <tips-and-tricks-urxvt>`.
 
-Download the font of your choice from `powerline-fonts`_. If you can't find 
-your preferred font in the `powerline-fonts`_ repo, you'll have to patch your 
+Download the font of your choice from `powerline-fonts`_. If you can’t find 
+your preferred font in the `powerline-fonts`_ repo, you’ll have to patch your 
 own font instead.
 
 .. _powerline-fonts: https://github.com/Lokaltog/powerline-fonts

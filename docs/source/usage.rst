@@ -12,11 +12,11 @@ The vim plugin requires a vim version with Python support compiled in.  You
 can check if your vim supports Python by running ``vim --version | grep 
 +python``.
 
-If your vim version doesn't have support for Python, you'll have to compile 
+If your vim version doesn’t have support for Python, you’ll have to compile 
 it with the ``--enable-pythoninterp`` flag (``--enable-python3interp`` if 
 you want Python 3 support instead). Note that this also requires the related 
 Python headers to be installed on your system. Please consult your 
-distribution's documentation for details on how to compile and install 
+distribution’s documentation for details on how to compile and install 
 packages.
 
 Vim version 7.4 or newer is recommended for performance reasons, but Powerline 
