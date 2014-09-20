@@ -116,7 +116,7 @@ class BaseConstructor:
 		if not isinstance(node, nodes.MappingNode):
 			raise ConstructorError(
 				None, None,
-				"expected a mapping node, but found %s" % node.id,
+				'expected a mapping node, but found %s' % node.id,
 				node.start_mark
 			)
 		mapping = {}
@@ -174,9 +174,9 @@ class Constructor(BaseConstructor):
 					for subnode in value_node.value:
 						if not isinstance(subnode, nodes.MappingNode):
 							raise ConstructorError(
-								"while constructing a mapping",
+								'while constructing a mapping',
 								node.start_mark,
-								"expected a mapping for merging, but found %s" % subnode.id,
+								'expected a mapping for merging, but found %s' % subnode.id,
 								subnode.start_mark
 							)
 						self.flatten_mapping(subnode)
@@ -186,9 +186,9 @@ class Constructor(BaseConstructor):
 						merge.extend(value)
 				else:
 					raise ConstructorError(
-						"while constructing a mapping",
+						'while constructing a mapping',
 						node.start_mark,
-						("expected a mapping or list of mappings for merging, but found %s" % value_node.id),
+						('expected a mapping or list of mappings for merging, but found %s' % value_node.id),
 						value_node.start_mark
 					)
 			elif key_node.tag == 'tag:yaml.org,2002:value':
@@ -255,7 +255,7 @@ class Constructor(BaseConstructor):
 	def construct_undefined(self, node):
 		raise ConstructorError(
 			None, None,
-			"could not determine a constructor for the tag %r" % node.tag,
+			'could not determine a constructor for the tag %r' % node.tag,
 			node.start_mark
 		)
 
