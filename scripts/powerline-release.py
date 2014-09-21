@@ -101,7 +101,7 @@ def create_ebuilds(version_string, overlay, user, **kwargs):
 	new_files = []
 	for category, pn in (
 		('app-misc', 'powerline'),
-		('app-vim', 'powerline-python'),
+		('app-vim', 'powerline-vim'),
 	):
 		pdir = os.path.join(overlay, category, pn)
 		v1_0 = os.path.join(pdir, '{0}-1.0.ebuild'.format(pn))
