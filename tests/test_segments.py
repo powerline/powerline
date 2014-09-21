@@ -273,12 +273,6 @@ class TestShell(TestCase):
 			cwd[0] = ValueError()
 			self.assertRaises(ValueError, shell.cwd, pl=pl, segment_info=segment_info, dir_limit_depth=2, dir_shorten_len=2)
 
-	def test_date(self):
-		pl = Pl()
-		with replace_attr(common, 'datetime', Args(now=lambda: Args(strftime=lambda fmt: fmt))):
-			self.assertEqual(common.date(pl=pl), [{'contents': '%Y-%m-%d', 'highlight_group': ['date'], 'divider_highlight_group': None}])
-			self.assertEqual(common.date(pl=pl, format='%H:%M', istime=True), [{'contents': '%H:%M', 'highlight_group': ['time', 'date'], 'divider_highlight_group': 'time:divider'}])
-
 
 class TestTmux(TestCase):
 	def test_attached_clients(self):
@@ -295,25 +289,154 @@ class TestTmux(TestCase):
 
 
 class TestCommon(TestCase):
+	@classmethod
+	def setUpClass(cls):
+		module = __import__(str('powerline.segments.common.{0}'.format(cls.module_name)))
+		cls.module = getattr(module.segments.common, str(cls.module_name))
+
+
+class TestNet(TestCommon):
+	module_name = 'net'
+
 	def test_hostname(self):
 		pl = Pl()
 		with replace_env('SSH_CLIENT', '192.168.0.12 40921 22') as segment_info:
-			with replace_module_module(common, 'socket', gethostname=lambda: 'abc'):
+			with replace_module_module(self.module, 'socket', gethostname=lambda: 'abc'):
 				self.assertEqual(common.hostname(pl=pl, segment_info=segment_info), 'abc')
 				self.assertEqual(common.hostname(pl=pl, segment_info=segment_info, only_if_ssh=True), 'abc')
-			with replace_module_module(common, 'socket', gethostname=lambda: 'abc.mydomain'):
+			with replace_module_module(self.module, 'socket', gethostname=lambda: 'abc.mydomain'):
 				self.assertEqual(common.hostname(pl=pl, segment_info=segment_info), 'abc.mydomain')
 				self.assertEqual(common.hostname(pl=pl, segment_info=segment_info, exclude_domain=True), 'abc')
 				self.assertEqual(common.hostname(pl=pl, segment_info=segment_info, only_if_ssh=True), 'abc.mydomain')
 				self.assertEqual(common.hostname(pl=pl, segment_info=segment_info, only_if_ssh=True, exclude_domain=True), 'abc')
 			segment_info['environ'].pop('SSH_CLIENT')
-			with replace_module_module(common, 'socket', gethostname=lambda: 'abc'):
+			with replace_module_module(self.module, 'socket', gethostname=lambda: 'abc'):
 				self.assertEqual(common.hostname(pl=pl, segment_info=segment_info), 'abc')
 				self.assertEqual(common.hostname(pl=pl, segment_info=segment_info, only_if_ssh=True), None)
-			with replace_module_module(common, 'socket', gethostname=lambda: 'abc.mydomain'):
+			with replace_module_module(self.module, 'socket', gethostname=lambda: 'abc.mydomain'):
 				self.assertEqual(common.hostname(pl=pl, segment_info=segment_info), 'abc.mydomain')
 				self.assertEqual(common.hostname(pl=pl, segment_info=segment_info, exclude_domain=True), 'abc')
 				self.assertEqual(common.hostname(pl=pl, segment_info=segment_info, only_if_ssh=True, exclude_domain=True), None)
+
+	def test_external_ip(self):
+		pl = Pl()
+		with replace_attr(self.module, 'urllib_read', urllib_read):
+			self.assertEqual(common.external_ip(pl=pl), [{'contents': '127.0.0.1', 'divider_highlight_group': 'background:divider'}])
+
+	def test_internal_ip(self):
+		try:
+			import netifaces
+		except ImportError:
+			raise SkipTest('netifaces module is not available')
+		pl = Pl()
+		addr = {
+			'enp2s0': {
+				netifaces.AF_INET: [{'addr': '192.168.100.200'}],
+				netifaces.AF_INET6: [{'addr': 'feff::5446:5eff:fe5a:7777%enp2s0'}]
+			},
+			'lo': {
+				netifaces.AF_INET: [{'addr': '127.0.0.1'}],
+				netifaces.AF_INET6: [{'addr': '::1'}]
+			},
+			'teredo': {
+				netifaces.AF_INET6: [{'addr': 'feff::5446:5eff:fe5a:7777'}]
+			},
+		}
+		interfaces = ['lo', 'enp2s0', 'teredo']
+		with replace_module_module(
+			self.module, 'netifaces',
+			interfaces=(lambda: interfaces),
+			ifaddresses=(lambda interface: addr[interface]),
+			AF_INET=netifaces.AF_INET,
+			AF_INET6=netifaces.AF_INET6,
+		):
+			self.assertEqual(common.internal_ip(pl=pl), '192.168.100.200')
+			self.assertEqual(common.internal_ip(pl=pl, interface='detect'), '192.168.100.200')
+			self.assertEqual(common.internal_ip(pl=pl, interface='lo'), '127.0.0.1')
+			self.assertEqual(common.internal_ip(pl=pl, interface='teredo'), None)
+			self.assertEqual(common.internal_ip(pl=pl, ipv=4), '192.168.100.200')
+			self.assertEqual(common.internal_ip(pl=pl, interface='detect', ipv=4), '192.168.100.200')
+			self.assertEqual(common.internal_ip(pl=pl, interface='lo', ipv=4), '127.0.0.1')
+			self.assertEqual(common.internal_ip(pl=pl, interface='teredo', ipv=4), None)
+			self.assertEqual(common.internal_ip(pl=pl, ipv=6), 'feff::5446:5eff:fe5a:7777%enp2s0')
+			self.assertEqual(common.internal_ip(pl=pl, interface='detect', ipv=6), 'feff::5446:5eff:fe5a:7777%enp2s0')
+			self.assertEqual(common.internal_ip(pl=pl, interface='lo', ipv=6), '::1')
+			self.assertEqual(common.internal_ip(pl=pl, interface='teredo', ipv=6), 'feff::5446:5eff:fe5a:7777')
+			interfaces[1:2] = ()
+			self.assertEqual(common.internal_ip(pl=pl, ipv=6), 'feff::5446:5eff:fe5a:7777')
+			interfaces[1:2] = ()
+			self.assertEqual(common.internal_ip(pl=pl, ipv=6), '::1')
+			interfaces[:] = ()
+			self.assertEqual(common.internal_ip(pl=pl, ipv=6), None)
+
+	def test_network_load(self):
+		from time import sleep
+
+		def gb(interface):
+			return None
+
+		f = [gb]
+
+		def _get_bytes(interface):
+			return f[0](interface)
+
+		pl = Pl()
+
+		with replace_attr(self.module, '_get_bytes', _get_bytes):
+			common.network_load.startup(pl=pl)
+			try:
+				self.assertEqual(common.network_load(pl=pl, interface='eth0'), None)
+				sleep(common.network_load.interval)
+				self.assertEqual(common.network_load(pl=pl, interface='eth0'), None)
+				while 'prev' not in common.network_load.interfaces.get('eth0', {}):
+					sleep(0.1)
+				self.assertEqual(common.network_load(pl=pl, interface='eth0'), None)
+
+				l = [0, 0]
+
+				def gb2(interface):
+					l[0] += 1200
+					l[1] += 2400
+					return tuple(l)
+				f[0] = gb2
+
+				while not common.network_load.interfaces.get('eth0', {}).get('prev', (None, None))[1]:
+					sleep(0.1)
+				self.assertEqual(common.network_load(pl=pl, interface='eth0'), [
+					{'divider_highlight_group': 'background:divider', 'contents': 'DL  1 KiB/s', 'highlight_group': ['network_load_recv', 'network_load']},
+					{'divider_highlight_group': 'background:divider', 'contents': 'UL  2 KiB/s', 'highlight_group': ['network_load_sent', 'network_load']},
+				])
+				self.assertEqual(common.network_load(pl=pl, interface='eth0', recv_format='r {value}', sent_format='s {value}'), [
+					{'divider_highlight_group': 'background:divider', 'contents': 'r 1 KiB/s', 'highlight_group': ['network_load_recv', 'network_load']},
+					{'divider_highlight_group': 'background:divider', 'contents': 's 2 KiB/s', 'highlight_group': ['network_load_sent', 'network_load']},
+				])
+				self.assertEqual(common.network_load(pl=pl, recv_format='r {value}', sent_format='s {value}', suffix='bps', interface='eth0'), [
+					{'divider_highlight_group': 'background:divider', 'contents': 'r 1 Kibps', 'highlight_group': ['network_load_recv', 'network_load']},
+					{'divider_highlight_group': 'background:divider', 'contents': 's 2 Kibps', 'highlight_group': ['network_load_sent', 'network_load']},
+				])
+				self.assertEqual(common.network_load(pl=pl, recv_format='r {value}', sent_format='s {value}', si_prefix=True, interface='eth0'), [
+					{'divider_highlight_group': 'background:divider', 'contents': 'r 1 kB/s', 'highlight_group': ['network_load_recv', 'network_load']},
+					{'divider_highlight_group': 'background:divider', 'contents': 's 2 kB/s', 'highlight_group': ['network_load_sent', 'network_load']},
+				])
+				self.assertEqual(common.network_load(pl=pl, recv_format='r {value}', sent_format='s {value}', recv_max=0, interface='eth0'), [
+					{'divider_highlight_group': 'background:divider', 'contents': 'r 1 KiB/s', 'highlight_group': ['network_load_recv_gradient', 'network_load_gradient', 'network_load_recv', 'network_load'], 'gradient_level': 100},
+					{'divider_highlight_group': 'background:divider', 'contents': 's 2 KiB/s', 'highlight_group': ['network_load_sent', 'network_load']},
+				])
+
+				class ApproxEqual(object):
+					def __eq__(self, i):
+						return abs(i - 50.0) < 1
+
+				self.assertEqual(common.network_load(pl=pl, recv_format='r {value}', sent_format='s {value}', sent_max=4800, interface='eth0'), [
+					{'divider_highlight_group': 'background:divider', 'contents': 'r 1 KiB/s', 'highlight_group': ['network_load_recv', 'network_load']},
+					{'divider_highlight_group': 'background:divider', 'contents': 's 2 KiB/s', 'highlight_group': ['network_load_sent_gradient', 'network_load_gradient', 'network_load_sent', 'network_load'], 'gradient_level': ApproxEqual()},
+				])
+			finally:
+				common.network_load.shutdown()
+
+
+class TestEnv(TestCommon):
+	module_name = 'env'
 
 	def test_user(self):
 		new_os = new_module('os', getpid=lambda: 1)
@@ -332,9 +455,9 @@ class TestCommon(TestCase):
 		pl = Pl()
 		with replace_env('USER', 'def') as segment_info:
 			common.username = False
-			with replace_attr(common, 'os', new_os):
-				with replace_attr(common, 'psutil', new_psutil):
-					with replace_attr(common, '_geteuid', lambda: 5):
+			with replace_attr(self.module, 'os', new_os):
+				with replace_attr(self.module, 'psutil', new_psutil):
+					with replace_attr(self.module, '_geteuid', lambda: 5):
 						self.assertEqual(common.user(pl=pl, segment_info=segment_info), [
 							{'contents': 'def', 'highlight_group': ['user']}
 						])
@@ -342,37 +465,10 @@ class TestCommon(TestCase):
 							{'contents': 'def', 'highlight_group': ['user']}
 						])
 						self.assertEqual(common.user(pl=pl, segment_info=segment_info, hide_user='def'), None)
-					with replace_attr(common, '_geteuid', lambda: 0):
+					with replace_attr(self.module, '_geteuid', lambda: 0):
 						self.assertEqual(common.user(pl=pl, segment_info=segment_info), [
 							{'contents': 'def', 'highlight_group': ['superuser', 'user']}
 						])
-
-	def test_branch(self):
-		pl = Pl()
-		create_watcher = get_fallback_create_watcher()
-		segment_info = {'getcwd': os.getcwd}
-		branch = partial(common.branch, pl=pl, create_watcher=create_watcher)
-		with replace_attr(common, 'guess', get_dummy_guess(status=lambda: None, directory='/tmp/tests')):
-			with replace_attr(common, 'tree_status', lambda repo, pl: None):
-				self.assertEqual(branch(segment_info=segment_info, status_colors=False), [
-					{'highlight_group': ['branch'], 'contents': 'tests'}
-				])
-				self.assertEqual(branch(segment_info=segment_info, status_colors=True), [
-					{'contents': 'tests', 'highlight_group': ['branch_clean', 'branch']}
-				])
-		with replace_attr(common, 'guess', get_dummy_guess(status=lambda: 'D  ', directory='/tmp/tests')):
-			with replace_attr(common, 'tree_status', lambda repo, pl: 'D '):
-				self.assertEqual(branch(segment_info=segment_info, status_colors=False), [
-					{'highlight_group': ['branch'], 'contents': 'tests'}
-				])
-				self.assertEqual(branch(segment_info=segment_info, status_colors=True), [
-					{'contents': 'tests', 'highlight_group': ['branch_dirty', 'branch']}
-				])
-				self.assertEqual(branch(segment_info=segment_info, status_colors=False), [
-					{'highlight_group': ['branch'], 'contents': 'tests'}
-				])
-		with replace_attr(common, 'guess', lambda path, create_watcher: None):
-			self.assertEqual(branch(segment_info=segment_info, status_colors=False), None)
 
 	def test_cwd(self):
 		new_os = new_module('os', path=os.path, sep='/')
@@ -387,7 +483,7 @@ class TestCommon(TestCase):
 				return wd
 
 		segment_info = {'getcwd': getcwd, 'home': None}
-		with replace_attr(common, 'os', new_os):
+		with replace_attr(self.module, 'os', new_os):
 			cwd[0] = '/abc/def/ghi/foo/bar'
 			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info), [
 				{'contents': '/', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
@@ -473,16 +569,67 @@ class TestCommon(TestCase):
 			cwd[0] = ValueError()
 			self.assertRaises(ValueError, common.cwd, pl=pl, segment_info=segment_info, dir_limit_depth=2, dir_shorten_len=2)
 
+	def test_virtualenv(self):
+		pl = Pl()
+		with replace_env('VIRTUAL_ENV', '/abc/def/ghi') as segment_info:
+			self.assertEqual(common.virtualenv(pl=pl, segment_info=segment_info), 'ghi')
+			segment_info['environ'].pop('VIRTUAL_ENV')
+			self.assertEqual(common.virtualenv(pl=pl, segment_info=segment_info), None)
+
+	def test_environment(self):
+		pl = Pl()
+		variable = 'FOO'
+		value = 'bar'
+		with replace_env(variable, value) as segment_info:
+			self.assertEqual(common.environment(pl=pl, segment_info=segment_info, variable=variable), value)
+			segment_info['environ'].pop(variable)
+			self.assertEqual(common.environment(pl=pl, segment_info=segment_info, variable=variable), None)
+
+
+class TestVcs(TestCommon):
+	module_name = 'vcs'
+
+	def test_branch(self):
+		pl = Pl()
+		create_watcher = get_fallback_create_watcher()
+		segment_info = {'getcwd': os.getcwd}
+		branch = partial(common.branch, pl=pl, create_watcher=create_watcher)
+		with replace_attr(self.module, 'guess', get_dummy_guess(status=lambda: None, directory='/tmp/tests')):
+			with replace_attr(self.module, 'tree_status', lambda repo, pl: None):
+				self.assertEqual(branch(segment_info=segment_info, status_colors=False), [
+					{'highlight_group': ['branch'], 'contents': 'tests'}
+				])
+				self.assertEqual(branch(segment_info=segment_info, status_colors=True), [
+					{'contents': 'tests', 'highlight_group': ['branch_clean', 'branch']}
+				])
+		with replace_attr(self.module, 'guess', get_dummy_guess(status=lambda: 'D  ', directory='/tmp/tests')):
+			with replace_attr(self.module, 'tree_status', lambda repo, pl: 'D '):
+				self.assertEqual(branch(segment_info=segment_info, status_colors=False), [
+					{'highlight_group': ['branch'], 'contents': 'tests'}
+				])
+				self.assertEqual(branch(segment_info=segment_info, status_colors=True), [
+					{'contents': 'tests', 'highlight_group': ['branch_dirty', 'branch']}
+				])
+				self.assertEqual(branch(segment_info=segment_info, status_colors=False), [
+					{'highlight_group': ['branch'], 'contents': 'tests'}
+				])
+		with replace_attr(self.module, 'guess', lambda path, create_watcher: None):
+			self.assertEqual(branch(segment_info=segment_info, status_colors=False), None)
+
+
+class TestTime(TestCommon):
+	module_name = 'time'
+
 	def test_date(self):
 		pl = Pl()
-		with replace_attr(common, 'datetime', Args(now=lambda: Args(strftime=lambda fmt: fmt))):
+		with replace_attr(self.module, 'datetime', Args(now=lambda: Args(strftime=lambda fmt: fmt))):
 			self.assertEqual(common.date(pl=pl), [{'contents': '%Y-%m-%d', 'highlight_group': ['date'], 'divider_highlight_group': None}])
 			self.assertEqual(common.date(pl=pl, format='%H:%M', istime=True), [{'contents': '%H:%M', 'highlight_group': ['time', 'date'], 'divider_highlight_group': 'time:divider'}])
 
 	def test_fuzzy_time(self):
 		time = Args(hour=0, minute=45)
 		pl = Pl()
-		with replace_attr(common, 'datetime', Args(now=lambda: time)):
+		with replace_attr(self.module, 'datetime', Args(now=lambda: time)):
 			self.assertEqual(common.fuzzy_time(pl=pl), 'quarter to one')
 			time.hour = 23
 			time.minute = 59
@@ -500,19 +647,18 @@ class TestCommon(TestCase):
 			time.minute = 60
 			self.assertEqual(common.fuzzy_time(pl=pl, unicode_text=True), 'twelve o’clock')
 
-	def test_external_ip(self):
-		pl = Pl()
-		with replace_attr(common, 'urllib_read', urllib_read):
-			self.assertEqual(common.external_ip(pl=pl), [{'contents': '127.0.0.1', 'divider_highlight_group': 'background:divider'}])
+
+class TestSys(TestCommon):
+	module_name = 'sys'
 
 	def test_uptime(self):
 		pl = Pl()
-		with replace_attr(common, '_get_uptime', lambda: 259200):
+		with replace_attr(self.module, '_get_uptime', lambda: 259200):
 			self.assertEqual(common.uptime(pl=pl), [{'contents': '3d', 'divider_highlight_group': 'background:divider'}])
-		with replace_attr(common, '_get_uptime', lambda: 93784):
+		with replace_attr(self.module, '_get_uptime', lambda: 93784):
 			self.assertEqual(common.uptime(pl=pl), [{'contents': '1d 2h 3m', 'divider_highlight_group': 'background:divider'}])
 			self.assertEqual(common.uptime(pl=pl, shorten_len=4), [{'contents': '1d 2h 3m 4s', 'divider_highlight_group': 'background:divider'}])
-		with replace_attr(common, '_get_uptime', lambda: 65536):
+		with replace_attr(self.module, '_get_uptime', lambda: 65536):
 			self.assertEqual(common.uptime(pl=pl), [{'contents': '18h 12m 16s', 'divider_highlight_group': 'background:divider'}])
 			self.assertEqual(common.uptime(pl=pl, shorten_len=2), [{'contents': '18h 12m', 'divider_highlight_group': 'background:divider'}])
 			self.assertEqual(common.uptime(pl=pl, shorten_len=1), [{'contents': '18h', 'divider_highlight_group': 'background:divider'}])
@@ -520,12 +666,45 @@ class TestCommon(TestCase):
 		def _get_uptime():
 			raise NotImplementedError
 
-		with replace_attr(common, '_get_uptime', _get_uptime):
+		with replace_attr(self.module, '_get_uptime', _get_uptime):
 			self.assertEqual(common.uptime(pl=pl), None)
+
+	def test_system_load(self):
+		pl = Pl()
+		with replace_module_module(self.module, 'os', getloadavg=lambda: (7.5, 3.5, 1.5)):
+			with replace_attr(self.module, '_cpu_count', lambda: 2):
+				self.assertEqual(common.system_load(pl=pl), [
+					{'contents': '7.5 ', 'highlight_group': ['system_load_gradient', 'system_load'], 'divider_highlight_group': 'background:divider', 'gradient_level': 100},
+					{'contents': '3.5 ', 'highlight_group': ['system_load_gradient', 'system_load'], 'divider_highlight_group': 'background:divider', 'gradient_level': 75.0},
+					{'contents': '1.5', 'highlight_group': ['system_load_gradient', 'system_load'], 'divider_highlight_group': 'background:divider', 'gradient_level': 0}
+				])
+				self.assertEqual(common.system_load(pl=pl, format='{avg:.0f}', threshold_good=0, threshold_bad=1), [
+					{'contents': '8 ', 'highlight_group': ['system_load_gradient', 'system_load'], 'divider_highlight_group': 'background:divider', 'gradient_level': 100},
+					{'contents': '4 ', 'highlight_group': ['system_load_gradient', 'system_load'], 'divider_highlight_group': 'background:divider', 'gradient_level': 100},
+					{'contents': '2', 'highlight_group': ['system_load_gradient', 'system_load'], 'divider_highlight_group': 'background:divider', 'gradient_level': 75.0}
+				])
+
+	def test_cpu_load_percent(self):
+		pl = Pl()
+		with replace_module_module(self.module, 'psutil', cpu_percent=lambda **kwargs: 52.3):
+			self.assertEqual(common.cpu_load_percent(pl=pl), [{
+				'contents': '52%',
+				'gradient_level': 52.3,
+				'highlight_group': ['cpu_load_percent_gradient', 'cpu_load_percent'],
+			}])
+			self.assertEqual(common.cpu_load_percent(pl=pl, format='{0:.1f}%'), [{
+				'contents': '52.3%',
+				'gradient_level': 52.3,
+				'highlight_group': ['cpu_load_percent_gradient', 'cpu_load_percent'],
+			}])
+
+
+class TestWthr(TestCommon):
+	module_name = 'wthr'
 
 	def test_weather(self):
 		pl = Pl()
-		with replace_attr(common, 'urllib_read', urllib_read):
+		with replace_attr(self.module, 'urllib_read', urllib_read):
 			self.assertEqual(common.weather(pl=pl), [
 				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_condition_partly_cloudy_day', 'weather_condition_cloudy', 'weather_conditions', 'weather'], 'contents': 'CLOUDS '},
 				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '-9°C', 'gradient_level': 30.0}
@@ -558,7 +737,7 @@ class TestCommon(TestCase):
 				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_condition_partly_cloudy_day', 'weather_condition_cloudy', 'weather_conditions', 'weather'], 'contents': 'CLOUDS '},
 				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '-9.0e+00C', 'gradient_level': 30.0}
 			])
-		with replace_attr(common, 'urllib_read', urllib_read):
+		with replace_attr(self.module, 'urllib_read', urllib_read):
 			common.weather.startup(pl=pl, location_query='Meppen,06,DE')
 			self.assertEqual(common.weather(pl=pl), [
 				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_condition_partly_cloudy_day', 'weather_condition_cloudy', 'weather_conditions', 'weather'], 'contents': 'CLOUDS '},
@@ -570,123 +749,25 @@ class TestCommon(TestCase):
 			])
 			common.weather.shutdown()
 
-	def test_system_load(self):
-		pl = Pl()
-		with replace_module_module(common, 'os', getloadavg=lambda: (7.5, 3.5, 1.5)):
-			with replace_attr(common, '_cpu_count', lambda: 2):
-				self.assertEqual(common.system_load(pl=pl), [
-					{'contents': '7.5 ', 'highlight_group': ['system_load_gradient', 'system_load'], 'divider_highlight_group': 'background:divider', 'gradient_level': 100},
-					{'contents': '3.5 ', 'highlight_group': ['system_load_gradient', 'system_load'], 'divider_highlight_group': 'background:divider', 'gradient_level': 75.0},
-					{'contents': '1.5', 'highlight_group': ['system_load_gradient', 'system_load'], 'divider_highlight_group': 'background:divider', 'gradient_level': 0}
-				])
-				self.assertEqual(common.system_load(pl=pl, format='{avg:.0f}', threshold_good=0, threshold_bad=1), [
-					{'contents': '8 ', 'highlight_group': ['system_load_gradient', 'system_load'], 'divider_highlight_group': 'background:divider', 'gradient_level': 100},
-					{'contents': '4 ', 'highlight_group': ['system_load_gradient', 'system_load'], 'divider_highlight_group': 'background:divider', 'gradient_level': 100},
-					{'contents': '2', 'highlight_group': ['system_load_gradient', 'system_load'], 'divider_highlight_group': 'background:divider', 'gradient_level': 75.0}
-				])
 
-	def test_cpu_load_percent(self):
-		pl = Pl()
-		with replace_module_module(common, 'psutil', cpu_percent=lambda **kwargs: 52.3):
-			self.assertEqual(common.cpu_load_percent(pl=pl), [{
-				'contents': '52%',
-				'gradient_level': 52.3,
-				'highlight_group': ['cpu_load_percent_gradient', 'cpu_load_percent'],
-			}])
-			self.assertEqual(common.cpu_load_percent(pl=pl, format='{0:.1f}%'), [{
-				'contents': '52.3%',
-				'gradient_level': 52.3,
-				'highlight_group': ['cpu_load_percent_gradient', 'cpu_load_percent'],
-			}])
-
-	def test_network_load(self):
-		from time import sleep
-
-		def gb(interface):
-			return None
-
-		f = [gb]
-
-		def _get_bytes(interface):
-			return f[0](interface)
-
-		pl = Pl()
-
-		with replace_attr(common, '_get_bytes', _get_bytes):
-			common.network_load.startup(pl=pl)
-			try:
-				self.assertEqual(common.network_load(pl=pl, interface='eth0'), None)
-				sleep(common.network_load.interval)
-				self.assertEqual(common.network_load(pl=pl, interface='eth0'), None)
-				while 'prev' not in common.network_load.interfaces.get('eth0', {}):
-					sleep(0.1)
-				self.assertEqual(common.network_load(pl=pl, interface='eth0'), None)
-
-				l = [0, 0]
-
-				def gb2(interface):
-					l[0] += 1200
-					l[1] += 2400
-					return tuple(l)
-				f[0] = gb2
-
-				while not common.network_load.interfaces.get('eth0', {}).get('prev', (None, None))[1]:
-					sleep(0.1)
-				self.assertEqual(common.network_load(pl=pl, interface='eth0'), [
-					{'divider_highlight_group': 'background:divider', 'contents': 'DL  1 KiB/s', 'highlight_group': ['network_load_recv', 'network_load']},
-					{'divider_highlight_group': 'background:divider', 'contents': 'UL  2 KiB/s', 'highlight_group': ['network_load_sent', 'network_load']},
-				])
-				self.assertEqual(common.network_load(pl=pl, interface='eth0', recv_format='r {value}', sent_format='s {value}'), [
-					{'divider_highlight_group': 'background:divider', 'contents': 'r 1 KiB/s', 'highlight_group': ['network_load_recv', 'network_load']},
-					{'divider_highlight_group': 'background:divider', 'contents': 's 2 KiB/s', 'highlight_group': ['network_load_sent', 'network_load']},
-				])
-				self.assertEqual(common.network_load(pl=pl, recv_format='r {value}', sent_format='s {value}', suffix='bps', interface='eth0'), [
-					{'divider_highlight_group': 'background:divider', 'contents': 'r 1 Kibps', 'highlight_group': ['network_load_recv', 'network_load']},
-					{'divider_highlight_group': 'background:divider', 'contents': 's 2 Kibps', 'highlight_group': ['network_load_sent', 'network_load']},
-				])
-				self.assertEqual(common.network_load(pl=pl, recv_format='r {value}', sent_format='s {value}', si_prefix=True, interface='eth0'), [
-					{'divider_highlight_group': 'background:divider', 'contents': 'r 1 kB/s', 'highlight_group': ['network_load_recv', 'network_load']},
-					{'divider_highlight_group': 'background:divider', 'contents': 's 2 kB/s', 'highlight_group': ['network_load_sent', 'network_load']},
-				])
-				self.assertEqual(common.network_load(pl=pl, recv_format='r {value}', sent_format='s {value}', recv_max=0, interface='eth0'), [
-					{'divider_highlight_group': 'background:divider', 'contents': 'r 1 KiB/s', 'highlight_group': ['network_load_recv_gradient', 'network_load_gradient', 'network_load_recv', 'network_load'], 'gradient_level': 100},
-					{'divider_highlight_group': 'background:divider', 'contents': 's 2 KiB/s', 'highlight_group': ['network_load_sent', 'network_load']},
-				])
-
-				class ApproxEqual(object):
-					def __eq__(self, i):
-						return abs(i - 50.0) < 1
-
-				self.assertEqual(common.network_load(pl=pl, recv_format='r {value}', sent_format='s {value}', sent_max=4800, interface='eth0'), [
-					{'divider_highlight_group': 'background:divider', 'contents': 'r 1 KiB/s', 'highlight_group': ['network_load_recv', 'network_load']},
-					{'divider_highlight_group': 'background:divider', 'contents': 's 2 KiB/s', 'highlight_group': ['network_load_sent_gradient', 'network_load_gradient', 'network_load_sent', 'network_load'], 'gradient_level': ApproxEqual()},
-				])
-			finally:
-				common.network_load.shutdown()
-
-	def test_virtualenv(self):
-		pl = Pl()
-		with replace_env('VIRTUAL_ENV', '/abc/def/ghi') as segment_info:
-			self.assertEqual(common.virtualenv(pl=pl, segment_info=segment_info), 'ghi')
-			segment_info['environ'].pop('VIRTUAL_ENV')
-			self.assertEqual(common.virtualenv(pl=pl, segment_info=segment_info), None)
-
-	def test_environment(self):
-		pl = Pl()
-		variable = 'FOO'
-		value = 'bar'
-		with replace_env(variable, value) as segment_info:
-			self.assertEqual(common.environment(pl=pl, segment_info=segment_info, variable=variable), value)
-			segment_info['environ'].pop(variable)
-			self.assertEqual(common.environment(pl=pl, segment_info=segment_info, variable=variable), None)
+class TestMail(TestCommon):
+	module_name = 'mail'
 
 	def test_email_imap_alert(self):
 		# TODO
 		pass
 
+
+class TestPlayers(TestCommon):
+	module_name = 'players'
+
 	def test_now_playing(self):
 		# TODO
 		pass
+
+
+class TestBat(TestCommon):
+	module_name = 'bat'
 
 	def test_battery(self):
 		pl = Pl()
@@ -694,7 +775,7 @@ class TestCommon(TestCase):
 		def _get_capacity(pl):
 			return 86
 
-		with replace_attr(common, '_get_capacity', _get_capacity):
+		with replace_attr(self.module, '_get_capacity', _get_capacity):
 			self.assertEqual(common.battery(pl=pl), [{
 				'contents': '86%',
 				'highlight_group': ['battery_gradient', 'battery'],
@@ -738,52 +819,6 @@ class TestCommon(TestCase):
 					'gradient_level': 100
 				}
 			])
-
-	def test_internal_ip(self):
-		try:
-			import netifaces
-		except ImportError:
-			raise SkipTest()
-		pl = Pl()
-		addr = {
-			'enp2s0': {
-				netifaces.AF_INET: [{'addr': '192.168.100.200'}],
-				netifaces.AF_INET6: [{'addr': 'feff::5446:5eff:fe5a:7777%enp2s0'}]
-			},
-			'lo': {
-				netifaces.AF_INET: [{'addr': '127.0.0.1'}],
-				netifaces.AF_INET6: [{'addr': '::1'}]
-			},
-			'teredo': {
-				netifaces.AF_INET6: [{'addr': 'feff::5446:5eff:fe5a:7777'}]
-			},
-		}
-		interfaces = ['lo', 'enp2s0', 'teredo']
-		with replace_module_module(
-			common, 'netifaces',
-			interfaces=(lambda: interfaces),
-			ifaddresses=(lambda interface: addr[interface]),
-			AF_INET=netifaces.AF_INET,
-			AF_INET6=netifaces.AF_INET6,
-		):
-			self.assertEqual(common.internal_ip(pl=pl), '192.168.100.200')
-			self.assertEqual(common.internal_ip(pl=pl, interface='detect'), '192.168.100.200')
-			self.assertEqual(common.internal_ip(pl=pl, interface='lo'), '127.0.0.1')
-			self.assertEqual(common.internal_ip(pl=pl, interface='teredo'), None)
-			self.assertEqual(common.internal_ip(pl=pl, ipv=4), '192.168.100.200')
-			self.assertEqual(common.internal_ip(pl=pl, interface='detect', ipv=4), '192.168.100.200')
-			self.assertEqual(common.internal_ip(pl=pl, interface='lo', ipv=4), '127.0.0.1')
-			self.assertEqual(common.internal_ip(pl=pl, interface='teredo', ipv=4), None)
-			self.assertEqual(common.internal_ip(pl=pl, ipv=6), 'feff::5446:5eff:fe5a:7777%enp2s0')
-			self.assertEqual(common.internal_ip(pl=pl, interface='detect', ipv=6), 'feff::5446:5eff:fe5a:7777%enp2s0')
-			self.assertEqual(common.internal_ip(pl=pl, interface='lo', ipv=6), '::1')
-			self.assertEqual(common.internal_ip(pl=pl, interface='teredo', ipv=6), 'feff::5446:5eff:fe5a:7777')
-			interfaces[1:2] = ()
-			self.assertEqual(common.internal_ip(pl=pl, ipv=6), 'feff::5446:5eff:fe5a:7777')
-			interfaces[1:2] = ()
-			self.assertEqual(common.internal_ip(pl=pl, ipv=6), '::1')
-			interfaces[:] = ()
-			self.assertEqual(common.internal_ip(pl=pl, ipv=6), None)
 
 
 class TestVim(TestCase):

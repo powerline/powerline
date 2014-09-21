@@ -42,7 +42,7 @@ class Reader(object):
 		self.column = 0
 
 		self.stream = stream
-		self.name = getattr(stream, 'name', "<file>")
+		self.name = getattr(stream, 'name', '<file>')
 		self.eof = False
 		self.raw_buffer = None
 

@@ -1,9 +1,8 @@
 {
-	"default_module": "powerline.segments.common",
 	"segments": {
 		"left": [
 			{
-				"function": "virtualenv",
+				"function": "powerline.segments.common.env.virtualenv",
 				"priority": 10
 			},
 			{

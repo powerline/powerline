@@ -3,7 +3,7 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 
 from powerline.theme import requires_segment_info
 from powerline.segments import with_docstring
-from powerline.segments.common import CwdSegment
+from powerline.segments.common.env import CwdSegment
 from powerline.lib.unicode import out_u
 
 
