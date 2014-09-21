@@ -15,6 +15,10 @@ from powerline.lib import mergedicts
 from powerline.lib.encoding import get_preferred_output_encoding
 
 
+class NotInterceptedError(BaseException):
+	pass
+
+
 def _config_loader_condition(path):
 	if path and os.path.isfile(path):
 		return path
