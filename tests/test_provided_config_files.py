@@ -13,6 +13,7 @@ import tests.vim as vim_module
 from tests.lib import Args, urllib_read, replace_attr
 from tests import TestCase
 
+from powerline.segments.common import wthr
 
 VBLOCK = chr(ord('V') - 0x40)
 SBLOCK = chr(ord('S') - 0x40)
@@ -145,7 +146,7 @@ class TestConfig(TestCase):
 		from imp import reload
 		reload(common)
 		from powerline import Powerline
-		with replace_attr(common, 'urllib_read', urllib_read):
+		with replace_attr(wthr, 'urllib_read', urllib_read):
 			Powerline(ext='wm', renderer_module='pango_markup', run_once=True).render()
 		reload(common)
 
