@@ -9,6 +9,8 @@ import struct
 
 from ctypes.util import find_library
 
+from powerline.lib.encoding import get_preferred_file_name_encoding
+
 
 __copyright__ = '2013, Kovid Goyal <kovid at kovidgoyal.net>'
 __docformat__ = 'restructuredtext en'
@@ -39,27 +41,27 @@ def load_inotify():
 		if not name:
 			raise INotifyError('Cannot find C library')
 		libc = ctypes.CDLL(name, use_errno=True)
-		for function in ("inotify_add_watch", "inotify_init1", "inotify_rm_watch"):
+		for function in ('inotify_add_watch', 'inotify_init1', 'inotify_rm_watch'):
 			if not hasattr(libc, function):
 				raise INotifyError('libc is too old')
 		# inotify_init1()
 		prototype = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_int, use_errno=True)
-		init1 = prototype(('inotify_init1', libc), ((1, "flags", 0),))
+		init1 = prototype(('inotify_init1', libc), ((1, 'flags', 0),))
 
 		# inotify_add_watch()
 		prototype = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_int, ctypes.c_char_p, ctypes.c_uint32, use_errno=True)
 		add_watch = prototype(('inotify_add_watch', libc), (
-			(1, "fd"), (1, "pathname"), (1, "mask")))
+			(1, 'fd'), (1, 'pathname'), (1, 'mask')))
 
 		# inotify_rm_watch()
 		prototype = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_int, ctypes.c_int, use_errno=True)
 		rm_watch = prototype(('inotify_rm_watch', libc), (
-			(1, "fd"), (1, "wd")))
+			(1, 'fd'), (1, 'wd')))
 
 		# read()
 		prototype = ctypes.CFUNCTYPE(ctypes.c_ssize_t, ctypes.c_int, ctypes.c_void_p, ctypes.c_size_t, use_errno=True)
 		read = prototype(('read', libc), (
-			(1, "fd"), (1, "buf"), (1, "count")))
+			(1, 'fd'), (1, 'buf'), (1, 'count')))
 		_inotify = (init1, add_watch, rm_watch, read)
 	return _inotify
 
@@ -121,10 +123,8 @@ class INotify(object):
 			raise INotifyError(os.strerror(ctypes.get_errno()))
 
 		self._buf = ctypes.create_string_buffer(5000)
-		self.fenc = sys.getfilesystemencoding() or 'utf-8'
+		self.fenc = get_preferred_file_name_encoding()
 		self.hdr = struct.Struct(b'iIII')
-		if self.fenc == 'ascii':
-			self.fenc = 'utf-8'
 		# We keep a reference to os to prevent it from being deleted
 		# during interpreter shutdown, which would lead to errors in the
 		# __del__ method
@@ -176,7 +176,7 @@ class INotify(object):
 			pos += self.hdr.size
 			name = None
 			if get_name:
-				name = raw[pos:pos + name_len].rstrip(b'\0').decode(self.fenc)
+				name = raw[pos:pos + name_len].rstrip(b'\0')
 			pos += name_len
 			self.process_event(wd, mask, cookie, name)
 

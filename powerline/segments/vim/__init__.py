@@ -28,13 +28,11 @@ except ImportError:
 
 
 vim_funcs = {
-	'virtcol': vim_get_func('virtcol', rettype=int),
+	'virtcol': vim_get_func('virtcol', rettype='int'),
 	'getpos': vim_get_func('getpos'),
-	'fnamemodify': vim_get_func('fnamemodify'),
-	'expand': vim_get_func('expand'),
-	'bufnr': vim_get_func('bufnr', rettype=int),
-	'line2byte': vim_get_func('line2byte', rettype=int),
-	'line': vim_get_func('line', rettype=int),
+	'fnamemodify': vim_get_func('fnamemodify', rettype='bytes'),
+	'line2byte': vim_get_func('line2byte', rettype='int'),
+	'line': vim_get_func('line', rettype='int'),
 }
 
 vim_modes = {
@@ -135,8 +133,8 @@ def visual_range(pl, segment_info, CTRL_V_text='{rows} x {vcols}', v_text_onelin
 	vcols      Number of virtual columns in the selection
 	=========  =============================================================
 	'''
-	sline, scol, soff = [int(v) for v in vim_funcs['getpos']("v")[1:]]
-	eline, ecol, eoff = [int(v) for v in vim_funcs['getpos'](".")[1:]]
+	sline, scol, soff = [int(v) for v in vim_funcs['getpos']('v')[1:]]
+	eline, ecol, eoff = [int(v) for v in vim_funcs['getpos']('.')[1:]]
 	svcol = vim_funcs['virtcol']([sline, scol, soff])
 	evcol = vim_funcs['virtcol']([eline, ecol, eoff])
 	rows = abs(eline - sline) + 1
@@ -225,7 +223,7 @@ def file_scheme(pl, segment_info):
 		name will look like :file:`zipfile:/path/to/archive.zip::file.txt`. 
 		``file_scheme`` segment will catch ``zipfile`` part here.
 	'''
-	name = buffer_name(segment_info['buffer'])
+	name = buffer_name(segment_info)
 	if not name:
 		return None
 	match = SCHEME_RE.match(name)
@@ -254,7 +252,7 @@ def file_directory(pl, segment_info, remove_scheme=True, shorten_user=True, shor
 		Shorten all directories in :file:`/home/` to :file:`~user/` instead of 
 		:file:`/home/user/`. Does not work for files with scheme present.
 	'''
-	name = buffer_name(segment_info['buffer'])
+	name = buffer_name(segment_info)
 	if not name:
 		return None
 	match = SCHEME_RE.match(name)
@@ -271,7 +269,7 @@ def file_directory(pl, segment_info, remove_scheme=True, shorten_user=True, shor
 			return None
 		if shorten_home and file_directory.startswith('/home/'):
 			file_directory = b'~' + file_directory[6:]
-	file_directory = file_directory.decode('utf-8', 'powerline_vim_strtrans_error')
+	file_directory = file_directory.decode(segment_info['encoding'], 'powerline_vim_strtrans_error')
 	return file_directory + os.sep
 
 
@@ -286,7 +284,7 @@ def file_name(pl, segment_info, display_no_file=False, no_file_text='[No file]')
 
 	Highlight groups used: ``file_name_no_file`` or ``file_name``, ``file_name``.
 	'''
-	name = buffer_name(segment_info['buffer'])
+	name = buffer_name(segment_info)
 	if not name:
 		if display_no_file:
 			return [{
@@ -295,7 +293,7 @@ def file_name(pl, segment_info, display_no_file=False, no_file_text='[No file]')
 			}]
 		else:
 			return None
-	return os.path.basename(name).decode('utf-8', 'powerline_vim_strtrans_error')
+	return os.path.basename(name).decode(segment_info['encoding'], 'powerline_vim_strtrans_error')
 
 
 @window_cached
@@ -306,7 +304,7 @@ def file_size(pl, suffix='B', si_prefix=False):
 		string appended to the file size
 	:param bool si_prefix:
 		use SI prefix, e.g. MB instead of MiB
-	:return: file size or None if the file isn't saved or if the size is too big to fit in a number
+	:return: file size or None if the file isn’t saved or if the size is too big to fit in a number
 	'''
 	# Note: returns file size in &encoding, not in &fileencoding. But returned 
 	# size is updated immediately; and it is valid for any buffer
@@ -470,10 +468,13 @@ def modified_buffers(pl, text='+ ', join_str=','):
 	:param str join_str:
 		string to use for joining the modified buffer list
 	'''
-	buffer_len = vim_funcs['bufnr']('$')
-	buffer_mod = [str(bufnr) for bufnr in range(1, buffer_len + 1) if int(getbufvar(bufnr, '&modified') or 0)]
-	if buffer_mod:
-		return text + join_str.join(buffer_mod)
+	buffer_mod_text = join_str.join((
+		str(buffer.number)
+		for buffer in vim.buffers
+		if int(vim_getbufoption({'buffer': buffer, 'bufnr': buffer.number}, 'modified'))
+	))
+	if buffer_mod_text:
+		return text + buffer_mod_text
 	return None
 
 
@@ -489,7 +490,7 @@ def branch(pl, segment_info, create_watcher, status_colors=False):
 
 	Divider highlight group used: ``branch:divider``.
 	'''
-	name = segment_info['buffer'].name
+	name = buffer_name(segment_info)
 	skip = not (name and (not vim_getbufoption(segment_info, 'buftype')))
 	if not skip:
 		repo = guess(path=name, create_watcher=create_watcher)
@@ -513,7 +514,7 @@ def file_vcs_status(pl, segment_info, create_watcher):
 
 	Highlight groups used: ``file_vcs_status``.
 	'''
-	name = segment_info['buffer'].name
+	name = buffer_name(segment_info)
 	skip = not (name and (not vim_getbufoption(segment_info, 'buftype')))
 	if not skip:
 		repo = guess(path=name, create_watcher=create_watcher)

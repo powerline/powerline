@@ -15,7 +15,7 @@ always absolute.
 
 Segments are regular Python functions, and they may accept arguments. All 
 arguments should have a default value which will be used for themes that 
-don't provide an ``args`` dict.
+don’t provide an ``args`` dict.
 
 More information is available in :ref:`Writing segments <dev-segments>` section.
 

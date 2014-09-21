@@ -5,7 +5,6 @@ import os
 import sys
 import logging
 
-from locale import getpreferredencoding
 from threading import Lock, Event
 
 from powerline.colorscheme import Colorscheme
@@ -13,6 +12,11 @@ from powerline.lib.config import ConfigLoader
 from powerline.lib.unicode import safe_unicode, FailedUnicode
 from powerline.config import DEFAULT_SYSTEM_CONFIG_DIR
 from powerline.lib import mergedicts
+from powerline.lib.encoding import get_preferred_output_encoding
+
+
+class NotInterceptedError(BaseException):
+	pass
 
 
 def _config_loader_condition(path):
@@ -413,7 +417,7 @@ class Powerline(object):
 		self.setup_kwargs = {}
 		self.imported_modules = set()
 
-	get_encoding = staticmethod(getpreferredencoding)
+	get_encoding = staticmethod(get_preferred_output_encoding)
 	'''Get encoding used by the current application
 
 	Usually returns encoding of the current locale.
@@ -744,16 +748,12 @@ class Powerline(object):
 			self.update_renderer()
 			return self.renderer.render(*args, **kwargs)
 		except Exception as e:
+			exc = e
 			try:
 				self.exception('Failed to render: {0}', str(e))
 			except Exception as e:
-				# Updates e variable to new value, masking previous one. 
-				# Normally it is the same exception (due to raise in case pl is 
-				# unset), but it may also show error in logger. Note that latter 
-				# is not logged by logger for obvious reasons, thus this also 
-				# prevents us from seeing logger traceback.
-				pass
-			return FailedUnicode(safe_unicode(e))
+				exc = e
+			return FailedUnicode(safe_unicode(exc))
 
 	def render_above_lines(self, *args, **kwargs):
 		'''Like .render(), but for ``self.renderer.render_above_lines()``
@@ -763,16 +763,12 @@ class Powerline(object):
 			for line in self.renderer.render_above_lines(*args, **kwargs):
 				yield line
 		except Exception as e:
+			exc = e
 			try:
 				self.exception('Failed to render: {0}', str(e))
 			except Exception as e:
-				# Updates e variable to new value, masking previous one. 
-				# Normally it is the same exception (due to raise in case pl is 
-				# unset), but it may also show error in logger. Note that latter 
-				# is not logged by logger for obvious reasons, thus this also 
-				# prevents us from seeing logger traceback.
-				pass
-			yield FailedUnicode(safe_unicode(e))
+				exc = e
+			yield FailedUnicode(safe_unicode(exc))
 
 	def setup(self, *args, **kwargs):
 		'''Setup the environment to use powerline.

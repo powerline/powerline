@@ -88,7 +88,7 @@ class Parser:
 			token = self.peek_token()
 			self.echoerr(
 				None, None,
-				("expected '<stream end>', but found %r" % token.id), token.start_mark
+				('expected \'<stream end>\', but found %r' % token.id), token.start_mark
 			)
 			return events.StreamEndEvent(token.start_mark, token.end_mark)
 		else:
@@ -141,8 +141,8 @@ class Parser:
 		else:
 			token = self.peek_token()
 			raise ParserError(
-				"while parsing a flow node", start_mark,
-				"expected the node content, but found %r" % token.id,
+				'while parsing a flow node', start_mark,
+				'expected the node content, but found %r' % token.id,
 				token.start_mark
 			)
 		return event
@@ -160,14 +160,14 @@ class Parser:
 					if self.check_token(tokens.FlowSequenceEndToken):
 						token = self.peek_token()
 						self.echoerr(
-							"While parsing a flow sequence", self.marks[-1],
-							("expected sequence value, but got %r" % token.id), token.start_mark
+							'While parsing a flow sequence', self.marks[-1],
+							('expected sequence value, but got %r' % token.id), token.start_mark
 						)
 				else:
 					token = self.peek_token()
 					raise ParserError(
-						"while parsing a flow sequence", self.marks[-1],
-						("expected ',' or ']', but got %r" % token.id), token.start_mark
+						'while parsing a flow sequence', self.marks[-1],
+						('expected \',\' or \']\', but got %r' % token.id), token.start_mark
 					)
 
 			if not self.check_token(tokens.FlowSequenceEndToken):
@@ -197,14 +197,14 @@ class Parser:
 					if self.check_token(tokens.FlowMappingEndToken):
 						token = self.peek_token()
 						self.echoerr(
-							"While parsing a flow mapping", self.marks[-1],
-							("expected mapping key, but got %r" % token.id), token.start_mark
+							'While parsing a flow mapping', self.marks[-1],
+							('expected mapping key, but got %r' % token.id), token.start_mark
 						)
 				else:
 					token = self.peek_token()
 					raise ParserError(
-						"while parsing a flow mapping", self.marks[-1],
-						("expected ',' or '}', but got %r" % token.id), token.start_mark
+						'while parsing a flow mapping', self.marks[-1],
+						('expected \',\' or \'}\', but got %r' % token.id), token.start_mark
 					)
 			if self.check_token(tokens.KeyToken):
 				token = self.get_token()
@@ -214,8 +214,8 @@ class Parser:
 				else:
 					token = self.peek_token()
 					raise ParserError(
-						"while parsing a flow mapping", self.marks[-1],
-						("expected value, but got %r" % token.id), token.start_mark
+						'while parsing a flow mapping', self.marks[-1],
+						('expected value, but got %r' % token.id), token.start_mark
 					)
 			elif not self.check_token(tokens.FlowMappingEndToken):
 				token = self.peek_token()
@@ -226,14 +226,14 @@ class Parser:
 
 				if expect_key:
 					raise ParserError(
-						"while parsing a flow mapping", self.marks[-1],
-						("expected string key, but got %r" % token.id), token.start_mark
+						'while parsing a flow mapping', self.marks[-1],
+						('expected string key, but got %r' % token.id), token.start_mark
 					)
 				else:
 					token = self.peek_token()
 					raise ParserError(
-						"while parsing a flow mapping", self.marks[-1],
-						("expected ':', but got %r" % token.id), token.start_mark
+						'while parsing a flow mapping', self.marks[-1],
+						('expected \':\', but got %r' % token.id), token.start_mark
 					)
 		token = self.get_token()
 		event = events.MappingEndEvent(token.start_mark, token.end_mark)
@@ -250,6 +250,6 @@ class Parser:
 
 		token = self.peek_token()
 		raise ParserError(
-			"while parsing a flow mapping", self.marks[-1],
-			("expected mapping value, but got %r" % token.id), token.start_mark
+			'while parsing a flow mapping', self.marks[-1],
+			('expected mapping value, but got %r' % token.id), token.start_mark
 		)

@@ -31,7 +31,7 @@ _powerline_init_tmux_support() {
 		# TMUX variable may be unset to create new tmux session inside this one
 		_POWERLINE_TMUX="$TMUX"
 
-		trap "_powerline_tmux_set_columns" WINCH
+		trap '_powerline_tmux_set_columns' WINCH
 		_powerline_tmux_set_columns
 
 		test "x$PROMPT_COMMAND" != "x${PROMPT_COMMAND/_powerline_tmux_set_pwd}" ||

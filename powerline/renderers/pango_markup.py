@@ -12,7 +12,7 @@ class PangoMarkupRenderer(Renderer):
 
 	@staticmethod
 	def hlstyle(*args, **kwargs):
-		# We don't need to explicitly reset attributes, so skip those calls
+		# We don’t need to explicitly reset attributes, so skip those calls
 		return ''
 
 	def hl(self, contents, fg=None, bg=None, attr=None):

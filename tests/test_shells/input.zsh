@@ -1,5 +1,7 @@
+unset HOME
 unsetopt promptsp notransientrprompt
 setopt interactivecomments
+setopt autonamedirs
 # POWERLINE_CONFIG_PATH=$PWD/powerline/config_files
 # POWERLINE_THEME_CONFIG=( default_leftonly.segment_data.hostname.args.only_if_ssh=false )
 # POWERLINE_CONFIG=( ext.shell.theme=default_leftonly )
@@ -11,7 +13,7 @@ export VIRTUAL_ENV=
 cd tests/shell/3rd
 cd .git
 cd ..
-VIRTUAL_ENV="$HOME/.virtenvs/some-virtual-environment"
+VIRTUAL_ENV="/home/USER/.virtenvs/some-virtual-environment"
 VIRTUAL_ENV=
 bgscript.sh & waitpid.sh
 false
@@ -38,6 +40,8 @@ do
 	break
 done
 1
+cd .
+cd .
 hash -d foo=$PWD:h ; cd .
 POWERLINE_COMMAND="$POWERLINE_COMMAND -t default.dividers.left.hard=\$ABC"
 true

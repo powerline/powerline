@@ -183,6 +183,7 @@ mkdir tests/shell/path
 ln -s "$(which "${PYTHON}")" tests/shell/path/python
 ln -s "$(which screen)" tests/shell/path
 ln -s "$(which env)" tests/shell/path
+ln -s "$(which git)" tests/shell/path
 ln -s "$(which sleep)" tests/shell/path
 ln -s "$(which cat)" tests/shell/path
 ln -s "$(which false)" tests/shell/path
@@ -332,12 +333,12 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 	done
 fi
 
-if ! $PYTHON scripts/powerline-daemon -s$ADDRESS > tests/shell/daemon_log_2 2>&1 ; then
-	echo "Daemon exited with status $?"
-	FAILED=1
-else
+if $PYTHON scripts/powerline-daemon -s$ADDRESS > tests/shell/daemon_log_2 2>&1 ; then
 	sleep 1
 	$PYTHON scripts/powerline-daemon -s$ADDRESS -k
+else
+	echo "Daemon exited with status $?"
+	FAILED=1
 fi
 
 if ! test -z "$(cat tests/shell/daemon_log_2)" ; then

@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.abspath(os.getcwd()))
 extensions = ['powerline_autodoc', 'sphinx.ext.todo', 'sphinx.ext.coverage', 'sphinx.ext.viewcode']
 source_suffix = '.rst'
 master_doc = 'index'
-project = u'Powerline'
+project = 'Powerline'
 version = 'beta'
 release = 'beta'
 exclude_patterns = ['_build']
@@ -22,7 +22,7 @@ html_show_copyright = False
 
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 
-if not on_rtd:  # only import and set the theme if we're building docs locally
+if not on_rtd:  # only import and set the theme if we’re building docs locally
 	try:
 		import sphinx_rtd_theme
 		html_theme = 'sphinx_rtd_theme'

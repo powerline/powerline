@@ -33,7 +33,7 @@ def read_to_log(pl, client):
 while True:
 	start_time = monotonic()
 	s = powerline.render(side='right')
-	request = "powerline_widget:set_markup('" + s.replace('\\', '\\\\').replace("'", "\\'") + "')\n"
+	request = 'powerline_widget:set_markup(\'' + s.replace('\\', '\\\\').replace('\'', '\\\'') + '\')\n'
 	client = Popen(['awesome-client'], shell=False, stdout=PIPE, stderr=PIPE, stdin=PIPE)
 	client.stdin.write(request.encode('utf-8'))
 	client.stdin.close()

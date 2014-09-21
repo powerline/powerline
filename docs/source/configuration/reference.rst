@@ -177,7 +177,7 @@ Color definitions
     * A cterm color index.
     * A list with a cterm color index and a hex color string (e.g. ``[123, 
       "aabbcc"]``). This is useful for colorschemes that use colors that 
-      aren't available in color terminals.
+      aren’t available in color terminals.
 
 ``gradients``
     Gradient definitions, consisting of a dict where the key is the name of the 
@@ -236,7 +236,7 @@ override those from each previous file. It is required that either
 
 ``mode_translations``
     Mode-specific highlighting for extensions that support it (e.g. the vim 
-    extension). It's an easy way of changing a color in a specific mode.  
+    extension). It’s an easy way of changing a color in a specific mode.  
     Consists of a dict where the key is the mode and the value is a dict 
     with the following options:
 
@@ -308,7 +308,7 @@ ascii                       Theme without any unicode characters at all
 
 ``dividers``
     Defines the dividers used in all Powerline extensions. This option 
-    should usually only be changed if you don't have a patched font, or if 
+    should usually only be changed if you don’t have a patched font, or if 
     you use a font patched with the legacy font patcher.
 
     The ``hard`` dividers are used to divide segments with different 

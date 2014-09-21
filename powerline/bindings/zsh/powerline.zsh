@@ -36,7 +36,7 @@ _powerline_init_tmux_support() {
 		}
 
 		chpwd_functions+=( _powerline_tmux_set_pwd )
-		trap "_powerline_tmux_set_columns" SIGWINCH
+		trap '_powerline_tmux_set_columns' SIGWINCH
 		_powerline_tmux_set_columns
 		_powerline_tmux_set_pwd
 	fi
@@ -103,10 +103,6 @@ _powerline_set_jobnum() {
 	_POWERLINE_JOBNUM=${(%):-%j}
 }
 
-_powerline_set_shortened_path() {
-	_POWERLINE_SHORTENED_PATH="${(%):-%~}"
-}
-
 _powerline_update_counter() {
 	zpython '_powerline.precmd()'
 }
@@ -115,13 +111,11 @@ _powerline_setup_prompt() {
 	emulate -L zsh
 
 	for f in "${precmd_functions[@]}"; do
-		if [[ "$f" = "_powerline_set_jobnum" ]]; then
+		if [[ "$f" = '_powerline_set_jobnum' ]]; then
 			return
 		fi
 	done
 	precmd_functions+=( _powerline_set_jobnum )
-	chpwd_functions+=( _powerline_set_shortened_path )
-	_powerline_set_shortened_path
 
 	VIRTUAL_ENV_DISABLE_PROMPT=1
 
@@ -144,7 +138,7 @@ _powerline_setup_prompt() {
 		add_args+=' --last_exit_code=$?'
 		add_args+=' --last_pipe_status="$pipestatus"'
 		add_args+=' --renderer_arg="client_id=$$"'
-		add_args+=' --renderer_arg="shortened_path=$_POWERLINE_SHORTENED_PATH"'
+		add_args+=' --renderer_arg="shortened_path=${(%):-%~}"'
 		add_args+=' --jobnum=$_POWERLINE_JOBNUM'
 		local new_args_2=' --renderer_arg="parser_state=${(%%):-%_}"'
 		new_args_2+=' --renderer_arg="local_theme=continuation"'

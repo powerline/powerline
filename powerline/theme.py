@@ -163,6 +163,6 @@ class Theme(object):
 					elif segment['align'] == 'c':
 						segment['contents'] = segment['contents'].center(segment['width'])
 				# We need to yield a copy of the segment, or else mode-dependent
-				# segment contents can't be cached correctly e.g. when caching
+				# segment contents can’t be cached correctly e.g. when caching
 				# non-current window contents for vim statuslines
 				yield segment.copy()

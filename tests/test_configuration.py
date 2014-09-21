@@ -653,9 +653,9 @@ class TestVim(TestCase):
 					window = vim_module.current.window
 					window_id = 1
 					winnr = window.number
-					self.assertEqual(powerline.render(window, window_id, winnr), '%#Pl_3_8404992_4_192_underline#\xa0abc%#Pl_4_192_NONE_None_NONE#>>')
+					self.assertEqual(powerline.render(window, window_id, winnr), b'%#Pl_3_8404992_4_192_underline#\xc2\xa0abc%#Pl_4_192_NONE_None_NONE#>>')
 					vim_module._environ['TEST'] = 'def'
-					self.assertEqual(powerline.render(window, window_id, winnr), '%#Pl_3_8404992_4_192_underline#\xa0def%#Pl_4_192_NONE_None_NONE#>>')
+					self.assertEqual(powerline.render(window, window_id, winnr), b'%#Pl_3_8404992_4_192_underline#\xc2\xa0def%#Pl_4_192_NONE_None_NONE#>>')
 
 	def test_local_themes(self):
 		# Regression test: VimPowerline.add_local_theme did not work properly.
@@ -682,7 +682,7 @@ class TestVim(TestCase):
 				window = vim_module.current.window
 				window_id = 1
 				winnr = window.number
-				self.assertEqual(powerline.render(window, window_id, winnr), '%#Pl_5_12583104_6_32896_NONE#\xa0\u201cbar\u201d%#Pl_6_32896_NONE_None_NONE#>>')
+				self.assertEqual(powerline.render(window, window_id, winnr), b'%#Pl_5_12583104_6_32896_NONE#\xc2\xa0\xe2\x80\x9cbar\xe2\x80\x9d%#Pl_6_32896_NONE_None_NONE#>>')
 
 	@classmethod
 	def setUpClass(cls):

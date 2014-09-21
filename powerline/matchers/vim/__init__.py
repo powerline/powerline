@@ -3,7 +3,7 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 
 import os
 
-from powerline.bindings.vim import vim_getbufoption
+from powerline.bindings.vim import vim_getbufoption, buffer_name
 
 
 def help(matcher_info):
@@ -11,8 +11,8 @@ def help(matcher_info):
 
 
 def cmdwin(matcher_info):
-	name = matcher_info['buffer'].name
-	return name and os.path.basename(name) == '[Command Line]'
+	name = buffer_name(matcher_info)
+	return name and os.path.basename(name) == b'[Command Line]'
 
 
 def quickfix(matcher_info):

@@ -1,20 +1,19 @@
 {
-	"default_module": "powerline.segments.common",
 	"segments": {
 		"right": [
 			{
-				"function": "uptime",
+				"function": "powerline.segments.common.sys.uptime",
 				"priority": 50
 			},
 			{
-				"function": "system_load",
+				"function": "powerline.segments.common.sys.system_load",
 				"priority": 50
 			},
 			{
-				"function": "date"
+				"function": "powerline.segments.common.time.date"
 			},
 			{
-				"function": "date",
+				"function": "powerline.segments.common.time.date",
 				"name": "time",
 				"args": {
 					"format": "%H:%M",
@@ -22,7 +21,7 @@
 				}
 			},
 			{
-				"function": "hostname"
+				"function": "powerline.segments.common.net.hostname"
 			}
 		]
 	}

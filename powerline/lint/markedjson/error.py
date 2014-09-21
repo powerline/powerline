@@ -57,10 +57,10 @@ class Mark:
 
 	def __str__(self):
 		snippet = self.get_snippet()
-		where = ("  in \"%s\", line %d, column %d" % (
+		where = ('  in "%s", line %d, column %d' % (
 			self.name, self.line + 1, self.column + 1))
 		if snippet is not None:
-			where += ":\n" + snippet
+			where += ':\n' + snippet
 		if type(where) is str:
 			return where
 		else:
@@ -68,8 +68,9 @@ class Mark:
 
 
 def echoerr(*args, **kwargs):
-	sys.stderr.write('\n')
-	sys.stderr.write(format_error(*args, **kwargs) + '\n')
+	stream = kwargs.pop('stream', sys.stderr)
+	stream.write('\n')
+	stream.write(format_error(*args, **kwargs) + '\n')
 
 
 def format_error(context=None, context_mark=None, problem=None, problem_mark=None, note=None):
@@ -98,3 +99,34 @@ def format_error(context=None, context_mark=None, problem=None, problem_mark=Non
 class MarkedError(Exception):
 	def __init__(self, context=None, context_mark=None, problem=None, problem_mark=None, note=None):
 		Exception.__init__(self, format_error(context, context_mark, problem, problem_mark, note))
+
+
+class EchoErr(object):
+	__slots__ = ('echoerr', 'logger',)
+
+	def __init__(self, echoerr, logger):
+		self.echoerr = echoerr
+		self.logger = logger
+
+	def __call__(self, *args, **kwargs):
+		self.echoerr(*args, **kwargs)
+
+
+class DelayedEchoErr(EchoErr):
+	__slots__ = ('echoerr', 'logger', 'errs')
+
+	def __init__(self, echoerr):
+		super(DelayedEchoErr, self).__init__(echoerr, echoerr.logger)
+		self.errs = []
+
+	def __call__(self, *args, **kwargs):
+		self.errs.append((args, kwargs))
+
+	def echo_all(self):
+		for args, kwargs in self.errs:
+			self.echoerr(*args, **kwargs)
+
+	def __nonzero__(self):
+		return not not self.errs
+
+	__bool__ = __nonzero__

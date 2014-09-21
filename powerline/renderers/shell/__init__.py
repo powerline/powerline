@@ -82,7 +82,7 @@ class ShellRenderer(Renderer):
 
 		If an argument is None, the argument is ignored. If an argument is
 		False, the argument is reset to the terminal defaults. If an argument
-		is a valid color or attribute, it's added to the ANSI escape code.
+		is a valid color or attribute, it’s added to the ANSI escape code.
 		'''
 		ansi = [0]
 		if fg is not None:

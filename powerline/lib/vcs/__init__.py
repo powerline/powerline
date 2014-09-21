@@ -8,6 +8,8 @@ from threading import Lock
 from collections import defaultdict
 
 from powerline.lib.watcher import create_tree_watcher
+from powerline.lib.unicode import out_u
+from powerline.lib.path import join
 
 
 def generate_directories(path):
@@ -75,10 +77,10 @@ def get_branch_name(directory, config_file, get_func, create_watcher):
 					raise
 				# Config file does not exist (happens for mercurial)
 				if config_file not in branch_name_cache:
-					branch_name_cache[config_file] = get_func(directory, config_file)
+					branch_name_cache[config_file] = out_u(get_func(directory, config_file))
 		if changed:
 			# Config file has changed or was not tracked
-			branch_name_cache[config_file] = get_func(directory, config_file)
+			branch_name_cache[config_file] = out_u(get_func(directory, config_file))
 		return branch_name_cache[config_file]
 
 
@@ -96,7 +98,7 @@ class FileStatusCache(dict):
 			if nparent == parent:
 				break
 			parent = nparent
-			ignore_files.add(os.path.join(parent, ignore_file_name))
+			ignore_files.add(join(parent, ignore_file_name))
 		for f in extra_ignore_files:
 			ignore_files.add(f)
 		self.keypath_ignore_map[keypath] = ignore_files
@@ -120,7 +122,7 @@ file_status_cache = FileStatusCache()
 
 def get_file_status(directory, dirstate_file, file_path, ignore_file_name, get_func, create_watcher, extra_ignore_files=()):
 	global file_status_cache
-	keypath = file_path if os.path.isabs(file_path) else os.path.join(directory, file_path)
+	keypath = file_path if os.path.isabs(file_path) else join(directory, file_path)
 	file_status_cache.update_maps(keypath, directory, dirstate_file, ignore_file_name, extra_ignore_files)
 
 	with file_status_lock:
@@ -218,9 +220,15 @@ vcs_props = (
 )
 
 
+vcs_props_bytes = [
+	(vcs, vcs_dir.encode('ascii'), check)
+	for vcs, vcs_dir, check in vcs_props
+]
+
+
 def guess(path, create_watcher):
 	for directory in generate_directories(path):
-		for vcs, vcs_dir, check in vcs_props:
+		for vcs, vcs_dir, check in (vcs_props_bytes if isinstance(path, bytes) else vcs_props):
 			repo_dir = os.path.join(directory, vcs_dir)
 			if check(repo_dir):
 				if os.path.isdir(repo_dir) and not os.access(repo_dir, os.X_OK):
@@ -245,7 +253,7 @@ def debug():
 	'''Test run guess(), repo.branch() and repo.status()
 
 	To use::
-		python -c "from powerline.lib.vcs import debug; debug()" some_file_to_watch.
+		python -c 'from powerline.lib.vcs import debug; debug()' some_file_to_watch.
 	'''
 	import sys
 	dest = sys.argv[-1]

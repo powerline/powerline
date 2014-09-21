@@ -9,10 +9,10 @@ from powerline.bindings.vim import vim_get_func, vim_getoption, environ, current
 from powerline.renderer import Renderer
 from powerline.colorscheme import ATTR_BOLD, ATTR_ITALIC, ATTR_UNDERLINE
 from powerline.theme import Theme
-from powerline.lib.unicode import unichr
+from powerline.lib.unicode import unichr, register_strwidth_error
 
 
-vim_mode = vim_get_func('mode', rettype=str)
+vim_mode = vim_get_func('mode', rettype='unicode')
 if int(vim.eval('v:version')) >= 702:
 	_vim_mode = vim_mode
 	vim_mode = lambda: _vim_mode(1)
@@ -41,6 +41,8 @@ class VimRenderer(Renderer):
 		super(VimRenderer, self).__init__(*args, **kwargs)
 		self.hl_groups = {}
 		self.prev_highlight = None
+		self.strwidth_error_name = register_strwidth_error(self.strwidth)
+		self.encoding = vim.eval('&encoding')
 
 	def shutdown(self):
 		self.theme.shutdown()
@@ -71,11 +73,10 @@ class VimRenderer(Renderer):
 
 	if hasattr(vim, 'strwidth'):
 		if sys.version_info < (3,):
-			@staticmethod
-			def strwidth(string):
+			def strwidth(self, string):
 				# Does not work with tabs, but neither is strwidth from default 
 				# renderer
-				return vim.strwidth(string.encode('utf-8'))
+				return vim.strwidth(string.encode(self.encoding, 'replace'))
 		else:
 			@staticmethod
 			def strwidth(string):
@@ -101,6 +102,7 @@ class VimRenderer(Renderer):
 			winnr=winnr,
 			buffer=window.buffer,
 			tabpage=current_tabpage(),
+			encoding=self.encoding,
 		)
 		segment_info['tabnr'] = segment_info['tabpage'].number
 		segment_info['bufnr'] = segment_info['buffer'].number
@@ -115,6 +117,7 @@ class VimRenderer(Renderer):
 			segment_info=segment_info,
 			matcher_info=(None if is_tabline else segment_info),
 		)
+		statusline = statusline.encode(self.encoding, self.strwidth_error_name)
 		return statusline
 
 	def reset_highlight(self):
@@ -125,7 +128,7 @@ class VimRenderer(Renderer):
 
 		If an argument is None, the argument is ignored. If an argument is
 		False, the argument is reset to the terminal defaults. If an argument
-		is a valid color or attribute, it's added to the vim highlight group.
+		is a valid color or attribute, it’s added to the vim highlight group.
 		'''
 		# In order not to hit E541 two consequent identical highlighting 
 		# specifiers may be squashed into one.
@@ -134,7 +137,7 @@ class VimRenderer(Renderer):
 			return ''
 		self.prev_highlight = (fg, bg, attr)
 
-		# We don't need to explicitly reset attributes in vim, so skip those 
+		# We don’t need to explicitly reset attributes in vim, so skip those 
 		# calls
 		if not attr and not bg and not fg:
 			return ''

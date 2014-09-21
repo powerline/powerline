@@ -28,13 +28,16 @@
 			"before": "⌚ "
 		},
 
-		"powerline.segments.common.network_load": {
+		"powerline.segments.common.net.network_load": {
 			"args": {
 				"recv_format": "⬇ {value:>8}",
 				"sent_format": "⬆ {value:>8}"
 			}
 		},
-		"powerline.segments.common.now_playing": {
+		"powerline.segments.common.net.hostname": {
+			"before": "⌂ "
+		},
+		"powerline.segments.common.players.now_playing": {
 			"args": {
 				"state_symbols": {
 					"fallback": "♫",
@@ -44,25 +47,22 @@
 				}
 			}
 		},
-		"powerline.segments.common.battery": {
+		"powerline.segments.common.bat.battery": {
 			"args": {
 				"full_heart": "♥",
 				"empty_heart": "♥"
 			}
 		},
-		"powerline.segments.common.uptime": {
+		"powerline.segments.common.sys.uptime": {
 			"before": "⇑  "
 		},
-		"powerline.segments.common.email_imap_alert": {
+		"powerline.segments.common.mail.email_imap_alert": {
 			"before": "✉ "
 		},
-		"powerline.segments.common.virtualenv": {
+		"powerline.segments.common.env.virtualenv": {
 			"before": "ⓔ  "
 		},
-		"powerline.segments.common.hostname": {
-			"before": "⌂ "
-		},
-		"powerline.segments.common.weather": {
+		"powerline.segments.common.wthr.weather": {
 			"args": {
 				"icons": {
 					"day":           "〇",
@@ -80,7 +80,7 @@
 				}
 			}
 		},
-		"powerline.segments.common.fuzzy_time": {
+		"powerline.segments.common.time.fuzzy_time": {
 			"args": {
 				"unicode_text": true
 			}

@@ -6,13 +6,15 @@ import os
 from mercurial import hg, ui, match
 
 from powerline.lib.vcs import get_branch_name, get_file_status
+from powerline.lib.path import join
+from powerline.lib.encoding import get_preferred_file_contents_encoding
 
 
 def branch_name_from_config_file(directory, config_file):
 	try:
 		with open(config_file, 'rb') as f:
 			raw = f.read()
-		return raw.decode('utf-8', 'replace').strip()
+		return raw.decode(get_preferred_file_contents_encoding(), 'replace').strip()
 	except Exception:
 		return 'default'
 
@@ -39,18 +41,18 @@ class Repository(object):
 
 		Without file argument: returns status of the repository:
 
-		:"D?": dirty (tracked modified files: added, removed, deleted, modified),
-		:"?U": untracked-dirty (added, but not tracked files)
+		:'D?': dirty (tracked modified files: added, removed, deleted, modified),
+		:'?U': untracked-dirty (added, but not tracked files)
 		:None: clean (status is empty)
 
-		With file argument: returns status of this file: "M"odified, "A"dded,
-		"R"emoved, "D"eleted (removed from filesystem, but still tracked),
-		"U"nknown, "I"gnored, (None)Clean.
+		With file argument: returns status of this file: `M`odified, `A`dded,
+		`R`emoved, `D`eleted (removed from filesystem, but still tracked),
+		`U`nknown, `I`gnored, (None)Clean.
 		'''
 		if path:
 			return get_file_status(
 				directory=self.directory,
-				dirstate_file=os.path.join(self.directory, '.hg', 'dirstate'),
+				dirstate_file=join(self.directory, '.hg', 'dirstate'),
 				file_path=path,
 				ignore_file_name='.hgignore',
 				get_func=self.do_status,
@@ -75,7 +77,7 @@ class Repository(object):
 			return self.repo_statuses_str[resulting_status]
 
 	def branch(self):
-		config_file = os.path.join(self.directory, '.hg', 'branch')
+		config_file = join(self.directory, '.hg', 'branch')
 		return get_branch_name(
 			directory=self.directory,
 			config_file=config_file,

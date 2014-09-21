@@ -1,7 +1,6 @@
 # vim:fileencoding=utf-8:noet
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
-import sys
 import os
 import re
 
@@ -10,12 +9,14 @@ from io import StringIO
 from bzrlib import (workingtree, status, library_state, trace, ui)
 
 from powerline.lib.vcs import get_branch_name, get_file_status
+from powerline.lib.path import join
+from powerline.lib.encoding import get_preferred_file_contents_encoding
 
 
 class CoerceIO(StringIO):
 	def write(self, arg):
 		if isinstance(arg, bytes):
-			arg = arg.decode('utf-8', 'replace')
+			arg = arg.decode(get_preferred_file_contents_encoding(), 'replace')
 		return super(CoerceIO, self).write(arg)
 
 
@@ -29,7 +30,7 @@ def branch_name_from_config_file(directory, config_file):
 			for line in f:
 				m = nick_pat.match(line)
 				if m is not None:
-					ans = m.group(1).strip().decode('utf-8', 'replace')
+					ans = m.group(1).strip().decode(get_preferred_file_contents_encoding(), 'replace')
 					break
 	except Exception:
 		pass
@@ -41,8 +42,6 @@ state = None
 
 class Repository(object):
 	def __init__(self, directory, create_watcher):
-		if isinstance(directory, bytes):
-			directory = directory.decode(sys.getfilesystemencoding() or sys.getdefaultencoding() or 'utf-8')
 		self.directory = os.path.abspath(directory)
 		self.create_watcher = create_watcher
 
@@ -51,8 +50,8 @@ class Repository(object):
 
 		Without file argument: returns status of the repository:
 
-		:"D?": dirty (tracked modified files: added, removed, deleted, modified),
-		:"?U": untracked-dirty (added, but not tracked files)
+		:'D?': dirty (tracked modified files: added, removed, deleted, modified),
+		:'?U': untracked-dirty (added, but not tracked files)
 		:None: clean (status is empty)
 
 		With file argument: returns status of this file: The status codes are
@@ -61,7 +60,7 @@ class Repository(object):
 		if path is not None:
 			return get_file_status(
 				directory=self.directory,
-				dirstate_file=os.path.join(self.directory, '.bzr', 'checkout', 'dirstate'),
+				dirstate_file=join(self.directory, '.bzr', 'checkout', 'dirstate'),
 				file_path=path,
 				ignore_file_name='.bzrignore',
 				get_func=self.do_status,
@@ -100,7 +99,7 @@ class Repository(object):
 		return ans if ans.strip() else None
 
 	def branch(self):
-		config_file = os.path.join(self.directory, '.bzr', 'branch', 'branch.conf')
+		config_file = join(self.directory, '.bzr', 'branch', 'branch.conf')
 		return get_branch_name(
 			directory=self.directory,
 			config_file=config_file,

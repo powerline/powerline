@@ -10,6 +10,8 @@ import zsh
 from powerline.shell import ShellPowerline
 from powerline.lib import parsedotval
 from powerline.lib.unicode import unicode
+from powerline.lib.encoding import (get_preferred_output_encoding,
+                                    get_preferred_environment_encoding)
 
 
 used_powerlines = WeakValueDictionary()
@@ -65,7 +67,7 @@ class Args(object):
 
 def string(s):
 	if type(s) is bytes:
-		return s.decode('utf-8', 'replace')
+		return s.decode(get_preferred_environment_encoding(), 'replace')
 	else:
 		return str(s)
 
@@ -129,6 +131,7 @@ class Prompt(object):
 
 	def __str__(self):
 		zsh.eval('_POWERLINE_PARSER_STATE="${(%):-%_}"')
+		zsh.eval('_POWERLINE_SHORTENED_PATH="${(%):-%~}"')
 		segment_info = {
 			'args': self.args,
 			'environ': environ,
@@ -137,6 +140,8 @@ class Prompt(object):
 			'parser_state': zsh.getvalue('_POWERLINE_PARSER_STATE'),
 			'shortened_path': zsh.getvalue('_POWERLINE_SHORTENED_PATH'),
 		}
+		zsh.setvalue('_POWERLINE_PARSER_STATE', None)
+		zsh.setvalue('_POWERLINE_SHORTENED_PATH', None)
 		r = ''
 		if self.above:
 			for line in self.powerline.render_above_lines(
@@ -151,9 +156,9 @@ class Prompt(object):
 		)
 		if type(r) is not str:
 			if type(r) is bytes:
-				return r.decode('utf-8')
+				return r.decode(get_preferred_output_encoding(), 'replace')
 			else:
-				return r.encode('utf-8')
+				return r.encode(get_preferred_output_encoding(), 'replace')
 		return r
 
 	def __del__(self):
