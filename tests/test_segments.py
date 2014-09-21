@@ -448,7 +448,7 @@ class TestEnv(TestCommon):
 			def username(self):
 				return 'def'
 
-			if hasattr(common, 'psutil') and not callable(common.psutil.Process.username):
+			if hasattr(self.module, 'psutil') and not callable(self.module.psutil.Process.username):
 				username = property(username)
 
 		new_psutil = new_module('psutil', Process=Process)
