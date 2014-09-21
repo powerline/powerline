@@ -122,15 +122,20 @@ try:
 
 	# psutil-2.0.0: psutil.Process.username is unbound method
 	if callable(psutil.Process.username):
-		def _get_user(segment_info):
+		def _get_user():
 			return psutil.Process(os.getpid()).username()
 	# pre psutil-2.0.0: psutil.Process.username has type property
 	else:
-		def _get_user(segment_info):
+		def _get_user():
 			return psutil.Process(os.getpid()).username
 except ImportError:
-	def _get_user(segment_info):
-		return segment_info['environ'].get('USER', None)
+	try:
+		import pwd
+	except ImportError:
+		from getpass import getuser as _get_user
+	else:
+		def _get_user():
+			return pwd.getpwuid(os.geteuid()).pw_name
 
 
 username = False
@@ -138,7 +143,7 @@ username = False
 _geteuid = getattr(os, 'geteuid', lambda: 1)
 
 
-def user(pl, segment_info=None, hide_user=None):
+def user(pl, hide_user=None):
 	'''Return the current user.
 
 	:param str hide_user:
@@ -150,7 +155,7 @@ def user(pl, segment_info=None, hide_user=None):
 	'''
 	global username
 	if username is False:
-		username = _get_user(segment_info)
+		username = _get_user()
 	if username is None:
 		pl.warn('Failed to get username')
 		return None
@@ -161,5 +166,3 @@ def user(pl, segment_info=None, hide_user=None):
 		'contents': username,
 		'highlight_group': ['user'] if euid != 0 else ['superuser', 'user'],
 	}]
-if 'psutil' not in globals():
-	user = requires_segment_info(user)

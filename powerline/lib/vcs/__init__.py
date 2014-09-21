@@ -9,6 +9,7 @@ from collections import defaultdict
 
 from powerline.lib.watcher import create_tree_watcher
 from powerline.lib.unicode import out_u
+from powerline.lib.path import join
 
 
 def generate_directories(path):
@@ -97,7 +98,7 @@ class FileStatusCache(dict):
 			if nparent == parent:
 				break
 			parent = nparent
-			ignore_files.add(os.path.join(parent, ignore_file_name))
+			ignore_files.add(join(parent, ignore_file_name))
 		for f in extra_ignore_files:
 			ignore_files.add(f)
 		self.keypath_ignore_map[keypath] = ignore_files
@@ -121,7 +122,7 @@ file_status_cache = FileStatusCache()
 
 def get_file_status(directory, dirstate_file, file_path, ignore_file_name, get_func, create_watcher, extra_ignore_files=()):
 	global file_status_cache
-	keypath = file_path if os.path.isabs(file_path) else os.path.join(directory, file_path)
+	keypath = file_path if os.path.isabs(file_path) else join(directory, file_path)
 	file_status_cache.update_maps(keypath, directory, dirstate_file, ignore_file_name, extra_ignore_files)
 
 	with file_status_lock:

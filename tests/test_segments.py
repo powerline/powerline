@@ -5,6 +5,7 @@ import sys
 import os
 
 from functools import partial
+from collections import namedtuple
 
 from powerline.segments import shell, tmux, common
 from powerline.lib.vcs import get_fallback_create_watcher
@@ -448,27 +449,30 @@ class TestEnv(TestCommon):
 			def username(self):
 				return 'def'
 
-			if hasattr(common, 'psutil') and not callable(common.psutil.Process.username):
+			if hasattr(self.module, 'psutil') and not callable(self.module.psutil.Process.username):
 				username = property(username)
 
+		struct_passwd = namedtuple('struct_passwd', ('pw_name',))
 		new_psutil = new_module('psutil', Process=Process)
+		new_pwd = new_module('pwd', getpwuid=lambda uid: struct_passwd(pw_name='def'))
+		new_getpass = new_module('getpass', getuser=lambda: 'def')
 		pl = Pl()
-		with replace_env('USER', 'def') as segment_info:
-			common.username = False
-			with replace_attr(self.module, 'os', new_os):
-				with replace_attr(self.module, 'psutil', new_psutil):
-					with replace_attr(self.module, '_geteuid', lambda: 5):
-						self.assertEqual(common.user(pl=pl, segment_info=segment_info), [
-							{'contents': 'def', 'highlight_group': ['user']}
-						])
-						self.assertEqual(common.user(pl=pl, segment_info=segment_info, hide_user='abc'), [
-							{'contents': 'def', 'highlight_group': ['user']}
-						])
-						self.assertEqual(common.user(pl=pl, segment_info=segment_info, hide_user='def'), None)
-					with replace_attr(self.module, '_geteuid', lambda: 0):
-						self.assertEqual(common.user(pl=pl, segment_info=segment_info), [
-							{'contents': 'def', 'highlight_group': ['superuser', 'user']}
-						])
+		with replace_attr(self.module, 'pwd', new_pwd):
+			with replace_attr(self.module, 'getpass', new_getpass):
+				with replace_attr(self.module, 'os', new_os):
+					with replace_attr(self.module, 'psutil', new_psutil):
+						with replace_attr(self.module, '_geteuid', lambda: 5):
+							self.assertEqual(common.user(pl=pl), [
+								{'contents': 'def', 'highlight_group': ['user']}
+							])
+							self.assertEqual(common.user(pl=pl, hide_user='abc'), [
+								{'contents': 'def', 'highlight_group': ['user']}
+							])
+							self.assertEqual(common.user(pl=pl, hide_user='def'), None)
+						with replace_attr(self.module, '_geteuid', lambda: 0):
+							self.assertEqual(common.user(pl=pl), [
+								{'contents': 'def', 'highlight_group': ['superuser', 'user']}
+							])
 
 	def test_cwd(self):
 		new_os = new_module('os', path=os.path, sep='/')

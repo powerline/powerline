@@ -24,10 +24,11 @@ class RewriteResult(object):
 
 
 class IPythonPowerline(Powerline):
-	def init(self):
+	def init(self, **kwargs):
 		super(IPythonPowerline, self).init(
 			'ipython',
-			use_daemon_threads=True
+			use_daemon_threads=True,
+			**kwargs
 		)
 
 	def get_config_paths(self):
