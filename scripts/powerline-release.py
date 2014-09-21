@@ -98,6 +98,9 @@ def create_ebuilds(version_string, overlay, user, **kwargs):
 	branch = OVERLAY_BRANCH_FORMAT.format(version_string)
 	check_call(['git', 'branch', branch], cwd=overlay)
 	check_call(['git', 'checkout', branch], cwd=overlay)
+	os.environ['DISTDIR'] = '/tmp/powerline-distfiles'
+	if not os.path.isdir(os.environ['DISTDIR']):
+		os.mkdir(os.environ['DISTDIR'])
 	new_files = []
 	for category, pn in (
 		('app-misc', 'powerline'),
@@ -107,8 +110,10 @@ def create_ebuilds(version_string, overlay, user, **kwargs):
 		v1_0 = os.path.join(pdir, '{0}-1.0.ebuild'.format(pn))
 		vcur = os.path.join(pdir, '{0}-{1}.ebuild'.format(pn, version_string))
 		shutil.copy2(v1_0, vcur)
-		check_call(['git', 'add', vcur], cwd=overlay)
 		new_files.append(vcur)
+		check_call(['ebuild', vcur, 'manifest'])
+		new_files.append(os.path.join(pdir, 'Manifest'))
+	check_call(['git', 'add', '--'] + new_files, cwd=overlay)
 	check_call(['git', 'commit'] + new_files + ['-m', 'powerline*: Release {0}'.format(version_string)],
 	           cwd=overlay)
 	check_call(['git', 'push', 'git@github.com:{0}/{1}'.format(user, OVERLAY_NAME), branch], cwd=overlay)
