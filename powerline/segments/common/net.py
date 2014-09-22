@@ -72,13 +72,16 @@ except ImportError:
 		return None
 else:
 	_interface_starts = {
-		'eth':   10,  # Regular ethernet adapters         : eth1
-		'enp':   10,  # Regular ethernet adapters, Gentoo : enp2s0
-		'ath':    9,  # Atheros WiFi adapters             : ath0
-		'wlan':   9,  # Other WiFi adapters               : wlan1
-		'wlp':    9,  # Other WiFi adapters, Gentoo       : wlp5s0
-		'teredo': 1,  # miredo interface                  : teredo
-		'lo':   -10,  # Loopback interface                : lo
+		'eth':      10,  # Regular ethernet adapters         : eth1
+		'enp':      10,  # Regular ethernet adapters, Gentoo : enp2s0
+		'ath':       9,  # Atheros WiFi adapters             : ath0
+		'wlan':      9,  # Other WiFi adapters               : wlan1
+		'wlp':       9,  # Other WiFi adapters, Gentoo       : wlp5s0
+		'teredo':    1,  # miredo interface                  : teredo
+		'lo':      -10,  # Loopback interface                : lo
+		'docker':  -10,  # Docker virtual interface          : docker0
+		'vmnet':   -10,  # VMware virtual interface          : vmnet1
+		'vboxnet': -10,  # VirtualBox virtual interface      : vboxnet0
 	}
 
 	_interface_start_re = re.compile(r'^([a-z]+?)(\d|$)')
