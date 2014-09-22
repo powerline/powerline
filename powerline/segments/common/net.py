@@ -82,10 +82,11 @@ else:
 	}
 
 	_interface_start_re = re.compile(r'^([a-z]+?)(\d|$)')
+	_interface_ignore_re = re.compile(r'(docker|vmnet)')
 
 	def _interface_key(interface):
 		match = _interface_start_re.match(interface)
-		if match:
+		if match and not _interface_ignore_re.match(interface):
 			try:
 				base = _interface_starts[match.group(1)] * 100
 			except KeyError:
@@ -117,9 +118,9 @@ internal_ip = with_docstring(internal_ip,
 Requires ``netifaces`` module to work properly.
 
 :param str interface:
-	Interface on which IP will be checked. Use ``detect`` to automatically 
-	detect interface. In this case interfaces with lower numbers will be 
-	preferred over interfaces with similar names. Order of preference based on 
+	Interface on which IP will be checked. Use ``detect`` to automatically
+	detect interface. In this case interfaces with lower numbers will be
+	preferred over interfaces with similar names. Order of preference based on
 	names:
 
 	#. ``eth`` and ``enp`` followed by number or the end of string.
@@ -128,7 +129,7 @@ Requires ``netifaces`` module to work properly.
 	#. Any other interface that is not ``lo*``.
 	#. ``lo`` followed by number or the end of string.
 :param int ipv:
-	4 or 6 for ipv4 and ipv6 respectively, depending on which IP address you 
+	4 or 6 for ipv4 and ipv6 respectively, depending on which IP address you
 	need exactly.
 ''')
 
