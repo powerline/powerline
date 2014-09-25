@@ -629,6 +629,28 @@ class TestVcs(TestCommon):
 				}])
 		with replace_attr(self.module, 'guess', lambda path, create_watcher: None):
 			self.assertEqual(branch(segment_info=segment_info, status_colors=False), None)
+		with replace_attr(self.module, 'guess', get_dummy_guess(status=lambda: 'U')):
+			with replace_attr(self.module, 'tree_status', lambda repo, pl: 'U'):
+				self.assertEqual(branch(segment_info=segment_info, status_colors=False, ignore_statuses=['U']), [{
+					'highlight_group': ['branch'],
+					'contents': 'tests',
+					'divider_highlight_group': None
+				}])
+				self.assertEqual(branch(segment_info=segment_info, status_colors=True, ignore_statuses=['DU']), [{
+					'highlight_group': ['branch_dirty', 'branch'],
+					'contents': 'tests',
+					'divider_highlight_group': None
+				}])
+				self.assertEqual(branch(segment_info=segment_info, status_colors=True), [{
+					'highlight_group': ['branch_dirty', 'branch'],
+					'contents': 'tests',
+					'divider_highlight_group': None
+				}])
+				self.assertEqual(branch(segment_info=segment_info, status_colors=True, ignore_statuses=['U']), [{
+					'highlight_group': ['branch_clean', 'branch'],
+					'contents': 'tests',
+					'divider_highlight_group': None
+				}])
 
 
 class TestTime(TestCommon):
@@ -1082,6 +1104,20 @@ class TestVim(TestCase):
 					])
 					self.assertEqual(branch(segment_info=segment_info, status_colors=True), [
 						{'divider_highlight_group': 'branch:divider', 'highlight_group': ['branch_dirty', 'branch'], 'contents': 'foo'}
+					])
+			with replace_attr(self.vcs, 'guess', get_dummy_guess(status=lambda: 'U')):
+				with replace_attr(self.vcs, 'tree_status', lambda repo, pl: 'U'):
+					self.assertEqual(branch(segment_info=segment_info, status_colors=False, ignore_statuses=['U']), [
+						{'divider_highlight_group': 'branch:divider', 'highlight_group': ['branch'], 'contents': 'foo'}
+					])
+					self.assertEqual(branch(segment_info=segment_info, status_colors=True, ignore_statuses=['DU']), [
+						{'divider_highlight_group': 'branch:divider', 'highlight_group': ['branch_dirty', 'branch'], 'contents': 'foo'}
+					])
+					self.assertEqual(branch(segment_info=segment_info, status_colors=True), [
+						{'divider_highlight_group': 'branch:divider', 'highlight_group': ['branch_dirty', 'branch'], 'contents': 'foo'}
+					])
+					self.assertEqual(branch(segment_info=segment_info, status_colors=True, ignore_statuses=['U']), [
+						{'divider_highlight_group': 'branch:divider', 'highlight_group': ['branch_clean', 'branch'], 'contents': 'foo'}
 					])
 
 	def test_file_vcs_status(self):

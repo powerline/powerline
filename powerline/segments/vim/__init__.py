@@ -496,7 +496,15 @@ branch = with_docstring(VimBranchSegment(),
 '''Return the current working branch.
 
 :param bool status_colors:
-	determines whether repository status will be used to determine highlighting. Default: False.
+	Determines whether repository status will be used to determine highlighting. 
+	Default: False.
+:param bool ignore_statuses:
+	List of statuses which will not result in repo being marked as dirty. Most 
+	useful is setting this option to ``["U"]``: this will ignore repository 
+	which has just untracked files (i.e. repository with modified, deleted or 
+	removed files will be marked as dirty, while just untracked files will make 
+	segment show clean repository). Only applicable if ``status_colors`` option 
+	is True.
 
 Highlight groups used: ``branch_clean``, ``branch_dirty``, ``branch``.
 
