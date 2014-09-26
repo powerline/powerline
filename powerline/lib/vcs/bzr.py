@@ -98,6 +98,7 @@ class Repository(object):
 		ans = dirtied + untracked
 		return ans if ans.strip() else None
 
+	@property
 	def branch(self):
 		config_file = join(self.directory, '.bzr', 'branch', 'branch.conf')
 		return get_branch_name(

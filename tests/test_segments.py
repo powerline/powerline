@@ -17,13 +17,23 @@ from tests.lib import Args, urllib_read, replace_attr, new_module, replace_modul
 from tests import TestCase, SkipTest
 
 
+class DummyRepository(Args):
+	def __init__(self, branch, **kwargs):
+		self._branch = branch
+		super(DummyRepository, self).__init__(**kwargs)
+
+	@property
+	def branch(self):
+		return self._branch()
+
+
 def get_dummy_guess(**kwargs):
 	if 'directory' in kwargs:
 		def guess(path, create_watcher):
-			return Args(branch=lambda: out_u(os.path.basename(path)), **kwargs)
+			return DummyRepository(branch=lambda: out_u(os.path.basename(path)), **kwargs)
 	else:
 		def guess(path, create_watcher):
-			return Args(branch=lambda: out_u(os.path.basename(path)), directory=path, **kwargs)
+			return DummyRepository(branch=lambda: out_u(os.path.basename(path)), directory=path, **kwargs)
 	return guess
 
 

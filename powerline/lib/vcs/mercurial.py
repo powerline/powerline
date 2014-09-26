@@ -76,6 +76,7 @@ class Repository(object):
 					resulting_status |= status
 			return self.repo_statuses_str[resulting_status]
 
+	@property
 	def branch(self):
 		config_file = join(self.directory, '.hg', 'branch')
 		return get_branch_name(

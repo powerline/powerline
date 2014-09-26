@@ -83,6 +83,7 @@ class GitRepository(object):
 			)
 		return self.do_status(self.directory, path)
 
+	@property
 	def branch(self):
 		directory = git_directory(self.directory)
 		head = join(directory, 'HEAD')

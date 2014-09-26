@@ -250,7 +250,7 @@ def get_fallback_create_watcher():
 
 
 def debug():
-	'''Test run guess(), repo.branch() and repo.status()
+	'''Test run guess(), repo.branch and repo.status()
 
 	To use::
 		python -c 'from powerline.lib.vcs import debug; debug()' some_file_to_watch.
@@ -266,7 +266,7 @@ def debug():
 	try:
 		while True:
 			if os.path.isdir(dest):
-				print ('Branch name: %s Status: %s' % (repo.branch(), repo.status()))
+				print ('Branch name: %s Status: %s' % (repo.branch, repo.status()))
 			else:
 				print ('File status: %s' % repo.status(dest))
 			raw_input('Press Enter to check again: ')

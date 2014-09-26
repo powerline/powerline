@@ -402,7 +402,7 @@ class TestVCS(TestCase):
 		st = monotonic()
 		while monotonic() - st < 1:
 			# Give inotify time to deliver events
-			ans = repo.branch()
+			ans = repo.branch
 			if hasattr(q, '__call__'):
 				if q(ans):
 					break
@@ -419,7 +419,7 @@ class TestVCS(TestCase):
 		create_watcher = get_fallback_create_watcher()
 		repo = guess(path=GIT_REPO, create_watcher=create_watcher)
 		self.assertNotEqual(repo, None)
-		self.assertEqual(repo.branch(), 'master')
+		self.assertEqual(repo.branch, 'master')
 		self.assertEqual(repo.status(), None)
 		self.assertEqual(repo.status('file'), None)
 		with open(os.path.join(GIT_REPO, 'file'), 'w') as f:
@@ -436,7 +436,7 @@ class TestVCS(TestCase):
 			self.assertEqual(repo.status('file'), 'AM')
 		os.remove(os.path.join(GIT_REPO, 'file'))
 		# Test changing branch
-		self.assertEqual(repo.branch(), 'master')
+		self.assertEqual(repo.branch, 'master')
 		try:
 			call(['git', 'branch', 'branch1'], cwd=GIT_REPO)
 			call(['git', 'checkout', '-q', 'branch1'], cwd=GIT_REPO)
@@ -461,7 +461,7 @@ class TestVCS(TestCase):
 			self.assertTrue(os.path.isdir(gitdir))
 			self.assertEqual(gitdir, os.path.abspath(spacegit))
 			repo = guess(path=GIT_REPO, create_watcher=create_watcher)
-			self.assertEqual(repo.branch(), 'master')
+			self.assertEqual(repo.branch, 'master')
 		finally:
 			os.remove(dotgit)
 			os.rename(spacegit, dotgit)
@@ -472,7 +472,7 @@ class TestVCS(TestCase):
 		create_watcher = get_fallback_create_watcher()
 		repo = guess(path=HG_REPO, create_watcher=create_watcher)
 		self.assertNotEqual(repo, None)
-		self.assertEqual(repo.branch(), 'default')
+		self.assertEqual(repo.branch, 'default')
 		self.assertEqual(repo.status(), None)
 		with open(os.path.join(HG_REPO, 'file'), 'w') as f:
 			f.write('abc')
@@ -490,7 +490,7 @@ class TestVCS(TestCase):
 		create_watcher = get_fallback_create_watcher()
 		repo = guess(path=BZR_REPO, create_watcher=create_watcher)
 		self.assertNotEqual(repo, None, 'No bzr repo found. Do you have bzr installed?')
-		self.assertEqual(repo.branch(), 'test_powerline')
+		self.assertEqual(repo.branch, 'test_powerline')
 		self.assertEqual(repo.status(), None)
 		with open(os.path.join(BZR_REPO, 'file'), 'w') as f:
 			f.write('abc')
@@ -540,7 +540,7 @@ class TestVCS(TestCase):
 			call(['bzr', 'init', '-q'], cwd=d)
 			call(['bzr', 'nick', '-q', x], cwd=d)
 			repo = guess(path=d, create_watcher=create_watcher)
-			self.assertEqual(repo.branch(), x)
+			self.assertEqual(repo.branch, x)
 			self.assertFalse(repo.status())
 			if x == 'b1':
 				open(os.path.join(d, 'dirty'), 'w').close()

@@ -20,7 +20,6 @@ class BranchSegment(Segment):
 		if name:
 			repo = guess(path=name, create_watcher=create_watcher)
 			if repo is not None:
-				branch = repo.branch()
 				scol = ['branch']
 				if status_colors:
 					try:
@@ -34,7 +33,7 @@ class BranchSegment(Segment):
 							status = None
 					scol.insert(0, 'branch_dirty' if status else 'branch_clean')
 				return [{
-					'contents': branch,
+					'contents': repo.branch,
 					'highlight_group': scol,
 					'divider_highlight_group': self.divider_highlight_group,
 				}]
