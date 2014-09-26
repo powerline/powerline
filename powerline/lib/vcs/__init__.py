@@ -274,3 +274,60 @@ def debug():
 		pass
 	except EOFError:
 		pass
+
+
+class BaseRepository(object):
+	'''Base class for all repository objects
+
+	:param str directory: Working directory root.
+	:param create_watcher: Function that is responsible for creating FS watcher.
+	'''
+
+	__slots__ = ('directory', 'create_watcher')
+
+	def __init__(self, directory, create_watcher):
+		self.directory = os.path.abspath(directory)
+		self.create_watcher = create_watcher
+
+	@staticmethod
+	def ignore_event(path, name):
+		'''Determines which FS events should be ignored
+
+		This function output is considered when determining whether repository 
+		status recalculation should be triggered.
+
+		:param str path: Name of the directory.
+		:param str name: Name of the file that triggered event.
+
+		:return: True or False.
+		'''
+		return False
+
+	@property
+	def branch(self):
+		'''Current branch
+		'''
+		return None
+
+	def status(self, path=None):
+		'''Return status of the repository or a single file within it
+
+		Without ``path`` argument: returns status of the repository.
+
+		Statuses (arranged in columns):
+
+		============  ========================================================
+		Character(s)  Description
+		============  ========================================================
+		D / space     D if working directory is dirty.
+		I / space     Git only, I if index is dirty (has something to commit).
+		U / space     U if working directory contains untracked files.
+		============  ========================================================
+
+		If repository is not dirty (has no changes, additions, removals or 
+		untracked files) None is returned.
+
+		With file argument: returns status of this file. Output is 
+		VCS-dependent.
+		'''
+		return None

@@ -8,6 +8,7 @@ from mercurial import hg, ui, match
 from powerline.lib.vcs import get_branch_name, get_file_status
 from powerline.lib.path import join
 from powerline.lib.encoding import get_preferred_file_contents_encoding
+from powerline.lib.vcs import BaseRepository
 
 
 def branch_name_from_config_file(directory, config_file):
@@ -19,8 +20,8 @@ def branch_name_from_config_file(directory, config_file):
 		return 'default'
 
 
-class Repository(object):
-	__slots__ = ('directory', 'ui', 'create_watcher')
+class Repository(BaseRepository):
+	__slots__ = ('ui',)
 
 	statuses = 'MARDUI'
 	repo_statuses = (1, 1, 1, 1, 2)

@@ -10,6 +10,7 @@ from powerline.lib.path import join
 from powerline.lib.encoding import (get_preferred_file_name_encoding,
                                     get_preferred_file_contents_encoding)
 from powerline.lib.shell import which
+from powerline.lib.vcs import BaseRepository
 
 
 _ref_pat = re.compile(br'ref:\s*refs/heads/(.+)')
@@ -46,13 +47,7 @@ def git_directory(directory):
 		return path
 
 
-class GitRepository(object):
-	__slots__ = ('directory', 'create_watcher')
-
-	def __init__(self, directory, create_watcher):
-		self.directory = os.path.abspath(directory)
-		self.create_watcher = create_watcher
-
+class GitRepository(BaseRepository):
 	def status(self, path=None):
 		'''Return status of repository or file.
 
