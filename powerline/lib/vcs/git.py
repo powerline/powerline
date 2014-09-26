@@ -92,8 +92,6 @@ class GitRepository(object):
 			get_func=branch_name_from_config_file,
 			create_watcher=self.create_watcher,
 		)
-
-
 try:
 	import pygit2 as git
 
@@ -168,20 +166,20 @@ except ImportError:
 			# status
 			return path.endswith('.git') and name == 'index.lock'
 
-		def _gitcmd(self, directory, *args):
-			return readlines(('git',) + args, directory)
+		def gitcmd(self, *args, **kwargs):
+			return readlines(('git',) + args, kwargs.get('directory', self.directory))
 
 		def do_status(self, directory, path):
 			if path:
 				try:
-					return next(self._gitcmd(directory, 'status', '--porcelain', '--ignored', '--', path))[:2]
+					return next(self.gitcmd('status', '--porcelain', '--ignored', '--', path, directory=directory))[:2]
 				except StopIteration:
 					return None
 			else:
 				wt_column = ' '
 				index_column = ' '
 				untracked_column = ' '
-				for line in self._gitcmd(directory, 'status', '--porcelain'):
+				for line in self.gitcmd('status', '--porcelain', directory=directory):
 					if line[0] == '?':
 						untracked_column = 'U'
 						continue
