@@ -12,6 +12,7 @@ from powerline.lib.vcs import get_branch_name, get_file_status
 from powerline.lib.path import join
 from powerline.lib.encoding import get_preferred_file_contents_encoding
 from powerline.lib.vcs import BaseRepository
+from powerline.lib.unicode import unicode
 
 
 class CoerceIO(StringIO):
@@ -71,12 +72,15 @@ class Repository(BaseRepository):
 		except Exception:
 			pass
 
+	def _wt(self, directory=None):
+		return workingtree.WorkingTree.open(directory or self.directory)
+
 	def _status(self, directory, path):
 		global state
 		if state is None:
 			state = library_state.BzrLibraryState(ui=ui.SilentUIFactory, trace=trace.DefaultConfig())
 		buf = CoerceIO()
-		w = workingtree.WorkingTree.open(directory)
+		w = self._wt(directory)
 		status.show_tree_status(w, specific_files=[path] if path else None, to_file=buf, short=True)
 		raw = buf.getvalue()
 		if not raw.strip():
@@ -104,3 +108,27 @@ class Repository(BaseRepository):
 			get_func=branch_name_from_config_file,
 			create_watcher=self.create_watcher,
 		)
+
+	@property
+	def short(self):
+		return unicode(self._wt().branch.revno())
+
+	@property
+	def summary(self):
+		w = self._wt()
+		branch = w.branch
+		cs = branch.repository.get_revision(branch.get_rev_id(branch.revno()))
+		description = cs.message
+		try:
+			summary = description[:description.index('\n')].strip()
+		except ValueError:
+			summary = description.strip()
+		return summary
+
+	@property
+	def name(self):
+		return self.short
+
+	@property
+	def bookmark(self):
+		return self.branch

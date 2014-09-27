@@ -20,7 +20,7 @@ from powerline.lib import add_divider_highlight_group
 from powerline.lib.vcs import guess
 from powerline.lib.humanize_bytes import humanize_bytes
 from powerline.lib import wraps_saveargs as wraps
-from powerline.segments.common.vcs import BranchSegment
+from powerline.segments.common.vcs import BranchSegment, VCSInfoSegment
 from powerline.segments import with_docstring
 
 try:
@@ -480,16 +480,18 @@ def modified_buffers(pl, text='+ ', join_str=','):
 	return None
 
 
-@requires_filesystem_watcher
-@requires_segment_info
-class VimBranchSegment(BranchSegment):
-	divider_highlight_group = 'branch:divider'
-
+class VimVCSInfoMixin(object):
 	@staticmethod
 	def get_directory(segment_info):
 		if vim_getbufoption(segment_info, 'buftype'):
 			return None
 		return buffer_name(segment_info)
+
+
+@requires_filesystem_watcher
+@requires_segment_info
+class VimBranchSegment(VimVCSInfoMixin, BranchSegment):
+	divider_highlight_group = 'branch:divider'
 
 
 branch = with_docstring(VimBranchSegment(),
@@ -509,6 +511,44 @@ branch = with_docstring(VimBranchSegment(),
 Highlight groups used: ``branch_clean``, ``branch_dirty``, ``branch``.
 
 Divider highlight group used: ``branch:divider``.
+''')
+
+
+@requires_filesystem_watcher
+@requires_segment_info
+class VimVCSInfoSegment(VimVCSInfoMixin, VCSInfoSegment):
+	pass
+
+
+vcsinfo = with_docstring(VimVCSInfoSegment(),
+'''Return the current revision info
+
+:param str name:
+	Determines what property should be used. Valid values:
+
+	========  ===================================================
+	Name      Description
+	========  ===================================================
+	branch    Current branch name.
+	short     Current commit revision abbreviated hex or revno.
+	summary   Current commit summary.
+	name      Human-readable name of the current revision.
+	bookmark  Current bookmark (mercurial) or branch (otherwise).
+	========  ===================================================
+:param bool status_colors:
+	Determines whether repository status will be used to determine highlighting. 
+	Default: False.
+:param bool ignore_statuses:
+	List of statuses which will not result in repo being marked as dirty. Most 
+	useful is setting this option to ``["U"]``: this will ignore repository 
+	which has just untracked files (i.e. repository with modified, deleted or 
+	removed files will be marked as dirty, while just untracked files will make 
+	segment show clean repository). Only applicable if ``status_colors`` option 
+	is True.
+
+Highlight groups used: ``vcsinfo:clean``, ``vcsinfo:dirty``, ``vcsinfo``.
+
+Additionally ``vcsinfo:{name}`` is used.
 ''')
 
 

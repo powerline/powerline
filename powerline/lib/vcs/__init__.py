@@ -304,8 +304,34 @@ class BaseRepository(object):
 		return False
 
 	@property
+	def short(self):
+		'''Short, but unique name of the current revision
+		'''
+		return None
+
+	@property
+	def summary(self):
+		'''Current revision summary
+		'''
+		return None
+
+	@property
+	def name(self):
+		'''Human-readable name of the current revision
+
+		Exact meaning depends on the used VCS.
+		'''
+		return None
+
+	@property
 	def branch(self):
 		'''Current branch
+		'''
+		return None
+
+	@property
+	def bookmark(self):
+		'''Current bookmark if any, branch otherwise
 		'''
 		return None
 

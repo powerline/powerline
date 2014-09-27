@@ -397,6 +397,9 @@ class TestLib(TestCase):
 		self.assertEqual(humanize_bytes(1000000000, si_prefix=False), '953.7 MiB')
 
 
+git_abbr_re = re.compile(r'^[a-f0-9]+$')
+
+
 class TestVCS(TestCase):
 	def do_branch_rename_test(self, repo, q):
 		st = monotonic()
@@ -437,6 +440,10 @@ class TestVCS(TestCase):
 		os.remove(os.path.join(GIT_REPO, 'file'))
 		# Test changing branch
 		self.assertEqual(repo.branch, 'master')
+		self.assertEqual(repo.bookmark, 'master')
+		self.assertTrue(git_abbr_re.match(repo.short))
+		self.assertEqual(repo.summary, 'Initial commit')
+		self.assertEqual(repo.name, 'master')
 		try:
 			call(['git', 'branch', 'branch1'], cwd=GIT_REPO)
 			call(['git', 'checkout', '-q', 'branch1'], cwd=GIT_REPO)
@@ -445,7 +452,7 @@ class TestVCS(TestCase):
 			call(['git', 'checkout', '-q', 'branch2'], cwd=GIT_REPO)
 			self.do_branch_rename_test(repo, 'branch2')
 			call(['git', 'checkout', '-q', '--detach', 'branch1'], cwd=GIT_REPO)
-			self.do_branch_rename_test(repo, lambda b: re.match(r'^[a-f0-9]+$', b))
+			self.do_branch_rename_test(repo, git_abbr_re.match)
 		finally:
 			call(['git', 'checkout', '-q', 'master'], cwd=GIT_REPO)
 
@@ -473,6 +480,10 @@ class TestVCS(TestCase):
 		repo = guess(path=HG_REPO, create_watcher=create_watcher)
 		self.assertNotEqual(repo, None)
 		self.assertEqual(repo.branch, 'default')
+		self.assertEqual(repo.bookmark, None)
+		self.assertEqual(repo.short, '-1')
+		self.assertEqual(repo.summary, '')
+		self.assertEqual(repo.name, 'tip')
 		self.assertEqual(repo.status(), None)
 		with open(os.path.join(HG_REPO, 'file'), 'w') as f:
 			f.write('abc')
@@ -482,7 +493,52 @@ class TestVCS(TestCase):
 			call(['hg', 'add', '.'], cwd=HG_REPO, stdout=PIPE)
 			self.assertEqual(repo.status(), 'D ')
 			self.assertEqual(repo.status('file'), 'A')
-		os.remove(os.path.join(HG_REPO, 'file'))
+		call(['hg', 'commit', '-m', 'Abc\ndef'], cwd=HG_REPO, stdout=PIPE)
+		self.assertEqual(repo.branch, 'default')
+		self.assertEqual(repo.bookmark, None)
+		self.assertEqual(repo.short, '0')
+		self.assertEqual(repo.summary, 'Abc')
+		self.assertEqual(repo.name, 'tip')
+		call(['hg', 'bookmark', 'bm'], cwd=HG_REPO, stdout=PIPE)
+		self.assertEqual(repo.branch, 'default')
+		self.assertEqual(repo.bookmark, 'bm')
+		self.assertEqual(repo.short, '0')
+		self.assertEqual(repo.summary, 'Abc')
+		self.assertEqual(repo.name, 'bm')
+		call(['hg', 'rm', 'file'], cwd=HG_REPO, stdout=PIPE)
+		call(['hg', 'commit', '-m', 'Ghi'], cwd=HG_REPO, stdout=PIPE)
+		self.assertEqual(repo.branch, 'default')
+		self.assertEqual(repo.bookmark, 'bm')
+		self.assertEqual(repo.short, '1')
+		self.assertEqual(repo.summary, 'Ghi')
+		self.assertEqual(repo.name, 'bm')
+		call(['hg', 'bookmark', '-i'], cwd=HG_REPO, stdout=PIPE)
+		self.assertEqual(repo.branch, 'default')
+		self.assertEqual(repo.bookmark, None)
+		self.assertEqual(repo.short, '1')
+		self.assertEqual(repo.summary, 'Ghi')
+		self.assertEqual(repo.name, 'tip')
+		call(['hg', 'update', '-r', '-2'], cwd=HG_REPO, stdout=PIPE)
+		call(['hg', 'branch', 'b2'], cwd=HG_REPO, stdout=PIPE)
+		call(['hg', 'rm', 'file'], cwd=HG_REPO, stdout=PIPE)
+		call(['hg', 'commit', '-m', 'Jkl'], cwd=HG_REPO, stdout=PIPE)
+		self.do_branch_rename_test(repo, 'b2')
+		self.assertEqual(repo.bookmark, None)
+		self.assertEqual(repo.short, '2')
+		self.assertEqual(repo.summary, 'Jkl')
+		self.assertEqual(repo.name, 'tip')
+		call(['hg', 'update', 'default'], cwd=HG_REPO, stdout=PIPE)
+		self.do_branch_rename_test(repo, 'default')
+		self.assertEqual(repo.bookmark, None)
+		self.assertEqual(repo.short, '1')
+		self.assertEqual(repo.summary, 'Ghi')
+		self.assertEqual(repo.name, 'default')
+		call(['hg', 'update', '0'], cwd=HG_REPO, stdout=PIPE)
+		self.assertEqual(repo.branch, 'default')
+		self.assertEqual(repo.bookmark, None)
+		self.assertEqual(repo.short, '0')
+		self.assertEqual(repo.summary, 'Abc')
+		self.assertEqual(repo.name, '0')
 
 	def test_bzr(self):
 		if not use_bzr:
@@ -532,6 +588,10 @@ class TestVCS(TestCase):
 		# Test changing branch
 		call(['bzr', 'nick', 'branch1'], cwd=BZR_REPO, stdout=PIPE, stderr=PIPE)
 		self.do_branch_rename_test(repo, 'branch1')
+		self.assertEqual(repo.bookmark, 'branch1')
+		self.assertEqual(repo.short, '3')
+		self.assertEqual(repo.summary, 'multi')
+		self.assertEqual(repo.name, '3')
 
 		# Test branch name/status changes when swapping repos
 		for x in ('b1', 'b2'):
