@@ -7,7 +7,7 @@ import re
 from powerline.bindings.vim import buffer_name
 
 
-NERD_TREE_RE = re.compile(b'NERD_TREE_\\d+')
+NERD_TREE_RE = re.compile(b'NERD_tree_\\d+')
 
 
 def nerdtree(matcher_info):
