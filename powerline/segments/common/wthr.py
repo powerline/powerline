@@ -141,11 +141,11 @@ class WeatherSegment(KwThreadedSegment):
 			self.error('Failed to get response')
 			return
 		response = json.loads(raw_response)
-		condition = response['query']['results']['weather']['rss']['channel']['item']['condition']
-		condition_code = int(condition['code'])
-		temp = float(condition['temp'])
-
+		
 		try:
+			condition = response['query']['results']['weather']['rss']['channel']['item']['condition']
+			condition_code = int(condition['code'])
+			temp = float(condition['temp'])
 			icon_names = weather_conditions_codes[condition_code]
 		except IndexError:
 			if condition_code == 3200:
@@ -154,6 +154,10 @@ class WeatherSegment(KwThreadedSegment):
 			else:
 				icon_names = ('unknown',)
 				self.error('Unknown condition code: {0}', condition_code)
+		except KeyError as e:
+			temp = -100
+			icon_names = ('not_available',)
+			self.error('Unknown error occured, no weather information found')
 
 		return (temp, icon_names)
 
