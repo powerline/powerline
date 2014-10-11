@@ -277,7 +277,7 @@ class TestShell(TestCase):
 
 class TestTmux(TestCase):
 	def test_attached_clients(self):
-		def get_tmux_output(cmd, *args):
+		def get_tmux_output(pl, cmd, *args):
 			if cmd == 'list-panes':
 				return 'session_name\n'
 			elif cmd == 'list-clients':
