@@ -48,7 +48,10 @@ class PlayerSegment(Segment):
 			return None
 		stats.update(func_stats)
 		stats['state_symbol'] = state_symbols.get(stats['state'])
-		return format.format(**stats)
+		return [{
+			'contents': format.format(**stats),
+			'highlight_group': ['player_' + (stats['state'] or 'fallback'), 'player', 'now_playing'],
+		}]
 
 	def argspecobjs(self):
 		for ret in super(PlayerSegment, self).argspecobjs():
@@ -70,6 +73,8 @@ This player segment should be added like this:
 	}}
 
 (with additional ``"args": {{…}}`` if needed).
+
+Highlight groups used: ``player_fallback`` or ``player``, ``player_play`` or ``player``, ``player_pause`` or ``player``, ``player_stop`` or ``player``.
 
 :param str format:
 	Format used for displaying data from player. Should be a str.format-like 
