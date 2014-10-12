@@ -59,3 +59,12 @@ I receive an ``ImportError`` when trying to use Powerline on OS X!
 
 * See `issue #39 <https://github.com/Lokaltog/powerline/issues/39>`_ for 
   a discussion and other possible solutions for this issue.
+
+I receive “FSEventStreamStart: register_with_server: ERROR” with status_colors
+------------------------------------------------------------------------------
+
+This is `a known <https://github.com/joyent/node/issues/5463>`_ libuv issue that 
+happens if one is trying to watch too many files. It should be fixed in 
+libuv-0.12. Until then it is suggested to either disable ``status_colors`` (from 
+:py:func:`powerline.segments.common.vcs.branch`) or choose stat-based watcher 
+(will have effectively the same effect as disabling ``status_colors``).
