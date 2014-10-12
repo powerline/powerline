@@ -17,9 +17,11 @@ from powerline.bindings.vim import (vim_get_func, getbufvar, vim_getbufoption,
                                     list_tabpage_buffers_segment_info)
 from powerline.theme import requires_segment_info, requires_filesystem_watcher
 from powerline.lib import add_divider_highlight_group
-from powerline.lib.vcs import guess, tree_status
+from powerline.lib.vcs import guess
 from powerline.lib.humanize_bytes import humanize_bytes
 from powerline.lib import wraps_saveargs as wraps
+from powerline.segments.common.vcs import BranchSegment
+from powerline.segments import with_docstring
 
 try:
 	from __builtin__ import xrange as range
@@ -480,31 +482,34 @@ def modified_buffers(pl, text='+ ', join_str=','):
 
 @requires_filesystem_watcher
 @requires_segment_info
-def branch(pl, segment_info, create_watcher, status_colors=False):
-	'''Return the current working branch.
+class VimBranchSegment(BranchSegment):
+	divider_highlight_group = 'branch:divider'
 
-	:param bool status_colors:
-		determines whether repository status will be used to determine highlighting. Default: False.
+	@staticmethod
+	def get_directory(segment_info):
+		if vim_getbufoption(segment_info, 'buftype'):
+			return None
+		return buffer_name(segment_info)
 
-	Highlight groups used: ``branch_clean``, ``branch_dirty``, ``branch``.
 
-	Divider highlight group used: ``branch:divider``.
-	'''
-	name = buffer_name(segment_info)
-	skip = not (name and (not vim_getbufoption(segment_info, 'buftype')))
-	if not skip:
-		repo = guess(path=name, create_watcher=create_watcher)
-		if repo is not None:
-			branch = repo.branch()
-			scol = ['branch']
-			if status_colors:
-				status = tree_status(repo, pl)
-				scol.insert(0, 'branch_dirty' if status and status.strip() else 'branch_clean')
-			return [{
-				'contents': branch,
-				'highlight_group': scol,
-				'divider_highlight_group': 'branch:divider',
-			}]
+branch = with_docstring(VimBranchSegment(),
+'''Return the current working branch.
+
+:param bool status_colors:
+	Determines whether repository status will be used to determine highlighting. 
+	Default: False.
+:param bool ignore_statuses:
+	List of statuses which will not result in repo being marked as dirty. Most 
+	useful is setting this option to ``["U"]``: this will ignore repository 
+	which has just untracked files (i.e. repository with modified, deleted or 
+	removed files will be marked as dirty, while just untracked files will make 
+	segment show clean repository). Only applicable if ``status_colors`` option 
+	is True.
+
+Highlight groups used: ``branch_clean``, ``branch_dirty``, ``branch``.
+
+Divider highlight group used: ``branch:divider``.
+''')
 
 
 @requires_filesystem_watcher

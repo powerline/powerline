@@ -62,7 +62,7 @@ run() {
 	env -i \
 		LANG=en_US.UTF-8 \
 		PATH="$local_path" \
-		TERM="${TERM}" \
+		TERM="screen-256color" \
 		COLUMNS="${COLUMNS}" \
 		LINES="${LINES}" \
 		TEST_TYPE="${TEST_TYPE}" \

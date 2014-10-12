@@ -28,7 +28,7 @@
 		"battery_gradient":          { "fg": "white_red", "bg": "gray0", "attr": [] },
 		"battery_full":              { "fg": "red", "bg": "gray0", "attr": [] },
 		"battery_empty":             { "fg": "white", "bg": "gray0", "attr": [] },
-		"now_playing":               { "fg": "gray10", "bg": "black", "attr": [] },
+		"player":                    { "fg": "gray10", "bg": "black", "attr": [] },
 		"user":                      { "fg": "white", "bg": "darkblue", "attr": ["bold"] },
 		"superuser":                 { "fg": "white", "bg": "brightred", "attr": ["bold"] },
 		"branch":                    { "fg": "gray9", "bg": "gray2", "attr": [] },

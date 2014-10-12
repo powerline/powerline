@@ -19,6 +19,16 @@
 				"ellipsis": "⋯"
 			}
 		},
+		"player": {
+			"args": {
+				"state_symbols": {
+					"fallback": "♫",
+					"play":     "▶",
+					"pause":    "▮▮",
+					"stop":     "■"
+				}
+			}
+		},
 
 		"line_current_symbol": {
 			"contents": "␤ "

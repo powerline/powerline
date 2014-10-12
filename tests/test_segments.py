@@ -277,7 +277,7 @@ class TestShell(TestCase):
 
 class TestTmux(TestCase):
 	def test_attached_clients(self):
-		def get_tmux_output(cmd, *args):
+		def get_tmux_output(pl, cmd, *args):
 			if cmd == 'list-panes':
 				return 'session_name\n'
 			elif cmd == 'list-clients':
@@ -600,25 +600,57 @@ class TestVcs(TestCommon):
 		branch = partial(common.branch, pl=pl, create_watcher=create_watcher)
 		with replace_attr(self.module, 'guess', get_dummy_guess(status=lambda: None, directory='/tmp/tests')):
 			with replace_attr(self.module, 'tree_status', lambda repo, pl: None):
-				self.assertEqual(branch(segment_info=segment_info, status_colors=False), [
-					{'highlight_group': ['branch'], 'contents': 'tests'}
-				])
-				self.assertEqual(branch(segment_info=segment_info, status_colors=True), [
-					{'contents': 'tests', 'highlight_group': ['branch_clean', 'branch']}
-				])
+				self.assertEqual(branch(segment_info=segment_info, status_colors=False), [{
+						'highlight_group': ['branch'],
+						'contents': 'tests',
+						'divider_highlight_group': None
+				}])
+				self.assertEqual(branch(segment_info=segment_info, status_colors=True), [{
+					'contents': 'tests',
+					'highlight_group': ['branch_clean', 'branch'],
+					'divider_highlight_group': None
+				}])
 		with replace_attr(self.module, 'guess', get_dummy_guess(status=lambda: 'D  ', directory='/tmp/tests')):
 			with replace_attr(self.module, 'tree_status', lambda repo, pl: 'D '):
-				self.assertEqual(branch(segment_info=segment_info, status_colors=False), [
-					{'highlight_group': ['branch'], 'contents': 'tests'}
-				])
-				self.assertEqual(branch(segment_info=segment_info, status_colors=True), [
-					{'contents': 'tests', 'highlight_group': ['branch_dirty', 'branch']}
-				])
-				self.assertEqual(branch(segment_info=segment_info, status_colors=False), [
-					{'highlight_group': ['branch'], 'contents': 'tests'}
-				])
+				self.assertEqual(branch(segment_info=segment_info, status_colors=False), [{
+					'highlight_group': ['branch'],
+					'contents': 'tests',
+					'divider_highlight_group': None
+				}])
+				self.assertEqual(branch(segment_info=segment_info, status_colors=True), [{
+					'contents': 'tests',
+					'highlight_group': ['branch_dirty', 'branch'],
+					'divider_highlight_group': None
+				}])
+				self.assertEqual(branch(segment_info=segment_info, status_colors=False), [{
+					'highlight_group': ['branch'],
+					'contents': 'tests',
+					'divider_highlight_group': None
+				}])
 		with replace_attr(self.module, 'guess', lambda path, create_watcher: None):
 			self.assertEqual(branch(segment_info=segment_info, status_colors=False), None)
+		with replace_attr(self.module, 'guess', get_dummy_guess(status=lambda: 'U')):
+			with replace_attr(self.module, 'tree_status', lambda repo, pl: 'U'):
+				self.assertEqual(branch(segment_info=segment_info, status_colors=False, ignore_statuses=['U']), [{
+					'highlight_group': ['branch'],
+					'contents': 'tests',
+					'divider_highlight_group': None
+				}])
+				self.assertEqual(branch(segment_info=segment_info, status_colors=True, ignore_statuses=['DU']), [{
+					'highlight_group': ['branch_dirty', 'branch'],
+					'contents': 'tests',
+					'divider_highlight_group': None
+				}])
+				self.assertEqual(branch(segment_info=segment_info, status_colors=True), [{
+					'highlight_group': ['branch_dirty', 'branch'],
+					'contents': 'tests',
+					'divider_highlight_group': None
+				}])
+				self.assertEqual(branch(segment_info=segment_info, status_colors=True, ignore_statuses=['U']), [{
+					'highlight_group': ['branch_clean', 'branch'],
+					'contents': 'tests',
+					'divider_highlight_group': None
+				}])
 
 
 class TestTime(TestCommon):
@@ -1057,21 +1089,35 @@ class TestVim(TestCase):
 		create_watcher = get_fallback_create_watcher()
 		branch = partial(self.vim.branch, pl=pl, create_watcher=create_watcher)
 		with vim_module._with('buffer', '/foo') as segment_info:
-			with replace_attr(self.vim, 'guess', get_dummy_guess(status=lambda: None)):
-				with replace_attr(self.vim, 'tree_status', lambda repo, pl: None):
+			with replace_attr(self.vcs, 'guess', get_dummy_guess(status=lambda: None)):
+				with replace_attr(self.vcs, 'tree_status', lambda repo, pl: None):
 					self.assertEqual(branch(segment_info=segment_info, status_colors=False), [
 						{'divider_highlight_group': 'branch:divider', 'highlight_group': ['branch'], 'contents': 'foo'}
 					])
 					self.assertEqual(branch(segment_info=segment_info, status_colors=True), [
 						{'divider_highlight_group': 'branch:divider', 'highlight_group': ['branch_clean', 'branch'], 'contents': 'foo'}
 					])
-			with replace_attr(self.vim, 'guess', get_dummy_guess(status=lambda: 'DU')):
-				with replace_attr(self.vim, 'tree_status', lambda repo, pl: 'DU'):
+			with replace_attr(self.vcs, 'guess', get_dummy_guess(status=lambda: 'DU')):
+				with replace_attr(self.vcs, 'tree_status', lambda repo, pl: 'DU'):
 					self.assertEqual(branch(segment_info=segment_info, status_colors=False), [
 						{'divider_highlight_group': 'branch:divider', 'highlight_group': ['branch'], 'contents': 'foo'}
 					])
 					self.assertEqual(branch(segment_info=segment_info, status_colors=True), [
 						{'divider_highlight_group': 'branch:divider', 'highlight_group': ['branch_dirty', 'branch'], 'contents': 'foo'}
+					])
+			with replace_attr(self.vcs, 'guess', get_dummy_guess(status=lambda: 'U')):
+				with replace_attr(self.vcs, 'tree_status', lambda repo, pl: 'U'):
+					self.assertEqual(branch(segment_info=segment_info, status_colors=False, ignore_statuses=['U']), [
+						{'divider_highlight_group': 'branch:divider', 'highlight_group': ['branch'], 'contents': 'foo'}
+					])
+					self.assertEqual(branch(segment_info=segment_info, status_colors=True, ignore_statuses=['DU']), [
+						{'divider_highlight_group': 'branch:divider', 'highlight_group': ['branch_dirty', 'branch'], 'contents': 'foo'}
+					])
+					self.assertEqual(branch(segment_info=segment_info, status_colors=True), [
+						{'divider_highlight_group': 'branch:divider', 'highlight_group': ['branch_dirty', 'branch'], 'contents': 'foo'}
+					])
+					self.assertEqual(branch(segment_info=segment_info, status_colors=True, ignore_statuses=['U']), [
+						{'divider_highlight_group': 'branch:divider', 'highlight_group': ['branch_clean', 'branch'], 'contents': 'foo'}
 					])
 
 	def test_file_vcs_status(self):
@@ -1155,6 +1201,8 @@ class TestVim(TestCase):
 		sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'path')))
 		from powerline.segments import vim
 		cls.vim = vim
+		from powerline.segments.common import vcs
+		cls.vcs = vcs
 
 	@classmethod
 	def tearDownClass(cls):

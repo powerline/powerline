@@ -54,7 +54,7 @@ else:
 
 setup(
 	name='powerline-status',
-	version='1.1',
+	version='1.2',
 	description='The ultimate statusline/prompt utility.',
 	long_description=README,
 	classifiers=[

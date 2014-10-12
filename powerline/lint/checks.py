@@ -5,6 +5,8 @@ import os
 import re
 import logging
 
+from collections import defaultdict
+
 from powerline.lib.threaded import ThreadedSegment
 from powerline.lib.unicode import unicode
 from powerline.lint.markedjson.markedvalue import MarkedUnicode
@@ -673,6 +675,16 @@ def get_one_segment_function(data, context, echoerr):
 			yield func
 
 
+common_names = defaultdict(set)
+
+
+def register_common_name(name, cmodule, cname):
+	s = cmodule + '.' + cname
+	cmodule_mark = Mark('<common name definition>', 1, 1, s, 1)
+	cname_mark = Mark('<common name definition>', 1, len(cmodule) + 1, s, len(cmodule) + 1)
+	common_names[name].add((MarkedUnicode(cmodule, cmodule_mark), MarkedUnicode(cname, cname_mark)))
+
+
 def get_all_possible_functions(data, context, echoerr):
 	name = context[-2][0]
 	module, name = name.rpartition('.')[::2]
@@ -681,6 +693,11 @@ def get_all_possible_functions(data, context, echoerr):
 		if func:
 			yield func
 	else:
+		if name in common_names:
+			for cmodule, cname in common_names[name]:
+				cfunc = import_segment(cname, data, context, echoerr, module=MarkedUnicode(cmodule, None))
+				if cfunc:
+					yield cfunc
 		for ext, theme_config in list_themes(data, context):
 			for segments in theme_config.get('segments', {}).values():
 				for segment in segments:

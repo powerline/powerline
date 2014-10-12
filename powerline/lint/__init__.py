@@ -19,7 +19,7 @@ from powerline.lint.checks import (check_matcher_func, check_ext, check_config, 
                                    check_segment_module, check_exinclude_function, type_keys,
                                    check_segment_function, check_args, get_one_segment_function,
                                    check_highlight_groups, check_highlight_group, check_full_segment_data,
-                                   get_all_possible_functions, check_segment_data_key)
+                                   get_all_possible_functions, check_segment_data_key, register_common_name)
 from powerline.lint.spec import Spec
 from powerline.lint.context import Context
 
@@ -289,6 +289,10 @@ theme_spec = common_theme_spec().update(
 )
 
 
+def register_common_names():
+	register_common_name('player', 'powerline.segments.common.players', '_player')
+
+
 def check(paths=None, debug=False, echoerr=echoerr, require_ext=None):
 	'''Check configuration sanity
 
@@ -308,6 +312,7 @@ def check(paths=None, debug=False, echoerr=echoerr, require_ext=None):
 		``False`` if user configuration seems to be completely sane and ``True`` 
 		if some problems were found.
 	'''
+	register_common_names()
 	search_paths = paths or get_config_paths()
 	find_config_files = generate_config_finder(lambda: search_paths)
 
