@@ -446,7 +446,6 @@ class RDIOPlayerSegment(PlayerSegment):
 			'elapsed': elapsed,
 			'total': total,
 			'state': state,
-			'state_symbol': self.STATE_SYMBOLS.get(state)
 		}
 
 
