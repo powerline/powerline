@@ -29,6 +29,24 @@ object it should receive the following arguments:
 And also any other argument(s) specified by user in :ref:`args key 
 <config-themes-seg-args>` (no additional arguments by default).
 
+.. note::
+    For powerline-lint to work properly the following things may be needed:
+
+    #. If your segment is a :py:class:`powerline.segments.Segment` and used 
+       arguments are scattered over multiple methods 
+       :py:meth:`powerline.segments.Segment.argspecobjs` should be overridden in 
+       subclass to tell powerline-lint which objects should be inspected for 
+       arguments.
+    #. If your segment takes some arguments that are never listed, but accessed 
+       via ``kwargs.get()`` or you cannot use previous function for whatever 
+       reason :py:meth:`powerline.segments.Segment.additional_args` should be 
+       overridden in subclass.
+    #. If you are expecting user to use one :ref:`name <config-themes-seg-name>` 
+       for multiple segments which cannot be linked to the segment function 
+       automatically by powerline-lint (e.g. because there are no instances of 
+       the segments in question in the default configuration) you should use 
+       :py:func:`powerline.lint.checks.register_common_name`.
+
 Object representing segment may have the following attributes used by 
 powerline:
 

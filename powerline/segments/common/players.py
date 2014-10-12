@@ -53,6 +53,9 @@ class PlayerSegment(Segment):
 			'highlight_group': ['now_playing', 'player_' + (stats['state'] or 'fallback'), 'player'],
 		}]
 
+	def get_player_status(self, pl):
+		pass
+
 	def argspecobjs(self):
 		for ret in super(PlayerSegment, self).argspecobjs():
 			yield ret
@@ -110,6 +113,9 @@ Highlight groups used: ``player_fallback`` or ``player``, ``player_play`` or ``p
 	fallback  Displayed if state is not one of the above or not known.
 	========  ========================================================
 '''
+
+
+_player = with_docstring(PlayerSegment(), _common_args.format('_player'))
 
 
 class CmusPlayerSegment(PlayerSegment):
@@ -458,6 +464,17 @@ class NowPlayingSegment(Segment):
 		player_segment = globals()[player]
 		assert(isinstance(player_segment, PlayerSegment))
 		return player_segment(**kwargs)
+
+	def argspecobjs(self):
+		for ret in super(NowPlayingSegment, self).argspecobjs():
+			yield ret
+		yield '__call__', PlayerSegment.__call__
+		for k, v in globals().items():
+			if isinstance(v, type) and issubclass(v, PlayerSegment) and v is not DbusPlayerSegment:
+				yield 'get_player_status', v.get_player_status
+
+	def omitted_args(self, name, method):
+		return (0,)
 
 
 now_playing = NowPlayingSegment()
