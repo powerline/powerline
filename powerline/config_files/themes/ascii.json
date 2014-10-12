@@ -20,6 +20,16 @@
 				"ellipsis": "..."
 			}
 		},
+		"player": {
+			"args": {
+				"state_symbols": {
+					"fallback": "",
+					"play":     ">",
+					"pause":    "~",
+					"stop":     "X"
+				}
+			}
+		},
 
 		"line_current_symbol": {
 			"contents": "LN "

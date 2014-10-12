@@ -23,6 +23,16 @@
 		"line_current_symbol": {
 			"contents": "␤ "
 		},
+		"player": {
+			"args": {
+				"state_symbols": {
+					"fallback": "♫",
+					"play":     "▶",
+					"pause":    "▮▮",
+					"stop":     "■"
+				}
+			}
+		},
 
 		"time": {
 			"before": ""

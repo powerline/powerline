@@ -16,7 +16,7 @@ if sys.platform.startswith('win32'):
 	Popen = partial(Popen, creationflags=0x08000000)
 
 
-def run_cmd(pl, cmd, stdin=None):
+def run_cmd(pl, cmd, stdin=None, strip=True):
 	'''Run command and return its stdout, stripped
 
 	If running command fails returns None and logs failure to ``pl`` argument.
@@ -27,6 +27,8 @@ def run_cmd(pl, cmd, stdin=None):
 		Command which will be run.
 	:param str stdin:
 		String passed to command. May be None.
+	:param bool strip:
+		True if the result should be stripped.
 	'''
 	try:
 		p = Popen(cmd, shell=False, stdout=PIPE, stdin=PIPE)
@@ -36,7 +38,7 @@ def run_cmd(pl, cmd, stdin=None):
 	else:
 		stdout, err = p.communicate(stdin)
 		stdout = stdout.decode(get_preferred_input_encoding())
-	return stdout.strip()
+	return stdout.strip() if strip else stdout
 
 
 def asrun(pl, ascript):
