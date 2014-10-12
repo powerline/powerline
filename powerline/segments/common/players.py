@@ -160,7 +160,12 @@ class MpdPlayerSegment(PlayerSegment):
 		try:
 			import mpd
 		except ImportError:
-			now_playing = run_cmd(pl, ['mpc', 'current', '-f', '%album%\n%artist%\n%title%\n%time%', '-h', str(host), '-p', str(port)])
+			now_playing = run_cmd(pl, [
+				'mpc', 'current',
+				'-f', '%album%\n%artist%\n%title%\n%time%',
+				'-h', str(host),
+				'-p', str(port)
+			], strip=False)
 			if not now_playing:
 				return
 			now_playing = now_playing.split('\n')
@@ -372,7 +377,7 @@ class RhythmboxPlayerSegment(PlayerSegment):
 			'rhythmbox-client',
 			'--no-start', '--no-present',
 			'--print-playing-format', '%at\n%aa\n%tt\n%te\n%td'
-		])
+		], strip=False)
 		if not now_playing:
 			return
 		now_playing = now_playing.split('\n')
