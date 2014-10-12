@@ -16,9 +16,20 @@ version = 'beta'
 release = 'beta'
 exclude_patterns = ['_build']
 pygments_style = 'sphinx'
+
 html_theme = 'default'
 html_static_path = ['_static']
 html_show_copyright = False
+
+latex_show_urls = 'footnote'
+latex_elements = {
+	'preamble': '''
+		\\DeclareUnicodeCharacter{22EF}{$\\cdots$}   % Dots
+		\\DeclareUnicodeCharacter{2665}{\\ding{170}} % Heart
+		\\DeclareUnicodeCharacter{2746}{\\ding{105}} % Snow
+		\\usepackage{pifont}
+	''',
+}
 
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 
