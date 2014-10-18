@@ -63,4 +63,12 @@ if __name__ == '__main__':
 
 	pl = config.create_powerline_logger(args)
 
-	args.function(pl, args)
+	try:
+		function = args.function
+	except AttributeError:
+		# In Python-3* `powerline-config` (without arguments) raises 
+		# AttributeError. I have not found any standard way to display same 
+		# error message as in Python-2*.
+		parser.error('too few arguments')
+	else:
+		function(pl, args)
