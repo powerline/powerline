@@ -52,9 +52,17 @@ except Exception as e:
 else:
 	can_use_scripts = False
 
+
+def get_version():
+	try:
+		return 'dev-' + subprocess.check_output(['git', 'rev-parse', 'HEAD'])
+	except Exception as e:
+		return 'dev'
+
+
 setup(
 	name='powerline-status',
-	version='dev',
+	version=get_version(),
 	description='The ultimate statusline/prompt utility.',
 	long_description=README,
 	classifiers=[
