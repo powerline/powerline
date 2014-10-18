@@ -36,7 +36,7 @@ if __name__ == '__main__':
 		choices=tuple(TMUX_ACTIONS.values()),
 		metavar='action',
 		type=(lambda v: TMUX_ACTIONS.get(v)),
-		help='If action is "source" then version-specific tmux configuration files are sourced.'
+		help='If action is `source\' then version-specific tmux configuration files are sourced.'
 	)
 
 	shell_parser = subparsers.add_parser('shell', help='Shell-specific commands')
@@ -45,7 +45,7 @@ if __name__ == '__main__':
 		choices=tuple(SHELL_ACTIONS.values()),
 		type=(lambda v: SHELL_ACTIONS.get(v)),
 		metavar='action',
-		help='If action is "command" then preferred powerline command is output, if it is “uses” then powerline-config script will exit with 1 if specified component is disabled and 0 otherwise.',
+		help='If action is `command\' then preferred powerline command is output, if it is `uses\' then powerline-config script will exit with 1 if specified component is disabled and 0 otherwise.',
 	)
 	shell_parser.add_argument(
 		'component',
@@ -63,4 +63,12 @@ if __name__ == '__main__':
 
 	pl = config.create_powerline_logger(args)
 
-	args.function(pl, args)
+	try:
+		function = args.function
+	except AttributeError:
+		# In Python-3* `powerline-config` (without arguments) raises 
+		# AttributeError. I have not found any standard way to display same 
+		# error message as in Python-2*.
+		parser.error('too few arguments')
+	else:
+		function(pl, args)
