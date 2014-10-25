@@ -9,6 +9,10 @@ automatically do most of the configuration for you.
 * `Arch Linux (AUR), Python 2 version <https://aur.archlinux.org/packages/python2-powerline-git/>`_
 * `Arch Linux (AUR), Python 3 version <https://aur.archlinux.org/packages/python-powerline-git/>`_
 * Gentoo Live ebuild in `raiagent <https://github.com/leycec/raiagent>`_ overlay
+* Powerline package is available for debian starting from wheezy (via `backports 
+  <https://packages.debian.org/wheezy-backports/powerline>`_). Use `search 
+  <https://packages.debian.org/search?keywords=powerline&searchon=names&suite=all&section=all>`_ 
+  to get more information.
 
 If you’re running a distribution without an official package you’ll have to 
 follow the installation guide below:
