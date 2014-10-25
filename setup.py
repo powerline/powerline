@@ -55,7 +55,7 @@ else:
 
 def get_version():
 	try:
-		return 'dev-' + subprocess.check_output(['git', 'rev-parse', 'HEAD'])
+		return 'dev-' + subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip()
 	except Exception as e:
 		return 'dev'
 
