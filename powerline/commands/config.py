@@ -47,7 +47,7 @@ def get_argparser(ArgumentParser=ConfigArgParser):
 	tmux_parser.add_argument(
 		'function',
 		choices=tuple(TMUX_ACTIONS.values()),
-		metavar='action',
+		metavar='ACTION',
 		type=(lambda v: TMUX_ACTIONS.get(v)),
 		help='If action is `source\' then version-specific tmux configuration files are sourced.'
 	)
@@ -57,14 +57,14 @@ def get_argparser(ArgumentParser=ConfigArgParser):
 		'function',
 		choices=tuple(SHELL_ACTIONS.values()),
 		type=(lambda v: SHELL_ACTIONS.get(v)),
-		metavar='action',
+		metavar='ACTION',
 		help='If action is `command\' then preferred powerline command is output, if it is `uses\' then powerline-config script will exit with 1 if specified component is disabled and 0 otherwise.',
 	)
 	shell_parser.add_argument(
 		'component',
 		nargs='?',
 		choices=('tmux', 'prompt'),
-		metavar='component',
+		metavar='COMPONENT',
 	)
 	shell_parser.add_argument(
 		'-s', '--shell',
