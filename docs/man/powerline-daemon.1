@@ -1,0 +1,33 @@
+.TH "POWERLINE-DAEMON" "1" "October 2014" "Powerline" "Powerline manual"
+.SH "NAME"
+powerline-daemon \- Daemon to improve the performance of powerline
+.SH "SYNOPSIS"
+\fIpowerline\-daemon\fR [\-h] [\-\-quiet] [\-\-socket SOCKET]
+                 [\-\-kill | \fB\-\-foreground\fR | \fB\-\-replace]\fR
+.SH "DESCRIPTION"
+.PP 
+powerline\-daemon ensures only one Python instance of powerline is launched for prompts and statuslines.
+.SH "OPTIONS"
+.SS "optional arguments:"
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+show this help message and exit
+.TP
+\fB\-\-quiet\fR, \fB\-q\fR
+Without other options: do not complain about already running powerline\-daemon instance. Will still exit with 1. With `\-\-kill' and `\-\-replace': do not show any messages. With `\-\-foreground': ignored. Does not silence exceptions in any case.
+.TP
+\fB\-\-socket\fR SOCKET, \fB\-s\fR SOCKET
+Specify socket which will be used for connecting to daemon.
+.TP
+\fB\-\-kill\fR, \fB\-k\fR
+Kill an already running instance
+.TP
+\fB\-\-foreground\fR, \fB\-f\fR
+Run in the foreground (dont daemonize)
+.TP
+\fB\-\-replace\fR, \fB\-r\fR
+Replace an already running instance
+.SH "SEE ALSO"
+\fBpowerline\fR(1), \fBpowerline-config\fR(1), \fBpowerline-lint\fR(1)
+.SH "AUTHORS"
+Kim Silkebækken, Nikolay Pavlov, Kovid Goyal and contributors. The glyphs in the font patcher are created by Fabrizio Schiavi.
