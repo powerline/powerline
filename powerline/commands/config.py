@@ -6,14 +6,26 @@ import argparse
 import powerline.bindings.config as config
 
 
+class StrFunction(object):
+	def __init__(self, function, name=None):
+		self.name = name or function.__name__
+		self.function = function
+
+	def __call__(self, *args, **kwargs):
+		self.function(*args, **kwargs)
+
+	def __str__(self):
+		return self.name
+
+
 TMUX_ACTIONS = {
-	'source': config.source_tmux_files,
+	'source': StrFunction(config.source_tmux_files, 'source'),
 }
 
 
 SHELL_ACTIONS = {
-	'command': config.shell_command,
-	'uses': config.uses,
+	'command': StrFunction(config.shell_command, 'command'),
+	'uses': StrFunction(config.uses),
 }
 
 
@@ -56,7 +68,7 @@ def get_argparser(ArgumentParser=ConfigArgParser):
 	)
 	shell_parser.add_argument(
 		'-s', '--shell',
-		nargs='?',
+		metavar='SHELL',
 		help='Shell for which query is run',
 	)
 	return parser
