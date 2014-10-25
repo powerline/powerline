@@ -65,6 +65,7 @@ def get_argparser(ArgumentParser=ConfigArgParser):
 		nargs='?',
 		choices=('tmux', 'prompt'),
 		metavar='COMPONENT',
+		help='Only applicable for `uses\' subcommand: makes `powerline-config\' exit with 0 if specific component is enabled and with 1 otherwise. `tmux\' component stands for tmux bindings (e.g. those that notify tmux about current directory changes), `prompt\' component stands for shell prompt.'
 	)
 	shell_parser.add_argument(
 		'-s', '--shell',
