@@ -40,7 +40,7 @@ except Exception as e:
 		which = shutil.which
 	else:
 		sys.path.append(CURRENT_DIR)
-		from powerline.lib import which
+		from powerline.lib.shell import which
 	if which('socat') and which('sed') and which('sh'):
 		print('Using powerline.sh script instead of C version (requires socat, sed and sh)')
 		shutil.copyfile('client/powerline.sh', 'scripts/powerline')
