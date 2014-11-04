@@ -138,11 +138,9 @@ def uses(pl, args):
 	for sh in (shell, 'shell') if shell else ('shell'):
 		varname = template.format(shell=sh.upper(), component=component.upper())
 		if os.environ.get(varname):
-			print ('HERE')
 			sys.exit(1)
 	config = get_main_config(args)
 	if component in config.get('ext', {}).get('shell', {}).get('components', ('tmux', 'prompt')):
 		sys.exit(0)
 	else:
-		print ('THERE')
 		sys.exit(1)
