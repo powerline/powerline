@@ -19,6 +19,8 @@ Generic requirements
   repositories.
 * ``bzr`` python package (note: *not* standalone executable). Required to work 
   with bazaar repositories.
+* ``pysvn`` python package (note: *not* ``svn`` standalone executable). Required 
+  to work with subversion repositories.
 * ``pyuv`` python package. Required for :ref:`libuv-based watcher 
   <config-common-watcher>` to work.
 * ``i3-py``, `available on github <https://github.com/ziberna/i3-py>`_. Required 
