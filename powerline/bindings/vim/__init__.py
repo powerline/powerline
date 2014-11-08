@@ -398,3 +398,16 @@ def on_bwipe():
 
 
 environ = VimEnviron()
+
+
+def create_ruby_dpowerline():
+	vim.command((
+		'''
+		ruby
+		if $powerline == nil
+			class Powerline
+			end
+			$powerline = Powerline.new
+		end
+		'''
+	))

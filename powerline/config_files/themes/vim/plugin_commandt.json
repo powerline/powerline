@@ -1,0 +1,26 @@
+{
+	"segments": {
+		"left": [
+			{
+				"type": "string",
+				"contents": "Command-T",
+				"highlight_group": ["commandt:label"]
+			},
+			{
+				"function": "powerline.segments.vim.plugin.commandt.finder"
+			},
+			{
+				"function": "powerline.segments.vim.plugin.commandt.path"
+			},
+			{
+				"type": "string",
+				"highlight_group": ["commandt:background"],
+				"draw_soft_divider": false,
+				"draw_hard_divider": false,
+				"width": "auto"
+			}
+		],
+		"right": [
+		]
+	}
+}

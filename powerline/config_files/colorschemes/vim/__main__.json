@@ -26,6 +26,11 @@
 		"buf_nc:file_directory":     "tab_nc:file_directory",
 		"buf_nc:file_name":          "tab_nc:file_name",
 		"buf_nc:bufnr":              "tab_nc:tabnr",
-		"buf_nc:modified_indicator": "tab_nc:modified_indicator"
+		"buf_nc:modified_indicator": "tab_nc:modified_indicator",
+
+		"commandt:label":      "file_name",
+		"commandt:background": "background",
+		"commandt:finder":     "file_name",
+		"commandt:path":       "file_directory"
 	}
 }
