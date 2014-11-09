@@ -288,6 +288,12 @@ def eval(expr):
 		winnr = int(match.group(2))
 		varname = match.group(3)
 		return tabpages[tabnr].windows[winnr].vars[varname]
+	elif expr.startswith('type(function('):
+		import re
+		match = re.match(r'^type\(function\("([^"]+)"\)\) == 2$', expr)
+		if not match:
+			raise NotImplementedError(expr)
+		return 0
 	raise NotImplementedError(expr)
 
 

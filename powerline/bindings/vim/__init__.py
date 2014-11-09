@@ -124,6 +124,22 @@ else:
 	vim_get_func = VimFunc
 
 
+if hasattr(vim, 'Function'):
+	def vim_func_exists(f):
+		try:
+			vim.Function(f)
+		except ValueError:
+			return False
+		else:
+			return True
+else:
+	def vim_func_exists(f):
+		try:
+			return bool(int(vim.eval('type(function("{0}")) == 2'.format(f))))
+		except vim.error:
+			return False
+
+
 if type(vim) is object:
 	vim_get_func = lambda *args, **kwargs: None
 
@@ -398,3 +414,16 @@ def on_bwipe():
 
 
 environ = VimEnviron()
+
+
+def create_ruby_dpowerline():
+	vim.command((
+		'''
+		ruby
+		if $powerline == nil
+			class Powerline
+			end
+			$powerline = Powerline.new
+		end
+		'''
+	))

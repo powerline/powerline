@@ -21,6 +21,12 @@ Ctrl-P segments
 .. automodule:: powerline.segments.vim.plugin.ctrlp
    :members:
 
+Command-T segments
+------------------
+
+.. automodule:: powerline.segments.vim.plugin.commandt
+   :members:
+
 Tagbar segments
 ---------------
 
@@ -31,4 +37,10 @@ NERDTree segments
 -----------------
 
 .. automodule:: powerline.segments.vim.plugin.nerdtree
+   :members:
+
+Capslock segments
+-----------------
+
+.. automodule:: powerline.segments.vim.plugin.capslock
    :members:
