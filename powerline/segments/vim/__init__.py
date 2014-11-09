@@ -4,6 +4,7 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 import os
 import re
 import csv
+import sys
 
 from collections import defaultdict
 
@@ -646,6 +647,22 @@ CSV_SNIFF_LINES = 100
 CSV_PARSE_LINES = 10
 
 
+if sys.version_info < (2, 7):
+	def read_csv(l, dialect, fin=next):
+		try:
+			return fin(csv.reader(l, dialect))
+		except csv.Error as e:
+			if str(e) == 'newline inside string' and dialect.quotechar:
+				# Maybe we are inside an unfinished quoted string. Python-2.6 
+				# does not handle this fine
+				return fin(csv.reader(l[:-1] + [l[-1] + dialect.quotechar]))
+			else:
+				raise
+else:
+	def read_csv(l, dialect, fin=next):
+		return fin(csv.reader(l, dialect))
+
+
 def process_csv_buffer(pl, buffer, line, col, display_name):
 	global csv_cache
 	if csv_cache is None:
@@ -682,13 +699,16 @@ def process_csv_buffer(pl, buffer, line, col, display_name):
 				return None, None
 	if len(buffer) > 2:
 		csv_cache[buffer.number] = dialect, has_header, cur_first_line
-	column_number = len(list(csv.reader(
-		buffer[max(0, line - CSV_PARSE_LINES):line - 1] + [buffer[line - 1][:col]], dialect=dialect))[-1]) or 1
+	column_number = len(read_csv(
+		buffer[max(0, line - CSV_PARSE_LINES):line - 1] + [buffer[line - 1][:col]],
+		dialect=dialect,
+		fin=list,
+	)[-1]) or 1
 	if has_header:
 		try:
-			header = next(csv.reader(buffer[0:1], dialect=dialect))
+			header = read_csv(buffer[0:1], dialect=dialect)
 		except UnicodeDecodeError:
-			header = next(csv.reader([vim.eval('strtrans(getline(1))')], dialect=dialect))
+			header = read_csv([vim.eval('strtrans(getline(1))')], dialect=dialect)
 		column_name = header[column_number - 1]
 	else:
 		column_name = None

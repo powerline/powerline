@@ -1231,6 +1231,8 @@ class TestVim(TestCase):
 			}, {
 				'contents': ' (Bar)', 'highlight_group': ['csv:column_name', 'csv']
 			}])
+			if sys.version_info < (2, 7):
+				raise SkipTest('csv module in Python-2.6 does not handle multiline csv files well')
 			buffer[len(buffer):] = ['1;"bc', 'def', 'ghi', 'jkl";3']
 			vim_module._set_cursor(5, 1)
 			self.assertEqual(csv_col_current(), [{
