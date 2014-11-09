@@ -32,3 +32,9 @@ NERDTree segments
 
 .. automodule:: powerline.segments.vim.plugin.nerdtree
    :members:
+
+Capslock segments
+-----------------
+
+.. automodule:: powerline.segments.vim.plugin.capslock
+   :members:

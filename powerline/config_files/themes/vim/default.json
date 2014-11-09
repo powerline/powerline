@@ -16,6 +16,11 @@
 				"priority": 10
 			},
 			{
+				"function": "powerline.segments.vim.plugin.capslock.capslock_indicator",
+				"include_modes": ["i", "R", "Rv"],
+				"priority": 10
+			},
+			{
 				"function": "branch",
 				"exclude_modes": ["nc"],
 				"priority": 30
