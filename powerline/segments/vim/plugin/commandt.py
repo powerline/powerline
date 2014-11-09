@@ -46,8 +46,10 @@ initialized = False
 def finder(pl):
 	'''Display Command-T finder name
 
-	Requires $command_t.active_finder and .path methods (code above may 
-	monkey-patch $command_t to add them).
+	Requires $command_t.active_finder and methods (code above may monkey-patch 
+	$command_t to add them). All Command-T finders have ``CommandT::`` module 
+	prefix, but it is stripped out (actually, any ``CommandT::`` substring will 
+	be stripped out).
 	'''
 	initialize()
 	vim.command('ruby $powerline.commandt_set_active_finder')
@@ -66,6 +68,15 @@ FINDERS_WITHOUT_PATH = set((
 
 
 def path(pl):
+	'''Display path used by Command-T
+
+	Requires $command_t.active_finder and .path methods (code above may 
+	monkey-patch $command_t to add them).
+
+	$command_t.active_finder is required in order to omit displaying path for 
+	finders ``MRUBufferFinder``, ``BufferFinder``, ``TagFinder`` and 
+	``JumpFinder`` (pretty much any finder, except ``FileFinder``).
+	'''
 	initialize()
 	vim.command('ruby $powerline.commandt_set_active_finder')
 	finder = vim.eval('g:powerline_commandt_reply')
