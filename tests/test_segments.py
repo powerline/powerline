@@ -1196,6 +1196,73 @@ class TestVim(TestCase):
 					'highlight_group': ['tab_modified_indicator', 'modified_indicator'],
 				}])
 
+	def test_csv_col_current(self):
+		pl = Pl()
+		segment_info = vim_module._get_segment_info()
+
+		def csv_col_current(**kwargs):
+			self.vim.csv_cache and self.vim.csv_cache.clear()
+			return self.vim.csv_col_current(pl=pl, segment_info=segment_info, **kwargs)
+
+		buffer = segment_info['buffer']
+		try:
+			self.assertEqual(csv_col_current(), None)
+			buffer.options['filetype'] = 'csv'
+			self.assertEqual(csv_col_current(), None)
+			buffer[:] = ['1;2;3', '4;5;6']
+			vim_module._set_cursor(1, 1)
+			self.assertEqual(csv_col_current(), [{
+				'contents': '1', 'highlight_group': ['csv:column_number', 'csv']
+			}])
+			vim_module._set_cursor(2, 3)
+			self.assertEqual(csv_col_current(), [{
+				'contents': '2', 'highlight_group': ['csv:column_number', 'csv']
+			}])
+			vim_module._set_cursor(2, 3)
+			self.assertEqual(csv_col_current(display_name=True), [{
+				'contents': '2', 'highlight_group': ['csv:column_number', 'csv']
+			}, {
+				'contents': ' (2)', 'highlight_group': ['csv:column_name', 'csv']
+			}])
+			buffer[:0] = ['Foo;Bar;Baz']
+			vim_module._set_cursor(2, 3)
+			self.assertEqual(csv_col_current(), [{
+				'contents': '2', 'highlight_group': ['csv:column_number', 'csv']
+			}, {
+				'contents': ' (Bar)', 'highlight_group': ['csv:column_name', 'csv']
+			}])
+			buffer[len(buffer):] = ['1;"bc', 'def', 'ghi', 'jkl";3']
+			vim_module._set_cursor(5, 1)
+			self.assertEqual(csv_col_current(), [{
+				'contents': '2', 'highlight_group': ['csv:column_number', 'csv']
+			}, {
+				'contents': ' (Bar)', 'highlight_group': ['csv:column_name', 'csv']
+			}])
+			vim_module._set_cursor(7, 6)
+			self.assertEqual(csv_col_current(), [{
+				'contents': '3', 'highlight_group': ['csv:column_number', 'csv']
+			}, {
+				'contents': ' (Baz)', 'highlight_group': ['csv:column_name', 'csv']
+			}])
+			self.assertEqual(csv_col_current(name_format=' ({column_name:.1})'), [{
+				'contents': '3', 'highlight_group': ['csv:column_number', 'csv']
+			}, {
+				'contents': ' (B)', 'highlight_group': ['csv:column_name', 'csv']
+			}])
+			self.assertEqual(csv_col_current(display_name=True, name_format=' ({column_name:.1})'), [{
+				'contents': '3', 'highlight_group': ['csv:column_number', 'csv']
+			}, {
+				'contents': ' (B)', 'highlight_group': ['csv:column_name', 'csv']
+			}])
+			self.assertEqual(csv_col_current(display_name=False, name_format=' ({column_name:.1})'), [{
+				'contents': '3', 'highlight_group': ['csv:column_number', 'csv']
+			}])
+			self.assertEqual(csv_col_current(display_name=False), [{
+				'contents': '3', 'highlight_group': ['csv:column_number', 'csv']
+			}])
+		finally:
+			vim_module._bw(segment_info['bufnr'])
+
 	@classmethod
 	def setUpClass(cls):
 		sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'path')))

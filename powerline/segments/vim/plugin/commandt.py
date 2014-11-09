@@ -22,19 +22,19 @@ def initialize():
 		ruby
 		if (not ($command_t.respond_to? 'active_finder'))
 			def $command_t.active_finder
-				@active_finder.class.name
+				@active_finder and @active_finder.class.name or ''
 			end
 		end
 		if (not ($command_t.respond_to? 'path'))
 			def $command_t.path
-				@path
+				@path or ''
 			end
 		end
 		def $powerline.commandt_set_active_finder
 			::VIM::command "let g:powerline_commandt_reply = '#{$command_t.active_finder}'"
 		end
 		def $powerline.commandt_set_path
-			::VIM::command "let g:powerline_commandt_reply = '#{$command_t.path.gsub(/'/, "''")}'"
+			::VIM::command "let g:powerline_commandt_reply = '#{($command_t.path or '').gsub(/'/, "''")}'"
 		end
 		'''
 	))
