@@ -3,11 +3,9 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 
 import os
 import re
+import csv
 
 from collections import defaultdict
-from csv import Sniffer, reader
-
-from csv import Error as CSVError
 
 try:
 	import vim
@@ -634,7 +632,7 @@ def winnr(pl, segment_info, show_current=True):
 
 
 csv_cache = None
-sniffer = Sniffer()
+sniffer = csv.Sniffer()
 
 
 def detect_text_csv_dialect(text, display_name, header_text=None):
@@ -664,7 +662,7 @@ def process_csv_buffer(pl, buffer, line, col, display_name):
 			text = vim.eval('join(map(getline(1, {0}), "strtrans(v:val)"), "\\n")'.format(CSV_SNIFF_LINES))
 		try:
 			dialect, has_header = detect_text_csv_dialect(text, display_name)
-		except CSVError as e:
+		except csv.Error as e:
 			pl.warn('Failed to detect csv format: {0}', str(e))
 			# Try detecting using three lines only:
 			if line == 1:
@@ -679,18 +677,18 @@ def process_csv_buffer(pl, buffer, line, col, display_name):
 					display_name,
 					header_text='\n'.join(buffer[:4]),
 				)
-			except CSVError as e:
+			except csv.Error as e:
 				pl.error('Failed to detect csv format: {0}', str(e))
 				return None, None
 	if len(buffer) > 2:
 		csv_cache[buffer.number] = dialect, has_header, cur_first_line
-	column_number = len(list(reader(
+	column_number = len(list(csv.reader(
 		buffer[max(0, line - CSV_PARSE_LINES):line - 1] + [buffer[line - 1][:col]], dialect=dialect))[-1]) or 1
 	if has_header:
 		try:
-			header = next(reader(buffer[0:1], dialect=dialect))
+			header = next(csv.reader(buffer[0:1], dialect=dialect))
 		except UnicodeDecodeError:
-			header = next(reader([vim.eval('strtrans(getline(1))')], dialect=dialect))
+			header = next(csv.reader([vim.eval('strtrans(getline(1))')], dialect=dialect))
 		column_name = header[column_number - 1]
 	else:
 		column_name = None
