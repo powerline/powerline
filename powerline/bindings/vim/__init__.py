@@ -135,7 +135,7 @@ if hasattr(vim, 'Function'):
 else:
 	def vim_func_exists(f):
 		try:
-			return bool(int(vim.eval('type(function("{0}")) == 2'.format(f))))
+			return bool(int(vim.eval('exists("*{0}")'.format(f))))
 		except vim.error:
 			return False
 
