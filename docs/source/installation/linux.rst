@@ -48,6 +48,13 @@ generally works well with any coding font.
 
       mv PowerlineSymbols.otf ~/.fonts/
 
+#. Some distributions (e.g. Ubuntu or Linux Mint) block bitmap fonts from being imported by default. 
+   If you want to add the Terminus font, which is a bitmap font, you have to check if
+   
+      /etc/fonts/conf.d/70-no-bitmaps.conf
+   
+   exists and delete it or comment it before proceeding with the next step.
+
 #. Update font cache for the path you moved the font to (you may need to be 
    root to update the cache for system-wide paths)::
 
@@ -77,6 +84,13 @@ After downloading font you should do the following:
    listed with ``xset q``::
 
       mv 'MyFont for Powerline.otf' ~/.fonts/
+
+#. Some distributions (e.g. Ubuntu or Linux Mint) block bitmap fonts from being imported by default. 
+   If you want to add the Terminus font, which is a bitmap font, you have to check if
+   
+      /etc/fonts/conf.d/70-no-bitmaps.conf
+   
+   exists and delete it or comment it before proceeding with the next step.
 
 #. Update font cache for the path you moved the font to (you may need to be 
    root to update the cache for system-wide paths)::
