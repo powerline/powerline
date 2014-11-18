@@ -23,9 +23,8 @@ follow the installation guide below:
 
        pip install --user git+git://github.com/Lokaltog/powerline
 
-.. note:: You need to use the GitHub URI when installing Powerline! This 
-   project is currently unavailable on the PyPI due to a naming conflict 
-   with an unrelated project.
+.. note:: Due to the naming conflict with an unrelated project powerline is
+   named ``powerline-status`` in PyPI.
 
 .. note:: If you are powerline developer you should be aware that ``pip install 
    --editable`` does not currently fully work. If you
