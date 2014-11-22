@@ -142,10 +142,14 @@ class Prompt(object):
 		}
 		zsh.setvalue('_POWERLINE_PARSER_STATE', None)
 		zsh.setvalue('_POWERLINE_SHORTENED_PATH', None)
+		try:
+			zle_rprompt_indent = zsh.getvalue('ZLE_RPROMPT_INDENT')
+		except IndexError:
+			zle_rprompt_indent = 1
 		r = ''
 		if self.above:
 			for line in self.powerline.render_above_lines(
-				width=zsh.columns() - 1,
+				width=zsh.columns() - zle_rprompt_indent,
 				segment_info=segment_info,
 			):
 				r += line + '\n'
