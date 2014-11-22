@@ -144,7 +144,7 @@ _powerline_setup_prompt() {
 		new_args_2+=' --renderer_arg="local_theme=continuation"'
 		local add_args_3=$add_args' --renderer_arg="local_theme=select"'
 		local add_args_2=$add_args$new_args_2
-		add_args+=' --width=$(( ${COLUMNS:-$(_powerline_columns_fallback)} - 1 ))'
+		add_args+=' --width=$(( ${COLUMNS:-$(_powerline_columns_fallback)} - ${ZLE_RPROMPT_INDENT:-1} ))'
 		local add_args_r2=$add_args$new_args_2
 		PS1='$($=POWERLINE_COMMAND shell aboveleft '$add_args')'
 		RPS1='$($=POWERLINE_COMMAND shell right '$add_args')'
