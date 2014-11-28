@@ -24,6 +24,7 @@ cd ../'#[bold]'
 cd ../'(echo)'
 cd ../'$(echo)'
 cd ../'`echo`'
+cd ../'«Unicode!»'
 POWERLINE_COMMAND="$POWERLINE_COMMAND -t default_leftonly.dividers.left.hard=\$ABC"
 false
 true is the last line

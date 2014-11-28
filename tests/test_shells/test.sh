@@ -173,6 +173,7 @@ mkdir tests/shell/3rd/'#[bold]'
 mkdir tests/shell/3rd/'(echo)'
 mkdir tests/shell/3rd/'$(echo)'
 mkdir tests/shell/3rd/'`echo`'
+mkdir tests/shell/3rd/'«Unicode!»'
 
 mkdir tests/shell/fish_home
 mkdir tests/shell/fish_home/fish

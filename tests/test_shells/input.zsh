@@ -26,6 +26,7 @@ cd ../'#[bold]'
 cd ../'(echo)'
 cd ../'$(echo)'
 cd ../'`echo`'
+cd ../'«Unicode!»'
 cd ..
 POWERLINE_COMMAND="${POWERLINE_COMMAND//_leftonly}" ; bindkey -v
 
