@@ -143,6 +143,16 @@ started from.*
 Shell issues
 ============
 
+When sourcing shell bindings it complains about missing command or file
+-----------------------------------------------------------------------
+
+If you are using ``pip`` based installation do not forget to add pip-specific 
+executable path to ``$PATH`` environment variable. This path usually looks 
+something like ``$HOME/.local/bin`` (linux) or 
+``$HOME/Library/Python/{python_version}/bin`` (OS X). One may check out where 
+``powerline-config`` script was installed by using ``pip show -f 
+powerline-status | grep powerline-config`` (does not always work).
+
 I am suffering bad lags before displaying shell prompt
 ------------------------------------------------------
 
