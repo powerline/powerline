@@ -64,6 +64,21 @@ def get_preferred_input_encoding():
 	)
 
 
+def get_preferred_arguments_encoding():
+	'''Get encoding that should be used for command-line arguments
+
+	.. warning::
+		Falls back to latin1 so that function is less likely to throw as 
+		non-ASCII command-line arguments most likely contain non-ASCII 
+		filenames and screwing them up due to unidentified locale is not much of 
+		a problem.
+	'''
+	return (
+		locale.getdefaultlocale()[1]
+		or 'latin1'
+	)
+
+
 def get_preferred_environment_encoding():
 	'''Get encoding that should be used for decoding environment variables
 	'''

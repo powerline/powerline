@@ -3,8 +3,20 @@
 from __future__ import (division, absolute_import, print_function)
 
 import argparse
+import sys
 
 from powerline.lib import mergedicts, parsedotval
+from powerline.lib.encoding import get_preferred_arguments_encoding
+
+
+if sys.version_info < (3,):
+	encoding = get_preferred_arguments_encoding()
+
+	def arg_to_unicode(s):
+		return unicode(s, encoding, 'replace') if not isinstance(s, unicode) else s
+else:
+	def arg_to_unicode(s):
+		return s
 
 
 def mergeargs(argvalue):
@@ -39,9 +51,9 @@ def get_argparser(ArgumentParser=argparse.ArgumentParser):
 	parser.add_argument('--last_exit_code', metavar='INT', type=int, help='Last exit code.')
 	parser.add_argument('--last_pipe_status', metavar='LIST', default='', type=lambda s: [int(status) for status in s.split()], help='Like above, but is supposed to contain space-separated array of statuses, representing exit statuses of commands in one pipe.')
 	parser.add_argument('--jobnum', metavar='INT', type=int, help='Number of jobs.')
-	parser.add_argument('-c', '--config', metavar='KEY.KEY=VALUE', action='append', help='Configuration overrides for `config.json\'. Is translated to a dictionary and merged with the dictionary obtained from actual JSON configuration: KEY.KEY=VALUE is translated to `{"KEY": {"KEY": VALUE}}\' and then merged recursively. VALUE may be any JSON value, values that are not `null\', `true\', `false\', start with digit, `{\', `[\' are treated like strings. If VALUE is omitted then corresponding key is removed.')
-	parser.add_argument('-t', '--theme_option', metavar='THEME.KEY.KEY=VALUE', action='append', help='Like above, but theme-specific. THEME should point to an existing and used theme to have any effect, but it is fine to use any theme here.')
-	parser.add_argument('-R', '--renderer_arg', metavar='KEY=VAL', action='append', help='Like above, but provides argument for renderer. Is supposed to be used only by shell bindings to provide various data like last_exit_code or last_pipe_status (they are not using `--renderer_arg\' for historical resons: `--renderer_arg\' was added later).')
+	parser.add_argument('-c', '--config', metavar='KEY.KEY=VALUE', type=arg_to_unicode, action='append', help='Configuration overrides for `config.json\'. Is translated to a dictionary and merged with the dictionary obtained from actual JSON configuration: KEY.KEY=VALUE is translated to `{"KEY": {"KEY": VALUE}}\' and then merged recursively. VALUE may be any JSON value, values that are not `null\', `true\', `false\', start with digit, `{\', `[\' are treated like strings. If VALUE is omitted then corresponding key is removed.')
+	parser.add_argument('-t', '--theme_option', metavar='THEME.KEY.KEY=VALUE', type=arg_to_unicode, action='append', help='Like above, but theme-specific. THEME should point to an existing and used theme to have any effect, but it is fine to use any theme here.')
+	parser.add_argument('-R', '--renderer_arg', metavar='KEY=VAL', type=arg_to_unicode, action='append', help='Like above, but provides argument for renderer. Is supposed to be used only by shell bindings to provide various data like last_exit_code or last_pipe_status (they are not using `--renderer_arg\' for historical resons: `--renderer_arg\' was added later).')
 	parser.add_argument('-p', '--config_path', action='append', metavar='PATH', help='Path to configuration directory. If it is present then configuration files will only be seeked in the provided path. May be provided multiple times to search in a list of directories.')
 	parser.add_argument('--socket', metavar='ADDRESS', type=str, help='Socket address to use in daemon clients. Is always UNIX domain socket on linux and file socket on Mac OS X. Not used here, present only for compatibility with other powerline clients. This argument must always be the first one and be in a form `--socket ADDRESS\': no `=\' or short form allowed (in other powerline clients, not here).')
 	return parser
