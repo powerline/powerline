@@ -13,38 +13,6 @@ System-specific issues
 Common issues
 =============
 
-I’m using tmux and Powerline looks like crap, what’s wrong?
------------------------------------------------------------
-
-* You need to tell tmux that it has 256-color capabilities. Add this to your 
-  :file:`.tmux.conf` to solve this issue::
-
-    set -g default-terminal "screen-256color"
-* If you’re using iTerm2, make sure that you have enabled the setting 
-  :guilabel:`Set locale variables automatically` in :menuselection:`Profiles --> 
-  Terminal --> Environment`.
-* Make sure tmux knows that terminal it is running in support 256 colors. You 
-  may tell it tmux by using ``-2`` option when launching it.
-
-I’m using tmux/screen and Powerline is colorless
-------------------------------------------------
-
-* If the above advices do not help, then you need to disable 
-  :ref:`term_truecolor <config-common-term_truecolor>`.
-* Alternative: set :ref:`additional_escapes <config-common-additional_escapes>` 
-  to ``"tmux"`` or ``"screen"``. Note that it is known to work perfectly in 
-  screen, but in tmux it may produce ugly spaces.
-
-  .. warning::
-    Both tmux and screen are not resending sequences escaped in such a way. Thus 
-    even though additional escaping will work for the last shown prompt, 
-    highlighting will eventually go away when tmux or screen will redraw screen 
-    for some reason.
-
-    E.g. in screen it will go away when you used copy mode and prompt got out of 
-    screen and in tmux it will go away immediately after you press ``<Enter>``.
-
-
 After an update something stopped working
 -----------------------------------------
 
@@ -129,6 +97,49 @@ make powerline package importable anywhere: use
 
      pip install --user --editable path/to/powerline
 
+Tmux/screen-related issues
+==========================
+
+I’m using tmux and Powerline looks like crap, what’s wrong?
+-----------------------------------------------------------
+
+* You need to tell tmux that it has 256-color capabilities. Add this to your 
+  :file:`.tmux.conf` to solve this issue::
+
+    set -g default-terminal "screen-256color"
+* If you’re using iTerm2, make sure that you have enabled the setting 
+  :guilabel:`Set locale variables automatically` in :menuselection:`Profiles --> 
+  Terminal --> Environment`.
+* Make sure tmux knows that terminal it is running in support 256 colors. You 
+  may tell it tmux by using ``-2`` option when launching it.
+
+I’m using tmux/screen and Powerline is colorless
+------------------------------------------------
+
+* If the above advices do not help, then you need to disable 
+  :ref:`term_truecolor <config-common-term_truecolor>`.
+* Alternative: set :ref:`additional_escapes <config-common-additional_escapes>` 
+  to ``"tmux"`` or ``"screen"``. Note that it is known to work perfectly in 
+  screen, but in tmux it may produce ugly spaces.
+
+  .. warning::
+    Both tmux and screen are not resending sequences escaped in such a way. Thus 
+    even though additional escaping will work for the last shown prompt, 
+    highlighting will eventually go away when tmux or screen will redraw screen 
+    for some reason.
+
+    E.g. in screen it will go away when you used copy mode and prompt got out of 
+    screen and in tmux it will go away immediately after you press ``<Enter>``.
+
+In tmux there is a green bar in place of powerline
+--------------------------------------------------
+
+In order for tmux bindings to work ``powerline-config`` script is required to be 
+present in ``$PATH``. Alternatively one may define ``$POWERLINE_CONFIG_COMMAND`` 
+environment variable pointing to the location of the script. *This variable must 
+be defined prior to launching tmux server and in the environment where server is 
+started from.*
+
 Shell issues
 ============
 
@@ -180,8 +191,8 @@ My vim statusline has a lot of ``^`` or underline characters in it!
 -------------------------------------------------------------------
 
 * You need to configure the ``fillchars`` setting to disable statusline 
-  fillchars (see ``:h fillchars`` for details). Add this to your 
-  :file:`vimrc` to solve this issue:
+  fillchars (see ``:h 'fillchars'`` for details). Add this to your :file:`vimrc` 
+  to solve this issue:
 
    .. code-block:: vim
 
