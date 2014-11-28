@@ -78,6 +78,10 @@ run() {
 		"$@"
 }
 
+# HACK: get newline for use in strings given that "\n" and $'' do not work.
+NL="$(printf '\nE')"
+NL="${NL%E}"
+
 run_test() {
 	TEST_TYPE="$1"
 	shift
@@ -105,7 +109,7 @@ run_test() {
 		#     …
 		#     prompt1> prompt2> …
 		while read -r line ; do
-			screen -S "$SESNAME" -p 0 -X stuff "$line"$(printf '\r')
+			screen -S "$SESNAME" -p 0 -X stuff "$line$NL"
 			sleep 1
 		done < tests/test_shells/input.$SH
 	else
