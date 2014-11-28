@@ -75,11 +75,20 @@ class Renderer(object):
 	See documentation of ``unicode.translate`` for details.
 	'''
 
-	np_character_translations = dict(((i, '^' + unichr(i + 0x40)) for i in range(0x20)))
+	np_character_translations = dict(chain(
+		# Control characters: ^@ … ^Y
+		((i1, '^' + unichr(i1 + 0x40)) for i1 in range(0x20)),
+		# Invalid unicode characters obtained using 'surrogateescape' error 
+		# handler.
+		((i2, '<{0:02x}>'.format(i2 - 0xDC00)) for i2 in range(0xDC80, 0xDD00)),
+	))
 	'''Non-printable character translations
 
 	These are used to transform characters in range 0x00—0x1F into ``^@``, 
-	``^A`` and so on. Unilke with ``.escape()`` method (and 
+	``^A`` and so on and characters in range 0xDC80—0xDCFF into ``<80>``, 
+	``<81>`` and so on (latter are invalid characters obtained using 
+	``surrogateescape`` error handling method used automatically in a number of 
+	places in Python3). Unilke with ``.escape()`` method (and 
 	``character_translations``) result is passed to ``.strwidth()`` method.
 
 	Note: transforms tab into ``^I``.
