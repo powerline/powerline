@@ -35,6 +35,15 @@ I’m using tmux/screen and Powerline is colorless
   to ``"tmux"`` or ``"screen"``. Note that it is known to work perfectly in 
   screen, but in tmux it may produce ugly spaces.
 
+  .. warning::
+    Both tmux and screen are not resending sequences escaped in such a way. Thus 
+    even though additional escaping will work for the last shown prompt, 
+    highlighting will eventually go away when tmux or screen will redraw screen 
+    for some reason.
+
+    E.g. in screen it will go away when you used copy mode and prompt got out of 
+    screen and in tmux it will go away immediately after you press ``<Enter>``.
+
 
 After an update something stopped working
 -----------------------------------------
