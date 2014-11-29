@@ -127,7 +127,7 @@ run_test() {
 	while screen -S "$SESNAME" -X blankerprg "" > /dev/null ; do
 		sleep 0.1s
 	done
-	./tests/test_shells/postproc.py ${TEST_TYPE} ${TEST_CLIENT} ${SH}
+	${PYTHON} ./tests/test_shells/postproc.py ${TEST_TYPE} ${TEST_CLIENT} ${SH}
 	rm -f tests/shell/3rd/pid
 	if ! check_screen_log ${TEST_TYPE} ${TEST_CLIENT} ${SH} ; then
 		echo '____________________________________________________________'
