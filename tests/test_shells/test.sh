@@ -102,7 +102,13 @@ run_test() {
 	while ! screen -S "$SESNAME" -p 0 -X width 300 1 ; do
 		sleep 0.1s
 	done
-	if test "x${SH}" = "xdash" ; then
+	if ( \
+		test "x${SH}" = "xdash" ||
+		( \
+			test "x${SH}" = "xipython" \
+			&& ${PYTHON} -c 'import platform, sys; sys.exit(1 - (platform.python_implementation() == "PyPy"))' \
+		) \
+	) ; then
 		# If I do not use this hack for dash then output will look like
 		#
 		#     command1
@@ -121,7 +127,7 @@ run_test() {
 	while screen -S "$SESNAME" -X blankerprg "" > /dev/null ; do
 		sleep 0.1s
 	done
-	./tests/test_shells/postproc.py ${TEST_TYPE} ${TEST_CLIENT} ${SH}
+	${PYTHON} ./tests/test_shells/postproc.py ${TEST_TYPE} ${TEST_CLIENT} ${SH}
 	rm -f tests/shell/3rd/pid
 	if ! check_screen_log ${TEST_TYPE} ${TEST_CLIENT} ${SH} ; then
 		echo '____________________________________________________________'
