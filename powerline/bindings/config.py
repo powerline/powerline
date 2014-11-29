@@ -142,6 +142,10 @@ def init_environment(pl, args):
 		else:
 			set_tmux_environment(varname, 'colour' + str(get_highlighting(group)[attr][0]))
 
+	left_dividers = powerline.renderer.theme.dividers['left']
+	set_tmux_environment('_POWERLINE_LEFT_HARD_DIVIDER', left_dividers['hard'])
+	set_tmux_environment('_POWERLINE_LEFT_SOFT_DIVIDER', left_dividers['soft'])
+
 
 def get_main_config(args):
 	find_config_files = generate_config_finder()
