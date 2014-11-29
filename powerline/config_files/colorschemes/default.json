@@ -1,6 +1,7 @@
 {
 	"name": "Default",
 	"groups": {
+		"background":                { "fg": "white", "bg": "gray0", "attr": [] },
 		"background:divider":        { "fg": "gray5", "bg": "gray0", "attr": [] },
 		"session":                   { "fg": "black", "bg": "gray10", "attr": ["bold"] },
 		"date":                      { "fg": "gray8", "bg": "gray2", "attr": [] },

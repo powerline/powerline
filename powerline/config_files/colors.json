@@ -3,6 +3,7 @@
 		"black": 16,
 		"white": 231,
 
+		"green": 2,
 		"darkestgreen": 22,
 		"darkgreen": 28,
 		"mediumgreen": 70,
@@ -32,6 +33,7 @@
 		"brightorange": 208,
 		"brightestorange": 214,
 
+		"yellow": 11,
 		"brightyellow": 220,
 
 		"gray0": 233,
@@ -45,6 +47,11 @@
 		"gray8": 247,
 		"gray9": 250,
 		"gray10": 252,
+
+		"gray11": 234,
+		"gray90": 254,
+
+		"gray70": [249, "b3b3b3"],
 
 		"lightyellowgreen": 106,
 		"gold3": 178,

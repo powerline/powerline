@@ -20,6 +20,7 @@ class StrFunction(object):
 
 TMUX_ACTIONS = {
 	'source': StrFunction(config.source_tmux_files, 'source'),
+	'setenv': StrFunction(config.init_environment, 'setenv'),
 }
 
 
@@ -42,6 +43,7 @@ class ConfigArgParser(argparse.ArgumentParser):
 
 def get_argparser(ArgumentParser=ConfigArgParser):
 	parser = ArgumentParser(description='Script used to obtain powerline configuration.')
+	parser.add_argument('-p', '--config_path', action='append', metavar='PATH', help='Path to configuration directory. If it is present then configuration files will only be seeked in the provided path. May be provided multiple times to search in a list of directories.')
 	subparsers = parser.add_subparsers()
 	tmux_parser = subparsers.add_parser('tmux', help='Tmux-specific commands')
 	tmux_parser.add_argument(
@@ -49,7 +51,7 @@ def get_argparser(ArgumentParser=ConfigArgParser):
 		choices=tuple(TMUX_ACTIONS.values()),
 		metavar='ACTION',
 		type=(lambda v: TMUX_ACTIONS.get(v)),
-		help='If action is `source\' then version-specific tmux configuration files are sourced.'
+		help='If action is `source\' then version-specific tmux configuration files are sourced, if it is `setenv\' then special (prefixed with `_POWERLINE\') tmux global environment variables are filled with data from powerline configuration.'
 	)
 
 	shell_parser = subparsers.add_parser('shell', help='Shell-specific commands')
