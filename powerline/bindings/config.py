@@ -29,8 +29,7 @@ CONFIG_PRIORITY = {
 
 def list_all_tmux_configs():
 	'''List all version-specific tmux configuration files'''
-	directory = TMUX_CONFIG_DIRECTORY
-	for root, dirs, files in os.walk(directory):
+	for root, dirs, files in os.walk(TMUX_CONFIG_DIRECTORY):
 		dirs[:] = ()
 		for fname in files:
 			match = CONFIG_FILE_NAME.match(fname)
@@ -67,6 +66,7 @@ def source_tmux_files(pl, args):
 	  sourced, then _plus files and then files without _minus or _plus suffixes.
 	'''
 	version = get_tmux_version(pl)
+	run_tmux_command('source', os.path.join(TMUX_CONFIG_DIRECTORY, 'powerline-base.conf'))
 	for fname, priority in sorted(get_tmux_configs(version), key=(lambda v: v[1])):
 		run_tmux_command('source', fname)
 	if not os.environ.get('POWERLINE_COMMAND'):
