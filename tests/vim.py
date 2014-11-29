@@ -412,9 +412,11 @@ def _emul_bufnr(expr):
 
 
 @_vim
-def _emul_exists(varname):
-	if varname.startswith('g:'):
-		return varname[2:] in vars
+def _emul_exists(ident):
+	if ident.startswith('g:'):
+		return ident[2:] in vars
+	elif ident.startswith(':'):
+		return 0
 	raise NotImplementedError
 
 

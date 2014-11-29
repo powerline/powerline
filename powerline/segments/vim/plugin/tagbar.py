@@ -1,12 +1,11 @@
 # vim:fileencoding=utf-8:noet
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
-try:
-	import vim
-except ImportError:
-	vim = object()
-
 from powerline.segments.vim import window_cached
+from powerline.bindings.vim import vim_command_exists, vim_get_autoload_func
+
+
+currenttag = None
 
 
 @window_cached
@@ -25,6 +24,12 @@ def current_tag(pl, flags='s'):
 
 		.. _`official documentation`: https://github.com/majutsushi/tagbar/blob/master/doc/tagbar.txt
 	'''
-	if not int(vim.eval('exists(":Tagbar")')):
-		return None
-	return vim.eval('tagbar#currenttag("%s", "", "{0}")'.format(flags))
+	global currenttag
+	if not currenttag:
+		if vim_command_exists('Tagbar'):
+			currenttag = vim_get_autoload_func('tagbar#currenttag')
+			if not currenttag:
+				return None
+		else:
+			return None
+	return currenttag('%s', '', flags)
