@@ -77,7 +77,9 @@ def source_tmux_files(pl, args):
 	run_tmux_command('refresh-client')
 
 
-def init_color_variables(pl, args):
+def init_environment(pl, args):
+	'''Initialize tmux environment from tmux configuration
+	'''
 	powerline = TmuxPowerline(args.config_path)
 	# TODO Move configuration files loading out of Powerline object and use it 
 	# directly
