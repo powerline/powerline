@@ -10,7 +10,7 @@ from powerline.lib.config import ConfigLoader
 from powerline import generate_config_finder, load_config, create_logger, PowerlineLogger, finish_common_config
 from powerline.tmux import TmuxPowerline
 from powerline.lib.shell import which
-from powerline.bindings.tmux import TmuxVersionInfo, run_tmux_command, get_tmux_version
+from powerline.bindings.tmux import TmuxVersionInfo, run_tmux_command, set_tmux_environment, get_tmux_version
 from powerline.lib.encoding import get_preferred_output_encoding
 from powerline.renderers.tmux import attr_to_tmux_attr
 
@@ -73,7 +73,7 @@ def source_tmux_files(pl, args):
 	if not os.environ.get('POWERLINE_COMMAND'):
 		cmd = deduce_command()
 		if cmd:
-			run_tmux_command('set-environment', '-g', 'POWERLINE_COMMAND', deduce_command())
+			set_tmux_environment('POWERLINE_COMMAND', deduce_command(), remove=False)
 	run_tmux_command('refresh-client')
 
 
@@ -103,8 +103,7 @@ def init_environment(pl, args):
 		('_POWERLINE_SESSION_COLOR', 'session'),
 	):
 		highlight = get_highlighting(highlight_group)
-		run_tmux_command('set-environment', '-g', varname, powerline.renderer.hlstyle(**highlight)[2:-1])
-		run_tmux_command('set-environment', '-r', varname)
+		set_tmux_environment(varname, powerline.renderer.hlstyle(**highlight)[2:-1])
 	for varname, prev_group, next_group in (
 		('_POWERLINE_WINDOW_CURRENT_HARD_DIVIDER_COLOR', 'window', 'window:current'),
 		('_POWERLINE_WINDOW_CURRENT_HARD_DIVIDER_NEXT_COLOR', 'window:current', 'window'),
@@ -112,15 +111,14 @@ def init_environment(pl, args):
 	):
 		prev_highlight = get_highlighting(prev_group)
 		next_highlight = get_highlighting(next_group)
-		run_tmux_command(
-			'set-environment', '-g', varname,
+		set_tmux_environment(
+			varname,
 			powerline.renderer.hlstyle(
 				fg=prev_highlight['bg'],
 				bg=next_highlight['bg'],
 				attr=0,
 			)[2:-1]
 		)
-		run_tmux_command('set-environment', '-r', varname)
 	for varname, attr, group in (
 		('_POWERLINE_ACTIVE_WINDOW_FG', 'fg', 'active_window_status'),
 		('_POWERLINE_WINDOW_STATUS_FG', 'fg', 'window_status'),
@@ -139,21 +137,10 @@ def init_environment(pl, args):
 	):
 		if attr == 'attr':
 			attrs = attr_to_tmux_attr(get_highlighting(group)[attr])
-			run_tmux_command(
-				'set-environment', '-g', varname,
-				']#['.join(attrs)
-			)
-			run_tmux_command(
-				'set-environment', '-g', varname + '_LEGACY',
-				','.join(attrs)
-			)
-			run_tmux_command('set-environment', '-r', varname + '_LEGACY')
+			set_tmux_environment(varname, ']#['.join(attrs))
+			set_tmux_environment(varname + '_LEGACY', ','.join(attrs))
 		else:
-			run_tmux_command(
-				'set-environment', '-g', varname,
-				'colour' + str(get_highlighting(group)[attr][0])
-			)
-		run_tmux_command('set-environment', '-r', varname)
+			set_tmux_environment(varname, 'colour' + str(get_highlighting(group)[attr][0]))
 
 
 def get_main_config(args):

@@ -37,6 +37,22 @@ def get_tmux_output(pl, *args):
 	return _run_tmux(lambda cmd: run_cmd(pl, cmd), args)
 
 
+def set_tmux_environment(varname, value, remove=True):
+	'''Set tmux global environment variable
+
+	:param str varname:
+		Name of the variable to set.
+	:param str value:
+		Variable value.
+	:param bool remove:
+		True if variable should be removed from the environment prior to 
+		attaching any client (runs ``tmux set-environment -r {varname}``).
+	'''
+	run_tmux_command('set-environment', '-g', varname, value)
+	if remove:
+		run_tmux_command('set-environment', '-r', varname)
+
+
 NON_DIGITS = re.compile('[^0-9]+')
 DIGITS = re.compile('[0-9]+')
 NON_LETTERS = re.compile('[^a-z]+')
