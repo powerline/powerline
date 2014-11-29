@@ -7,7 +7,8 @@ import sys
 
 from powerline.config import POWERLINE_ROOT, TMUX_CONFIG_DIRECTORY
 from powerline.lib.config import ConfigLoader
-from powerline import generate_config_finder, load_config, create_logger, PowerlineLogger, finish_common_config, Powerline
+from powerline import generate_config_finder, load_config, create_logger, PowerlineLogger, finish_common_config
+from powerline.tmux import TmuxPowerline
 from powerline.lib.shell import which
 from powerline.bindings.tmux import TmuxVersionInfo, run_tmux_command, get_tmux_version
 from powerline.lib.encoding import get_preferred_output_encoding
@@ -77,7 +78,7 @@ def source_tmux_files(pl, args):
 
 
 def init_color_variables(pl, args):
-	powerline = Powerline('tmux')
+	powerline = TmuxPowerline(args.config_path)
 	# TODO Move configuration files loading out of Powerline object and use it 
 	# directly
 	powerline.update_renderer()

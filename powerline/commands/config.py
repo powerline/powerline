@@ -43,6 +43,7 @@ class ConfigArgParser(argparse.ArgumentParser):
 
 def get_argparser(ArgumentParser=ConfigArgParser):
 	parser = ArgumentParser(description='Script used to obtain powerline configuration.')
+	parser.add_argument('-p', '--config_path', action='append', metavar='PATH', help='Path to configuration directory. If it is present then configuration files will only be seeked in the provided path. May be provided multiple times to search in a list of directories.')
 	subparsers = parser.add_subparsers()
 	tmux_parser = subparsers.add_parser('tmux', help='Tmux-specific commands')
 	tmux_parser.add_argument(
