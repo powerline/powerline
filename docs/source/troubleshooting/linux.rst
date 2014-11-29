@@ -21,6 +21,17 @@ I can’t see any fancy symbols, what’s wrong?
 
   In any case the only absolute requirement is launching xterm with UTF-8 
   locale.
+* If you are using bitmap font make sure that 
+  :file:`/etc/fonts/conf.d/70-no-bitmaps.conf` does not exist. If it does check 
+  out your distribution documentation to find a proper way to remove it (so that 
+  it won’t reappear after update). E.g. in Gentoo this is::
+
+      eselect fontconfig disable 70-no-bitmaps.conf
+
+  (currently this only removes the symlink from :file:`/etc/fonts/conf.d`). Also 
+  check out that no other fontconfig file does not have ``rejectfont`` tag that 
+  tells fontconfig to disable bitmap fonts (they are referenced as not 
+  scalable).
 
 The fancy symbols look a bit blurry or “off”!
 ---------------------------------------------
