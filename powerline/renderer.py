@@ -233,7 +233,7 @@ class Renderer(object):
 			line=line,
 			output_raw=output_raw,
 			output_width=output_width,
-			segment_info=segment_info,
+			segment_info=self.get_segment_info(segment_info, mode),
 			theme=theme,
 		)
 
@@ -252,7 +252,7 @@ class Renderer(object):
 	def do_render(self, mode, width, side, line, output_raw, output_width, segment_info, theme):
 		'''Like Renderer.render(), but accept theme in place of matcher_info
 		'''
-		segments = list(theme.get_segments(side, line, self.get_segment_info(segment_info, mode), mode))
+		segments = list(theme.get_segments(side, line, segment_info, mode))
 
 		current_width = 0
 

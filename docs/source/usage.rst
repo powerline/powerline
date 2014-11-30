@@ -52,6 +52,7 @@ if your terminal emulator supports it.
    Terminal.app          OS X    |i_yes|               |i_no|                |i_no|
    libvte-based [#]_     Linux   |i_yes|               |i_yes|               |i_yes| [#]_
    xterm                 Linux   |i_yes|               |i_no|                |i_partial| [#]_
+   fbterm                Linux   |i_yes|               |i_yes|               |i_no|
    ===================== ======= ===================== ===================== =====================
 
 .. |i_yes| image:: _static/img/icons/tick.png

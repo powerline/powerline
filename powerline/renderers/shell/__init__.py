@@ -18,6 +18,7 @@ class ShellRenderer(Renderer):
 	escape_hl_start = ''
 	escape_hl_end = ''
 	term_truecolor = False
+	term_escape_style = 'auto'
 	tmux_escape = False
 	screen_escape = False
 
@@ -36,6 +37,13 @@ class ShellRenderer(Renderer):
 		)
 
 	def do_render(self, output_width, segment_info, side, theme, width=None, **kwargs):
+		if self.term_escape_style == 'auto':
+			if segment_info['environ'].get('TERM') == 'fbterm':
+				self.used_term_escape_style = 'fbterm'
+			else:
+				self.used_term_escape_style = 'xterm'
+		else:
+			self.used_term_escape_style = self.term_escape_style
 		if isinstance(segment_info, dict):
 			client_id = segment_info.get('client_id')
 		else:
@@ -85,11 +93,13 @@ class ShellRenderer(Renderer):
 		is a valid color or attribute, it’s added to the ANSI escape code.
 		'''
 		ansi = [0]
+		is_fbterm = self.used_term_escape_style == 'fbterm'
+		term_truecolor = not is_fbterm and self.term_truecolor
 		if fg is not None:
 			if fg is False or fg[0] is False:
 				ansi += [39]
 			else:
-				if self.term_truecolor:
+				if term_truecolor:
 					ansi += [38, 2] + list(int_to_rgb(fg[1]))
 				else:
 					ansi += [38, 5, fg[0]]
@@ -97,7 +107,7 @@ class ShellRenderer(Renderer):
 			if bg is False or bg[0] is False:
 				ansi += [49]
 			else:
-				if self.term_truecolor:
+				if term_truecolor:
 					ansi += [48, 2] + list(int_to_rgb(bg[1]))
 				else:
 					ansi += [48, 5, bg[0]]
@@ -113,7 +123,21 @@ class ShellRenderer(Renderer):
 					ansi += [3]
 				elif attr & ATTR_UNDERLINE:
 					ansi += [4]
-		r = '\033[{0}m'.format(';'.join(str(attr) for attr in ansi))
+		if is_fbterm:
+			r = []
+			while ansi:
+				cur_ansi = ansi.pop(0)
+				if cur_ansi == 38:
+					ansi.pop(0)
+					r.append('\033[1;{0}}}'.format(ansi.pop(0)))
+				elif cur_ansi == 48:
+					ansi.pop(0)
+					r.append('\033[2;{0}}}'.format(ansi.pop(0)))
+				else:
+					r.append('\033[{0}m'.format(cur_ansi))
+			r = ''.join(r)
+		else:
+			r = '\033[{0}m'.format(';'.join(str(attr) for attr in ansi))
 		if self.tmux_escape:
 			r = '\033Ptmux;' + r.replace('\033', '\033\033') + '\033\\'
 		elif self.screen_escape:
