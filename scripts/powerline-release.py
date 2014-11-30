@@ -151,7 +151,7 @@ def create_ebuilds(version_string, overlay, user, **kwargs):
 	check_call(['git', 'add', '--'] + new_files, cwd=overlay)
 	check_call(['git', 'commit'] + new_files + ['-m', 'powerline*: Release {0}'.format(version_string)],
 	           cwd=overlay)
-	check_call(['git', 'push', 'git@github.com:{0}/{1}'.format(user, OVERLAY_NAME), branch], cwd=overlay)
+	check_call(['git', 'push', '-f', 'git@github.com:{0}/{1}'.format(user, OVERLAY_NAME), branch], cwd=overlay)
 
 
 def update_overlay(version_string, user, password, **kwargs):
