@@ -7,6 +7,7 @@ except ImportError:
 	vim = object()
 
 from powerline.segments.vim import window_cached
+from powerline.bindings.vim import vim_global_exists
 
 
 @window_cached
@@ -21,8 +22,8 @@ def syntastic(pl, err_format='ERR:  {first_line} ({num}) ', warn_format='WARN
 
 	Highlight groups used: ``syntastic.warning`` or ``warning``, ``syntastic.error`` or ``error``.
 	'''
-	if not int(vim.eval('exists("g:SyntasticLoclist")')):
-		return
+	if not vim_global_exists('SyntasticLoclist'):
+		return None
 	has_errors = int(vim.eval('g:SyntasticLoclist.current().hasErrorsOrWarningsToDisplay()'))
 	if not has_errors:
 		return

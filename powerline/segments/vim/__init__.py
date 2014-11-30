@@ -62,11 +62,6 @@ vim_modes = {
 }
 
 
-eventfuncs = defaultdict(lambda: [])
-bufeventfuncs = defaultdict(lambda: [])
-defined_events = set()
-
-
 # TODO Remove cache when needed
 def window_cached(func):
 	cache = {}
