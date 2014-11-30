@@ -40,7 +40,7 @@ except Exception as e:
 		which = shutil.which
 	else:
 		sys.path.append(CURRENT_DIR)
-		from powerline.lib import which
+		from powerline.lib.shell import which
 	if which('socat') and which('sed') and which('sh'):
 		print('Using powerline.sh script instead of C version (requires socat, sed and sh)')
 		shutil.copyfile('client/powerline.sh', 'scripts/powerline')
@@ -52,9 +52,17 @@ except Exception as e:
 else:
 	can_use_scripts = False
 
+
+def get_version():
+	try:
+		return 'dev-' + subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip()
+	except Exception as e:
+		return 'dev'
+
+
 setup(
 	name='powerline-status',
-	version='1.2',
+	version='1.3',
 	description='The ultimate statusline/prompt utility.',
 	long_description=README,
 	classifiers=[

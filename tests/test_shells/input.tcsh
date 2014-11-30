@@ -17,6 +17,7 @@ cd ../'#[bold]'
 cd ../'(echo)'
 cd ../'$(echo)'
 cd ../'`echo`'
+cd ../'«Unicode\!»'
 false
 true is the last line
 exit

@@ -15,6 +15,11 @@ Powerline
    tips-and-tricks
    license-and-credits
 
+.. toctree::
+   :maxdepth: 2
+
+   commands
+
 Indices and tables
 ==================
 

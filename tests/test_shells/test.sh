@@ -1,5 +1,6 @@
 #!/bin/sh
 : ${PYTHON:=python}
+FAIL_SUMMARY=""
 FAILED=0
 if test "x$1" = "x--fast" ; then
 	FAST=1
@@ -78,6 +79,10 @@ run() {
 		"$@"
 }
 
+# HACK: get newline for use in strings given that "\n" and $'' do not work.
+NL="$(printf '\nE')"
+NL="${NL%E}"
+
 run_test() {
 	TEST_TYPE="$1"
 	shift
@@ -97,7 +102,13 @@ run_test() {
 	while ! screen -S "$SESNAME" -p 0 -X width 300 1 ; do
 		sleep 0.1s
 	done
-	if test "x${SH}" = "xdash" ; then
+	if ( \
+		test "x${SH}" = "xdash" ||
+		( \
+			test "x${SH}" = "xipython" \
+			&& ${PYTHON} -c 'import platform, sys; sys.exit(1 - (platform.python_implementation() == "PyPy"))' \
+		) \
+	) ; then
 		# If I do not use this hack for dash then output will look like
 		#
 		#     command1
@@ -105,7 +116,7 @@ run_test() {
 		#     …
 		#     prompt1> prompt2> …
 		while read -r line ; do
-			screen -S "$SESNAME" -p 0 -X stuff "$line"$(printf '\r')
+			screen -S "$SESNAME" -p 0 -X stuff "$line$NL"
 			sleep 1
 		done < tests/test_shells/input.$SH
 	else
@@ -116,7 +127,7 @@ run_test() {
 	while screen -S "$SESNAME" -X blankerprg "" > /dev/null ; do
 		sleep 0.1s
 	done
-	./tests/test_shells/postproc.py ${TEST_TYPE} ${TEST_CLIENT} ${SH}
+	${PYTHON} ./tests/test_shells/postproc.py ${TEST_TYPE} ${TEST_CLIENT} ${SH}
 	rm -f tests/shell/3rd/pid
 	if ! check_screen_log ${TEST_TYPE} ${TEST_CLIENT} ${SH} ; then
 		echo '____________________________________________________________'
@@ -173,6 +184,7 @@ mkdir tests/shell/3rd/'#[bold]'
 mkdir tests/shell/3rd/'(echo)'
 mkdir tests/shell/3rd/'$(echo)'
 mkdir tests/shell/3rd/'`echo`'
+mkdir tests/shell/3rd/'«Unicode!»'
 
 mkdir tests/shell/fish_home
 mkdir tests/shell/fish_home/fish
@@ -316,6 +328,7 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 				echo ">>> $(which $SH)"
 				if ! run_test $TEST_TYPE $TEST_CLIENT $TEST_COMMAND ; then
 					FAILED=1
+					FAIL_SUMMARY="${FAIL_SUMMARY}${NL}T ${TEST_TYPE} ${TEST_CLIENT} ${TEST_COMMAND}"
 				fi
 			done
 		done
@@ -328,6 +341,7 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 				echo '============================================================'
 				cat tests/shell/daemon_log
 				FAILED=1
+				FAIL_SUMMARY="${FAIL_SUMMARY}${NL}L ${TEST_TYPE} ${TEST_CLIENT} ${TEST_COMMAND}"
 			fi
 		fi
 	done
@@ -339,15 +353,16 @@ if $PYTHON scripts/powerline-daemon -s$ADDRESS > tests/shell/daemon_log_2 2>&1 ;
 else
 	echo "Daemon exited with status $?"
 	FAILED=1
+	FAIL_SUMMARY="${FAIL_SUMMARY}${NL}D"
 fi
 
 if ! test -z "$(cat tests/shell/daemon_log_2)" ; then
-	FAILED=1
 	echo '____________________________________________________________'
 	echo "Daemon log (2nd):"
 	echo '============================================================'
 	cat tests/shell/daemon_log_2
 	FAILED=1
+	FAIL_SUMMARY="${FAIL_SUMMARY}${NL}L"
 fi
 
 if test "x${ONLY_SHELL}" = "x" || test "x${ONLY_SHELL}" = "xipython" ; then
@@ -355,9 +370,14 @@ if test "x${ONLY_SHELL}" = "x" || test "x${ONLY_SHELL}" = "xipython" ; then
 		echo "> $(which ipython)"
 		if ! run_test ipython ipython ipython ; then
 			FAILED=1
+			FAIL_SUMMARY="${FAIL_SUMMARY}${NL}T ipython"
 		fi
 	fi
 fi
 
-test $FAILED -eq 0 && rm -r tests/shell
+if test $FAILED -eq 0 ; then
+	rm -r tests/shell
+else
+	echo "${FAIL_SUMMARY}"
+fi
 exit $FAILED

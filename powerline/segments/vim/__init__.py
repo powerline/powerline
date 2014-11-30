@@ -3,6 +3,8 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 
 import os
 import re
+import csv
+import sys
 
 from collections import defaultdict
 
@@ -22,6 +24,7 @@ from powerline.lib.humanize_bytes import humanize_bytes
 from powerline.lib import wraps_saveargs as wraps
 from powerline.segments.common.vcs import BranchSegment
 from powerline.segments import with_docstring
+from powerline.lib.unicode import string, unicode
 
 try:
 	from __builtin__ import xrange as range
@@ -57,11 +60,6 @@ vim_modes = {
 	'r?': 'CONFIRM',
 	'!': 'SHELL',
 }
-
-
-eventfuncs = defaultdict(lambda: [])
-bufeventfuncs = defaultdict(lambda: [])
-defined_events = set()
 
 
 # TODO Remove cache when needed
@@ -627,3 +625,118 @@ def winnr(pl, segment_info, show_current=True):
 	winnr = segment_info['winnr']
 	if show_current or winnr != vim.current.window.number:
 		return str(winnr)
+
+
+csv_cache = None
+sniffer = csv.Sniffer()
+
+
+def detect_text_csv_dialect(text, display_name, header_text=None):
+	return (
+		sniffer.sniff(string(text)),
+		sniffer.has_header(string(header_text or text)) if display_name == 'auto' else display_name,
+	)
+
+
+CSV_SNIFF_LINES = 100
+CSV_PARSE_LINES = 10
+
+
+if sys.version_info < (2, 7):
+	def read_csv(l, dialect, fin=next):
+		try:
+			return fin(csv.reader(l, dialect))
+		except csv.Error as e:
+			if str(e) == 'newline inside string' and dialect.quotechar:
+				# Maybe we are inside an unfinished quoted string. Python-2.6 
+				# does not handle this fine
+				return fin(csv.reader(l[:-1] + [l[-1] + dialect.quotechar]))
+			else:
+				raise
+else:
+	def read_csv(l, dialect, fin=next):
+		return fin(csv.reader(l, dialect))
+
+
+def process_csv_buffer(pl, buffer, line, col, display_name):
+	global csv_cache
+	if csv_cache is None:
+		csv_cache = register_buffer_cache(defaultdict(lambda: (None, None, None)))
+	try:
+		cur_first_line = buffer[0]
+	except UnicodeDecodeError:
+		cur_first_line = vim.eval('strtrans(getline(1))')
+	dialect, has_header, first_line = csv_cache[buffer.number]
+	if dialect is None or (cur_first_line != first_line and display_name == 'auto'):
+		try:
+			text = '\n'.join(buffer[:CSV_SNIFF_LINES])
+		except UnicodeDecodeError:  # May happen in Python 3
+			text = vim.eval('join(map(getline(1, {0}), "strtrans(v:val)"), "\\n")'.format(CSV_SNIFF_LINES))
+		try:
+			dialect, has_header = detect_text_csv_dialect(text, display_name)
+		except csv.Error as e:
+			pl.warn('Failed to detect csv format: {0}', str(e))
+			# Try detecting using three lines only:
+			if line == 1:
+				rng = (0, line + 2)
+			elif line == len(buffer):
+				rng = (line - 3, line)
+			else:
+				rng = (line - 2, line + 1)
+			try:
+				dialect, has_header = detect_text_csv_dialect(
+					'\n'.join(buffer[rng[0]:rng[1]]),
+					display_name,
+					header_text='\n'.join(buffer[:4]),
+				)
+			except csv.Error as e:
+				pl.error('Failed to detect csv format: {0}', str(e))
+				return None, None
+	if len(buffer) > 2:
+		csv_cache[buffer.number] = dialect, has_header, cur_first_line
+	column_number = len(read_csv(
+		buffer[max(0, line - CSV_PARSE_LINES):line - 1] + [buffer[line - 1][:col]],
+		dialect=dialect,
+		fin=list,
+	)[-1]) or 1
+	if has_header:
+		try:
+			header = read_csv(buffer[0:1], dialect=dialect)
+		except UnicodeDecodeError:
+			header = read_csv([vim.eval('strtrans(getline(1))')], dialect=dialect)
+		column_name = header[column_number - 1]
+	else:
+		column_name = None
+	return unicode(column_number), column_name
+
+
+@requires_segment_info
+def csv_col_current(pl, segment_info, display_name='auto', name_format=' ({column_name:.15})'):
+	'''Display CSV column number and column name
+
+	Requires filetype to be set to ``csv``.
+
+	:param bool or str name:
+		May be ``True``, ``False`` and ``"auto"``. In the first case value from 
+		the first raw will always be displayed. In the second case it will never 
+		be displayed. In thi last case ``csv.Sniffer().has_header()`` will be 
+		used to detect whether current file contains header in the first column.
+	:param str name_format:
+		String used to format column name (in case ``display_name`` is set to 
+		``True`` or ``"auto"``). Accepts ``column_name`` keyword argument.
+
+	Highlight groups used: ``csv:column_number`` or ``csv``, ``csv:column_name`` or ``csv``.
+	'''
+	if vim_getbufoption(segment_info, 'filetype') != 'csv':
+		return None
+	line, col = segment_info['window'].cursor
+	column_number, column_name = process_csv_buffer(pl, segment_info['buffer'], line, col, display_name)
+	if not column_number:
+		return None
+	return [{
+		'contents': column_number,
+		'highlight_group': ['csv:column_number', 'csv'],
+	}] + ([{
+		'contents': name_format.format(column_name=column_name),
+		'highlight_group': ['csv:column_name', 'csv'],
+	}] if column_name else [])

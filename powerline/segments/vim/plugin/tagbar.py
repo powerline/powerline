@@ -6,11 +6,16 @@ try:
 except ImportError:
 	vim = object()
 
-from powerline.segments.vim import window_cached
+from powerline.bindings.vim import vim_command_exists, vim_get_autoload_func
+from powerline.theme import requires_segment_info
 
 
-@window_cached
-def current_tag(pl, flags='s'):
+currenttag = None
+tag_cache = {}
+
+
+@requires_segment_info
+def current_tag(segment_info, pl, flags='s'):
 	'''Return tag that is near the cursor.
 
 	:param str flags:
@@ -25,6 +30,22 @@ def current_tag(pl, flags='s'):
 
 		.. _`official documentation`: https://github.com/majutsushi/tagbar/blob/master/doc/tagbar.txt
 	'''
-	if not int(vim.eval('exists(":Tagbar")')):
-		return None
-	return vim.eval('tagbar#currenttag("%s", "", "{0}")'.format(flags))
+	global currenttag
+	global tag_cache
+	window_id = segment_info['window_id']
+	if segment_info['mode'] == 'nc':
+		return tag_cache.get(window_id, (None,))[-1]
+	if not currenttag:
+		if vim_command_exists('Tagbar'):
+			currenttag = vim_get_autoload_func('tagbar#currenttag')
+			if not currenttag:
+				return None
+		else:
+			return None
+	prev_key, r = tag_cache.get(window_id, (None, None))
+	key = (int(vim.eval('b:changedtick')), segment_info['window'].cursor[0])
+	if prev_key and key == prev_key:
+		return r
+	r = currenttag('%s', '', flags)
+	tag_cache[window_id] = (key, r)
+	return r

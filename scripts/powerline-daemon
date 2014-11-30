@@ -14,9 +14,13 @@ from time import sleep
 from functools import partial
 from io import BytesIO
 
-from powerline.shell import get_argparser, finish_args, ShellPowerline, write_output
+from powerline.shell import ShellPowerline
+from powerline.commands.main import finish_args, write_output
 from powerline.lib.monotonic import monotonic
 from powerline.lib.encoding import get_preferred_output_encoding
+
+from powerline.commands.main import get_argparser as get_main_argparser
+from powerline.commands.daemon import get_argparser as get_daemon_argparser
 
 
 is_daemon = False
@@ -41,7 +45,7 @@ class NonInteractiveArgParser(ArgumentParser):
 		raise Exception(self.format_usage())
 
 
-parser = get_argparser(parser=NonInteractiveArgParser, description='powerline daemon')
+parser = get_main_argparser(NonInteractiveArgParser)
 
 EOF = b'EOF\0\0'
 
@@ -350,14 +354,7 @@ def lockpidfile():
 def main():
 	global address
 	global pidfile
-	p = ArgumentParser(description='Daemon to improve the performance of powerline')
-	p.add_argument('--quiet', '-q', action='store_true', help='Without other options: do not complain about already running powerline-daemon instance. Will still exit with 1. With `--kill\' and `--replace\': do not show any messages. With `--foreground\': ignored. Does not silence exceptions in any case.')
-	p.add_argument('--socket', '-s', help='Specify socket which will be used for connecting to daemon.')
-	a = p.add_mutually_exclusive_group().add_argument
-	a('--kill', '-k', action='store_true', help='Kill an already running instance')
-	a('--foreground', '-f', action='store_true', help='Run in the foreground (dont daemonize)')
-	a('--replace', '-r', action='store_true', help='Replace an already running instance')
-	args = p.parse_args()
+	args = get_daemon_argparser().parse_args()
 
 	if args.socket:
 		address = args.socket

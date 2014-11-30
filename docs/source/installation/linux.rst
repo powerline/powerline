@@ -9,6 +9,10 @@ automatically do most of the configuration for you.
 * `Arch Linux (AUR), Python 2 version <https://aur.archlinux.org/packages/python2-powerline-git/>`_
 * `Arch Linux (AUR), Python 3 version <https://aur.archlinux.org/packages/python-powerline-git/>`_
 * Gentoo Live ebuild in `raiagent <https://github.com/leycec/raiagent>`_ overlay
+* Powerline package is available for Debian starting from Wheezy (via `backports 
+  <https://packages.debian.org/wheezy-backports/powerline>`_). Use `search 
+  <https://packages.debian.org/search?keywords=powerline&searchon=names&suite=all&section=all>`_ 
+  to get more information.
 
 If you’re running a distribution without an official package you’ll have to 
 follow the installation guide below:
@@ -19,9 +23,8 @@ follow the installation guide below:
 
        pip install --user git+git://github.com/Lokaltog/powerline
 
-.. note:: You need to use the GitHub URI when installing Powerline! This 
-   project is currently unavailable on the PyPI due to a naming conflict 
-   with an unrelated project.
+.. note:: Due to the naming conflict with an unrelated project powerline is
+   named ``powerline-status`` in PyPI.
 
 .. note:: If you are powerline developer you should be aware that ``pip install 
    --editable`` does not currently fully work. If you

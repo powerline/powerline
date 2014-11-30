@@ -11,7 +11,7 @@ if sys.version_info < (3,):
 else:
 	from io import StringIO as StrIO
 
-from powerline.shell import get_argparser, finish_args
+from powerline.commands.main import get_argparser, finish_args
 
 from tests import TestCase
 from tests.lib import replace_attr

@@ -5,6 +5,26 @@ from powerline.renderer import Renderer
 from powerline.colorscheme import ATTR_BOLD, ATTR_ITALIC, ATTR_UNDERLINE
 
 
+def attr_to_tmux_attr(attr):
+	if attr is False:
+		return ['nobold', 'noitalics', 'nounderscore']
+	else:
+		ret = []
+		if attr & ATTR_BOLD:
+			ret += ['bold']
+		else:
+			ret += ['nobold']
+		if attr & ATTR_ITALIC:
+			ret += ['italics']
+		else:
+			ret += ['noitalics']
+		if attr & ATTR_UNDERLINE:
+			ret += ['underscore']
+		else:
+			ret += ['nounderscore']
+		return ret
+
+
 class TmuxRenderer(Renderer):
 	'''Powerline tmux segment renderer.'''
 
@@ -28,21 +48,7 @@ class TmuxRenderer(Renderer):
 			else:
 				tmux_attr += ['bg=colour' + str(bg[0])]
 		if attr is not None:
-			if attr is False:
-				tmux_attr += ['nobold', 'noitalics', 'nounderscore']
-			else:
-				if attr & ATTR_BOLD:
-					tmux_attr += ['bold']
-				else:
-					tmux_attr += ['nobold']
-				if attr & ATTR_ITALIC:
-					tmux_attr += ['italics']
-				else:
-					tmux_attr += ['noitalics']
-				if attr & ATTR_UNDERLINE:
-					tmux_attr += ['underscore']
-				else:
-					tmux_attr += ['nounderscore']
+			tmux_attr += attr_to_tmux_attr(attr)
 		return '#[' + ','.join(tmux_attr) + ']'
 
 	def get_segment_info(self, segment_info, mode):

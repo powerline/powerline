@@ -10,6 +10,7 @@ class TcshPromptRenderer(ZshPromptRenderer):
 	character_translations[ord('%')] = '%%'
 	character_translations[ord('\\')] = '\\\\'
 	character_translations[ord('^')] = '\\^'
+	character_translations[ord('!')] = '\\!'
 
 
 renderer = TcshPromptRenderer

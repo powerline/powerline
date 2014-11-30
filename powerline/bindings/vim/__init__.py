@@ -124,11 +124,36 @@ else:
 	vim_get_func = VimFunc
 
 
+def vim_get_autoload_func(f, rettype=None):
+	func = vim_get_func(f)
+	if not func:
+		vim.command('runtime! ' + f.replace('#', '/')[:f.rindex('#')] + '.vim')
+		func = vim_get_func(f)
+	return func
+
+
+if hasattr(vim, 'Function'):
+	def vim_func_exists(f):
+		try:
+			vim.Function(f)
+		except ValueError:
+			return False
+		else:
+			return True
+else:
+	def vim_func_exists(f):
+		try:
+			return bool(int(vim.eval('exists("*{0}")'.format(f))))
+		except vim.error:
+			return False
+
+
 if type(vim) is object:
 	vim_get_func = lambda *args, **kwargs: None
 
 
 _getbufvar = vim_get_func('getbufvar')
+_vim_exists = vim_get_func('exists', rettype='int')
 
 
 # It may crash on some old vim versions and I do not remember in which patch 
@@ -155,13 +180,19 @@ if hasattr(vim, 'vvars') and vim.vvars['version'] > 703:
 
 	def vim_getwinvar(segment_info, varname):
 		return _vim_to_python(segment_info['window'].vars[str(varname)])
+
+	def vim_global_exists(name):
+		try:
+			vim.vars[name]
+		except KeyError:
+			return False
+		else:
+			return True
 else:
 	_vim_to_python_types = {
 		dict: (lambda value: dict(((k, _vim_to_python(v)) for k, v in value.items()))),
 		list: (lambda value: [_vim_to_python(i) for i in value]),
 	}
-
-	_vim_exists = vim_get_func('exists', rettype='int')
 
 	def vim_getvar(varname):
 		varname = 'g:' + varname
@@ -184,6 +215,13 @@ else:
 			if not int(vim.eval('has_key(getwinvar({0}, ""), "{1}")'.format(segment_info['winnr'], varname))):
 				raise KeyError(varname)
 		return result
+
+	def vim_global_exists(name):
+		return int(vim.eval('exists("g:' + name + '")'))
+
+
+def vim_command_exists(name):
+	return _vim_exists(':' + name)
 
 
 if sys.version_info < (3,):
@@ -398,3 +436,16 @@ def on_bwipe():
 
 
 environ = VimEnviron()
+
+
+def create_ruby_dpowerline():
+	vim.command((
+		'''
+		ruby
+		if $powerline == nil
+			class Powerline
+			end
+			$powerline = Powerline.new
+		end
+		'''
+	))

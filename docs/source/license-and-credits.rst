@@ -5,6 +5,14 @@ License and credits
 Powerline is licensed under the `MIT license
 <https://raw.github.com/Lokaltog/powerline/develop/LICENSE>`_.
 
+..
+    This document is parsed by powerline_automan.py module. Do not forget to 
+    check that file before altering this one. Specifically it expects 
+    ``Authors`` and ``Contributors`` sections underlined by ``---``, a list of 
+    authors in format ``* `{name} <`` in the “Authors” section and fonts 
+    contributor name in format ``The glyphs in the font patcher are created by 
+    {name},`` in the “Contributors” section.
+
 Authors
 -------
 

@@ -139,11 +139,16 @@ class WeatherSegment(KwThreadedSegment):
 		raw_response = urllib_read(url)
 		if not raw_response:
 			self.error('Failed to get response')
-			return
+			return None
+
 		response = json.loads(raw_response)
-		condition = response['query']['results']['weather']['rss']['channel']['item']['condition']
-		condition_code = int(condition['code'])
-		temp = float(condition['temp'])
+		try:
+			condition = response['query']['results']['weather']['rss']['channel']['item']['condition']
+			condition_code = int(condition['code'])
+			temp = float(condition['temp'])
+		except (KeyError, ValueError):
+			self.exception('Yahoo returned malformed or unexpected response: {0}', repr(raw_response))
+			return None
 
 		try:
 			icon_names = weather_conditions_codes[condition_code]
