@@ -43,7 +43,7 @@ powerline with ``pip``:
 
 .. code-block:: sh
 
-    pip install -e --user {path_to_powerline}
+    pip install --user --editable={path_to_powerline}
 
 , but note that in this case ``pip`` will not install ``powerline`` executable 
 and you will have to do something like
