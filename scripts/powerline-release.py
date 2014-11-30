@@ -50,7 +50,7 @@ def parse_version(s):
 
 def merge(version_string, rev, **kwargs):
 	check_call(['git', 'checkout', 'master'])
-	check_call(['git', 'merge', '--no-ff', '--no-commit', '--log', rev])
+	check_call(['git', '-c', 'merge.tool=vimdiff', 'merge', '--no-ff', '--no-commit', '--log', rev])
 
 	with codecs.open('.setup.py.new', 'w', encoding='utf-8') as NS:
 		with codecs.open('setup.py', 'r', encoding='utf-8') as OS:
