@@ -57,7 +57,7 @@ main_spec = (Spec(
 	common=Spec(
 		default_top_theme=top_theme_spec().optional(),
 		term_truecolor=Spec().type(bool).optional(),
-		term_escape_style=Spec().type(unicode).oneof(set(('auto', 'xterm', 'fbterm'))),
+		term_escape_style=Spec().type(unicode).oneof(set(('auto', 'xterm', 'fbterm'))).optional(),
 		# Python is capable of loading from zip archives. Thus checking path 
 		# only for existence of the path, not for it being a directory
 		paths=Spec().list(
