@@ -237,10 +237,14 @@ else:
 			return
 		if not info:
 			return
-		album = out_u(info.get('xesam:album'))
-		title = out_u(info.get('xesam:title'))
+		album = info.get('xesam:album')
+		title = info.get('xesam:title')
 		artist = info.get('xesam:artist')
 		state = _convert_state(status)
+		if album:
+			album = out_u(album)
+		if title:
+			title = out_u(title)
 		if artist:
 			artist = out_u(artist[0])
 		return {
