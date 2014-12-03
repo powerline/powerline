@@ -3,7 +3,7 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 
 from powerline.lint.markedjson.error import MarkedError
 from powerline.lint.markedjson import tokens
-from powerline.lib.unicode import unicode
+from powerline.lib.unicode import unicode, unichr
 
 
 # Scanner produces tokens of the following types:
@@ -423,7 +423,7 @@ class Scanner:
 								self.get_mark()
 							)
 					code = int(self.prefix(length), 16)
-					chunks.append(chr(code))
+					chunks.append(unichr(code))
 					self.forward(length)
 				else:
 					raise ScannerError(
