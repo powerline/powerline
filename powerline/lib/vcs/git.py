@@ -10,6 +10,7 @@ from powerline.lib.path import join
 from powerline.lib.encoding import (get_preferred_file_name_encoding,
                                     get_preferred_file_contents_encoding)
 from powerline.lib.shell import which
+from powerline.lib.vcs import BaseRepository
 
 
 _ref_pat = re.compile(br'ref:\s*refs/heads/(.+)')
@@ -24,6 +25,7 @@ def branch_name_from_config_file(directory, config_file):
 	m = _ref_pat.match(raw)
 	if m is not None:
 		return m.group(1).decode(get_preferred_file_contents_encoding(), 'replace')
+	# FIXME Use proper abbreviation length
 	return raw[:7]
 
 
@@ -46,13 +48,7 @@ def git_directory(directory):
 		return path
 
 
-class GitRepository(object):
-	__slots__ = ('directory', 'create_watcher')
-
-	def __init__(self, directory, create_watcher):
-		self.directory = os.path.abspath(directory)
-		self.create_watcher = create_watcher
-
+class GitRepository(BaseRepository):
 	def status(self, path=None):
 		'''Return status of repository or file.
 
@@ -83,6 +79,7 @@ class GitRepository(object):
 			)
 		return self.do_status(self.directory, path)
 
+	@property
 	def branch(self):
 		directory = git_directory(self.directory)
 		head = join(directory, 'HEAD')
@@ -93,7 +90,9 @@ class GitRepository(object):
 			create_watcher=self.create_watcher,
 		)
 
-
+	@property
+	def bookmark(self):
+		return self.branch
 try:
 	import pygit2 as git
 
@@ -102,10 +101,13 @@ try:
 		def ignore_event(path, name):
 			return False
 
+		def _repo(self, directory=None):
+			return git.Repository(directory or self.directory)
+
 		def do_status(self, directory, path):
 			if path:
 				try:
-					status = git.Repository(directory).status_file(path)
+					status = self._repo(directory).status_file(path)
 				except (KeyError, ValueError):
 					return None
 
@@ -154,6 +156,27 @@ try:
 						index_column = 'I'
 				r = wt_column + index_column + untracked_column
 				return r if r != '   ' else None
+
+		@property
+		def short(self):
+			# FIXME Use proper abbreviation length
+			return self._repo().head.target.hex[:7]
+
+		@property
+		def summary(self):
+			repo = self._repo()
+			commit = repo[repo.head.target]
+			description = commit.message
+			try:
+				# Command `git log --format=%s` treats commit like 
+				# `l1\nl2\n\nl4` as having description `l1 l2`.
+				return description[:description.index('\n\n')].replace('\n', ' ').strip()
+			except ValueError:
+				return description.replace('\n', ' ').strip()
+
+		@property
+		def name(self):
+			return self.branch
 except ImportError:
 	class Repository(GitRepository):
 		def __init__(self, *args, **kwargs):
@@ -168,20 +191,26 @@ except ImportError:
 			# status
 			return path.endswith('.git') and name == 'index.lock'
 
-		def _gitcmd(self, directory, *args):
-			return readlines(('git',) + args, directory)
+		def gitcmd(self, *args, **kwargs):
+			return readlines(('git',) + args, kwargs.get('directory', self.directory))
+
+		def getgitline(self, *args, **kwargs):
+			try:
+				return next(self.gitcmd(*args, **kwargs)).rstrip('\n')
+			except StopIteration:
+				return None
 
 		def do_status(self, directory, path):
 			if path:
 				try:
-					return next(self._gitcmd(directory, 'status', '--porcelain', '--ignored', '--', path))[:2]
+					return next(self.gitcmd('status', '--porcelain', '--ignored', '--', path, directory=directory))[:2]
 				except StopIteration:
 					return None
 			else:
 				wt_column = ' '
 				index_column = ' '
 				untracked_column = ' '
-				for line in self._gitcmd(directory, 'status', '--porcelain'):
+				for line in self.gitcmd('status', '--porcelain', directory=directory):
 					if line[0] == '?':
 						untracked_column = 'U'
 						continue
@@ -196,3 +225,16 @@ except ImportError:
 
 				r = wt_column + index_column + untracked_column
 				return r if r != '   ' else None
+
+		@property
+		def short(self):
+			return self._repo().getgitline('rev-parse', '--short', 'HEAD')
+
+		@property
+		def summary(self):
+			return self._repo().getgitline('log', '--max-count=1', '--format=%s')
+
+		@property
+		def name(self):
+			return self._repo().getgitline(
+				'name-rev', '--name-only', '--no-undefined', '--always', 'HEAD').strip()
