@@ -313,6 +313,8 @@ class Renderer(object):
 
 		current_width = 0
 
+		self._prepare_segments(segments, output_width or width)
+
 		if not width:
 			# No width specified, so we don’t need to crop or pad anything
 			if output_width:
@@ -376,6 +378,15 @@ class Renderer(object):
 
 		return construct_returned_value(rendered_highlighted, segments, current_width, output_raw, output_width)
 
+	def _prepare_segments(self, segments, calculate_contents_len):
+		'''Translate non-printable characters and calculate segment width
+		'''
+		for segment in segments:
+			segment['contents'] = translate_np(segment['contents'])
+		if calculate_contents_len:
+			for segment in segments:
+				segment['_contents_len'] = self.strwidth(segment['contents'])
+
 	def _render_length(self, theme, segments, divider_widths):
 		'''Update segments lengths and return them
 		'''
@@ -384,10 +395,7 @@ class Renderer(object):
 		divider_spaces = theme.get_spaces()
 		for index, segment in enumerate(segments):
 			side = segment['side']
-			if segment['_contents_len'] is None:
-				segment_len = segment['_contents_len'] = self.strwidth(segment['contents'])
-			else:
-				segment_len = segment['_contents_len']
+			segment_len = segment['_contents_len']
 
 			prev_segment = segments[index - 1] if index > 0 else theme.EMPTY_SEGMENT
 			next_segment = segments[index + 1] if index < segments_len - 1 else theme.EMPTY_SEGMENT
@@ -437,8 +445,6 @@ class Renderer(object):
 			contents_raw = segment['contents']
 			contents_highlighted = ''
 			draw_divider = segment['draw_' + divider_type + '_divider']
-
-			contents_raw = translate_np(contents_raw)
 
 			# XXX Make sure self.hl() calls are called in the same order 
 			# segments are displayed. This is needed for Vim renderer to work.
