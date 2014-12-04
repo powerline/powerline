@@ -128,3 +128,9 @@ def string(s):
 		return s.encode('utf-8')
 	else:
 		return s
+
+
+def surrogate_pair_to_character(high, low):
+	'''Transform a pair of surrogate codepoints to one codepoint
+	'''
+	return 0x10000 + ((high - 0xD800) << 10) + (low - 0xDC00)

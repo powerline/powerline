@@ -1,9 +1,14 @@
 # vim:fileencoding=utf-8:noet
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
+from string import hexdigits
+
 from powerline.lint.markedjson.error import MarkedError
 from powerline.lint.markedjson import tokens
-from powerline.lib.unicode import unicode
+from powerline.lib.unicode import unicode, unichr, surrogate_pair_to_character
+
+
+hexdigits_set = set(hexdigits)
 
 
 # Scanner produces tokens of the following types:
@@ -415,7 +420,7 @@ class Scanner:
 					length = self.ESCAPE_CODES[ch]
 					self.forward()
 					for k in range(length):
-						if self.peek(k) not in '0123456789ABCDEFabcdef':
+						if self.peek(k) not in hexdigits:
 							raise ScannerError(
 								'while scanning a double-quoted scalar', start_mark,
 								'expected escape sequence of %d hexdecimal numbers, but found %r' % (
@@ -423,8 +428,26 @@ class Scanner:
 								self.get_mark()
 							)
 					code = int(self.prefix(length), 16)
-					chunks.append(chr(code))
 					self.forward(length)
+					if 0xD800 <= code <= 0xDC00:
+						# Start of the surrogate pair
+						next_char = self.prefix(6)
+						if (
+							next_char[0] != '\\'
+							or next_char[1] != 'u'
+							or not (set(next_char[2:]) < hexdigits_set)
+							or not (0xDC00 <= int(next_char[2:], 16) <= 0xDFFF)
+						):
+							raise ScannerError(
+								'while scanning a double-quoted scalar', start_mark,
+								'expected escape sequence with the next character in surrogate pair, but found %r' % (
+									next_char
+								),
+								self.get_mark()
+							)
+						code = surrogate_pair_to_character(code, int(next_char[2:], 16))
+						self.forward(6)
+					chunks.append(unichr(code))
 				else:
 					raise ScannerError(
 						'while scanning a double-quoted scalar', start_mark,
