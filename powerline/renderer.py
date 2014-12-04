@@ -5,11 +5,10 @@ import sys
 import os
 import re
 
-from unicodedata import east_asian_width, combining
 from itertools import chain
 
 from powerline.theme import Theme
-from powerline.lib.unicode import unichr, surrogate_pair_to_character
+from powerline.lib.unicode import unichr, strwidth_ucs_2, strwidth_ucs_4
 
 
 NBSP = ' '
@@ -177,46 +176,21 @@ class Renderer(object):
 			'F': 2,          # Fullwidth
 		}
 
-	def strwidth(self, string):
-		'''Function that returns string width.
+	strwidth = lambda self, s: (
+		(strwidth_ucs_2 if sys.maxunicode < 0x10FFFF else strwidth_ucs_4)(
+			self.width_data, s)
+	)
+	'''Function that returns string width.
 
-		Is used to calculate the place given string occupies when handling 
-		``width`` argument to ``.render()`` method. Must take east asian width 
-		into account.
+	Is used to calculate the place given string occupies when handling 
+	``width`` argument to ``.render()`` method. Must take east asian width 
+	into account.
 
-		:param unicode string:
-			String whose width will be calculated.
+	:param unicode string:
+		String whose width will be calculated.
 
-		:return: unsigned integer.
-		'''
-		return sum(((
-			(
-				0
-			) if combining(symbol) else (
-				self.width_data[east_asian_width(symbol)]
-			)
-		) for symbol in string))
-
-	if sys.maxunicode < 0x10FFFF:
-		old_strwidth = strwidth
-
-		def strwidth(self, string):
-			return sum(((
-				(
-					self.width_data[
-						east_asian_width(
-							unichr(surrogate_pair_to_character(ord(string[i - 1]), ord(symbol)))
-						)
-					]
-				) if 0xDC00 <= ord(symbol) <= 0xDFFF else (
-					0
-				) if combining(symbol) or 0xD800 <= ord(symbol) <= 0xDBFF else (
-					self.width_data[east_asian_width(symbol)]
-				)
-			) for i, symbol in enumerate(string)))
-
-		strwidth.__doc__ = old_strwidth.__doc__
-		del old_strwidth
+	:return: unsigned integer.
+	'''
 
 	def get_theme(self, matcher_info):
 		'''Get Theme object.
