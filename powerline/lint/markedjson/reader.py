@@ -125,7 +125,12 @@ class Reader(object):
 				self.raw_buffer = None
 				break
 
-	def update_raw(self, size=4096):
+	def update_raw(self, size=-1):
+		# Was size=4096
+		assert(size < 0)
+		# WARNING: reading the whole stream at once. To change this behaviour to 
+		# former reading N characters at once one must make sure that reading 
+		# never ends at partial unicode character.
 		data = self.stream.read(size)
 		if self.raw_buffer is None:
 			self.raw_buffer = data
