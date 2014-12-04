@@ -145,6 +145,8 @@ def init_environment(pl, args):
 	left_dividers = powerline.renderer.theme.dividers['left']
 	set_tmux_environment('_POWERLINE_LEFT_HARD_DIVIDER', left_dividers['hard'])
 	set_tmux_environment('_POWERLINE_LEFT_SOFT_DIVIDER', left_dividers['soft'])
+	set_tmux_environment('_POWERLINE_LEFT_HARD_DIVIDER_SPACES', (
+		' ' * powerline.renderer.strwidth(left_dividers['hard'])))
 
 
 def get_main_config(args):
