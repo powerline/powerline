@@ -7,7 +7,25 @@ import re
 from powerline.lib.unicode import unichr
 
 
-NON_PRINTABLE = re.compile('[^\t\n\x20-\x7E' + unichr(0x85) + (unichr(0xA0) + '-' + unichr(0xD7FF)) + (unichr(0xE000) + '-' + unichr(0xFFFD)) + ']')
+NON_PRINTABLE = re.compile(
+	'[^'
+	# ASCII control characters: 0x00-0x19
+	+ '\t\n'           # Tab, newline: allowed ASCII control characters
+	+ '\x20-\x7E'      # ASCII printable characters
+	# Unicode control characters: 0x7F-0x9F
+	+ '\u0085'         # Allowed unicode control character: next line character
+	+ '\u00A0-\uD7FF'
+	# Surrogate escapes: 0xD800-0xDFFF
+	+ '\uE000-\uFFFD'
+	+ ']'
+	+ ((
+		# Paired surrogate escapes: allowed in UCS-2 builds as the only way to 
+		# represent characters above 0xFFFF. Only paired variant is allowed.
+		'|[\uD800-\uDBFF][\uDC00-\uDFFF]'
+	) if sys.maxunicode < 0x10FFFF else (
+		''
+	))
+)
 
 
 def repl(s):
