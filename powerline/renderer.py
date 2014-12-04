@@ -9,7 +9,7 @@ from unicodedata import east_asian_width, combining
 from itertools import chain
 
 from powerline.theme import Theme
-from powerline.lib.unicode import unichr
+from powerline.lib.unicode import unichr, surrogate_pair_to_character
 
 
 NBSP = ' '
@@ -189,7 +189,34 @@ class Renderer(object):
 
 		:return: unsigned integer.
 		'''
-		return sum((0 if combining(symbol) else self.width_data[east_asian_width(symbol)] for symbol in string))
+		return sum(((
+			(
+				0
+			) if combining(symbol) else (
+				self.width_data[east_asian_width(symbol)]
+			)
+		) for symbol in string))
+
+	if sys.maxunicode < 0x10FFFF:
+		old_strwidth = strwidth
+
+		def strwidth(self, string):
+			return sum(((
+				(
+					self.width_data[
+						east_asian_width(
+							unichr(surrogate_pair_to_character(ord(string[i - 1]), ord(symbol)))
+						)
+					]
+				) if 0xDC00 <= ord(symbol) <= 0xDFFF else (
+					0
+				) if combining(symbol) or 0xD800 <= ord(symbol) <= 0xDBFF else (
+					self.width_data[east_asian_width(symbol)]
+				)
+			) for i, symbol in enumerate(string)))
+
+		strwidth.__doc__ = old_strwidth.__doc__
+		del old_strwidth
 
 	def get_theme(self, matcher_info):
 		'''Get Theme object.
