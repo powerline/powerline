@@ -25,7 +25,7 @@ from powerline.commands.daemon import get_argparser as get_daemon_argparser
 
 is_daemon = False
 platform = sys.platform.lower()
-use_filesystem = 'darwin' in platform
+use_filesystem = any(pname in platform for pname in ['darwin','freebsd'])
 
 address = None
 pidfile = None
