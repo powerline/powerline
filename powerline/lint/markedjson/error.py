@@ -7,7 +7,7 @@ import re
 from powerline.lib.unicode import unichr
 
 
-NON_PRINTABLE = re.compile(
+NON_PRINTABLE_STR = (
 	'[^'
 	# ASCII control characters: 0x00-0x19
 	+ '\t\n'           # Tab, newline: allowed ASCII control characters
@@ -26,6 +26,7 @@ NON_PRINTABLE = re.compile(
 		''
 	))
 )
+NON_PRINTABLE_RE = re.compile(NON_PRINTABLE_STR)
 
 
 def repl(s):
@@ -33,7 +34,7 @@ def repl(s):
 
 
 def strtrans(s):
-	return NON_PRINTABLE.sub(repl, s.replace('\t', '>---'))
+	return NON_PRINTABLE_RE.sub(repl, s.replace('\t', '>---'))
 
 
 class Mark:
@@ -72,6 +73,13 @@ class Mark:
 			' ' * indent + head + ''.join(snippet) + tail + '\n'
 			+ ' ' * (indent + len(head) + len(snippet[0])) + '^'
 		)
+
+	def advance_string(self, diff):
+		ret = self.copy()
+		# FIXME Currently does not work properly with escaped strings.
+		ret.column += diff
+		ret.pointer += diff
+		return ret
 
 	def __str__(self):
 		snippet = self.get_snippet()
