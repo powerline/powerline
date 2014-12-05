@@ -3,7 +3,7 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 
 import codecs
 
-from powerline.lint.markedjson.error import MarkedError, Mark, NON_PRINTABLE
+from powerline.lint.markedjson.error import MarkedError, Mark, NON_PRINTABLE_RE
 from powerline.lib.unicode import unicode
 
 
@@ -84,7 +84,7 @@ class Reader(object):
 		return Mark(self.name, self.line, self.column, self.full_buffer, self.full_pointer)
 
 	def check_printable(self, data):
-		match = NON_PRINTABLE.search(data)
+		match = NON_PRINTABLE_RE.search(data)
 		if match:
 			self.update_pointer(match.start())
 			raise ReaderError(
@@ -125,7 +125,12 @@ class Reader(object):
 				self.raw_buffer = None
 				break
 
-	def update_raw(self, size=4096):
+	def update_raw(self, size=-1):
+		# Was size=4096
+		assert(size < 0)
+		# WARNING: reading the whole stream at once. To change this behaviour to 
+		# former reading N characters at once one must make sure that reading 
+		# never ends at partial unicode character.
 		data = self.stream.read(size)
 		if self.raw_buffer is None:
 			self.raw_buffer = data

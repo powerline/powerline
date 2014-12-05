@@ -28,6 +28,7 @@ except IOError:
 hostname = socket.gethostname()
 user = os.environ['USER']
 
+REFS_RE = re.compile(r'^\[\d+ refs\]\n')
 IPYPY_DEANSI_RE = re.compile(r'\033(?:\[(?:\?\d+[lh]|[^a-zA-Z]+[a-ln-zA-Z])|[=>])')
 
 with codecs.open(fname, 'r', encoding='utf-8') as R:
@@ -42,6 +43,8 @@ with codecs.open(fname, 'r', encoding='utf-8') as R:
 			line = line.translate({
 				ord('\r'): None
 			})
+			if REFS_RE.match(line):
+				continue
 			line = line.replace(hostname, 'HOSTNAME')
 			line = line.replace(user, 'USER')
 			if pid is not None:

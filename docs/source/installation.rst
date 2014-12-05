@@ -7,6 +7,15 @@ Generic requirements
 
 * Python 2.6 or later, 3.2 or later, PyPy 2.0 or later. It is the only 
   non-optional requirement.
+
+  .. warning:
+     It is highly advised to use UCS-4 version of Python because UCS-2 version 
+     uses significantly slower text processing (length determination and 
+     non-printable character replacement) functions due to the need of 
+     supporting unicode characters above U+FFFF which are represented as 
+     surrogate pairs. This price will be paid even if configuration has no such 
+     characters.
+
 * C compiler. Required to build powerline client on linux. If it is not present 
   then powerline will fall back to shell script or python client.
 * ``socat`` program. Required for shell variant of client which runs a bit 
