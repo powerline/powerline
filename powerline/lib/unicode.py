@@ -212,11 +212,7 @@ strwidth_ucs_4.__doc__ = _strwidth_documentation.format(
 def strwidth_ucs_2(width_data, string):
 	return sum(((
 		(
-			width_data[
-				east_asian_width(
-					unichr(surrogate_pair_to_character(ord(string[i - 1]), ord(symbol)))
-				)
-			]
+			width_data[east_asian_width(string[i - 1] + symbol)]
 		) if 0xDC00 <= ord(symbol) <= 0xDFFF else (
 			0
 		) if combining(symbol) or 0xD800 <= ord(symbol) <= 0xDBFF else (
