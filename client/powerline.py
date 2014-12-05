@@ -27,7 +27,7 @@ if len(sys.argv) < 2:
 	raise SystemExit(1)
 
 platform = sys.platform.lower()
-use_filesystem = 'darwin' in platform
+use_filesystem = platform.startswith(('darwin', 'freebsd'))
 del platform
 
 if sys.argv[1] == '--socket':
