@@ -1,6 +1,22 @@
 #!/bin/sh
 
-test "${OSTYPE#darwin}" = "${OSTYPE}" && darwin=n || darwin=y
+use_filesystem=1
+darwin=
+if test -n "$OSTYPE" ; then
+	# OSTYPE variable is a shell feature. supported by bash and zsh, but not 
+	# dash, busybox or (m)ksh.
+	if test "${OSTYPE#linux}" '!=' "${OSTYPE}" ; then
+		use_filesystem=
+	elif test "${OSTYPE#darwin}" ; then
+		darwin=1
+	fi
+elif which uname >/dev/null ; then
+	if uname -o | grep -iqF linux ; then
+		use_filesystem=
+	elif uname -o | grep -iqF darwin ; then
+		darwin=1
+	fi
+fi
 
 if test "$1" = "--socket" ; then
 	shift
@@ -8,13 +24,16 @@ if test "$1" = "--socket" ; then
 	shift
 else
 	ADDRESS="powerline-ipc-${UID:-`id -u`}"
-	test "$darwin" = y && ADDRESS="/tmp/$ADDRESS"
+	test -n "$use_filesystem" && ADDRESS="/tmp/$ADDRESS"
 fi
 
-if test "$darwin" = y; then
+if test -n "$darwin" ; then
 	ENV=genv
 else
 	ENV=env
+fi
+
+if test -z "$use_filesystem" ; then
 	ADDRESS="abstract-client:$ADDRESS"
 fi
 

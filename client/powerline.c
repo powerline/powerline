@@ -42,12 +42,12 @@ void do_write(int sd, const char *raw, size_t len) {
 	}
 }
 
-#ifdef __APPLE__
-# define ADDRESS_TEMPLATE "/tmp/powerline-ipc-%d"
-# define A
-#else
+#ifdef __linux__
 # define ADDRESS_TEMPLATE "powerline-ipc-%d"
 # define A +1
+#else
+# define ADDRESS_TEMPLATE "/tmp/powerline-ipc-%d"
+# define A
 #endif
 
 #define ADDRESS_SIZE sizeof(ADDRESS_TEMPLATE) + (sizeof(uid_t) * 4)

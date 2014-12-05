@@ -26,9 +26,7 @@ if len(sys.argv) < 2:
 	print('Must provide at least one argument.', file=sys.stderr)
 	raise SystemExit(1)
 
-platform = sys.platform.lower()
-use_filesystem = 'darwin' in platform
-del platform
+use_filesystem = not sys.platform.lower().startswith('linux')
 
 if sys.argv[1] == '--socket':
 	address = sys.argv[2]
