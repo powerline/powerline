@@ -91,8 +91,11 @@ run_test() {
 	SH="$1"
 	SESNAME="powerline-shell-test-${SH}-$$"
 
+	# Note: when running screen with setuid libc unsets LD_LIBRARY_PATH, so it 
+	# cannot be added to the `env -i` call above.
 	run "${TEST_TYPE}" "${TEST_CLIENT}" "${SH}" \
 		screen -L -c tests/test_shells/screenrc -d -m -S "$SESNAME" \
+			env LD_LIBRARY_PATH="${LD_LIBRARY_PATH}" \
 			"$@"
 	while ! screen -S "$SESNAME" -X readreg a tests/test_shells/input.$SH ; do
 		sleep 0.1s
