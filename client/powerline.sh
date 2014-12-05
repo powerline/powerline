@@ -1,6 +1,7 @@
 #!/bin/sh
 
-test "${OSTYPE#darwin}" = "${OSTYPE}" && darwin=n || darwin=y
+fssock=y
+test "${OSTYPE#darwin}" = "${OSTYPE}" && test "${OSTYPE#freebsd}" = "${OSTYPE}" && fssock=n
 
 if test "$1" = "--socket" ; then
 	shift
@@ -8,10 +9,10 @@ if test "$1" = "--socket" ; then
 	shift
 else
 	ADDRESS="powerline-ipc-${UID:-`id -u`}"
-	test "$darwin" = y && ADDRESS="/tmp/$ADDRESS"
+	test "$fssock" = y && ADDRESS="/tmp/$ADDRESS"
 fi
 
-if test "$darwin" = y; then
+if test "$fssock" = y; then
 	ENV=genv
 else
 	ENV=env

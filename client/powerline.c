@@ -42,7 +42,7 @@ void do_write(int sd, const char *raw, size_t len) {
 	}
 }
 
-#ifdef __APPLE__
+#if defined(__APPLE__) || defined(__FreeBSD__)
 # define ADDRESS_TEMPLATE "/tmp/powerline-ipc-%d"
 # define A
 #else
