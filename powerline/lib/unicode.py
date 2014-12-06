@@ -116,8 +116,7 @@ def safe_unicode(s):
 
 
 class FailedUnicode(unicode):
-	'''Builtin ``unicode`` (``str`` in python 3) subclass indicating fatal 
-	error.
+	'''Builtin ``unicode`` subclass indicating fatal error
 
 	If your code for some reason wants to determine whether `.render()` method 
 	failed it should check returned string for being a FailedUnicode instance. 
