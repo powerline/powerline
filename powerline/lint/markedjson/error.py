@@ -4,8 +4,6 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 import sys
 import re
 
-from powerline.lib.unicode import unichr
-
 
 NON_PRINTABLE_STR = (
 	'[^'
@@ -17,11 +15,17 @@ NON_PRINTABLE_STR = (
 	+ '\u00A0-\uD7FF'
 	# Surrogate escapes: 0xD800-0xDFFF
 	+ '\uE000-\uFFFD'
+	+ ((
+		'\uD800-\uDFFF'
+	) if sys.maxunicode < 0x10FFFF else (
+		'\U00010000-\U0010FFFF'
+	))
 	+ ']'
 	+ ((
 		# Paired surrogate escapes: allowed in UCS-2 builds as the only way to 
 		# represent characters above 0xFFFF. Only paired variant is allowed.
-		'|[\uD800-\uDBFF][\uDC00-\uDFFF]'
+		'|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]'
+		+ '|[\uD800-\uDBFF](?![\uDC00-\uDFFF])'
 	) if sys.maxunicode < 0x10FFFF else (
 		''
 	))
