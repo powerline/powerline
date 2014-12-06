@@ -419,8 +419,7 @@ class TestUnicode(TestCase):
 		self.assertTrue(type('abc') is plu.unicode)
 
 	def test_unichr(self):
-		if not sys.maxunicode < 0x10FFFF:
-			self.assertStringsIdentical('\U0010FFFF', plu.unichr(0x10FFFF))
+		self.assertStringsIdentical('\U0010FFFF', plu.unichr(0x10FFFF))
 		self.assertStringsIdentical('\uFFFF', plu.unichr(0xFFFF))
 		self.assertStringsIdentical('\x20', plu.unichr(0x20))
 
