@@ -41,7 +41,7 @@ def generate_json_config_loader(lhadproblem):
 function_name_re = '^(\w+\.)*[a-zA-Z_]\w*$'
 
 
-divider_spec = Spec().type(unicode).len(
+divider_spec = Spec().printable().len(
 	'le', 3, (lambda value: 'Divider {0!r} is too large!'.format(value))).copy
 ext_theme_spec = Spec().type(unicode).func(lambda *args: check_config('themes', *args)).copy
 top_theme_spec = Spec().type(unicode).func(check_top_theme).copy
@@ -211,12 +211,12 @@ segment_spec = Spec(
 	display=Spec().type(bool).optional(),
 	module=segment_module_spec(),
 	priority=Spec().type(int, float, type(None)).optional(),
-	after=Spec().type(unicode).optional(),
-	before=Spec().type(unicode).optional(),
+	after=Spec().printable().optional(),
+	before=Spec().printable().optional(),
 	width=Spec().either(Spec().unsigned(), Spec().cmp('eq', 'auto')).optional(),
 	align=Spec().oneof(set('lr')).optional(),
 	args=args_spec().func(lambda *args, **kwargs: check_args(get_one_segment_function, *args, **kwargs)),
-	contents=Spec().type(unicode).optional(),
+	contents=Spec().printable().optional(),
 	highlight_group=Spec().list(
 		highlight_group_spec().re(
 			'^(?:(?!:divider$).)+$',
@@ -243,11 +243,11 @@ divside_spec = Spec(
 	soft=divider_spec(),
 ).copy
 segment_data_value_spec = Spec(
-	after=Spec().type(unicode).optional(),
-	before=Spec().type(unicode).optional(),
+	after=Spec().printable().optional(),
+	before=Spec().printable().optional(),
 	display=Spec().type(bool).optional(),
 	args=args_spec().func(lambda *args, **kwargs: check_args(get_all_possible_functions, *args, **kwargs)),
-	contents=Spec().type(unicode).optional(),
+	contents=Spec().printable().optional(),
 ).copy
 dividers_spec = Spec(
 	left=divside_spec(),

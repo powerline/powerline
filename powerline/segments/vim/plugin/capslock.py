@@ -14,7 +14,7 @@ from powerline.theme import requires_segment_info
 def capslock_indicator(pl, segment_info, text='CAPS'):
 	'''Shows the indicator if tpope/vim-capslock plugin is enabled
 
-	.. _note::
+	.. note::
 		In the current state plugin automatically disables itself when leaving 
 		insert mode. So trying to use this segment not in insert or replace 
 		modes is useless.

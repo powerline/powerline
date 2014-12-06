@@ -7,7 +7,7 @@ import codecs
 import os
 import re
 
-from subprocess import check_output, check_call
+from subprocess import check_output, check_call, CalledProcessError
 from getpass import getpass
 
 from github import Github
@@ -50,7 +50,10 @@ def parse_version(s):
 
 def merge(version_string, rev, **kwargs):
 	check_call(['git', 'checkout', 'master'])
-	check_call(['git', 'merge', '--no-ff', '--no-commit', '--log', rev])
+	try:
+		check_call(['git', 'merge', '--no-ff', '--no-commit', '--log', rev])
+	except CalledProcessError:
+		check_call(['git', 'mergetool', '--tool', 'vimdiff2'])
 
 	with codecs.open('.setup.py.new', 'w', encoding='utf-8') as NS:
 		with codecs.open('setup.py', 'r', encoding='utf-8') as OS:
@@ -148,7 +151,7 @@ def create_ebuilds(version_string, overlay, user, **kwargs):
 	check_call(['git', 'add', '--'] + new_files, cwd=overlay)
 	check_call(['git', 'commit'] + new_files + ['-m', 'powerline*: Release {0}'.format(version_string)],
 	           cwd=overlay)
-	check_call(['git', 'push', 'git@github.com:{0}/{1}'.format(user, OVERLAY_NAME), branch], cwd=overlay)
+	check_call(['git', 'push', '-f', 'git@github.com:{0}/{1}'.format(user, OVERLAY_NAME), branch], cwd=overlay)
 
 
 def update_overlay(version_string, user, password, **kwargs):

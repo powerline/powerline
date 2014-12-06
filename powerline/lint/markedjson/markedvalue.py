@@ -33,12 +33,7 @@ class MarkedUnicode(unicode):
 		pointdiff = 1
 		r = []
 		for s in part_result:
-			mark = self.mark.copy()
-			# XXX Does not work properly with escaped strings, but this requires 
-			# saving much more information in mark.
-			mark.column += pointdiff
-			mark.pointer += pointdiff
-			r.append(MarkedUnicode(s, mark))
+			r.append(MarkedUnicode(s, self.mark.advance_string(pointdiff)))
 			pointdiff += len(s)
 		return tuple(r)
 

@@ -55,7 +55,7 @@ def finder(pl):
 	vim.command('ruby $powerline.commandt_set_active_finder')
 	return [{
 		'highlight_group': ['commandt:finder'],
-		'contents': vim.eval('g:powerline_commandt_reply').replace('CommandT::', '')
+		'contents': vim.eval('g:powerline_commandt_reply').replace('CommandT::', '').replace('Finder::', '')
 	}]
 
 
@@ -64,6 +64,10 @@ FINDERS_WITHOUT_PATH = set((
 	'CommandT::BufferFinder',
 	'CommandT::TagFinder',
 	'CommandT::JumpFinder',
+	'CommandT::Finder::MRUBufferFinder',
+	'CommandT::Finder::BufferFinder',
+	'CommandT::Finder::TagFinder',
+	'CommandT::Finder::JumpFinder',
 ))
 
 

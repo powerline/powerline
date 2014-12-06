@@ -1,16 +1,91 @@
 # vim:fileencoding=utf-8:noet
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
+import sys
 import os
+import re
 
-from unicodedata import east_asian_width, combining
 from itertools import chain
 
 from powerline.theme import Theme
-from powerline.lib.unicode import unichr
+from powerline.lib.unicode import unichr, strwidth_ucs_2, strwidth_ucs_4
 
 
 NBSP = ' '
+
+
+np_control_character_translations = dict((
+	# Control characters: ^@ … ^Y
+	(i1, '^' + unichr(i1 + 0x40)) for i1 in range(0x20)
+))
+'''Control character translations
+
+Dictionary that maps characters in range 0x00–0x1F (inclusive) to strings 
+``'^@'``, ``'^A'`` and so on.
+
+.. note: maps tab to ``^I`` and newline to ``^J``.
+'''
+
+np_invalid_character_translations = dict((
+	# Invalid unicode characters obtained using 'surrogateescape' error 
+	# handler.
+	(i2, '<{0:02x}>'.format(i2 - 0xDC00)) for i2 in range(0xDC80, 0xDD00)
+))
+'''Invalid unicode character translations
+
+When using ``surrogateescape`` encoding error handling method characters in 
+range 0x80–0xFF (inclusive) are transformed into unpaired surrogate escape 
+unicode codepoints 0xDC80–0xDD00. This dictionary maps such characters to 
+``<80>``, ``<81>``, and so on: in Python-3 they cannot be printed or 
+converted to UTF-8 because UTF-8 standard does not allow surrogate escape 
+characters, not even paired ones. Python-2 contains a bug that allows such 
+action, but printing them in any case makes no sense.
+'''
+
+# XXX: not using `r` because it makes no sense.
+np_invalid_character_re = re.compile('(?<![\uD800-\uDBFF])[\uDC80-\uDD00]')
+'''Regex that finds unpaired surrogate escape characters
+
+Search is only limited to the ones obtained from ``surrogateescape`` error 
+handling method. This regex is only used for UCS-2 Python variants because 
+in this case characters above 0xFFFF are represented as surrogate escapes 
+characters and are thus subject to partial transformation if 
+``np_invalid_character_translations`` translation table is used.
+'''
+
+np_character_translations = np_control_character_translations.copy()
+'''Dictionary that contains non-printable character translations
+
+In UCS-4 versions of Python this is a union of 
+``np_invalid_character_translations`` and ``np_control_character_translations`` 
+dictionaries. In UCS-2 for technical reasons ``np_invalid_character_re`` is used 
+instead and this dictionary only contains items from 
+``np_control_character_translations``.
+'''
+
+translate_np = (
+	(
+		lambda s: (
+			np_invalid_character_re.subn(
+				lambda match: (
+					np_invalid_character_translations[ord(match.group(0))]
+				), s
+			)[0].translate(np_character_translations)
+		)
+	) if sys.maxunicode < 0x10FFFF else (
+		lambda s: (
+			s.translate(np_character_translations)
+		)
+	)
+)
+'''Function that translates non-printable characters into printable strings
+
+Is used to translate control characters and surrogate escape characters 
+obtained from ``surrogateescape`` encoding errors handling method into some 
+printable sequences. See documentation for 
+``np_invalid_character_translations`` and 
+``np_control_character_translations`` for more details.
+'''
 
 
 def construct_returned_value(rendered_highlighted, segments, width, output_raw, output_width):
@@ -75,25 +150,6 @@ class Renderer(object):
 	See documentation of ``unicode.translate`` for details.
 	'''
 
-	np_character_translations = dict(chain(
-		# Control characters: ^@ … ^Y
-		((i1, '^' + unichr(i1 + 0x40)) for i1 in range(0x20)),
-		# Invalid unicode characters obtained using 'surrogateescape' error 
-		# handler.
-		((i2, '<{0:02x}>'.format(i2 - 0xDC00)) for i2 in range(0xDC80, 0xDD00)),
-	))
-	'''Non-printable character translations
-
-	These are used to transform characters in range 0x00—0x1F into ``^@``, 
-	``^A`` and so on and characters in range 0xDC80—0xDCFF into ``<80>``, 
-	``<81>`` and so on (latter are invalid characters obtained using 
-	``surrogateescape`` error handling method used automatically in a number of 
-	places in Python3). Unilke with ``.escape()`` method (and 
-	``character_translations``) result is passed to ``.strwidth()`` method.
-
-	Note: transforms tab into ``^I``.
-	'''
-
 	def __init__(self,
 	             theme_config,
 	             local_themes,
@@ -120,19 +176,21 @@ class Renderer(object):
 			'F': 2,          # Fullwidth
 		}
 
-	def strwidth(self, string):
-		'''Function that returns string width.
+	strwidth = lambda self, s: (
+		(strwidth_ucs_2 if sys.maxunicode < 0x10FFFF else strwidth_ucs_4)(
+			self.width_data, s)
+	)
+	'''Function that returns string width.
 
-		Is used to calculate the place given string occupies when handling 
-		``width`` argument to ``.render()`` method. Must take east asian width 
-		into account.
+	Is used to calculate the place given string occupies when handling 
+	``width`` argument to ``.render()`` method. Must take east asian width 
+	into account.
 
-		:param unicode string:
-			String whose width will be calculated.
+	:param unicode string:
+		String whose width will be calculated.
 
-		:return: unsigned integer.
-		'''
-		return sum((0 if combining(symbol) else self.width_data[east_asian_width(symbol)] for symbol in string))
+	:return: unsigned integer.
+	'''
 
 	def get_theme(self, matcher_info):
 		'''Get Theme object.
@@ -256,6 +314,8 @@ class Renderer(object):
 
 		current_width = 0
 
+		self._prepare_segments(segments, output_width or width)
+
 		if not width:
 			# No width specified, so we don’t need to crop or pad anything
 			if output_width:
@@ -319,6 +379,15 @@ class Renderer(object):
 
 		return construct_returned_value(rendered_highlighted, segments, current_width, output_raw, output_width)
 
+	def _prepare_segments(self, segments, calculate_contents_len):
+		'''Translate non-printable characters and calculate segment width
+		'''
+		for segment in segments:
+			segment['contents'] = translate_np(segment['contents'])
+		if calculate_contents_len:
+			for segment in segments:
+				segment['_contents_len'] = self.strwidth(segment['contents'])
+
 	def _render_length(self, theme, segments, divider_widths):
 		'''Update segments lengths and return them
 		'''
@@ -327,10 +396,7 @@ class Renderer(object):
 		divider_spaces = theme.get_spaces()
 		for index, segment in enumerate(segments):
 			side = segment['side']
-			if segment['_contents_len'] is None:
-				segment_len = segment['_contents_len'] = self.strwidth(segment['contents'])
-			else:
-				segment_len = segment['_contents_len']
+			segment_len = segment['_contents_len']
 
 			prev_segment = segments[index - 1] if index > 0 else theme.EMPTY_SEGMENT
 			next_segment = segments[index + 1] if index < segments_len - 1 else theme.EMPTY_SEGMENT
@@ -380,8 +446,6 @@ class Renderer(object):
 			contents_raw = segment['contents']
 			contents_highlighted = ''
 			draw_divider = segment['draw_' + divider_type + '_divider']
-
-			contents_raw = contents_raw.translate(self.np_character_translations)
 
 			# XXX Make sure self.hl() calls are called in the same order 
 			# segments are displayed. This is needed for Vim renderer to work.

@@ -3,6 +3,7 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 
 import threading
 import os
+import sys
 import re
 import shutil
 
@@ -16,7 +17,9 @@ from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment
 from powerline.lib.monotonic import monotonic
 from powerline.lib.vcs.git import git_directory
 
-from tests.lib import Pl
+import powerline.lib.unicode as plu
+
+from tests.lib import Pl, replace_attr
 from tests import TestCase, SkipTest
 
 
@@ -395,6 +398,101 @@ class TestLib(TestCase):
 		self.assertEqual(humanize_bytes(1024, si_prefix=True), '1 kB')
 		self.assertEqual(humanize_bytes(1000000000, si_prefix=True), '1.00 GB')
 		self.assertEqual(humanize_bytes(1000000000, si_prefix=False), '953.7 MiB')
+
+
+width_data = {
+	'N': 1,          # Neutral
+	'Na': 1,         # Narrow
+	'A': 1,          # Ambigious
+	'H': 1,          # Half-width
+	'W': 2,          # Wide
+	'F': 2,          # Fullwidth
+}
+
+
+class TestUnicode(TestCase):
+	def assertStringsIdentical(self, s1, s2):
+		self.assertTrue(type(s1) is type(s2), msg='string types differ')
+		self.assertEqual(s1, s2)
+
+	def test_unicode(self):
+		self.assertTrue(type('abc') is plu.unicode)
+
+	def test_unichr(self):
+		self.assertStringsIdentical('\U0010FFFF', plu.unichr(0x10FFFF))
+		self.assertStringsIdentical('\uFFFF', plu.unichr(0xFFFF))
+		self.assertStringsIdentical('\x20', plu.unichr(0x20))
+
+	def test_u(self):
+		self.assertStringsIdentical('Test', plu.u('Test'))
+		self.assertStringsIdentical('Test', plu.u(b'Test'))
+		self.assertStringsIdentical('«»', plu.u(b'\xC2\xAB\xC2\xBB'))
+		self.assertRaises(UnicodeDecodeError, plu.u, b'\xFF')
+
+	def test_tointiter(self):
+		self.assertEqual([1, 2, 3], list(plu.tointiter(b'\x01\x02\x03')))
+
+	def test_decode_error(self):
+		self.assertStringsIdentical('<FF>', b'\xFF'.decode('utf-8', 'powerline_decode_error'))
+		self.assertStringsIdentical('abc', b'abc'.decode('utf-8', 'powerline_decode_error'))
+
+	def test_register_strwidth_error(self):
+		ename = plu.register_strwidth_error(lambda s: 3)
+		self.assertStringsIdentical(b'???', 'Ａ'.encode('latin1', ename))
+		self.assertStringsIdentical(b'abc', 'abc'.encode('latin1', ename))
+
+	def test_out_u(self):
+		self.assertStringsIdentical('abc', plu.out_u('abc'))
+		self.assertStringsIdentical('abc', plu.out_u(b'abc'))
+		self.assertRaises(TypeError, plu.out_u, None)
+
+	def test_safe_unicode(self):
+		self.assertStringsIdentical('abc', plu.safe_unicode('abc'))
+		self.assertStringsIdentical('abc', plu.safe_unicode(b'abc'))
+		self.assertStringsIdentical('«»', plu.safe_unicode(b'\xc2\xab\xc2\xbb'))
+		with replace_attr(plu, 'get_preferred_output_encoding', lambda: 'latin1'):
+			self.assertStringsIdentical('ÿ', plu.safe_unicode(b'\xFF'))
+		self.assertStringsIdentical('None', plu.safe_unicode(None))
+
+		class FailingStr(object):
+			def __str__(self):
+				raise NotImplementedError('Fail!')
+
+		self.assertStringsIdentical('Fail!', plu.safe_unicode(FailingStr()))
+
+	def test_FailedUnicode(self):
+		self.assertTrue(isinstance(plu.FailedUnicode('abc'), plu.unicode))
+		self.assertEqual('abc', plu.FailedUnicode('abc'))
+
+	def test_string(self):
+		self.assertStringsIdentical(str('abc'), plu.string('abc'))
+		self.assertStringsIdentical(str('abc'), plu.string(b'abc'))
+
+	def test_surrogate_pair_to_character(self):
+		self.assertEqual(0x1F48E, plu.surrogate_pair_to_character(0xD83D, 0xDC8E))
+
+	def test_strwidth_ucs_4(self):
+		self.assertEqual(4, plu.strwidth_ucs_4(width_data, 'abcd'))
+		self.assertEqual(4, plu.strwidth_ucs_4(width_data, 'ＡＢ'))
+		if sys.maxunicode < 0x10FFFF:
+			raise SkipTest('Can only test strwidth_ucs_4 in UCS-4 Pythons')
+
+		def east_asian_width(ch):
+			assert (len(ch) == 1)
+			assert ord(ch) == 0x1F48E
+			return 'F'
+
+		with replace_attr(plu, 'east_asian_width', east_asian_width):
+			# Warning: travis unicodedata.east_asian_width for some reason 
+			# thinks this character is 5 symbols wide.
+			self.assertEqual(2, plu.strwidth_ucs_4(width_data, '\U0001F48E'))
+
+	def test_strwidth_ucs_2(self):
+		self.assertEqual(4, plu.strwidth_ucs_2(width_data, 'abcd'))
+		self.assertEqual(4, plu.strwidth_ucs_2(width_data, 'ＡＢ'))
+		if not sys.maxunicode < 0x10FFFF:
+			raise SkipTest('Can only test strwidth_ucs_2 in UCS-2 Pythons')
+		self.assertEqual(2, plu.strwidth_ucs_2(width_data, '\ud83d\udc8e'))
 
 
 class TestVCS(TestCase):
