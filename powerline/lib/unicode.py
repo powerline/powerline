@@ -21,6 +21,17 @@ except ImportError:
 	unichr = chr
 
 
+if sys.maxunicode < 0x10FFFF:
+	_unichr = unichr
+
+	def unichr(ch):
+		if ch <= sys.maxunicode:
+			return _unichr(ch)
+		else:
+			ch -= 0x10000
+			return _unichr((ch >> 10) + 0xD800) + _unichr((ch & ((1 << 10) - 1)) + 0xDC00)
+
+
 def u(s):
 	'''Return unicode instance assuming UTF-8 encoded string.
 	'''
