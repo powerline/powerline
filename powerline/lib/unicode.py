@@ -100,7 +100,10 @@ def safe_unicode(s):
 	'''
 	try:
 		try:
-			return unicode(s)
+			if type(s) is bytes:
+				return unicode(s, 'ascii')
+			else:
+				return unicode(s)
 		except UnicodeDecodeError:
 			try:
 				return unicode(s, 'utf-8')
@@ -125,11 +128,18 @@ class FailedUnicode(unicode):
 	pass
 
 
-def string(s):
-	if type(s) is not str:
-		return s.encode('utf-8')
-	else:
-		return s
+if sys.version_info < (3,):
+	def string(s):
+		if type(s) is not str:
+			return s.encode('utf-8')
+		else:
+			return s
+else:
+	def string(s):
+		if type(s) is not str:
+			return s.decode('utf-8')
+		else:
+			return s
 
 
 def surrogate_pair_to_character(high, low):

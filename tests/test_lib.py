@@ -448,7 +448,6 @@ class TestUnicode(TestCase):
 		self.assertRaises(TypeError, plu.out_u, None)
 
 	def test_safe_unicode(self):
-		raise SkipTest('safe_unicode() function is buggy')
 		self.assertStringsIdentical('abc', plu.safe_unicode('abc'))
 		self.assertStringsIdentical('abc', plu.safe_unicode(b'abc'))
 		self.assertStringsIdentical('«»', plu.safe_unicode(b'\xc2\xab\xc2\xbb'))
@@ -467,7 +466,6 @@ class TestUnicode(TestCase):
 		self.assertEqual('abc', plu.FailedUnicode('abc'))
 
 	def test_string(self):
-		raise SkipTest('string() function is buggy')
 		self.assertStringsIdentical(str('abc'), plu.string('abc'))
 		self.assertStringsIdentical(str('abc'), plu.string(b'abc'))
 
