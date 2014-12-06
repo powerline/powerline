@@ -69,6 +69,27 @@ last_swe_idx = 0
 
 
 def register_strwidth_error(strwidth):
+	'''Create new encode errors handling method similar to ``replace``
+
+	Like ``replace`` this method uses question marks in place of the characters 
+	that cannot be represented in the requested encoding. Unlike ``replace`` the 
+	amount of question marks is identical to the amount of display cells 
+	offending character occupies. Thus encoding ``…`` (U+2026, HORIZONTAL 
+	ELLIPSIS) to ``latin1`` will emit one question mark, but encoding ``Ａ`` 
+	(U+FF21, FULLWIDTH LATIN CAPITAL LETTER A) will emit two question marks.
+
+	Since width of some characters depends on the terminal settings and 
+	powerline knows how to respect them a single error handling method cannot be 
+	used. Instead of it the generator function is used which takes ``strwidth`` 
+	function (function that knows how to compute string width respecting all 
+	needed settings) and emits new error handling method name.
+
+	:param function strwidth:
+		Function that computs string width measured in display cells the string 
+		occupies when displayed.
+
+	:return: New error handling method name.
+	'''
 	global last_swe_idx
 	last_swe_idx += 1
 
@@ -111,7 +132,10 @@ def safe_unicode(s):
 	'''
 	try:
 		try:
-			return unicode(s)
+			if type(s) is bytes:
+				return unicode(s, 'ascii')
+			else:
+				return unicode(s)
 		except UnicodeDecodeError:
 			try:
 				return unicode(s, 'utf-8')
@@ -124,8 +148,7 @@ def safe_unicode(s):
 
 
 class FailedUnicode(unicode):
-	'''Builtin ``unicode`` (``str`` in python 3) subclass indicating fatal 
-	error.
+	'''Builtin ``unicode`` subclass indicating fatal error
 
 	If your code for some reason wants to determine whether `.render()` method 
 	failed it should check returned string for being a FailedUnicode instance. 
@@ -136,11 +159,32 @@ class FailedUnicode(unicode):
 	pass
 
 
-def string(s):
-	if type(s) is not str:
-		return s.encode('utf-8')
-	else:
-		return s
+if sys.version_info < (3,):
+	def string(s):
+		if type(s) is not str:
+			return s.encode('utf-8')
+		else:
+			return s
+else:
+	def string(s):
+		if type(s) is not str:
+			return s.decode('utf-8')
+		else:
+			return s
+
+
+string.__doc__ = (
+	'''Transform ``unicode`` or ``bytes`` object into ``str`` object
+
+	On Python-2 this encodes ``unicode`` to ``bytes`` (which is ``str``) using 
+	UTF-8 encoding; on Python-3 this decodes ``bytes`` to ``unicode`` (which is 
+	``str``) using UTF-8 encoding.
+
+	Useful for functions that expect an ``str`` object in both unicode versions, 
+	not caring about the semantic differences between them in Python-2 and 
+	Python-3.
+	'''
+)
 
 
 def surrogate_pair_to_character(high, low):
