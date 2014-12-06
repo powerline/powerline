@@ -258,6 +258,7 @@ def finish_common_config(encoding, common_config):
 	common_config.setdefault('log_level', 'WARNING')
 	common_config.setdefault('log_format', '%(asctime)s:%(levelname)s:%(message)s')
 	common_config.setdefault('term_truecolor', False)
+	common_config.setdefault('term_escape_style', 'auto')
 	common_config.setdefault('ambiwidth', 1)
 	common_config.setdefault('additional_escapes', None)
 	common_config.setdefault('reload_config', True)
@@ -474,6 +475,7 @@ class Powerline(object):
 				mergedicts(self.renderer_options, dict(
 					pl=self.pl,
 					term_truecolor=self.common_config['term_truecolor'],
+					term_escape_style=self.common_config['term_escape_style'],
 					ambiwidth=self.common_config['ambiwidth'],
 					tmux_escape=self.common_config['additional_escapes'] == 'tmux',
 					screen_escape=self.common_config['additional_escapes'] == 'screen',

@@ -26,6 +26,29 @@ Common configuration is a subdictionary that is a value of ``common`` key in
     to the terminal emulator. See the :ref:`term-feature-support-matrix` for 
     information on whether your terminal emulator supports 24-bit colors.
 
+    This variable is forced to be ``false`` if :ref:`term_escape_style 
+    <config-common-term_escape_style>` option is set to ``"fbterm"`` or if it is 
+    set to ``"auto"`` and powerline detected fbterm.
+
+.. _config-common-term_escape_style:
+
+``term_escape_style``
+    Defines what escapes sequences should be used. Accepts three variants:
+
+    =======  ===================================================================
+    Variant  Description
+    =======  ===================================================================
+    auto     ``xterm`` or ``fbterm`` depending on ``$TERM`` variable value: 
+             ``TERM=fbterm`` implies ``fbterm`` escaping style, all other values 
+             select ``xterm`` escaping.
+    xterm    Uses ``\e[{fb};5;{color}m`` for colors (``{fb}`` is either ``38`` 
+             (foreground) or ``48`` (background)). Should be used for most 
+             terminals.
+    fbterm   Uses ``\e[{fb};{color}}`` for colors (``{fb}`` is either ``1`` 
+             (foreground) or ``2`` (background)). Should be used for fbterm: 
+             framebuffer terminal.
+    =======  ===================================================================
+
 .. _config-common-ambiwidth:
 
 ``ambiwidth``
