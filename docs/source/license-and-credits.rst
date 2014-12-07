@@ -3,7 +3,7 @@ License and credits
 *******************
 
 Powerline is licensed under the `MIT license
-<https://raw.github.com/Lokaltog/powerline/develop/LICENSE>`_.
+<https://raw.github.com/powerline/powerline/develop/LICENSE>`_.
 
 ..
     This document is parsed by powerline_automan.py module. Do not forget to 
@@ -24,7 +24,7 @@ Contributors
 ------------
 
 * `List of contributors
-  <https://github.com/Lokaltog/powerline/contributors>`_
+  <https://github.com/powerline/powerline/contributors>`_
 * The glyphs in the font patcher are created by Fabrizio Schiavi, creator of
   the excellent coding font `Pragmata Pro`_.
 

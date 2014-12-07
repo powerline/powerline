@@ -57,7 +57,7 @@ I receive an ``ImportError`` when trying to use Powerline on OS X!
 
       sudo port select python python27-apple
 
-* See `issue #39 <https://github.com/Lokaltog/powerline/issues/39>`_ for 
+* See `issue #39 <https://github.com/powerline/powerline/issues/39>`_ for 
   a discussion and other possible solutions for this issue.
 
 I receive “FSEventStreamStart: register_with_server: ERROR” with status_colors

@@ -24,9 +24,9 @@ two possible explanations:
 * Update brought some bug to powerline.
 
 In the second case you, of course, should report the bug to `powerline bug 
-tracker <https://github.com/Lokaltog/powerline>`_.  In the first you should make 
-sure you either have only one powerline installation or you update all of them 
-simultaneously (beware that in the second case you are not supported). To 
+tracker <https://github.com/powerline/powerline>`_.  In the first you should 
+make sure you either have only one powerline installation or you update all of 
+them simultaneously (beware that in the second case you are not supported). To 
 diagnose this problem you may do the following:
 
 #) If this problem is observed within the shell make sure that
