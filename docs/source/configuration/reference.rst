@@ -296,6 +296,7 @@ with the following top themes:
 Theme                       Description
 ==========================  ====================================================
 powerline                   Default powerline theme with fancy powerline symbols
+powerline_unicode7          Theme with powerline dividers and unicode-7 symbols
 unicode                     Theme without any symbols from private use area
 unicode_terminus            Theme containing only symbols from terminus PCF font
 unicode_terminus_condensed  Like above, but occupies as less space as possible
