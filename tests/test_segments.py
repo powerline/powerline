@@ -721,6 +721,10 @@ class TestSys(TestCommon):
 				])
 
 	def test_cpu_load_percent(self):
+		try:
+			__import__('psutil')
+		except ImportError as e:
+			raise SkipTest('Failed to import psutil: {0}'.format(e))
 		pl = Pl()
 		with replace_module_module(self.module, 'psutil', cpu_percent=lambda **kwargs: 52.3):
 			self.assertEqual(common.cpu_load_percent(pl=pl), [{

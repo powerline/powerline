@@ -134,8 +134,13 @@ except ImportError:
 	except ImportError:
 		from getpass import getuser as _get_user
 	else:
+		try:
+			from os import geteuid as getuid
+		except ImportError:
+			from os import getuid
+
 		def _get_user():
-			return pwd.getpwuid(os.geteuid()).pw_name
+			return pwd.getpwuid(getuid()).pw_name
 
 
 username = False
