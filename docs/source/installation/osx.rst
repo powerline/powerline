@@ -6,7 +6,7 @@ Python package
 ==============
 
 1. Install a proper Python version (see `issue #39 
-   <https://github.com/Lokaltog/powerline/issues/39>`_ for a discussion 
+   <https://github.com/powerline/powerline/issues/39>`_ for a discussion 
    regarding the required Python version on OS X)::
 
        sudo port select python python27-apple
@@ -24,7 +24,7 @@ Python package
 
 2. Install Powerline using the following command::
 
-       pip install --user git+git://github.com/Lokaltog/powerline
+       pip install --user git+git://github.com/powerline/powerline
 
    .. warning::
       When using ``brew install`` to install Python one must not supply

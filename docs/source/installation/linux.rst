@@ -21,7 +21,7 @@ follow the installation guide below:
    distribution-specific, so no commands provided.
 2. Install Powerline using the following command::
 
-       pip install --user git+git://github.com/Lokaltog/powerline
+       pip install --user git+git://github.com/powerline/powerline
 
 .. note:: Due to the naming conflict with an unrelated project powerline is
    named ``powerline-status`` in PyPI.
@@ -43,8 +43,8 @@ generally works well with any coding font.
 
 #. Download the latest version of the symbol font and fontconfig file::
 
-      wget https://github.com/Lokaltog/powerline/raw/develop/font/PowerlineSymbols.otf
-      wget https://github.com/Lokaltog/powerline/raw/develop/font/10-powerline-symbols.conf
+      wget https://github.com/powerline/powerline/raw/develop/font/PowerlineSymbols.otf
+      wget https://github.com/powerline/powerline/raw/develop/font/10-powerline-symbols.conf
 
 #. Move the symbol font to a valid X font path. Valid font paths can be 
    listed with ``xset q``::

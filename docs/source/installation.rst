@@ -46,7 +46,7 @@ powerline with ``pip``:
 
 .. code-block:: sh
 
-    pip install --user git+git://github.com/Lokaltog/powerline
+    pip install --user git+git://github.com/powerline/powerline
 
 . You may also choose to clone powerline repository somewhere and use
 
@@ -65,8 +65,8 @@ and you will have to do something like
 
 .. note::
     If your ISP blocks git protocol for some reason github also provides ``ssh`` 
-    (``git+ssh://git@github.com/Lokaltog/powerline``) and ``https`` 
-    (``git+https://github.com/Lokaltog/powerline``) protocols. ``git`` protocol 
+    (``git+ssh://git@github.com/powerline/powerline``) and ``https`` 
+    (``git+https://github.com/powerline/powerline``) protocols. ``git`` protocol 
     should be the fastest, but least secure one though.
 
 To install release version uploaded to PyPI use
@@ -103,7 +103,7 @@ Download the font of your choice from `powerline-fonts`_. If you can’t find
 your preferred font in the `powerline-fonts`_ repo, you’ll have to patch your 
 own font instead.
 
-.. _powerline-fonts: https://github.com/Lokaltog/powerline-fonts
+.. _powerline-fonts: https://github.com/powerline/fonts
 
 After downloading this font refer to platform-specific instructions.
 

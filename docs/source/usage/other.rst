@@ -34,7 +34,7 @@ With Vundle you may instead use
 
 .. code-block:: vim
 
-    Bundle 'Lokaltog/powerline', {'rtp': 'powerline/bindings/vim/'}
+    Bundle 'powerline/powerline', {'rtp': 'powerline/bindings/vim/'}
 
 (replace ``Bundle`` with ``NeoBundle`` for NeoBundle).
 

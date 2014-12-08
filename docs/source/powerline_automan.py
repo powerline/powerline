@@ -361,7 +361,7 @@ class AutoMan(Directive):
 			),
 			ids=['author-section']
 		)
-		issues_url = 'https://github.com/Lokaltog/powerline/issues'
+		issues_url = 'https://github.com/powerline/powerline/issues'
 		reporting_bugs_section = nodes.section(
 			'', nodes.title(text='Reporting bugs'),
 			nodes.paragraph(
