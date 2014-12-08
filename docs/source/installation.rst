@@ -5,8 +5,8 @@ Installation
 Generic requirements
 ====================
 
-* Python 2.6 or later, 3.2 or later, PyPy 2.0 or later. It is the only 
-  non-optional requirement.
+* Python 2.6 or later, 3.2 or later, PyPy 2.0 or later, PyPy3 2.3 or later. It 
+  is the only non-optional requirement.
 
   .. warning:
      It is highly advised to use UCS-4 version of Python because UCS-2 version 
