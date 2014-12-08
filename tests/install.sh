@@ -4,7 +4,7 @@ pip install psutil netifaces
 if python -c 'import sys; sys.exit(1 * (sys.version_info[0] != 2))' ; then
 	# Python 2
 	if python -c 'import platform, sys; sys.exit(1 - (platform.python_implementation() == "CPython"))' ; then
-		# PyPy
+		# CPython
 		pip install mercurial
 		pip install --allow-external bzr --allow-unverified bzr bzr
 	fi
