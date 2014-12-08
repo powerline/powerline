@@ -38,3 +38,41 @@ The fancy symbols look a bit blurry or “off”!
 
 * Make sure that you have patched all variants of your font (i.e. both the 
   regular and the bold font files).
+
+I am seeing strange blocks in place of playing/paused/stopped signs
+-------------------------------------------------------------------
+
+If you are using ``powerline_unicode7`` :ref:`top-level theme 
+<config-common-default_top_theme>` then symbols for player segments are taken 
+from U+23F4–U+23FA range which is missing from most fonts. You may fix the issue 
+by using `Symbola <http://users.teilar.gr/~g1951d/>`_ font (or any other font 
+which contains these glyphs).
+
+If your terminal emulator is using fontconfig library then you can create 
+a fontconfig configuration file with the following contents:
+
+.. code-block:: xml
+
+    <?xml version="1.0"?>
+    <!DOCTYPE fontconfig SYSTEM "fonts.dtd">
+
+    <fontconfig>
+    	<alias>
+    		<family>Terminus</family>
+    		<prefer><family>Symbola</family></prefer>
+    	</alias>
+    </fontconfig>
+
+(replace ``Terminus`` with the name of the font you are using). Exact sequence 
+of actions you need to perform is different across distributions, most likely it 
+will work if you put the above xml into 
+:file:`/etc/fonts/conf.d/99-prefer-symbola.conf`. On Gentoo you need to put it 
+into :file:`/etc/fonts/conf.d/99-prefer-symbola.conf` and run::
+
+    eselect fontconfig enable 99-prefer-symbola
+
+.
+
+.. warning::
+    This answer is only applicable if you use ``powerline_unicode7`` theme or if 
+    you configured powerline to use the same characters yourself.

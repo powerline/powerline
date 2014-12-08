@@ -38,7 +38,7 @@ weather_conditions_codes = (
 	('fog',                     'foggy' ),  # 20
 	('haze',                    'foggy' ),  # 21
 	('smoky',                   'foggy' ),  # 22
-	('blustery',                'foggy' ),  # 23
+	('blustery',                'windy' ),  # 23
 	('windy',                           ),  # 24
 	('cold',                    'day'   ),  # 25
 	('clouds',                  'cloudy'),  # 26

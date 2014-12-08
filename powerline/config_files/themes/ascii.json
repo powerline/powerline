@@ -110,15 +110,15 @@
 					"S":  "S-LINE",
 					"^S": "S-BLCK",
 					"i":  "INSERT",
-					"R":  "REPLACE",
-					"Rv": "V-RPLCE",
+					"R":  "RPLACE",
+					"Rv": "V-RPLC",
 					"c":  "COMMND",
-					"cv": "VIM EX",
-					"ce": "EX",
+					"cv": "VIM-EX",
+					"ce": "NRM-EX",
 					"r":  "PROMPT",
-					"rm": "MORE",
-					"r?": "CONFIRM",
-					"!":  "SHELL"
+					"rm": "-MORE-",
+					"r?": "CNFIRM",
+					"!":  "!SHELL"
 				}
 			}
 		},
