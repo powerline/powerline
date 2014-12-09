@@ -27,7 +27,7 @@ def _get_battery(pl):
 			try:
 				up = bus.get_object(interface, '/org/freedesktop/UPower')
 			except dbus.exceptions.DBusException as e:
-				if getattr(e, '_dbus_error_name', '').endswidth('ServiceUnknown'):
+				if getattr(e, '_dbus_error_name', '').endswith('ServiceUnknown'):
 					pl.debug('Not using DBUS+UPower as UPower is not available via dbus')
 				else:
 					pl.exception('Failed to get UPower service with dbus: {0}', str(e))
