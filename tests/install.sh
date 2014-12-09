@@ -1,27 +1,20 @@
-#!/bin/sh
-pip install .
-pip install psutil netifaces
-if python -c 'import sys; sys.exit(1 * (sys.version_info[0] != 2))' ; then
-	# Python 2
-	if python -c 'import platform, sys; sys.exit(1 - (platform.python_implementation() == "CPython"))' ; then
-		# CPython
-		pip install mercurial
-		pip install --allow-external bzr --allow-unverified bzr bzr
-	fi
-	if python -c 'import sys; sys.exit(1 * (sys.version_info[1] >= 7))' ; then
-		# Python 2.6
-		pip install unittest2 argparse
-	else
-		# Python 2.7
-		pip install ipython
-	fi
-else
-	# Python 3
-	if python -c 'import sys; sys.exit(1 * (sys.version_info < (3, 3)))' ; then
-		# Python 3.3+
-		pip install ipython
-	fi
+#!/bin/bash
+git clone --depth=1 git://github.com/powerline/bot-ci tests/bot-ci
+git clone --depth=1 git://github.com/powerline/deps tests/bot-ci/deps
+
+. tests/bot-ci/scripts/common/main.sh
+
+if test -n "$USE_UCS2_PYTHON" ; then
+	for variant in $UCS2_PYTHON_VARIANTS ; do
+		archive="${PWD:-$(pwd)}/tests/bot-ci/deps/cpython-ucs2/cpython-ucs2-${variant}.tar.gz"
+		sudo sh -c "cd /opt && tar xzvf $archive"
+	done
 fi
+
+pip install .
+
+pip install --no-deps tests/bot-ci/deps/wheels/$PYTHON_SUFFIX/*.whl
+
 sudo apt-get install -qq screen zsh tcsh mksh busybox socat
 # Travis has too outdated fish. It cannot be used for tests.
 # sudo apt-get install fish
