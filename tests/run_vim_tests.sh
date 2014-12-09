@@ -3,6 +3,9 @@
 FAILED=0
 
 if test -z "$VIM" ; then
+	if test "$PYTHON_IMPLEMENTATION" != "CPython" ; then
+		exit 0
+	fi
 	NEW_VIM="$PWD/tests/bot-ci/deps/vim/tip-$PYTHON_VERSION/vim"
 	OLD_VIM="$PWD/tests/bot-ci/deps/vim/v7-0-112-$PYTHON_VERSION/vim"
 	if test -e "$OLD_VIM" ; then
