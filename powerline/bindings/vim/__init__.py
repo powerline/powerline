@@ -158,7 +158,7 @@ _vim_exists = vim_get_func('exists', rettype='int')
 
 # It may crash on some old vim versions and I do not remember in which patch 
 # I fixed this crash.
-if hasattr(vim, 'vvars') and vim.vvars['version'] > 703:
+if hasattr(vim, 'vvars') and vim.vvars[str('version')] > 703:
 	_vim_to_python_types = {
 		getattr(vim, 'Dictionary', None) or type(vim.bindeval('{}')):
 			lambda value: dict((
