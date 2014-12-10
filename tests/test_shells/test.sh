@@ -73,6 +73,7 @@ run() {
 		DIR2="${DIR2}" \
 		XDG_CONFIG_HOME="$PWD/tests/shell/fish_home" \
 		IPYTHONDIR="$PWD/tests/shell/ipython_home" \
+		PYTHONPATH="${PWD}${PYTHONPATH:+:}$PYTHONPATH" \
 		POWERLINE_SHELL_CONTINUATION=$additional_prompts \
 		POWERLINE_SHELL_SELECT=$additional_prompts \
 		POWERLINE_COMMAND="${POWERLINE_COMMAND} -p $PWD/powerline/config_files" \

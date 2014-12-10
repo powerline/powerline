@@ -3,15 +3,19 @@
 FAILED=0
 
 if test -z "$VIM" ; then
-	if test "$PYTHON_IMPLEMENTATION" != "CPython" ; then
-		exit 0
-	fi
-	NEW_VIM="$PWD/tests/bot-ci/deps/vim/tip-$PYTHON_VERSION/vim"
-	OLD_VIM="$PWD/tests/bot-ci/deps/vim/v7-0-112-$PYTHON_VERSION/vim"
-	if test -e "$OLD_VIM" ; then
-		VIMS="NEW_VIM OLD_VIM"
+	if test -n "$USE_UCS2_PYTHON" ; then
+		NEW_VIM="$PWD/tests/bot-ci/deps/vim/tip-$UCS2_PYTHON_VARIANT-double/vim"
 	else
-		VIMS="NEW_VIM"
+		if test "$PYTHON_IMPLEMENTATION" != "CPython" ; then
+			exit 0
+		fi
+		NEW_VIM="$PWD/tests/bot-ci/deps/vim/tip-$PYTHON_VERSION/vim"
+		OLD_VIM="$PWD/tests/bot-ci/deps/vim/v7-0-112-$PYTHON_VERSION/vim"
+		if test -e "$OLD_VIM" ; then
+			VIMS="NEW_VIM OLD_VIM"
+		else
+			VIMS="NEW_VIM"
+		fi
 	fi
 else
 	NEW_VIM="$VIM"

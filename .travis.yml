@@ -10,5 +10,11 @@ matrix:
         - python: "3.4"
         - python: "pypy"
         - python: "pypy3"
+        - env: >-
+            USE_UCS2_PYTHON=1
+            UCS2_PYTHON_VARIANT="2.6"
+        - env: >-
+            USE_UCS2_PYTHON=1
+            UCS2_PYTHON_VARIANT="2.7"
 
 # vim: et
