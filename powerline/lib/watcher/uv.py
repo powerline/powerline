@@ -82,12 +82,9 @@ class UvWatcher(object):
 		with self.lock:
 			if path not in self.watches:
 				try:
-					self.watches[path] = pyuv.fs.FSEvent(
-						self.loop,
-						path,
-						partial(self._record_event, path),
-						pyuv.fs.UV_CHANGE | pyuv.fs.UV_RENAME
-					)
+					handle = pyuv.fs.FSEvent(self.loop)
+					self.watches[path] = handle
+					handle.start(path, 0, partial(self._record_event, path))
 				except pyuv.error.FSEventError as e:
 					code = e.args[0]
 					if code == pyuv.errno.UV_ENOENT:
