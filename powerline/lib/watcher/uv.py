@@ -34,14 +34,18 @@ class UvThread(Thread):
 
 	def __init__(self, loop):
 		self.uv_loop = loop
+		self.async_handle = pyuv.Async(loop, self._async_cb)
 		super(UvThread, self).__init__()
 
+	def _async_cb(self, handle):
+		self.uv_loop.stop()
+		self.async_handle.close()
+
 	def run(self):
-		while True:
-			self.uv_loop.run()
+		self.uv_loop.run()
 
 	def join(self):
-		self.uv_loop.stop()
+		self.async_handle.send()
 		return super(UvThread, self).join()
 
 
