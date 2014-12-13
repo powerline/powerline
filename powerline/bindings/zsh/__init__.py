@@ -190,6 +190,11 @@ def reload():
 		powerline.reload()
 
 
+def reload_config():
+	for powerline in used_powerlines.values():
+		powerline.create_renderer(load_main=True, load_colors=True, load_colorscheme=True, load_theme=True)
+
+
 def setup(zsh_globals):
 	powerline = ZshPowerline()
 	powerline.setup(zsh_globals)
