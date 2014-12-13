@@ -133,6 +133,10 @@ class Prompt(object):
 	def __str__(self):
 		zsh.eval('_POWERLINE_PARSER_STATE="${(%):-%_}"')
 		zsh.eval('_POWERLINE_SHORTENED_PATH="${(%):-%~}"')
+		try:
+			mode = zsh.getvalue('_POWERLINE_MODE')
+		except IndexError:
+			mode = None
 		segment_info = {
 			'args': self.args,
 			'environ': environ,
@@ -140,6 +144,7 @@ class Prompt(object):
 			'local_theme': self.theme,
 			'parser_state': zsh.getvalue('_POWERLINE_PARSER_STATE'),
 			'shortened_path': zsh.getvalue('_POWERLINE_SHORTENED_PATH'),
+			'mode': mode,
 		}
 		zsh.setvalue('_POWERLINE_PARSER_STATE', None)
 		zsh.setvalue('_POWERLINE_SHORTENED_PATH', None)
@@ -158,6 +163,7 @@ class Prompt(object):
 			width=zsh.columns(),
 			side=self.side,
 			segment_info=segment_info,
+			mode=mode,
 		)
 		if type(r) is not str:
 			if type(r) is bytes:
