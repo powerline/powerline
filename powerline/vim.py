@@ -10,7 +10,7 @@ import vim
 
 from powerline.bindings.vim import vim_get_func, vim_getvar, get_vim_encoding
 from powerline import Powerline, FailedUnicode
-from powerline.lib import mergedicts
+from powerline.lib.dict import mergedicts
 
 
 def _override_from(config, override_varname):

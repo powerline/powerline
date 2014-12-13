@@ -11,7 +11,7 @@ from powerline.colorscheme import Colorscheme
 from powerline.lib.config import ConfigLoader
 from powerline.lib.unicode import safe_unicode, FailedUnicode
 from powerline.config import DEFAULT_SYSTEM_CONFIG_DIR
-from powerline.lib import mergedicts
+from powerline.lib.dict import mergedicts
 from powerline.lib.encoding import get_preferred_output_encoding
 
 
