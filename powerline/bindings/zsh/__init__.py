@@ -12,6 +12,7 @@ from powerline.lib import parsedotval
 from powerline.lib.unicode import unicode
 from powerline.lib.encoding import (get_preferred_output_encoding,
                                     get_preferred_environment_encoding)
+from powerline.lib.dict import mergeargs
 
 
 used_powerlines = WeakValueDictionary()
@@ -24,7 +25,7 @@ def shutdown():
 
 def get_var_config(var):
 	try:
-		return [parsedotval(i) for i in zsh.getvalue(var).items()]
+		return mergeargs([parsedotval(i) for i in zsh.getvalue(var).items()])
 	except:
 		return None
 
