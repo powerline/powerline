@@ -437,7 +437,7 @@ class RDIOPlayerSegment(PlayerSegment):
 		now_playing = asrun(pl, ascript)
 		if not now_playing:
 			return
-		now_playing = now_playing.split('\n')
+		now_playing = now_playing.split(status_delimiter)
 		if len(now_playing) != 6:
 			return
 		state = _convert_state(now_playing[5])
