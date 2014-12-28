@@ -87,8 +87,8 @@ class UvWatcher(object):
 
 	def _start_watch_1_x(self, path):
 		handle = pyuv.fs.FSEvent(self.loop)
-		self.watches[path] = handle
 		handle.start(path, 0, partial(self._record_event, path))
+		self.watches[path] = handle
 
 	def _start_watch_0_x(self, path):
 		self.watches[path] = pyuv.fs.FSEvent(
