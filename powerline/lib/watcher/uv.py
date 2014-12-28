@@ -18,15 +18,19 @@ class UvNotFound(NotImplementedError):
 
 
 pyuv = None
+pyuv_version_info = None
 
 
 def import_pyuv():
 	global pyuv
+	global pyuv_version_info
 	if not pyuv:
 		try:
 			pyuv = __import__('pyuv')
 		except ImportError:
 			raise UvNotFound
+		else:
+			pyuv_version_info = tuple((int(c) for c in pyuv.__version__.split('.')))
 
 
 class UvThread(Thread):
@@ -76,15 +80,30 @@ class UvWatcher(object):
 		self.lock = RLock()
 		self.loop = start_uv_thread()
 		self.fenc = get_preferred_file_name_encoding()
+		if pyuv_version_info >= (1, 0):
+			self._start_watch = self._start_watch_1_x
+		else:
+			self._start_watch = self._start_watch_0_x
+
+	def _start_watch_1_x(self, path):
+		handle = pyuv.fs.FSEvent(self.loop)
+		self.watches[path] = handle
+		handle.start(path, 0, partial(self._record_event, path))
+
+	def _start_watch_0_x(self, path):
+		self.watches[path] = pyuv.fs.FSEvent(
+			self.loop,
+			path,
+			partial(self._record_event, path),
+			pyuv.fs.UV_CHANGE | pyuv.fs.UV_RENAME
+		)
 
 	def watch(self, path):
 		path = normpath(path, self.fenc)
 		with self.lock:
 			if path not in self.watches:
 				try:
-					handle = pyuv.fs.FSEvent(self.loop)
-					self.watches[path] = handle
-					handle.start(path, 0, partial(self._record_event, path))
+					self._start_watch(path)
 				except pyuv.error.FSEventError as e:
 					code = e.args[0]
 					if code == pyuv.errno.UV_ENOENT:
