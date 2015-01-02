@@ -37,17 +37,11 @@ class Args(object):
 
 	@property
 	def config(self):
-		try:
-			return get_var_config('POWERLINE_CONFIG')
-		except IndexError:
-			return None
+		return get_var_config('POWERLINE_CONFIG')
 
 	@property
 	def theme_option(self):
-		try:
-			return get_var_config('POWERLINE_THEME_CONFIG')
-		except IndexError:
-			return None
+		return get_var_config('POWERLINE_THEME_CONFIG')
 
 	@property
 	def config_path(self):
