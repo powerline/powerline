@@ -4,13 +4,20 @@ FAILED=0
 
 if test -z "$VIM" ; then
 	if test -n "$USE_UCS2_PYTHON" ; then
-		NEW_VIM="$PWD/tests/bot-ci/deps/vim/tip-$UCS2_PYTHON_VARIANT-double/vim"
+		NEW_VIM="$ROOT/tests/bot-ci/deps/vim/tip-$UCS2_PYTHON_VARIANT-double/vim"
+		opt_dir="/opt/cpython-ucs2-$UCS2_PYTHON_VARIANT"
+		main_path="$opt_dir/lib/python$UCS2_PYTHON_VARIANT"
+		site_path="$main_path/site-packages"
+		venv_main_path="$VIRTUAL_ENV/lib/python$UCS2_PYTHON_VARIANT"
+		venv_site_path="$venv_main_path/site-packages"
+		new_paths="${main_path}:${site_path}:${venv_main_path}:${venv_site_path}"
+		export PYTHONPATH="$new_paths${PYTHONPATH:+:}$PYTHONPATH"
 	else
 		if test "$PYTHON_IMPLEMENTATION" != "CPython" ; then
 			exit 0
 		fi
-		NEW_VIM="$PWD/tests/bot-ci/deps/vim/tip-$PYTHON_VERSION/vim"
-		OLD_VIM="$PWD/tests/bot-ci/deps/vim/v7-0-112-$PYTHON_VERSION/vim"
+		NEW_VIM="$ROOT/tests/bot-ci/deps/vim/tip-$PYTHON_VERSION/vim"
+		OLD_VIM="$ROOT/tests/bot-ci/deps/vim/v7-0-112-$PYTHON_VERSION/vim"
 		if test -e "$OLD_VIM" ; then
 			VIMS="NEW_VIM OLD_VIM"
 		else
