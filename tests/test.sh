@@ -3,6 +3,10 @@
 
 FAILED=0
 
+if test "$PYTHON_IMPLEMENTATION" = "CPython" ; then
+	export PATH="/opt/zsh-${PYTHON_VERSION}/bin:${PATH}"
+fi
+
 if test -n "$USE_UCS2_PYTHON" ; then
 	export LD_LIBRARY_PATH=/opt/cpython-ucs2-$UCS2_PYTHON_VARIANT/lib
 	set +e
