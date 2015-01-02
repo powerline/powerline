@@ -9,7 +9,7 @@ import zsh
 
 from powerline.shell import ShellPowerline
 from powerline.lib import parsedotval
-from powerline.lib.unicode import unicode
+from powerline.lib.unicode import unicode, u
 from powerline.lib.encoding import (get_preferred_output_encoding,
                                     get_preferred_environment_encoding)
 from powerline.lib.dict import mergeargs
@@ -134,7 +134,7 @@ class Prompt(object):
 		zsh.eval('_POWERLINE_PARSER_STATE="${(%):-%_}"')
 		zsh.eval('_POWERLINE_SHORTENED_PATH="${(%):-%~}"')
 		try:
-			mode = zsh.getvalue('_POWERLINE_MODE')
+			mode = u(zsh.getvalue('_POWERLINE_MODE'))
 		except IndexError:
 			mode = None
 		segment_info = {
