@@ -20,9 +20,18 @@ if test -n "$USE_UCS2_PYTHON" ; then
 	mkvirtualenv -p "$PYTHON" cpython-ucs2-$UCS2_PYTHON_VARIANT
 	set -e
 	pip install .
+	if test "$UCS2_PYTHON_VARIANT" = "2.6" ; then
+		rm tests/bot-ci/deps/wheels/ucs2-CPython-${UCS2_PYTHON_VARIANT}*/pyuv*.whl
+	fi
 	pip install --no-deps tests/bot-ci/deps/wheels/ucs2-CPython-${UCS2_PYTHON_VARIANT}*/*.whl
 else
 	pip install .
+	# FIXME Uv watcher sometimes misses events and INotify is not available in
+	#       Python-2.6, thus pyuv should be removed in order for VCS tests to 
+	#       pass.
+	if test "$PYTHON_VERSION_MAJOR" -eq 2 && test "$PYTHON_VERSION_MINOR" -lt 7 ; then
+		rm tests/bot-ci/deps/wheels/$PYTHON_SUFFIX/pyuv*.whl
+	fi
 	pip install --no-deps tests/bot-ci/deps/wheels/$PYTHON_SUFFIX/*.whl
 	if test "$PYTHON_IMPLEMENTATION" = "CPython" ; then
 		archive="${PWD:-$(pwd)}/tests/bot-ci/deps/zpython/zsh-${PYTHON_VERSION}.tar.gz"
