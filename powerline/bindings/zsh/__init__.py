@@ -25,7 +25,7 @@ def shutdown():
 
 def get_var_config(var):
 	try:
-		return mergeargs([parsedotval(i) for i in zsh.getvalue(var).items()])
+		return mergeargs([parsedotval((u(k), u(v))) for k, v in zsh.getvalue(var).items()])
 	except:
 		return None
 
