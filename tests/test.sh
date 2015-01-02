@@ -3,6 +3,8 @@
 
 FAILED=0
 
+export PATH="/opt/fish/bin:${PATH}"
+
 if test "$PYTHON_IMPLEMENTATION" = "CPython" ; then
 	export PATH="/opt/zsh-${PYTHON_VERSION}/bin:${PATH}"
 fi

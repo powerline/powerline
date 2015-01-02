@@ -30,6 +30,9 @@ else
 	fi
 fi
 
+archive="${PWD:-$(pwd)}/tests/bot-ci/deps/fish/fish.tar.gz"
+sudo sh -c "cd /opt && tar xzf $archive"
+
 # Travis has too outdated fish. It cannot be used for tests.
 # sudo apt-get install fish
 true
