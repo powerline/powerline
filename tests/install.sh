@@ -15,7 +15,7 @@ if test -n "$USE_UCS2_PYTHON" ; then
 	archive="${PWD:-$(pwd)}/tests/bot-ci/deps/cpython-ucs2/cpython-ucs2-${UCS2_PYTHON_VARIANT}.tar.gz"
 	sudo sh -c "cd /opt && tar xzf $archive"
 	PYTHON="/opt/cpython-ucs2-$UCS2_PYTHON_VARIANT/bin/python$UCS2_PYTHON_VARIANT"
-	export LD_LIBRARY_PATH=/opt/cpython-ucs2-$UCS2_PYTHON_VARIANT/lib
+	export LD_LIBRARY_PATH="/opt/cpython-ucs2-$UCS2_PYTHON_VARIANT/lib${LD_LIBRARY_PATH:+:}${LD_LIBRARY_PATH}"
 	set +e
 	mkvirtualenv -p "$PYTHON" cpython-ucs2-$UCS2_PYTHON_VARIANT
 	set -e

@@ -10,7 +10,7 @@ if test "$PYTHON_IMPLEMENTATION" = "CPython" ; then
 fi
 
 if test -n "$USE_UCS2_PYTHON" ; then
-	export LD_LIBRARY_PATH=/opt/cpython-ucs2-$UCS2_PYTHON_VARIANT/lib
+	export LD_LIBRARY_PATH="/opt/cpython-ucs2-$UCS2_PYTHON_VARIANT/lib${LD_LIBRARY_PATH:+:}$LD_LIBRARY_PATH"
 	set +e
 	. virtualenvwrapper.sh
 	workon cpython-ucs2-$UCS2_PYTHON_VARIANT
