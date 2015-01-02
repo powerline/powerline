@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 : ${PYTHON:=python}
 FAIL_SUMMARY=""
 FAILED=0
