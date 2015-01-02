@@ -18,7 +18,7 @@ if test -n "$USE_UCS2_PYTHON" ; then
 fi
 
 export PYTHON="${PYTHON:=python}"
-export PYTHONPATH="${PYTHONPATH}:`realpath .`"
+export PYTHONPATH="${PYTHONPATH}${PYTHONPATH:+:}`realpath .`"
 for script in tests/run_*_tests.sh ; do
 	if ! sh $script ; then
 		echo "Failed $script"
