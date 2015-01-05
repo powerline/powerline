@@ -46,6 +46,15 @@ endfunction
 function CheckRecordedStatuslineValue(expected)
 	return CheckStatuslineValue(g:statusline_value, a:expected)
 endfunction
+function GetCurrentStatusline()
+	if &l:statusline[:1] isnot# '%!'
+		ERR 'Statusline does not start with %!', &l:statusline
+	endif
+	return eval(&l:statusline[2:])
+endfunction
+function CheckCurrentStatusline(expected)
+	return CheckStatuslineValue(GetCurrentStatusline(), a:expected)
+endfunction
 function CheckMessages()
 	if !empty(g:powerline_log_messages)
 		LST ['Unexpected messages in log'] + g:powerline_log_messages
