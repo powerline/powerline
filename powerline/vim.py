@@ -3,14 +3,16 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 
 import sys
 import json
+import logging
 
 from itertools import count
 
 import vim
 
-from powerline.bindings.vim import vim_get_func, vim_getvar, get_vim_encoding
+from powerline.bindings.vim import vim_get_func, vim_getvar, get_vim_encoding, python_to_vim
 from powerline import Powerline, FailedUnicode
 from powerline.lib.dict import mergedicts
+from powerline.lib.unicode import u
 
 
 def _override_from(config, override_varname):
@@ -22,6 +24,24 @@ def _override_from(config, override_varname):
 	return config
 
 
+class VimVarHandler(logging.Handler):
+	'''Vim-specific handler which emits messages to Vim global variables
+
+	Used variable: ``g:powerline_log_messages``.
+	'''
+	def __init__(self, *args, **kwargs):
+		super(VimVarHandler, self).__init__(*args, **kwargs)
+		vim.command('unlet! g:powerline_log_messages')
+		vim.command('let g:powerline_log_messages = []')
+
+	@staticmethod
+	def emit(record):
+		message = u(record.message)
+		if record.exc_text:
+			message += '\n' + u(record.exc_text)
+		vim.eval(b'add(g:powerline_log_messages, ' + python_to_vim(message) + b')')
+
+
 class VimPowerline(Powerline):
 	def init(self, pyeval='PowerlinePyeval', **kwargs):
 		super(VimPowerline, self).init('vim', **kwargs)
@@ -30,6 +50,18 @@ class VimPowerline(Powerline):
 		self.window_statusline = '%!' + pyeval + '(\'powerline.statusline({0})\')'
 
 	default_log_stream = sys.stdout
+
+	def create_logger(self):
+		logger = super(VimPowerline, self).create_logger()
+		try:
+			if int(vim_getvar('powerline_use_var_handler')):
+				formatter = logging.Formatter(self.common_config['log_format'])
+				handler = VimVarHandler(getattr(logging, self.common_config['log_level']))
+				handler.setFormatter(formatter)
+				logger.addHandler(handler)
+		except KeyError:
+			pass
+		return logger
 
 	def add_local_theme(self, key, config):
 		'''Add local themes at runtime (during vim session).

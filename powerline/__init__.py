@@ -424,6 +424,14 @@ class Powerline(object):
 	Usually returns encoding of the current locale.
 	'''
 
+	def create_logger(self):
+		'''Create logger
+
+		This function is used to create logger unless it was already specified 
+		at initialization.
+		'''
+		return create_logger(self.common_config, self.default_log_stream)
+
 	def create_renderer(self, load_main=False, load_colors=False, load_colorscheme=False, load_theme=False):
 		'''(Re)create renderer object. Can be used after Powerline object was 
 		successfully initialized. If any of the below parameters except 
@@ -461,7 +469,7 @@ class Powerline(object):
 				self.import_paths = self.common_config['paths']
 
 				if not self.logger:
-					self.logger = create_logger(self.common_config, self.default_log_stream)
+					self.logger = self.create_logger()
 
 				if not self.pl:
 					self.pl = PowerlineLogger(self.use_daemon_threads, self.logger, self.ext)
