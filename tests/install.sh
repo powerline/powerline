@@ -42,6 +42,15 @@ fi
 archive="${PWD:-$(pwd)}/tests/bot-ci/deps/fish/fish.tar.gz"
 sudo sh -c "cd /opt && tar xzf $archive"
 
+mkdir tests/vim-plugins
+
+for archive in "$ROOT"/tests/bot-ci/deps/vim-plugins/*.tar.gz ; do
+	(
+		cd tests/vim-plugins
+		tar -xzvf "$archive"
+	)
+done
+
 # Travis has too outdated fish. It cannot be used for tests.
 # sudo apt-get install fish
 true
