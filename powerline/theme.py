@@ -146,6 +146,7 @@ class Theme(object):
 						self.colorscheme,
 					)
 			for segment in parsed_segments:
+				self.pl.prefix = segment['name']
 				width = segment['width']
 				align = segment['align']
 				if width == 'auto' and segment['expand'] is None:
