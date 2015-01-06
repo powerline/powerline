@@ -39,12 +39,12 @@ def finish_args(environ, args):
 	:return: Object received as second (``args``) argument.
 	'''
 	args.config_override = mergeargs(chain(
-		(parsedotval(v) for v in args.config_override or ()),
 		parse_override_var(environ.get('POWERLINE_CONFIG_OVERRIDES', '')),
+		(parsedotval(v) for v in args.config_override or ()),
 	))
 	args.theme_override = mergeargs(chain(
-		(parsedotval(v) for v in args.theme_override or ()),
 		parse_override_var(environ.get('POWERLINE_THEME_OVERRIDES', '')),
+		(parsedotval(v) for v in args.theme_override or ()),
 	))
 	if args.renderer_arg:
 		args.renderer_arg = mergeargs((parsedotval(v) for v in args.renderer_arg), remove=True)
