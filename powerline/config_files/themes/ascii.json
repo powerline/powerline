@@ -48,16 +48,6 @@
 		"powerline.segments.common.net.hostname": {
 			"before": "H "
 		},
-		"powerline.segments.common.players.now_playing": {
-			"args": {
-				"state_symbols": {
-					"fallback": "",
-					"play":     ">",
-					"pause":    "~",
-					"stop":     "X"
-				}
-			}
-		},
 		"powerline.segments.common.bat.battery": {
 			"args": {
 				"full_heart": "O",
