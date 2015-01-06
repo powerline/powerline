@@ -23,6 +23,21 @@ else:
 
 
 def finish_args(environ, args):
+	'''Do some final transformations
+
+	Transforms ``*_override`` arguments into dictionaries, adding overrides from 
+	environment variables. Transforms ``renderer_arg`` argument into dictionary 
+	as well, but only if it is true.
+
+	:param dict environ:
+		Environment from which additional overrides should be taken from.
+	:param args:
+		Arguments object returned by 
+		:py:meth:`argparse.ArgumentParser.parse_args`. Will be modified 
+		in-place.
+
+	:return: Object received as second (``args``) argument.
+	'''
 	args.config_override = mergeargs(chain(
 		(parsedotval(v) for v in args.config_override or ()),
 		parse_override_var(environ.get('POWERLINE_CONFIG_OVERRIDES', '')),
@@ -33,6 +48,7 @@ def finish_args(environ, args):
 	))
 	if args.renderer_arg:
 		args.renderer_arg = mergeargs((parsedotval(v) for v in args.renderer_arg), remove=True)
+	return args
 
 
 def get_argparser(ArgumentParser=argparse.ArgumentParser):
