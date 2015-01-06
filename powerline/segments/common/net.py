@@ -68,7 +68,7 @@ Divider highlight group used: ``background:divider``.
 try:
 	import netifaces
 except ImportError:
-	def internal_ip(pl, interface='detect', ipv=4):
+	def internal_ip(pl, interface='auto', ipv=4):
 		return None
 else:
 	_interface_starts = {
@@ -100,8 +100,8 @@ else:
 		else:
 			return 0
 
-	def internal_ip(pl, interface='detect', ipv=4):
-		if interface == 'detect':
+	def internal_ip(pl, interface='auto', ipv=4):
+		if interface == 'auto':
 			try:
 				interface = next(iter(sorted(netifaces.interfaces(), key=_interface_key, reverse=True)))
 			except StopIteration:
@@ -120,7 +120,7 @@ internal_ip = with_docstring(internal_ip,
 Requires ``netifaces`` module to work properly.
 
 :param str interface:
-	Interface on which IP will be checked. Use ``detect`` to automatically 
+	Interface on which IP will be checked. Use ``auto`` to automatically 
 	detect interface. In this case interfaces with lower numbers will be 
 	preferred over interfaces with similar names. Order of preference based on 
 	names:
@@ -174,11 +174,11 @@ class NetworkLoadSegment(KwThreadedSegment):
 	replace_num_pat = re.compile(r'[a-zA-Z]+')
 
 	@staticmethod
-	def key(interface='detect', **kwargs):
+	def key(interface='auto', **kwargs):
 		return interface
 
 	def compute_state(self, interface):
-		if interface == 'detect':
+		if interface == 'auto':
 			proc_exists = getattr(self, 'proc_exists', None)
 			if proc_exists is None:
 				proc_exists = self.proc_exists = os.path.exists('/proc/net/route')
@@ -192,7 +192,7 @@ class NetworkLoadSegment(KwThreadedSegment):
 							if not destination.replace(b'0', b''):
 								interface = iface.decode('utf-8')
 								break
-			if interface == 'detect':
+			if interface == 'auto':
 				# Choose interface with most total activity, excluding some
 				# well known interface names
 				interface, total = 'eth0', -1
@@ -248,7 +248,7 @@ class NetworkLoadSegment(KwThreadedSegment):
 			r.append({
 				'contents': format.format(value=humanize_bytes(value, suffix, si_prefix)),
 				'divider_highlight_group': 'background:divider',
-				'highlight_group': hl_groups,
+				'highlight_groups': hl_groups,
 			})
 			if is_gradient:
 				max = kwargs[max_key]
@@ -268,21 +268,24 @@ falls back to reading
 :file:`/sys/class/net/{interface}/statistics/{rx,tx}_bytes`.
 
 :param str interface:
-	network interface to measure (use the special value "detect" to have powerline try to auto-detect the network interface)
+	Network interface to measure (use the special value "auto" to have powerline 
+	try to auto-detect the network interface).
 :param str suffix:
-	string appended to each load string
+	String appended to each load string.
 :param bool si_prefix:
-	use SI prefix, e.g. MB instead of MiB
+	Use SI prefix, e.g. MB instead of MiB.
 :param str recv_format:
-	format string, receives ``value`` as argument
+	Format string that determines how download speed should look like. Receives 
+	``value`` as argument.
 :param str sent_format:
-	format string, receives ``value`` as argument
+	Format string that determines how upload speed should look like. Receives 
+	``value`` as argument.
 :param float recv_max:
-	maximum number of received bytes per second. Is only used to compute
-	gradient level
+	Maximum number of received bytes per second. Is only used to compute
+	gradient level.
 :param float sent_max:
-	maximum number of sent bytes per second. Is only used to compute gradient
-	level
+	Maximum number of sent bytes per second. Is only used to compute gradient
+	level.
 
 Divider highlight group used: ``background:divider``.
 

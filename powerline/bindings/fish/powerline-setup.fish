@@ -21,17 +21,17 @@ function powerline-setup
 		end
 	end
 
-	if test -z "$POWERLINE_CONFIG"
+	if test -z "$POWERLINE_CONFIG_COMMAND"
 		if which powerline-config >/dev/null
-			set -g POWERLINE_CONFIG powerline-config
+			set -g POWERLINE_CONFIG_COMMAND powerline-config
 		else
-			set -g POWERLINE_CONFIG (dirname (status -f))/../../../scripts/powerline-config
+			set -g POWERLINE_CONFIG_COMMAND (dirname (status -f))/../../../scripts/powerline-config
 		end
 	end
 
-	if eval $POWERLINE_CONFIG shell --shell=fish uses prompt
+	if env $POWERLINE_CONFIG_COMMAND shell --shell=fish uses prompt
 		if test -z "$POWERLINE_COMMAND"
-			set -g POWERLINE_COMMAND (eval $POWERLINE_CONFIG shell command)
+			set -g POWERLINE_COMMAND (env $POWERLINE_CONFIG_COMMAND shell command)
 		end
 		function --on-variable fish_bind_mode _powerline_bind_mode
 			set -g -x _POWERLINE_MODE $fish_bind_mode
@@ -44,12 +44,12 @@ function powerline-setup
 			end
 		end
 		function --on-variable POWERLINE_COMMAND _powerline_update
-			set -l addargs "--last_exit_code=\$status"
-			set -l addargs "$addargs --last_pipe_status=\$status"
+			set -l addargs "--last-exit-code=\$status"
+			set -l addargs "$addargs --last-pipe-status=\$status"
 			set -l addargs "$addargs --jobnum=(jobs -p | wc -l)"
 			# One random value has an 1/32767 = 0.0031% probability of having 
 			# the same value in two shells
-			set -l addargs "$addargs --renderer_arg=client_id="(random)
+			set -l addargs "$addargs --renderer-arg=client_id="(random)
 			set -l addargs "$addargs --width=\$_POWERLINE_COLUMNS"
 			set -l promptside
 			set -l rpromptpast
@@ -81,7 +81,7 @@ function powerline-setup
 		_powerline_set_default_mode
 		_powerline_update
 	end
-	if eval $POWERLINE_CONFIG shell --shell=fish uses tmux
+	if env $POWERLINE_CONFIG_COMMAND shell --shell=fish uses tmux
 		if test -n "$TMUX"
 			if tmux refresh -S ^/dev/null
 				function _powerline_tmux_setenv

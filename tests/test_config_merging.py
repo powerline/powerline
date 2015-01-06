@@ -44,7 +44,7 @@ colors_config = lambda: {
 
 colorscheme_config = lambda: {
 	'groups': {
-		'g': {'fg': 'c1', 'bg': 'c2', 'attr': []},
+		'g': {'fg': 'c1', 'bg': 'c2', 'attrs': []},
 	}
 }
 
@@ -61,7 +61,7 @@ theme_config = lambda: {
 				'type': 'string',
 				'name': 's',
 				'contents': 't',
-				'highlight_group': ['g'],
+				'highlight_groups': ['g'],
 			},
 		],
 		'right': [],
@@ -246,7 +246,7 @@ class TestMerging(TestCase):
 		with WithConfigTree(mdc(main_tree(), {
 			'2/colorschemes/default': {
 				'groups': {
-					'g': {'fg': 'c2', 'bg': 'c1', 'attr': []},
+					'g': {'fg': 'c2', 'bg': 'c1', 'attrs': []},
 				}
 			},
 		})) as p:

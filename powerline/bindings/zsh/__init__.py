@@ -37,7 +37,7 @@ class Args(object):
 
 	@property
 	def config(self):
-		return get_var_config('POWERLINE_CONFIG')
+		return get_var_config('POWERLINE_CONFIG_OVERRIDES')
 
 	@property
 	def theme_option(self):

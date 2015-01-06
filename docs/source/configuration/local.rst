@@ -53,7 +53,7 @@ Powerline script has a number of options controlling powerline behavior. Here
     If ``VALUE`` is omitted then corresponding key will be removed from the 
     configuration (if it was present).
 
-``-t THEME_NAME.KEY.NESTED_KEY=VALUE`` or ``--theme_option=THEME_NAME.KEY.NESTED_KEY=VALUE``
+``-t THEME_NAME.KEY.NESTED_KEY=VALUE`` or ``--theme-option=THEME_NAME.KEY.NESTED_KEY=VALUE``
     Overrides options from :file:`powerline/themes/{ext}/{THEME_NAME}.json`. 
     ``KEY.NESTED_KEY=VALUE`` is processed like described above, ``{ext}`` is the 
     first argument to powerline script. May be passed multiple times.
@@ -61,7 +61,7 @@ Powerline script has a number of options controlling powerline behavior. Here
     If ``VALUE`` is omitted then corresponding key will be removed from the 
     configuration (if it was present).
 
-``-p PATH`` or ``--config_path=PATH``
+``-p PATH`` or ``--config-path=PATH``
     Sets directory where configuration should be read from. If present, no 
     default locations are searched for configuration. No expansions are 
     performed by powerline script itself, but ``-p ~/.powerline`` will likely be 
@@ -73,7 +73,7 @@ Zsh/zpython overrides
 Here overrides are controlled by similarly to the powerline script, but values 
 are taken from zsh variables.
 
-``POWERLINE_CONFIG``
+``POWERLINE_CONFIG_OVERRIDES``
     Overrides options from :file:`powerline/config.json`. Should be a zsh 
     associative array with keys equal to ``KEY.NESTED_KEY`` and values being 
     JSON strings. Pair ``KEY.KEY1 VALUE`` is equivalent to ``{"KEY": {"KEY1": 
@@ -83,9 +83,10 @@ are taken from zsh variables.
 ``POWERLINE_THEME_CONFIG``
     Overrides options from :file:`powerline/themes/shell/*.json`. Should be 
     a zsh associative array with keys equal to ``THEME_NAME.KEY.NESTED_KEY`` and 
-    values being JSON strings. Is processed like the above ``POWERLINE_CONFIG``, 
-    but only subdictionaries for ``THEME_NAME`` key are merged with theme 
-    configuration when theme with given name is requested.
+    values being JSON strings. Is processed like the above 
+    ``POWERLINE_CONFIG_OVERRIDES``, but only subdictionaries for ``THEME_NAME`` 
+    key are merged with theme configuration when theme with given name is 
+    requested.
 
 ``POWERLINE_CONFIG_PATHS``
     Sets directories where configuration should be read from. If present, no 
@@ -121,9 +122,9 @@ Prompt command
 
 In addition to the above configuration options you can use 
 ``$POWERLINE_COMMAND`` environment variable to tell shell or tmux to use 
-specific powerline implementation and ``$POWERLINE_CONFIG`` to tell zsh or tmux 
-where ``powerline-config`` script is located. This is mostly useful for putting 
-powerline into different directory.
+specific powerline implementation and ``$POWERLINE_CONFIG_COMMAND`` to tell zsh 
+or tmux where ``powerline-config`` script is located. This is mostly useful for 
+putting powerline into different directory.
 
 .. note::
 

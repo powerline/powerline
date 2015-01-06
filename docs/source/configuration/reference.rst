@@ -250,7 +250,7 @@ override those from each previous file. It is required that either
            Background color. Must be defined in :ref:`colors 
            <config-colors-colors>`.
 
-       ``attr``
+       ``attrs``
            List of attributes. Valid values are one or more of ``bold``, 
            ``italic`` and ``underline``. Note that some attributes may be 
            unavailable in some applications or terminal emulators. If you do not 
@@ -412,8 +412,8 @@ ascii                       Theme without any unicode characters at all
         ``string``
             A static string segment where the contents is defined in the 
             :ref:`contents option <config-themes-seg-contents>`, and the 
-            highlighting group is defined in the :ref:`highlight_group 
-            option <config-themes-seg-highlight_group>`.
+            highlighting group is defined in the :ref:`highlight_groups option 
+            <config-themes-seg-highlight_groups>`.
 
         ``segments_list``
             Sub-list of segments. This list only allows :ref:`function 
@@ -445,9 +445,9 @@ ascii                       Theme without any unicode characters at all
         or ``{function}``. If ``{module}`` is omitted :ref:`default_module 
         option <config-themes-default_module>` is used.
 
-    .. _config-themes-seg-highlight_group:
+    .. _config-themes-seg-highlight_groups:
 
-    ``highlight_group``
+    ``highlight_groups``
         Highlighting group for this segment. Consists of a prioritized list of 
         highlighting groups, where the first highlighting group that is 
         available in the colorscheme is used.

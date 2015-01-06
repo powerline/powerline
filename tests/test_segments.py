@@ -32,7 +32,7 @@ class TestShell(TestCase):
 		pl = Pl()
 		segment_info = {'args': Args(last_exit_code=10)}
 		self.assertEqual(shell.last_status(pl=pl, segment_info=segment_info), [
-			{'contents': '10', 'highlight_group': ['exit_fail']}
+			{'contents': '10', 'highlight_groups': ['exit_fail']}
 		])
 		segment_info['args'].last_exit_code = 0
 		self.assertEqual(shell.last_status(pl=pl, segment_info=segment_info), None)
@@ -47,9 +47,9 @@ class TestShell(TestCase):
 		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info), None)
 		segment_info['args'].last_pipe_status = [0, 2, 0]
 		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info), [
-			{'contents': '0', 'highlight_group': ['exit_success'], 'draw_inner_divider': True},
-			{'contents': '2', 'highlight_group': ['exit_fail'], 'draw_inner_divider': True},
-			{'contents': '0', 'highlight_group': ['exit_success'], 'draw_inner_divider': True}
+			{'contents': '0', 'highlight_groups': ['exit_success'], 'draw_inner_divider': True},
+			{'contents': '2', 'highlight_groups': ['exit_fail'], 'draw_inner_divider': True},
+			{'contents': '0', 'highlight_groups': ['exit_success'], 'draw_inner_divider': True}
 		])
 
 	def test_jobnum(self):
@@ -68,14 +68,14 @@ class TestShell(TestCase):
 		self.assertEqual(shell.continuation(pl=pl, segment_info={}), [{
 			'contents': '',
 			'width': 'auto',
-			'highlight_group': ['continuation:current', 'continuation'],
+			'highlight_groups': ['continuation:current', 'continuation'],
 		}])
 		segment_info = {'parser_state': 'if cmdsubst'}
 		self.assertEqual(shell.continuation(pl=pl, segment_info=segment_info), [
 			{
 				'contents': 'if',
 				'draw_inner_divider': True,
-				'highlight_group': ['continuation:current', 'continuation'],
+				'highlight_groups': ['continuation:current', 'continuation'],
 				'width': 'auto',
 				'align': 'l',
 			},
@@ -84,7 +84,7 @@ class TestShell(TestCase):
 			{
 				'contents': 'if',
 				'draw_inner_divider': True,
-				'highlight_group': ['continuation:current', 'continuation'],
+				'highlight_groups': ['continuation:current', 'continuation'],
 				'width': 'auto',
 				'align': 'r',
 			},
@@ -93,12 +93,12 @@ class TestShell(TestCase):
 			{
 				'contents': 'if',
 				'draw_inner_divider': True,
-				'highlight_group': ['continuation'],
+				'highlight_groups': ['continuation'],
 			},
 			{
 				'contents': 'cmdsubst',
 				'draw_inner_divider': True,
-				'highlight_group': ['continuation:current', 'continuation'],
+				'highlight_groups': ['continuation:current', 'continuation'],
 				'width': 'auto',
 				'align': 'l',
 			},
@@ -107,21 +107,21 @@ class TestShell(TestCase):
 			{
 				'contents': 'if',
 				'draw_inner_divider': True,
-				'highlight_group': ['continuation'],
+				'highlight_groups': ['continuation'],
 				'width': 'auto',
 				'align': 'r',
 			},
 			{
 				'contents': 'cmdsubst',
 				'draw_inner_divider': True,
-				'highlight_group': ['continuation:current', 'continuation'],
+				'highlight_groups': ['continuation:current', 'continuation'],
 			},
 		])
 		self.assertEqual(shell.continuation(pl=pl, segment_info=segment_info, omit_cmdsubst=True, right_align=True), [
 			{
 				'contents': 'if',
 				'draw_inner_divider': True,
-				'highlight_group': ['continuation:current', 'continuation'],
+				'highlight_groups': ['continuation:current', 'continuation'],
 				'width': 'auto',
 				'align': 'r',
 			},
@@ -130,7 +130,7 @@ class TestShell(TestCase):
 			{
 				'contents': 'IF',
 				'draw_inner_divider': True,
-				'highlight_group': ['continuation:current', 'continuation'],
+				'highlight_groups': ['continuation:current', 'continuation'],
 				'width': 'auto',
 				'align': 'r',
 			},
@@ -138,7 +138,7 @@ class TestShell(TestCase):
 		self.assertEqual(shell.continuation(pl=pl, segment_info=segment_info, omit_cmdsubst=True, right_align=True, renames={'if': None}), [
 			{
 				'contents': '',
-				'highlight_group': ['continuation:current', 'continuation'],
+				'highlight_groups': ['continuation:current', 'continuation'],
 				'width': 'auto',
 				'align': 'r',
 			},
@@ -148,17 +148,17 @@ class TestShell(TestCase):
 			{
 				'contents': 'then',
 				'draw_inner_divider': True,
-				'highlight_group': ['continuation'],
+				'highlight_groups': ['continuation'],
 			},
 			{
 				'contents': 'then',
 				'draw_inner_divider': True,
-				'highlight_group': ['continuation'],
+				'highlight_groups': ['continuation'],
 			},
 			{
 				'contents': 'then',
 				'draw_inner_divider': True,
-				'highlight_group': ['continuation:current', 'continuation'],
+				'highlight_groups': ['continuation:current', 'continuation'],
 				'width': 'auto',
 				'align': 'l',
 			},
@@ -185,89 +185,89 @@ class TestShell(TestCase):
 				{'contents': 'def', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
 				{'contents': 'ghi', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
 				{'contents': 'foo', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
-				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_group': ['cwd:current_folder', 'cwd']},
+				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_groups': ['cwd:current_folder', 'cwd']},
 			])
 			segment_info['home'] = '/abc/def/ghi'
 			self.assertEqual(shell.cwd(pl=pl, segment_info=segment_info), [
 				{'contents': '~', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
 				{'contents': 'foo', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
-				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_group': ['cwd:current_folder', 'cwd']},
+				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_groups': ['cwd:current_folder', 'cwd']},
 			])
 			segment_info.update(shortened_path='~foo/ghi')
 			self.assertEqual(shell.cwd(pl=pl, segment_info=segment_info), [
 				{'contents': '~foo', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
-				{'contents': 'ghi', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_group': ['cwd:current_folder', 'cwd']},
+				{'contents': 'ghi', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_groups': ['cwd:current_folder', 'cwd']},
 			])
 			self.assertEqual(shell.cwd(pl=pl, segment_info=segment_info, use_shortened_path=False), [
 				{'contents': '~', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
 				{'contents': 'foo', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
-				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_group': ['cwd:current_folder', 'cwd']},
+				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_groups': ['cwd:current_folder', 'cwd']},
 			])
 			segment_info.pop('shortened_path')
 			self.assertEqual(shell.cwd(pl=pl, segment_info=segment_info, dir_limit_depth=3), [
 				{'contents': '~', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
 				{'contents': 'foo', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
-				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_group': ['cwd:current_folder', 'cwd']}
+				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_groups': ['cwd:current_folder', 'cwd']}
 			])
 			self.assertEqual(shell.cwd(pl=pl, segment_info=segment_info, dir_limit_depth=3, shorten_home=False), [
 				{'contents': '...', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
 				{'contents': 'ghi', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
 				{'contents': 'foo', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
-				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_group': ['cwd:current_folder', 'cwd']}
+				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_groups': ['cwd:current_folder', 'cwd']}
 			])
 			self.assertEqual(shell.cwd(pl=pl, segment_info=segment_info, dir_limit_depth=1), [
 				{'contents': '...', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
-				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_group': ['cwd:current_folder', 'cwd']}
+				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_groups': ['cwd:current_folder', 'cwd']}
 			])
 			self.assertEqual(shell.cwd(pl=pl, segment_info=segment_info, dir_limit_depth=1, ellipsis='---'), [
 				{'contents': '---', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
-				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_group': ['cwd:current_folder', 'cwd']}
+				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_groups': ['cwd:current_folder', 'cwd']}
 			])
 			self.assertEqual(shell.cwd(pl=pl, segment_info=segment_info, dir_limit_depth=1, ellipsis=None), [
-				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_group': ['cwd:current_folder', 'cwd']}
+				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_groups': ['cwd:current_folder', 'cwd']}
 			])
 			self.assertEqual(shell.cwd(pl=pl, segment_info=segment_info, dir_limit_depth=1, use_path_separator=True), [
 				{'contents': '.../', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False},
-				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False, 'highlight_group': ['cwd:current_folder', 'cwd']}
+				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False, 'highlight_groups': ['cwd:current_folder', 'cwd']}
 			])
 			self.assertEqual(shell.cwd(pl=pl, segment_info=segment_info, dir_limit_depth=1, use_path_separator=True, ellipsis='---'), [
 				{'contents': '---/', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False},
-				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False, 'highlight_group': ['cwd:current_folder', 'cwd']}
+				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False, 'highlight_groups': ['cwd:current_folder', 'cwd']}
 			])
 			self.assertEqual(shell.cwd(pl=pl, segment_info=segment_info, dir_limit_depth=1, use_path_separator=True, ellipsis=None), [
-				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False, 'highlight_group': ['cwd:current_folder', 'cwd']}
+				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False, 'highlight_groups': ['cwd:current_folder', 'cwd']}
 			])
 			self.assertEqual(shell.cwd(pl=pl, segment_info=segment_info, dir_limit_depth=2, dir_shorten_len=2), [
 				{'contents': '~', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
 				{'contents': 'fo', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
-				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_group': ['cwd:current_folder', 'cwd']}
+				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_groups': ['cwd:current_folder', 'cwd']}
 			])
 			self.assertEqual(shell.cwd(pl=pl, segment_info=segment_info, dir_limit_depth=2, dir_shorten_len=2, use_path_separator=True), [
 				{'contents': '~/', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False},
 				{'contents': 'fo/', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False},
-				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False, 'highlight_group': ['cwd:current_folder', 'cwd']}
+				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False, 'highlight_groups': ['cwd:current_folder', 'cwd']}
 			])
 			cwd[0] = '/etc'
 			self.assertEqual(shell.cwd(pl=pl, segment_info=segment_info, use_path_separator=False), [
 				{'contents': '/', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
-				{'contents': 'etc', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_group': ['cwd:current_folder', 'cwd']},
+				{'contents': 'etc', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_groups': ['cwd:current_folder', 'cwd']},
 			])
 			self.assertEqual(shell.cwd(pl=pl, segment_info=segment_info, use_path_separator=True), [
 				{'contents': '/', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False},
-				{'contents': 'etc', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False, 'highlight_group': ['cwd:current_folder', 'cwd']},
+				{'contents': 'etc', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False, 'highlight_groups': ['cwd:current_folder', 'cwd']},
 			])
 			cwd[0] = '/'
 			self.assertEqual(shell.cwd(pl=pl, segment_info=segment_info, use_path_separator=False), [
-				{'contents': '/', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_group': ['cwd:current_folder', 'cwd']},
+				{'contents': '/', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_groups': ['cwd:current_folder', 'cwd']},
 			])
 			self.assertEqual(shell.cwd(pl=pl, segment_info=segment_info, use_path_separator=True), [
-				{'contents': '/', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False, 'highlight_group': ['cwd:current_folder', 'cwd']},
+				{'contents': '/', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False, 'highlight_groups': ['cwd:current_folder', 'cwd']},
 			])
 			ose = OSError()
 			ose.errno = 2
 			cwd[0] = ose
 			self.assertEqual(shell.cwd(pl=pl, segment_info=segment_info, dir_limit_depth=2, dir_shorten_len=2), [
-				{'contents': '[not found]', 'divider_highlight_group': 'cwd:divider', 'highlight_group': ['cwd:current_folder', 'cwd'], 'draw_inner_divider': True}
+				{'contents': '[not found]', 'divider_highlight_group': 'cwd:divider', 'highlight_groups': ['cwd:current_folder', 'cwd'], 'draw_inner_divider': True}
 			])
 			cwd[0] = OSError()
 			self.assertRaises(OSError, shell.cwd, pl=pl, segment_info=segment_info, dir_limit_depth=2, dir_shorten_len=2)
@@ -352,15 +352,15 @@ class TestNet(TestCommon):
 			AF_INET6=netifaces.AF_INET6,
 		):
 			self.assertEqual(common.internal_ip(pl=pl), '192.168.100.200')
-			self.assertEqual(common.internal_ip(pl=pl, interface='detect'), '192.168.100.200')
+			self.assertEqual(common.internal_ip(pl=pl, interface='auto'), '192.168.100.200')
 			self.assertEqual(common.internal_ip(pl=pl, interface='lo'), '127.0.0.1')
 			self.assertEqual(common.internal_ip(pl=pl, interface='teredo'), None)
 			self.assertEqual(common.internal_ip(pl=pl, ipv=4), '192.168.100.200')
-			self.assertEqual(common.internal_ip(pl=pl, interface='detect', ipv=4), '192.168.100.200')
+			self.assertEqual(common.internal_ip(pl=pl, interface='auto', ipv=4), '192.168.100.200')
 			self.assertEqual(common.internal_ip(pl=pl, interface='lo', ipv=4), '127.0.0.1')
 			self.assertEqual(common.internal_ip(pl=pl, interface='teredo', ipv=4), None)
 			self.assertEqual(common.internal_ip(pl=pl, ipv=6), 'feff::5446:5eff:fe5a:7777%enp2s0')
-			self.assertEqual(common.internal_ip(pl=pl, interface='detect', ipv=6), 'feff::5446:5eff:fe5a:7777%enp2s0')
+			self.assertEqual(common.internal_ip(pl=pl, interface='auto', ipv=6), 'feff::5446:5eff:fe5a:7777%enp2s0')
 			self.assertEqual(common.internal_ip(pl=pl, interface='lo', ipv=6), '::1')
 			self.assertEqual(common.internal_ip(pl=pl, interface='teredo', ipv=6), 'feff::5446:5eff:fe5a:7777')
 			interfaces[1:2] = ()
@@ -404,24 +404,24 @@ class TestNet(TestCommon):
 				while not common.network_load.interfaces.get('eth0', {}).get('prev', (None, None))[1]:
 					sleep(0.1)
 				self.assertEqual(common.network_load(pl=pl, interface='eth0'), [
-					{'divider_highlight_group': 'background:divider', 'contents': 'DL  1 KiB/s', 'highlight_group': ['network_load_recv', 'network_load']},
-					{'divider_highlight_group': 'background:divider', 'contents': 'UL  2 KiB/s', 'highlight_group': ['network_load_sent', 'network_load']},
+					{'divider_highlight_group': 'background:divider', 'contents': 'DL  1 KiB/s', 'highlight_groups': ['network_load_recv', 'network_load']},
+					{'divider_highlight_group': 'background:divider', 'contents': 'UL  2 KiB/s', 'highlight_groups': ['network_load_sent', 'network_load']},
 				])
 				self.assertEqual(common.network_load(pl=pl, interface='eth0', recv_format='r {value}', sent_format='s {value}'), [
-					{'divider_highlight_group': 'background:divider', 'contents': 'r 1 KiB/s', 'highlight_group': ['network_load_recv', 'network_load']},
-					{'divider_highlight_group': 'background:divider', 'contents': 's 2 KiB/s', 'highlight_group': ['network_load_sent', 'network_load']},
+					{'divider_highlight_group': 'background:divider', 'contents': 'r 1 KiB/s', 'highlight_groups': ['network_load_recv', 'network_load']},
+					{'divider_highlight_group': 'background:divider', 'contents': 's 2 KiB/s', 'highlight_groups': ['network_load_sent', 'network_load']},
 				])
 				self.assertEqual(common.network_load(pl=pl, recv_format='r {value}', sent_format='s {value}', suffix='bps', interface='eth0'), [
-					{'divider_highlight_group': 'background:divider', 'contents': 'r 1 Kibps', 'highlight_group': ['network_load_recv', 'network_load']},
-					{'divider_highlight_group': 'background:divider', 'contents': 's 2 Kibps', 'highlight_group': ['network_load_sent', 'network_load']},
+					{'divider_highlight_group': 'background:divider', 'contents': 'r 1 Kibps', 'highlight_groups': ['network_load_recv', 'network_load']},
+					{'divider_highlight_group': 'background:divider', 'contents': 's 2 Kibps', 'highlight_groups': ['network_load_sent', 'network_load']},
 				])
 				self.assertEqual(common.network_load(pl=pl, recv_format='r {value}', sent_format='s {value}', si_prefix=True, interface='eth0'), [
-					{'divider_highlight_group': 'background:divider', 'contents': 'r 1 kB/s', 'highlight_group': ['network_load_recv', 'network_load']},
-					{'divider_highlight_group': 'background:divider', 'contents': 's 2 kB/s', 'highlight_group': ['network_load_sent', 'network_load']},
+					{'divider_highlight_group': 'background:divider', 'contents': 'r 1 kB/s', 'highlight_groups': ['network_load_recv', 'network_load']},
+					{'divider_highlight_group': 'background:divider', 'contents': 's 2 kB/s', 'highlight_groups': ['network_load_sent', 'network_load']},
 				])
 				self.assertEqual(common.network_load(pl=pl, recv_format='r {value}', sent_format='s {value}', recv_max=0, interface='eth0'), [
-					{'divider_highlight_group': 'background:divider', 'contents': 'r 1 KiB/s', 'highlight_group': ['network_load_recv_gradient', 'network_load_gradient', 'network_load_recv', 'network_load'], 'gradient_level': 100},
-					{'divider_highlight_group': 'background:divider', 'contents': 's 2 KiB/s', 'highlight_group': ['network_load_sent', 'network_load']},
+					{'divider_highlight_group': 'background:divider', 'contents': 'r 1 KiB/s', 'highlight_groups': ['network_load_recv_gradient', 'network_load_gradient', 'network_load_recv', 'network_load'], 'gradient_level': 100},
+					{'divider_highlight_group': 'background:divider', 'contents': 's 2 KiB/s', 'highlight_groups': ['network_load_sent', 'network_load']},
 				])
 
 				class ApproxEqual(object):
@@ -429,8 +429,8 @@ class TestNet(TestCommon):
 						return abs(i - 50.0) < 1
 
 				self.assertEqual(common.network_load(pl=pl, recv_format='r {value}', sent_format='s {value}', sent_max=4800, interface='eth0'), [
-					{'divider_highlight_group': 'background:divider', 'contents': 'r 1 KiB/s', 'highlight_group': ['network_load_recv', 'network_load']},
-					{'divider_highlight_group': 'background:divider', 'contents': 's 2 KiB/s', 'highlight_group': ['network_load_sent_gradient', 'network_load_gradient', 'network_load_sent', 'network_load'], 'gradient_level': ApproxEqual()},
+					{'divider_highlight_group': 'background:divider', 'contents': 'r 1 KiB/s', 'highlight_groups': ['network_load_recv', 'network_load']},
+					{'divider_highlight_group': 'background:divider', 'contents': 's 2 KiB/s', 'highlight_groups': ['network_load_sent_gradient', 'network_load_gradient', 'network_load_sent', 'network_load'], 'gradient_level': ApproxEqual()},
 				])
 			finally:
 				common.network_load.shutdown()
@@ -463,15 +463,15 @@ class TestEnv(TestCommon):
 					with replace_attr(self.module, 'psutil', new_psutil):
 						with replace_attr(self.module, '_geteuid', lambda: 5):
 							self.assertEqual(common.user(pl=pl), [
-								{'contents': 'def', 'highlight_group': ['user']}
+								{'contents': 'def', 'highlight_groups': ['user']}
 							])
 							self.assertEqual(common.user(pl=pl, hide_user='abc'), [
-								{'contents': 'def', 'highlight_group': ['user']}
+								{'contents': 'def', 'highlight_groups': ['user']}
 							])
 							self.assertEqual(common.user(pl=pl, hide_user='def'), None)
 						with replace_attr(self.module, '_geteuid', lambda: 0):
 							self.assertEqual(common.user(pl=pl), [
-								{'contents': 'def', 'highlight_group': ['superuser', 'user']}
+								{'contents': 'def', 'highlight_groups': ['superuser', 'user']}
 							])
 
 	def test_cwd(self):
@@ -495,78 +495,78 @@ class TestEnv(TestCommon):
 				{'contents': 'def', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
 				{'contents': 'ghi', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
 				{'contents': 'foo', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
-				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_group': ['cwd:current_folder', 'cwd']},
+				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_groups': ['cwd:current_folder', 'cwd']},
 			])
 			segment_info['home'] = '/abc/def/ghi'
 			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info), [
 				{'contents': '~', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
 				{'contents': 'foo', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
-				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_group': ['cwd:current_folder', 'cwd']},
+				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_groups': ['cwd:current_folder', 'cwd']},
 			])
 			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info, dir_limit_depth=3), [
 				{'contents': '~', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
 				{'contents': 'foo', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
-				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_group': ['cwd:current_folder', 'cwd']}
+				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_groups': ['cwd:current_folder', 'cwd']}
 			])
 			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info, dir_limit_depth=3, shorten_home=False), [
 				{'contents': '...', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
 				{'contents': 'ghi', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
 				{'contents': 'foo', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
-				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_group': ['cwd:current_folder', 'cwd']}
+				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_groups': ['cwd:current_folder', 'cwd']}
 			])
 			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info, dir_limit_depth=1), [
 				{'contents': '...', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
-				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_group': ['cwd:current_folder', 'cwd']}
+				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_groups': ['cwd:current_folder', 'cwd']}
 			])
 			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info, dir_limit_depth=1, ellipsis='---'), [
 				{'contents': '---', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
-				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_group': ['cwd:current_folder', 'cwd']}
+				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_groups': ['cwd:current_folder', 'cwd']}
 			])
 			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info, dir_limit_depth=1, ellipsis=None), [
-				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_group': ['cwd:current_folder', 'cwd']}
+				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_groups': ['cwd:current_folder', 'cwd']}
 			])
 			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info, dir_limit_depth=1, use_path_separator=True), [
 				{'contents': '.../', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False},
-				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False, 'highlight_group': ['cwd:current_folder', 'cwd']}
+				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False, 'highlight_groups': ['cwd:current_folder', 'cwd']}
 			])
 			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info, dir_limit_depth=1, use_path_separator=True, ellipsis='---'), [
 				{'contents': '---/', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False},
-				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False, 'highlight_group': ['cwd:current_folder', 'cwd']}
+				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False, 'highlight_groups': ['cwd:current_folder', 'cwd']}
 			])
 			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info, dir_limit_depth=1, use_path_separator=True, ellipsis=None), [
-				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False, 'highlight_group': ['cwd:current_folder', 'cwd']}
+				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False, 'highlight_groups': ['cwd:current_folder', 'cwd']}
 			])
 			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info, dir_limit_depth=2, dir_shorten_len=2), [
 				{'contents': '~', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
 				{'contents': 'fo', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
-				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_group': ['cwd:current_folder', 'cwd']}
+				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_groups': ['cwd:current_folder', 'cwd']}
 			])
 			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info, dir_limit_depth=2, dir_shorten_len=2, use_path_separator=True), [
 				{'contents': '~/', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False},
 				{'contents': 'fo/', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False},
-				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False, 'highlight_group': ['cwd:current_folder', 'cwd']}
+				{'contents': 'bar', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False, 'highlight_groups': ['cwd:current_folder', 'cwd']}
 			])
 			cwd[0] = '/etc'
 			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info, use_path_separator=False), [
 				{'contents': '/', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True},
-				{'contents': 'etc', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_group': ['cwd:current_folder', 'cwd']},
+				{'contents': 'etc', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_groups': ['cwd:current_folder', 'cwd']},
 			])
 			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info, use_path_separator=True), [
 				{'contents': '/', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False},
-				{'contents': 'etc', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False, 'highlight_group': ['cwd:current_folder', 'cwd']},
+				{'contents': 'etc', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False, 'highlight_groups': ['cwd:current_folder', 'cwd']},
 			])
 			cwd[0] = '/'
 			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info, use_path_separator=False), [
-				{'contents': '/', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_group': ['cwd:current_folder', 'cwd']},
+				{'contents': '/', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': True, 'highlight_groups': ['cwd:current_folder', 'cwd']},
 			])
 			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info, use_path_separator=True), [
-				{'contents': '/', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False, 'highlight_group': ['cwd:current_folder', 'cwd']},
+				{'contents': '/', 'divider_highlight_group': 'cwd:divider', 'draw_inner_divider': False, 'highlight_groups': ['cwd:current_folder', 'cwd']},
 			])
 			ose = OSError()
 			ose.errno = 2
 			cwd[0] = ose
 			self.assertEqual(common.cwd(pl=pl, segment_info=segment_info, dir_limit_depth=2, dir_shorten_len=2), [
-				{'contents': '[not found]', 'divider_highlight_group': 'cwd:divider', 'highlight_group': ['cwd:current_folder', 'cwd'], 'draw_inner_divider': True}
+				{'contents': '[not found]', 'divider_highlight_group': 'cwd:divider', 'highlight_groups': ['cwd:current_folder', 'cwd'], 'draw_inner_divider': True}
 			])
 			cwd[0] = OSError()
 			self.assertRaises(OSError, common.cwd, pl=pl, segment_info=segment_info, dir_limit_depth=2, dir_shorten_len=2)
@@ -601,29 +601,29 @@ class TestVcs(TestCommon):
 		with replace_attr(self.module, 'guess', get_dummy_guess(status=lambda: None, directory='/tmp/tests')):
 			with replace_attr(self.module, 'tree_status', lambda repo, pl: None):
 				self.assertEqual(branch(segment_info=segment_info, status_colors=False), [{
-						'highlight_group': ['branch'],
+						'highlight_groups': ['branch'],
 						'contents': 'tests',
 						'divider_highlight_group': None
 				}])
 				self.assertEqual(branch(segment_info=segment_info, status_colors=True), [{
 					'contents': 'tests',
-					'highlight_group': ['branch_clean', 'branch'],
+					'highlight_groups': ['branch_clean', 'branch'],
 					'divider_highlight_group': None
 				}])
 		with replace_attr(self.module, 'guess', get_dummy_guess(status=lambda: 'D  ', directory='/tmp/tests')):
 			with replace_attr(self.module, 'tree_status', lambda repo, pl: 'D '):
 				self.assertEqual(branch(segment_info=segment_info, status_colors=False), [{
-					'highlight_group': ['branch'],
+					'highlight_groups': ['branch'],
 					'contents': 'tests',
 					'divider_highlight_group': None
 				}])
 				self.assertEqual(branch(segment_info=segment_info, status_colors=True), [{
 					'contents': 'tests',
-					'highlight_group': ['branch_dirty', 'branch'],
+					'highlight_groups': ['branch_dirty', 'branch'],
 					'divider_highlight_group': None
 				}])
 				self.assertEqual(branch(segment_info=segment_info, status_colors=False), [{
-					'highlight_group': ['branch'],
+					'highlight_groups': ['branch'],
 					'contents': 'tests',
 					'divider_highlight_group': None
 				}])
@@ -632,22 +632,22 @@ class TestVcs(TestCommon):
 		with replace_attr(self.module, 'guess', get_dummy_guess(status=lambda: 'U')):
 			with replace_attr(self.module, 'tree_status', lambda repo, pl: 'U'):
 				self.assertEqual(branch(segment_info=segment_info, status_colors=False, ignore_statuses=['U']), [{
-					'highlight_group': ['branch'],
+					'highlight_groups': ['branch'],
 					'contents': 'tests',
 					'divider_highlight_group': None
 				}])
 				self.assertEqual(branch(segment_info=segment_info, status_colors=True, ignore_statuses=['DU']), [{
-					'highlight_group': ['branch_dirty', 'branch'],
+					'highlight_groups': ['branch_dirty', 'branch'],
 					'contents': 'tests',
 					'divider_highlight_group': None
 				}])
 				self.assertEqual(branch(segment_info=segment_info, status_colors=True), [{
-					'highlight_group': ['branch_dirty', 'branch'],
+					'highlight_groups': ['branch_dirty', 'branch'],
 					'contents': 'tests',
 					'divider_highlight_group': None
 				}])
 				self.assertEqual(branch(segment_info=segment_info, status_colors=True, ignore_statuses=['U']), [{
-					'highlight_group': ['branch_clean', 'branch'],
+					'highlight_groups': ['branch_clean', 'branch'],
 					'contents': 'tests',
 					'divider_highlight_group': None
 				}])
@@ -659,8 +659,8 @@ class TestTime(TestCommon):
 	def test_date(self):
 		pl = Pl()
 		with replace_attr(self.module, 'datetime', Args(now=lambda: Args(strftime=lambda fmt: fmt))):
-			self.assertEqual(common.date(pl=pl), [{'contents': '%Y-%m-%d', 'highlight_group': ['date'], 'divider_highlight_group': None}])
-			self.assertEqual(common.date(pl=pl, format='%H:%M', istime=True), [{'contents': '%H:%M', 'highlight_group': ['time', 'date'], 'divider_highlight_group': 'time:divider'}])
+			self.assertEqual(common.date(pl=pl), [{'contents': '%Y-%m-%d', 'highlight_groups': ['date'], 'divider_highlight_group': None}])
+			self.assertEqual(common.date(pl=pl, format='%H:%M', istime=True), [{'contents': '%H:%M', 'highlight_groups': ['time', 'date'], 'divider_highlight_group': 'time:divider'}])
 
 	def test_fuzzy_time(self):
 		time = Args(hour=0, minute=45)
@@ -710,14 +710,14 @@ class TestSys(TestCommon):
 		with replace_module_module(self.module, 'os', getloadavg=lambda: (7.5, 3.5, 1.5)):
 			with replace_attr(self.module, '_cpu_count', lambda: 2):
 				self.assertEqual(common.system_load(pl=pl), [
-					{'contents': '7.5 ', 'highlight_group': ['system_load_gradient', 'system_load'], 'divider_highlight_group': 'background:divider', 'gradient_level': 100},
-					{'contents': '3.5 ', 'highlight_group': ['system_load_gradient', 'system_load'], 'divider_highlight_group': 'background:divider', 'gradient_level': 75.0},
-					{'contents': '1.5', 'highlight_group': ['system_load_gradient', 'system_load'], 'divider_highlight_group': 'background:divider', 'gradient_level': 0}
+					{'contents': '7.5 ', 'highlight_groups': ['system_load_gradient', 'system_load'], 'divider_highlight_group': 'background:divider', 'gradient_level': 100},
+					{'contents': '3.5 ', 'highlight_groups': ['system_load_gradient', 'system_load'], 'divider_highlight_group': 'background:divider', 'gradient_level': 75.0},
+					{'contents': '1.5', 'highlight_groups': ['system_load_gradient', 'system_load'], 'divider_highlight_group': 'background:divider', 'gradient_level': 0}
 				])
 				self.assertEqual(common.system_load(pl=pl, format='{avg:.0f}', threshold_good=0, threshold_bad=1), [
-					{'contents': '8 ', 'highlight_group': ['system_load_gradient', 'system_load'], 'divider_highlight_group': 'background:divider', 'gradient_level': 100},
-					{'contents': '4 ', 'highlight_group': ['system_load_gradient', 'system_load'], 'divider_highlight_group': 'background:divider', 'gradient_level': 100},
-					{'contents': '2', 'highlight_group': ['system_load_gradient', 'system_load'], 'divider_highlight_group': 'background:divider', 'gradient_level': 75.0}
+					{'contents': '8 ', 'highlight_groups': ['system_load_gradient', 'system_load'], 'divider_highlight_group': 'background:divider', 'gradient_level': 100},
+					{'contents': '4 ', 'highlight_groups': ['system_load_gradient', 'system_load'], 'divider_highlight_group': 'background:divider', 'gradient_level': 100},
+					{'contents': '2', 'highlight_groups': ['system_load_gradient', 'system_load'], 'divider_highlight_group': 'background:divider', 'gradient_level': 75.0}
 				])
 
 	def test_cpu_load_percent(self):
@@ -730,12 +730,12 @@ class TestSys(TestCommon):
 			self.assertEqual(common.cpu_load_percent(pl=pl), [{
 				'contents': '52%',
 				'gradient_level': 52.3,
-				'highlight_group': ['cpu_load_percent_gradient', 'cpu_load_percent'],
+				'highlight_groups': ['cpu_load_percent_gradient', 'cpu_load_percent'],
 			}])
 			self.assertEqual(common.cpu_load_percent(pl=pl, format='{0:.1f}%'), [{
 				'contents': '52.3%',
 				'gradient_level': 52.3,
-				'highlight_group': ['cpu_load_percent_gradient', 'cpu_load_percent'],
+				'highlight_groups': ['cpu_load_percent_gradient', 'cpu_load_percent'],
 			}])
 
 
@@ -746,46 +746,46 @@ class TestWthr(TestCommon):
 		pl = Pl()
 		with replace_attr(self.module, 'urllib_read', urllib_read):
 			self.assertEqual(common.weather(pl=pl), [
-				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_condition_partly_cloudy_day', 'weather_condition_cloudy', 'weather_conditions', 'weather'], 'contents': 'CLOUDS '},
-				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '-9°C', 'gradient_level': 30.0}
+				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_condition_partly_cloudy_day', 'weather_condition_cloudy', 'weather_conditions', 'weather'], 'contents': 'CLOUDS '},
+				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '-9°C', 'gradient_level': 30.0}
 			])
 			self.assertEqual(common.weather(pl=pl, temp_coldest=0, temp_hottest=100), [
-				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_condition_partly_cloudy_day', 'weather_condition_cloudy', 'weather_conditions', 'weather'], 'contents': 'CLOUDS '},
-				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '-9°C', 'gradient_level': 0}
+				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_condition_partly_cloudy_day', 'weather_condition_cloudy', 'weather_conditions', 'weather'], 'contents': 'CLOUDS '},
+				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '-9°C', 'gradient_level': 0}
 			])
 			self.assertEqual(common.weather(pl=pl, temp_coldest=-100, temp_hottest=-50), [
-				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_condition_partly_cloudy_day', 'weather_condition_cloudy', 'weather_conditions', 'weather'], 'contents': 'CLOUDS '},
-				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '-9°C', 'gradient_level': 100}
+				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_condition_partly_cloudy_day', 'weather_condition_cloudy', 'weather_conditions', 'weather'], 'contents': 'CLOUDS '},
+				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '-9°C', 'gradient_level': 100}
 			])
 			self.assertEqual(common.weather(pl=pl, icons={'cloudy': 'o'}), [
-				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_condition_partly_cloudy_day', 'weather_condition_cloudy', 'weather_conditions', 'weather'], 'contents': 'o '},
-				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '-9°C', 'gradient_level': 30.0}
+				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_condition_partly_cloudy_day', 'weather_condition_cloudy', 'weather_conditions', 'weather'], 'contents': 'o '},
+				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '-9°C', 'gradient_level': 30.0}
 			])
 			self.assertEqual(common.weather(pl=pl, icons={'partly_cloudy_day': 'x'}), [
-				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_condition_partly_cloudy_day', 'weather_condition_cloudy', 'weather_conditions', 'weather'], 'contents': 'x '},
-				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '-9°C', 'gradient_level': 30.0}
+				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_condition_partly_cloudy_day', 'weather_condition_cloudy', 'weather_conditions', 'weather'], 'contents': 'x '},
+				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '-9°C', 'gradient_level': 30.0}
 			])
 			self.assertEqual(common.weather(pl=pl, unit='F'), [
-				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_condition_partly_cloudy_day', 'weather_condition_cloudy', 'weather_conditions', 'weather'], 'contents': 'CLOUDS '},
-				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '16°F', 'gradient_level': 30.0}
+				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_condition_partly_cloudy_day', 'weather_condition_cloudy', 'weather_conditions', 'weather'], 'contents': 'CLOUDS '},
+				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '16°F', 'gradient_level': 30.0}
 			])
 			self.assertEqual(common.weather(pl=pl, unit='K'), [
-				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_condition_partly_cloudy_day', 'weather_condition_cloudy', 'weather_conditions', 'weather'], 'contents': 'CLOUDS '},
-				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '264K', 'gradient_level': 30.0}
+				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_condition_partly_cloudy_day', 'weather_condition_cloudy', 'weather_conditions', 'weather'], 'contents': 'CLOUDS '},
+				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '264K', 'gradient_level': 30.0}
 			])
 			self.assertEqual(common.weather(pl=pl, temp_format='{temp:.1e}C'), [
-				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_condition_partly_cloudy_day', 'weather_condition_cloudy', 'weather_conditions', 'weather'], 'contents': 'CLOUDS '},
-				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '-9.0e+00C', 'gradient_level': 30.0}
+				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_condition_partly_cloudy_day', 'weather_condition_cloudy', 'weather_conditions', 'weather'], 'contents': 'CLOUDS '},
+				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '-9.0e+00C', 'gradient_level': 30.0}
 			])
 		with replace_attr(self.module, 'urllib_read', urllib_read):
 			common.weather.startup(pl=pl, location_query='Meppen,06,DE')
 			self.assertEqual(common.weather(pl=pl), [
-				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_condition_partly_cloudy_day', 'weather_condition_cloudy', 'weather_conditions', 'weather'], 'contents': 'CLOUDS '},
-				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '-9°C', 'gradient_level': 30.0}
+				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_condition_partly_cloudy_day', 'weather_condition_cloudy', 'weather_conditions', 'weather'], 'contents': 'CLOUDS '},
+				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '-9°C', 'gradient_level': 30.0}
 			])
 			self.assertEqual(common.weather(pl=pl, location_query='Moscow,RU'), [
-				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_condition_partly_cloudy_day', 'weather_condition_cloudy', 'weather_conditions', 'weather'], 'contents': 'CLOUDS '},
-				{'divider_highlight_group': 'background:divider', 'highlight_group': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '19°C', 'gradient_level': 70.0}
+				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_condition_partly_cloudy_day', 'weather_condition_cloudy', 'weather_conditions', 'weather'], 'contents': 'CLOUDS '},
+				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '19°C', 'gradient_level': 70.0}
 			])
 			common.weather.shutdown()
 
@@ -818,30 +818,30 @@ class TestBat(TestCommon):
 		with replace_attr(self.module, '_get_capacity', _get_capacity):
 			self.assertEqual(common.battery(pl=pl), [{
 				'contents': '86%',
-				'highlight_group': ['battery_gradient', 'battery'],
+				'highlight_groups': ['battery_gradient', 'battery'],
 				'gradient_level': 14,
 			}])
 			self.assertEqual(common.battery(pl=pl, format='{capacity:.2f}'), [{
 				'contents': '0.86',
-				'highlight_group': ['battery_gradient', 'battery'],
+				'highlight_groups': ['battery_gradient', 'battery'],
 				'gradient_level': 14,
 			}])
 			self.assertEqual(common.battery(pl=pl, steps=7), [{
 				'contents': '86%',
-				'highlight_group': ['battery_gradient', 'battery'],
+				'highlight_groups': ['battery_gradient', 'battery'],
 				'gradient_level': 14,
 			}])
 			self.assertEqual(common.battery(pl=pl, gamify=True), [
 				{
 					'contents': 'OOOO',
 					'draw_inner_divider': False,
-					'highlight_group': ['battery_full', 'battery_gradient', 'battery'],
+					'highlight_groups': ['battery_full', 'battery_gradient', 'battery'],
 					'gradient_level': 0
 				},
 				{
 					'contents': 'O',
 					'draw_inner_divider': False,
-					'highlight_group': ['battery_empty', 'battery_gradient', 'battery'],
+					'highlight_groups': ['battery_empty', 'battery_gradient', 'battery'],
 					'gradient_level': 100
 				}
 			])
@@ -849,13 +849,13 @@ class TestBat(TestCommon):
 				{
 					'contents': '++++++++',
 					'draw_inner_divider': False,
-					'highlight_group': ['battery_full', 'battery_gradient', 'battery'],
+					'highlight_groups': ['battery_full', 'battery_gradient', 'battery'],
 					'gradient_level': 0
 				},
 				{
 					'contents': '--',
 					'draw_inner_divider': False,
-					'highlight_group': ['battery_empty', 'battery_gradient', 'battery'],
+					'highlight_groups': ['battery_empty', 'battery_gradient', 'battery'],
 					'gradient_level': 100
 				}
 			])
@@ -983,10 +983,10 @@ class TestVim(TestCase):
 		segment_info = vim_module._get_segment_info()
 		self.assertEqual(self.vim.file_name(pl=pl, segment_info=segment_info), None)
 		self.assertEqual(self.vim.file_name(pl=pl, segment_info=segment_info, display_no_file=True), [
-			{'contents': '[No file]', 'highlight_group': ['file_name_no_file', 'file_name']}
+			{'contents': '[No file]', 'highlight_groups': ['file_name_no_file', 'file_name']}
 		])
 		self.assertEqual(self.vim.file_name(pl=pl, segment_info=segment_info, display_no_file=True, no_file_text='X'), [
-			{'contents': 'X', 'highlight_group': ['file_name_no_file', 'file_name']}
+			{'contents': 'X', 'highlight_groups': ['file_name_no_file', 'file_name']}
 		])
 		with vim_module._with('buffer', '/tmp/abc') as segment_info:
 			self.assertEqual(self.vim.file_name(pl=pl, segment_info=segment_info), 'abc')
@@ -1033,7 +1033,7 @@ class TestVim(TestCase):
 			vim_module._set_cursor(50, 0)
 			self.assertEqual(self.vim.line_percent(pl=pl, segment_info=segment_info), '50')
 			self.assertEqual(self.vim.line_percent(pl=pl, segment_info=segment_info, gradient=True), [
-				{'contents': '50', 'highlight_group': ['line_percent_gradient', 'line_percent'], 'gradient_level': 50 * 100.0 / 101}
+				{'contents': '50', 'highlight_groups': ['line_percent_gradient', 'line_percent'], 'gradient_level': 50 * 100.0 / 101}
 			])
 		finally:
 			vim_module._bw(segment_info['bufnr'])
@@ -1057,7 +1057,7 @@ class TestVim(TestCase):
 			vim_module._set_cursor(49, 0)
 			self.assertEqual(self.vim.position(pl=pl, segment_info=segment_info), '50%')
 			self.assertEqual(self.vim.position(pl=pl, segment_info=segment_info, gradient=True), [
-				{'contents': '50%', 'highlight_group': ['position_gradient', 'position'], 'gradient_level': 50.0}
+				{'contents': '50%', 'highlight_groups': ['position_gradient', 'position'], 'gradient_level': 50.0}
 			])
 			vim_module._set_cursor(0, 0)
 			self.assertEqual(self.vim.position(pl=pl, segment_info=segment_info), 'Top')
@@ -1067,7 +1067,7 @@ class TestVim(TestCase):
 			vim_module._set_cursor(0, 0)
 			self.assertEqual(self.vim.position(pl=pl, segment_info=segment_info, position_strings={'top': 'Comienzo', 'bottom': 'Final', 'all': 'Todo'}), 'Todo')
 			self.assertEqual(self.vim.position(pl=pl, segment_info=segment_info, gradient=True), [
-				{'contents': 'All', 'highlight_group': ['position_gradient', 'position'], 'gradient_level': 0.0}
+				{'contents': 'All', 'highlight_groups': ['position_gradient', 'position'], 'gradient_level': 0.0}
 			])
 		finally:
 			vim_module._bw(segment_info['bufnr'])
@@ -1078,10 +1078,10 @@ class TestVim(TestCase):
 		self.assertEqual(self.vim.line_current(pl=pl, segment_info=segment_info), '1')
 		self.assertEqual(self.vim.col_current(pl=pl, segment_info=segment_info), '1')
 		self.assertEqual(self.vim.virtcol_current(pl=pl, segment_info=segment_info), [{
-			'highlight_group': ['virtcol_current_gradient', 'virtcol_current', 'col_current'], 'contents': '1', 'gradient_level': 100.0 / 80,
+			'highlight_groups': ['virtcol_current_gradient', 'virtcol_current', 'col_current'], 'contents': '1', 'gradient_level': 100.0 / 80,
 		}])
 		self.assertEqual(self.vim.virtcol_current(pl=pl, segment_info=segment_info, gradient=False), [{
-			'highlight_group': ['virtcol_current', 'col_current'], 'contents': '1',
+			'highlight_groups': ['virtcol_current', 'col_current'], 'contents': '1',
 		}])
 
 	def test_modified_buffers(self):
@@ -1096,32 +1096,32 @@ class TestVim(TestCase):
 			with replace_attr(self.vcs, 'guess', get_dummy_guess(status=lambda: None)):
 				with replace_attr(self.vcs, 'tree_status', lambda repo, pl: None):
 					self.assertEqual(branch(segment_info=segment_info, status_colors=False), [
-						{'divider_highlight_group': 'branch:divider', 'highlight_group': ['branch'], 'contents': 'foo'}
+						{'divider_highlight_group': 'branch:divider', 'highlight_groups': ['branch'], 'contents': 'foo'}
 					])
 					self.assertEqual(branch(segment_info=segment_info, status_colors=True), [
-						{'divider_highlight_group': 'branch:divider', 'highlight_group': ['branch_clean', 'branch'], 'contents': 'foo'}
+						{'divider_highlight_group': 'branch:divider', 'highlight_groups': ['branch_clean', 'branch'], 'contents': 'foo'}
 					])
 			with replace_attr(self.vcs, 'guess', get_dummy_guess(status=lambda: 'DU')):
 				with replace_attr(self.vcs, 'tree_status', lambda repo, pl: 'DU'):
 					self.assertEqual(branch(segment_info=segment_info, status_colors=False), [
-						{'divider_highlight_group': 'branch:divider', 'highlight_group': ['branch'], 'contents': 'foo'}
+						{'divider_highlight_group': 'branch:divider', 'highlight_groups': ['branch'], 'contents': 'foo'}
 					])
 					self.assertEqual(branch(segment_info=segment_info, status_colors=True), [
-						{'divider_highlight_group': 'branch:divider', 'highlight_group': ['branch_dirty', 'branch'], 'contents': 'foo'}
+						{'divider_highlight_group': 'branch:divider', 'highlight_groups': ['branch_dirty', 'branch'], 'contents': 'foo'}
 					])
 			with replace_attr(self.vcs, 'guess', get_dummy_guess(status=lambda: 'U')):
 				with replace_attr(self.vcs, 'tree_status', lambda repo, pl: 'U'):
 					self.assertEqual(branch(segment_info=segment_info, status_colors=False, ignore_statuses=['U']), [
-						{'divider_highlight_group': 'branch:divider', 'highlight_group': ['branch'], 'contents': 'foo'}
+						{'divider_highlight_group': 'branch:divider', 'highlight_groups': ['branch'], 'contents': 'foo'}
 					])
 					self.assertEqual(branch(segment_info=segment_info, status_colors=True, ignore_statuses=['DU']), [
-						{'divider_highlight_group': 'branch:divider', 'highlight_group': ['branch_dirty', 'branch'], 'contents': 'foo'}
+						{'divider_highlight_group': 'branch:divider', 'highlight_groups': ['branch_dirty', 'branch'], 'contents': 'foo'}
 					])
 					self.assertEqual(branch(segment_info=segment_info, status_colors=True), [
-						{'divider_highlight_group': 'branch:divider', 'highlight_group': ['branch_dirty', 'branch'], 'contents': 'foo'}
+						{'divider_highlight_group': 'branch:divider', 'highlight_groups': ['branch_dirty', 'branch'], 'contents': 'foo'}
 					])
 					self.assertEqual(branch(segment_info=segment_info, status_colors=True, ignore_statuses=['U']), [
-						{'divider_highlight_group': 'branch:divider', 'highlight_group': ['branch_clean', 'branch'], 'contents': 'foo'}
+						{'divider_highlight_group': 'branch:divider', 'highlight_groups': ['branch_clean', 'branch'], 'contents': 'foo'}
 					])
 
 	def test_file_vcs_status(self):
@@ -1131,7 +1131,7 @@ class TestVim(TestCase):
 		with vim_module._with('buffer', '/foo') as segment_info:
 			with replace_attr(self.vim, 'guess', get_dummy_guess(status=lambda file: 'M')):
 				self.assertEqual(file_vcs_status(segment_info=segment_info), [
-					{'highlight_group': ['file_vcs_status_M', 'file_vcs_status'], 'contents': 'M'}
+					{'highlight_groups': ['file_vcs_status_M', 'file_vcs_status'], 'contents': 'M'}
 				])
 			with replace_attr(self.vim, 'guess', get_dummy_guess(status=lambda file: None)):
 				self.assertEqual(file_vcs_status(segment_info=segment_info), None)
@@ -1148,11 +1148,11 @@ class TestVim(TestCase):
 			self.assertEqual(trailing_whitespace(), None)
 			vim_module.current.buffer[0] = ' '
 			self.assertEqual(trailing_whitespace(), [{
-				'highlight_group': ['trailing_whitespace', 'warning'],
+				'highlight_groups': ['trailing_whitespace', 'warning'],
 				'contents': '1',
 			}])
 			self.assertEqual(trailing_whitespace(), [{
-				'highlight_group': ['trailing_whitespace', 'warning'],
+				'highlight_groups': ['trailing_whitespace', 'warning'],
 				'contents': '1',
 			}])
 			vim_module.current.buffer[0] = ''
@@ -1185,7 +1185,7 @@ class TestVim(TestCase):
 				vim_module.current.buffer[0] = ' '
 				self.assertEqual(self.vim.tab_modified_indicator(pl=pl, segment_info=segment_info), [{
 					'contents': '+',
-					'highlight_group': ['tab_modified_indicator', 'modified_indicator'],
+					'highlight_groups': ['tab_modified_indicator', 'modified_indicator'],
 				}])
 				vim_module._undo()
 				self.assertEqual(self.vim.tab_modified_indicator(pl=pl, segment_info=segment_info), None)
@@ -1197,7 +1197,7 @@ class TestVim(TestCase):
 				self.assertEqual(self.vim.modified_indicator(pl=pl, segment_info=segment_info), None)
 				self.assertEqual(self.vim.tab_modified_indicator(pl=pl, segment_info=segment_info), [{
 					'contents': '+',
-					'highlight_group': ['tab_modified_indicator', 'modified_indicator'],
+					'highlight_groups': ['tab_modified_indicator', 'modified_indicator'],
 				}])
 
 	def test_csv_col_current(self):
@@ -1216,55 +1216,55 @@ class TestVim(TestCase):
 			buffer[:] = ['1;2;3', '4;5;6']
 			vim_module._set_cursor(1, 1)
 			self.assertEqual(csv_col_current(), [{
-				'contents': '1', 'highlight_group': ['csv:column_number', 'csv']
+				'contents': '1', 'highlight_groups': ['csv:column_number', 'csv']
 			}])
 			vim_module._set_cursor(2, 3)
 			self.assertEqual(csv_col_current(), [{
-				'contents': '2', 'highlight_group': ['csv:column_number', 'csv']
+				'contents': '2', 'highlight_groups': ['csv:column_number', 'csv']
 			}])
 			vim_module._set_cursor(2, 3)
 			self.assertEqual(csv_col_current(display_name=True), [{
-				'contents': '2', 'highlight_group': ['csv:column_number', 'csv']
+				'contents': '2', 'highlight_groups': ['csv:column_number', 'csv']
 			}, {
-				'contents': ' (2)', 'highlight_group': ['csv:column_name', 'csv']
+				'contents': ' (2)', 'highlight_groups': ['csv:column_name', 'csv']
 			}])
 			buffer[:0] = ['Foo;Bar;Baz']
 			vim_module._set_cursor(2, 3)
 			self.assertEqual(csv_col_current(), [{
-				'contents': '2', 'highlight_group': ['csv:column_number', 'csv']
+				'contents': '2', 'highlight_groups': ['csv:column_number', 'csv']
 			}, {
-				'contents': ' (Bar)', 'highlight_group': ['csv:column_name', 'csv']
+				'contents': ' (Bar)', 'highlight_groups': ['csv:column_name', 'csv']
 			}])
 			if sys.version_info < (2, 7):
 				raise SkipTest('csv module in Python-2.6 does not handle multiline csv files well')
 			buffer[len(buffer):] = ['1;"bc', 'def', 'ghi', 'jkl";3']
 			vim_module._set_cursor(5, 1)
 			self.assertEqual(csv_col_current(), [{
-				'contents': '2', 'highlight_group': ['csv:column_number', 'csv']
+				'contents': '2', 'highlight_groups': ['csv:column_number', 'csv']
 			}, {
-				'contents': ' (Bar)', 'highlight_group': ['csv:column_name', 'csv']
+				'contents': ' (Bar)', 'highlight_groups': ['csv:column_name', 'csv']
 			}])
 			vim_module._set_cursor(7, 6)
 			self.assertEqual(csv_col_current(), [{
-				'contents': '3', 'highlight_group': ['csv:column_number', 'csv']
+				'contents': '3', 'highlight_groups': ['csv:column_number', 'csv']
 			}, {
-				'contents': ' (Baz)', 'highlight_group': ['csv:column_name', 'csv']
+				'contents': ' (Baz)', 'highlight_groups': ['csv:column_name', 'csv']
 			}])
 			self.assertEqual(csv_col_current(name_format=' ({column_name:.1})'), [{
-				'contents': '3', 'highlight_group': ['csv:column_number', 'csv']
+				'contents': '3', 'highlight_groups': ['csv:column_number', 'csv']
 			}, {
-				'contents': ' (B)', 'highlight_group': ['csv:column_name', 'csv']
+				'contents': ' (B)', 'highlight_groups': ['csv:column_name', 'csv']
 			}])
 			self.assertEqual(csv_col_current(display_name=True, name_format=' ({column_name:.1})'), [{
-				'contents': '3', 'highlight_group': ['csv:column_number', 'csv']
+				'contents': '3', 'highlight_groups': ['csv:column_number', 'csv']
 			}, {
-				'contents': ' (B)', 'highlight_group': ['csv:column_name', 'csv']
+				'contents': ' (B)', 'highlight_groups': ['csv:column_name', 'csv']
 			}])
 			self.assertEqual(csv_col_current(display_name=False, name_format=' ({column_name:.1})'), [{
-				'contents': '3', 'highlight_group': ['csv:column_number', 'csv']
+				'contents': '3', 'highlight_groups': ['csv:column_number', 'csv']
 			}])
 			self.assertEqual(csv_col_current(display_name=False), [{
-				'contents': '3', 'highlight_group': ['csv:column_number', 'csv']
+				'contents': '3', 'highlight_groups': ['csv:column_number', 'csv']
 			}])
 		finally:
 			vim_module._bw(segment_info['bufnr'])

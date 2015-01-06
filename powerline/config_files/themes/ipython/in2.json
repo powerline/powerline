@@ -5,7 +5,7 @@
 				"type": "string",
 				"contents": "",
 				"width": "auto",
-				"highlight_group": ["prompt"]
+				"highlight_groups": ["prompt"]
 			}
 		]
 	}

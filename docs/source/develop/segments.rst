@@ -139,7 +139,7 @@ value:
 
     [{
         'contents': original_return,
-        'highlight_group': [segment_name],
+        'highlight_groups': [segment_name],
     }]
 
 .. _dev-segments-return:
@@ -163,11 +163,11 @@ Detailed description of used dictionary keys:
     as :ref:`the similar keys in configuration <config-themes-seg-draw_divider>` 
     (:ref:`draw_inner_divider <config-themes-seg-draw_inner_divider>`).
 
-.. _dev-segments-highlight_group:
+.. _dev-segments-highlight_groups:
 
-``highlight_group``
+``highlight_groups``
     Determines segment highlighting. Refer to :ref:`themes documentation 
-    <config-themes-seg-highlight_group>` for more details.
+    <config-themes-seg-highlight_groups>` for more details.
 
     Defaults to the name of the segment.
 
@@ -206,8 +206,8 @@ Detailed description of used dictionary keys:
 ``gradient_level``
     First and the only key that may not be specified in user configuration. It 
     determines which color should be used for this segment when one of the 
-    highlighting groups specified by :ref:`highlight_group 
-    <dev-segments-highlight_group>` was defined to use the color gradient.
+    highlighting groups specified by :ref:`highlight_groups 
+    <dev-segments-highlight_groups>` was defined to use the color gradient.
 
     This key may have any value from 0 to 100 inclusive, value is supposed to be 
     an ``int`` or ``float`` instance.
@@ -243,7 +243,7 @@ Segment dictionary contains the following keys:
     :ref:`Segment type <config-themes-seg-type>`. Always represents actual type 
     and is never ``None``.
 
-  ``highlight_group``, ``divider_highlight_group``
+  ``highlight_groups``, ``divider_highlight_group``
     Used highlight groups. May be ``None``.
 
   ``highlight_group_prefix``

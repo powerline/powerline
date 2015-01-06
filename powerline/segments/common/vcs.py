@@ -35,7 +35,7 @@ class BranchSegment(Segment):
 					scol.insert(0, 'branch_dirty' if status else 'branch_clean')
 				return [{
 					'contents': branch,
-					'highlight_group': scol,
+					'highlight_groups': scol,
 					'divider_highlight_group': self.divider_highlight_group,
 				}]
 

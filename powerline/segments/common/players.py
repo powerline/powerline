@@ -50,7 +50,7 @@ class PlayerSegment(Segment):
 		stats['state_symbol'] = state_symbols.get(stats['state'])
 		return [{
 			'contents': format.format(**stats),
-			'highlight_group': ['now_playing', 'player_' + (stats['state'] or 'fallback'), 'player'],
+			'highlight_groups': ['now_playing', 'player_' + (stats['state'] or 'fallback'), 'player'],
 		}]
 
 	def get_player_status(self, pl):

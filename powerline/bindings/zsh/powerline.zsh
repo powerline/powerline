@@ -136,18 +136,18 @@ _powerline_setup_prompt() {
 		}
 	else
 		if test -z "${POWERLINE_COMMAND}" ; then
-			POWERLINE_COMMAND="$($POWERLINE_CONFIG shell command)"
+			POWERLINE_COMMAND="$($POWERLINE_CONFIG_COMMAND shell command)"
 		fi
 
 		local add_args='-r .zsh'
-		add_args+=' --last_exit_code=$?'
-		add_args+=' --last_pipe_status="$pipestatus"'
-		add_args+=' --renderer_arg="client_id=$$"'
-		add_args+=' --renderer_arg="shortened_path=${(%):-%~}"'
+		add_args+=' --last-exit-code=$?'
+		add_args+=' --last-pipe-status="$pipestatus"'
+		add_args+=' --renderer-arg="client_id=$$"'
+		add_args+=' --renderer-arg="shortened_path=${(%):-%~}"'
 		add_args+=' --jobnum=$_POWERLINE_JOBNUM'
-		local new_args_2=' --renderer_arg="parser_state=${(%%):-%_}"'
-		new_args_2+=' --renderer_arg="local_theme=continuation"'
-		local add_args_3=$add_args' --renderer_arg="local_theme=select"'
+		local new_args_2=' --renderer-arg="parser_state=${(%%):-%_}"'
+		new_args_2+=' --renderer-arg="local_theme=continuation"'
+		local add_args_3=$add_args' --renderer-arg="local_theme=select"'
 		local add_args_2=$add_args$new_args_2
 		add_args+=' --width=$(( ${COLUMNS:-$(_powerline_columns_fallback)} - ${ZLE_RPROMPT_INDENT:-1} ))'
 		local add_args_r2=$add_args$new_args_2
@@ -183,21 +183,21 @@ _powerline_add_widget() {
 	fi
 }
 
-if test -z "${POWERLINE_CONFIG}" ; then
+if test -z "${POWERLINE_CONFIG_COMMAND}" ; then
 	if which powerline-config >/dev/null ; then
-		export POWERLINE_CONFIG=powerline-config
+		export POWERLINE_CONFIG_COMMAND=powerline-config
 	else
-		export POWERLINE_CONFIG="$_POWERLINE_SOURCED:h:h:h:h/scripts/powerline-config"
+		export POWERLINE_CONFIG_COMMAND="$_POWERLINE_SOURCED:h:h:h:h/scripts/powerline-config"
 	fi
 fi
 
 setopt promptpercent
 setopt promptsubst
 
-if ${POWERLINE_CONFIG} shell --shell=zsh uses prompt ; then
+if "${POWERLINE_CONFIG_COMMAND}" shell --shell=zsh uses prompt ; then
 	_powerline_setup_prompt
 	_powerline_init_modes_support
 fi
-if ${POWERLINE_CONFIG} shell --shell=zsh uses tmux ; then
+if "${POWERLINE_CONFIG_COMMAND}" shell --shell=zsh uses tmux ; then
 	_powerline_init_tmux_support
 fi
