@@ -250,7 +250,7 @@ override those from each previous file. It is required that either
            Background color. Must be defined in :ref:`colors 
            <config-colors-colors>`.
 
-       ``attr``
+       ``attrs``
            List of attributes. Valid values are one or more of ``bold``, 
            ``italic`` and ``underline``. Note that some attributes may be 
            unavailable in some applications or terminal emulators. If you do not 

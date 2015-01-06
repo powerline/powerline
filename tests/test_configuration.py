@@ -67,20 +67,20 @@ config = {
 		'groups': {
 			'm1': 'g1',
 			'm2': 'g3',
-			'm3': {'fg': 'col11', 'bg': 'col12', 'attr': []},
+			'm3': {'fg': 'col11', 'bg': 'col12', 'attrs': []},
 		}
 	},
 	'colorschemes/default': {
 		'groups': {
-			'g1': {'fg': 'col5', 'bg': 'col6', 'attr': []},
-			'g2': {'fg': 'col7', 'bg': 'col8', 'attr': []},
-			'g3': {'fg': 'col9', 'bg': 'col10', 'attr': []},
+			'g1': {'fg': 'col5', 'bg': 'col6', 'attrs': []},
+			'g2': {'fg': 'col7', 'bg': 'col8', 'attrs': []},
+			'g3': {'fg': 'col9', 'bg': 'col10', 'attrs': []},
 		}
 	},
 	'colorschemes/test/default': {
 		'groups': {
-			'str1': {'fg': 'col1', 'bg': 'col2', 'attr': ['bold']},
-			'str2': {'fg': 'col3', 'bg': 'col4', 'attr': ['underline']},
+			'str1': {'fg': 'col1', 'bg': 'col2', 'attrs': ['bold']},
+			'str2': {'fg': 'col3', 'bg': 'col4', 'attrs': ['underline']},
 			'd1': 'g2',
 			'd2': 'm2',
 			'd3': 'm3',
@@ -88,7 +88,7 @@ config = {
 	},
 	'colorschemes/vim/default': {
 		'groups': {
-			'environment': {'fg': 'col3', 'bg': 'col4', 'attr': ['underline']},
+			'environment': {'fg': 'col3', 'bg': 'col4', 'attrs': ['underline']},
 		},
 	},
 	'themes/test/default': {

@@ -142,7 +142,7 @@ group_name_spec = Spec().ident().copy
 group_spec = Spec().either(Spec(
 	fg=color_spec(),
 	bg=color_spec(),
-	attr=Spec().list(Spec().type(unicode).oneof(set(('bold', 'italic', 'underline')))),
+	attrs=Spec().list(Spec().type(unicode).oneof(set(('bold', 'italic', 'underline')))),
 ), group_name_spec().func(check_group)).copy
 groups_spec = Spec().unknown_spec(
 	group_name_spec(),

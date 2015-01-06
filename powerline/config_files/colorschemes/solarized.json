@@ -1,18 +1,18 @@
 {
 	"name": "Solarized dark",
 	"groups": {
-		"background":         { "fg": "solarized:base3", "bg": "solarized:base02", "attr": [] },
-		"user":               { "fg": "solarized:base3", "bg": "solarized:blue", "attr": ["bold"] },
-		"superuser":          { "fg": "solarized:base3", "bg": "solarized:red", "attr": ["bold"] },
-		"virtualenv":         { "fg": "solarized:base3", "bg": "solarized:green", "attr": [] },
-		"branch":             { "fg": "solarized:base1", "bg": "solarized:base02", "attr": [] },
-		"branch_dirty":       { "fg": "solarized:yellow", "bg": "solarized:base02", "attr": [] },
-		"branch_clean":       { "fg": "solarized:base1", "bg": "solarized:base02", "attr": [] },
-		"cwd":                { "fg": "solarized:base2", "bg": "solarized:base01", "attr": [] },
-		"cwd:current_folder": { "fg": "solarized:base3", "bg": "solarized:base01", "attr": ["bold"] },
-		"cwd:divider":        { "fg": "solarized:base1", "bg": "solarized:base01", "attr": [] },
-		"hostname":           { "fg": "solarized:base3", "bg": "solarized:base01", "attr": [] },
-		"environment":        { "fg": "solarized:base3", "bg": "solarized:green", "attr": [] },
-		"attached_clients":   { "fg": "solarized:base3", "bg": "solarized:green", "attr": [] }
+		"background":         { "fg": "solarized:base3", "bg": "solarized:base02", "attrs": [] },
+		"user":               { "fg": "solarized:base3", "bg": "solarized:blue", "attrs": ["bold"] },
+		"superuser":          { "fg": "solarized:base3", "bg": "solarized:red", "attrs": ["bold"] },
+		"virtualenv":         { "fg": "solarized:base3", "bg": "solarized:green", "attrs": [] },
+		"branch":             { "fg": "solarized:base1", "bg": "solarized:base02", "attrs": [] },
+		"branch_dirty":       { "fg": "solarized:yellow", "bg": "solarized:base02", "attrs": [] },
+		"branch_clean":       { "fg": "solarized:base1", "bg": "solarized:base02", "attrs": [] },
+		"cwd":                { "fg": "solarized:base2", "bg": "solarized:base01", "attrs": [] },
+		"cwd:current_folder": { "fg": "solarized:base3", "bg": "solarized:base01", "attrs": ["bold"] },
+		"cwd:divider":        { "fg": "solarized:base1", "bg": "solarized:base01", "attrs": [] },
+		"hostname":           { "fg": "solarized:base3", "bg": "solarized:base01", "attrs": [] },
+		"environment":        { "fg": "solarized:base3", "bg": "solarized:green", "attrs": [] },
+		"attached_clients":   { "fg": "solarized:base3", "bg": "solarized:green", "attrs": [] }
 	}
 }

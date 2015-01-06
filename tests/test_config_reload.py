@@ -34,14 +34,14 @@ config = {
 	},
 	'colorschemes/test/default': {
 		'groups': {
-			"str1": {"fg": "col1", "bg": "col2", "attr": ["bold"]},
-			"str2": {"fg": "col3", "bg": "col4", "attr": ["underline"]},
+			'str1': {'fg': 'col1', 'bg': 'col2', 'attrs': ['bold']},
+			'str2': {'fg': 'col3', 'bg': 'col4', 'attrs': ['underline']},
 		},
 	},
 	'colorschemes/test/2': {
 		'groups': {
-			"str1": {"fg": "col2", "bg": "col3", "attr": ["bold"]},
-			"str2": {"fg": "col1", "bg": "col4", "attr": ["underline"]},
+			'str1': {'fg': 'col2', 'bg': 'col3', 'attrs': ['bold']},
+			'str2': {'fg': 'col1', 'bg': 'col4', 'attrs': ['underline']},
 		},
 	},
 	'themes/test/default': {
@@ -227,8 +227,8 @@ class TestConfigReload(TestCase):
 			config['colorschemes/nonexistentraise'] = {}
 			config['colorschemes/test/nonexistentraise'] = {
 				'groups': {
-					"str1": {"fg": "col1", "bg": "col3", "attr": ["bold"]},
-					"str2": {"fg": "col2", "bg": "col4", "attr": ["underline"]},
+					'str1': {'fg': 'col1', 'bg': 'col3', 'attrs': ['bold']},
+					'str2': {'fg': 'col2', 'bg': 'col4', 'attrs': ['underline']},
 				},
 			}
 			while not p._will_create_renderer():

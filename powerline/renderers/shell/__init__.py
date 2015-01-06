@@ -85,7 +85,7 @@ class ShellRenderer(Renderer):
 		else:
 			return ret
 
-	def hlstyle(self, fg=None, bg=None, attr=None):
+	def hlstyle(self, fg=None, bg=None, attrs=None):
 		'''Highlight a segment.
 
 		If an argument is None, the argument is ignored. If an argument is
@@ -111,17 +111,17 @@ class ShellRenderer(Renderer):
 					ansi += [48, 2] + list(int_to_rgb(bg[1]))
 				else:
 					ansi += [48, 5, bg[0]]
-		if attr is not None:
-			if attr is False:
+		if attrs is not None:
+			if attrs is False:
 				ansi += [22]
 			else:
-				if attr & ATTR_BOLD:
+				if attrs & ATTR_BOLD:
 					ansi += [1]
-				elif attr & ATTR_ITALIC:
+				elif attrs & ATTR_ITALIC:
 					# Note: is likely not to work or even be inverse in place of
 					# italic. Omit using this in colorschemes.
 					ansi += [3]
-				elif attr & ATTR_UNDERLINE:
+				elif attrs & ATTR_UNDERLINE:
 					ansi += [4]
 		if is_fbterm:
 			r = []
