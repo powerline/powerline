@@ -12,14 +12,14 @@ class ShellPowerline(Powerline):
 
 	def load_main_config(self):
 		r = super(ShellPowerline, self).load_main_config()
-		if self.args.config:
-			mergedicts(r, self.args.config)
+		if self.args.config_override:
+			mergedicts(r, self.args.config_override)
 		return r
 
 	def load_theme_config(self, name):
 		r = super(ShellPowerline, self).load_theme_config(name)
-		if self.args.theme_option and name in self.args.theme_option:
-			mergedicts(r, self.args.theme_option[name])
+		if self.args.theme_override and name in self.args.theme_override:
+			mergedicts(r, self.args.theme_override[name])
 		return r
 
 	def get_config_paths(self):

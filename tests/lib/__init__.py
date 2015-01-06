@@ -23,8 +23,8 @@ class Pl(object):
 
 
 class Args(object):
-	theme_option = {}
-	config = None
+	theme_override = {}
+	config_override = {}
 	config_path = None
 	ext = ['shell']
 	renderer_module = None

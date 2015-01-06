@@ -43,7 +43,7 @@ Powerline script overrides
 Powerline script has a number of options controlling powerline behavior. Here 
 ``VALUE`` always means “some JSON object”.
 
-``-c KEY.NESTED_KEY=VALUE`` or ``--config=KEY.NESTED_KEY=VALUE``
+``-c KEY.NESTED_KEY=VALUE`` or ``--config-override=KEY.NESTED_KEY=VALUE``
     Overrides options from :file:`powerline/config.json`. 
     ``KEY.KEY2.KEY3=VALUE`` is a shortcut for ``KEY={"KEY2": {"KEY3": VALUE}}``. 
     Multiple options (i.e. ``-c K1=V1 -c K2=V2``) are allowed, result (in the 
@@ -53,7 +53,7 @@ Powerline script has a number of options controlling powerline behavior. Here
     If ``VALUE`` is omitted then corresponding key will be removed from the 
     configuration (if it was present).
 
-``-t THEME_NAME.KEY.NESTED_KEY=VALUE`` or ``--theme-option=THEME_NAME.KEY.NESTED_KEY=VALUE``
+``-t THEME_NAME.KEY.NESTED_KEY=VALUE`` or ``--theme-override=THEME_NAME.KEY.NESTED_KEY=VALUE``
     Overrides options from :file:`powerline/themes/{ext}/{THEME_NAME}.json`. 
     ``KEY.NESTED_KEY=VALUE`` is processed like described above, ``{ext}`` is the 
     first argument to powerline script. May be passed multiple times.

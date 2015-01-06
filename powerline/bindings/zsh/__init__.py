@@ -36,11 +36,11 @@ class Args(object):
 	renderer_module = '.zsh'
 
 	@property
-	def config(self):
+	def config_override(self):
 		return get_var_config('POWERLINE_CONFIG_OVERRIDES')
 
 	@property
-	def theme_option(self):
+	def theme_override(self):
 		return get_var_config('POWERLINE_THEME_CONFIG')
 
 	@property
