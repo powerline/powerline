@@ -54,7 +54,6 @@ class TestVimConfig(TestCase):
 			(('bufname', 'NERD_tree_1'), {}),
 			(('bufname', '__Gundo__'), {}),
 			(('bufname', '__Gundo_Preview__'), {}),
-			(('bufname', 'ControlP'), {}),
 			# No Command-T tests here: requires +ruby or emulation
 			# No tabline here: tablines are tested separately
 		)
@@ -94,10 +93,6 @@ class TestVimConfig(TestCase):
 								for args, kwargs in buffers:
 									i += 1
 									if mode in exclude:
-										continue
-									if mode == 'nc' and args == ('bufname', 'ControlP'):
-										# ControlP window is not supposed to not 
-										# be in the focus
 										continue
 									with vim_module._with(*args, **kwargs):
 										check_output(mode, args, kwargs)
