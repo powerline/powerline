@@ -460,24 +460,3 @@ Requires ``osascript`` available in $PATH.
 
 {0}
 ''').format(_common_args.format('rdio')))
-
-
-class NowPlayingSegment(Segment):
-	def __call__(self, player='mpd', **kwargs):
-		player_segment = globals()[player]
-		assert(isinstance(player_segment, PlayerSegment))
-		return player_segment(**kwargs)
-
-	def argspecobjs(self):
-		for ret in super(NowPlayingSegment, self).argspecobjs():
-			yield ret
-		yield '__call__', PlayerSegment.__call__
-		for k, v in globals().items():
-			if isinstance(v, type) and issubclass(v, PlayerSegment) and v is not DbusPlayerSegment:
-				yield 'get_player_status', v.get_player_status
-
-	def omitted_args(self, name, method):
-		return (0,)
-
-
-now_playing = NowPlayingSegment()
