@@ -47,16 +47,6 @@
 		"powerline.segments.common.net.hostname": {
 			"before": " "
 		},
-		"powerline.segments.common.players.now_playing": {
-			"args": {
-				"state_symbols": {
-					"fallback": "♫",
-					"play":     "▶",
-					"pause":    "▮▮",
-					"stop":     "■"
-				}
-			}
-		},
 		"powerline.segments.common.bat.battery": {
 			"args": {
 				"full_heart": "♥",
