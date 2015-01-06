@@ -19,7 +19,8 @@ from powerline.lint.checks import (check_matcher_func, check_ext, check_config, 
                                    check_segment_module, check_exinclude_function, type_keys,
                                    check_segment_function, check_args, get_one_segment_function,
                                    check_highlight_groups, check_highlight_group, check_full_segment_data,
-                                   get_all_possible_functions, check_segment_data_key, register_common_name)
+                                   get_all_possible_functions, check_segment_data_key, register_common_name,
+                                   highlight_group_spec)
 from powerline.lint.spec import Spec
 from powerline.lint.context import Context
 
@@ -194,7 +195,6 @@ args_spec = Spec(
 	pl=Spec().error('pl object must be set by powerline').optional(),
 	segment_info=Spec().error('Segment info dictionary must be set by powerline').optional(),
 ).unknown_spec(Spec(), Spec()).optional().copy
-highlight_group_spec = Spec().ident().copy
 segment_module_spec = Spec().type(unicode).func(check_segment_module).optional().copy
 sub_segments_spec = Spec()
 exinclude_spec = Spec().re(function_name_re).func(check_exinclude_function).copy
