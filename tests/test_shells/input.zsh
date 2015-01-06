@@ -4,7 +4,7 @@ setopt interactivecomments
 setopt autonamedirs
 if test -z "$POWERLINE_NO_ZSH_ZPYTHON" ; then
 	function set_theme_option() {
-		POWERLINE_THEME_CONFIG[$1]=$2
+		POWERLINE_THEME_OVERRIDES[$1]=$2
 		powerline-reload-config
 	}
 	function set_theme() {
@@ -23,7 +23,7 @@ else
 	}
 fi
 source powerline/bindings/zsh/powerline.zsh
-typeset -gA POWERLINE_CONFIG_OVERRIDES POWERLINE_THEME_CONFIG
+typeset -gA POWERLINE_CONFIG_OVERRIDES POWERLINE_THEME_OVERRIDES
 set_theme_option default_leftonly.segment_data.hostname.args.only_if_ssh false
 set_theme_option default.segment_data.hostname.args.only_if_ssh false
 set_theme default_leftonly

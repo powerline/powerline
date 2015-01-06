@@ -80,7 +80,7 @@ are taken from zsh variables.
     VALUE}}``. All pairs are then recursively merged into one dictionary and 
     this dictionary is recursively merged with the contents of the file.
 
-``POWERLINE_THEME_CONFIG``
+``POWERLINE_THEME_OVERRIDES``
     Overrides options from :file:`powerline/themes/shell/*.json`. Should be 
     a zsh associative array with keys equal to ``THEME_NAME.KEY.NESTED_KEY`` and 
     values being JSON strings. Is processed like the above 
