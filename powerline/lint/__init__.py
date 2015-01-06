@@ -194,7 +194,7 @@ args_spec = Spec(
 	pl=Spec().error('pl object must be set by powerline').optional(),
 	segment_info=Spec().error('Segment info dictionary must be set by powerline').optional(),
 ).unknown_spec(Spec(), Spec()).optional().copy
-highlight_group_spec = Spec().type(unicode).copy
+highlight_group_spec = Spec().ident().copy
 segment_module_spec = Spec().type(unicode).func(check_segment_module).optional().copy
 sub_segments_spec = Spec()
 exinclude_spec = Spec().re(function_name_re).func(check_exinclude_function).copy
