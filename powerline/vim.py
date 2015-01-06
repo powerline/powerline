@@ -24,7 +24,7 @@ def _override_from(config, override_varname):
 	return config
 
 
-class VimVarHandler(logging.Handler):
+class VimVarHandler(logging.Handler, object):
 	'''Vim-specific handler which emits messages to Vim global variables
 
 	Used variable: ``g:powerline_log_messages``.
