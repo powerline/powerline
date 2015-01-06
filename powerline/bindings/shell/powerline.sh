@@ -138,10 +138,10 @@ _powerline_local_prompt() {
 	_powerline_set_jobs
 	$POWERLINE_COMMAND shell $1 \
 		$_POWERLINE_RENDERER_ARG \
-		--renderer_arg="client_id=$$" \
-		--last_exit_code=$2 \
+		--renderer-arg="client_id=$$" \
+		--last-exit-code=$2 \
 		--jobnum=$_POWERLINE_JOBS \
-		--renderer_arg="local_theme=$3"
+		--renderer-arg="local_theme=$3"
 }
 
 _powerline_prompt() {
@@ -150,8 +150,8 @@ _powerline_prompt() {
 	$POWERLINE_COMMAND shell $1 \
 		--width="${COLUMNS:-$(_powerline_columns_fallback)}" \
 		$_POWERLINE_RENDERER_ARG \
-		--renderer_arg="client_id=$$" \
-		--last_exit_code=$2 \
+		--renderer-arg="client_id=$$" \
+		--last-exit-code=$2 \
 		--jobnum=$_POWERLINE_JOBS
 	_powerline_update_psN
 }

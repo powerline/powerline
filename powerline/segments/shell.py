@@ -157,7 +157,7 @@ Returns a segment list to create a breadcrumb-like effect.
 :param bool use_path_separator:
 	Use path separator in place of soft divider.
 :param bool use_shortened_path:
-	Use path from shortened_path ``--renderer_arg`` argument. If this argument 
+	Use path from shortened_path ``--renderer-arg`` argument. If this argument 
 	is present ``shorten_home`` argument is ignored.
 :param bool shorten_home:
 	Shorten home directory to ``~``.

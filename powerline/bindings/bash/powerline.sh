@@ -43,10 +43,10 @@ _powerline_local_prompt() {
 	# Arguments: side, renderer_module arg, last_exit_code, jobnum, local theme
 	$POWERLINE_COMMAND shell $1 \
 		$2 \
-		--last_exit_code=$3 \
+		--last-exit-code=$3 \
 		--jobnum=$4 \
-		--renderer_arg="client_id=$$" \
-		--renderer_arg="local_theme=$5"
+		--renderer-arg="client_id=$$" \
+		--renderer-arg="local_theme=$5"
 }
 
 _powerline_prompt() {
@@ -54,9 +54,9 @@ _powerline_prompt() {
 	$POWERLINE_COMMAND shell $1 \
 		--width="${COLUMNS:-$(_powerline_columns_fallback)}" \
 		-r.bash \
-		--last_exit_code=$2 \
+		--last-exit-code=$2 \
 		--jobnum=$3 \
-		--renderer_arg="client_id=$$"
+		--renderer-arg="client_id=$$"
 }
 
 _powerline_set_prompt() {

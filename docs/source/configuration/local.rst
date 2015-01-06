@@ -53,7 +53,7 @@ Powerline script has a number of options controlling powerline behavior. Here
     If ``VALUE`` is omitted then corresponding key will be removed from the 
     configuration (if it was present).
 
-``-t THEME_NAME.KEY.NESTED_KEY=VALUE`` or ``--theme_option=THEME_NAME.KEY.NESTED_KEY=VALUE``
+``-t THEME_NAME.KEY.NESTED_KEY=VALUE`` or ``--theme-option=THEME_NAME.KEY.NESTED_KEY=VALUE``
     Overrides options from :file:`powerline/themes/{ext}/{THEME_NAME}.json`. 
     ``KEY.NESTED_KEY=VALUE`` is processed like described above, ``{ext}`` is the 
     first argument to powerline script. May be passed multiple times.
@@ -61,7 +61,7 @@ Powerline script has a number of options controlling powerline behavior. Here
     If ``VALUE`` is omitted then corresponding key will be removed from the 
     configuration (if it was present).
 
-``-p PATH`` or ``--config_path=PATH``
+``-p PATH`` or ``--config-path=PATH``
     Sets directory where configuration should be read from. If present, no 
     default locations are searched for configuration. No expansions are 
     performed by powerline script itself, but ``-p ~/.powerline`` will likely be 

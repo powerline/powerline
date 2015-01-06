@@ -140,14 +140,14 @@ _powerline_setup_prompt() {
 		fi
 
 		local add_args='-r .zsh'
-		add_args+=' --last_exit_code=$?'
-		add_args+=' --last_pipe_status="$pipestatus"'
-		add_args+=' --renderer_arg="client_id=$$"'
-		add_args+=' --renderer_arg="shortened_path=${(%):-%~}"'
+		add_args+=' --last-exit-code=$?'
+		add_args+=' --last-pipe-status="$pipestatus"'
+		add_args+=' --renderer-arg="client_id=$$"'
+		add_args+=' --renderer-arg="shortened_path=${(%):-%~}"'
 		add_args+=' --jobnum=$_POWERLINE_JOBNUM'
-		local new_args_2=' --renderer_arg="parser_state=${(%%):-%_}"'
-		new_args_2+=' --renderer_arg="local_theme=continuation"'
-		local add_args_3=$add_args' --renderer_arg="local_theme=select"'
+		local new_args_2=' --renderer-arg="parser_state=${(%%):-%_}"'
+		new_args_2+=' --renderer-arg="local_theme=continuation"'
+		local add_args_3=$add_args' --renderer-arg="local_theme=select"'
 		local add_args_2=$add_args$new_args_2
 		add_args+=' --width=$(( ${COLUMNS:-$(_powerline_columns_fallback)} - ${ZLE_RPROMPT_INDENT:-1} ))'
 		local add_args_r2=$add_args$new_args_2
