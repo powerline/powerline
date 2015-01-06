@@ -75,7 +75,7 @@ _powerline_set_prompt() {
 _powerline_setup_prompt() {
 	VIRTUAL_ENV_DISABLE_PROMPT=1
 	if test -z "${POWERLINE_COMMAND}" ; then
-		POWERLINE_COMMAND="$("$POWERLINE_CONFIG" shell command)"
+		POWERLINE_COMMAND="$("$POWERLINE_CONFIG_COMMAND" shell command)"
 	fi
 	test "x$PROMPT_COMMAND" != "x${PROMPT_COMMAND%_powerline_set_prompt*}" ||
 		PROMPT_COMMAND=$'_powerline_set_prompt\n'"${PROMPT_COMMAND}"
@@ -83,17 +83,17 @@ _powerline_setup_prompt() {
 	PS3="$(_powerline_local_prompt left '' 0 0 select)"
 }
 
-if test -z "${POWERLINE_CONFIG}" ; then
+if test -z "${POWERLINE_CONFIG_COMMAND}" ; then
 	if which powerline-config >/dev/null ; then
-		POWERLINE_CONFIG=powerline-config
+		POWERLINE_CONFIG_COMMAND=powerline-config
 	else
-		POWERLINE_CONFIG="$(dirname "$BASH_SOURCE")/../../../scripts/powerline-config"
+		POWERLINE_CONFIG_COMMAND="$(dirname "$BASH_SOURCE")/../../../scripts/powerline-config"
 	fi
 fi
 
-if "${POWERLINE_CONFIG}" shell --shell=bash uses prompt ; then
+if "${POWERLINE_CONFIG_COMMAND}" shell --shell=bash uses prompt ; then
 	_powerline_setup_prompt
 fi
-if "${POWERLINE_CONFIG}" shell --shell=bash uses tmux ; then
+if "${POWERLINE_CONFIG_COMMAND}" shell --shell=bash uses tmux ; then
 	_powerline_init_tmux_support
 fi

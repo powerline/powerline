@@ -136,7 +136,7 @@ _powerline_setup_prompt() {
 		}
 	else
 		if test -z "${POWERLINE_COMMAND}" ; then
-			POWERLINE_COMMAND="$($POWERLINE_CONFIG shell command)"
+			POWERLINE_COMMAND="$($POWERLINE_CONFIG_COMMAND shell command)"
 		fi
 
 		local add_args='-r .zsh'
@@ -183,21 +183,21 @@ _powerline_add_widget() {
 	fi
 }
 
-if test -z "${POWERLINE_CONFIG}" ; then
+if test -z "${POWERLINE_CONFIG_COMMAND}" ; then
 	if which powerline-config >/dev/null ; then
-		export POWERLINE_CONFIG=powerline-config
+		export POWERLINE_CONFIG_COMMAND=powerline-config
 	else
-		export POWERLINE_CONFIG="$_POWERLINE_SOURCED:h:h:h:h/scripts/powerline-config"
+		export POWERLINE_CONFIG_COMMAND="$_POWERLINE_SOURCED:h:h:h:h/scripts/powerline-config"
 	fi
 fi
 
 setopt promptpercent
 setopt promptsubst
 
-if ${POWERLINE_CONFIG} shell --shell=zsh uses prompt ; then
+if "${POWERLINE_CONFIG_COMMAND}" shell --shell=zsh uses prompt ; then
 	_powerline_setup_prompt
 	_powerline_init_modes_support
 fi
-if ${POWERLINE_CONFIG} shell --shell=zsh uses tmux ; then
+if "${POWERLINE_CONFIG_COMMAND}" shell --shell=zsh uses tmux ; then
 	_powerline_init_tmux_support
 fi

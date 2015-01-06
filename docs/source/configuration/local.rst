@@ -121,9 +121,9 @@ Prompt command
 
 In addition to the above configuration options you can use 
 ``$POWERLINE_COMMAND`` environment variable to tell shell or tmux to use 
-specific powerline implementation and ``$POWERLINE_CONFIG`` to tell zsh or tmux 
-where ``powerline-config`` script is located. This is mostly useful for putting 
-powerline into different directory.
+specific powerline implementation and ``$POWERLINE_CONFIG_COMMAND`` to tell zsh 
+or tmux where ``powerline-config`` script is located. This is mostly useful for 
+putting powerline into different directory.
 
 .. note::
 

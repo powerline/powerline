@@ -21,17 +21,17 @@ function powerline-setup
 		end
 	end
 
-	if test -z "$POWERLINE_CONFIG"
+	if test -z "$POWERLINE_CONFIG_COMMAND"
 		if which powerline-config >/dev/null
-			set -g POWERLINE_CONFIG powerline-config
+			set -g POWERLINE_CONFIG_COMMAND powerline-config
 		else
-			set -g POWERLINE_CONFIG (dirname (status -f))/../../../scripts/powerline-config
+			set -g POWERLINE_CONFIG_COMMAND (dirname (status -f))/../../../scripts/powerline-config
 		end
 	end
 
-	if eval $POWERLINE_CONFIG shell --shell=fish uses prompt
+	if eval $POWERLINE_CONFIG_COMMAND shell --shell=fish uses prompt
 		if test -z "$POWERLINE_COMMAND"
-			set -g POWERLINE_COMMAND (eval $POWERLINE_CONFIG shell command)
+			set -g POWERLINE_COMMAND (eval $POWERLINE_CONFIG_COMMAND shell command)
 		end
 		function --on-variable fish_bind_mode _powerline_bind_mode
 			set -g -x _POWERLINE_MODE $fish_bind_mode
@@ -81,7 +81,7 @@ function powerline-setup
 		_powerline_set_default_mode
 		_powerline_update
 	end
-	if eval $POWERLINE_CONFIG shell --shell=fish uses tmux
+	if eval $POWERLINE_CONFIG_COMMAND shell --shell=fish uses tmux
 		if test -n "$TMUX"
 			if tmux refresh -S ^/dev/null
 				function _powerline_tmux_setenv
