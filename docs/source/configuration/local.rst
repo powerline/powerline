@@ -112,7 +112,7 @@ use ``c.Powerline.KEY``. Supported ``KEY`` strings or keyword argument names:
     a dictionary where keys are theme names and values are dictionaries which 
     will be recursively merged with the contents of the given theme.
 
-``paths``
+``config_paths``
     Sets directories where configuration should be read from. If present, no 
     default locations are searched for configuration. No expansions are 
     performed thus you cannot use paths starting with ``~/``.

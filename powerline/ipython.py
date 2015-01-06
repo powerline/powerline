@@ -32,8 +32,8 @@ class IPythonPowerline(Powerline):
 		)
 
 	def get_config_paths(self):
-		if self.paths:
-			return self.paths
+		if self.config_paths:
+			return self.config_paths
 		else:
 			return super(IPythonPowerline, self).get_config_paths()
 

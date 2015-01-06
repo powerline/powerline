@@ -148,7 +148,7 @@ class TestConfig(TestCase):
 		from powerline.ipython import IPythonPowerline
 
 		class IpyPowerline(IPythonPowerline):
-			paths = None
+			config_paths = None
 			config_overrides = None
 			theme_overrides = {}
 

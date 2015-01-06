@@ -95,10 +95,10 @@ class PowerlinePrompt2(PowerlinePromptOut):
 
 
 class ConfigurableIPythonPowerline(IPythonPowerline):
-	def init(self, config_overrides=None, theme_overrides={}, paths=None):
+	def init(self, config_overrides=None, theme_overrides={}, config_paths=None):
 		self.config_overrides = config_overrides
 		self.theme_overrides = theme_overrides
-		self.paths = paths
+		self.config_paths = config_paths
 		super(ConfigurableIPythonPowerline, self).init()
 
 	def ipython_magic(self, ip, parameter_s=''):
