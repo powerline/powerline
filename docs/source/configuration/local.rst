@@ -16,11 +16,11 @@ Vim configuration can be overridden using the following options:
     Dictionary, recursively merged with contents of 
     :file:`powerline/config.json`.
 
-``g:powerline_theme_overrides__{theme_name}``
-    Dictionary, recursively merged with contents of 
-    :file:`powerline/themes/vim/{theme_name}.json`. Note that this way you can’t 
-    redefine some value (e.g. segment) in list, only the whole list itself: only 
-    dictionaries are merged recursively.
+``g:powerline_theme_overrides``
+    Dictionary mapping theme names to theme overrides, recursively merged with 
+    contents of :file:`powerline/themes/vim/{key}.json`. Note that this way you 
+    can’t redefine some value (e.g. segment) in list, only the whole list 
+    itself: only dictionaries are merged recursively.
 
 ``g:powerline_config_paths``
     Paths list (each path must be expanded, ``~`` shortcut is not supported). 
