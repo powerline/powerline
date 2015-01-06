@@ -2,13 +2,12 @@
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 from powerline import Powerline
-from powerline.lib import mergedicts
+from powerline.lib.dict import mergedicts
 
 
 class ShellPowerline(Powerline):
 	def init(self, args, **kwargs):
 		self.args = args
-		self.theme_option = args.theme_option
 		super(ShellPowerline, self).init(args.ext[0], args.renderer_module, **kwargs)
 
 	def load_main_config(self):
@@ -19,8 +18,8 @@ class ShellPowerline(Powerline):
 
 	def load_theme_config(self, name):
 		r = super(ShellPowerline, self).load_theme_config(name)
-		if self.theme_option and name in self.theme_option:
-			mergedicts(r, self.theme_option[name])
+		if self.args.theme_option and name in self.args.theme_option:
+			mergedicts(r, self.args.theme_option[name])
 		return r
 
 	def get_config_paths(self):

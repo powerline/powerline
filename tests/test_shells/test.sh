@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 : ${PYTHON:=python}
 FAIL_SUMMARY=""
 FAILED=0
@@ -70,9 +71,11 @@ run() {
 		TEST_CLIENT="${TEST_CLIENT}" \
 		SH="${SH}" \
 		DIR1="${DIR1}" \
+		POWERLINE_NO_ZSH_ZPYTHON="$(test $TEST_TYPE = zpython || echo 1)" \
 		DIR2="${DIR2}" \
 		XDG_CONFIG_HOME="$PWD/tests/shell/fish_home" \
 		IPYTHONDIR="$PWD/tests/shell/ipython_home" \
+		PYTHONPATH="${PWD}${PYTHONPATH:+:}$PYTHONPATH" \
 		POWERLINE_SHELL_CONTINUATION=$additional_prompts \
 		POWERLINE_SHELL_SELECT=$additional_prompts \
 		POWERLINE_COMMAND="${POWERLINE_COMMAND} -p $PWD/powerline/config_files" \
@@ -367,6 +370,16 @@ if ! test -z "$(cat tests/shell/daemon_log_2)" ; then
 	cat tests/shell/daemon_log_2
 	FAILED=1
 	FAIL_SUMMARY="${FAIL_SUMMARY}${NL}L"
+fi
+
+if ( test "x${ONLY_SHELL}" = "x" || test "x${ONLY_SHELL}" = "xzsh" ) \
+	&& ( test "x${ONLY_TEST_TYPE}" = "x" || test "x${ONLY_TEST_TYPE}" = "xzpython" ) \
+	&& zsh -f -c 'zmodload libzpython' 2>/dev/null; then
+	echo "> zpython"
+	if ! run_test zpython zpython zsh -f -i ; then
+		FAILED=1
+		FAIL_SUMMARY="${FAIL_SUMMARY}${NL}T zpython zsh -f -i"
+	fi
 fi
 
 if test "x${ONLY_SHELL}" = "x" || test "x${ONLY_SHELL}" = "xipython" ; then

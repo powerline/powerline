@@ -9,7 +9,7 @@ from functools import partial
 
 from powerline import generate_config_finder, get_config_paths, load_config
 from powerline.segments.vim import vim_modes
-from powerline.lib import mergedicts_copy
+from powerline.lib.dict import mergedicts_copy
 from powerline.lib.config import ConfigLoader
 from powerline.lib.unicode import unicode
 from powerline.lint.markedjson import load

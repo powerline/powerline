@@ -5,7 +5,7 @@ import sys
 
 import vim
 
-from powerline.bindings.vim import vim_get_func, vim_getoption, environ, current_tabpage
+from powerline.bindings.vim import vim_get_func, vim_getoption, environ, current_tabpage, get_vim_encoding
 from powerline.renderer import Renderer
 from powerline.colorscheme import ATTR_BOLD, ATTR_ITALIC, ATTR_UNDERLINE
 from powerline.theme import Theme
@@ -42,7 +42,7 @@ class VimRenderer(Renderer):
 		self.hl_groups = {}
 		self.prev_highlight = None
 		self.strwidth_error_name = register_strwidth_error(self.strwidth)
-		self.encoding = vim.eval('&encoding')
+		self.encoding = get_vim_encoding()
 
 	def shutdown(self):
 		self.theme.shutdown()

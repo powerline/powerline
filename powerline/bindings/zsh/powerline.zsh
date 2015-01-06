@@ -129,6 +129,11 @@ _powerline_setup_prompt() {
 			zpython '_powerline_reload()'
 			zpython 'del _powerline_reload'
 		}
+		powerline-reload-config() {
+			zpython 'from powerline.bindings.zsh import reload_config as _powerline_reload_config'
+			zpython '_powerline_reload_config()'
+			zpython 'del _powerline_reload_config'
+		}
 	else
 		if test -z "${POWERLINE_COMMAND}" ; then
 			POWERLINE_COMMAND="$($POWERLINE_CONFIG shell command)"

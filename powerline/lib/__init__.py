@@ -5,8 +5,7 @@ import json
 
 from functools import wraps
 
-
-REMOVE_THIS_KEY = object()
+from powerline.lib.dict import REMOVE_THIS_KEY
 
 
 def wraps_saveargs(wrapped):
@@ -15,47 +14,6 @@ def wraps_saveargs(wrapped):
 		r.powerline_origin = getattr(wrapped, 'powerline_origin', wrapped)
 		return r
 	return dec
-
-
-def mergedicts(d1, d2):
-	'''Recursively merge two dictionaries
-
-	First dictionary is modified in-place.
-	'''
-	for k in d2:
-		if k in d1 and isinstance(d1[k], dict) and isinstance(d2[k], dict):
-			mergedicts(d1[k], d2[k])
-		elif d2[k] is REMOVE_THIS_KEY:
-			d1.pop(k, None)
-		else:
-			d1[k] = d2[k]
-
-
-def mergedefaults(d1, d2):
-	'''Recursively merge two dictionaries, keeping existing values
-
-	First dictionary is modified in-place.
-	'''
-	for k in d2:
-		if k in d1 and isinstance(d1[k], dict) and isinstance(d2[k], dict):
-			mergedefaults(d1[k], d2[k])
-		else:
-			d1.setdefault(k, d2[k])
-
-
-def mergedicts_copy(d1, d2):
-	'''Recursively merge two dictionaries.
-
-	Dictionaries are not modified. Copying happens only if necessary. Assumes 
-	that first dictionary supports .copy() method.
-	'''
-	ret = d1.copy()
-	for k in d2:
-		if k in d1 and isinstance(d1[k], dict) and isinstance(d2[k], dict):
-			ret[k] = mergedicts_copy(d1[k], d2[k])
-		else:
-			ret[k] = d2[k]
-	return ret
 
 
 def add_divider_highlight_group(highlight_group):
@@ -74,6 +32,31 @@ def add_divider_highlight_group(highlight_group):
 	return dec
 
 
+def parse_value(s):
+	'''Convert string to Python object
+
+	Rules:
+
+	* Empty string means that corresponding key should be removed from the 
+	  dictionary.
+	* Strings that start with a minus, digit or with some character that starts 
+	  JSON collection or string object are parsed as JSON.
+	* JSON special values ``null``, ``true``, ``false`` (case matters) are 
+	  parsed  as JSON.
+	* All other values are considered to be raw strings.
+
+	:param str s: Parsed string.
+
+	:return: Python object.
+	'''
+	if not s:
+		return REMOVE_THIS_KEY
+	elif s[0] in '"{[0193456789-' or s in ('null', 'true', 'false'):
+		return json.loads(s)
+	else:
+		return s
+
+
 def keyvaluesplit(s):
 	if '=' not in s:
 		raise TypeError('Option must look like option=json_value')
@@ -81,19 +64,14 @@ def keyvaluesplit(s):
 		raise ValueError('Option names must not start with `_\'')
 	idx = s.index('=')
 	o = s[:idx]
-	rest = s[idx + 1:]
-	if not rest:
-		val = REMOVE_THIS_KEY
-	elif rest[0] in '"{[0193456789' or rest in ('null', 'true', 'false'):
-		val = json.loads(s[idx + 1:])
-	else:
-		val = rest
+	val = parse_value(s[idx + 1:])
 	return (o, val)
 
 
 def parsedotval(s):
 	if type(s) is tuple:
 		o, val = s
+		val = parse_value(val)
 	else:
 		o, val = keyvaluesplit(s)
 

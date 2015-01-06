@@ -110,7 +110,7 @@ def ctrlp_stl_right_prog(pl, progress):
 	'''
 	return [
 		{
-			'contents': progress,
+			'contents': str(progress),
 			'highlight_group': ['ctrlp.progress', 'file_name'],
 		},
 	]

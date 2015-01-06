@@ -220,6 +220,30 @@ def process_segment(pl, side, segment_info, parsed_segments, segment, mode, colo
 
 always_true = lambda pl, segment_info, mode: True
 
+get_fallback_segment = {
+	'name': 'fallback',
+	'type': 'string',
+	'highlight_group': 'background',
+	'divider_highlight_group': None,
+	'before': None,
+	'after': None,
+	'contents': '',
+	'priority': None,
+	'draw_soft_divider': True,
+	'draw_hard_divider': True,
+	'draw_inner_divider': True,
+	'display_condition': always_true,
+	'width': None,
+	'align': None,
+	'expand': None,
+	'truncate': None,
+	'startup': None,
+	'shutdown': None,
+	'_rendered_raw': '',
+	'_rendered_hl': '',
+	'_len': None,
+	'_contents_len': None,
+}.copy
 
 def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, get_module_attr, top_theme):
 	data = {

@@ -2,7 +2,7 @@
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 from powerline import Powerline
-from powerline.lib import mergedicts
+from powerline.lib.dict import mergedicts
 from powerline.lib.unicode import string
 
 

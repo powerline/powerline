@@ -98,6 +98,8 @@ Common configuration is a subdictionary that is a value of ``common`` key in
     Defines path which will hold powerline logs. If not present, logging will be 
     done to stderr.
 
+.. _config-common-log_level:
+
 ``log_level``
     String, determines logging level. Defaults to ``WARNING``.
 

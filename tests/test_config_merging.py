@@ -8,7 +8,7 @@ from subprocess import check_call
 from operator import add
 from shutil import rmtree
 
-from powerline.lib import mergedicts_copy as mdc
+from powerline.lib.dict import mergedicts_copy as mdc
 from powerline import Powerline
 
 from tests import TestCase

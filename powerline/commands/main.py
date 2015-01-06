@@ -5,7 +5,8 @@ from __future__ import (division, absolute_import, print_function)
 import argparse
 import sys
 
-from powerline.lib import mergedicts, parsedotval
+from powerline.lib import parsedotval
+from powerline.lib.dict import mergeargs
 from powerline.lib.encoding import get_preferred_arguments_encoding
 
 
@@ -17,15 +18,6 @@ if sys.version_info < (3,):
 else:
 	def arg_to_unicode(s):
 		return s
-
-
-def mergeargs(argvalue):
-	if not argvalue:
-		return None
-	r = {}
-	for subval in argvalue:
-		mergedicts(r, dict([subval]))
-	return r
 
 
 def finish_args(args):

@@ -31,6 +31,12 @@ Vim configuration can be overridden using the following options:
     If this variable is set to a true value it will prevent Powerline from reporting 
     an error when loaded in a copy of vim without the necessary Python support.
 
+``g:powerline_use_var_handler``
+    This variable may be set to either 0 or 1. If it is set to 1 then Vim will 
+    save log in ``g:powerline_log_messages`` variable in addition to whatever 
+    was configured in :ref:`log_* options <config-common-log>`. Level is always 
+    :ref:`log_level <config-common-log_level>`, same for format.
+
 Powerline script overrides
 ==========================
 

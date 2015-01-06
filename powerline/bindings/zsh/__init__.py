@@ -9,9 +9,10 @@ import zsh
 
 from powerline.shell import ShellPowerline
 from powerline.lib import parsedotval
-from powerline.lib.unicode import unicode
+from powerline.lib.unicode import unicode, u
 from powerline.lib.encoding import (get_preferred_output_encoding,
                                     get_preferred_environment_encoding)
+from powerline.lib.dict import mergeargs
 
 
 used_powerlines = WeakValueDictionary()
@@ -24,7 +25,7 @@ def shutdown():
 
 def get_var_config(var):
 	try:
-		return [parsedotval(i) for i in zsh.getvalue(var).items()]
+		return mergeargs([parsedotval((u(k), u(v))) for k, v in zsh.getvalue(var).items()])
 	except:
 		return None
 
@@ -36,17 +37,11 @@ class Args(object):
 
 	@property
 	def config(self):
-		try:
-			return get_var_config('POWERLINE_CONFIG')
-		except IndexError:
-			return None
+		return get_var_config('POWERLINE_CONFIG')
 
 	@property
 	def theme_option(self):
-		try:
-			return get_var_config('POWERLINE_THEME_CONFIG')
-		except IndexError:
-			return None
+		return get_var_config('POWERLINE_THEME_CONFIG')
 
 	@property
 	def config_path(self):
@@ -132,6 +127,10 @@ class Prompt(object):
 	def __str__(self):
 		zsh.eval('_POWERLINE_PARSER_STATE="${(%):-%_}"')
 		zsh.eval('_POWERLINE_SHORTENED_PATH="${(%):-%~}"')
+		try:
+			mode = u(zsh.getvalue('_POWERLINE_MODE'))
+		except IndexError:
+			mode = None
 		segment_info = {
 			'args': self.args,
 			'environ': environ,
@@ -139,6 +138,7 @@ class Prompt(object):
 			'local_theme': self.theme,
 			'parser_state': zsh.getvalue('_POWERLINE_PARSER_STATE'),
 			'shortened_path': zsh.getvalue('_POWERLINE_SHORTENED_PATH'),
+			'mode': mode,
 		}
 		zsh.setvalue('_POWERLINE_PARSER_STATE', None)
 		zsh.setvalue('_POWERLINE_SHORTENED_PATH', None)
@@ -157,6 +157,7 @@ class Prompt(object):
 			width=zsh.columns(),
 			side=self.side,
 			segment_info=segment_info,
+			mode=mode,
 		)
 		if type(r) is not str:
 			if type(r) is bytes:
@@ -187,6 +188,11 @@ def set_prompt(powerline, psvar, side, theme, above=False):
 def reload():
 	for powerline in tuple(used_powerlines.values()):
 		powerline.reload()
+
+
+def reload_config():
+	for powerline in used_powerlines.values():
+		powerline.create_renderer(load_main=True, load_colors=True, load_colorscheme=True, load_theme=True)
 
 
 def setup(zsh_globals):

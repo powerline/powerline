@@ -10,7 +10,8 @@ import shutil
 from time import sleep
 from subprocess import call, PIPE
 
-from powerline.lib import mergedicts, add_divider_highlight_group, REMOVE_THIS_KEY
+from powerline.lib import add_divider_highlight_group
+from powerline.lib.dict import mergedicts, REMOVE_THIS_KEY
 from powerline.lib.humanize_bytes import humanize_bytes
 from powerline.lib.vcs import guess, get_fallback_create_watcher
 from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment
