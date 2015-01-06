@@ -48,6 +48,10 @@ def finish_args(environ, args):
 	))
 	if args.renderer_arg:
 		args.renderer_arg = mergeargs((parsedotval(v) for v in args.renderer_arg), remove=True)
+	args.config_path = (
+		environ.get('POWERLINE_CONFIG_PATHS', '').split(':')
+		+ (args.config_path or [])
+	)
 	return args
 
 
