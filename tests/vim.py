@@ -191,9 +191,6 @@ def command(cmd):
 	elif cmd.startswith('hi '):
 		sp = cmd.split()
 		_highlights[sp[1]] = sp[2:]
-	elif cmd.startswith('function! Powerline_plugin_ctrlp'):
-		# Ignore CtrlP updating functions
-		pass
 	elif cmd.startswith('augroup'):
 		augroup = cmd.partition(' ')[2]
 		if augroup.upper() == 'END':
@@ -858,9 +855,6 @@ class _WithBufName(object):
 		self.buffer = buffer
 		self.old = buffer.name
 		buffer.name = self.new
-		if buffer.name and os.path.basename(buffer.name) == 'ControlP':
-			buffer.vars['powerline_ctrlp_type'] = 'main'
-			buffer.vars['powerline_ctrlp_args'] = ['focus', 'byfname', '0', 'prev', 'item', 'next', 'marked']
 
 	def __exit__(self, *args):
 		self.buffer.name = self.old
