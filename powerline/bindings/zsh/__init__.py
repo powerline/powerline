@@ -8,7 +8,7 @@ from weakref import WeakValueDictionary, ref
 import zsh
 
 from powerline.shell import ShellPowerline
-from powerline.lib.overrides import parsedotval
+from powerline.lib.overrides import parsedotval, parse_override_var
 from powerline.lib.unicode import unicode, u
 from powerline.lib.encoding import (get_preferred_output_encoding,
                                     get_preferred_environment_encoding)
@@ -25,7 +25,13 @@ def shutdown():
 
 def get_var_config(var):
 	try:
-		return mergeargs([parsedotval((u(k), u(v))) for k, v in zsh.getvalue(var).items()])
+		val = zsh.getvalue(var)
+		if isinstance(val, dict):
+			return mergeargs([parsedotval((u(k), u(v))) for k, v in val.items()])
+		elif isinstance(val, (unicode, str, bytes)):
+			return mergeargs(parse_override_var(u(val)))
+		else:
+			return None
 	except:
 		return None
 
