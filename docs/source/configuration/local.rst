@@ -67,6 +67,10 @@ Powerline script has a number of options controlling powerline behavior. Here
     performed by powerline script itself, but ``-p ~/.powerline`` will likely be 
     expanded by the shell to something like ``-p /home/user/.powerline``.
 
+.. warning::
+    Such overrides are suggested for testing purposes only. Use 
+    :ref:`Environment variables overrides` for other purposes.
+
 Environment variables overrides
 ===============================
 
@@ -136,6 +140,10 @@ above rules:
 Additionally one environment variable is a usual *colon*-separated list of 
 directories: ``POWERLINE_CONFIG_PATHS``. This one defines paths which will be 
 searched for configuration.
+
+.. note::
+    Overrides from environment variables have lower priority then 
+    :ref:`Powerline script overrides`. Latter are suggested for tests only.
 
 Zsh/zpython overrides
 =====================
