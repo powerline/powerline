@@ -114,7 +114,7 @@ class TestParser(TestCase):
 				(['shell', '-c', 'common={ }'], {'ext': ['shell'], 'config_override': {'common': {}}}),
 			]:
 				args = parser.parse_args(argv)
-				finish_args(args)
+				finish_args({}, args)
 				for key, val in expargs.items():
 					self.assertEqual(getattr(args, key), val)
 				for key, val in args.__dict__.items():

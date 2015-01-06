@@ -5,26 +5,44 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 REMOVE_THIS_KEY = object()
 
 
-def mergeargs(argvalue):
+def mergeargs(argvalue, remove=False):
 	if not argvalue:
 		return None
 	r = {}
 	for subval in argvalue:
-		mergedicts(r, dict([subval]))
+		mergedicts(r, dict([subval]), remove=remove)
 	return r
 
 
-def mergedicts(d1, d2):
+def _clear_special_values(d):
+	'''Remove REMOVE_THIS_KEY values from dictionary
+	'''
+	l = [d]
+	while l:
+		i = l.pop()
+		pops = []
+		for k, v in i.items():
+			if v is REMOVE_THIS_KEY:
+				pops.append(k)
+			elif isinstance(v, dict):
+				l.append(v)
+		for k in pops:
+			i.pop(k)
+
+
+def mergedicts(d1, d2, remove=True):
 	'''Recursively merge two dictionaries
 
 	First dictionary is modified in-place.
 	'''
 	for k in d2:
 		if k in d1 and isinstance(d1[k], dict) and isinstance(d2[k], dict):
-			mergedicts(d1[k], d2[k])
-		elif d2[k] is REMOVE_THIS_KEY:
+			mergedicts(d1[k], d2[k], remove)
+		elif remove and d2[k] is REMOVE_THIS_KEY:
 			d1.pop(k, None)
 		else:
+			if remove and isinstance(d2[k], dict):
+				_clear_special_values(d2[k])
 			d1[k] = d2[k]
 
 

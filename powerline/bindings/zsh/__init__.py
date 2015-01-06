@@ -8,7 +8,7 @@ from weakref import WeakValueDictionary, ref
 import zsh
 
 from powerline.shell import ShellPowerline
-from powerline.lib import parsedotval
+from powerline.lib.overrides import parsedotval
 from powerline.lib.unicode import unicode, u
 from powerline.lib.encoding import (get_preferred_output_encoding,
                                     get_preferred_environment_encoding)

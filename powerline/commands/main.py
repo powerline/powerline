@@ -5,7 +5,9 @@ from __future__ import (division, absolute_import, print_function)
 import argparse
 import sys
 
-from powerline.lib import parsedotval
+from itertools import chain
+
+from powerline.lib.overrides import parsedotval, parse_override_var
 from powerline.lib.dict import mergeargs
 from powerline.lib.encoding import get_preferred_arguments_encoding
 
@@ -14,21 +16,23 @@ if sys.version_info < (3,):
 	encoding = get_preferred_arguments_encoding()
 
 	def arg_to_unicode(s):
-		return unicode(s, encoding, 'replace') if not isinstance(s, unicode) else s
+		return unicode(s, encoding, 'replace') if not isinstance(s, unicode) else s  # NOQA
 else:
 	def arg_to_unicode(s):
 		return s
 
 
-def finish_args(args):
-	if args.config_override:
-		args.config_override = mergeargs((parsedotval(v) for v in args.config_override))
-	if args.theme_override:
-		args.theme_override = mergeargs((parsedotval(v) for v in args.theme_override))
-	else:
-		args.theme_override = {}
+def finish_args(environ, args):
+	args.config_override = mergeargs(chain(
+		(parsedotval(v) for v in args.config_override or ()),
+		parse_override_var(environ.get('POWERLINE_CONFIG_OVERRIDES', '')),
+	))
+	args.theme_override = mergeargs(chain(
+		(parsedotval(v) for v in args.theme_override or ()),
+		parse_override_var(environ.get('POWERLINE_THEME_OVERRIDES', '')),
+	))
 	if args.renderer_arg:
-		args.renderer_arg = mergeargs((parsedotval(v) for v in args.renderer_arg))
+		args.renderer_arg = mergeargs((parsedotval(v) for v in args.renderer_arg), remove=True)
 
 
 def get_argparser(ArgumentParser=argparse.ArgumentParser):

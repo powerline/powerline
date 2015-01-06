@@ -67,11 +67,82 @@ Powerline script has a number of options controlling powerline behavior. Here
     performed by powerline script itself, but ``-p ~/.powerline`` will likely be 
     expanded by the shell to something like ``-p /home/user/.powerline``.
 
+Environment variables overrides
+===============================
+
+All bindings that use ``POWERLINE_COMMAND`` environment variable support taking 
+overrides from environment variables. In this case overrides should look like 
+the following::
+
+    OVERRIDE='key1.key2.key3=value;key4.key5={"value":1};key6=true;key1.key7=10'
+
+. This will be parsed into
+
+.. code-block:: Python
+
+    {
+        "key1": {
+            "key2": {
+                "key3": "value"
+            },
+            "key7": 10,
+        },
+        "key4": {
+            "key5": {
+                "value": 1,
+            },
+        },
+        "key6": True,
+    }
+
+. Rules:
+
+#. Environment variable must form a semicolon-separated list of key-value pairs: 
+   ``key=value;key2=value2``.
+#. Keys are always dot-separated strings that must not contain equals sign (as 
+   well as semicolon) or start with an underscore. They are interpreted 
+   literally and create a nested set of dictionaries: ``k1.k2.k3`` creates 
+   ``{"k1":{"k2":{}}}`` and inside the innermost dictionary last key (``k3`` in 
+   the example) is contained with its value.
+#. Value may be empty in which case they are interpreted as an order to remove 
+   some value: ``k1.k2=`` will form ``{"k1":{"k2":REMOVE_THIS_KEY}}`` nested 
+   dictionary where ``k2`` value is a special value that tells 
+   dictionary-merging function to remove ``k2`` rather then replace it with 
+   something.
+#. Value may be a JSON strings like ``{"a":1}`` (JSON dictionary), ``["a",1]`` 
+   (JSON list), ``1`` or ``-1`` (JSON number), ``"abc"`` (JSON string) or 
+   ``true``, ``false`` and ``null`` (JSON boolean objects and ``Null`` object 
+   from JSON). General rule is that anything starting with a digit (U+0030 till 
+   U+0039, inclusive), a hyphenminus (U+002D), a quotation mark (U+0022), a left 
+   curly bracket (U+007B) or a left square bracket (U+005B) is considered to be 
+   some JSON object, same for *exact* values ``true``, ``false`` and ``null``.
+#. Any other value is considered to be literal string: ``k1=foo:bar`` parses to 
+   ``{"k1": "foo:bar"}``.
+
+The following environment variables may be used for overrides according to the 
+above rules:
+
+``POWERLINE_CONFIG_OVERRIDES``
+    Overrides values from :file:`powerline/config.json`.
+
+``POWERLINE_THEME_OVERRIDES``
+    Overrides values from :file:`powerline/themes/{ext}/{key}.json`. Top-level 
+    key is treated as a name of the theme for which overrides are used: e.g. to 
+    disable cwd segment defined in :file:`powerline/themes/shell/default.json` 
+    one needs to use::
+
+        POWERLINE_THEME_OVERRIDES=default.segment_data.cwd.display=false
+
+Additionally one environment variable is a usual *colon*-separated list of 
+directories: ``POWERLINE_CONFIG_PATHS``. This one defines paths which will be 
+searched for configuration.
+
 Zsh/zpython overrides
 =====================
 
 Here overrides are controlled by similarly to the powerline script, but values 
-are taken from zsh variables.
+are taken from zsh variables. :ref:`Environment variable overrides` are also 
+supported: if variable is a string this variant is used.
 
 ``POWERLINE_CONFIG_OVERRIDES``
     Overrides options from :file:`powerline/config.json`. Should be a zsh 
