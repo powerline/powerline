@@ -268,21 +268,24 @@ falls back to reading
 :file:`/sys/class/net/{interface}/statistics/{rx,tx}_bytes`.
 
 :param str interface:
-	network interface to measure (use the special value "auto" to have powerline try to auto-detect the network interface)
+	Network interface to measure (use the special value "auto" to have powerline 
+	try to auto-detect the network interface).
 :param str suffix:
-	string appended to each load string
+	String appended to each load string.
 :param bool si_prefix:
-	use SI prefix, e.g. MB instead of MiB
+	Use SI prefix, e.g. MB instead of MiB.
 :param str recv_format:
-	format string, receives ``value`` as argument
+	Format string that determines how download speed should look like. Receives 
+	``value`` as argument.
 :param str sent_format:
-	format string, receives ``value`` as argument
+	Format string that determines how upload speed should look like. Receives 
+	``value`` as argument.
 :param float recv_max:
-	maximum number of received bytes per second. Is only used to compute
-	gradient level
+	Maximum number of received bytes per second. Is only used to compute
+	gradient level.
 :param float sent_max:
-	maximum number of sent bytes per second. Is only used to compute gradient
-	level
+	Maximum number of sent bytes per second. Is only used to compute gradient
+	level.
 
 Divider highlight group used: ``background:divider``.
 
