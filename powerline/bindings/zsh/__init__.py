@@ -97,7 +97,7 @@ class Environment(object):
 			return False
 
 
-environ = Environment()
+environ = getattr(zsh, 'environ', Environment())
 
 
 class ZshPowerline(ShellPowerline):
