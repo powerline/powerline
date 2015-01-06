@@ -142,7 +142,7 @@ def set_segment_highlighting(pl, colorscheme, segment, mode):
 		hl_groups = lambda hlgs: [highlight_group_prefix + ':' + hlg for hlg in hlgs] + hlgs
 	try:
 		segment['highlight'] = colorscheme.get_highlighting(
-			hl_groups(segment['highlight_group']),
+			hl_groups(segment['highlight_groups']),
 			mode,
 			segment.get('gradient_level')
 		)
@@ -223,7 +223,7 @@ always_true = lambda pl, segment_info, mode: True
 get_fallback_segment = {
 	'name': 'fallback',
 	'type': 'string',
-	'highlight_group': 'background',
+	'highlight_groups': ['background'],
 	'divider_highlight_group': None,
 	'before': None,
 	'after': None,
@@ -335,9 +335,9 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, ge
 				pass
 
 		if segment_type == 'function':
-			highlight_group = [function_name]
+			highlight_groups = [function_name]
 		else:
-			highlight_group = segment.get('highlight_group') or name
+			highlight_groups = segment.get('highlight_groups') or [name]
 
 		if segment_type in ('function', 'segment_list'):
 			args = dict((
@@ -360,7 +360,7 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, ge
 			return {
 				'name': name or function_name,
 				'type': segment_type,
-				'highlight_group': None,
+				'highlight_groups': None,
 				'divider_highlight_group': None,
 				'before': None,
 				'after': None,
@@ -415,7 +415,7 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, ge
 		return {
 			'name': name or function_name,
 			'type': segment_type,
-			'highlight_group': highlight_group,
+			'highlight_groups': highlight_groups,
 			'divider_highlight_group': None,
 			'before': get_key(False, segment, module, function_name, name, 'before', ''),
 			'after': get_key(False, segment, module, function_name, name, 'after', ''),

@@ -54,7 +54,7 @@ def finder(pl):
 	initialize()
 	vim.command('ruby $powerline.commandt_set_active_finder')
 	return [{
-		'highlight_group': ['commandt:finder'],
+		'highlight_groups': ['commandt:finder'],
 		'contents': vim.eval('g:powerline_commandt_reply').replace('CommandT::', '').replace('Finder::', '')
 	}]
 
@@ -88,6 +88,6 @@ def path(pl):
 		return None
 	vim.command('ruby $powerline.commandt_set_path')
 	return [{
-		'highlight_group': ['commandt:path'],
+		'highlight_groups': ['commandt:path'],
 		'contents': vim.eval('g:powerline_commandt_reply')
 	}]

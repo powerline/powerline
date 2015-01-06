@@ -18,7 +18,7 @@ def highlighted_string(s, group, **kwargs):
 	ret = {
 		'type': 'string',
 		'contents': s,
-		'highlight_group': [group],
+		'highlight_groups': [group],
 	}
 	ret.update(kwargs)
 	return ret
@@ -782,7 +782,7 @@ class TestVim(TestCase):
 							{
 								'type': 'string',
 								'name': 'foo',
-								'highlight_group': ['g1']
+								'highlight_groups': ['g1']
 							}
 						]
 					}

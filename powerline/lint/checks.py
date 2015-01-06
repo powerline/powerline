@@ -33,7 +33,7 @@ generic_keys = set((
 ))
 type_keys = {
 	'function': set(('function', 'args', 'draw_inner_divider')),
-	'string': set(('contents', 'type', 'highlight_group', 'divider_highlight_group')),
+	'string': set(('contents', 'type', 'highlight_groups', 'divider_highlight_group')),
 	'segment_list': set(('function', 'segments', 'args', 'type')),
 }
 required_keys = {
@@ -41,7 +41,7 @@ required_keys = {
 	'string': set(()),
 	'segment_list': set(('function', 'segments',)),
 }
-highlight_keys = set(('highlight_group', 'name'))
+highlight_keys = set(('highlight_groups', 'name'))
 
 
 def get_function_strings(function_name, context, ext):
@@ -281,7 +281,7 @@ def check_key_compatibility(segment, data, context, echoerr):
 			context_mark=context[-1][1].mark,
 			problem=(
 				'found missing keys required to determine highlight group. '
-				'Either highlight_group or name key must be present'
+				'Either highlight_groups or name key must be present'
 			)
 		)
 		hadproblem = True

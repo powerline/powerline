@@ -6,7 +6,7 @@
 				"contents": "Select variant",
 				"width": "auto",
 				"align": "r",
-				"highlight_group": ["continuation:current"]
+				"highlight_groups": ["continuation:current"]
 			}
 		]
 	}

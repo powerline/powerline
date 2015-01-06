@@ -7,7 +7,7 @@
 				"contents": "",
 				"draw_soft_divider": false,
 				"width": "auto",
-				"highlight_group": ["prompt"]
+				"highlight_groups": ["prompt"]
 			},
 			{
 				"function": "prompt_count",
@@ -16,7 +16,7 @@
 			{
 				"type": "string",
 				"contents": ">",
-				"highlight_group": ["prompt"]
+				"highlight_groups": ["prompt"]
 			}
 		]
 	}

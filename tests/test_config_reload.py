@@ -50,12 +50,12 @@ config = {
 				{
 					"type": "string",
 					"contents": "s",
-					"highlight_group": ["str1"],
+					"highlight_groups": ["str1"],
 				},
 				{
 					"type": "string",
 					"contents": "g",
-					"highlight_group": ["str2"],
+					"highlight_groups": ["str2"],
 				},
 			],
 			"right": [
@@ -94,12 +94,12 @@ config = {
 				{
 					"type": "string",
 					"contents": "t",
-					"highlight_group": ["str1"],
+					"highlight_groups": ["str1"],
 				},
 				{
 					"type": "string",
 					"contents": "b",
-					"highlight_group": ["str2"],
+					"highlight_groups": ["str2"],
 				},
 			],
 			"right": [

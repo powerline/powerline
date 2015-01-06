@@ -21,5 +21,5 @@ def nerdtree(pl):
 	path_str = vim.eval('getbufvar("%", "NERDTreeRoot").path.str()')
 	return [{
 		'contents': path_str,
-		'highlight_group': ['nerdtree.path', 'file_name'],
+		'highlight_groups': ['nerdtree.path', 'file_name'],
 	}]

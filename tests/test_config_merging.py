@@ -61,7 +61,7 @@ theme_config = lambda: {
 				'type': 'string',
 				'name': 's',
 				'contents': 't',
-				'highlight_group': ['g'],
+				'highlight_groups': ['g'],
 			},
 		],
 		'right': [],

@@ -18,7 +18,7 @@ def date(pl, format='%Y-%m-%d', istime=False):
 	'''
 	return [{
 		'contents': datetime.now().strftime(format),
-		'highlight_group': (['time'] if istime else []) + ['date'],
+		'highlight_groups': (['time'] if istime else []) + ['date'],
 		'divider_highlight_group': 'time:divider' if istime else None,
 	}]
 

@@ -188,12 +188,12 @@ class WeatherSegment(KwThreadedSegment):
 		return [
 			{
 				'contents': icon + ' ',
-				'highlight_group': groups,
+				'highlight_groups': groups,
 				'divider_highlight_group': 'background:divider',
 			},
 			{
 				'contents': temp_format.format(temp=converted_temp),
-				'highlight_group': ['weather_temp_gradient', 'weather_temp', 'weather'],
+				'highlight_groups': ['weather_temp_gradient', 'weather_temp', 'weather'],
 				'divider_highlight_group': 'background:divider',
 				'gradient_level': gradient_level,
 			},

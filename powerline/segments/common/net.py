@@ -248,7 +248,7 @@ class NetworkLoadSegment(KwThreadedSegment):
 			r.append({
 				'contents': format.format(value=humanize_bytes(value, suffix, si_prefix)),
 				'divider_highlight_group': 'background:divider',
-				'highlight_group': hl_groups,
+				'highlight_groups': hl_groups,
 			})
 			if is_gradient:
 				max = kwargs[max_key]

@@ -58,7 +58,7 @@
 			},
 			{
 				"type": "string",
-				"highlight_group": ["background"],
+				"highlight_groups": ["background"],
 				"draw_soft_divider": false,
 				"draw_hard_divider": false,
 				"width": "auto"
@@ -69,14 +69,14 @@
 				"type": "string",
 				"contents": "Bufs",
 				"name": "single_tab",
-				"highlight_group": ["single_tab"],
+				"highlight_groups": ["single_tab"],
 				"include_function": "single_tab"
 			},
 			{
 				"type": "string",
 				"contents": "Tabs",
 				"name": "many_tabs",
-				"highlight_group": ["many_tabs"],
+				"highlight_groups": ["many_tabs"],
 				"exclude_function": "single_tab"
 			}
 		]

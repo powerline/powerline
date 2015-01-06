@@ -218,7 +218,7 @@ segment_spec = Spec(
 	align=Spec().oneof(set('lr')).optional(),
 	args=args_spec().func(lambda *args, **kwargs: check_args(get_one_segment_function, *args, **kwargs)),
 	contents=Spec().printable().optional(),
-	highlight_group=Spec().list(
+	highlight_groups=Spec().list(
 		highlight_group_spec().re(
 			'^(?:(?!:divider$).)+$',
 			(lambda value: 'it is recommended that only divider highlight group names end with ":divider"')
