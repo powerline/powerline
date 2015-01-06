@@ -352,15 +352,15 @@ class TestNet(TestCommon):
 			AF_INET6=netifaces.AF_INET6,
 		):
 			self.assertEqual(common.internal_ip(pl=pl), '192.168.100.200')
-			self.assertEqual(common.internal_ip(pl=pl, interface='detect'), '192.168.100.200')
+			self.assertEqual(common.internal_ip(pl=pl, interface='auto'), '192.168.100.200')
 			self.assertEqual(common.internal_ip(pl=pl, interface='lo'), '127.0.0.1')
 			self.assertEqual(common.internal_ip(pl=pl, interface='teredo'), None)
 			self.assertEqual(common.internal_ip(pl=pl, ipv=4), '192.168.100.200')
-			self.assertEqual(common.internal_ip(pl=pl, interface='detect', ipv=4), '192.168.100.200')
+			self.assertEqual(common.internal_ip(pl=pl, interface='auto', ipv=4), '192.168.100.200')
 			self.assertEqual(common.internal_ip(pl=pl, interface='lo', ipv=4), '127.0.0.1')
 			self.assertEqual(common.internal_ip(pl=pl, interface='teredo', ipv=4), None)
 			self.assertEqual(common.internal_ip(pl=pl, ipv=6), 'feff::5446:5eff:fe5a:7777%enp2s0')
-			self.assertEqual(common.internal_ip(pl=pl, interface='detect', ipv=6), 'feff::5446:5eff:fe5a:7777%enp2s0')
+			self.assertEqual(common.internal_ip(pl=pl, interface='auto', ipv=6), 'feff::5446:5eff:fe5a:7777%enp2s0')
 			self.assertEqual(common.internal_ip(pl=pl, interface='lo', ipv=6), '::1')
 			self.assertEqual(common.internal_ip(pl=pl, interface='teredo', ipv=6), 'feff::5446:5eff:fe5a:7777')
 			interfaces[1:2] = ()
