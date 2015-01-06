@@ -123,11 +123,10 @@ config = {
 		},
 	},
 	'themes/vim/default': {
-		'default_module': 'powerline.segments.common',
 		'segments': {
 			'left': [
 				{
-					'function': 'environment',
+					'function': 'powerline.segments.common.env.environment',
 					'args': {
 						'variable': 'TEST',
 					},
