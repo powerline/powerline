@@ -78,7 +78,8 @@ run() {
 		PYTHONPATH="${PWD}${PYTHONPATH:+:}$PYTHONPATH" \
 		POWERLINE_SHELL_CONTINUATION=$additional_prompts \
 		POWERLINE_SHELL_SELECT=$additional_prompts \
-		POWERLINE_COMMAND="${POWERLINE_COMMAND} -p $PWD/powerline/config_files" \
+		POWERLINE_CONFIG_PATHS="$PWD/powerline/config_files" \
+		POWERLINE_COMMAND="${POWERLINE_COMMAND}" \
 		"$@"
 }
 

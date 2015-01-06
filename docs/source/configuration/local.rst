@@ -37,6 +37,8 @@ Vim configuration can be overridden using the following options:
     was configured in :ref:`log_* options <config-common-log>`. Level is always 
     :ref:`log_level <config-common-log_level>`, same for format.
 
+.. _local-configuration-overrides-script:
+
 Powerline script overrides
 ==========================
 
@@ -69,7 +71,10 @@ Powerline script has a number of options controlling powerline behavior. Here
 
 .. warning::
     Such overrides are suggested for testing purposes only. Use 
-    :ref:`Environment variables overrides` for other purposes.
+    :ref:`Environment variables overrides <local-configuration-overrides-env>` 
+    for other purposes.
+
+.. _local-configuration-overrides-env:
 
 Environment variables overrides
 ===============================
@@ -143,14 +148,16 @@ searched for configuration.
 
 .. note::
     Overrides from environment variables have lower priority then 
-    :ref:`Powerline script overrides`. Latter are suggested for tests only.
+    :ref:`Powerline script overrides <local-configuration-overrides-script>`. 
+    Latter are suggested for tests only.
 
 Zsh/zpython overrides
 =====================
 
 Here overrides are controlled by similarly to the powerline script, but values 
-are taken from zsh variables. :ref:`Environment variable overrides` are also 
-supported: if variable is a string this variant is used.
+are taken from zsh variables. :ref:`Environment variable overrides 
+<local-configuration-overrides-env>` are also supported: if variable is a string 
+this variant is used.
 
 ``POWERLINE_CONFIG_OVERRIDES``
     Overrides options from :file:`powerline/config.json`. Should be a zsh 
@@ -210,7 +217,9 @@ putting powerline into different directory.
     ``$POWERLINE_COMMAND`` appears in shell scripts without quotes thus you can 
     specify additional parameters in bash. In tmux it is passed to ``eval`` and 
     depends on the shell used. POSIX-compatible shells, zsh, bash and fish will 
-    split this variable in this case.
+    split this variable in this case. Do not use this feature for overriding 
+    configuration: there are :ref:`Environment variables overrides 
+    <local-configuration-overrides-env>`.
 
 If you want to disable prompt in shell, but still have tmux support or if you 
 want to disable tmux support you can use variables 

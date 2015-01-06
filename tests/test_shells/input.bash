@@ -1,7 +1,13 @@
+set_theme_option() {
+	export POWERLINE_THEME_OVERRIDES="${POWERLINE_THEME_OVERRIDES};$1=$2"
+}
+set_theme() {
+	export POWERLINE_CONFIG_OVERRIDES="ext.shell.theme=$1"
+}
+set_theme_option default_leftonly.segment_data.hostname.args.only_if_ssh false
+set_theme default_leftonly
 export VIRTUAL_ENV=
 source powerline/bindings/bash/powerline.sh
-POWERLINE_COMMAND="$POWERLINE_COMMAND -t default_leftonly.segment_data.hostname.args.only_if_ssh=false"
-POWERLINE_COMMAND="$POWERLINE_COMMAND -c ext.shell.theme=default_leftonly"
 cd tests/shell/3rd
 cd .git
 cd ..
@@ -10,8 +16,8 @@ VIRTUAL_ENV=
 bgscript.sh & waitpid.sh
 false
 kill `cat pid` ; sleep 1s
-POWERLINE_COMMAND="$POWERLINE_COMMAND -t default_leftonly.segment_data.hostname.display=false"
-POWERLINE_COMMAND="$POWERLINE_COMMAND -t default_leftonly.segment_data.user.display=false"
+set_theme_option default_leftonly.segment_data.hostname.display false
+set_theme_option default_leftonly.segment_data.user.display false
 echo '
 abc
 def
@@ -25,7 +31,7 @@ cd ../'(echo)'
 cd ../'$(echo)'
 cd ../'`echo`'
 cd ../'«Unicode!»'
-POWERLINE_COMMAND="$POWERLINE_COMMAND -t default_leftonly.dividers.left.hard=\$ABC"
+set_theme_option default_leftonly.dividers.left.hard \$ABC
 false
 true is the last line
 exit
