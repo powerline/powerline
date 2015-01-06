@@ -136,7 +136,7 @@ def init_environment(pl, args):
 		('_POWERLINE_SESSION_PREFIX_ATTR', 'attrs', 'session:prefix'),
 	):
 		if attr == 'attrs':
-			attrs = attr_to_tmux_attr(get_highlighting(group)[attr])
+			attrs = attrs_to_tmux_attrs(get_highlighting(group)[attr])
 			set_tmux_environment(varname, ']#['.join(attrs))
 			set_tmux_environment(varname + '_LEGACY', ','.join(attrs))
 		else:
