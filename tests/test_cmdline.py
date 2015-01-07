@@ -41,8 +41,8 @@ class TestParser(TestCase):
 				(['shell', '--width'],                   'expected one argument'),
 				(['shell', '--last-exit-code'],          'expected one argument'),
 				(['shell', '--last-pipe-status'],        'expected one argument'),
-				(['shell', '--config'],                  'expected one argument'),
-				(['shell', '--theme-option'],            'expected one argument'),
+				(['shell', '--config-override'],         'expected one argument'),
+				(['shell', '--theme-override'],          'expected one argument'),
 				(['shell', '--config-path'],             'expected one argument'),
 				(['shell', '--renderer-arg'],            'expected one argument'),
 				(['shell', '--jobnum'],                  'expected one argument'),
@@ -85,8 +85,8 @@ class TestParser(TestCase):
 					'last_pipe_status': [10, 20, 30],
 					'jobnum': 10,
 					'width': 100,
-					'config': {'common': {'term_truecolor': True, 'spaces': 4}},
-					'theme_option': {
+					'config_override': {'common': {'term_truecolor': True, 'spaces': 4}},
+					'theme_override': {
 						'default': {
 							'segment_data': {
 								'hostname': {
@@ -103,7 +103,7 @@ class TestParser(TestCase):
 				(['shell', '-R', 'arg='], {'ext': ['shell'], 'renderer_arg': {}}),
 				(['shell', '-t', 'default.segment_info={"hostname": {}}'], {
 					'ext': ['shell'],
-					'theme_option': {
+					'theme_override': {
 						'default': {
 							'segment_info': {
 								'hostname': {}
@@ -111,10 +111,10 @@ class TestParser(TestCase):
 						}
 					},
 				}),
-				(['shell', '-c', 'common={ }'], {'ext': ['shell'], 'config': {'common': {}}}),
+				(['shell', '-c', 'common={ }'], {'ext': ['shell'], 'config_override': {'common': {}}}),
 			]:
 				args = parser.parse_args(argv)
-				finish_args(args)
+				finish_args({}, args)
 				for key, val in expargs.items():
 					self.assertEqual(getattr(args, key), val)
 				for key, val in args.__dict__.items():

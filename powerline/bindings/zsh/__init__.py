@@ -8,7 +8,7 @@ from weakref import WeakValueDictionary, ref
 import zsh
 
 from powerline.shell import ShellPowerline
-from powerline.lib import parsedotval
+from powerline.lib.overrides import parsedotval, parse_override_var
 from powerline.lib.unicode import unicode, u
 from powerline.lib.encoding import (get_preferred_output_encoding,
                                     get_preferred_environment_encoding)
@@ -25,7 +25,13 @@ def shutdown():
 
 def get_var_config(var):
 	try:
-		return mergeargs([parsedotval((u(k), u(v))) for k, v in zsh.getvalue(var).items()])
+		val = zsh.getvalue(var)
+		if isinstance(val, dict):
+			return mergeargs([parsedotval((u(k), u(v))) for k, v in val.items()])
+		elif isinstance(val, (unicode, str, bytes)):
+			return mergeargs(parse_override_var(u(val)))
+		else:
+			return None
 	except:
 		return None
 
@@ -36,12 +42,12 @@ class Args(object):
 	renderer_module = '.zsh'
 
 	@property
-	def config(self):
+	def config_override(self):
 		return get_var_config('POWERLINE_CONFIG_OVERRIDES')
 
 	@property
-	def theme_option(self):
-		return get_var_config('POWERLINE_THEME_CONFIG')
+	def theme_override(self):
+		return get_var_config('POWERLINE_THEME_OVERRIDES')
 
 	@property
 	def config_path(self):
@@ -51,7 +57,11 @@ class Args(object):
 			return None
 		else:
 			if isinstance(ret, (unicode, str, bytes)):
-				return ret.split(type(ret)(':'))
+				return [
+					path
+					for path in ret.split((b':' if isinstance(ret, bytes) else ':'))
+					if path
+				]
 			else:
 				return ret
 
@@ -91,7 +101,7 @@ class Environment(object):
 			return False
 
 
-environ = Environment()
+environ = getattr(zsh, 'environ', Environment())
 
 
 class ZshPowerline(ShellPowerline):

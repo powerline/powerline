@@ -13,6 +13,7 @@ from powerline.lib.unicode import safe_unicode, FailedUnicode
 from powerline.config import DEFAULT_SYSTEM_CONFIG_DIR
 from powerline.lib.dict import mergedicts
 from powerline.lib.encoding import get_preferred_output_encoding
+from powerline.lib.path import join
 
 
 class NotInterceptedError(BaseException):
@@ -29,7 +30,7 @@ def _find_config_files(search_paths, config_file, config_loader=None, loader_cal
 	config_file += '.json'
 	found = False
 	for path in search_paths:
-		config_file_path = os.path.join(path, config_file)
+		config_file_path = join(path, config_file)
 		if os.path.isfile(config_file_path):
 			yield config_file_path
 			found = True
@@ -142,12 +143,12 @@ def get_config_paths():
 	:return: list of paths
 	'''
 	config_home = os.environ.get('XDG_CONFIG_HOME', os.path.join(os.path.expanduser('~'), '.config'))
-	config_path = os.path.join(config_home, 'powerline')
+	config_path = join(config_home, 'powerline')
 	config_paths = [config_path]
 	config_dirs = os.environ.get('XDG_CONFIG_DIRS', DEFAULT_SYSTEM_CONFIG_DIR)
 	if config_dirs is not None:
-		config_paths[:0] = reversed([os.path.join(d, 'powerline') for d in config_dirs.split(':')])
-	plugin_path = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'config_files')
+		config_paths[:0] = reversed([join(d, 'powerline') for d in config_dirs.split(':')])
+	plugin_path = join(os.path.realpath(os.path.dirname(__file__)), 'config_files')
 	config_paths.insert(0, plugin_path)
 	return config_paths
 

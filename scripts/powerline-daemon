@@ -75,11 +75,14 @@ def render(args, environ, cwd):
 	key = (
 		args.ext[0],
 		args.renderer_module,
-		tuple(args.config) if args.config else None,
-		tuple(args.theme_option) if args.theme_option else None,
+		tuple(args.config_override) if args.config_override else None,
+		tuple(args.theme_override) if args.theme_override else None,
 		tuple(args.config_path) if args.config_path else None,
+		environ.get('POWERLINE_THEME_OVERRIDES', ''),
+		environ.get('POWERLINE_CONFIG_OVERRIDES', ''),
+		environ.get('POWERLINE_CONFIG_PATHS', ''),
 	)
-	finish_args(args)
+	finish_args(environ, args)
 	powerline = None
 	try:
 		powerline = powerlines[key]

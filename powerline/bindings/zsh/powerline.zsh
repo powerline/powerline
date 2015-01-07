@@ -151,11 +151,11 @@ _powerline_setup_prompt() {
 		local add_args_2=$add_args$new_args_2
 		add_args+=' --width=$(( ${COLUMNS:-$(_powerline_columns_fallback)} - ${ZLE_RPROMPT_INDENT:-1} ))'
 		local add_args_r2=$add_args$new_args_2
-		PS1='$($=POWERLINE_COMMAND shell aboveleft '$add_args')'
-		RPS1='$($=POWERLINE_COMMAND shell right '$add_args')'
-		PS2='$($=POWERLINE_COMMAND shell left '$add_args_2')'
-		RPS2='$($=POWERLINE_COMMAND shell right '$add_args_r2')'
-		PS3='$($=POWERLINE_COMMAND shell left '$add_args_3')'
+		PS1='$("$POWERLINE_COMMAND" $=POWERLINE_COMMAND_ARGS shell aboveleft '$add_args')'
+		RPS1='$("$POWERLINE_COMMAND" $=POWERLINE_COMMAND_ARGS shell right '$add_args')'
+		PS2='$("$POWERLINE_COMMAND" $=POWERLINE_COMMAND_ARGS shell left '$add_args_2')'
+		RPS2='$("$POWERLINE_COMMAND" $=POWERLINE_COMMAND_ARGS shell right '$add_args_r2')'
+		PS3='$("$POWERLINE_COMMAND" $=POWERLINE_COMMAND_ARGS shell left '$add_args_3')'
 	fi
 }
 

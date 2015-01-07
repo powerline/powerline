@@ -15,11 +15,16 @@ from powerline.lib.dict import mergedicts
 from powerline.lib.unicode import u
 
 
-def _override_from(config, override_varname):
+def _override_from(config, override_varname, key=None):
 	try:
 		overrides = vim_getvar(override_varname)
 	except KeyError:
 		return config
+	if key is not None:
+		try:
+			overrides = overrides[key]
+		except KeyError:
+			return config
 	mergedicts(config, overrides)
 	return config
 
@@ -111,12 +116,10 @@ class VimPowerline(Powerline):
 		return _override_from(super(VimPowerline, self).load_main_config(), 'powerline_config_overrides')
 
 	def load_theme_config(self, name):
-		# Note: themes with non-[a-zA-Z0-9_] names are impossible to override 
-		# (though as far as I know exists() won’t throw). Won’t fix, use proper 
-		# theme names.
 		return _override_from(
 			super(VimPowerline, self).load_theme_config(name),
-			'powerline_theme_overrides__' + name
+			'powerline_theme_overrides',
+			name
 		)
 
 	def get_local_themes(self, local_themes):

@@ -16,11 +16,11 @@ Vim configuration can be overridden using the following options:
     Dictionary, recursively merged with contents of 
     :file:`powerline/config.json`.
 
-``g:powerline_theme_overrides__{theme_name}``
-    Dictionary, recursively merged with contents of 
-    :file:`powerline/themes/vim/{theme_name}.json`. Note that this way you can’t 
-    redefine some value (e.g. segment) in list, only the whole list itself: only 
-    dictionaries are merged recursively.
+``g:powerline_theme_overrides``
+    Dictionary mapping theme names to theme overrides, recursively merged with 
+    contents of :file:`powerline/themes/vim/{key}.json`. Note that this way you 
+    can’t redefine some value (e.g. segment) in list, only the whole list 
+    itself: only dictionaries are merged recursively.
 
 ``g:powerline_config_paths``
     Paths list (each path must be expanded, ``~`` shortcut is not supported). 
@@ -37,13 +37,15 @@ Vim configuration can be overridden using the following options:
     was configured in :ref:`log_* options <config-common-log>`. Level is always 
     :ref:`log_level <config-common-log_level>`, same for format.
 
+.. _local-configuration-overrides-script:
+
 Powerline script overrides
 ==========================
 
 Powerline script has a number of options controlling powerline behavior. Here 
 ``VALUE`` always means “some JSON object”.
 
-``-c KEY.NESTED_KEY=VALUE`` or ``--config=KEY.NESTED_KEY=VALUE``
+``-c KEY.NESTED_KEY=VALUE`` or ``--config-override=KEY.NESTED_KEY=VALUE``
     Overrides options from :file:`powerline/config.json`. 
     ``KEY.KEY2.KEY3=VALUE`` is a shortcut for ``KEY={"KEY2": {"KEY3": VALUE}}``. 
     Multiple options (i.e. ``-c K1=V1 -c K2=V2``) are allowed, result (in the 
@@ -53,7 +55,7 @@ Powerline script has a number of options controlling powerline behavior. Here
     If ``VALUE`` is omitted then corresponding key will be removed from the 
     configuration (if it was present).
 
-``-t THEME_NAME.KEY.NESTED_KEY=VALUE`` or ``--theme-option=THEME_NAME.KEY.NESTED_KEY=VALUE``
+``-t THEME_NAME.KEY.NESTED_KEY=VALUE`` or ``--theme-override=THEME_NAME.KEY.NESTED_KEY=VALUE``
     Overrides options from :file:`powerline/themes/{ext}/{THEME_NAME}.json`. 
     ``KEY.NESTED_KEY=VALUE`` is processed like described above, ``{ext}`` is the 
     first argument to powerline script. May be passed multiple times.
@@ -67,11 +69,96 @@ Powerline script has a number of options controlling powerline behavior. Here
     performed by powerline script itself, but ``-p ~/.powerline`` will likely be 
     expanded by the shell to something like ``-p /home/user/.powerline``.
 
+.. warning::
+    Such overrides are suggested for testing purposes only. Use 
+    :ref:`Environment variables overrides <local-configuration-overrides-env>` 
+    for other purposes.
+
+.. _local-configuration-overrides-env:
+
+Environment variables overrides
+===============================
+
+All bindings that use ``POWERLINE_COMMAND`` environment variable support taking 
+overrides from environment variables. In this case overrides should look like 
+the following::
+
+    OVERRIDE='key1.key2.key3=value;key4.key5={"value":1};key6=true;key1.key7=10'
+
+. This will be parsed into
+
+.. code-block:: Python
+
+    {
+        "key1": {
+            "key2": {
+                "key3": "value"
+            },
+            "key7": 10,
+        },
+        "key4": {
+            "key5": {
+                "value": 1,
+            },
+        },
+        "key6": True,
+    }
+
+. Rules:
+
+#. Environment variable must form a semicolon-separated list of key-value pairs: 
+   ``key=value;key2=value2``.
+#. Keys are always dot-separated strings that must not contain equals sign (as 
+   well as semicolon) or start with an underscore. They are interpreted 
+   literally and create a nested set of dictionaries: ``k1.k2.k3`` creates 
+   ``{"k1":{"k2":{}}}`` and inside the innermost dictionary last key (``k3`` in 
+   the example) is contained with its value.
+#. Value may be empty in which case they are interpreted as an order to remove 
+   some value: ``k1.k2=`` will form ``{"k1":{"k2":REMOVE_THIS_KEY}}`` nested 
+   dictionary where ``k2`` value is a special value that tells 
+   dictionary-merging function to remove ``k2`` rather then replace it with 
+   something.
+#. Value may be a JSON strings like ``{"a":1}`` (JSON dictionary), ``["a",1]`` 
+   (JSON list), ``1`` or ``-1`` (JSON number), ``"abc"`` (JSON string) or 
+   ``true``, ``false`` and ``null`` (JSON boolean objects and ``Null`` object 
+   from JSON). General rule is that anything starting with a digit (U+0030 till 
+   U+0039, inclusive), a hyphenminus (U+002D), a quotation mark (U+0022), a left 
+   curly bracket (U+007B) or a left square bracket (U+005B) is considered to be 
+   some JSON object, same for *exact* values ``true``, ``false`` and ``null``.
+#. Any other value is considered to be literal string: ``k1=foo:bar`` parses to 
+   ``{"k1": "foo:bar"}``.
+
+The following environment variables may be used for overrides according to the 
+above rules:
+
+``POWERLINE_CONFIG_OVERRIDES``
+    Overrides values from :file:`powerline/config.json`.
+
+``POWERLINE_THEME_OVERRIDES``
+    Overrides values from :file:`powerline/themes/{ext}/{key}.json`. Top-level 
+    key is treated as a name of the theme for which overrides are used: e.g. to 
+    disable cwd segment defined in :file:`powerline/themes/shell/default.json` 
+    one needs to use::
+
+        POWERLINE_THEME_OVERRIDES=default.segment_data.cwd.display=false
+
+Additionally one environment variable is a usual *colon*-separated list of 
+directories: ``POWERLINE_CONFIG_PATHS``. This one defines paths which will be 
+searched for configuration. Empty paths in ``POWERLINE_CONFIG_PATHS`` are 
+ignored.
+
+.. note::
+    Overrides from environment variables have lower priority then 
+    :ref:`Powerline script overrides <local-configuration-overrides-script>`. 
+    Latter are suggested for tests only.
+
 Zsh/zpython overrides
 =====================
 
 Here overrides are controlled by similarly to the powerline script, but values 
-are taken from zsh variables.
+are taken from zsh variables. :ref:`Environment variable overrides 
+<local-configuration-overrides-env>` are also supported: if variable is a string 
+this variant is used.
 
 ``POWERLINE_CONFIG_OVERRIDES``
     Overrides options from :file:`powerline/config.json`. Should be a zsh 
@@ -80,7 +167,7 @@ are taken from zsh variables.
     VALUE}}``. All pairs are then recursively merged into one dictionary and 
     this dictionary is recursively merged with the contents of the file.
 
-``POWERLINE_THEME_CONFIG``
+``POWERLINE_THEME_OVERRIDES``
     Overrides options from :file:`powerline/themes/shell/*.json`. Should be 
     a zsh associative array with keys equal to ``THEME_NAME.KEY.NESTED_KEY`` and 
     values being JSON strings. Is processed like the above 
@@ -112,7 +199,7 @@ use ``c.Powerline.KEY``. Supported ``KEY`` strings or keyword argument names:
     a dictionary where keys are theme names and values are dictionaries which 
     will be recursively merged with the contents of the given theme.
 
-``paths``
+``config_paths``
     Sets directories where configuration should be read from. If present, no 
     default locations are searched for configuration. No expansions are 
     performed thus you cannot use paths starting with ``~/``.
@@ -128,10 +215,11 @@ putting powerline into different directory.
 
 .. note::
 
-    ``$POWERLINE_COMMAND`` appears in shell scripts without quotes thus you can 
-    specify additional parameters in bash. In tmux it is passed to ``eval`` and 
-    depends on the shell used. POSIX-compatible shells, zsh, bash and fish will 
-    split this variable in this case.
+    ``$POWERLINE_COMMAND`` is always treated as one path in shell bindings, so 
+    you may use paths with spaces in it. To specify additional arguments one may 
+    use ``$POWERLINE_COMMAND_ARGS``, but note that this variable exists for 
+    testing purposes only and may be removed. One should use :ref:`Environment 
+    variable overrides <local-configuration-overrides-env>` instead.
 
 If you want to disable prompt in shell, but still have tmux support or if you 
 want to disable tmux support you can use variables 

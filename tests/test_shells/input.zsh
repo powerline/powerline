@@ -2,28 +2,18 @@ unset HOME
 unsetopt promptsp notransientrprompt
 setopt interactivecomments
 setopt autonamedirs
-if test -z "$POWERLINE_NO_ZSH_ZPYTHON" ; then
-	function set_theme_option() {
-		POWERLINE_THEME_CONFIG[$1]=$2
-		powerline-reload-config
-	}
-	function set_theme() {
-		typeset -A POWERLINE_CONFIG_OVERRIDES
-		POWERLINE_CONFIG_OVERRIDES=(
-			ext.shell.theme $1
-		)
-		powerline-reload-config
-	}
-else
-	function set_theme_option() {
-		POWERLINE_COMMAND="$POWERLINE_COMMAND -t $1=$2"
-	}
-	function set_theme() {
-		POWERLINE_COMMAND="$POWERLINE_COMMAND -c ext.shell.theme=$1"
-	}
+function set_theme_option() {
+	export POWERLINE_THEME_OVERRIDES="${POWERLINE_THEME_OVERRIDES};$1=$2"
+	powerline-reload-config
+}
+function set_theme() {
+	export POWERLINE_CONFIG_OVERRIDES="ext.shell.theme=$1"
+	powerline-reload-config
+}
+if test -n "$POWERLINE_NO_ZSH_ZPYTHON" ; then
+	powerline-reload-config():
 fi
 source powerline/bindings/zsh/powerline.zsh
-typeset -gA POWERLINE_CONFIG_OVERRIDES POWERLINE_THEME_CONFIG
 set_theme_option default_leftonly.segment_data.hostname.args.only_if_ssh false
 set_theme_option default.segment_data.hostname.args.only_if_ssh false
 set_theme default_leftonly

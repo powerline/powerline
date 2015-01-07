@@ -138,7 +138,7 @@ class TestConfig(TestCase):
 
 	def test_bash(self):
 		from powerline.shell import ShellPowerline
-		args = Args(last_exit_code=1, jobnum=0, ext=['shell'], renderer_module='.bash', config={'ext': {'shell': {'theme': 'default_leftonly'}}})
+		args = Args(last_exit_code=1, jobnum=0, ext=['shell'], renderer_module='.bash', config_override={'ext': {'shell': {'theme': 'default_leftonly'}}})
 		with ShellPowerline(args, logger=get_logger(), run_once=False) as powerline:
 			powerline.render(segment_info={'args': args})
 		with ShellPowerline(args, logger=get_logger(), run_once=False) as powerline:
@@ -148,7 +148,7 @@ class TestConfig(TestCase):
 		from powerline.ipython import IPythonPowerline
 
 		class IpyPowerline(IPythonPowerline):
-			paths = None
+			config_paths = None
 			config_overrides = None
 			theme_overrides = {}
 

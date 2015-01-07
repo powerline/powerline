@@ -72,7 +72,7 @@ class ConfigurableIPythonPowerline(IPythonPowerline):
 		config = ip.config.Powerline
 		self.config_overrides = config.get('config_overrides')
 		self.theme_overrides = config.get('theme_overrides', {})
-		self.paths = config.get('paths')
+		self.config_paths = config.get('config_paths')
 		super(ConfigurableIPythonPowerline, self).init()
 
 	def do_setup(self, ip, shutdown_hook):

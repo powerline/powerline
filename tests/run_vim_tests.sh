@@ -29,6 +29,11 @@ else
 	OLD_VIM="$VIM"
 fi
 
+# Define some overrides. These ones must be ignored and do not affect Vim 
+# status/tab lines.
+export POWERLINE_CONFIG_OVERRIDES='common.default_top_theme=ascii'
+export POWERLINE_THEME_OVERRIDES='default.segments.left=[]'
+
 test_script() {
 	local vim="$1"
 	local script="$2"
