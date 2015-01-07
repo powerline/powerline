@@ -42,15 +42,17 @@ def strtrans(s):
 
 
 class Mark:
-	def __init__(self, name, line, column, buffer, pointer):
+	def __init__(self, name, line, column, buffer, pointer, old_mark=None, merged_marks=None):
 		self.name = name
 		self.line = line
 		self.column = column
 		self.buffer = buffer
 		self.pointer = pointer
+		self.old_mark = old_mark
+		self.merged_marks = merged_marks or []
 
 	def copy(self):
-		return Mark(self.name, self.line, self.column, self.buffer, self.pointer)
+		return Mark(self.name, self.line, self.column, self.buffer, self.pointer, self.old_mark, self.merged_marks[:])
 
 	def get_snippet(self, indent=4, max_length=75):
 		if self.buffer is None:
@@ -85,16 +87,56 @@ class Mark:
 		ret.pointer += diff
 		return ret
 
-	def __str__(self):
-		snippet = self.get_snippet()
-		where = ('  in "%s", line %d, column %d' % (
-			self.name, self.line + 1, self.column + 1))
-		if snippet is not None:
-			where += ':\n' + snippet
+	def set_old_mark(self, old_mark):
+		if self is old_mark:
+			return
+		checked_marks = set([id(self)])
+		older_mark = old_mark
+		while True:
+			if id(older_mark) in checked_marks:
+				raise ValueError('Trying to set recursive marks')
+			checked_marks.add(id(older_mark))
+			older_mark = older_mark.old_mark
+			if not older_mark:
+				break
+		self.old_mark = old_mark
+
+	def set_merged_mark(self, merged_mark):
+		self.merged_marks.append(merged_mark)
+
+	def to_string(self, indent=0, head_text='in ', add_snippet=True):
+		mark = self
+		where = ''
+		processed_marks = set()
+		while mark:
+			indentstr = ' ' * indent
+			where += ('%s  %s"%s", line %d, column %d' % (
+				indentstr, head_text, mark.name, mark.line + 1, mark.column + 1))
+			if add_snippet:
+				snippet = mark.get_snippet(indent=(indent + 4))
+				if snippet:
+					where += ':\n' + snippet
+			if mark.merged_marks:
+				where += '\n' + indentstr + '  with additionally merged\n'
+				where += mark.merged_marks[0].to_string(indent + 4, head_text='', add_snippet=False)
+				for mmark in mark.merged_marks[1:]:
+					where += '\n' + indentstr + '  and\n'
+					where += mmark.to_string(indent + 4, head_text='', add_snippet=False)
+			if add_snippet:
+				processed_marks.add(id(mark))
+				if mark.old_mark:
+					where += '\n' + indentstr + '  which replaced value\n'
+					indent += 4
+			mark = mark.old_mark
+			if id(mark) in processed_marks:
+				raise ValueError('Trying to dump recursive mark')
 		if type(where) is str:
 			return where
 		else:
 			return where.encode('utf-8')
+
+	def __str__(self):
+		return self.to_string()
 
 
 def echoerr(*args, **kwargs):
