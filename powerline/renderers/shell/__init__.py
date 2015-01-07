@@ -48,18 +48,18 @@ class ShellRenderer(Renderer):
 			client_id = segment_info.get('client_id')
 		else:
 			client_id = None
-		local_key = (client_id, side, None if theme is self.theme else id(theme))
-		key = (client_id, side, None)
-		did_width = False
-		if local_key[-1] != key[-1] and side == 'left':
-			try:
-				width = self.old_widths[key]
-			except KeyError:
-				pass
-			else:
-				did_width = True
-		if not did_width:
-			if width is not None:
+		if client_id is not None:
+			local_key = (client_id, side, None if theme is self.theme else id(theme))
+			key = (client_id, side, None)
+			did_width = False
+			if local_key[-1] != key[-1] and side == 'left':
+				try:
+					width = self.old_widths[key]
+				except KeyError:
+					pass
+				else:
+					did_width = True
+			if not did_width and width is not None:
 				if theme.cursor_space_multiplier is not None:
 					width = int(width * theme.cursor_space_multiplier)
 				elif theme.cursor_columns:
@@ -78,7 +78,8 @@ class ShellRenderer(Renderer):
 			side=side,
 			**kwargs
 		)
-		self.old_widths[local_key] = res[-1]
+		if client_id is not None:
+			self.old_widths[local_key] = res[-1]
 		ret = res if output_width else res[:-1]
 		if len(ret) == 1:
 			return ret[0]
