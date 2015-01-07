@@ -33,12 +33,9 @@ function powerline-setup
 		if test -z "$POWERLINE_COMMAND"
 			set -g POWERLINE_COMMAND (env $POWERLINE_CONFIG_COMMAND shell command)
 		end
-		function --on-variable fish_bind_mode _powerline_bind_mode
-			set -g -x _POWERLINE_MODE $fish_bind_mode
-		end
 		function --on-variable fish_key_bindings _powerline_set_default_mode
 			if test x$fish_key_bindings != xfish_vi_key_bindings
-				set -g -x _POWERLINE_DEFAULT_MODE default
+				set -g _POWERLINE_DEFAULT_MODE default
 			else
 				set -g -e _POWERLINE_DEFAULT_MODE
 			end
@@ -51,6 +48,8 @@ function powerline-setup
 			# the same value in two shells
 			set -l addargs "$addargs --renderer-arg=client_id="(random)
 			set -l addargs "$addargs --width=\$_POWERLINE_COLUMNS"
+			set -l addargs "$addargs --renderer-arg=mode=\$fish_bind_mode"
+			set -l addargs "$addargs --renderer-arg=default_mode=\$_POWERLINE_DEFAULT_MODE"
 			set -l promptside
 			set -l rpromptpast
 			set -l columnsexpr

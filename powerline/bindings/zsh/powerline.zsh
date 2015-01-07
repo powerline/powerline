@@ -60,7 +60,7 @@ _powerline_init_modes_support() {
 	}
 
 	function -g _powerline_set_true_keymap_name() {
-		export _POWERLINE_MODE="${1}"
+		_POWERLINE_MODE="${1}"
 		local plm_bk="$(bindkey -lL ${_POWERLINE_MODE})"
 		if [[ $plm_bk = 'bindkey -A'* ]] ; then
 			_powerline_set_true_keymap_name ${(Q)${${(z)plm_bk}[3]}}
@@ -83,7 +83,7 @@ _powerline_init_modes_support() {
 	_powerline_set_main_keymap_name
 
 	if [[ "$_POWERLINE_MODE" != vi* ]] ; then
-		export _POWERLINE_DEFAULT_MODE="$_POWERLINE_MODE"
+		_POWERLINE_DEFAULT_MODE="$_POWERLINE_MODE"
 	fi
 
 	precmd_functions+=( _powerline_set_main_keymap_name )
@@ -145,6 +145,8 @@ _powerline_setup_prompt() {
 		add_args+=' --renderer-arg="client_id=$$"'
 		add_args+=' --renderer-arg="shortened_path=${(%):-%~}"'
 		add_args+=' --jobnum=$_POWERLINE_JOBNUM'
+		add_args+=' --renderer-arg="mode=$_POWERLINE_MODE"'
+		add_args+=' --renderer-arg="default_mode=$_POWERLINE_DEFAULT_MODE"'
 		local new_args_2=' --renderer-arg="parser_state=${(%%):-%_}"'
 		new_args_2+=' --renderer-arg="local_theme=continuation"'
 		local add_args_3=$add_args' --renderer-arg="local_theme=select"'
@@ -179,15 +181,15 @@ _powerline_add_widget() {
 		eval "function $save_widget() { emulate -L zsh; $widget \$@ }"
 		eval "${old_widget_command/$widget/$save_widget}"
 		zle -N $widget $function
-		export _POWERLINE_SAVE_WIDGET="$save_widget"
+		_POWERLINE_SAVE_WIDGET="$save_widget"
 	fi
 }
 
 if test -z "${POWERLINE_CONFIG_COMMAND}" ; then
 	if which powerline-config >/dev/null ; then
-		export POWERLINE_CONFIG_COMMAND=powerline-config
+		POWERLINE_CONFIG_COMMAND=powerline-config
 	else
-		export POWERLINE_CONFIG_COMMAND="$_POWERLINE_SOURCED:h:h:h:h/scripts/powerline-config"
+		POWERLINE_CONFIG_COMMAND="$_POWERLINE_SOURCED:h:h:h:h/scripts/powerline-config"
 	fi
 fi
 

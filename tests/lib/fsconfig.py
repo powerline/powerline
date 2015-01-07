@@ -5,8 +5,8 @@ import os
 import json
 
 from subprocess import check_call
-from operator import add
 from shutil import rmtree
+from itertools import chain
 
 from powerline import Powerline
 
@@ -64,9 +64,12 @@ class FSTree(object):
 			)
 		if os.environ.get('POWERLINE_RUN_LINT_DURING_TESTS'):
 			try:
-				check_call(['scripts/powerline-lint'] + reduce(add, (
-					['-p', d] for d in self.p.get_config_paths()
-				)))
+				check_call(chain(['scripts/powerline-lint'], *[
+					('-p', d) for d in (
+						self.p.get_config_paths() if self.p
+						else self.get_config_paths(self.root)
+					)
+				]))
 			except:
 				self.__exit__()
 				raise
