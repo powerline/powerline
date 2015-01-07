@@ -33,9 +33,16 @@ class IPythonRenderer(ShellRenderer):
 			if 'theme' in match:
 				match['theme'].shutdown()
 
-	def render(self, *args, **kwargs):
+	def render(self, **kwargs):
 		# XXX super(ShellRenderer), *not* super(IPythonRenderer)
-		return super(ShellRenderer, self).render(*args, **kwargs)
+		return super(ShellRenderer, self).render(**kwargs)
+
+	def do_render(self, segment_info, **kwargs):
+		segment_info.update(client_id='ipython')
+		return super(IPythonRenderer, self).do_render(
+			segment_info=segment_info,
+			**kwargs
+		)
 
 
 class IPythonPromptRenderer(IPythonRenderer):
