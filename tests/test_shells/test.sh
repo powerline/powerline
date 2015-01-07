@@ -233,6 +233,8 @@ ln -s "$(which grep)" tests/shell/path
 ln -s "$(which sed)" tests/shell/path
 ln -s "$(which rm)" tests/shell/path
 ln -s "$(which uname)" tests/shell/path
+ln -s "$(which test)" tests/shell/path
+ln -s "$(which pwd)" tests/shell/path
 ln -s ../../test_shells/bgscript.sh tests/shell/path
 ln -s ../../test_shells/waitpid.sh tests/shell/path
 if which socat ; then
@@ -249,6 +251,20 @@ for pexe in powerline powerline-config ; do
 	fi
 done
 
+if test -z "$POWERLINE_RC_EXE" ; then
+	if which rc-status >/dev/null ; then
+		# On Gentoo `rc` executable is from OpenRC. Thus app-shells/rc instals 
+		# `rcsh` executable.
+		POWERLINE_RC_EXE=rcsh
+	else
+		POWERLINE_RC_EXE=rc
+	fi
+fi
+
+if which "$POWERLINE_RC_EXE" >/dev/null ; then
+	ln -s "$(which $POWERLINE_RC_EXE)" tests/shell/path/rc
+fi
+
 for exe in bash zsh busybox fish tcsh mksh dash ipython ; do
 	if which $exe >/dev/null ; then
 		ln -s "$(which $exe)" tests/shell/path
@@ -261,7 +277,7 @@ export ADDRESS="powerline-ipc-test-$$"
 export PYTHON
 echo "Powerline address: $ADDRESS"
 
-if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || test "x${ONLY_SHELL}" = xbusybox ; then
+if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || test "x${ONLY_SHELL}" = xbusybox || test "x${ONLY_SHELL}" = xrc ; then
 	scripts/powerline-config shell command
 
 	for TEST_TYPE in "daemon" "nodaemon" ; do
@@ -327,7 +343,8 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 				"tcsh -f -i" \
 				"busybox ash -i" \
 				"mksh -i" \
-				"dash -i"
+				"dash -i" \
+				"rc -i -p"
 			do
 				J="$(( J + 1 ))"
 				if test x$FAST = x1 ; then
@@ -343,10 +360,10 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 				if test "x$ONLY_SHELL" != "x" && test "x$ONLY_SHELL" != "x$SH" ; then
 					continue
 				fi
-				if ! which $SH >/dev/null ; then
+				if ! test -x tests/shell/path/$SH ; then
 					continue
 				fi
-				echo ">>> $(which $SH)"
+				echo ">>> $(readlink "tests/shell/path/$SH")"
 				if ! run_test $TEST_TYPE $TEST_CLIENT $TEST_COMMAND ; then
 					FAILED=1
 					FAIL_SUMMARY="${FAIL_SUMMARY}${NL}T ${TEST_TYPE} ${TEST_CLIENT} ${TEST_COMMAND}"

@@ -67,6 +67,27 @@ is the absolute path to your Powerline installation directory:
 
 .. _tmux-statusline:
 
+Rcsh prompt
+===========
+
+Powerline supports Plan9 rc reimplementation *by Byron Rakitzis* packaged by 
+many \*nix distributions. To use it add
+
+.. code-black:: bash
+
+   . {repository_root}/powerline/bindings/rc/powerline.rc
+
+to your :file:`rcrc` file (usually :file:`~/.rcrc`) and make sure you start your 
+shell as a login shell (with ``-l`` argument): otherwise this configuration file 
+is not read.
+
+.. warning::
+   Original Plan9 shell and its \*nix port are not supported because they are 
+   missing ``prompt`` special function (it is being called once before each 
+   non-continuation prompt). Since powerline could not support shell without 
+   this or equivalent feature some other not-so-critical features of that port 
+   were used.
+
 Busybox (ash), mksh and dash prompt
 =====================================
 
