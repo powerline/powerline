@@ -57,7 +57,11 @@ class Args(object):
 			return None
 		else:
 			if isinstance(ret, (unicode, str, bytes)):
-				return ret.split((b':' if isinstance(ret, bytes) else ':'))
+				return [
+					path
+					for path in ret.split((b':' if isinstance(ret, bytes) else ':'))
+					if path
+				]
 			else:
 				return ret
 
