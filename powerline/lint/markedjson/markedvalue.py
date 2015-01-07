@@ -66,6 +66,21 @@ class MarkedDict(dict):
 		return r
 
 	def __setitem__(self, key, value):
+		try:
+			old_value = self[key]
+		except KeyError:
+			pass
+		else:
+			try:
+				key.mark.set_old_mark(self.keydict[key].mark)
+			except AttributeError:
+				pass
+			except KeyError:
+				pass
+			try:
+				value.mark.set_old_mark(old_value.mark)
+			except AttributeError:
+				pass
 		dict.__setitem__(self, key, value)
 		self.keydict[key] = key
 
