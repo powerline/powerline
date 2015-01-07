@@ -57,7 +57,7 @@ class Args(object):
 			return None
 		else:
 			if isinstance(ret, (unicode, str, bytes)):
-				return ret.split(type(ret)(':'))
+				return ret.split((b':' if isinstance(ret, bytes) else ':'))
 			else:
 				return ret
 
