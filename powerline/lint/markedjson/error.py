@@ -42,16 +42,17 @@ def strtrans(s):
 
 
 class Mark:
-	def __init__(self, name, line, column, buffer, pointer, old_mark=None):
+	def __init__(self, name, line, column, buffer, pointer, old_mark=None, merged_marks=None):
 		self.name = name
 		self.line = line
 		self.column = column
 		self.buffer = buffer
 		self.pointer = pointer
 		self.old_mark = old_mark
+		self.merged_marks = merged_marks or []
 
 	def copy(self):
-		return Mark(self.name, self.line, self.column, self.buffer, self.pointer, self.old_mark)
+		return Mark(self.name, self.line, self.column, self.buffer, self.pointer, self.old_mark, self.merged_marks[:])
 
 	def get_snippet(self, indent=4, max_length=75):
 		if self.buffer is None:
@@ -100,21 +101,32 @@ class Mark:
 				break
 		self.old_mark = old_mark
 
-	def to_string(self, indent=0):
+	def set_merged_mark(self, merged_mark):
+		self.merged_marks.append(merged_mark)
+
+	def to_string(self, indent=0, head_text='in ', add_snippet=True):
 		mark = self
 		where = ''
 		processed_marks = set()
 		while mark:
 			indentstr = ' ' * indent
-			snippet = mark.get_snippet(indent=(indent + 4))
-			where += (indentstr + '  in "%s", line %d, column %d' % (
-				mark.name, mark.line + 1, mark.column + 1))
-			if snippet:
-				where += ':\n' + snippet
-			processed_marks.add(id(mark))
-			if mark.old_mark:
-				where += '\n' + indentstr + '  which replaced value\n'
-				indent += 4
+			where += ('%s  %s"%s", line %d, column %d' % (
+				indentstr, head_text, mark.name, mark.line + 1, mark.column + 1))
+			if add_snippet:
+				snippet = mark.get_snippet(indent=(indent + 4))
+				if snippet:
+					where += ':\n' + snippet
+			if mark.merged_marks:
+				where += '\n' + indentstr + '  with additionally merged\n'
+				where += mark.merged_marks[0].to_string(indent + 4, head_text='', add_snippet=False)
+				for mmark in mark.merged_marks[1:]:
+					where += '\n' + indentstr + '  and\n'
+					where += mmark.to_string(indent + 4, head_text='', add_snippet=False)
+			if add_snippet:
+				processed_marks.add(id(mark))
+				if mark.old_mark:
+					where += '\n' + indentstr + '  which replaced value\n'
+					indent += 4
 			mark = mark.old_mark
 			if id(mark) in processed_marks:
 				raise ValueError('Trying to dump recursive mark')

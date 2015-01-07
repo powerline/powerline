@@ -35,6 +35,7 @@ def mergedicts(d1, d2, remove=True):
 
 	First dictionary is modified in-place.
 	'''
+	_setmerged(d1, d2)
 	for k in d2:
 		if k in d1 and isinstance(d1[k], dict) and isinstance(d2[k], dict):
 			mergedicts(d1[k], d2[k], remove)
@@ -58,6 +59,11 @@ def mergedefaults(d1, d2):
 			d1.setdefault(k, d2[k])
 
 
+def _setmerged(d1, d2):
+	if hasattr(d1, 'setmerged'):
+		d1.setmerged(d2)
+
+
 def mergedicts_copy(d1, d2):
 	'''Recursively merge two dictionaries.
 
@@ -65,6 +71,7 @@ def mergedicts_copy(d1, d2):
 	that first dictionary supports .copy() method.
 	'''
 	ret = d1.copy()
+	_setmerged(ret, d2)
 	for k in d2:
 		if k in d1 and isinstance(d1[k], dict) and isinstance(d2[k], dict):
 			ret[k] = mergedicts_copy(d1[k], d2[k])

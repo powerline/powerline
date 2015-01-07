@@ -65,6 +65,12 @@ class MarkedDict(dict):
 		r.keydict = dict(((key, key) for key in r))
 		return r
 
+	def setmerged(self, d):
+		try:
+			self.mark.set_merged_mark(d.mark)
+		except AttributeError:
+			pass
+
 	def __setitem__(self, key, value):
 		try:
 			old_value = self[key]
