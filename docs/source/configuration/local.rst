@@ -144,7 +144,8 @@ above rules:
 
 Additionally one environment variable is a usual *colon*-separated list of 
 directories: ``POWERLINE_CONFIG_PATHS``. This one defines paths which will be 
-searched for configuration.
+searched for configuration. Empty paths in ``POWERLINE_CONFIG_PATHS`` are 
+ignored.
 
 .. note::
     Overrides from environment variables have lower priority then 
