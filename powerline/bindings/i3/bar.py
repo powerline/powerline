@@ -29,7 +29,7 @@ if __name__ == '__main__':
 		with lock:
 			ln = u'%{l}'
 			ln += powerline.render(side='left')
-			# ln += u'%{r}'
+			ln += u'%{r}'
 			ln += powerline.render(side='right')
 			print( ln.encode('utf-8') )
 			sys.stdout.flush()
@@ -41,5 +41,4 @@ if __name__ == '__main__':
 			render()
 			time.sleep(max(interval - (monotonic() - start_time), 0.1))
 	except KeyboardInterrupt, e:
-		print( "caught" )
 		exit()
