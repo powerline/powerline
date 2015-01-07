@@ -13,6 +13,7 @@ from powerline.lib.unicode import safe_unicode, FailedUnicode
 from powerline.config import DEFAULT_SYSTEM_CONFIG_DIR
 from powerline.lib.dict import mergedicts
 from powerline.lib.encoding import get_preferred_output_encoding
+from powerline.lib.path import join
 
 
 class NotInterceptedError(BaseException):
@@ -29,7 +30,7 @@ def _find_config_files(search_paths, config_file, config_loader=None, loader_cal
 	config_file += '.json'
 	found = False
 	for path in search_paths:
-		config_file_path = os.path.join(path, config_file)
+		config_file_path = join(path, config_file)
 		if os.path.isfile(config_file_path):
 			yield config_file_path
 			found = True
