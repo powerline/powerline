@@ -215,12 +215,11 @@ putting powerline into different directory.
 
 .. note::
 
-    ``$POWERLINE_COMMAND`` appears in shell scripts without quotes thus you can 
-    specify additional parameters in bash. In tmux it is passed to ``eval`` and 
-    depends on the shell used. POSIX-compatible shells, zsh, bash and fish will 
-    split this variable in this case. Do not use this feature for overriding 
-    configuration: there are :ref:`Environment variables overrides 
-    <local-configuration-overrides-env>`.
+    ``$POWERLINE_COMMAND`` is always treated as one path in shell bindings, so 
+    you may use paths with spaces in it. To specify additional arguments one may 
+    use ``$POWERLINE_COMMAND_ARGS``, but note that this variable exists for 
+    testing purposes only and may be removed. One should use :ref:`Environment 
+    variable overrides <local-configuration-overrides-env>` instead.
 
 If you want to disable prompt in shell, but still have tmux support or if you 
 want to disable tmux support you can use variables 

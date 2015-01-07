@@ -136,7 +136,7 @@ _powerline_set_jobs() {
 _powerline_local_prompt() {
 	# Arguments: side, exit_code, local theme
 	_powerline_set_jobs
-	$POWERLINE_COMMAND shell $1 \
+	"$POWERLINE_COMMAND" $POWERLINE_COMMAND_ARGS shell $1 \
 		$_POWERLINE_RENDERER_ARG \
 		--renderer-arg="client_id=$$" \
 		--last-exit-code=$2 \
@@ -147,7 +147,7 @@ _powerline_local_prompt() {
 _powerline_prompt() {
 	# Arguments: side, exit_code
 	_powerline_set_jobs
-	$POWERLINE_COMMAND shell $1 \
+	"$POWERLINE_COMMAND" $POWERLINE_COMMAND_ARGS shell $1 \
 		--width="${COLUMNS:-$(_powerline_columns_fallback)}" \
 		$_POWERLINE_RENDERER_ARG \
 		--renderer-arg="client_id=$$" \

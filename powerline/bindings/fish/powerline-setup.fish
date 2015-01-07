@@ -65,10 +65,10 @@ function powerline-setup
 			end
 			eval "
 			function fish_prompt
-				$POWERLINE_COMMAND shell $promptside $addargs
+				env \$POWERLINE_COMMAND $POWERLINE_COMMAND_ARGS shell $promptside $addargs
 			end
 			function fish_right_prompt
-				$POWERLINE_COMMAND shell right $addargs
+				env \$POWERLINE_COMMAND $POWERLINE_COMMAND_ARGS shell right $addargs
 				$rpromptpast
 			end
 			function --on-signal WINCH _powerline_set_columns

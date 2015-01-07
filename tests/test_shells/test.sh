@@ -79,6 +79,7 @@ run() {
 		POWERLINE_SHELL_CONTINUATION=$additional_prompts \
 		POWERLINE_SHELL_SELECT=$additional_prompts \
 		POWERLINE_CONFIG_PATHS="$PWD/powerline/config_files" \
+		POWERLINE_COMMAND_ARGS="${POWERLINE_COMMAND_ARGS}" \
 		POWERLINE_COMMAND="${POWERLINE_COMMAND}" \
 		"$@"
 }
@@ -303,7 +304,8 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 			if test "x$ONLY_TEST_CLIENT" != "x" && test "x$TEST_CLIENT" != "x$ONLY_TEST_CLIENT" ; then
 				continue
 			fi
-			POWERLINE_COMMAND="$POWERLINE_COMMAND --socket $ADDRESS"
+			POWERLINE_COMMAND_ARGS="--socket $ADDRESS"
+			POWERLINE_COMMAND="$POWERLINE_COMMAND"
 			export POWERLINE_COMMAND
 			echo ">> powerline command is ${POWERLINE_COMMAND:-empty}"
 			J=-1

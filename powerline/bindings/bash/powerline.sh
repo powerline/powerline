@@ -41,7 +41,7 @@ _powerline_init_tmux_support() {
 
 _powerline_local_prompt() {
 	# Arguments: side, renderer_module arg, last_exit_code, jobnum, local theme
-	$POWERLINE_COMMAND shell $1 \
+	"$POWERLINE_COMMAND" $POWERLINE_COMMAND_ARGS shell $1 \
 		$2 \
 		--last-exit-code=$3 \
 		--jobnum=$4 \
@@ -51,7 +51,7 @@ _powerline_local_prompt() {
 
 _powerline_prompt() {
 	# Arguments: side, last_exit_code, jobnum
-	$POWERLINE_COMMAND shell $1 \
+	"$POWERLINE_COMMAND" $POWERLINE_COMMAND_ARGS shell $1 \
 		--width="${COLUMNS:-$(_powerline_columns_fallback)}" \
 		-r.bash \
 		--last-exit-code=$2 \
