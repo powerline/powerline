@@ -141,6 +141,10 @@ class Prompt(object):
 			mode = u(zsh.getvalue('_POWERLINE_MODE'))
 		except IndexError:
 			mode = None
+		try:
+			default_mode = u(zsh.getvalue('_POWERLINE_DEFAULT_MODE'))
+		except IndexError:
+			default_mode = None
 		segment_info = {
 			'args': self.args,
 			'environ': environ,
@@ -149,6 +153,7 @@ class Prompt(object):
 			'parser_state': zsh.getvalue('_POWERLINE_PARSER_STATE'),
 			'shortened_path': zsh.getvalue('_POWERLINE_SHORTENED_PATH'),
 			'mode': mode,
+			'default_mode': default_mode,
 		}
 		zsh.setvalue('_POWERLINE_PARSER_STATE', None)
 		zsh.setvalue('_POWERLINE_SHORTENED_PATH', None)
