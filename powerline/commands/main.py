@@ -82,7 +82,7 @@ def write_output(args, powerline, segment_info, write, encoding):
 		for line in powerline.render_above_lines(
 			width=args.width,
 			segment_info=segment_info,
-			mode=segment_info['environ'].get('_POWERLINE_MODE'),
+			mode=segment_info.get('mode', None),
 		):
 			write(line.encode(encoding, 'replace'))
 			write(b'\n')
@@ -93,6 +93,6 @@ def write_output(args, powerline, segment_info, write, encoding):
 			width=args.width,
 			side=args.side,
 			segment_info=segment_info,
-			mode=segment_info['environ'].get('_POWERLINE_MODE'),
+			mode=segment_info.get('mode', None),
 		)
 		write(rendered.encode(encoding, 'replace'))

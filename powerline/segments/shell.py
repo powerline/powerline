@@ -65,11 +65,11 @@ def mode(pl, segment_info, override={'vicmd': 'COMMND', 'viins': 'INSERT'}, defa
 		``$POWERLINE_DEFAULT_MODE`` variable. This variable is set by zsh 
 		bindings for any mode that does not start from ``vi``.
 	'''
-	mode = segment_info['mode']
+	mode = segment_info.get('mode', None)
 	if not mode:
-		pl.debug('No or empty _POWERLINE_MODE variable')
+		pl.debug('No mode specified')
 		return None
-	default = default or segment_info['environ'].get('_POWERLINE_DEFAULT_MODE')
+	default = default or segment_info.get('default_mode', None)
 	if mode == default:
 		return None
 	try:
@@ -78,9 +78,9 @@ def mode(pl, segment_info, override={'vicmd': 'COMMND', 'viins': 'INSERT'}, defa
 		# Note: with zsh line editor you can emulate as much modes as you wish. 
 		# Thus having unknown mode is not an error: maybe just some developer 
 		# added support for his own zle widgets. As there is no built-in mode() 
-		# function like in VimL and _POWERLINE_MODE is likely be defined by our 
-		# code or by somebody knowing what he is doing there is absolutely no 
-		# need in keeping translations dictionary.
+		# function like in VimL and mode is likely be defined by our code or by 
+		# somebody knowing what he is doing there is absolutely no need in 
+		# keeping translations dictionary.
 		return mode.upper()
 
 
