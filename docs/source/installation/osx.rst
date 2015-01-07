@@ -22,9 +22,19 @@ Python package
       should also install GNU env named ``genv``. This may be achieved by 
       running ``brew install coreutils``.
 
-2. Install Powerline using the following command::
+2. Install Powerline using one of the following commans:
+
+   .. code-block:: sh
+
+       pip install --user powerline-status
+
+   will get current release version and
+
+   .. code-block:: sh
 
        pip install --user git+git://github.com/powerline/powerline
+
+   will get latest development version.
 
    .. warning::
       When using ``brew install`` to install Python one must not supply
@@ -37,8 +47,8 @@ Python package
    .. note::
       If you are powerline developer you should be aware that ``pip install 
       --editable`` does not currently fully work. If you install powerline this 
-      way you will be missing ``powerline`` executable and need to symlink it. It 
-      will be located in ``scripts/powerline``.
+      way you will be missing ``powerline`` executable and need to symlink it. 
+      It will be located in ``scripts/powerline``.
 
 Vim installation
 ================

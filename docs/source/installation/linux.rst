@@ -19,17 +19,27 @@ follow the installation guide below:
 
 1. Install Python 3.2+ or Python 2.6+ with ``pip``. This step is 
    distribution-specific, so no commands provided.
-2. Install Powerline using the following command::
+2. Install Powerline using one of the following commands:
 
-       pip install --user git+git://github.com/powerline/powerline
+   .. code-block:: sh
 
-.. note:: Due to the naming conflict with an unrelated project powerline is
-   named ``powerline-status`` in PyPI.
+      pip install --user powerline-status
 
-.. note:: If you are powerline developer you should be aware that ``pip install 
-   --editable`` does not currently fully work. If you
-   install powerline this way you will be missing ``powerline`` executable and 
-   need to symlink it. It will be located in ``scripts/powerline``.
+   will get the latest release version and
+
+   .. code-block:: sh
+
+      pip install --user git+git://github.com/powerline/powerline
+
+   will get the latest development version.
+
+   .. note:: Due to the naming conflict with an unrelated project powerline is
+      named ``powerline-status`` in PyPI.
+
+   .. note:: If you are powerline developer you should be aware that ``pip install 
+      --editable`` does not currently fully work. If you
+      install powerline this way you will be missing ``powerline`` executable and 
+      need to symlink it. It will be located in ``scripts/powerline``.
 
 Fonts installation
 ==================
