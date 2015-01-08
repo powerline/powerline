@@ -13,8 +13,7 @@ class BarRenderer(Renderer):
 	'''
 
 	character_translations = Renderer.character_translations.copy()
-	character_translations[ord('{')] = '{{'
-	character_translations[ord('}')] = '}}'
+	character_translations[ord('%')] = '%%'
 
 	@staticmethod
 	def hlstyle(*args, **kwargs):
