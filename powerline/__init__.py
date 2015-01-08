@@ -764,7 +764,10 @@ class Powerline(object):
 				self.exception('Failed to render: {0}', str(e))
 			except Exception as e:
 				exc = e
-			return FailedUnicode(safe_unicode(exc))
+			ret = FailedUnicode(safe_unicode(exc))
+			if kwargs.get('output_width', False):
+				ret = ret, len(ret)
+			return ret
 
 	def render_above_lines(self, *args, **kwargs):
 		'''Like .render(), but for ``self.renderer.render_above_lines()``
