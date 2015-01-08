@@ -20,6 +20,11 @@ if __name__ == '__main__':
 	interval = 0.5
 	lock = Lock()
 
+	def encode( str ): return str.encode('utf-8')
+
+	if sys.version_info > (3,0):
+		def encode( str ): return str
+
 	def render(event=None, data=None, sub=None):
 		global lock
 		with lock:
@@ -27,7 +32,7 @@ if __name__ == '__main__':
 			ln += powerline.render(side='left')
 			ln += '%{r}'
 			ln += powerline.render(side='right')
-			print( ln.encode('utf-8') )
+			print( encode(ln) )
 			sys.stdout.flush()
 
 	sub = i3.Subscription(render, 'workspace')
