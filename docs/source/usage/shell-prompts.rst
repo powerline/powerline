@@ -73,7 +73,7 @@ Rcsh prompt
 Powerline supports Plan9 rc reimplementation *by Byron Rakitzis* packaged by 
 many \*nix distributions. To use it add
 
-.. code-black:: bash
+.. code-block:: bash
 
    . {repository_root}/powerline/bindings/rc/powerline.rc
 
