@@ -90,7 +90,7 @@ run() {
 NL="$(printf '\nE')"
 NL="${NL%E}"
 
-run_test() {
+do_run_test() {
 	TEST_TYPE="$1"
 	shift
 	TEST_CLIENT="$1"
@@ -178,6 +178,15 @@ run_test() {
 		return 1
 	fi
 	return 0
+}
+
+run_test() {
+	local attempts=3
+	while test $attempts -gt 0 ; do
+		do_run_test "$@" && return 0
+		attempts=$(( attempts - 1 ))
+	done
+	return 1
 }
 
 test -d tests/shell && rm -r tests/shell
