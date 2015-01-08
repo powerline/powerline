@@ -15,32 +15,35 @@ If installed using pip just add
     python powerline_setup()
     python del powerline_setup
 
-(replace ``python`` with ``python3`` if appropriate) to your :file:`vimrc`.
+(replace ``python`` with ``python3`` if appropriate) to the :file:`vimrc`.
 
-If you just cloned the repository add the following line to your :file:`vimrc`, 
-where ``{repository_root}`` is the absolute path to your Powerline installation 
-directory:
+If the repository was just cloned the following line needs to be added to the 
+:file:`vimrc`:
 
 .. code-block:: vim
 
    set rtp+={repository_root}/powerline/bindings/vim
 
-If you’re using pathogen and don’t want Powerline functionality in any other 
-applications, simply add Powerline as a bundle and point the path above to the 
-Powerline bundle directory, e.g. 
-``~/.vim/bundle/powerline/powerline/bindings/vim``.
+where ``{repository_root}`` is the absolute path to the Powerline installation 
+directory.
 
-With Vundle you may instead use
+If pathogen is used and Powerline functionality is not needed outside of Vim 
+then it is possible to simply add Powerline as a bundle and point the path above 
+to the Powerline bundle directory, e.g. 
+:file:`~/.vim/bundle/powerline/powerline/bindings/vim`.
+
+Vundle and NeoBundle users may instead use
 
 .. code-block:: vim
 
     Bundle 'powerline/powerline', {'rtp': 'powerline/bindings/vim/'}
 
-(replace ``Bundle`` with ``NeoBundle`` for NeoBundle).
+(NeoBundle users need ``NeoBundle`` in place of ``Bundle``, otherwise setup is 
+the same).
 
-For vim-addon-manager it is even easier since you don’t need to write this big 
-path or install anything by hand: ``powerline`` is installed and run just like 
-any other plugin using
+Vim-addon-manager setup is even easier because it is not needed to write this 
+big path or install anything by hand: ``powerline`` can be installed and 
+activated just like any other plugin using
 
 .. code-block:: vim
 
@@ -48,17 +51,16 @@ any other plugin using
 
 .. warning::
     *Never* install powerline with pathogen/VAM/Vundle/NeoBundle *and* with pip. 
-    If you want powerline functionality in vim and other applications use 
-    system-wide installation if your system has powerline package, pip-only or 
-    ``pip install --editable`` kind of installation performed on the repository 
-    installed by Vim plugin manager.
+    If powerline functionality is needed in applications other then Vim then 
+    system-wide installation (in case used OS distribution has powerline 
+    package), pip-only or ``pip install --editable`` kind of installation 
+    performed on the repository installed by Vim plugin manager should be used.
 
-    If you have installed powerline with pip and with some of Vim package 
-    managers do never report any errors to powerline bug tracker, especially 
-    errors occurring after updates.
+    No issues are accepted in powerline issue tracker for double pip/non-pip 
+    installations, especially if these issues occur after update.
 
 .. note::
-    If you use supplied :file:`powerline.vim` file to load powerline there are 
+    If supplied :file:`powerline.vim` file is used to load powerline there are 
     additional configuration variables available: ``g:powerline_pycmd`` and 
     ``g:powerline_pyeval``. First sets command used to load powerline: expected 
     values are ``"py"`` and ``"py3"``. Second sets function used in statusline, 
@@ -66,32 +68,32 @@ any other plugin using
 
     If ``g:powerline_pycmd`` is set to the one of the expected values then 
     ``g:powerline_pyeval`` will be set accordingly. If it is set to some other 
-    value then you must also set ``g:powerline_pyeval``. Powerline will not 
-    check that Vim is compiled with Python support if you set 
-    ``g:powerline_pycmd`` to an unexpected value.
+    value then ``g:powerline_pyeval`` must also be set. Powerline will not check 
+    that Vim is compiled with Python support if ``g:powerline_pycmd`` is set to 
+    an unexpected value.
 
     These values are to be used to specify the only Python that is to be loaded 
-    if you have both versions: Vim may disable loading one python version if 
-    other was already loaded. They should also be used if you have two python 
-    versions able to load simultaneously, but with powerline installed only for 
+    if both versions are present: Vim may disable loading one python version if 
+    other was already loaded. They should also be used if two python versions 
+    are able to load simultaneously, but powerline was installed only for 
     python-3 version.
 
 Tmux statusline
 ===============
 
-Add the following lines to your :file:`.tmux.conf`, where ``{repository_root}`` 
-is the absolute path to your Powerline installation directory::
+Add the following lines to :file:`.tmux.conf`, where ``{repository_root}`` is 
+the absolute path to the Powerline installation directory::
 
    source "{repository_root}/powerline/bindings/tmux/powerline.conf"
 
 .. note::
     The availability of the ``powerline-config`` command is required for 
-    powerline support. You may specify location of this script via 
+    powerline support. DLlocation of this script may be specified via 
     ``$POWERLINE_CONFIG_COMMAND`` environment variable.
 
 .. note::
-    It is advised that you run ``powerline-daemon`` before adding the above line 
-    to tmux.conf. To do so add::
+    It is advised to run ``powerline-daemon`` before adding the above line to 
+    tmux.conf. To do so add::
 
         run-shell "powerline-daemon -q"
 
@@ -100,18 +102,21 @@ is the absolute path to your Powerline installation directory::
 IPython prompt
 ==============
 
-For IPython<0.11 add the following lines to your 
-:file:`.ipython/ipy_user_conf.py`::
+For IPython<0.11 add the following lines to :file:`.ipython/ipy_user_conf.py`:
+
+.. code-block:: Python
 
     # top
     from powerline.bindings.ipython.pre_0_11 import setup as powerline_setup
 
-    # main() function (assuming you launched ipython without configuration to 
+    # main() function (assuming ipython was launched without configuration to 
     # create skeleton ipy_user_conf.py file):
     powerline_setup()
 
-For IPython>=0.11 add the following line to your :file:`ipython_config.py` 
-file in the profile you are using::
+For IPython>=0.11 add the following line to :file:`ipython_config.py` file in 
+the used profile:
+
+.. code-block:: Python
 
     c.InteractiveShellApp.extensions = [
         'powerline.bindings.ipython.post_0_11'

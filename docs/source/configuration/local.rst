@@ -18,8 +18,8 @@ Vim configuration can be overridden using the following options:
 
 ``g:powerline_theme_overrides``
     Dictionary mapping theme names to theme overrides, recursively merged with 
-    contents of :file:`powerline/themes/vim/{key}.json`. Note that this way you 
-    can’t redefine some value (e.g. segment) in list, only the whole list 
+    contents of :file:`powerline/themes/vim/{key}.json`. Note that this way some 
+    value (e.g. segment) in a list cannot be redefined, only the whole list 
     itself: only dictionaries are merged recursively.
 
 ``g:powerline_config_paths``
@@ -179,16 +179,17 @@ this variant is used.
     Sets directories where configuration should be read from. If present, no 
     default locations are searched for configuration. No expansions are 
     performed by powerline script itself, but zsh usually performs them on its 
-    own if you set variable without quotes: ``POWERLINE_CONFIG_PATHS=( ~/example 
-    )``. You should use array parameter or the usual colon-separated 
-    ``POWERLINE_CONFIG_PATHS=$HOME/path1:$HOME/path2``.
+    own if variable without is set without quotes: ``POWERLINE_CONFIG_PATHS=( 
+    ~/example )``. In addition to arrays usual colon-separated “array” string 
+    can be used: ``POWERLINE_CONFIG_PATHS=$HOME/path1:$HOME/path2``.
 
 Ipython overrides
 =================
 
-Ipython overrides depend on ipython version. Before ipython-0.11 you should pass 
-additional keyword arguments to setup() function. After ipython-0.11 you should 
-use ``c.Powerline.KEY``. Supported ``KEY`` strings or keyword argument names:
+Ipython overrides depend on ipython version. Before ipython-0.11 additional 
+keyword arguments should be passed to setup() function. After ipython-0.11 
+``c.Powerline.KEY`` should be used. Supported ``KEY`` strings or keyword 
+argument names:
 
 ``config_overrides``
     Overrides options from :file:`powerline/config.json`. Should be a dictionary 
@@ -202,41 +203,39 @@ use ``c.Powerline.KEY``. Supported ``KEY`` strings or keyword argument names:
 ``config_paths``
     Sets directories where configuration should be read from. If present, no 
     default locations are searched for configuration. No expansions are 
-    performed thus you cannot use paths starting with ``~/``.
+    performed thus paths starting with ``~/`` cannot be used: use 
+    :py:func:`os.path.expanduser`.
 
 Prompt command
 ==============
 
-In addition to the above configuration options you can use 
-``$POWERLINE_COMMAND`` environment variable to tell shell or tmux to use 
-specific powerline implementation and ``$POWERLINE_CONFIG_COMMAND`` to tell zsh 
-or tmux where ``powerline-config`` script is located. This is mostly useful for 
-putting powerline into different directory.
+In addition to the above configuration options ``$POWERLINE_COMMAND`` 
+environment variable can be used to tell shell or tmux to use specific powerline 
+implementation and ``$POWERLINE_CONFIG_COMMAND`` to tell zsh or tmux where 
+``powerline-config`` script is located. This is mostly useful for putting 
+powerline into different directory.
 
 .. note::
 
     ``$POWERLINE_COMMAND`` is always treated as one path in shell bindings, so 
-    you may use paths with spaces in it. To specify additional arguments one may 
+    path with spaces in it may be used. To specify additional arguments one may 
     use ``$POWERLINE_COMMAND_ARGS``, but note that this variable exists for 
     testing purposes only and may be removed. One should use :ref:`Environment 
     variable overrides <local-configuration-overrides-env>` instead.
 
-If you want to disable prompt in shell, but still have tmux support or if you 
-want to disable tmux support you can use variables 
-``$POWERLINE_NO_{SHELL}_PROMPT``/``$POWERLINE_NO_SHELL_PROMPT`` and 
-``$POWERLINE_NO_{SHELL}_TMUX_SUPPORT``/``$POWERLINE_NO_SHELL_TMUX_SUPPORT`` 
-(substitute ``{SHELL}`` with the name of the shell (all-caps) you want to 
-disable support for (e.g. ``BASH``) or use all-inclusive ``SHELL`` that will 
-disable support for all shells). These variables have no effect after 
-configuration script was sourced (in fish case: after ``powerline-setup`` 
-function was run). To disable specific feature support set one of these 
-variables to some non-empty value.
+To disable prompt in shell, but still have tmux support or to disable tmux 
+support environment variables ``$POWERLINE_NO_{SHELL}_PROMPT`` and 
+``$POWERLINE_NO_{SHELL}_TMUX_SUPPORT`` can be used (substitute ``{SHELL}`` with 
+the name of the shell (all-caps) that should be affected (e.g. ``BASH``) or use 
+all-inclusive ``SHELL`` that will disable support for all shells). These 
+variables have no effect after configuration script was sourced (in fish case: 
+after ``powerline-setup`` function was run). To disable specific feature support 
+set one of these variables to some non-empty value.
 
-If you do not want to disable prompt in shell, but yet do not want to launch 
-python twice to get :ref:`above <config-themes-above>` lines you do not use in 
-tcsh you should set ``$POWERLINE_NO_TCSH_ABOVE`` or 
-``$POWERLINE_NO_SHELL_ABOVE`` variable.
+In order to keep shell prompt, but avoid launching Python twice to get unused 
+:ref:`above <config-themes-above>` lines in tcsh ``$POWERLINE_NO_TCSH_ABOVE`` or 
+``$POWERLINE_NO_SHELL_ABOVE`` variable should be set.
 
-If you do not want to see additional space which is added to the right prompt in 
-fish in order to support multiline prompt you should set 
-``$POWERLINE_NO_FISH_ABOVE`` or ``$POWERLINE_NO_SHELL_ABOVE`` variables.
+In order to remove additional space from the end of the right prompt in fish 
+that was added in order to support multiline prompt ``$POWERLINE_NO_FISH_ABOVE`` 
+or ``$POWERLINE_NO_SHELL_ABOVE`` variable should be set.

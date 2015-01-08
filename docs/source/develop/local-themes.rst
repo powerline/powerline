@@ -32,7 +32,7 @@ arguments: matcher name (same as in :ref:`local_themes
 <config-ext-local_themes>`) and dictionary with theme. This dictionary is merged 
 with :ref:`top theme <config-ext-top_theme>` and 
 :file:`powerline/themes/vim/__main__.json`. Note that if user already specified 
-your matcher in his configuration file ``KeyError`` is raised.
+the matcher in his configuration file ``KeyError`` is raised.
 
 Other local themes
 ==================
