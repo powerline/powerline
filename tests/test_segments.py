@@ -7,7 +7,7 @@ import os
 from functools import partial
 from collections import namedtuple
 
-from powerline.segments import shell, tmux, common
+from powerline.segments import shell, tmux
 from powerline.lib.vcs import get_fallback_create_watcher
 from powerline.lib.unicode import out_u
 
@@ -38,6 +38,14 @@ class TestShell(TestCase):
 		self.assertEqual(shell.last_status(pl=pl, segment_info=segment_info), None)
 		segment_info['args'].last_exit_code = None
 		self.assertEqual(shell.last_status(pl=pl, segment_info=segment_info), None)
+		segment_info['args'].last_exit_code = 'sigsegv'
+		self.assertEqual(shell.last_status(pl=pl, segment_info=segment_info), [
+			{'contents': 'sigsegv', 'highlight_groups': ['exit_fail']}
+		])
+		segment_info['args'].last_exit_code = 'sigsegv+core'
+		self.assertEqual(shell.last_status(pl=pl, segment_info=segment_info), [
+			{'contents': 'sigsegv+core', 'highlight_groups': ['exit_fail']}
+		])
 
 	def test_last_pipe_status(self):
 		pl = Pl()
@@ -49,6 +57,24 @@ class TestShell(TestCase):
 		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info), [
 			{'contents': '0', 'highlight_groups': ['exit_success'], 'draw_inner_divider': True},
 			{'contents': '2', 'highlight_groups': ['exit_fail'], 'draw_inner_divider': True},
+			{'contents': '0', 'highlight_groups': ['exit_success'], 'draw_inner_divider': True}
+		])
+		segment_info['args'].last_pipe_status = [0, 'sigsegv', 'sigsegv+core']
+		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info), [
+			{'contents': '0', 'highlight_groups': ['exit_success'], 'draw_inner_divider': True},
+			{'contents': 'sigsegv', 'highlight_groups': ['exit_fail'], 'draw_inner_divider': True},
+			{'contents': 'sigsegv+core', 'highlight_groups': ['exit_fail'], 'draw_inner_divider': True}
+		])
+		segment_info['args'].last_pipe_status = [0, 'sigsegv', 0]
+		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info), [
+			{'contents': '0', 'highlight_groups': ['exit_success'], 'draw_inner_divider': True},
+			{'contents': 'sigsegv', 'highlight_groups': ['exit_fail'], 'draw_inner_divider': True},
+			{'contents': '0', 'highlight_groups': ['exit_success'], 'draw_inner_divider': True}
+		])
+		segment_info['args'].last_pipe_status = [0, 'sigsegv+core', 0]
+		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info), [
+			{'contents': '0', 'highlight_groups': ['exit_success'], 'draw_inner_divider': True},
+			{'contents': 'sigsegv+core', 'highlight_groups': ['exit_fail'], 'draw_inner_divider': True},
 			{'contents': '0', 'highlight_groups': ['exit_success'], 'draw_inner_divider': True}
 		])
 

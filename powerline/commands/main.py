@@ -10,6 +10,7 @@ from itertools import chain
 from powerline.lib.overrides import parsedotval, parse_override_var
 from powerline.lib.dict import mergeargs
 from powerline.lib.encoding import get_preferred_arguments_encoding
+from powerline.lib.unicode import u
 
 
 if sys.version_info < (3,):
@@ -55,6 +56,13 @@ def finish_args(environ, args):
 	return args
 
 
+def int_or_sig(s):
+	if s.startswith('sig'):
+		return u(s)
+	else:
+		return int(s)
+
+
 def get_argparser(ArgumentParser=argparse.ArgumentParser):
 	parser = ArgumentParser(description='Powerline prompt and statusline script.')
 	parser.add_argument('ext', nargs=1, help='Extension: application for which powerline command is launched (usually `shell\' or `tmux\').')
@@ -64,8 +72,8 @@ def get_argparser(ArgumentParser=argparse.ArgumentParser):
 		help='Renderer module. Usually something like `.bash\' or `.zsh\', is supposed to be set only in shell-specific bindings file.'
 	)
 	parser.add_argument('-w', '--width', type=int, help='Maximum prompt with. Triggers truncation of some segments.')
-	parser.add_argument('--last-exit-code', metavar='INT', type=int, help='Last exit code.')
-	parser.add_argument('--last-pipe-status', metavar='LIST', default='', type=lambda s: [int(status) for status in s.split()], help='Like above, but is supposed to contain space-separated array of statuses, representing exit statuses of commands in one pipe.')
+	parser.add_argument('--last-exit-code', metavar='INT', type=int_or_sig, help='Last exit code.')
+	parser.add_argument('--last-pipe-status', metavar='LIST', default='', type=lambda s: [int_or_sig(status) for status in s.split()], help='Like above, but is supposed to contain space-separated array of statuses, representing exit statuses of commands in one pipe.')
 	parser.add_argument('--jobnum', metavar='INT', type=int, help='Number of jobs.')
 	parser.add_argument('-c', '--config-override', metavar='KEY.KEY=VALUE', type=arg_to_unicode, action='append', help='Configuration overrides for `config.json\'. Is translated to a dictionary and merged with the dictionary obtained from actual JSON configuration: KEY.KEY=VALUE is translated to `{"KEY": {"KEY": VALUE}}\' and then merged recursively. VALUE may be any JSON value, values that are not `null\', `true\', `false\', start with digit, `{\', `[\' are treated like strings. If VALUE is omitted then corresponding key is removed.')
 	parser.add_argument('-t', '--theme-override', metavar='THEME.KEY.KEY=VALUE', type=arg_to_unicode, action='append', help='Like above, but theme-specific. THEME should point to an existing and used theme to have any effect, but it is fine to use any theme here.')

@@ -416,11 +416,15 @@ Shell
     Currently it is expected to contain at least the following attributes:
 
     ``last_exit_code``
-        Exit code returned by last shell command.
+        Exit code returned by last shell command. Is either one integer, 
+        ``sig{name}`` or ``sig{name}+core`` (latter two are only seen in ``rc`` 
+        shell).
 
     ``last_pipe_status``
         List of exit codes returned by last programs in the pipe or some false 
-        object. Only available in ``zsh``.
+        object. Only available in ``zsh`` and ``rc``. Is a list of either 
+        integers, ``sig{name}`` or ``sig{name}+core`` (latter two are only seen 
+        in ``rc`` shell).
 
     ``jobnum``
         Number of background jobs.
