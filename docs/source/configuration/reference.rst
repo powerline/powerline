@@ -24,7 +24,7 @@ Common configuration is a subdictionary that is a value of ``common`` key in
 ``term_truecolor``
     Defines whether to output cterm indices (8-bit) or RGB colors (24-bit) 
     to the terminal emulator. See the :ref:`term-feature-support-matrix` for 
-    information on whether your terminal emulator supports 24-bit colors.
+    information on whether used terminal emulator supports 24-bit colors.
 
     This variable is forced to be ``false`` if :ref:`term_escape_style 
     <config-common-term_escape_style>` option is set to ``"fbterm"`` or if it is 
@@ -55,7 +55,7 @@ Common configuration is a subdictionary that is a value of ``common`` key in
     Tells powerline what to do with characters with East Asian Width Class 
     Ambigious (such as Euro, Registered Sign, Copyright Sign, Greek
     letters, Cyrillic letters). Valid values: any positive integer; it is 
-    suggested that you only set it to 1 (default) or 2.
+    suggested that this option is only set it to 1 (default) or 2.
 
 .. _config-common-watcher:
 
@@ -77,12 +77,11 @@ Common configuration is a subdictionary that is a value of ``common`` key in
 
 ``additional_escapes``
     Valid for shell extensions, makes sense only if :ref:`term_truecolor 
-    <config-common-term_truecolor>` is enabled. Is to be set from command-line 
-    (unless you are sure you always need it). Controls additional escaping that 
-    is needed for tmux/screen to work with terminal true color escape codes: 
-    normally tmux/screen prevent terminal emulator from receiving these control 
-    codes thus rendering powerline prompt colorless. Valid values: ``"tmux"``, 
-    ``"screen"``, ``null`` (default).
+    <config-common-term_truecolor>` is enabled. Is to be set from command-line. 
+    Controls additional escaping that is needed for tmux/screen to work with 
+    terminal true color escape codes: normally tmux/screen prevent terminal 
+    emulator from receiving these control codes thus rendering powerline prompt 
+    colorless. Valid values: ``"tmux"``, ``"screen"``, ``null`` (default).
 
 .. _config-common-paths:
 
@@ -212,8 +211,8 @@ Color definitions
     * A list of cterm color indicies.
     * A list of hex color strings.
 
-    It is expected that you define gradients from least alert color to most 
-    alert or use non-alert colors.
+    It is expected that gradients are defined from least alert color to most 
+    alert or non-alert colors are used.
 
 .. _config-colorschemes:
 
@@ -253,8 +252,8 @@ override those from each previous file. It is required that either
        ``attrs``
            List of attributes. Valid values are one or more of ``bold``, 
            ``italic`` and ``underline``. Note that some attributes may be 
-           unavailable in some applications or terminal emulators. If you do not 
-           need any attributes leave this empty.
+           unavailable in some applications or terminal emulators. If no 
+           attributes are needed this list should be left empty.
 
     #) a string (an alias): a name of existing group. This group’s definition 
        will be used when this color is requested.
@@ -333,9 +332,7 @@ ascii                       Theme without any unicode characters at all
 
 
 ``dividers``
-    Defines the dividers used in all Powerline extensions. This option 
-    should usually only be changed if you don’t have a patched font, or if 
-    you use a font patched with the legacy font patcher.
+    Defines the dividers used in all Powerline extensions.
 
     The ``hard`` dividers are used to divide segments with different 
     background colors, while the ``soft`` dividers are used to divide 

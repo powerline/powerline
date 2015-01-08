@@ -11,16 +11,16 @@ Python package
 
        sudo port select python python27-apple
 
-   . You may use homebrew for this::
+   . Homebrew may be used here::
 
        brew install python
 
    .
 
    .. note::
-      In case you want or have to use ``powerline.sh`` socat-based client you 
-      should also install GNU env named ``genv``. This may be achieved by 
-      running ``brew install coreutils``.
+      In case :file:`powerline.sh` as a client ``socat`` and ``coreutils`` need 
+      to be installed. ``coreutils`` may be installed using ``brew install 
+      coreutils``.
 
 2. Install Powerline using one of the following commans:
 
@@ -45,16 +45,16 @@ Python package
       ``powerline-status`` in PyPI.
 
    .. note::
-      If you are powerline developer you should be aware that ``pip install 
-      --editable`` does not currently fully work. If you install powerline this 
-      way you will be missing ``powerline`` executable and need to symlink it. 
-      It will be located in ``scripts/powerline``.
+      Powerline developers should be aware that``pip install --editable`` does 
+      not currently fully work. Installation performed this way are missing 
+      ``powerline`` executable that needs to be symlinked. It will be located in 
+      ``scripts/powerline``.
 
 Vim installation
 ================
 
 Any terminal vim version with Python 3.2+ or Python 2.6+ support should work, 
-but if you’re using MacVim you need to install it using the following command::
+but MacVim users need to install it using the following command::
 
     brew install macvim --env-std --override-system-vim
 
@@ -64,6 +64,6 @@ Fonts installation
 Install downloaded patched font by double-clicking the font file in Finder, then 
 clicking :guilabel:`Install this font` in the preview window.
 
-After installing the patched font you need to update MacVim or your terminal 
-emulator to use the patched font. The correct font usually ends with *for 
-Powerline*.
+After installing the patched font MacVim or terminal emulator (whatever 
+application powerline should work with) need to be configured to use the patched 
+font. The correct font usually ends with *for Powerline*.

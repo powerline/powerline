@@ -4,19 +4,19 @@ Shell prompts
 
 .. note::
     Powerline daemon is not run automatically by any of my bindings. It is 
-    advised that you add
+    advised to add
 
     .. code-block:: bash
 
         powerline-daemon -q
 
-    before any other powerline-related code in your shell configuration file.
+    before any other powerline-related code in the shell configuration file.
 
 Bash prompt
 ===========
 
-Add the following line to your :file:`bashrc`, where ``{repository_root}`` is 
-the absolute path to your Powerline installation directory:
+Add the following line to the :file:`bashrc`, where ``{repository_root}`` is the 
+absolute path to the Powerline installation directory:
 
 .. code-block:: bash
 
@@ -34,21 +34,21 @@ the absolute path to your Powerline installation directory:
        POWERLINE_BASH_SELECT=1
        . {repository_root}/powerline/bindings/bash/powerline.sh
 
-    in your bash configuration file. Without ``POWERLINE_BASH_*`` variables PS2 
+    in the bash configuration file. Without ``POWERLINE_BASH_*`` variables PS2 
     and PS3 prompts are computed exactly once at bash startup.
 
 .. warning::
     At maximum bash continuation PS2 and select PS3 prompts are computed each 
-    time main PS1 prompt is computed. Do not expect it to work properly if you 
-    e.g. put current time there.
+    time main PS1 prompt is computed. Thus putting e.g. current time into PS2 or 
+    PS3 prompt will not work as expected.
 
     At minimum they are computed once on startup.
 
 Zsh prompt
 ==========
 
-Add the following line to your :file:`zshrc`, where ``{repository_root}`` is the 
-absolute path to your Powerline installation directory:
+Add the following line to the :file:`zshrc`, where ``{repository_root}`` is the 
+absolute path to the Powerline installation directory:
 
 .. code-block:: bash
 
@@ -57,8 +57,8 @@ absolute path to your Powerline installation directory:
 Fish prompt
 ===========
 
-Add the following line to your :file:`config.fish`, where ``{repository_root}`` 
-is the absolute path to your Powerline installation directory:
+Add the following line to :file:`config.fish`, where ``{repository_root}`` is 
+the absolute path to the Powerline installation directory:
 
 .. code-block:: bash
 
@@ -73,13 +73,13 @@ Rcsh prompt
 Powerline supports Plan9 rc reimplementation *by Byron Rakitzis* packaged by 
 many \*nix distributions. To use it add
 
-.. code-black:: bash
+.. code-block:: bash
 
    . {repository_root}/powerline/bindings/rc/powerline.rc
 
-to your :file:`rcrc` file (usually :file:`~/.rcrc`) and make sure you start your 
-shell as a login shell (with ``-l`` argument): otherwise this configuration file 
-is not read.
+to :file:`rcrc` file (usually :file:`~/.rcrc`) and make sure ``rc`` is startead 
+as a login shell (with ``-l`` argument): otherwise this configuration file is 
+not read.
 
 .. warning::
    Original Plan9 shell and its \*nix port are not supported because they are 

@@ -43,7 +43,12 @@ class ConfigArgParser(argparse.ArgumentParser):
 
 def get_argparser(ArgumentParser=ConfigArgParser):
 	parser = ArgumentParser(description='Script used to obtain powerline configuration.')
-	parser.add_argument('-p', '--config-path', action='append', metavar='PATH', help='Path to configuration directory. If it is present then configuration files will only be seeked in the provided path. May be provided multiple times to search in a list of directories.')
+	parser.add_argument(
+		'-p', '--config-path', action='append', metavar='PATH',
+		help='Path to configuration directory. If it is present '
+		     'then configuration files will only be seeked in the provided path. '
+		     'May be provided multiple times to search in a list of directories.'
+	)
 	subparsers = parser.add_subparsers()
 	tmux_parser = subparsers.add_parser('tmux', help='Tmux-specific commands')
 	tmux_parser.add_argument(
@@ -51,7 +56,10 @@ def get_argparser(ArgumentParser=ConfigArgParser):
 		choices=tuple(TMUX_ACTIONS.values()),
 		metavar='ACTION',
 		type=(lambda v: TMUX_ACTIONS.get(v)),
-		help='If action is `source\' then version-specific tmux configuration files are sourced, if it is `setenv\' then special (prefixed with `_POWERLINE\') tmux global environment variables are filled with data from powerline configuration.'
+		help='If action is `source\' then version-specific tmux configuration '
+		     'files are sourced, if it is `setenv\' then special '
+		     '(prefixed with `_POWERLINE\') tmux global environment variables '
+		     'are filled with data from powerline configuration.'
 	)
 
 	shell_parser = subparsers.add_parser('shell', help='Shell-specific commands')
@@ -60,14 +68,20 @@ def get_argparser(ArgumentParser=ConfigArgParser):
 		choices=tuple(SHELL_ACTIONS.values()),
 		type=(lambda v: SHELL_ACTIONS.get(v)),
 		metavar='ACTION',
-		help='If action is `command\' then preferred powerline command is output, if it is `uses\' then powerline-config script will exit with 1 if specified component is disabled and 0 otherwise.',
+		help='If action is `command\' then preferred powerline command is '
+		     'output, if it is `uses\' then powerline-config script will exit '
+		     'with 1 if specified component is disabled and 0 otherwise.',
 	)
 	shell_parser.add_argument(
 		'component',
 		nargs='?',
 		choices=('tmux', 'prompt'),
 		metavar='COMPONENT',
-		help='Only applicable for `uses\' subcommand: makes `powerline-config\' exit with 0 if specific component is enabled and with 1 otherwise. `tmux\' component stands for tmux bindings (e.g. those that notify tmux about current directory changes), `prompt\' component stands for shell prompt.'
+		help='Only applicable for `uses\' subcommand: makes `powerline-config\' '
+		     'exit with 0 if specific component is enabled and with 1 otherwise. '
+		     '`tmux\' component stands for tmux bindings '
+		     '(e.g. those that notify tmux about current directory changes), '
+		     '`prompt\' component stands for shell prompt.'
 	)
 	shell_parser.add_argument(
 		'-s', '--shell',

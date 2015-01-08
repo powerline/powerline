@@ -8,16 +8,15 @@ Application-specific requirements
 Vim plugin requirements
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-The vim plugin requires a vim version with Python support compiled in.  You 
-can check if your vim supports Python by running ``vim --version | grep 
+The vim plugin requires a vim version with Python support compiled in. Presense 
+of Python support in Vim can be checked by running ``vim --version | grep 
 +python``.
 
-If your vim version doesn’t have support for Python, you’ll have to compile 
-it with the ``--enable-pythoninterp`` flag (``--enable-python3interp`` if 
-you want Python 3 support instead). Note that this also requires the related 
-Python headers to be installed on your system. Please consult your 
-distribution’s documentation for details on how to compile and install 
-packages.
+If Python support is absent then Vim needs to be compiled with it. To do this 
+use ``--enable-pythoninterp`` :file:`./configure` flag (Python 3 uses 
+``--enable-python3interp`` flag instead). Note that this also requires the 
+related Python headers to be installed. Please consult distribution’s 
+documentation for details on how to compile and install packages.
 
 Vim version 7.4 or newer is recommended for performance reasons, but Powerline 
 is known to work on vim-7.0.112 (some segments may not work though as it was not 
@@ -28,13 +27,13 @@ actually tested).
 Terminal emulator requirements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Powerline uses several special glyphs to get the arrow effect and some 
-custom symbols for developers. This requires that you either have a symbol 
-font or a patched font on your system. Your terminal emulator must also 
-support either patched fonts or fontconfig for Powerline to work properly.
+Powerline uses several special glyphs to get the arrow effect and some custom 
+symbols for developers. This requires either a symbol font or a patched font 
+installed. Used terminal emulator must also support either patched fonts or 
+fontconfig for Powerline to work properly.
 
-You can also enable :ref:`24-bit color support <config-common-term_truecolor>` 
-if your terminal emulator supports it.
+:ref:`24-bit color support <config-common-term_truecolor>` can also be enabled 
+if terminal emulator supports it.
 
 .. table:: Application/terminal emulator feature support matrix
    :name: term-feature-support-matrix
