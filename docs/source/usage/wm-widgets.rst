@@ -46,8 +46,8 @@ Add the following to your :file:`~/.config/qtile/config.py`:
 
 .. _bar-usage:
 
-bar
-===
+LemonBoy’s bar
+=============
 
 .. note:: There is currently only a script to run inside i3, but you can just strip the
           i3-specific parts of the binding.
@@ -55,11 +55,11 @@ bar
 To run the bar simply pipe the output of the binding script into ``bar`` and specify appropriate
 options, for example like this::
 
-    python powerline-bar.py | bar -f "-xos4-*-*-*-*-*-*-*-*-*-*-*-*-*
+    python powerline-bar.py | bar -f "-xos4-*"
 
 to run with i3, simply ``exec`` this in your i3 config file::
 
-    exec python powerline-bar.py | bar -f "-xos4-*-*-*-*-*-*-*-*-*-*-*-*-*
+    exec python powerline-bar.py | bar -f "-xos4-*"
 
 See the `bar documentation <https://github.com/LemonBoy/bar>`_ for more information and options.
 
