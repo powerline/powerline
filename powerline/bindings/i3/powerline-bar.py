@@ -21,24 +21,20 @@ if __name__ == '__main__':
 	powerline.update_renderer()
 
 	interval = 0.5
-
 	lock = Lock()
 
 	def render(event=None, data=None, sub=None):
 		global lock
 		with lock:
-			ln = u'%{l}'
+			ln = '%{l}'
 			ln += powerline.render(side='left')
-			ln += u'%{r}'
+			ln += '%{r}'
 			ln += powerline.render(side='right')
 			print( ln.encode('utf-8') )
 			sys.stdout.flush()
 
 	sub = i3.Subscription(render, 'workspace')
-	try:
-		while True:
-			start_time = monotonic()
-			render()
-			time.sleep(max(interval - (monotonic() - start_time), 0.1))
-	except KeyboardInterrupt, e:
-		exit()
+	while True:
+		start_time = monotonic()
+		render()
+		time.sleep(max(interval - (monotonic() - start_time), 0.1))
