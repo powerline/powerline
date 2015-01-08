@@ -356,7 +356,8 @@ def lockpidfile():
 def main():
 	global address
 	global pidfile
-	args = get_daemon_argparser().parse_args()
+	parser = get_daemon_argparser()
+	args = parser.parse_args()
 
 	if args.socket:
 		address = args.socket
@@ -376,6 +377,8 @@ def main():
 		pidfile = address + '.pid'
 
 	if args.kill:
+		if args.foreground or args.replace:
+			parser.error('--kill and --foreground/--replace cannot be used together')
 		if kill_daemon():
 			if not args.quiet:
 				print ('Kill command sent to daemon, if it does not die in a couple of seconds use kill to kill it')

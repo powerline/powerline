@@ -91,6 +91,10 @@ class AutoManGroup(object):
 	def add_argument(self, *args, **kwargs):
 		self.arguments.append(parse_argument(*args, **kwargs))
 
+	def add_argument_group(self, *args, **kwargs):
+		self.arguments.append(AutoManGroup())
+		return self.arguments[-1]
+
 
 class SurroundWith():
 	def __init__(self, ret, condition, start='[', end=']'):
