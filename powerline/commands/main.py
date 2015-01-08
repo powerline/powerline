@@ -80,8 +80,11 @@ def get_argparser(ArgumentParser=argparse.ArgumentParser):
 	)
 	parser.add_argument(
 		'-r', '--renderer-module', metavar='MODULE', type=str,
-		help='Renderer module. Usually something like `.bash\' or `.zsh\', '
-		     'is supposed to be set only in shell-specific bindings file.'
+		help='Renderer module. Usually something like `.bash\' or `.zsh\' '
+		     '(with leading dot) which is `powerline.renderers.{ext}{MODULE}\', '
+		     'may also be full module name (must contain at least one dot or '
+		     'end with a dot in case it is top-level module) or '
+		     '`powerline.renderers\' submodule (in case there are no dots).'
 	)
 	parser.add_argument(
 		'-w', '--width', type=int,
