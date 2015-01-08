@@ -6,8 +6,10 @@ from powerline.colorscheme import ATTR_BOLD, ATTR_ITALIC, ATTR_UNDERLINE
 
 
 class BarRenderer(Renderer):
-	'''BAR (Bar ain't recursive) rendere
-	(https://github.com/LemonBoy/bar)
+	'''bar (bar ain't recursive) renderer
+
+
+	See documentation of `bar <https://github.com/LemonBoy/bar>`_ and :ref:`the usage instructions <bar-usage>`
 	'''
 
 	character_translations = Renderer.character_translations.copy()

@@ -44,12 +44,31 @@ Add the following to your :file:`~/.config/qtile/config.py`:
        ),
    ]
 
+.. _bar-usage:
+
+bar
+===
+
+.. note:: There is currently only a script to run inside i3, but you can just strip the
+          i3-specific parts of the binding.
+
+To run the bar simply pipe the output of the binding script into ``bar`` and specify appropriate
+options, for example like this::
+
+    python powerline-bar.py | bar -f "-xos4-*-*-*-*-*-*-*-*-*-*-*-*-*
+
+to run with i3, simply ``exec`` this in your i3 config file::
+
+    exec python powerline-bar.py | bar -f "-xos4-*-*-*-*-*-*-*-*-*-*-*-*-*
+
+See the `bar documentation <https://github.com/LemonBoy/bar>`_ for more information and options.
+
 I3 bar
 ======
 
-.. note:: Until the patch is done in i3, you will need a custom ``i3bar`` build
-          called ``i3bgbar``. The source is available `here 
-          <https://github.com/S0lll0s/i3bgbar>`_.
+.. note:: As the patch to include background-colors in i3bar is likely not to be merged,
+          it is recommended to instead run ``bar`` (see above).
+          The source for i3bgbar is however still available `here <https://github.com/S0lll0s/i3bgbar>`_.
 
 Add the following to your :file:`~/.i3/config`::
 

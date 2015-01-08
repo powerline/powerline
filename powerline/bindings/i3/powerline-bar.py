@@ -4,11 +4,8 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 
 import sys
 import time
-
-from threading import Lock
-
 import i3
-
+from threading import Lock
 from powerline import Powerline
 from powerline.lib.monotonic import monotonic
 
