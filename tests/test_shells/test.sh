@@ -181,8 +181,13 @@ do_run_test() {
 }
 
 run_test() {
+	TEST_TYPE="$1"
+	TEST_CLIENT="$2"
+	SH="$3"
 	local attempts=3
 	while test $attempts -gt 0 ; do
+		rm -f tests/shell/${SH}.${TEST_TYPE}.${TEST_CLIENT}.log
+		rm -f tests/shell/${SH}.${TEST_TYPE}.${TEST_CLIENT}.full.log
 		do_run_test "$@" && return 0
 		attempts=$(( attempts - 1 ))
 	done
