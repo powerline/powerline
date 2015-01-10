@@ -80,7 +80,7 @@ def source_tmux_files(pl, args):
 
 class EmptyArgs(object):
 	def __init__(self, ext, config_path):
-		self.ext = ext
+		self.ext = [ext]
 		self.config_path = None
 
 	def __getattr__(self, attr):
