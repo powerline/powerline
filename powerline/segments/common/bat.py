@@ -95,6 +95,14 @@ def _get_battery(pl):
 	else:
 		pl.debug('Not using pmset: executable not found')
 
+	if sys.platform.startswith('cygwin'):
+		BATTERY_PERCENT_RE = re.compile('[0-9]+')
+		def _get_capacity(pl):
+			battery_summary = run_cmd(pl, ['WMIC', 'Path','Win32_Battery', 'GET', 'EstimatedChargeRemaining'])
+			battery_percent = BATTERY_PERCENT_RE.search(battery_summary).group(0)
+			return int(battery_percent)
+		return _get_capacity
+	
 	if sys.platform.startswith('win'):
 		# From http://stackoverflow.com/a/21083571/273566, reworked
 		try:
