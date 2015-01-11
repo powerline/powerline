@@ -144,6 +144,32 @@ def _get_battery(pl):
 
 		return _get_capacity
 
+	if sys.platform.startswith('cygwin'):
+		# Cannot use "dumb which", because it wont find WMIC, which is part of Windows
+		# WMIC returns errorcode 0 and "No Instance(s) Available." for no batteries
+		BATTERY_PERCENT_RE = re.compile('[0-9]+')
+		battery_args = ['WMIC', 'Path', 'Win32_Battery', 'GET', 'EstimatedChargeRemaining']
+		try:
+			battery_summary = run_cmd(pl, battery_args)
+		except Exception as e:
+			pl.debug('Not using WMIC: Exception occured while trying to invoke WMIC: {0}', str(e))
+		else:
+			battery_matches = BATTERY_PERCENT_RE.search(battery_summary)
+			if battery_matches != None:
+				def _get_capacity(pl):
+					battery_summary = run_cmd(pl, battery_args)
+					battery_matches = BATTERY_PERCENT_RE.search(battery_summary)
+					if battery_matches != None:
+						battery_percent = battery_matches.group(0)
+					else:
+						pl.debug('WMIC did not return any batteries')
+					return int(battery_percent)
+				return _get_capacity
+			else:
+				pl.debug('Not using WMIC: WMIC did not return numeric value')
+	else:
+		pl.debug('Not using WMIC: environment is not cygwin')
+
 	raise NotImplementedError
 
 
