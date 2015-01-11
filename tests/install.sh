@@ -5,7 +5,7 @@ git clone --depth=1 git://github.com/powerline/deps tests/bot-ci/deps
 . tests/bot-ci/scripts/common/main.sh
 
 sudo apt-get install -qq libssl1.0.0
-sudo apt-get install -qq screen zsh tcsh mksh busybox socat realpath bc rc
+sudo apt-get install -qq screen zsh tcsh mksh busybox socat realpath bc rc tmux
 
 if test -n "$USE_UCS2_PYTHON" ; then
 	pip install virtualenvwrapper
