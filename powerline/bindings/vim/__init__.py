@@ -50,6 +50,11 @@ python_to_vim_types = {
 			ord('\''): '\'\'',
 		}).encode(vim_encoding)) + b'\''
 	),
+	list: (
+		lambda o: b'[' + (
+			b','.join((python_to_vim(i) for i in o))
+		) + b']'
+	),
 	bytes: (lambda o: b'\'' + o.replace(b'\'', b'\'\'') + b'\''),
 	int: (str if str is bytes else (lambda o: unicode(o).encode('ascii'))),
 }
