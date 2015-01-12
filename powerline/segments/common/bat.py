@@ -95,8 +95,6 @@ def _get_battery(pl):
 	else:
 		pl.debug('Not using pmset: executable not found')
 
-
-	
 	if sys.platform.startswith('win'):
 		# From http://stackoverflow.com/a/21083571/273566, reworked
 		try:
@@ -171,7 +169,6 @@ def _get_battery(pl):
 				pl.debug('Not using WMIC: WMIC did not return numeric value')
 	else:
 		pl.debug('Not using WMIC: environment is not cygwin')
-
 
 	raise NotImplementedError
 
