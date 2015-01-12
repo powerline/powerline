@@ -95,7 +95,7 @@ def _get_battery(pl):
 	else:
 		pl.debug('Not using pmset: executable not found')
 
-	if sys.platform.startswith('win'):
+	if sys.platform.startswith('win') or sys.platform == 'cygwin':
 		# From http://stackoverflow.com/a/21083571/273566, reworked
 		try:
 			from win32com.client import GetObject
@@ -116,9 +116,15 @@ def _get_battery(pl):
 
 					return _get_capacity
 				pl.debug('Not using win32com.client as no batteries were found')
-
-		from ctypes import Structure, c_byte, c_ulong, windll, byref
-
+		from ctypes import Structure, c_byte, c_ulong, byref
+		if sys.platform == 'cygwin':
+			pl.debug('Using cdll to communicate with kernel32 (Cygwin)')
+			from ctypes import cdll
+			library_loader = cdll
+		else:
+			pl.debug('Using windll to communicate with kernel32 (Windows)')
+			from ctypes import windll
+			library_loader = windll
 		class PowerClass(Structure):
 			_fields_ = [
 				('ACLineStatus', c_byte),
@@ -131,7 +137,7 @@ def _get_battery(pl):
 
 		def _get_capacity(pl):
 			powerclass = PowerClass()
-			result = windll.kernel32.GetSystemPowerStatus(byref(powerclass))
+			result = library_loader.kernel32.GetSystemPowerStatus(byref(powerclass))
 			# http://msdn.microsoft.com/en-us/library/windows/desktop/aa372693(v=vs.85).aspx
 			if result:
 				return None
@@ -143,32 +149,6 @@ def _get_battery(pl):
 			pl.debug('Using GetSystemPowerStatus')
 
 		return _get_capacity
-
-	if sys.platform.startswith('cygwin'):
-		# Cannot use "dumb which", because it wont find WMIC, which is part of Windows
-		# WMIC returns errorcode 0 and "No Instance(s) Available." for no batteries
-		BATTERY_PERCENT_RE = re.compile('[0-9]+')
-		battery_args = ['WMIC', 'Path', 'Win32_Battery', 'GET', 'EstimatedChargeRemaining']
-		try:
-			battery_summary = run_cmd(pl, battery_args)
-		except Exception as e:
-			pl.debug('Not using WMIC: Exception occured while trying to invoke WMIC: {0}', str(e))
-		else:
-			battery_matches = BATTERY_PERCENT_RE.search(battery_summary)
-			if battery_matches != None:
-				def _get_capacity(pl):
-					battery_summary = run_cmd(pl, battery_args)
-					battery_matches = BATTERY_PERCENT_RE.search(battery_summary)
-					if battery_matches != None:
-						battery_percent = battery_matches.group(0)
-					else:
-						pl.debug('WMIC did not return any batteries')
-					return int(battery_percent)
-				return _get_capacity
-			else:
-				pl.debug('Not using WMIC: WMIC did not return numeric value')
-	else:
-		pl.debug('Not using WMIC: environment is not cygwin')
 
 	raise NotImplementedError
 
