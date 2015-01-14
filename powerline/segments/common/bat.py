@@ -148,7 +148,7 @@ def _get_battery(pl):
 			pl.debug('Using GetSystemPowerStatus')
 
 		return _get_capacity
-	
+
 	raise NotImplementedError
 
 
