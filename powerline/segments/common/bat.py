@@ -116,13 +116,14 @@ def _get_battery(pl):
 
 					return _get_capacity
 				pl.debug('Not using win32com.client as no batteries were found')
+		from ctypes import Structure, c_byte, c_ulong, byref
 		if sys.platform == 'cygwin':
 			pl.debug('Using cdll to communicate with kernel32 (Cygwin)')
-			from ctypes import Structure, c_byte, c_ulong, cdll, byref
+			from ctypes import cdll
 			library_loader = cdll
 		else:
 			pl.debug('Using windll to communicate with kernel32 (Windows)')
-			from ctypes import Structure, c_byte, c_ulong, windll, byref
+			from ctypes import windll
 			library_loader = windll
 		class PowerClass(Structure):
 			_fields_ = [
