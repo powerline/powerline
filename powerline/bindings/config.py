@@ -87,7 +87,7 @@ class EmptyArgs(object):
 		return None
 
 
-def init_environment(pl, args):
+def init_tmux_environment(pl, args):
 	'''Initialize tmux environment from tmux configuration
 	'''
 	powerline = ShellPowerline(finish_args(os.environ, EmptyArgs('tmux', args.config_path)))
