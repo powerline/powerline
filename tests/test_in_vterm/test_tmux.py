@@ -141,6 +141,8 @@ def main():
 		if result == expected_result:
 			return True
 		else:
+			p.send(b'powerline-config tmux setup\n')
+			sleep(5)
 			print('Screen:')
 			screen = []
 			for i in range(rows):
