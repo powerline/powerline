@@ -148,7 +148,10 @@ def init_environment(pl, args):
 		if attr == 'attrs':
 			attrs = attrs_to_tmux_attrs(get_highlighting(group)[attr])
 			set_tmux_environment(varname, ']#['.join(attrs))
-			set_tmux_environment(varname + '_LEGACY', ','.join(attrs))
+			set_tmux_environment(varname + '_LEGACY', ','.join(
+				# Tmux-1.6 does not accept no… attributes in 
+				# window-status-…-attr options.
+				(attr for attr in attrs if not attr.startswith('no'))))
 		else:
 			set_tmux_environment(varname, 'colour' + str(get_highlighting(group)[attr][0]))
 
