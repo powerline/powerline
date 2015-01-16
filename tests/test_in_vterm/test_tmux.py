@@ -10,6 +10,8 @@ from itertools import groupby
 from difflib import ndiff
 
 from powerline.lib.unicode import u
+from powerline.bindings.tmux import get_tmux_version
+from powerline import get_fallback_logger
 
 from tests.lib.terminal import ExpectProcess
 
@@ -79,7 +81,7 @@ def main():
 			(key, ''.join((i.text for i in subline)))
 			for key, subline in groupby(last_line, lambda i: i.cell_properties_key)
 		))
-		expected_result = (
+		expected_result_new = (
 			(((0, 0, 0), (243, 243, 243), 1, 0, 0), ' 0 '),
 			(((243, 243, 243), (11, 11, 11), 0, 0, 0), ' '),
 			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' S2 string here  '),
@@ -99,6 +101,26 @@ def main():
 			(((88, 88, 88), (11, 11, 11), 0, 0, 0), ' '),
 			(((199, 199, 199), (88, 88, 88), 0, 0, 0), ' S1 string here '),
 		)
+		expected_result_old = (
+			(((0, 0, 0), (243, 243, 243), 1, 0, 0), ' 0 '),
+			(((243, 243, 243), (11, 11, 11), 0, 0, 0), ' '),
+			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' S2 string here  '),
+			(((133, 133, 133), (11, 11, 11), 0, 0, 0), ' 0 '),
+			(((88, 88, 88), (11, 11, 11), 0, 0, 0), '| '),
+			(((188, 188, 188), (11, 11, 11), 0, 0, 0), 'bash  '),
+			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' '),
+			(((133, 133, 133), (11, 11, 11), 0, 0, 0), ' 1 '),
+			(((88, 88, 88), (11, 11, 11), 0, 0, 0), '| '),
+			(((188, 188, 188), (11, 11, 11), 0, 0, 0), 'bash  '),
+			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' '),
+			(((11, 11, 11), (0, 102, 153), 0, 0, 0), ' '),
+			(((102, 204, 255), (0, 102, 153), 0, 0, 0), '2 | '),
+			(((255, 255, 255), (0, 102, 153), 1, 0, 0), 'bash '),
+			(((0, 102, 153), (11, 11, 11), 0, 0, 0), ' '),
+			(((255, 255, 255), (11, 11, 11), 0, 0, 0), '                                                                                                                               '),
+			(((88, 88, 88), (11, 11, 11), 0, 0, 0), ' '),
+			(((199, 199, 199), (88, 88, 88), 0, 0, 0), ' S1 string here '),
+		)
 		print('Result:')
 		shesc_result = ''.join((
 			'{0}{1}\x1b[m'.format(cell_properties_key_to_shell_escape(key), text)
@@ -106,6 +128,11 @@ def main():
 		))
 		print(shesc_result)
 		print('Expected:')
+		tmux_version = get_tmux_version(get_fallback_logger())
+		if tmux_version < (1, 8):
+			expected_result = expected_result_old
+		else:
+			expected_result = expected_result_new
 		shesc_expected_result = ''.join((
 			'{0}{1}\x1b[m'.format(cell_properties_key_to_shell_escape(key), text)
 			for key, text in expected_result
