@@ -164,6 +164,11 @@ def init_tmux_environment(pl, args):
 		' ' * powerline.renderer.strwidth(left_dividers['hard'])))
 
 
+def tmux_setup(pl, args):
+	init_tmux_environment(pl, args)
+	source_tmux_files(pl, args)
+
+
 def get_main_config(args):
 	find_config_files = generate_config_finder()
 	config_loader = ConfigLoader(run_once=True)
