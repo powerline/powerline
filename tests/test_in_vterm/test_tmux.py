@@ -73,7 +73,7 @@ def main():
 			},
 		)
 		p.start()
-		sleep(1)
+		sleep(10)
 		last_line = []
 		for col in range(cols):
 			last_line.append(p[rows - 1, col])
