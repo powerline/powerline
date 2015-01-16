@@ -32,12 +32,14 @@ def main():
 	rows = 50
 	cols = 200
 
+	tmux_exe = os.path.join(vterm_path, 'tmux')
+
 	try:
 		p = ExpectProcess(
 			lib='tests/bot-ci/deps/libvterm/libvterm.so',
 			rows=rows,
 			cols=cols,
-			cmd='tmux',
+			cmd=tmux_exe,
 			args=[
 				# Specify full path to tmux socket (testing tmux instance must 
 				# not interfere with user one)
@@ -135,7 +137,7 @@ def main():
 			print(''.join((u(line) for line in ndiff([a], [b]))))
 			return False
 	finally:
-		check_call(['tmux', '-S', socket_path, 'kill-server'], env={
+		check_call([tmux_exe, '-S', socket_path, 'kill-server'], env={
 			'PATH': vterm_path,
 		})
 
