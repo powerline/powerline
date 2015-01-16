@@ -70,6 +70,8 @@ def main():
 					'default.segment_data.s1.contents=S1 string here;'
 					'default.segment_data.s2.contents=S2 string here;'
 				),
+				'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
+				'PYTHONPATH': os.environ.get('PYTHONPATH', ''),
 			},
 		)
 		p.start()
