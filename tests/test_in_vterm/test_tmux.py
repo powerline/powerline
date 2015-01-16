@@ -138,24 +138,24 @@ def main():
 			for key, text in expected_result
 		))
 		print(shesc_expected_result)
-		print('Screen:')
-		screen = []
-		for i in range(rows):
-			screen.append([])
-			for j in range(cols):
-				screen[-1].append(p[i, j])
-		print('\n'.join(
-			''.join((
-				'{0}{1}\x1b[m'.format(
-					cell_properties_key_to_shell_escape(i.cell_properties_key),
-					i.text
-				) for i in line
-			))
-			for line in screen
-		))
 		if result == expected_result:
 			return True
 		else:
+			print('Screen:')
+			screen = []
+			for i in range(rows):
+				screen.append([])
+				for j in range(cols):
+					screen[-1].append(p[i, j])
+			print('\n'.join(
+				''.join((
+					'{0}{1}\x1b[m'.format(
+						cell_properties_key_to_shell_escape(i.cell_properties_key),
+						i.text
+					) for i in line
+				))
+				for line in screen
+			))
 			a = shesc_result.replace('\x1b', '\\e') + '\n'
 			b = shesc_expected_result.replace('\x1b', '\\e') + '\n'
 			print('_' * 80)
