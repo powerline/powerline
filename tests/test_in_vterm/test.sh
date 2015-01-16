@@ -1,12 +1,8 @@
 #!/bin/sh
-: ${PYTHON:=python}
+. tests/bot-ci/scripts/common/main.sh
+set +x
+
 : ${POWERLINE_TMUX_EXE:=tmux}
-
-set -e
-
-# HACK: get newline for use in strings given that "\n" and $'' do not work.
-NL="$(printf '\nE')"
-NL="${NL%E}"
 
 FAILED=0
 
@@ -23,6 +19,10 @@ ln -s "$PWD/scripts/powerline-config" tests/vterm/path
 FAIL_SUMMARY=""
 
 test_tmux() {
+	if test "$PYTHON_IMPLEMENTATION" = PyPy && test "$PYTHON_VERSION_MAJOR" -eq 3 ; then
+		# FIXME PyPy3 segfaults for some reason
+		return 0
+	fi
 	if ! which "${POWERLINE_TMUX_EXE}" ; then
 		return 0
 	fi
