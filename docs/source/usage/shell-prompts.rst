@@ -65,8 +65,6 @@ the absolute path to the Powerline installation directory:
    set fish_function_path $fish_function_path "{repository_root}/powerline/bindings/fish"
    powerline-setup
 
-.. _tmux-statusline:
-
 Rcsh prompt
 ===========
 
@@ -77,7 +75,7 @@ many \*nix distributions. To use it add
 
    . {repository_root}/powerline/bindings/rc/powerline.rc
 
-to :file:`rcrc` file (usually :file:`~/.rcrc`) and make sure ``rc`` is startead 
+to :file:`rcrc` file (usually :file:`~/.rcrc`) and make sure ``rc`` is started 
 as a login shell (with ``-l`` argument): otherwise this configuration file is 
 not read.
 

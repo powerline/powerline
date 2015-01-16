@@ -80,17 +80,17 @@ def source_tmux_files(pl, args):
 
 class EmptyArgs(object):
 	def __init__(self, ext, config_path):
-		self.ext = ext
+		self.ext = [ext]
 		self.config_path = None
 
 	def __getattr__(self, attr):
 		return None
 
 
-def init_environment(pl, args):
+def init_tmux_environment(pl, args):
 	'''Initialize tmux environment from tmux configuration
 	'''
-	powerline = ShellPowerline(finish_args(EmptyArgs('tmux', args.config_path)))
+	powerline = ShellPowerline(finish_args(os.environ, EmptyArgs('tmux', args.config_path)))
 	# TODO Move configuration files loading out of Powerline object and use it 
 	# directly
 	powerline.update_renderer()
@@ -148,7 +148,12 @@ def init_environment(pl, args):
 		if attr == 'attrs':
 			attrs = attrs_to_tmux_attrs(get_highlighting(group)[attr])
 			set_tmux_environment(varname, ']#['.join(attrs))
-			set_tmux_environment(varname + '_LEGACY', ','.join(attrs))
+			set_tmux_environment(varname + '_LEGACY', (','.join(
+				# Tmux-1.6 does not accept no… attributes in 
+				# window-status-…-attr options.
+				(attr for attr in attrs if not attr.startswith('no')))
+				# But it does not support empty attributes as well.
+				or 'none'))
 		else:
 			set_tmux_environment(varname, 'colour' + str(get_highlighting(group)[attr][0]))
 
@@ -157,6 +162,11 @@ def init_environment(pl, args):
 	set_tmux_environment('_POWERLINE_LEFT_SOFT_DIVIDER', left_dividers['soft'])
 	set_tmux_environment('_POWERLINE_LEFT_HARD_DIVIDER_SPACES', (
 		' ' * powerline.renderer.strwidth(left_dividers['hard'])))
+
+
+def tmux_setup(pl, args):
+	init_tmux_environment(pl, args)
+	source_tmux_files(pl, args)
 
 
 def get_main_config(args):
