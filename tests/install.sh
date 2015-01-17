@@ -19,6 +19,7 @@ if test -n "$USE_UCS2_PYTHON" ; then
 	set +e
 	mkvirtualenv -p "$PYTHON" cpython-ucs2-$UCS2_PYTHON_VARIANT
 	set -e
+	. tests/bot-ci/scripts/common/main.sh
 	pip install .
 	if test "$UCS2_PYTHON_VARIANT" = "2.6" ; then
 		rm tests/bot-ci/deps/wheels/ucs2-CPython-${UCS2_PYTHON_VARIANT}*/pyuv*.whl
@@ -33,10 +34,10 @@ else
 		rm tests/bot-ci/deps/wheels/$PYTHON_SUFFIX/pyuv*.whl
 	fi
 	pip install --no-deps tests/bot-ci/deps/wheels/$PYTHON_SUFFIX/*.whl
-	if test "$PYTHON_IMPLEMENTATION" = "CPython" ; then
-		archive="${PWD:-$(pwd)}/tests/bot-ci/deps/zpython/zsh-${PYTHON_VERSION}.tar.gz"
-		sudo sh -c "cd /opt && tar xzf $archive"
-	fi
+fi
+if test "$PYTHON_IMPLEMENTATION" = "CPython" ; then
+	archive="${PWD:-$(pwd)}/tests/bot-ci/deps/zpython/zsh-${PYTHON_MM}${USE_UCS2_PYTHON:+-ucs2}.tar.gz"
+	sudo sh -c "cd /opt && tar xzf $archive"
 fi
 
 archive="${PWD:-$(pwd)}/tests/bot-ci/deps/fish/fish.tar.gz"
