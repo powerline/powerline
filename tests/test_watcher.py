@@ -16,7 +16,7 @@ from powerline.lib.monotonic import monotonic
 from tests import TestCase, SkipTest
 
 
-INOTIFY_DIR = 'inotify' + os.environ.get('PYTHON', '')
+INOTIFY_DIR = 'inotify' + os.path.basename(os.environ.get('PYTHON', ''))
 
 
 def clear_dir(dir):

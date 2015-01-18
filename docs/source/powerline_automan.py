@@ -91,6 +91,10 @@ class AutoManGroup(object):
 	def add_argument(self, *args, **kwargs):
 		self.arguments.append(parse_argument(*args, **kwargs))
 
+	def add_argument_group(self, *args, **kwargs):
+		self.arguments.append(AutoManGroup())
+		return self.arguments[-1]
+
 
 class SurroundWith():
 	def __init__(self, ret, condition, start='[', end=']'):
@@ -361,7 +365,7 @@ class AutoMan(Directive):
 			),
 			ids=['author-section']
 		)
-		issues_url = 'https://github.com/Lokaltog/powerline/issues'
+		issues_url = 'https://github.com/powerline/powerline/issues'
 		reporting_bugs_section = nodes.section(
 			'', nodes.title(text='Reporting bugs'),
 			nodes.paragraph(

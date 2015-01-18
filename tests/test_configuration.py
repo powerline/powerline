@@ -18,7 +18,7 @@ def highlighted_string(s, group, **kwargs):
 	ret = {
 		'type': 'string',
 		'contents': s,
-		'highlight_group': [group],
+		'highlight_groups': [group],
 	}
 	ret.update(kwargs)
 	return ret
@@ -36,6 +36,10 @@ config = {
 				'colorscheme': 'default',
 			},
 			'vim': {
+				'theme': 'default',
+				'colorscheme': 'default',
+			},
+			'shell': {
 				'theme': 'default',
 				'colorscheme': 'default',
 			},
@@ -63,20 +67,20 @@ config = {
 		'groups': {
 			'm1': 'g1',
 			'm2': 'g3',
-			'm3': {'fg': 'col11', 'bg': 'col12', 'attr': []},
+			'm3': {'fg': 'col11', 'bg': 'col12', 'attrs': []},
 		}
 	},
 	'colorschemes/default': {
 		'groups': {
-			'g1': {'fg': 'col5', 'bg': 'col6', 'attr': []},
-			'g2': {'fg': 'col7', 'bg': 'col8', 'attr': []},
-			'g3': {'fg': 'col9', 'bg': 'col10', 'attr': []},
+			'g1': {'fg': 'col5', 'bg': 'col6', 'attrs': []},
+			'g2': {'fg': 'col7', 'bg': 'col8', 'attrs': []},
+			'g3': {'fg': 'col9', 'bg': 'col10', 'attrs': []},
 		}
 	},
 	'colorschemes/test/default': {
 		'groups': {
-			'str1': {'fg': 'col1', 'bg': 'col2', 'attr': ['bold']},
-			'str2': {'fg': 'col3', 'bg': 'col4', 'attr': ['underline']},
+			'str1': {'fg': 'col1', 'bg': 'col2', 'attrs': ['bold']},
+			'str2': {'fg': 'col3', 'bg': 'col4', 'attrs': ['underline']},
 			'd1': 'g2',
 			'd2': 'm2',
 			'd3': 'm3',
@@ -84,7 +88,7 @@ config = {
 	},
 	'colorschemes/vim/default': {
 		'groups': {
-			'environment': {'fg': 'col3', 'bg': 'col4', 'attr': ['underline']},
+			'environment': {'fg': 'col3', 'bg': 'col4', 'attrs': ['underline']},
 		},
 	},
 	'themes/test/default': {
@@ -119,15 +123,22 @@ config = {
 		},
 	},
 	'themes/vim/default': {
-		'default_module': 'powerline.segments.common',
 		'segments': {
 			'left': [
 				{
-					'function': 'environment',
+					'function': 'powerline.segments.common.env.environment',
 					'args': {
 						'variable': 'TEST',
 					},
 				},
+			],
+		},
+	},
+	'themes/shell/default': {
+		'default_module': 'powerline.segments.common',
+		'segments': {
+			'left': [
+				highlighted_string('s', 'g1', width='auto'),
 			],
 		},
 	},
@@ -639,6 +650,102 @@ class TestSegmentData(TestRender):
 		self.assertRenderEqual(p, '{56} 1S{56}>{56}3S{610}>>{910}3S{910}>{910}2S{10-}>>{--}')
 
 
+class TestShellEscapes(TestCase):
+	@with_new_config
+	def test_escapes(self, config):
+		from powerline.shell import ShellPowerline
+		import powerline as powerline_module
+		with swap_attributes(config, powerline_module):
+			with get_powerline_raw(config, ShellPowerline, args=Args(config_path=[''])) as powerline:
+				self.assertEqual(powerline.render(segment_info={}, side='left'), '\x1b[0;38;5;5;48;5;6m\xa0s\x1b[0;38;5;6;49;22m>>\x1b[0m')
+
+	@with_new_config
+	def test_tmux_escapes(self, config):
+		from powerline.shell import ShellPowerline
+		import powerline as powerline_module
+		config['config']['common']['additional_escapes'] = 'tmux'
+		with swap_attributes(config, powerline_module):
+			with get_powerline_raw(config, ShellPowerline, args=Args(config_path=[''])) as powerline:
+				self.assertEqual(powerline.render(segment_info={}, side='left'), '\x1bPtmux;\x1b\x1b[0;38;5;5;48;5;6m\x1b\\\xa0s\x1bPtmux;\x1b\x1b[0;38;5;6;49;22m\x1b\\>>\x1bPtmux;\x1b\x1b[0m\x1b\\')
+
+	@with_new_config
+	def test_screen_escapes(self, config):
+		from powerline.shell import ShellPowerline
+		import powerline as powerline_module
+		config['config']['common']['additional_escapes'] = 'screen'
+		with swap_attributes(config, powerline_module):
+			with get_powerline_raw(config, ShellPowerline, args=Args(config_path=[''])) as powerline:
+				self.assertEqual(powerline.render(segment_info={}, side='left'), '\x1bP\x1b\x1b[0;38;5;5;48;5;6m\x1b\\\xa0s\x1bP\x1b\x1b[0;38;5;6;49;22m\x1b\\>>\x1bP\x1b\x1b[0m\x1b\\')
+
+	@with_new_config
+	def test_fbterm_escapes(self, config):
+		from powerline.shell import ShellPowerline
+		import powerline as powerline_module
+		config['config']['common']['term_escape_style'] = 'fbterm'
+		with swap_attributes(config, powerline_module):
+			with get_powerline_raw(config, ShellPowerline, args=Args(config_path=[''])) as powerline:
+				self.assertEqual(powerline.render(segment_info={}, side='left'), '\x1b[0m\x1b[1;5}\x1b[2;6}\xa0s\x1b[0m\x1b[1;6}\x1b[49m\x1b[22m>>\x1b[0m')
+
+	@with_new_config
+	def test_fbterm_tmux_escapes(self, config):
+		from powerline.shell import ShellPowerline
+		import powerline as powerline_module
+		config['config']['common']['term_escape_style'] = 'fbterm'
+		config['config']['common']['additional_escapes'] = 'tmux'
+		with swap_attributes(config, powerline_module):
+			with get_powerline_raw(config, ShellPowerline, args=Args(config_path=[''])) as powerline:
+				self.assertEqual(powerline.render(segment_info={}, side='left'), '\x1bPtmux;\x1b\x1b[0m\x1b\x1b[1;5}\x1b\x1b[2;6}\x1b\\\xa0s\x1bPtmux;\x1b\x1b[0m\x1b\x1b[1;6}\x1b\x1b[49m\x1b\x1b[22m\x1b\\>>\x1bPtmux;\x1b\x1b[0m\x1b\\')
+
+	@with_new_config
+	def test_fbterm_screen_escapes(self, config):
+		from powerline.shell import ShellPowerline
+		import powerline as powerline_module
+		config['config']['common']['term_escape_style'] = 'fbterm'
+		config['config']['common']['additional_escapes'] = 'screen'
+		with swap_attributes(config, powerline_module):
+			with get_powerline_raw(config, ShellPowerline, args=Args(config_path=[''])) as powerline:
+				self.assertEqual(powerline.render(segment_info={}, side='left'), '\x1bP\x1b\x1b[0m\x1b\x1b[1;5}\x1b\x1b[2;6}\x1b\\\xa0s\x1bP\x1b\x1b[0m\x1b\x1b[1;6}\x1b\x1b[49m\x1b\x1b[22m\x1b\\>>\x1bP\x1b\x1b[0m\x1b\\')
+
+	@with_new_config
+	def test_term_truecolor_escapes(self, config):
+		from powerline.shell import ShellPowerline
+		import powerline as powerline_module
+		config['config']['common']['term_truecolor'] = True
+		with swap_attributes(config, powerline_module):
+			with get_powerline_raw(config, ShellPowerline, args=Args(config_path=[''])) as powerline:
+				self.assertEqual(powerline.render(segment_info={}, side='left'), '\x1b[0;38;2;192;0;192;48;2;0;128;128m\xa0s\x1b[0;38;2;0;128;128;49;22m>>\x1b[0m')
+
+	@with_new_config
+	def test_term_truecolor_fbterm_escapes(self, config):
+		from powerline.shell import ShellPowerline
+		import powerline as powerline_module
+		config['config']['common']['term_escape_style'] = 'fbterm'
+		config['config']['common']['term_truecolor'] = True
+		with swap_attributes(config, powerline_module):
+			with get_powerline_raw(config, ShellPowerline, args=Args(config_path=[''])) as powerline:
+				self.assertEqual(powerline.render(segment_info={}, side='left'), '\x1b[0m\x1b[1;5}\x1b[2;6}\xa0s\x1b[0m\x1b[1;6}\x1b[49m\x1b[22m>>\x1b[0m')
+
+	@with_new_config
+	def test_term_truecolor_tmux_escapes(self, config):
+		from powerline.shell import ShellPowerline
+		import powerline as powerline_module
+		config['config']['common']['term_truecolor'] = True
+		config['config']['common']['additional_escapes'] = 'tmux'
+		with swap_attributes(config, powerline_module):
+			with get_powerline_raw(config, ShellPowerline, args=Args(config_path=[''])) as powerline:
+				self.assertEqual(powerline.render(segment_info={}, side='left'), '\x1bPtmux;\x1b\x1b[0;38;2;192;0;192;48;2;0;128;128m\x1b\\\xa0s\x1bPtmux;\x1b\x1b[0;38;2;0;128;128;49;22m\x1b\\>>\x1bPtmux;\x1b\x1b[0m\x1b\\')
+
+	@with_new_config
+	def test_term_truecolor_screen_escapes(self, config):
+		from powerline.shell import ShellPowerline
+		import powerline as powerline_module
+		config['config']['common']['term_truecolor'] = True
+		config['config']['common']['additional_escapes'] = 'screen'
+		with swap_attributes(config, powerline_module):
+			with get_powerline_raw(config, ShellPowerline, args=Args(config_path=[''])) as powerline:
+				self.assertEqual(powerline.render(segment_info={}, side='left'), '\x1bP\x1b\x1b[0;38;2;192;0;192;48;2;0;128;128m\x1b\\\xa0s\x1bP\x1b\x1b[0;38;2;0;128;128;49;22m\x1b\\>>\x1bP\x1b\x1b[0m\x1b\\')
+
+
 class TestVim(TestCase):
 	def test_environ_update(self):
 		# Regression test: test that segment obtains environment from vim, not 
@@ -674,7 +781,7 @@ class TestVim(TestCase):
 							{
 								'type': 'string',
 								'name': 'foo',
-								'highlight_group': ['g1']
+								'highlight_groups': ['g1']
 							}
 						]
 					}

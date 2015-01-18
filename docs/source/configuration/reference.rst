@@ -24,7 +24,30 @@ Common configuration is a subdictionary that is a value of ``common`` key in
 ``term_truecolor``
     Defines whether to output cterm indices (8-bit) or RGB colors (24-bit) 
     to the terminal emulator. See the :ref:`term-feature-support-matrix` for 
-    information on whether your terminal emulator supports 24-bit colors.
+    information on whether used terminal emulator supports 24-bit colors.
+
+    This variable is forced to be ``false`` if :ref:`term_escape_style 
+    <config-common-term_escape_style>` option is set to ``"fbterm"`` or if it is 
+    set to ``"auto"`` and powerline detected fbterm.
+
+.. _config-common-term_escape_style:
+
+``term_escape_style``
+    Defines what escapes sequences should be used. Accepts three variants:
+
+    =======  ===================================================================
+    Variant  Description
+    =======  ===================================================================
+    auto     ``xterm`` or ``fbterm`` depending on ``$TERM`` variable value: 
+             ``TERM=fbterm`` implies ``fbterm`` escaping style, all other values 
+             select ``xterm`` escaping.
+    xterm    Uses ``\e[{fb};5;{color}m`` for colors (``{fb}`` is either ``38`` 
+             (foreground) or ``48`` (background)). Should be used for most 
+             terminals.
+    fbterm   Uses ``\e[{fb};{color}}`` for colors (``{fb}`` is either ``1`` 
+             (foreground) or ``2`` (background)). Should be used for fbterm: 
+             framebuffer terminal.
+    =======  ===================================================================
 
 .. _config-common-ambiwidth:
 
@@ -32,7 +55,7 @@ Common configuration is a subdictionary that is a value of ``common`` key in
     Tells powerline what to do with characters with East Asian Width Class 
     Ambigious (such as Euro, Registered Sign, Copyright Sign, Greek
     letters, Cyrillic letters). Valid values: any positive integer; it is 
-    suggested that you only set it to 1 (default) or 2.
+    suggested that this option is only set it to 1 (default) or 2.
 
 .. _config-common-watcher:
 
@@ -54,12 +77,11 @@ Common configuration is a subdictionary that is a value of ``common`` key in
 
 ``additional_escapes``
     Valid for shell extensions, makes sense only if :ref:`term_truecolor 
-    <config-common-term_truecolor>` is enabled. Is to be set from command-line 
-    (unless you are sure you always need it). Controls additional escaping that 
-    is needed for tmux/screen to work with terminal true color escape codes: 
-    normally tmux/screen prevent terminal emulator from receiving these control 
-    codes thus rendering powerline prompt colorless. Valid values: ``"tmux"``, 
-    ``"screen"``, ``null`` (default).
+    <config-common-term_truecolor>` is enabled. Is to be set from command-line. 
+    Controls additional escaping that is needed for tmux/screen to work with 
+    terminal true color escape codes: normally tmux/screen prevent terminal 
+    emulator from receiving these control codes thus rendering powerline prompt 
+    colorless. Valid values: ``"tmux"``, ``"screen"``, ``null`` (default).
 
 .. _config-common-paths:
 
@@ -74,6 +96,8 @@ Common configuration is a subdictionary that is a value of ``common`` key in
 ``log_file``
     Defines path which will hold powerline logs. If not present, logging will be 
     done to stderr.
+
+.. _config-common-log_level:
 
 ``log_level``
     String, determines logging level. Defaults to ``WARNING``.
@@ -187,8 +211,8 @@ Color definitions
     * A list of cterm color indicies.
     * A list of hex color strings.
 
-    It is expected that you define gradients from least alert color to most 
-    alert or use non-alert colors.
+    It is expected that gradients are defined from least alert color to most 
+    alert or non-alert colors are used.
 
 .. _config-colorschemes:
 
@@ -225,11 +249,11 @@ override those from each previous file. It is required that either
            Background color. Must be defined in :ref:`colors 
            <config-colors-colors>`.
 
-       ``attr``
+       ``attrs``
            List of attributes. Valid values are one or more of ``bold``, 
            ``italic`` and ``underline``. Note that some attributes may be 
-           unavailable in some applications or terminal emulators. If you do not 
-           need any attributes leave this empty.
+           unavailable in some applications or terminal emulators. If no 
+           attributes are needed this list should be left empty.
 
     #) a string (an alias): a name of existing group. This group’s definition 
        will be used when this color is requested.
@@ -273,6 +297,7 @@ with the following top themes:
 Theme                       Description
 ==========================  ====================================================
 powerline                   Default powerline theme with fancy powerline symbols
+powerline_unicode7          Theme with powerline dividers and unicode-7 symbols
 unicode                     Theme without any symbols from private use area
 unicode_terminus            Theme containing only symbols from terminus PCF font
 unicode_terminus_condensed  Like above, but occupies as less space as possible
@@ -307,9 +332,7 @@ ascii                       Theme without any unicode characters at all
 
 
 ``dividers``
-    Defines the dividers used in all Powerline extensions. This option 
-    should usually only be changed if you don’t have a patched font, or if 
-    you use a font patched with the legacy font patcher.
+    Defines the dividers used in all Powerline extensions.
 
     The ``hard`` dividers are used to divide segments with different 
     background colors, while the ``soft`` dividers are used to divide 
@@ -386,8 +409,8 @@ ascii                       Theme without any unicode characters at all
         ``string``
             A static string segment where the contents is defined in the 
             :ref:`contents option <config-themes-seg-contents>`, and the 
-            highlighting group is defined in the :ref:`highlight_group 
-            option <config-themes-seg-highlight_group>`.
+            highlighting group is defined in the :ref:`highlight_groups option 
+            <config-themes-seg-highlight_groups>`.
 
         ``segments_list``
             Sub-list of segments. This list only allows :ref:`function 
@@ -419,9 +442,9 @@ ascii                       Theme without any unicode characters at all
         or ``{function}``. If ``{module}`` is omitted :ref:`default_module 
         option <config-themes-default_module>` is used.
 
-    .. _config-themes-seg-highlight_group:
+    .. _config-themes-seg-highlight_groups:
 
-    ``highlight_group``
+    ``highlight_groups``
         Highlighting group for this segment. Consists of a prioritized list of 
         highlighting groups, where the first highlighting group that is 
         available in the colorscheme is used.

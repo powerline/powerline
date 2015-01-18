@@ -2,13 +2,21 @@ unset HOME
 unsetopt promptsp notransientrprompt
 setopt interactivecomments
 setopt autonamedirs
-# POWERLINE_CONFIG_PATH=$PWD/powerline/config_files
-# POWERLINE_THEME_CONFIG=( default_leftonly.segment_data.hostname.args.only_if_ssh=false )
-# POWERLINE_CONFIG=( ext.shell.theme=default_leftonly )
-POWERLINE_NO_ZSH_ZPYTHON=1  # TODO: make tests work with zsh/zpython
+function set_theme_option() {
+	export POWERLINE_THEME_OVERRIDES="${POWERLINE_THEME_OVERRIDES};$1=$2"
+	powerline-reload-config
+}
+function set_theme() {
+	export POWERLINE_CONFIG_OVERRIDES="ext.shell.theme=$1"
+	powerline-reload-config
+}
+if test -n "$POWERLINE_NO_ZSH_ZPYTHON" ; then
+	powerline-reload-config():
+fi
 source powerline/bindings/zsh/powerline.zsh
-POWERLINE_COMMAND="$POWERLINE_COMMAND -t default_leftonly.segment_data.hostname.args.only_if_ssh=false"
-POWERLINE_COMMAND="$POWERLINE_COMMAND -c ext.shell.theme=default_leftonly"
+set_theme_option default_leftonly.segment_data.hostname.args.only_if_ssh false
+set_theme_option default.segment_data.hostname.args.only_if_ssh false
+set_theme default_leftonly
 export VIRTUAL_ENV=
 cd tests/shell/3rd
 cd .git
@@ -28,13 +36,13 @@ cd ../'$(echo)'
 cd ../'`echo`'
 cd ../'«Unicode!»'
 cd ..
-POWERLINE_COMMAND="${POWERLINE_COMMAND//_leftonly}" ; bindkey -v
+bindkey -v ; set_theme default
 
 
 echo abc
 false
-POWERLINE_COMMAND="$POWERLINE_COMMAND -t default.segment_data.hostname.display=false"
-POWERLINE_COMMAND="$POWERLINE_COMMAND -t default.segment_data.user.display=false"
+set_theme_option default.segment_data.hostname.display false
+set_theme_option default.segment_data.user.display false
 select abc in def ghi jkl
 do
 	echo $abc
@@ -44,7 +52,7 @@ done
 cd .
 cd .
 hash -d foo=$PWD:h ; cd .
-POWERLINE_COMMAND="$POWERLINE_COMMAND -t default.dividers.left.hard=\$ABC"
+set_theme_option default.dividers.left.hard \$ABC
 true
 true is the last line
 exit

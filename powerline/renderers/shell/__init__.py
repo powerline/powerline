@@ -18,6 +18,7 @@ class ShellRenderer(Renderer):
 	escape_hl_start = ''
 	escape_hl_end = ''
 	term_truecolor = False
+	term_escape_style = 'auto'
 	tmux_escape = False
 	screen_escape = False
 
@@ -36,22 +37,29 @@ class ShellRenderer(Renderer):
 		)
 
 	def do_render(self, output_width, segment_info, side, theme, width=None, **kwargs):
+		if self.term_escape_style == 'auto':
+			if segment_info['environ'].get('TERM') == 'fbterm':
+				self.used_term_escape_style = 'fbterm'
+			else:
+				self.used_term_escape_style = 'xterm'
+		else:
+			self.used_term_escape_style = self.term_escape_style
 		if isinstance(segment_info, dict):
 			client_id = segment_info.get('client_id')
 		else:
 			client_id = None
-		local_key = (client_id, side, None if theme is self.theme else id(theme))
-		key = (client_id, side, None)
-		did_width = False
-		if local_key[-1] != key[-1] and side == 'left':
-			try:
-				width = self.old_widths[key]
-			except KeyError:
-				pass
-			else:
-				did_width = True
-		if not did_width:
-			if width is not None:
+		if client_id is not None:
+			local_key = (client_id, side, None if theme is self.theme else id(theme))
+			key = (client_id, side, None)
+			did_width = False
+			if local_key[-1] != key[-1] and side == 'left':
+				try:
+					width = self.old_widths[key]
+				except KeyError:
+					pass
+				else:
+					did_width = True
+			if not did_width and width is not None:
 				if theme.cursor_space_multiplier is not None:
 					width = int(width * theme.cursor_space_multiplier)
 				elif theme.cursor_columns:
@@ -70,14 +78,15 @@ class ShellRenderer(Renderer):
 			side=side,
 			**kwargs
 		)
-		self.old_widths[local_key] = res[-1]
+		if client_id is not None:
+			self.old_widths[local_key] = res[-1]
 		ret = res if output_width else res[:-1]
 		if len(ret) == 1:
 			return ret[0]
 		else:
 			return ret
 
-	def hlstyle(self, fg=None, bg=None, attr=None):
+	def hlstyle(self, fg=None, bg=None, attrs=None):
 		'''Highlight a segment.
 
 		If an argument is None, the argument is ignored. If an argument is
@@ -85,11 +94,13 @@ class ShellRenderer(Renderer):
 		is a valid color or attribute, it’s added to the ANSI escape code.
 		'''
 		ansi = [0]
+		is_fbterm = self.used_term_escape_style == 'fbterm'
+		term_truecolor = not is_fbterm and self.term_truecolor
 		if fg is not None:
 			if fg is False or fg[0] is False:
 				ansi += [39]
 			else:
-				if self.term_truecolor:
+				if term_truecolor:
 					ansi += [38, 2] + list(int_to_rgb(fg[1]))
 				else:
 					ansi += [38, 5, fg[0]]
@@ -97,23 +108,37 @@ class ShellRenderer(Renderer):
 			if bg is False or bg[0] is False:
 				ansi += [49]
 			else:
-				if self.term_truecolor:
+				if term_truecolor:
 					ansi += [48, 2] + list(int_to_rgb(bg[1]))
 				else:
 					ansi += [48, 5, bg[0]]
-		if attr is not None:
-			if attr is False:
+		if attrs is not None:
+			if attrs is False:
 				ansi += [22]
 			else:
-				if attr & ATTR_BOLD:
+				if attrs & ATTR_BOLD:
 					ansi += [1]
-				elif attr & ATTR_ITALIC:
+				elif attrs & ATTR_ITALIC:
 					# Note: is likely not to work or even be inverse in place of
 					# italic. Omit using this in colorschemes.
 					ansi += [3]
-				elif attr & ATTR_UNDERLINE:
+				elif attrs & ATTR_UNDERLINE:
 					ansi += [4]
-		r = '\033[{0}m'.format(';'.join(str(attr) for attr in ansi))
+		if is_fbterm:
+			r = []
+			while ansi:
+				cur_ansi = ansi.pop(0)
+				if cur_ansi == 38:
+					ansi.pop(0)
+					r.append('\033[1;{0}}}'.format(ansi.pop(0)))
+				elif cur_ansi == 48:
+					ansi.pop(0)
+					r.append('\033[2;{0}}}'.format(ansi.pop(0)))
+				else:
+					r.append('\033[{0}m'.format(cur_ansi))
+			r = ''.join(r)
+		else:
+			r = '\033[{0}m'.format(';'.join(str(attr) for attr in ansi))
 		if self.tmux_escape:
 			r = '\033Ptmux;' + r.replace('\033', '\033\033') + '\033\\'
 		elif self.screen_escape:

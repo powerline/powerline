@@ -38,7 +38,7 @@ weather_conditions_codes = (
 	('fog',                     'foggy' ),  # 20
 	('haze',                    'foggy' ),  # 21
 	('smoky',                   'foggy' ),  # 22
-	('blustery',                'foggy' ),  # 23
+	('blustery',                'windy' ),  # 23
 	('windy',                           ),  # 24
 	('cold',                    'day'   ),  # 25
 	('clouds',                  'cloudy'),  # 26
@@ -188,12 +188,12 @@ class WeatherSegment(KwThreadedSegment):
 		return [
 			{
 				'contents': icon + ' ',
-				'highlight_group': groups,
+				'highlight_groups': groups,
 				'divider_highlight_group': 'background:divider',
 			},
 			{
 				'contents': temp_format.format(temp=converted_temp),
-				'highlight_group': ['weather_temp_gradient', 'weather_temp', 'weather'],
+				'highlight_groups': ['weather_temp_gradient', 'weather_temp', 'weather'],
 				'divider_highlight_group': 'background:divider',
 				'gradient_level': gradient_level,
 			},

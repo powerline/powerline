@@ -50,7 +50,7 @@ class PlayerSegment(Segment):
 		stats['state_symbol'] = state_symbols.get(stats['state'])
 		return [{
 			'contents': format.format(**stats),
-			'highlight_group': ['now_playing', 'player_' + (stats['state'] or 'fallback'), 'player'],
+			'highlight_groups': ['player_' + (stats['state'] or 'fallback'), 'player'],
 		}]
 
 	def get_player_status(self, pl):
@@ -437,7 +437,7 @@ class RDIOPlayerSegment(PlayerSegment):
 		now_playing = asrun(pl, ascript)
 		if not now_playing:
 			return
-		now_playing = now_playing.split('\n')
+		now_playing = now_playing.split(status_delimiter)
 		if len(now_playing) != 6:
 			return
 		state = _convert_state(now_playing[5])
@@ -460,24 +460,3 @@ Requires ``osascript`` available in $PATH.
 
 {0}
 ''').format(_common_args.format('rdio')))
-
-
-class NowPlayingSegment(Segment):
-	def __call__(self, player='mpd', **kwargs):
-		player_segment = globals()[player]
-		assert(isinstance(player_segment, PlayerSegment))
-		return player_segment(**kwargs)
-
-	def argspecobjs(self):
-		for ret in super(NowPlayingSegment, self).argspecobjs():
-			yield ret
-		yield '__call__', PlayerSegment.__call__
-		for k, v in globals().items():
-			if isinstance(v, type) and issubclass(v, PlayerSegment) and v is not DbusPlayerSegment:
-				yield 'get_player_status', v.get_player_status
-
-	def omitted_args(self, name, method):
-		return (0,)
-
-
-now_playing = NowPlayingSegment()

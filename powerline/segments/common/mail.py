@@ -42,12 +42,12 @@ class EmailIMAPSegment(KwThreadedSegment):
 		elif type(unread_count) != int or not max_msgs:
 			return [{
 				'contents': str(unread_count),
-				'highlight_group': ['email_alert'],
+				'highlight_groups': ['email_alert'],
 			}]
 		else:
 			return [{
 				'contents': str(unread_count),
-				'highlight_group': ['email_alert_gradient', 'email_alert'],
+				'highlight_groups': ['email_alert_gradient', 'email_alert'],
 				'gradient_level': min(unread_count * 100.0 / max_msgs, 100),
 			}]
 

@@ -5,7 +5,7 @@ import sys
 
 import vim
 
-from powerline.bindings.vim import vim_get_func, vim_getoption, environ, current_tabpage
+from powerline.bindings.vim import vim_get_func, vim_getoption, environ, current_tabpage, get_vim_encoding
 from powerline.renderer import Renderer
 from powerline.colorscheme import ATTR_BOLD, ATTR_ITALIC, ATTR_UNDERLINE
 from powerline.theme import Theme
@@ -42,7 +42,7 @@ class VimRenderer(Renderer):
 		self.hl_groups = {}
 		self.prev_highlight = None
 		self.strwidth_error_name = register_strwidth_error(self.strwidth)
-		self.encoding = vim.eval('&encoding')
+		self.encoding = get_vim_encoding()
 
 	def shutdown(self):
 		self.theme.shutdown()
@@ -123,7 +123,7 @@ class VimRenderer(Renderer):
 	def reset_highlight(self):
 		self.hl_groups.clear()
 
-	def hlstyle(self, fg=None, bg=None, attr=None):
+	def hlstyle(self, fg=None, bg=None, attrs=None):
 		'''Highlight a segment.
 
 		If an argument is None, the argument is ignored. If an argument is
@@ -132,23 +132,23 @@ class VimRenderer(Renderer):
 		'''
 		# In order not to hit E541 two consequent identical highlighting 
 		# specifiers may be squashed into one.
-		attr = attr or 0  # Normalize `attr`
-		if (fg, bg, attr) == self.prev_highlight:
+		attrs = attrs or 0  # Normalize `attrs`
+		if (fg, bg, attrs) == self.prev_highlight:
 			return ''
-		self.prev_highlight = (fg, bg, attr)
+		self.prev_highlight = (fg, bg, attrs)
 
 		# We don’t need to explicitly reset attributes in vim, so skip those 
 		# calls
-		if not attr and not bg and not fg:
+		if not attrs and not bg and not fg:
 			return ''
 
-		if not (fg, bg, attr) in self.hl_groups:
+		if not (fg, bg, attrs) in self.hl_groups:
 			hl_group = {
 				'ctermfg': 'NONE',
 				'guifg': None,
 				'ctermbg': 'NONE',
 				'guibg': None,
-				'attr': ['NONE'],
+				'attrs': ['NONE'],
 				'name': '',
 			}
 			if fg is not None and fg is not False:
@@ -157,32 +157,32 @@ class VimRenderer(Renderer):
 			if bg is not None and bg is not False:
 				hl_group['ctermbg'] = bg[0]
 				hl_group['guibg'] = bg[1]
-			if attr:
-				hl_group['attr'] = []
-				if attr & ATTR_BOLD:
-					hl_group['attr'].append('bold')
-				if attr & ATTR_ITALIC:
-					hl_group['attr'].append('italic')
-				if attr & ATTR_UNDERLINE:
-					hl_group['attr'].append('underline')
+			if attrs:
+				hl_group['attrs'] = []
+				if attrs & ATTR_BOLD:
+					hl_group['attrs'].append('bold')
+				if attrs & ATTR_ITALIC:
+					hl_group['attrs'].append('italic')
+				if attrs & ATTR_UNDERLINE:
+					hl_group['attrs'].append('underline')
 			hl_group['name'] = (
 				'Pl_'
 				+ str(hl_group['ctermfg']) + '_'
 				+ str(hl_group['guifg']) + '_'
 				+ str(hl_group['ctermbg']) + '_'
 				+ str(hl_group['guibg']) + '_'
-				+ ''.join(hl_group['attr'])
+				+ ''.join(hl_group['attrs'])
 			)
-			self.hl_groups[(fg, bg, attr)] = hl_group
-			vim.command('hi {group} ctermfg={ctermfg} guifg={guifg} guibg={guibg} ctermbg={ctermbg} cterm={attr} gui={attr}'.format(
+			self.hl_groups[(fg, bg, attrs)] = hl_group
+			vim.command('hi {group} ctermfg={ctermfg} guifg={guifg} guibg={guibg} ctermbg={ctermbg} cterm={attrs} gui={attrs}'.format(
 				group=hl_group['name'],
 				ctermfg=hl_group['ctermfg'],
 				guifg='#{0:06x}'.format(hl_group['guifg']) if hl_group['guifg'] is not None else 'NONE',
 				ctermbg=hl_group['ctermbg'],
 				guibg='#{0:06x}'.format(hl_group['guibg']) if hl_group['guibg'] is not None else 'NONE',
-				attr=','.join(hl_group['attr']),
+				attrs=','.join(hl_group['attrs']),
 			))
-		return '%#' + self.hl_groups[(fg, bg, attr)]['name'] + '#'
+		return '%#' + self.hl_groups[(fg, bg, attrs)]['name'] + '#'
 
 
 renderer = VimRenderer

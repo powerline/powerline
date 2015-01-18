@@ -13,9 +13,8 @@ Getting started
 ===============
 
 * Make sure you have a `GitHub account <https://github.com/signup/free>`_.
-* Submit an `issue on GitHub 
-  <https://github.com/Lokaltog/powerline/issues>`_, assuming one does not 
-  already exist.
+* Submit an `issue on GitHub <https://github.com/powerline/powerline/issues>`_, 
+  assuming one does not already exist.
 
   * Clearly describe the issue.
   * If the issue is a bug: make sure you include steps to reproduce, and 
@@ -135,5 +134,5 @@ Submitting changes
 * Push your changes to a topic branch in your fork of the repository.
 * If necessary, use ``git rebase -i <revision>`` to squash or reword commits
   before submitting a pull request.
-* Submit a pull request to `Lokaltog's repository 
-  <https://github.com/Lokaltog/powerline>`_.
+* Submit a pull request to `powerline repository 
+  <https://github.com/powerline/powerline>`_.

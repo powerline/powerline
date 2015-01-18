@@ -177,7 +177,7 @@ def tab_modified_indicator(pl, segment_info, text='+'):
 		if int(vim_getbufoption(buf_segment_info, 'modified')):
 			return [{
 				'contents': text,
-				'highlight_group': ['tab_modified_indicator', 'modified_indicator'],
+				'highlight_groups': ['tab_modified_indicator', 'modified_indicator'],
 			}]
 	return None
 
@@ -289,7 +289,7 @@ def file_name(pl, segment_info, display_no_file=False, no_file_text='[No file]')
 		if display_no_file:
 			return [{
 				'contents': no_file_text,
-				'highlight_group': ['file_name_no_file', 'file_name'],
+				'highlight_groups': ['file_name_no_file', 'file_name'],
 			}]
 		else:
 			return None
@@ -380,7 +380,7 @@ def line_percent(pl, segment_info, gradient=False):
 		return str(int(round(percentage)))
 	return [{
 		'contents': str(int(round(percentage))),
-		'highlight_group': ['line_percent_gradient', 'line_percent'],
+		'highlight_groups': ['line_percent_gradient', 'line_percent'],
 		'gradient_level': percentage,
 	}]
 
@@ -418,7 +418,7 @@ def position(pl, position_strings={'top': 'Top', 'bottom': 'Bot', 'all': 'All'},
 		return content
 	return [{
 		'contents': content,
-		'highlight_group': ['position_gradient', 'position'],
+		'highlight_groups': ['position_gradient', 'position'],
 		'gradient_level': percentage,
 	}]
 
@@ -452,11 +452,11 @@ def virtcol_current(pl, gradient=True):
 	Highlight groups used: ``virtcol_current_gradient`` (gradient), ``virtcol_current`` or ``col_current``.
 	'''
 	col = vim_funcs['virtcol']('.')
-	r = [{'contents': str(col), 'highlight_group': ['virtcol_current', 'col_current']}]
+	r = [{'contents': str(col), 'highlight_groups': ['virtcol_current', 'col_current']}]
 	if gradient:
 		textwidth = int(getbufvar('%', '&textwidth'))
 		r[-1]['gradient_level'] = min(col * 100 / textwidth, 100) if textwidth else 0
-		r[-1]['highlight_group'].insert(0, 'virtcol_current_gradient')
+		r[-1]['highlight_groups'].insert(0, 'virtcol_current_gradient')
 	return r
 
 
@@ -530,7 +530,7 @@ def file_vcs_status(pl, segment_info, create_watcher):
 			for status in status:
 				ret.append({
 					'contents': status,
-					'highlight_group': ['file_vcs_status_' + status, 'file_vcs_status'],
+					'highlight_groups': ['file_vcs_status_' + status, 'file_vcs_status'],
 				})
 			return ret
 
@@ -579,7 +579,7 @@ def trailing_whitespace(pl, segment_info):
 		if has_trailing_ws:
 			ret = [{
 				'contents': str(i + 1),
-				'highlight_group': ['trailing_whitespace', 'warning'],
+				'highlight_groups': ['trailing_whitespace', 'warning'],
 			}]
 		else:
 			ret = None
@@ -735,8 +735,8 @@ def csv_col_current(pl, segment_info, display_name='auto', name_format=' ({colum
 		return None
 	return [{
 		'contents': column_number,
-		'highlight_group': ['csv:column_number', 'csv'],
+		'highlight_groups': ['csv:column_number', 'csv'],
 	}] + ([{
 		'contents': name_format.format(column_name=column_name),
-		'highlight_group': ['csv:column_name', 'csv'],
+		'highlight_groups': ['csv:column_name', 'csv'],
 	}] if column_name else [])

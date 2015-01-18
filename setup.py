@@ -6,6 +6,7 @@ import os
 import sys
 import subprocess
 import logging
+import shlex
 
 from setuptools import setup, find_packages
 
@@ -27,7 +28,10 @@ def compile_client():
 	else:
 		from distutils.ccompiler import new_compiler
 		compiler = new_compiler().compiler
-		subprocess.check_call(compiler + ['-O3', 'client/powerline.c', '-o', 'scripts/powerline'])
+		cflags = os.environ.get('CFLAGS', '-O3')
+		# A normal split would do a split on each space which might be incorrect. The
+		# shlex will not split if a space occurs in an arguments value.
+		subprocess.check_call(compiler + shlex.split(cflags) + ['client/powerline.c', '-o', 'scripts/powerline'])
 
 try:
 	compile_client()
@@ -62,7 +66,7 @@ def get_version():
 
 setup(
 	name='powerline-status',
-	version='1.3.1',
+	version='2.0',
 	description='The ultimate statusline/prompt utility.',
 	long_description=README,
 	classifiers=[
@@ -82,10 +86,10 @@ setup(
 		'Programming Language :: Python :: Implementation :: CPython',
 		'Programming Language :: Python :: Implementation :: PyPy',
 	],
-	download_url='https://github.com/Lokaltog/powerline/archive/develop.zip',
+	download_url='https://github.com/powerline/powerline/archive/develop.zip',
 	author='Kim Silkebaekken',
 	author_email='kim.silkebaekken+vim@gmail.com',
-	url='https://github.com/Lokaltog/powerline',
+	url='https://github.com/powerline/powerline',
 	license='MIT',
 	# XXX Python 3 doesn’t allow compiled C files to be included in the scripts 
 	# list below. This is because Python 3 distutils tries to decode the file to 

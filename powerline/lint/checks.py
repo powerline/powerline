@@ -33,7 +33,7 @@ generic_keys = set((
 ))
 type_keys = {
 	'function': set(('function', 'args', 'draw_inner_divider')),
-	'string': set(('contents', 'type', 'highlight_group', 'divider_highlight_group')),
+	'string': set(('contents', 'type', 'highlight_groups', 'divider_highlight_group')),
 	'segment_list': set(('function', 'segments', 'args', 'type')),
 }
 required_keys = {
@@ -41,7 +41,7 @@ required_keys = {
 	'string': set(()),
 	'segment_list': set(('function', 'segments',)),
 }
-highlight_keys = set(('highlight_group', 'name'))
+highlight_keys = set(('highlight_groups', 'name'))
 
 
 def get_function_strings(function_name, context, ext):
@@ -281,7 +281,7 @@ def check_key_compatibility(segment, data, context, echoerr):
 			context_mark=context[-1][1].mark,
 			problem=(
 				'found missing keys required to determine highlight group. '
-				'Either highlight_group or name key must be present'
+				'Either highlight_groups or name key must be present'
 			)
 		)
 		hadproblem = True
@@ -344,6 +344,28 @@ def check_full_segment_data(segment, data, context, echoerr):
 	return check_key_compatibility(segment_copy, data, context, echoerr)
 
 
+highlight_group_spec = Spec().ident().copy
+_highlight_group_spec = highlight_group_spec().context_message(
+	'Error while checking function documentation while checking theme (key {key})')
+
+
+def check_hl_group_name(hl_group, context_mark, context, echoerr):
+	'''Check highlight group name: it should match naming conventions
+
+	:param str hl_group:
+		Checked group.
+	:param Mark context_mark:
+		Context mark. May be ``None``.
+	:param Context context:
+		Current context.
+	:param func echoerr:
+		Function used for error reporting.
+
+	:return: ``False`` if check succeeded and ``True`` if it failed.
+	'''
+	return _highlight_group_spec.match(hl_group, context_mark=context_mark, context=context, echoerr=echoerr)[1]
+
+
 def check_segment_function(function_name, data, context, echoerr):
 	havemarks(function_name)
 	ext = data['ext']
@@ -385,12 +407,15 @@ def check_segment_function(function_name, data, context, echoerr):
 			if r:
 				echoerr(
 					context='Error while checking theme (key {key})'.format(key=context.key),
+					context_mark=function_name.mark,
 					problem=(
 						'found highlight group {0} not defined in the following colorschemes: {1}\n'
 						'(Group name was obtained from function documentation.)'
 					).format(divider_hl_group, list_sep.join(r)),
-					problem_mark=function_name.mark
+					problem_mark=divider_hl_group.mark,
 				)
+				hadproblem = True
+			if check_hl_group_name(divider_hl_group, function_name.mark, context, echoerr):
 				hadproblem = True
 
 		if hl_groups:
@@ -409,6 +434,8 @@ def check_segment_function(function_name, data, context, echoerr):
 								match.group(1),
 								Mark(*mark_args, pointer=sub_pointer + match.start(1))
 							)
+							if check_hl_group_name(hl_group, function_name.mark, context, echoerr):
+								hadproblem = True
 							gradient = bool(match.group(2))
 							required_pack.append((hl_group, gradient))
 						finally:

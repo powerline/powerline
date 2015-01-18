@@ -98,4 +98,7 @@ with codecs.open(fname, 'r', encoding='utf-8') as R:
 				line = IPYPY_DEANSI_RE.subn('', line)[0]
 				if line == '\n' and not was_empty:
 					line = ''
+			elif shell == 'rc':
+				if line == 'read() failed: Connection reset by peer\n':
+					line = ''
 			W.write(line)

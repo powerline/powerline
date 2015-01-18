@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 : ${PYTHON:=python}
 FAIL_SUMMARY=""
 FAILED=0
@@ -70,12 +71,18 @@ run() {
 		TEST_CLIENT="${TEST_CLIENT}" \
 		SH="${SH}" \
 		DIR1="${DIR1}" \
+		POWERLINE_NO_ZSH_ZPYTHON="$(test $TEST_TYPE = zpython || echo 1)" \
 		DIR2="${DIR2}" \
 		XDG_CONFIG_HOME="$PWD/tests/shell/fish_home" \
 		IPYTHONDIR="$PWD/tests/shell/ipython_home" \
+		PYTHONPATH="${PWD}${PYTHONPATH:+:}$PYTHONPATH" \
+		POWERLINE_CONFIG_OVERRIDES="${POWERLINE_CONFIG_OVERRIDES}" \
+		POWERLINE_THEME_OVERRIDES="${POWERLINE_THEME_OVERRIDES}" \
 		POWERLINE_SHELL_CONTINUATION=$additional_prompts \
 		POWERLINE_SHELL_SELECT=$additional_prompts \
-		POWERLINE_COMMAND="${POWERLINE_COMMAND} -p $PWD/powerline/config_files" \
+		POWERLINE_CONFIG_PATHS="$PWD/powerline/config_files" \
+		POWERLINE_COMMAND_ARGS="${POWERLINE_COMMAND_ARGS}" \
+		POWERLINE_COMMAND="${POWERLINE_COMMAND}" \
 		"$@"
 }
 
@@ -83,7 +90,7 @@ run() {
 NL="$(printf '\nE')"
 NL="${NL%E}"
 
-run_test() {
+do_run_test() {
 	TEST_TYPE="$1"
 	shift
 	TEST_CLIENT="$1"
@@ -173,6 +180,20 @@ run_test() {
 	return 0
 }
 
+run_test() {
+	TEST_TYPE="$1"
+	TEST_CLIENT="$2"
+	SH="$3"
+	local attempts=3
+	while test $attempts -gt 0 ; do
+		rm -f tests/shell/${SH}.${TEST_TYPE}.${TEST_CLIENT}.log
+		rm -f tests/shell/${SH}.${TEST_TYPE}.${TEST_CLIENT}.full.log
+		do_run_test "$@" && return 0
+		attempts=$(( attempts - 1 ))
+	done
+	return 1
+}
+
 test -d tests/shell && rm -r tests/shell
 mkdir tests/shell
 git init tests/shell/3rd
@@ -217,6 +238,8 @@ ln -s "$(which grep)" tests/shell/path
 ln -s "$(which sed)" tests/shell/path
 ln -s "$(which rm)" tests/shell/path
 ln -s "$(which uname)" tests/shell/path
+ln -s "$(which test)" tests/shell/path
+ln -s "$(which pwd)" tests/shell/path
 ln -s ../../test_shells/bgscript.sh tests/shell/path
 ln -s ../../test_shells/waitpid.sh tests/shell/path
 if which socat ; then
@@ -233,6 +256,20 @@ for pexe in powerline powerline-config ; do
 	fi
 done
 
+if test -z "$POWERLINE_RC_EXE" ; then
+	if which rc-status >/dev/null ; then
+		# On Gentoo `rc` executable is from OpenRC. Thus app-shells/rc instals 
+		# `rcsh` executable.
+		POWERLINE_RC_EXE=rcsh
+	else
+		POWERLINE_RC_EXE=rc
+	fi
+fi
+
+if which "$POWERLINE_RC_EXE" >/dev/null ; then
+	ln -s "$(which $POWERLINE_RC_EXE)" tests/shell/path/rc
+fi
+
 for exe in bash zsh busybox fish tcsh mksh dash ipython ; do
 	if which $exe >/dev/null ; then
 		ln -s "$(which $exe)" tests/shell/path
@@ -245,7 +282,7 @@ export ADDRESS="powerline-ipc-test-$$"
 export PYTHON
 echo "Powerline address: $ADDRESS"
 
-if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || test "x${ONLY_SHELL}" = xbusybox ; then
+if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || test "x${ONLY_SHELL}" = xbusybox || test "x${ONLY_SHELL}" = xrc ; then
 	scripts/powerline-config shell command
 
 	for TEST_TYPE in "daemon" "nodaemon" ; do
@@ -299,7 +336,8 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 			if test "x$ONLY_TEST_CLIENT" != "x" && test "x$TEST_CLIENT" != "x$ONLY_TEST_CLIENT" ; then
 				continue
 			fi
-			POWERLINE_COMMAND="$POWERLINE_COMMAND --socket $ADDRESS"
+			POWERLINE_COMMAND_ARGS="--socket $ADDRESS"
+			POWERLINE_COMMAND="$POWERLINE_COMMAND"
 			export POWERLINE_COMMAND
 			echo ">> powerline command is ${POWERLINE_COMMAND:-empty}"
 			J=-1
@@ -310,7 +348,8 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 				"tcsh -f -i" \
 				"busybox ash -i" \
 				"mksh -i" \
-				"dash -i"
+				"dash -i" \
+				"rc -i -p"
 			do
 				J="$(( J + 1 ))"
 				if test x$FAST = x1 ; then
@@ -326,10 +365,10 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 				if test "x$ONLY_SHELL" != "x" && test "x$ONLY_SHELL" != "x$SH" ; then
 					continue
 				fi
-				if ! which $SH >/dev/null ; then
+				if ! test -x tests/shell/path/$SH ; then
 					continue
 				fi
-				echo ">>> $(which $SH)"
+				echo ">>> $(readlink "tests/shell/path/$SH")"
 				if ! run_test $TEST_TYPE $TEST_CLIENT $TEST_COMMAND ; then
 					FAILED=1
 					FAIL_SUMMARY="${FAIL_SUMMARY}${NL}T ${TEST_TYPE} ${TEST_CLIENT} ${TEST_COMMAND}"
@@ -369,13 +408,28 @@ if ! test -z "$(cat tests/shell/daemon_log_2)" ; then
 	FAIL_SUMMARY="${FAIL_SUMMARY}${NL}L"
 fi
 
+if ( test "x${ONLY_SHELL}" = "x" || test "x${ONLY_SHELL}" = "xzsh" ) \
+	&& ( test "x${ONLY_TEST_TYPE}" = "x" || test "x${ONLY_TEST_TYPE}" = "xzpython" ) \
+	&& zsh -f -c 'zmodload libzpython' 2>/dev/null; then
+	echo "> zpython"
+	if ! run_test zpython zpython zsh -f -i ; then
+		FAILED=1
+		FAIL_SUMMARY="${FAIL_SUMMARY}${NL}T zpython zsh -f -i"
+	fi
+fi
+
 if test "x${ONLY_SHELL}" = "x" || test "x${ONLY_SHELL}" = "xipython" ; then
 	if which ipython >/dev/null ; then
+		# Define some overrides which should be ignored by IPython.
+		POWERLINE_CONFIG_OVERRIDES='common.term_escape_style=fbterm'
+		POWERLINE_THEME_OVERRIDES='in.segments.left=[]'
 		echo "> $(which ipython)"
 		if ! run_test ipython ipython ipython ; then
 			FAILED=1
 			FAIL_SUMMARY="${FAIL_SUMMARY}${NL}T ipython"
 		fi
+		unset POWERLINE_THEME_OVERRIDES
+		unset POWERLINE_CONFIG_OVERRIDES
 	fi
 fi
 

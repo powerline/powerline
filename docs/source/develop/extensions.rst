@@ -24,8 +24,8 @@ segments in some set of applications. Specifically this means
    computing text width.
 
    This subclass must be placed directly in :file:`powerline/renderers` 
-   directory (if you are creating powerline extension for a set of applications 
-   use :file:`powerline/renderers/{ext}/*.py`) and named like ``ExtRenderer`` or 
+   directory (for powerline extensions developed for a set of applications use 
+   :file:`powerline/renderers/{ext}/*.py`) and named like ``ExtRenderer`` or 
    ``AppPromptRenderer``. For technical reasons the class itself must be 
    referenced in ``renderer`` module attribute thus allowing only one renderer 
    per one module.

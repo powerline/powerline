@@ -5,20 +5,20 @@ from powerline.renderer import Renderer
 from powerline.colorscheme import ATTR_BOLD, ATTR_ITALIC, ATTR_UNDERLINE
 
 
-def attr_to_tmux_attr(attr):
-	if attr is False:
+def attrs_to_tmux_attrs(attrs):
+	if attrs is False:
 		return ['nobold', 'noitalics', 'nounderscore']
 	else:
 		ret = []
-		if attr & ATTR_BOLD:
+		if attrs & ATTR_BOLD:
 			ret += ['bold']
 		else:
 			ret += ['nobold']
-		if attr & ATTR_ITALIC:
+		if attrs & ATTR_ITALIC:
 			ret += ['italics']
 		else:
 			ret += ['noitalics']
-		if attr & ATTR_UNDERLINE:
+		if attrs & ATTR_UNDERLINE:
 			ret += ['underscore']
 		else:
 			ret += ['nounderscore']
@@ -31,25 +31,25 @@ class TmuxRenderer(Renderer):
 	character_translations = Renderer.character_translations.copy()
 	character_translations[ord('#')] = '##[]'
 
-	def hlstyle(self, fg=None, bg=None, attr=None):
+	def hlstyle(self, fg=None, bg=None, attrs=None):
 		'''Highlight a segment.'''
 		# We don’t need to explicitly reset attributes, so skip those calls
-		if not attr and not bg and not fg:
+		if not attrs and not bg and not fg:
 			return ''
-		tmux_attr = []
+		tmux_attrs = []
 		if fg is not None:
 			if fg is False or fg[0] is False:
-				tmux_attr += ['fg=default']
+				tmux_attrs += ['fg=default']
 			else:
-				tmux_attr += ['fg=colour' + str(fg[0])]
+				tmux_attrs += ['fg=colour' + str(fg[0])]
 		if bg is not None:
 			if bg is False or bg[0] is False:
-				tmux_attr += ['bg=default']
+				tmux_attrs += ['bg=default']
 			else:
-				tmux_attr += ['bg=colour' + str(bg[0])]
-		if attr is not None:
-			tmux_attr += attr_to_tmux_attr(attr)
-		return '#[' + ','.join(tmux_attr) + ']'
+				tmux_attrs += ['bg=colour' + str(bg[0])]
+		if attrs is not None:
+			tmux_attrs += attrs_to_tmux_attrs(attrs)
+		return '#[' + ','.join(tmux_attrs) + ']'
 
 	def get_segment_info(self, segment_info, mode):
 		r = self.segment_info.copy()

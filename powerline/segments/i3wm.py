@@ -23,5 +23,5 @@ def workspaces(pl):
 	'''
 	return [{
 		'contents': w['name'],
-		'highlight_group': calcgrp(w)
+		'highlight_groups': calcgrp(w)
 	} for w in i3.get_workspaces()]

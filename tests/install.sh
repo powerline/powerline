@@ -1,28 +1,57 @@
-#!/bin/sh
-pip install .
-pip install psutil netifaces
-if python -c 'import sys; sys.exit(1 * (sys.version_info[0] != 2))' ; then
-	# Python 2
-	if python -c 'import platform, sys; sys.exit(1 - (platform.python_implementation() == "CPython"))' ; then
-		# PyPy
-		pip install mercurial
-		pip install --allow-external bzr --allow-unverified bzr bzr
+#!/bin/bash
+git clone --depth=1 git://github.com/powerline/bot-ci tests/bot-ci
+git clone --depth=1 git://github.com/powerline/deps tests/bot-ci/deps
+
+. tests/bot-ci/scripts/common/main.sh
+
+sudo apt-get install -qq libssl1.0.0
+sudo apt-get install -qq screen zsh tcsh mksh busybox socat realpath bc rc tmux
+
+if test -n "$USE_UCS2_PYTHON" ; then
+	pip install virtualenvwrapper
+	set +e
+	. virtualenvwrapper.sh
+	set -e
+	archive="${PWD:-$(pwd)}/tests/bot-ci/deps/cpython-ucs2/cpython-ucs2-${UCS2_PYTHON_VARIANT}.tar.gz"
+	sudo sh -c "cd /opt && tar xzf $archive"
+	PYTHON="/opt/cpython-ucs2-$UCS2_PYTHON_VARIANT/bin/python$UCS2_PYTHON_VARIANT"
+	export LD_LIBRARY_PATH="/opt/cpython-ucs2-$UCS2_PYTHON_VARIANT/lib${LD_LIBRARY_PATH:+:}${LD_LIBRARY_PATH}"
+	set +e
+	mkvirtualenv -p "$PYTHON" cpython-ucs2-$UCS2_PYTHON_VARIANT
+	set -e
+	. tests/bot-ci/scripts/common/main.sh
+	pip install .
+	if test "$UCS2_PYTHON_VARIANT" = "2.6" ; then
+		rm tests/bot-ci/deps/wheels/ucs2-CPython-${UCS2_PYTHON_VARIANT}*/pyuv*.whl
 	fi
-	if python -c 'import sys; sys.exit(1 * (sys.version_info[1] >= 7))' ; then
-		# Python 2.6
-		pip install unittest2 argparse
-	else
-		# Python 2.7
-		pip install ipython
-	fi
+	pip install --no-deps tests/bot-ci/deps/wheels/ucs2-CPython-${UCS2_PYTHON_VARIANT}*/*.whl
 else
-	# Python 3
-	if python -c 'import sys; sys.exit(1 * (sys.version_info < (3, 3)))' ; then
-		# Python 3.3+
-		pip install ipython
+	pip install .
+	# FIXME Uv watcher sometimes misses events and INotify is not available in
+	#       Python-2.6, thus pyuv should be removed in order for VCS tests to 
+	#       pass.
+	if test "$PYTHON_VERSION_MAJOR" -eq 2 && test "$PYTHON_VERSION_MINOR" -lt 7 ; then
+		rm tests/bot-ci/deps/wheels/$PYTHON_SUFFIX/pyuv*.whl
 	fi
+	pip install --no-deps tests/bot-ci/deps/wheels/$PYTHON_SUFFIX/*.whl
 fi
-sudo apt-get install -qq screen zsh tcsh mksh busybox socat
+if test "$PYTHON_IMPLEMENTATION" = "CPython" ; then
+	archive="${PWD:-$(pwd)}/tests/bot-ci/deps/zpython/zsh-${PYTHON_MM}${USE_UCS2_PYTHON:+-ucs2}.tar.gz"
+	sudo sh -c "cd /opt && tar xzf $archive"
+fi
+
+archive="${PWD:-$(pwd)}/tests/bot-ci/deps/fish/fish.tar.gz"
+sudo sh -c "cd /opt && tar xzf $archive"
+
+mkdir tests/vim-plugins
+
+for archive in "$ROOT"/tests/bot-ci/deps/vim-plugins/*.tar.gz ; do
+	(
+		cd tests/vim-plugins
+		tar -xzvf "$archive"
+	)
+done
+
 # Travis has too outdated fish. It cannot be used for tests.
 # sudo apt-get install fish
 true

@@ -30,7 +30,7 @@ def last_status(pl, segment_info):
 	'''
 	if not segment_info['args'].last_exit_code:
 		return None
-	return [{'contents': str(segment_info['args'].last_exit_code), 'highlight_group': ['exit_fail']}]
+	return [{'contents': str(segment_info['args'].last_exit_code), 'highlight_groups': ['exit_fail']}]
 
 
 @requires_segment_info
@@ -44,7 +44,7 @@ def last_pipe_status(pl, segment_info):
 		return [
 			{
 				'contents': str(status),
-				'highlight_group': ['exit_fail' if status else 'exit_success'],
+				'highlight_groups': ['exit_fail' if status else 'exit_success'],
 				'draw_inner_divider': True
 			}
 			for status in last_pipe_status
@@ -65,11 +65,11 @@ def mode(pl, segment_info, override={'vicmd': 'COMMND', 'viins': 'INSERT'}, defa
 		``$POWERLINE_DEFAULT_MODE`` variable. This variable is set by zsh 
 		bindings for any mode that does not start from ``vi``.
 	'''
-	mode = segment_info['mode']
+	mode = segment_info.get('mode', None)
 	if not mode:
-		pl.debug('No or empty _POWERLINE_MODE variable')
+		pl.debug('No mode specified')
 		return None
-	default = default or segment_info['environ'].get('_POWERLINE_DEFAULT_MODE')
+	default = default or segment_info.get('default_mode', None)
 	if mode == default:
 		return None
 	try:
@@ -78,9 +78,9 @@ def mode(pl, segment_info, override={'vicmd': 'COMMND', 'viins': 'INSERT'}, defa
 		# Note: with zsh line editor you can emulate as much modes as you wish. 
 		# Thus having unknown mode is not an error: maybe just some developer 
 		# added support for his own zle widgets. As there is no built-in mode() 
-		# function like in VimL and _POWERLINE_MODE is likely be defined by our 
-		# code or by somebody knowing what he is doing there is absolutely no 
-		# need in keeping translations dictionary.
+		# function like in VimL and mode is likely be defined by our code or by 
+		# somebody knowing what he is doing there is absolutely no need in 
+		# keeping translations dictionary.
 		return mode.upper()
 
 
@@ -102,7 +102,7 @@ def continuation(pl, segment_info, omit_cmdsubst=True, right_align=False, rename
 		return [{
 			'contents': '',
 			'width': 'auto',
-			'highlight_group': ['continuation:current', 'continuation'],
+			'highlight_groups': ['continuation:current', 'continuation'],
 		}]
 	ret = []
 
@@ -111,7 +111,7 @@ def continuation(pl, segment_info, omit_cmdsubst=True, right_align=False, rename
 		if state:
 			ret.append({
 				'contents': state,
-				'highlight_group': ['continuation'],
+				'highlight_groups': ['continuation'],
 				'draw_inner_divider': True,
 			})
 
@@ -125,9 +125,9 @@ def continuation(pl, segment_info, omit_cmdsubst=True, right_align=False, rename
 
 	if right_align:
 		ret[0].update(width='auto', align='r')
-		ret[-1]['highlight_group'] = ['continuation:current', 'continuation']
+		ret[-1]['highlight_groups'] = ['continuation:current', 'continuation']
 	else:
-		ret[-1].update(width='auto', align='l', highlight_group=['continuation:current', 'continuation'])
+		ret[-1].update(width='auto', align='l', highlight_groups=['continuation:current', 'continuation'])
 
 	return ret
 
@@ -157,7 +157,7 @@ Returns a segment list to create a breadcrumb-like effect.
 :param bool use_path_separator:
 	Use path separator in place of soft divider.
 :param bool use_shortened_path:
-	Use path from shortened_path ``--renderer_arg`` argument. If this argument 
+	Use path from shortened_path ``--renderer-arg`` argument. If this argument 
 	is present ``shorten_home`` argument is ignored.
 :param bool shorten_home:
 	Shorten home directory to ``~``.

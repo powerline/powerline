@@ -57,7 +57,7 @@ def system_load(pl, format='{avg:.1f}', threshold_good=1, threshold_bad=2, track
 			gradient_level = 100
 		ret.append({
 			'contents': format.format(avg=avg),
-			'highlight_group': ['system_load_gradient', 'system_load'],
+			'highlight_groups': ['system_load_gradient', 'system_load'],
 			'divider_highlight_group': 'background:divider',
 			'gradient_level': gradient_level,
 		})
@@ -88,7 +88,7 @@ try:
 			return [{
 				'contents': format.format(cpu_percent),
 				'gradient_level': cpu_percent,
-				'highlight_group': ['cpu_load_percent_gradient', 'cpu_load_percent'],
+				'highlight_groups': ['cpu_load_percent_gradient', 'cpu_load_percent'],
 			}]
 except ImportError:
 	class CPULoadPercentSegment(ThreadedSegment):

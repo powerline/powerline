@@ -37,18 +37,18 @@ class TestParser(TestCase):
 				(['shell', '-t'],                        'expected one argument'),
 				(['shell', '-p'],                        'expected one argument'),
 				(['shell', '-R'],                        'expected one argument'),
-				(['shell', '--renderer_module'],         'expected one argument'),
+				(['shell', '--renderer-module'],         'expected one argument'),
 				(['shell', '--width'],                   'expected one argument'),
-				(['shell', '--last_exit_code'],          'expected one argument'),
-				(['shell', '--last_pipe_status'],        'expected one argument'),
-				(['shell', '--config'],                  'expected one argument'),
-				(['shell', '--theme_option'],            'expected one argument'),
-				(['shell', '--config_path'],             'expected one argument'),
-				(['shell', '--renderer_arg'],            'expected one argument'),
+				(['shell', '--last-exit-code'],          'expected one argument'),
+				(['shell', '--last-pipe-status'],        'expected one argument'),
+				(['shell', '--config-override'],         'expected one argument'),
+				(['shell', '--theme-override'],          'expected one argument'),
+				(['shell', '--config-path'],             'expected one argument'),
+				(['shell', '--renderer-arg'],            'expected one argument'),
 				(['shell', '--jobnum'],                  'expected one argument'),
 				(['-r', '.zsh'],                         'too few arguments|the following arguments are required: ext'),
-				(['shell', '--last_exit_code', 'i'],     'invalid int value'),
-				(['shell', '--last_pipe_status', '1 i'], 'invalid <lambda> value'),
+				(['shell', '--last-exit-code', 'i'],     'invalid int_or_sig value'),
+				(['shell', '--last-pipe-status', '1 i'], 'invalid <lambda> value'),
 			]:
 				self.assertRaises(SystemExit, parser.parse_args, raising_args)
 				self.assertFalse(out.getvalue())
@@ -67,8 +67,8 @@ class TestParser(TestCase):
 					'shell',
 					'left',
 					'-r', '.zsh',
-					'--last_exit_code', '10',
-					'--last_pipe_status', '10 20 30',
+					'--last-exit-code', '10',
+					'--last-pipe-status', '10 20 30',
 					'--jobnum=10',
 					'-w', '100',
 					'-c', 'common.term_truecolor=true',
@@ -85,8 +85,8 @@ class TestParser(TestCase):
 					'last_pipe_status': [10, 20, 30],
 					'jobnum': 10,
 					'width': 100,
-					'config': {'common': {'term_truecolor': True, 'spaces': 4}},
-					'theme_option': {
+					'config_override': {'common': {'term_truecolor': True, 'spaces': 4}},
+					'theme_override': {
 						'default': {
 							'segment_data': {
 								'hostname': {
@@ -103,7 +103,7 @@ class TestParser(TestCase):
 				(['shell', '-R', 'arg='], {'ext': ['shell'], 'renderer_arg': {}}),
 				(['shell', '-t', 'default.segment_info={"hostname": {}}'], {
 					'ext': ['shell'],
-					'theme_option': {
+					'theme_override': {
 						'default': {
 							'segment_info': {
 								'hostname': {}
@@ -111,10 +111,10 @@ class TestParser(TestCase):
 						}
 					},
 				}),
-				(['shell', '-c', 'common={ }'], {'ext': ['shell'], 'config': {'common': {}}}),
+				(['shell', '-c', 'common={ }'], {'ext': ['shell'], 'config_override': {'common': {}}}),
 			]:
 				args = parser.parse_args(argv)
-				finish_args(args)
+				finish_args({}, args)
 				for key, val in expargs.items():
 					self.assertEqual(getattr(args, key), val)
 				for key, val in args.__dict__.items():

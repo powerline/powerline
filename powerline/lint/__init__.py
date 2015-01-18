@@ -5,13 +5,15 @@ import os
 import logging
 
 from collections import defaultdict
+from itertools import chain
 from functools import partial
 
 from powerline import generate_config_finder, get_config_paths, load_config
 from powerline.segments.vim import vim_modes
-from powerline.lib import mergedicts_copy
+from powerline.lib.dict import mergedicts_copy
 from powerline.lib.config import ConfigLoader
 from powerline.lib.unicode import unicode
+from powerline.lib.path import join
 from powerline.lint.markedjson import load
 from powerline.lint.markedjson.error import echoerr, EchoErr, MarkedError
 from powerline.lint.checks import (check_matcher_func, check_ext, check_config, check_top_theme,
@@ -19,7 +21,8 @@ from powerline.lint.checks import (check_matcher_func, check_ext, check_config, 
                                    check_segment_module, check_exinclude_function, type_keys,
                                    check_segment_function, check_args, get_one_segment_function,
                                    check_highlight_groups, check_highlight_group, check_full_segment_data,
-                                   get_all_possible_functions, check_segment_data_key, register_common_name)
+                                   get_all_possible_functions, check_segment_data_key, register_common_name,
+                                   highlight_group_spec)
 from powerline.lint.spec import Spec
 from powerline.lint.context import Context
 
@@ -57,6 +60,7 @@ main_spec = (Spec(
 	common=Spec(
 		default_top_theme=top_theme_spec().optional(),
 		term_truecolor=Spec().type(bool).optional(),
+		term_escape_style=Spec().type(unicode).oneof(set(('auto', 'xterm', 'fbterm'))).optional(),
 		# Python is capable of loading from zip archives. Thus checking path 
 		# only for existence of the path, not for it being a directory
 		paths=Spec().list(
@@ -141,7 +145,7 @@ group_name_spec = Spec().ident().copy
 group_spec = Spec().either(Spec(
 	fg=color_spec(),
 	bg=color_spec(),
-	attr=Spec().list(Spec().type(unicode).oneof(set(('bold', 'italic', 'underline')))),
+	attrs=Spec().list(Spec().type(unicode).oneof(set(('bold', 'italic', 'underline')))),
 ), group_name_spec().func(check_group)).copy
 groups_spec = Spec().unknown_spec(
 	group_name_spec(),
@@ -193,7 +197,6 @@ args_spec = Spec(
 	pl=Spec().error('pl object must be set by powerline').optional(),
 	segment_info=Spec().error('Segment info dictionary must be set by powerline').optional(),
 ).unknown_spec(Spec(), Spec()).optional().copy
-highlight_group_spec = Spec().type(unicode).copy
 segment_module_spec = Spec().type(unicode).func(check_segment_module).optional().copy
 sub_segments_spec = Spec()
 exinclude_spec = Spec().re(function_name_re).func(check_exinclude_function).copy
@@ -217,7 +220,7 @@ segment_spec = Spec(
 	align=Spec().oneof(set('lr')).optional(),
 	args=args_spec().func(lambda *args, **kwargs: check_args(get_one_segment_function, *args, **kwargs)),
 	contents=Spec().printable().optional(),
-	highlight_group=Spec().list(
+	highlight_groups=Spec().list(
 		highlight_group_spec().re(
 			'^(?:(?!:divider$).)+$',
 			(lambda value: 'it is recommended that only divider highlight group names end with ":divider"')
@@ -293,6 +296,74 @@ def register_common_names():
 	register_common_name('player', 'powerline.segments.common.players', '_player')
 
 
+def load_json_file(path):
+	with open_file(path) as F:
+		try:
+			config, hadproblem = load(F)
+		except MarkedError as e:
+			return True, None, str(e)
+		else:
+			return hadproblem, config, None
+
+
+def updated_with_config(d):
+	hadproblem, config, error = load_json_file(d['path'])
+	d.update(
+		hadproblem=hadproblem,
+		config=config,
+		error=error,
+	)
+	return d
+
+
+def find_all_ext_config_files(search_paths, subdir):
+	for config_root in search_paths:
+		top_config_subpath = join(config_root, subdir)
+		if not os.path.isdir(top_config_subpath):
+			if os.path.exists(top_config_subpath):
+				yield {
+					'error': 'Path {0} is not a directory'.format(top_config_subpath),
+					'path': top_config_subpath,
+				}
+			continue
+		for ext_name in os.listdir(top_config_subpath):
+			ext_path = os.path.join(top_config_subpath, ext_name)
+			if not os.path.isdir(ext_path):
+				if ext_name.endswith('.json') and os.path.isfile(ext_path):
+					yield updated_with_config({
+						'error': False,
+						'path': ext_path,
+						'name': ext_name[:-5],
+						'ext': None,
+						'type': 'top_' + subdir,
+					})
+				else:
+					yield {
+						'error': 'Path {0} is not a directory or configuration file'.format(ext_path),
+						'path': ext_path,
+					}
+				continue
+			for config_file_name in os.listdir(ext_path):
+				config_file_path = os.path.join(ext_path, config_file_name)
+				if config_file_name.endswith('.json') and os.path.isfile(config_file_path):
+					yield updated_with_config({
+						'error': False,
+						'path': config_file_path,
+						'name': config_file_name[:-5],
+						'ext': ext_name,
+						'type': subdir,
+					})
+				else:
+					yield {
+						'error': 'Path {0} is not a configuration file'.format(config_file_path),
+						'path': config_file_path,
+					}
+
+
+def dict2(d):
+	return defaultdict(dict, ((k, dict(v)) for k, v in d.items()))
+
+
 def check(paths=None, debug=False, echoerr=echoerr, require_ext=None):
 	'''Check configuration sanity
 
@@ -312,6 +383,8 @@ def check(paths=None, debug=False, echoerr=echoerr, require_ext=None):
 		``False`` if user configuration seems to be completely sane and ``True`` 
 		if some problems were found.
 	'''
+	hadproblem = False
+
 	register_common_names()
 	search_paths = paths or get_config_paths()
 	find_config_files = generate_config_finder(lambda: search_paths)
@@ -336,65 +409,60 @@ def check(paths=None, debug=False, echoerr=echoerr, require_ext=None):
 
 	config_loader = ConfigLoader(run_once=True, load=load_json_config)
 
-	paths = {
-		'themes': defaultdict(lambda: []),
-		'colorschemes': defaultdict(lambda: []),
-		'top_colorschemes': [],
-		'top_themes': [],
-	}
 	lists = {
 		'colorschemes': set(),
 		'themes': set(),
 		'exts': set(),
 	}
-	for path in reversed(search_paths):
-		for typ in ('themes', 'colorschemes'):
-			d = os.path.join(path, typ)
-			if os.path.isdir(d):
-				for subp in os.listdir(d):
-					extpath = os.path.join(d, subp)
-					if os.path.isdir(extpath):
-						lists['exts'].add(subp)
-						paths[typ][subp].append(extpath)
-					elif extpath.endswith('.json'):
-						name = subp[:-5]
-						if name != '__main__':
-							lists[typ].add(name)
-						paths['top_' + typ].append(extpath)
-			else:
+	found_dir = {
+		'themes': False,
+		'colorschemes': False,
+	}
+	config_paths = defaultdict(lambda: defaultdict(dict))
+	loaded_configs = defaultdict(lambda: defaultdict(dict))
+	for d in chain(
+		find_all_ext_config_files(search_paths, 'colorschemes'),
+		find_all_ext_config_files(search_paths, 'themes'),
+	):
+		if d['error']:
+			hadproblem = True
+			ee(problem=d['error'])
+			continue
+		if d['hadproblem']:
+			hadproblem = True
+		if d['ext']:
+			found_dir[d['type']] = True
+			lists['exts'].add(d['ext'])
+			if d['name'] == '__main__':
+				pass
+			elif d['name'].startswith('__') or d['name'].endswith('__'):
 				hadproblem = True
-				ee(problem='Path {0} is supposed to be a directory, but it is not'.format(d))
+				ee(problem='File name is not supposed to start or end with “__”: {0}'.format(
+					d['path']))
+			else:
+				lists[d['type']].add(d['name'])
+			config_paths[d['type']][d['ext']][d['name']] = d['path']
+			loaded_configs[d['type']][d['ext']][d['name']] = d['config']
+		else:
+			config_paths[d['type']][d['name']] = d['path']
+			loaded_configs[d['type']][d['name']] = d['config']
 
-	hadproblem = False
-
-	configs = defaultdict(lambda: defaultdict(lambda: {}))
 	for typ in ('themes', 'colorschemes'):
-		for ext in paths[typ]:
-			for d in paths[typ][ext]:
-				for subp in os.listdir(d):
-					if subp.endswith('.json'):
-						name = subp[:-5]
-						if name != '__main__':
-							lists[typ].add(name)
-							if name.startswith('__') or name.endswith('__'):
-								hadproblem = True
-								ee(problem='File name is not supposed to start or end with “__”: {0}'.format(
-									os.path.join(d, subp)
-								))
-						configs[typ][ext][name] = os.path.join(d, subp)
-		for path in paths['top_' + typ]:
-			name = os.path.basename(path)[:-5]
-			configs['top_' + typ][name] = path
+		if not found_dir[typ]:
+			hadproblem = True
+			ee(problem='Subdirectory {0} was not found in paths {1}'.format(typ, ', '.join(search_paths)))
 
-	diff = set(configs['colorschemes']) - set(configs['themes'])
+	diff = set(config_paths['colorschemes']) - set(config_paths['themes'])
 	if diff:
 		hadproblem = True
 		for ext in diff:
-			typ = 'colorschemes' if ext in configs['themes'] else 'themes'
-			if not configs['top_' + typ] or typ == 'themes':
+			typ = 'colorschemes' if ext in config_paths['themes'] else 'themes'
+			if not config_paths['top_' + typ] or typ == 'themes':
 				ee(problem='{0} extension {1} not present in {2}'.format(
 					ext,
-					'configuration' if (ext in paths['themes'] and ext in paths['colorschemes']) else 'directory',
+					'configuration' if (
+						ext in loaded_configs['themes'] and ext in loaded_configs['colorschemes']
+					) else 'directory',
 					typ,
 				))
 
@@ -411,7 +479,7 @@ def check(paths=None, debug=False, echoerr=echoerr, require_ext=None):
 	else:
 		if used_main_spec.match(
 			main_config,
-			data={'configs': configs, 'lists': lists},
+			data={'configs': config_paths, 'lists': lists},
 			context=Context(main_config),
 			echoerr=ee
 		)[1]:
@@ -436,42 +504,19 @@ def check(paths=None, debug=False, echoerr=echoerr, require_ext=None):
 	if lhadproblem[0]:
 		hadproblem = True
 
-	top_colorscheme_configs = {}
+	top_colorscheme_configs = dict(loaded_configs['top_colorschemes'])
 	data = {
 		'ext': None,
 		'top_colorscheme_configs': top_colorscheme_configs,
 		'ext_colorscheme_configs': {},
 		'colors_config': colors_config
 	}
-	for colorscheme, cfile in configs['top_colorschemes'].items():
-		with open_file(cfile) as config_file_fp:
-			try:
-				config, lhadproblem = load(config_file_fp)
-			except MarkedError as e:
-				ee(problem=str(e))
-				hadproblem = True
-				continue
-		if lhadproblem:
-			hadproblem = True
-		top_colorscheme_configs[colorscheme] = config
+	for colorscheme, config in loaded_configs['top_colorschemes'].items():
 		data['colorscheme'] = colorscheme
 		if top_colorscheme_spec.match(config, context=Context(config), data=data, echoerr=ee)[1]:
 			hadproblem = True
 
-	ext_colorscheme_configs = defaultdict(lambda: {})
-	for ext in configs['colorschemes']:
-		for colorscheme, cfile in configs['colorschemes'][ext].items():
-			with open_file(cfile) as config_file_fp:
-				try:
-					config, lhadproblem = load(config_file_fp)
-				except MarkedError as e:
-					ee(problem=str(e))
-					hadproblem = True
-					continue
-			if lhadproblem:
-				hadproblem = True
-			ext_colorscheme_configs[ext][colorscheme] = config
-
+	ext_colorscheme_configs = dict2(loaded_configs['colorschemes'])
 	for ext, econfigs in ext_colorscheme_configs.items():
 		data = {
 			'ext': ext,
@@ -511,33 +556,8 @@ def check(paths=None, debug=False, echoerr=echoerr, require_ext=None):
 					config = mconfig
 			colorscheme_configs[colorscheme] = config
 
-	theme_configs = defaultdict(lambda: {})
-	for ext in configs['themes']:
-		for theme, sfile in configs['themes'][ext].items():
-			with open_file(sfile) as config_file_fp:
-				try:
-					config, lhadproblem = load(config_file_fp)
-				except MarkedError as e:
-					ee(problem=str(e))
-					hadproblem = True
-					continue
-			if lhadproblem:
-				hadproblem = True
-			theme_configs[ext][theme] = config
-
-	top_theme_configs = {}
-	for top_theme, top_theme_file in configs['top_themes'].items():
-		with open_file(top_theme_file) as config_file_fp:
-			try:
-				config, lhadproblem = load(config_file_fp)
-			except MarkedError as e:
-				ee(problem=str(e))
-				hadproblem = True
-				continue
-			if lhadproblem:
-				hadproblem = True
-			top_theme_configs[top_theme] = config
-
+	theme_configs = dict2(loaded_configs['themes'])
+	top_theme_configs = dict(loaded_configs['top_themes'])
 	for ext, configs in theme_configs.items():
 		data = {
 			'ext': ext,
@@ -561,12 +581,12 @@ def check(paths=None, debug=False, echoerr=echoerr, require_ext=None):
 
 	for top_theme, config in top_theme_configs.items():
 		data = {
-			'ext': ext,
+			'ext': None,
 			'colorscheme_configs': colorscheme_configs,
 			'import_paths': import_paths,
 			'main_config': main_config,
 			'theme_configs': theme_configs,
-			'ext_theme_configs': configs,
+			'ext_theme_configs': None,
 			'colors_config': colors_config
 		}
 		data['theme_type'] = 'top'

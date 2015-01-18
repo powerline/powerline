@@ -1,5 +1,6 @@
+setenv POWERLINE_THEME_OVERRIDES "default_leftonly.segment_data.hostname.args.only_if_ssh=false"
+setenv POWERLINE_CONFIG_OVERRIDES "ext.shell.theme=default_leftonly"
 source powerline/bindings/tcsh/powerline.tcsh
-set POWERLINE_COMMAND=$POWERLINE_COMMAND:q" -t default_leftonly.segment_data.hostname.args.only_if_ssh=false -c ext.shell.theme=default_leftonly"
 unsetenv VIRTUAL_ENV
 cd tests/shell/3rd
 cd .git

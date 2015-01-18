@@ -12,10 +12,36 @@ except ImportError:
 from powerline.lib.unicode import unicode
 
 
-try:
-	vim_encoding = vim.eval('&encoding')
-except AttributeError:
-	vim_encoding = 'utf-8'
+if (
+	hasattr(vim, 'options')
+	and hasattr(vim, 'vvars')
+	and vim.vvars['version'] > 703
+):
+	if sys.version_info < (3,):
+		def get_vim_encoding():
+			return vim.options['encoding'] or 'ascii'
+	else:
+		def get_vim_encoding():
+			return vim.options['encoding'].decode('ascii') or 'ascii'
+elif hasattr(vim, 'eval'):
+	def get_vim_encoding():
+		return vim.eval('&encoding') or 'ascii'
+else:
+	def get_vim_encoding():
+		return 'utf-8'
+
+get_vim_encoding.__doc__ = (
+	'''Get encoding used for Vim strings
+
+	:return:
+		Value of ``&encoding``. If it is empty (i.e. Vim is compiled 
+		without +multibyte) returns ``'ascii'``. When building documentation 
+		outputs ``'utf-8'`` unconditionally.
+	'''
+)
+
+
+vim_encoding = get_vim_encoding()
 
 
 python_to_vim_types = {
@@ -23,6 +49,11 @@ python_to_vim_types = {
 		lambda o: b'\'' + (o.translate({
 			ord('\''): '\'\'',
 		}).encode(vim_encoding)) + b'\''
+	),
+	list: (
+		lambda o: b'[' + (
+			b','.join((python_to_vim(i) for i in o))
+		) + b']'
 	),
 	bytes: (lambda o: b'\'' + o.replace(b'\'', b'\'\'') + b'\''),
 	int: (str if str is bytes else (lambda o: unicode(o).encode('ascii'))),
@@ -158,7 +189,7 @@ _vim_exists = vim_get_func('exists', rettype='int')
 
 # It may crash on some old vim versions and I do not remember in which patch 
 # I fixed this crash.
-if hasattr(vim, 'vvars') and vim.vvars['version'] > 703:
+if hasattr(vim, 'vvars') and vim.vvars[str('version')] > 703:
 	_vim_to_python_types = {
 		getattr(vim, 'Dictionary', None) or type(vim.bindeval('{}')):
 			lambda value: dict((

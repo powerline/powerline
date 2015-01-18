@@ -291,7 +291,7 @@ class Renderer(object):
 			line=line,
 			output_raw=output_raw,
 			output_width=output_width,
-			segment_info=segment_info,
+			segment_info=self.get_segment_info(segment_info, mode),
 			theme=theme,
 		)
 
@@ -310,7 +310,7 @@ class Renderer(object):
 	def do_render(self, mode, width, side, line, output_raw, output_width, segment_info, theme):
 		'''Like Renderer.render(), but accept theme in place of matcher_info
 		'''
-		segments = list(theme.get_segments(side, line, self.get_segment_info(segment_info, mode), mode))
+		segments = list(theme.get_segments(side, line, segment_info, mode))
 
 		current_width = 0
 
@@ -492,7 +492,7 @@ class Renderer(object):
 		'''
 		return string.translate(self.character_translations)
 
-	def hlstyle(fg=None, bg=None, attr=None):
+	def hlstyle(fg=None, bg=None, attrs=None):
 		'''Output highlight style string.
 
 		Assuming highlighted string looks like ``{style}{contents}`` this method 
@@ -501,10 +501,10 @@ class Renderer(object):
 		'''
 		raise NotImplementedError
 
-	def hl(self, contents, fg=None, bg=None, attr=None):
+	def hl(self, contents, fg=None, bg=None, attrs=None):
 		'''Output highlighted chunk.
 
 		This implementation just outputs ``.hlstyle()`` joined with 
 		``contents``.
 		'''
-		return self.hlstyle(fg, bg, attr) + (contents or '')
+		return self.hlstyle(fg, bg, attrs) + (contents or '')

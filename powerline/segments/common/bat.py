@@ -27,7 +27,7 @@ def _get_battery(pl):
 			try:
 				up = bus.get_object(interface, '/org/freedesktop/UPower')
 			except dbus.exceptions.DBusException as e:
-				if getattr(e, '_dbus_error_name', '').endswidth('ServiceUnknown'):
+				if getattr(e, '_dbus_error_name', '').endswith('ServiceUnknown'):
 					pl.debug('Not using DBUS+UPower as UPower is not available via dbus')
 				else:
 					pl.exception('Failed to get UPower service with dbus: {0}', str(e))
@@ -95,7 +95,7 @@ def _get_battery(pl):
 	else:
 		pl.debug('Not using pmset: executable not found')
 
-	if sys.platform.startswith('win'):
+	if sys.platform.startswith('win') or sys.platform == 'cygwin':
 		# From http://stackoverflow.com/a/21083571/273566, reworked
 		try:
 			from win32com.client import GetObject
@@ -116,9 +116,15 @@ def _get_battery(pl):
 
 					return _get_capacity
 				pl.debug('Not using win32com.client as no batteries were found')
-
-		from ctypes import Structure, c_byte, c_ulong, windll, byref
-
+		from ctypes import Structure, c_byte, c_ulong, byref
+		if sys.platform == 'cygwin':
+			pl.debug('Using cdll to communicate with kernel32 (Cygwin)')
+			from ctypes import cdll
+			library_loader = cdll
+		else:
+			pl.debug('Using windll to communicate with kernel32 (Windows)')
+			from ctypes import windll
+			library_loader = windll
 		class PowerClass(Structure):
 			_fields_ = [
 				('ACLineStatus', c_byte),
@@ -131,7 +137,7 @@ def _get_battery(pl):
 
 		def _get_capacity(pl):
 			powerclass = PowerClass()
-			result = windll.kernel32.GetSystemPowerStatus(byref(powerclass))
+			result = library_loader.kernel32.GetSystemPowerStatus(byref(powerclass))
 			# http://msdn.microsoft.com/en-us/library/windows/desktop/aa372693(v=vs.85).aspx
 			if result:
 				return None
@@ -200,21 +206,21 @@ def battery(pl, format='{capacity:3.0%}', steps=5, gamify=False, full_heart='O',
 		ret.append({
 			'contents': full_heart * numer,
 			'draw_inner_divider': False,
-			'highlight_group': ['battery_full', 'battery_gradient', 'battery'],
+			'highlight_groups': ['battery_full', 'battery_gradient', 'battery'],
 			# Using zero as “nothing to worry about”: it is least alert color.
 			'gradient_level': 0,
 		})
 		ret.append({
 			'contents': empty_heart * (denom - numer),
 			'draw_inner_divider': False,
-			'highlight_group': ['battery_empty', 'battery_gradient', 'battery'],
+			'highlight_groups': ['battery_empty', 'battery_gradient', 'battery'],
 			# Using a hundred as it is most alert color.
 			'gradient_level': 100,
 		})
 	else:
 		ret.append({
 			'contents': format.format(capacity=(capacity / 100.0)),
-			'highlight_group': ['battery_gradient', 'battery'],
+			'highlight_groups': ['battery_gradient', 'battery'],
 			# Gradients are “least alert – most alert” by default, capacity has 
 			# the opposite semantics.
 			'gradient_level': 100 - capacity,

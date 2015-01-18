@@ -20,7 +20,7 @@ def syntastic(pl, err_format='ERR:  {first_line} ({num}) ', warn_format='WARN
 	:param str warn_format:
 		Format string for warnings.
 
-	Highlight groups used: ``syntastic.warning`` or ``warning``, ``syntastic.error`` or ``error``.
+	Highlight groups used: ``syntastic:warning`` or ``warning``, ``syntastic:error`` or ``error``.
 	'''
 	if not vim_global_exists('SyntasticLoclist'):
 		return None
@@ -33,11 +33,11 @@ def syntastic(pl, err_format='ERR:  {first_line} ({num}) ', warn_format='WARN
 	if errors:
 		segments.append({
 			'contents': err_format.format(first_line=errors[0]['lnum'], num=len(errors)),
-			'highlight_group': ['syntastic.error', 'error'],
+			'highlight_groups': ['syntastic:error', 'error'],
 		})
 	if warnings:
 		segments.append({
 			'contents': warn_format.format(first_line=warnings[0]['lnum'], num=len(warnings)),
-			'highlight_group': ['syntastic.warning', 'warning'],
+			'highlight_groups': ['syntastic:warning', 'warning'],
 		})
 	return segments

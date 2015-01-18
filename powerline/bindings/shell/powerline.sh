@@ -100,7 +100,7 @@ _powerline_set_set_jobs() {
 
 _powerline_set_command() {
 	if test -z "${POWERLINE_COMMAND}" ; then
-		POWERLINE_COMMAND="$("$POWERLINE_CONFIG" shell command)"
+		POWERLINE_COMMAND="$("$POWERLINE_CONFIG_COMMAND" shell command)"
 	fi
 }
 
@@ -136,22 +136,22 @@ _powerline_set_jobs() {
 _powerline_local_prompt() {
 	# Arguments: side, exit_code, local theme
 	_powerline_set_jobs
-	$POWERLINE_COMMAND shell $1 \
+	"$POWERLINE_COMMAND" $POWERLINE_COMMAND_ARGS shell $1 \
 		$_POWERLINE_RENDERER_ARG \
-		--renderer_arg="client_id=$$" \
-		--last_exit_code=$2 \
+		--renderer-arg="client_id=$$" \
+		--last-exit-code=$2 \
 		--jobnum=$_POWERLINE_JOBS \
-		--renderer_arg="local_theme=$3"
+		--renderer-arg="local_theme=$3"
 }
 
 _powerline_prompt() {
 	# Arguments: side, exit_code
 	_powerline_set_jobs
-	$POWERLINE_COMMAND shell $1 \
+	"$POWERLINE_COMMAND" $POWERLINE_COMMAND_ARGS shell $1 \
 		--width="${COLUMNS:-$(_powerline_columns_fallback)}" \
 		$_POWERLINE_RENDERER_ARG \
-		--renderer_arg="client_id=$$" \
-		--last_exit_code=$2 \
+		--renderer-arg="client_id=$$" \
+		--last-exit-code=$2 \
 		--jobnum=$_POWERLINE_JOBS
 	_powerline_update_psN
 }
@@ -214,11 +214,11 @@ _powerline_init_tmux_support() {
 	fi
 }
 
-if test -z "${POWERLINE_CONFIG}" ; then
+if test -z "${POWERLINE_CONFIG_COMMAND}" ; then
 	if which powerline-config >/dev/null ; then
-		POWERLINE_CONFIG=powerline-config
+		POWERLINE_CONFIG_COMMAND=powerline-config
 	else
-		POWERLINE_CONFIG="$(dirname "$_POWERLINE_SOURCED")/../../../scripts/powerline-config"
+		POWERLINE_CONFIG_COMMAND="$(dirname "$_POWERLINE_SOURCED")/../../../scripts/powerline-config"
 	fi
 fi
 
@@ -227,9 +227,9 @@ _POWERLINE_USED_SHELL=${0#-}
 _POWERLINE_USED_SHELL=${_POWERLINE_USED_SHELL#/usr}
 _POWERLINE_USED_SHELL=${_POWERLINE_USED_SHELL#/bin/}
 
-if "${POWERLINE_CONFIG}" shell uses tmux ; then
+if "${POWERLINE_CONFIG_COMMAND}" shell uses tmux ; then
 	_powerline_init_tmux_support $_POWERLINE_USED_SHELL
 fi
-if "${POWERLINE_CONFIG}" shell --shell=bash uses prompt ; then
+if "${POWERLINE_CONFIG_COMMAND}" shell --shell=bash uses prompt ; then
 	_powerline_setup_prompt $_POWERLINE_USED_SHELL
 fi

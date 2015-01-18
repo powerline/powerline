@@ -11,8 +11,9 @@ from powerline.colorscheme import Colorscheme
 from powerline.lib.config import ConfigLoader
 from powerline.lib.unicode import safe_unicode, FailedUnicode
 from powerline.config import DEFAULT_SYSTEM_CONFIG_DIR
-from powerline.lib import mergedicts
+from powerline.lib.dict import mergedicts
 from powerline.lib.encoding import get_preferred_output_encoding
+from powerline.lib.path import join
 
 
 class NotInterceptedError(BaseException):
@@ -29,7 +30,7 @@ def _find_config_files(search_paths, config_file, config_loader=None, loader_cal
 	config_file += '.json'
 	found = False
 	for path in search_paths:
-		config_file_path = os.path.join(path, config_file)
+		config_file_path = join(path, config_file)
 		if os.path.isfile(config_file_path):
 			yield config_file_path
 			found = True
@@ -142,12 +143,12 @@ def get_config_paths():
 	:return: list of paths
 	'''
 	config_home = os.environ.get('XDG_CONFIG_HOME', os.path.join(os.path.expanduser('~'), '.config'))
-	config_path = os.path.join(config_home, 'powerline')
+	config_path = join(config_home, 'powerline')
 	config_paths = [config_path]
 	config_dirs = os.environ.get('XDG_CONFIG_DIRS', DEFAULT_SYSTEM_CONFIG_DIR)
 	if config_dirs is not None:
-		config_paths[:0] = reversed([os.path.join(d, 'powerline') for d in config_dirs.split(':')])
-	plugin_path = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'config_files')
+		config_paths[:0] = reversed([join(d, 'powerline') for d in config_dirs.split(':')])
+	plugin_path = join(os.path.realpath(os.path.dirname(__file__)), 'config_files')
 	config_paths.insert(0, plugin_path)
 	return config_paths
 
@@ -258,6 +259,7 @@ def finish_common_config(encoding, common_config):
 	common_config.setdefault('log_level', 'WARNING')
 	common_config.setdefault('log_format', '%(asctime)s:%(levelname)s:%(message)s')
 	common_config.setdefault('term_truecolor', False)
+	common_config.setdefault('term_escape_style', 'auto')
 	common_config.setdefault('ambiwidth', 1)
 	common_config.setdefault('additional_escapes', None)
 	common_config.setdefault('reload_config', True)
@@ -423,6 +425,14 @@ class Powerline(object):
 	Usually returns encoding of the current locale.
 	'''
 
+	def create_logger(self):
+		'''Create logger
+
+		This function is used to create logger unless it was already specified 
+		at initialization.
+		'''
+		return create_logger(self.common_config, self.default_log_stream)
+
 	def create_renderer(self, load_main=False, load_colors=False, load_colorscheme=False, load_theme=False):
 		'''(Re)create renderer object. Can be used after Powerline object was 
 		successfully initialized. If any of the below parameters except 
@@ -460,7 +470,7 @@ class Powerline(object):
 				self.import_paths = self.common_config['paths']
 
 				if not self.logger:
-					self.logger = create_logger(self.common_config, self.default_log_stream)
+					self.logger = self.create_logger()
 
 				if not self.pl:
 					self.pl = PowerlineLogger(self.use_daemon_threads, self.logger, self.ext)
@@ -474,6 +484,7 @@ class Powerline(object):
 				mergedicts(self.renderer_options, dict(
 					pl=self.pl,
 					term_truecolor=self.common_config['term_truecolor'],
+					term_escape_style=self.common_config['term_escape_style'],
 					ambiwidth=self.common_config['ambiwidth'],
 					tmux_escape=self.common_config['additional_escapes'] == 'tmux',
 					screen_escape=self.common_config['additional_escapes'] == 'screen',
@@ -753,7 +764,10 @@ class Powerline(object):
 				self.exception('Failed to render: {0}', str(e))
 			except Exception as e:
 				exc = e
-			return FailedUnicode(safe_unicode(exc))
+			ret = FailedUnicode(safe_unicode(exc))
+			if kwargs.get('output_width', False):
+				ret = ret, len(ret)
+			return ret
 
 	def render_above_lines(self, *args, **kwargs):
 		'''Like .render(), but for ``self.renderer.render_above_lines()``

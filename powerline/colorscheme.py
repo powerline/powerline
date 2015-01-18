@@ -12,16 +12,16 @@ ATTR_ITALIC = 2
 ATTR_UNDERLINE = 4
 
 
-def get_attr_flag(attributes):
+def get_attrs_flag(attrs):
 	'''Convert an attribute array to a renderer flag.'''
-	attr_flag = 0
-	if 'bold' in attributes:
-		attr_flag |= ATTR_BOLD
-	if 'italic' in attributes:
-		attr_flag |= ATTR_ITALIC
-	if 'underline' in attributes:
-		attr_flag |= ATTR_UNDERLINE
-	return attr_flag
+	attrs_flag = 0
+	if 'bold' in attrs:
+		attrs_flag |= ATTR_BOLD
+	if 'italic' in attrs:
+		attrs_flag |= ATTR_ITALIC
+	if 'underline' in attrs:
+		attrs_flag |= ATTR_UNDERLINE
+	return attrs_flag
 
 
 def pick_gradient_value(grad_list, gradient_level):
@@ -112,7 +112,7 @@ class Colorscheme(object):
 		return {
 			'fg': pick_color(group_props['fg']),
 			'bg': pick_color(group_props['bg']),
-			'attr': get_attr_flag(group_props.get('attr', [])),
+			'attrs': get_attrs_flag(group_props.get('attrs', [])),
 		}
 
 

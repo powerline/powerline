@@ -84,7 +84,7 @@ class CwdSegment(Segment):
 				'divider_highlight_group': 'cwd:divider',
 				'draw_inner_divider': draw_inner_divider,
 			})
-		ret[-1]['highlight_group'] = ['cwd:current_folder', 'cwd']
+		ret[-1]['highlight_groups'] = ['cwd:current_folder', 'cwd']
 		if use_path_separator:
 			ret[-1]['contents'] = ret[-1]['contents'][:-1]
 			if len(ret) > 1 and ret[0]['contents'][0] == os.sep:
@@ -134,8 +134,13 @@ except ImportError:
 	except ImportError:
 		from getpass import getuser as _get_user
 	else:
+		try:
+			from os import geteuid as getuid
+		except ImportError:
+			from os import getuid
+
 		def _get_user():
-			return pwd.getpwuid(os.geteuid()).pw_name
+			return pwd.getpwuid(getuid()).pw_name
 
 
 username = False
@@ -164,5 +169,5 @@ def user(pl, hide_user=None):
 	euid = _geteuid()
 	return [{
 		'contents': username,
-		'highlight_group': ['user'] if euid != 0 else ['superuser', 'user'],
+		'highlight_groups': ['user'] if euid != 0 else ['superuser', 'user'],
 	}]

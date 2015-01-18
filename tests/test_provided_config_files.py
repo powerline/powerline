@@ -54,7 +54,6 @@ class TestVimConfig(TestCase):
 			(('bufname', 'NERD_tree_1'), {}),
 			(('bufname', '__Gundo__'), {}),
 			(('bufname', '__Gundo_Preview__'), {}),
-			(('bufname', 'ControlP'), {}),
 			# No Command-T tests here: requires +ruby or emulation
 			# No tabline here: tablines are tested separately
 		)
@@ -94,10 +93,6 @@ class TestVimConfig(TestCase):
 								for args, kwargs in buffers:
 									i += 1
 									if mode in exclude:
-										continue
-									if mode == 'nc' and args == ('bufname', 'ControlP'):
-										# ControlP window is not supposed to not 
-										# be in the focus
 										continue
 									with vim_module._with(*args, **kwargs):
 										check_output(mode, args, kwargs)
@@ -143,7 +138,7 @@ class TestConfig(TestCase):
 
 	def test_bash(self):
 		from powerline.shell import ShellPowerline
-		args = Args(last_exit_code=1, jobnum=0, ext=['shell'], renderer_module='.bash', config={'ext': {'shell': {'theme': 'default_leftonly'}}})
+		args = Args(last_exit_code=1, jobnum=0, ext=['shell'], renderer_module='.bash', config_override={'ext': {'shell': {'theme': 'default_leftonly'}}})
 		with ShellPowerline(args, logger=get_logger(), run_once=False) as powerline:
 			powerline.render(segment_info={'args': args})
 		with ShellPowerline(args, logger=get_logger(), run_once=False) as powerline:
@@ -153,7 +148,7 @@ class TestConfig(TestCase):
 		from powerline.ipython import IPythonPowerline
 
 		class IpyPowerline(IPythonPowerline):
-			paths = None
+			config_paths = None
 			config_overrides = None
 			theme_overrides = {}
 

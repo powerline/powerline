@@ -2,7 +2,7 @@
 set encoding=utf-8
 let g:powerline_config_paths = [expand('<sfile>:p:h:h') . '/powerline/config_files']
 let g:powerline_config_overrides = {'common': {'default_top_theme': 'ascii'}}
-let g:powerline_theme_overrides__default = {'segment_data': {'line_current_symbol': {'contents': 'LN '}, 'branch': {'before': 'B '}}}
+let g:powerline_theme_overrides = {'default': {'segment_data': {'line_current_symbol': {'contents': 'LN '}, 'branch': {'before': 'B '}}}}
 
 redir => g:messages
 

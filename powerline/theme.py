@@ -3,8 +3,8 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 
 import itertools
 
-from powerline.segment import gen_segment_getter, process_segment
-from powerline.lib.unicode import u
+from powerline.segment import gen_segment_getter, process_segment, get_fallback_segment
+from powerline.lib.unicode import u, safe_unicode
 
 
 def requires_segment_info(func):
@@ -72,7 +72,7 @@ class Theme(object):
 		self.segments = []
 		self.EMPTY_SEGMENT = {
 			'contents': None,
-			'highlight': {'fg': False, 'bg': False, 'attr': 0}
+			'highlight': {'fg': False, 'bg': False, 'attrs': 0}
 		}
 		self.pl = pl
 		theme_configs = [theme_config]
@@ -146,23 +146,36 @@ class Theme(object):
 						self.colorscheme,
 					)
 			for segment in parsed_segments:
-				width = segment['width']
-				align = segment['align']
-				if width == 'auto' and segment['expand'] is None:
-					segment['expand'] = expand_functions.get(align)
-					if segment['expand'] is None:
-						self.pl.error('Align argument must be “r”, “l” or “c”, not “{0}”', align)
+				self.pl.prefix = segment['name']
+				try:
+					width = segment['width']
+					align = segment['align']
+					if width == 'auto' and segment['expand'] is None:
+						segment['expand'] = expand_functions.get(align)
+						if segment['expand'] is None:
+							self.pl.error('Align argument must be “r”, “l” or “c”, not “{0}”', align)
 
-				segment['contents'] = segment['before'] + u(segment['contents'] if segment['contents'] is not None else '') + segment['after']
-				# Align segment contents
-				if segment['width'] and segment['width'] != 'auto':
-					if segment['align'] == 'l':
-						segment['contents'] = segment['contents'].ljust(segment['width'])
-					elif segment['align'] == 'r':
-						segment['contents'] = segment['contents'].rjust(segment['width'])
-					elif segment['align'] == 'c':
-						segment['contents'] = segment['contents'].center(segment['width'])
-				# We need to yield a copy of the segment, or else mode-dependent
-				# segment contents can’t be cached correctly e.g. when caching
-				# non-current window contents for vim statuslines
-				yield segment.copy()
+					try:
+						segment['contents'] = segment['before'] + u(
+							segment['contents'] if segment['contents'] is not None else ''
+						) + segment['after']
+					except Exception as e:
+						self.pl.exception('Failed to compute segment contents: {0}', str(e))
+						segment['contents'] = safe_unicode(segment.get('contents'))
+					# Align segment contents
+					if segment['width'] and segment['width'] != 'auto':
+						if segment['align'] == 'l':
+							segment['contents'] = segment['contents'].ljust(segment['width'])
+						elif segment['align'] == 'r':
+							segment['contents'] = segment['contents'].rjust(segment['width'])
+						elif segment['align'] == 'c':
+							segment['contents'] = segment['contents'].center(segment['width'])
+					# We need to yield a copy of the segment, or else mode-dependent
+					# segment contents can’t be cached correctly e.g. when caching
+					# non-current window contents for vim statuslines
+					yield segment.copy()
+				except Exception as e:
+					self.pl.exception('Failed to compute segment: {0}', str(e))
+					fallback = get_fallback_segment()
+					fallback.update(side=side)
+					yield fallback

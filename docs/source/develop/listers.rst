@@ -4,7 +4,7 @@
 Writing listers
 ***************
 
-Listers allow you to show some segments multiple times: once per each entity 
+Listers provide a way to show some segments multiple times: once per each entity 
 (buffer, tabpage, etc) lister knows. They are functions which receive the 
 following arguments:
 
