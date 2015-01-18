@@ -59,7 +59,35 @@ def main():
 			],
 			cwd=VTERM_TEST_DIR,
 			env={
-				'TERM': 'vt100',
+				# Reasoning:
+				# 1. vt* TERMs (used to be vt100 here) make tmux-1.9 use
+				#    different and identical colors for inactive windows. This 
+				#    is not like tmux-1.6: foreground color is different from 
+				#    separator color and equal to (0, 102, 153) for some reason 
+				#    (separator has correct color). tmux-1.8 is fine, so are 
+				#    older versions (though tmux-1.6 and tmux-1.7 do not have 
+				#    highlighting for previously active window) and my system 
+				#    tmux-1.9a.
+				# 2. screen, xterm and some other non-256color terminals both
+				#    have the same issue and make libvterm emit complains like 
+				#    `Unhandled CSI SGR 3231`.
+				# 3. screen-256color, xterm-256color and other -256color
+				#    terminals make libvterm emit complains about unhandled 
+				#    escapes to stderr.
+				# 4. `st-256color` does not have any of the above problems, but
+				#    it may be not present on the target system because it is 
+				#    installed with x11-terms/st and not with sys-libs/ncurses.
+				#
+				# For the given reasons decision was made: to fix tmux-1.9 tests 
+				# and not make libvterm emit any data to stderr st-256color 
+				# $TERM should be used, up until libvterm has its own terminfo 
+				# database entry (if it ever will). To make sure that relevant 
+				# terminfo entry is present on the target system it should be 
+				# distributed with powerline test package. To make distribution 
+				# not require modifying anything outside of powerline test 
+				# directory TERMINFO variable is set.
+				'TERMINFO': os.path.join(VTERM_TEST_DIR, 'terminfo'),
+				'TERM': 'st-256color',
 				'PATH': vterm_path,
 				'SHELL': os.path.join(''),
 				'POWERLINE_CONFIG_PATHS': os.path.abspath('powerline/config_files'),
@@ -170,6 +198,7 @@ def main():
 	finally:
 		check_call([tmux_exe, '-S', socket_path, 'kill-server'], env={
 			'PATH': vterm_path,
+			'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
 		})
 
 
