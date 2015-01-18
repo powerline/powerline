@@ -45,7 +45,9 @@ test_tmux() {
 if test -z "$POWERLINE_TMUX_EXE" && test -d tests/bot-ci/deps/tmux ; then
 	for tmux in tests/bot-ci/deps/tmux/tmux-*/tmux ; do
 		export POWERLINE_TMUX_EXE="$PWD/$tmux"
-		test_tmux || true
+		if test_tmux ; then
+			rm -f tests/vterm/*.log
+		fi
 	done
 else
 	test_tmux || true
