@@ -14,6 +14,8 @@ ln -s "$(which env)" tests/vterm/path
 ln -s "$PWD/scripts/powerline-render" tests/vterm/path
 ln -s "$PWD/scripts/powerline-config" tests/vterm/path
 
+cp -r tests/terminfo tests/vterm
+
 FAIL_SUMMARY=""
 
 test_tmux() {
