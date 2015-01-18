@@ -170,6 +170,7 @@ def main():
 	finally:
 		check_call([tmux_exe, '-S', socket_path, 'kill-server'], env={
 			'PATH': vterm_path,
+			'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
 		})
 
 
