@@ -107,6 +107,16 @@ else:
 	environ = Environment()
 
 
+if hasattr(zsh, 'expand') and zsh.expand('${:-}') == '':
+	zsh_expand = zsh.expand
+else:
+	def zsh_expand(s):
+		zsh.eval('_POWERLINE_REPLY="' + s + '"')
+		ret = zsh.getvalue('_POWERLINE_REPLY')
+		zsh.setvalue('_POWERLINE_REPLY', None)
+		return ret
+
+
 class ZshPowerline(ShellPowerline):
 	def init(self, **kwargs):
 		super(ZshPowerline, self).init(Args(), **kwargs)
@@ -138,8 +148,8 @@ class Prompt(object):
 		self.theme = theme
 
 	def __str__(self):
-		zsh.eval('_POWERLINE_PARSER_STATE="${(%):-%_}"')
-		zsh.eval('_POWERLINE_SHORTENED_PATH="${(%):-%~}"')
+		parser_state = u(zsh_expand('${(%):-%_}'))
+		shortened_path = u(zsh_expand('${(%):-%~}'))
 		try:
 			mode = u(zsh.getvalue('_POWERLINE_MODE'))
 		except IndexError:
@@ -153,13 +163,11 @@ class Prompt(object):
 			'environ': environ,
 			'client_id': 1,
 			'local_theme': self.theme,
-			'parser_state': zsh.getvalue('_POWERLINE_PARSER_STATE'),
-			'shortened_path': zsh.getvalue('_POWERLINE_SHORTENED_PATH'),
+			'parser_state': parser_state,
+			'shortened_path': shortened_path,
 			'mode': mode,
 			'default_mode': default_mode,
 		}
-		zsh.setvalue('_POWERLINE_PARSER_STATE', None)
-		zsh.setvalue('_POWERLINE_SHORTENED_PATH', None)
 		try:
 			zle_rprompt_indent = zsh.getvalue('ZLE_RPROMPT_INDENT')
 		except IndexError:
