@@ -101,7 +101,10 @@ class Environment(object):
 			return False
 
 
-environ = getattr(zsh, 'environ', Environment())
+if hasattr(getattr(zsh, 'environ', None), '__contains__'):
+	environ = zsh.environ
+else:
+	environ = Environment()
 
 
 class ZshPowerline(ShellPowerline):
