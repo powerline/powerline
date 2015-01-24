@@ -750,26 +750,26 @@ class TestVim(TestCase):
 	def test_environ_update(self):
 		# Regression test: test that segment obtains environment from vim, not 
 		# from os.environ.
-		from powerline.vim import VimPowerline
-		import powerline as powerline_module
-		import vim
-		vim.vars['powerline_config_paths'] = ['/']
-		with swap_attributes(config, powerline_module):
-			with vim_module._with('environ', TEST='abc'):
-				with get_powerline_raw(config, VimPowerline) as powerline:
-					window = vim_module.current.window
-					window_id = 1
-					winnr = window.number
-					self.assertEqual(powerline.render(window, window_id, winnr), b'%#Pl_3_8404992_4_192_underline#\xc2\xa0abc%#Pl_4_192_NONE_None_NONE#>>')
-					vim_module._environ['TEST'] = 'def'
-					self.assertEqual(powerline.render(window, window_id, winnr), b'%#Pl_3_8404992_4_192_underline#\xc2\xa0def%#Pl_4_192_NONE_None_NONE#>>')
+		import tests.vim as vim_module
+		with vim_module._with('globals', powerline_config_paths=['/']):
+			from powerline.vim import VimPowerline
+			import powerline as powerline_module
+			with swap_attributes(config, powerline_module):
+				with vim_module._with('environ', TEST='abc'):
+					with get_powerline_raw(config, VimPowerline) as powerline:
+						window = vim_module.current.window
+						window_id = 1
+						winnr = window.number
+						self.assertEqual(powerline.render(window, window_id, winnr), b'%#Pl_3_8404992_4_192_underline#\xc2\xa0abc%#Pl_4_192_NONE_None_NONE#>>')
+						vim_module._environ['TEST'] = 'def'
+						self.assertEqual(powerline.render(window, window_id, winnr), b'%#Pl_3_8404992_4_192_underline#\xc2\xa0def%#Pl_4_192_NONE_None_NONE#>>')
 
 	def test_local_themes(self):
 		# Regression test: VimPowerline.add_local_theme did not work properly.
 		from powerline.vim import VimPowerline
 		import powerline as powerline_module
 		with swap_attributes(config, powerline_module):
-			with get_powerline_raw(config, VimPowerline) as powerline:
+			with get_powerline_raw(config, VimPowerline, replace_gcp=True) as powerline:
 				powerline.add_local_theme('tests.matchers.always_true', {
 					'segment_data': {
 						'foo': {
