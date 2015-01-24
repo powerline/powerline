@@ -205,7 +205,7 @@ def set_prompt(powerline, psvar, side, theme, above=False):
 		savedps = None
 	zpyvar = 'ZPYTHON_POWERLINE_' + psvar
 	prompt = Prompt(powerline, side, theme, psvar, savedps, above)
-	zsh.eval('unset ' + zpyvar)
+	zsh.setvalue(zpyvar, None)
 	zsh.set_special_string(zpyvar, prompt)
 	zsh.setvalue(psvar, '${' + zpyvar + '}')
 	return ref(prompt)
