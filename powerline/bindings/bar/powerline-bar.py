@@ -10,6 +10,7 @@ from argparse import ArgumentParser
 
 from powerline import Powerline
 from powerline.lib.monotonic import monotonic
+from powerline.lib.encoding import get_unicode_writer
 
 
 if __name__ == '__main__':
@@ -25,10 +26,13 @@ if __name__ == '__main__':
 	interval = 0.5
 	lock = Lock()
 
+	write = get_unicode_writer(encoding='utf-8')
+
 	def render(event=None, data=None, sub=None):
 		global lock
 		with lock:
-			print(powerline.render())
+			write(powerline.render())
+			write('\n')
 			sys.stdout.flush()
 
 	if args.i3:
