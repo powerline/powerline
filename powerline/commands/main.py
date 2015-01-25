@@ -150,7 +150,7 @@ def get_argparser(ArgumentParser=argparse.ArgumentParser):
 	return parser
 
 
-def write_output(args, powerline, segment_info, write, encoding):
+def write_output(args, powerline, segment_info, write):
 	if args.renderer_arg:
 		segment_info.update(args.renderer_arg)
 	if args.side.startswith('above'):
@@ -159,8 +159,7 @@ def write_output(args, powerline, segment_info, write, encoding):
 			segment_info=segment_info,
 			mode=segment_info.get('mode', None),
 		):
-			write(line.encode(encoding, 'replace'))
-			write(b'\n')
+			write(line + '\n')
 		args.side = args.side[len('above'):]
 
 	if args.side:
@@ -170,4 +169,4 @@ def write_output(args, powerline, segment_info, write, encoding):
 			segment_info=segment_info,
 			mode=segment_info.get('mode', None),
 		)
-		write(rendered.encode(encoding, 'replace'))
+		write(rendered)

@@ -43,6 +43,10 @@ config = {
 				'theme': 'default',
 				'colorscheme': 'default',
 			},
+			'wm': {
+				'theme': 'default',
+				'colorscheme': 'default',
+			},
 		},
 	},
 	'colors': {
@@ -89,6 +93,14 @@ config = {
 	'colorschemes/vim/default': {
 		'groups': {
 			'environment': {'fg': 'col3', 'bg': 'col4', 'attrs': ['underline']},
+		},
+	},
+	'colorschemes/wm/default': {
+		'groups': {
+			'hl1': {'fg': 'col1', 'bg': 'col2', 'attrs': ['underline']},
+			'hl2': {'fg': 'col2', 'bg': 'col1', 'attrs': []},
+			'hl3': {'fg': 'col3', 'bg': 'col1', 'attrs': ['underline']},
+			'hl4': {'fg': 'col2', 'bg': 'col4', 'attrs': []},
 		},
 	},
 	'themes/test/default': {
@@ -139,6 +151,19 @@ config = {
 		'segments': {
 			'left': [
 				highlighted_string('s', 'g1', width='auto'),
+			],
+		},
+	},
+	'themes/wm/default': {
+		'default_module': 'powerline.segments.common',
+		'segments': {
+			'left': [
+				highlighted_string('A', 'hl1'),
+				highlighted_string('B', 'hl2'),
+			],
+			'right': [
+				highlighted_string('C', 'hl3'),
+				highlighted_string('D', 'hl4'),
 			],
 		},
 	},
@@ -798,6 +823,31 @@ class TestVim(TestCase):
 	@classmethod
 	def tearDownClass(cls):
 		sys.path.pop(0)
+
+
+class TestBar(TestRender):
+	def test_bar(self):
+		import powerline as powerline_module
+		with swap_attributes(config, powerline_module):
+			with get_powerline_raw(config, powerline_module.Powerline, replace_gcp=True, ext='wm', renderer_module='bar') as powerline:
+				self.assertRenderEqual(
+					powerline,
+					'%{l}%{F#ffc00000}%{B#ff008000}%{+u} A%{F-B--u}%{F#ff008000}%{B#ffc00000}>>%{F-B--u}%{F#ff008000}%{B#ffc00000}B%{F-B--u}%{F#ffc00000}>>%{F-B--u}%{r}%{F#ffc00000}<<%{F-B--u}%{F#ff804000}%{B#ffc00000}%{+u}C%{F-B--u}%{F#ff0000c0}%{B#ffc00000}<<%{F-B--u}%{F#ff008000}%{B#ff0000c0}D %{F-B--u}'
+				)
+
+	@with_new_config
+	def test_bar_escape(self, config):
+		import powerline as powerline_module
+		config['themes/wm/default']['segments']['left'] = (
+			highlighted_string('%{asd}', 'hl1'),
+			highlighted_string('10% %', 'hl2'),
+		)
+		with swap_attributes(config, powerline_module):
+			with get_powerline_raw(config, powerline_module.Powerline, replace_gcp=True, ext='wm', renderer_module='bar') as powerline:
+				self.assertRenderEqual(
+					powerline,
+					'%{l}%{F#ffc00000}%{B#ff008000}%{+u} %%{asd}%{F-B--u}%{F#ff008000}%{B#ffc00000}>>%{F-B--u}%{F#ff008000}%{B#ffc00000}10%% %%%{F-B--u}%{F#ffc00000}>>%{F-B--u}%{r}%{F#ffc00000}<<%{F-B--u}%{F#ff804000}%{B#ffc00000}%{+u}C%{F-B--u}%{F#ff0000c0}%{B#ffc00000}<<%{F-B--u}%{F#ff008000}%{B#ff0000c0}D %{F-B--u}'
+				)
 
 
 if __name__ == '__main__':
