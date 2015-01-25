@@ -13,6 +13,21 @@ from powerline.lib.monotonic import monotonic
 from powerline.lib.encoding import get_unicode_writer
 
 
+class BarPowerline(Powerline):
+	get_encoding = staticmethod(lambda: 'utf-8')
+
+	def init(self):
+		super(BarPowerline, self).init(ext='wm', renderer_module='bar')
+
+
+def render(event=None, data=None, sub=None):
+	global lock
+	with lock:
+		write(powerline.render())
+		write('\n')
+		sys.stdout.flush()
+
+
 if __name__ == '__main__':
 	parser = ArgumentParser(description='Powerline BAR bindings.')
 	parser.add_argument(
@@ -20,20 +35,12 @@ if __name__ == '__main__':
 		help='Subscribe for i3 events.'
 	)
 	args = parser.parse_args()
-	powerline = Powerline('wm', renderer_module='bar')
-	powerline.update_renderer()
+	powerline = BarPowerline()
 
 	interval = 0.5
 	lock = Lock()
 
 	write = get_unicode_writer(encoding='utf-8')
-
-	def render(event=None, data=None, sub=None):
-		global lock
-		with lock:
-			write(powerline.render())
-			write('\n')
-			sys.stdout.flush()
 
 	if args.i3:
 		import i3
