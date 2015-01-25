@@ -47,18 +47,19 @@ Add the following to :file:`~/.config/qtile/config.py`:
 .. _bar-usage:
 
 LemonBoy’s bar
-=============
+==============
 
-To run the bar simply pipe the output of the binding script into ``bar`` and specify appropriate
-options, for example like this::
+To run the bar simply pipe the output of the binding script into ``bar`` and 
+specify appropriate options, for example like this::
 
-    python powerline-bar.py | bar -f "-xos4-*"
+    python /path/to/powerline/bindings/bar/powerline-bar.py | bar
 
 to run with i3, simply ``exec`` this in i3 config file::
 
-    exec python powerline-bar.py | bar -f "-xos4-*"
+    exec python /path/to/powerline/bindings/bar/powerline-bar.py --i3 | bar
 
-See the `bar documentation <https://github.com/LemonBoy/bar>`_ for more information and options.
+See the `bar documentation <https://github.com/LemonBoy/bar>`_ for more 
+information and options.
 
 I3 bar
 ======

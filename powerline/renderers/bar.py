@@ -2,7 +2,7 @@
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 from powerline.renderer import Renderer
-from powerline.colorscheme import ATTR_BOLD, ATTR_ITALIC, ATTR_UNDERLINE
+from powerline.colorscheme import ATTR_UNDERLINE
 
 
 class BarRenderer(Renderer):
@@ -25,15 +25,21 @@ class BarRenderer(Renderer):
 
 		if fg is not None:
 			if fg is not False and fg[1] is not False:
-				text +=  '%{{F#ff{0:06x}}}'.format(fg[1])
+				text += '%{{F#ff{0:06x}}}'.format(fg[1])
 		if bg is not None:
 			if bg is not False and bg[1] is not False:
-				text +=  '%{{B#ff{0:06x}}}'.format(bg[1])
+				text += '%{{B#ff{0:06x}}}'.format(bg[1])
 
 		if attrs & ATTR_UNDERLINE:
 			text += '%{+u}'
 
 		return text + contents + '%{F-B--u}'
+
+	def render(self):
+		return '%{{l}}{0}%{{r}}{1}'.format(
+			super(BarRenderer, self).render(side='left'),
+			super(BarRenderer, self).render(side='right'),
+		)
 
 
 renderer = BarRenderer

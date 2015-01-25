@@ -4,38 +4,37 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 
 import sys
 import time
-import i3
+
 from threading import Lock
+from argparse import ArgumentParser
+
 from powerline import Powerline
 from powerline.lib.monotonic import monotonic
 
-if __name__ == '__main__':
-	name = 'wm'
-	if len(sys.argv) > 1:
-		name = sys.argv[1]
 
-	powerline = Powerline( name, renderer_module='bar' )
+if __name__ == '__main__':
+	parser = ArgumentParser(description='Powerline BAR bindings.')
+	parser.add_argument(
+		'--i3', action='store_true',
+		help='Subscribe for i3 events.'
+	)
+	args = parser.parse_args()
+	powerline = Powerline('wm', renderer_module='bar')
 	powerline.update_renderer()
 
 	interval = 0.5
 	lock = Lock()
 
-	def encode( str ): return str.encode('utf-8')
-
-	if sys.version_info > (3,0):
-		def encode( str ): return str
-
 	def render(event=None, data=None, sub=None):
 		global lock
 		with lock:
-			ln = '%{l}'
-			ln += powerline.render(side='left')
-			ln += '%{r}'
-			ln += powerline.render(side='right')
-			print( encode(ln) )
+			print(powerline.render())
 			sys.stdout.flush()
 
-	sub = i3.Subscription(render, 'workspace')
+	if args.i3:
+		import i3
+		sub = i3.Subscription(render, 'workspace')
+
 	while True:
 		start_time = monotonic()
 		render()

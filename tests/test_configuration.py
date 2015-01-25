@@ -824,23 +824,30 @@ class TestVim(TestCase):
 	def tearDownClass(cls):
 		sys.path.pop(0)
 
-class TestBar(TestCase):
+
+class TestBar(TestRender):
 	def test_bar(self):
 		import powerline as powerline_module
 		with swap_attributes(config, powerline_module):
-			with get_powerline_raw(config, powerline_module, ext='wm', renderer_module='bar') as powerline:
-				self.assertEqual("%{{l}}{}%{{r}}{}".format(powerline.render(side='left'), powerline.render(side='right')), "SOME_STRING_HERE")
+			with get_powerline_raw(config, powerline_module.Powerline, replace_gcp=True, ext='wm', renderer_module='bar') as powerline:
+				self.assertRenderEqual(
+					powerline,
+					'%{l}%{F#ffc00000}%{B#ff008000}%{+u} A%{F-B--u}%{F#ff008000}%{B#ffc00000}>>%{F-B--u}%{F#ff008000}%{B#ffc00000}B%{F-B--u}%{F#ffc00000}>>%{F-B--u}%{r}%{F#ffc00000}<<%{F-B--u}%{F#ff804000}%{B#ffc00000}%{+u}C%{F-B--u}%{F#ff0000c0}%{B#ffc00000}<<%{F-B--u}%{F#ff008000}%{B#ff0000c0}D %{F-B--u}'
+				)
 
-	def test_bar_escape(self):
-		from powerline.shell import ShellPowerline
+	@with_new_config
+	def test_bar_escape(self, config):
 		import powerline as powerline_module
-		config['themes/wm/default']['segments']['left'] = {
+		config['themes/wm/default']['segments']['left'] = (
 			highlighted_string('%{asd}', 'hl1'),
 			highlighted_string('10% %', 'hl2'),
-		}
+		)
 		with swap_attributes(config, powerline_module):
-			with get_powerline_raw(config, powerline_module, ext='wm', renderer_module='bar') as powerline:
-				self.assertEqual(powerline.render(side='left'), "SOME_STRING_HERE")
+			with get_powerline_raw(config, powerline_module.Powerline, replace_gcp=True, ext='wm', renderer_module='bar') as powerline:
+				self.assertRenderEqual(
+					powerline,
+					'%{l}%{F#ffc00000}%{B#ff008000}%{+u} %%{asd}%{F-B--u}%{F#ff008000}%{B#ffc00000}>>%{F-B--u}%{F#ff008000}%{B#ffc00000}10%% %%%{F-B--u}%{F#ffc00000}>>%{F-B--u}%{r}%{F#ffc00000}<<%{F-B--u}%{F#ff804000}%{B#ffc00000}%{+u}C%{F-B--u}%{F#ff0000c0}%{B#ffc00000}<<%{F-B--u}%{F#ff008000}%{B#ff0000c0}D %{F-B--u}'
+				)
 
 
 if __name__ == '__main__':
