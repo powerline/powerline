@@ -469,6 +469,12 @@ Ipython
     Attribute ``prompt_count`` contains the so-called “history count” 
     (equivalent to ``\N`` in ``in_template``).
 
+Pdb
+---
+
+``pdb``
+    Currently active :py:class:`pdb.Pdb` instance.
+
 Segment class
 =============
 

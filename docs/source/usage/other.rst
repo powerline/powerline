@@ -124,3 +124,30 @@ the used profile:
 
 IPython=0.11* is not supported and does not work. IPython<0.10 was not 
 tested (not installable by pip).
+
+PDB prompt
+==========
+
+To use Powerline with PDB prompt you need to use custom class. Inherit your 
+class from :py:class:`pdb.Pdb` and decorate it with 
+:py:func:`powerline.bindings.pdb.use_powerline_prompt`:
+
+.. code-block:: Python
+
+   import pdb
+
+   from powerline.bindings.pdb import use_powerline_prompt
+
+   @use_powerline_prompt
+   class MyPdb(pdb.Pdb):
+       pass
+
+   MyPdb.run('some.code.to.debug()')
+
+. Alternatively you may use
+
+.. code-block:: bash
+
+   python -mpowerline.bindings.pdb path/to/script.py
+
+just like you used ``python -m pdb``.
