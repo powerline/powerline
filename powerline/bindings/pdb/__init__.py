@@ -16,6 +16,8 @@ if sys.version_info < (3,):
 	class PowerlineRenderBytesResult(bytes):
 		def __new__(cls, s, encoding=None):
 			encoding = encoding or s.encoding
+			if isinstance(s, PowerlineRenderResult):
+				return s.encode(encoding)
 			self = bytes.__new__(cls, s.encode(encoding) if isinstance(s, unicode) else s)
 			self.encoding = encoding
 			return self
@@ -57,12 +59,12 @@ if sys.version_info < (3,):
 		@staticmethod
 		def add(encoding, *args):
 			if any((isinstance(arg, unicode) for arg in args)):
-				return ''.join((
+				return PowerlineRenderResult(''.join((
 					arg
 					if isinstance(arg, unicode)
 					else arg.decode(encoding)
 					for arg in args
-				))
+				)), encoding)
 			else:
 				return PowerlineRenderBytesResult(b''.join(args), encoding=encoding)
 
@@ -91,6 +93,30 @@ if sys.version_info < (3,):
 
 		def __str__(self):
 			return PowerlineRenderBytesResult(self)
+
+		def __getitem__(self, *args):
+			return PowerlineRenderResult(unicode.__getitem__(self, *args))
+
+		def __getslice__(self, *args):
+			return PowerlineRenderResult(unicode.__getslice__(self, *args))
+
+		@staticmethod
+		def add(encoding, *args):
+			return PowerlineRenderResult(''.join((
+				arg
+				if isinstance(arg, unicode)
+				else arg.decode(encoding)
+				for arg in args
+			)), encoding)
+
+		def __add__(self, other):
+			return self.add(self.encoding, self, other)
+
+		def __radd__(self, other):
+			return self.add(self.encoding, other, self)
+
+		def encode(self, *args, **kwargs):
+			return PowerlineRenderBytesResult(unicode.encode(self, *args, **kwargs), args[0])
 else:
 	PowerlineRenderResult = str
 
