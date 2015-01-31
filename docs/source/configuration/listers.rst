@@ -23,3 +23,9 @@ Vim listers
 
 .. automodule:: powerline.listers.vim
    :members:
+
+Pdb listers
+-----------
+
+.. automodule:: powerline.listers.pdb
+   :members:

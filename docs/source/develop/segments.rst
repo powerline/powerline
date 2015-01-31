@@ -475,6 +475,15 @@ Pdb
 ``pdb``
     Currently active :py:class:`pdb.Pdb` instance.
 
+``curframe``
+    Frame which will be run next. Note: due to the existence of 
+    :py:func:`powerline.listers.pdb.frame_lister` one must not use 
+    ``segment_info['pdb'].curframe``.
+
+``initial_stack_length``
+    Equal to the length of :py:attr:`pdb.Pdb.stack` at the first invocation of 
+    the prompt decremented by one.
+
 Segment class
 =============
 

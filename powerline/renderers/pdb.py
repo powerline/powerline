@@ -9,10 +9,13 @@ class PDBRenderer(ReadlineRenderer):
 	'''PDB-specific powerline renderer
 	'''
 	pdb = None
+	initial_stack_length = None
 
 	def get_segment_info(self, segment_info, mode):
 		r = self.segment_info.copy()
 		r['pdb'] = self.pdb
+		r['initial_stack_length'] = self.initial_stack_length
+		r['curframe'] = self.pdb.curframe
 		return r
 
 	def set_pdb(self, pdb):
@@ -28,6 +31,8 @@ class PDBRenderer(ReadlineRenderer):
 		self.pdb = pdb
 
 	def render(self, **kwargs):
+		if self.initial_stack_length is None:
+			self.initial_stack_length = len(self.pdb.stack) - 1
 		return Renderer.render(self, **kwargs)
 
 

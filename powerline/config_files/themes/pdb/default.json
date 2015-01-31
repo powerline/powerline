@@ -1,20 +1,26 @@
 {
+	"default_module": "powerline.segments.pdb",
 	"segments": {
 		"left": [
 			{
-				"function": "powerline.segments.common.env.virtualenv",
-				"priority": 10
+				"function": "stack_depth"
 			},
 			{
-				"type": "string",
-				"contents": "In [",
-				"draw_soft_divider": false,
-				"highlight_groups": ["virtualenv"]
-			},
-			{
-				"type": "string",
-				"contents": "]",
-				"highlight_groups": ["virtualenv"]
+				"type": "segment_list",
+				"function": "powerline.listers.pdb.frame_lister",
+				"segments": [
+					{
+						"function": "current_file",
+						"after": ":"
+					},
+					{
+						"function": "current_line",
+						"after": " "
+					},
+					{
+						"function": "current_code_name"
+					}
+				]
 			}
 		]
 	}

@@ -1,0 +1,8 @@
+{
+	"groups": {
+		"current_line":      { "fg": "gray10", "bg": "gray4", "attrs": ["bold"] },
+		"current_file":      { "fg": "gray10", "bg": "gray4", "attrs": ["bold"] },
+		"current_code_name": { "fg": "gray9", "bg": "gray4", "attrs": ["bold"] },
+		"stack_depth":       { "fg": "gray1", "bg": "gray10", "attrs": ["bold"] }
+	}
+}
