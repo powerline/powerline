@@ -34,9 +34,14 @@ IPYPY_DEANSI_RE = re.compile(r'\033(?:\[(?:\?\d+[lh]|[^a-zA-Z]+[a-ln-zA-Z])|[=>]
 with codecs.open(fname, 'r', encoding='utf-8') as R:
 	with codecs.open(new_fname, 'w', encoding='utf-8') as W:
 		found_cd = False
+		i = -1
 		for line in (R if shell != 'fish' else R.read().split('\n')):
+			i += 1
 			if not found_cd:
-				found_cd = ('cd tests/shell/3rd' in line)
+				if shell == 'pdb':
+					found_cd = (i > 1)
+				else:
+					found_cd = ('cd tests/shell/3rd' in line)
 				continue
 			if 'true is the last line' in line:
 				break
@@ -101,4 +106,13 @@ with codecs.open(fname, 'r', encoding='utf-8') as R:
 			elif shell == 'rc':
 				if line == 'read() failed: Connection reset by peer\n':
 					line = ''
+			elif shell == 'pdb':
+				if is_pypy:
+					if line == '\033[?1h\033=\033[?25l\033[1A\n':
+						line = ''
+					line = IPYPY_DEANSI_RE.subn('', line)[0]
+				if line.startswith(('>',)):
+					line = ''
+				elif line == '-> self.quitting = 1\n':
+					line = '-> self.quitting = True\n'
 			W.write(line)

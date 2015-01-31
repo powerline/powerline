@@ -1,5 +1,7 @@
 #!/bin/sh
-set -e
+. tests/bot-ci/scripts/common/main.sh
+set +x
+
 : ${PYTHON:=python}
 FAIL_SUMMARY=""
 FAILED=0
@@ -113,10 +115,18 @@ do_run_test() {
 		sleep 0.1s
 	done
 	if ( \
-		test "x${SH}" = "xdash" ||
-		( \
+		test "x${SH}" = "xdash" \
+		|| ( \
 			test "x${SH}" = "xipython" \
-			&& ${PYTHON} -c 'import platform, sys; sys.exit(1 - (platform.python_implementation() == "PyPy"))' \
+			&& test "$PYTHON_IMPLEMENTATION" = "PyPy" \
+		) \
+		|| ( \
+			test "x${SH}" = "xpdb" \
+			&& ( test "$PYTHON_VERSION_MAJOR" -eq 3 \
+				&& test "$PYTHON_VERSION_MINOR" -eq 2 \
+				&& test "$PYTHON_IMPLEMENTATION" = "CPython" \
+			) \
+			|| test "$PYTHON_IMPLEMENTATION" = "PyPy"
 		) \
 	) ; then
 		# If I do not use this hack for dash then output will look like
@@ -126,7 +136,9 @@ do_run_test() {
 		#     …
 		#     prompt1> prompt2> …
 		while read -r line ; do
-			screen -S "$SESNAME" -p 0 -X stuff "$line$NL"
+			if test "$(screen -S "$SESNAME" -p 0 -X stuff "$line$NL")" = "No screen session found." ; then
+				break
+			fi
 			sleep 1
 		done < tests/test_shells/input.$SH
 	else
@@ -185,6 +197,9 @@ run_test() {
 	TEST_CLIENT="$2"
 	SH="$3"
 	local attempts=3
+	if test -n "$ONLY_SHELL$ONLY_TEST_TYPE$ONLY_TEST_CLIENT" ; then
+		attempts=1
+	fi
 	while test $attempts -gt 0 ; do
 		rm -f tests/shell/${SH}.${TEST_TYPE}.${TEST_CLIENT}.log
 		rm -f tests/shell/${SH}.${TEST_TYPE}.${TEST_CLIENT}.full.log
@@ -255,6 +270,9 @@ for pexe in powerline powerline-config ; do
 		exit 1
 	fi
 done
+
+ln -s python tests/shell/path/pdb
+PDB_PYTHON=pdb
 
 if test -z "$POWERLINE_RC_EXE" ; then
 	if which rc-status >/dev/null ; then
@@ -415,6 +433,18 @@ if ( test "x${ONLY_SHELL}" = "x" || test "x${ONLY_SHELL}" = "xzsh" ) \
 	if ! run_test zpython zpython zsh -f -i ; then
 		FAILED=1
 		FAIL_SUMMARY="${FAIL_SUMMARY}${NL}T zpython zsh -f -i"
+	fi
+fi
+
+if ( test "x${ONLY_SHELL}" = "x" || test "x${ONLY_SHELL}" = "xpdb" ) \
+	&& ( test "x${ONLY_TEST_TYPE}" = "x" || test "x${ONLY_TEST_TYPE}" = "xsubclass" )
+then
+	if ! ( test "$PYTHON_IMPLEMENTATION" = "PyPy" && test "$PYTHON_VERSION_MAJOR" = 2 ) ; then
+		echo "> pdb subclass"
+		if ! run_test pdb subclass $PDB_PYTHON "$PWD/tests/test_shells/pdb-main.py" ; then
+			FAILED=1
+			FAIL_SUMMARY="${FAIL_SUMMARY}${NL}T pdb $PDB_PYTHON -m $PWD/tests/test_shells/pdb-main.py"
+		fi
 	fi
 fi
 
