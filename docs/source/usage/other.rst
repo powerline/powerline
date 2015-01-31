@@ -152,4 +152,7 @@ class from :py:class:`pdb.Pdb` and decorate it with
 
 just like you used ``python -m pdb``.
 
-.. warning: PyPy is not supported, PyPy3 is.
+.. warning:
+   Using PyPy (not PyPy3) forces ASCII-only prompts. In other cases unicode 
+   characters are allowed, even if you use `pdbpp 
+   <https://pypi.python.org/pypi/pdbpp>`_.

@@ -1,6 +1,9 @@
 # vim:fileencoding=utf-8:noet
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
+import sys
+import platform
+
 from powerline.renderers.shell.readline import ReadlineRenderer
 from powerline.renderer import Renderer
 
@@ -34,6 +37,14 @@ class PDBRenderer(ReadlineRenderer):
 		if self.initial_stack_length is None:
 			self.initial_stack_length = len(self.pdb.stack) - 1
 		return Renderer.render(self, **kwargs)
+
+	if sys.version_info < (3,) and platform.python_implementation() == 'PyPy':
+		def do_render(self, **kwargs):
+			# Make sure that only ASCII characters survive
+			ret = super(PDBRenderer, self).do_render(**kwargs)
+			ret = ret.encode('ascii', 'replace')
+			ret = ret.decode('ascii')
+			return ret
 
 
 renderer = PDBRenderer
