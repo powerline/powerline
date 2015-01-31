@@ -111,8 +111,14 @@ do_run_test() {
 	done
 	# Wait for screen to initialize
 	sleep 1
-	while ! screen -S "$SESNAME" -p 0 -X width 300 1 ; do
+	local attempts=100
+	while ! screen -S "$SESNAME" -p 0 -X width 300 1 >/dev/null ; do
 		sleep 0.1s
+		attempts=$(( attempts - 1 ))
+		if test $attempts -eq 0 ; then
+			echo "Waiting for too long: assuming test failed"
+			return 1
+		fi
 	done
 	if ( \
 		test "x${SH}" = "xdash" \
