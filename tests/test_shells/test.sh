@@ -122,7 +122,8 @@ do_run_test() {
 		) \
 		|| ( \
 			test "x${SH}" = "xpdb" \
-			&& ( test "$PYTHON_VERSION_MAJOR" -eq 3 \
+			&& ( \
+				test "$PYTHON_VERSION_MAJOR" -eq 3 \
 				&& test "$PYTHON_VERSION_MINOR" -eq 2 \
 				&& test "$PYTHON_IMPLEMENTATION" = "CPython" \
 			) \
@@ -436,14 +437,21 @@ if ( test "x${ONLY_SHELL}" = "x" || test "x${ONLY_SHELL}" = "xzsh" ) \
 	fi
 fi
 
-if ( test "x${ONLY_SHELL}" = "x" || test "x${ONLY_SHELL}" = "xpdb" ) \
-	&& ( test "x${ONLY_TEST_TYPE}" = "x" || test "x${ONLY_TEST_TYPE}" = "xsubclass" )
-then
+if  test "x${ONLY_SHELL}" = "x" || test "x${ONLY_SHELL}" = "xpdb" ; then
 	if ! ( test "$PYTHON_IMPLEMENTATION" = "PyPy" && test "$PYTHON_VERSION_MAJOR" = 2 ) ; then
-		echo "> pdb subclass"
-		if ! run_test pdb subclass $PDB_PYTHON "$PWD/tests/test_shells/pdb-main.py" ; then
-			FAILED=1
-			FAIL_SUMMARY="${FAIL_SUMMARY}${NL}T pdb $PDB_PYTHON -m $PWD/tests/test_shells/pdb-main.py"
+		if test "x${ONLY_TEST_TYPE}" = "x" || test "x${ONLY_TEST_TYPE}" = "xsubclass" ; then
+			echo "> pdb subclass"
+			if ! run_test subclass python $PDB_PYTHON "$PWD/tests/test_shells/pdb-main.py" ; then
+				FAILED=1
+				FAIL_SUMMARY="${FAIL_SUMMARY}${NL}T pdb $PDB_PYTHON $PWD/tests/test_shells/pdb-main.py"
+			fi
+		fi
+		if test "x${ONLY_TEST_TYPE}" = "x" || test "x${ONLY_TEST_TYPE}" = "xmodule" ; then
+			echo "> pdb module"
+			if ! run_test module python $PDB_PYTHON -mpowerline.bindings.pdb "$PWD/tests/test_shells/pdb-script.py" ; then
+				FAILED=1
+				FAIL_SUMMARY="${FAIL_SUMMARY}${NL}T pdb $PDB_PYTHON -mpowerline.bindings.pdb $PWD/tests/test_shells/pdb-script"
+			fi
 		fi
 	fi
 fi
