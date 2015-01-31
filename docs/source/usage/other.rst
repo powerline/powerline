@@ -125,6 +125,8 @@ the used profile:
 IPython=0.11* is not supported and does not work. IPython<0.10 was not 
 tested (not installable by pip).
 
+.. _pdb-prompt:
+
 PDB prompt
 ==========
 
