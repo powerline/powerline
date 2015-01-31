@@ -464,9 +464,13 @@ if  test "x${ONLY_SHELL}" = "x" || test "x${ONLY_SHELL}" = "xpdb" ; then
 		fi
 		if test "x${ONLY_TEST_TYPE}" = "x" || test "x${ONLY_TEST_TYPE}" = "xmodule" ; then
 			echo "> pdb module"
-			if ! run_test module python $PDB_PYTHON -mpowerline.bindings.pdb "$PWD/tests/test_shells/pdb-script.py" ; then
+			MODULE="powerline.bindings.pdb"
+			if test "$PYTHON_MM" = "2.6" ; then
+				MODULE="powerline.bindings.pdb.__main__"
+			fi
+			if ! run_test module python $PDB_PYTHON -m$MODULE "$PWD/tests/test_shells/pdb-script.py" ; then
 				FAILED=1
-				FAIL_SUMMARY="${FAIL_SUMMARY}${NL}T pdb $PDB_PYTHON -mpowerline.bindings.pdb $PWD/tests/test_shells/pdb-script"
+				FAIL_SUMMARY="${FAIL_SUMMARY}${NL}T pdb $PDB_PYTHON -m$MODULE $PWD/tests/test_shells/pdb-script"
 			fi
 		fi
 	fi

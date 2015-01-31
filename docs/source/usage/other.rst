@@ -154,6 +154,10 @@ class from :py:class:`pdb.Pdb` and decorate it with
 
 just like you used ``python -m pdb``.
 
+.. note:
+   If you are using Python-2.6 you need to use ``python 
+   -mpowerline.bindings.pdb.__main__``, not what is shown above.
+
 .. warning:
    Using PyPy (not PyPy3) forces ASCII-only prompts. In other cases unicode 
    characters are allowed, even if you use `pdbpp 
