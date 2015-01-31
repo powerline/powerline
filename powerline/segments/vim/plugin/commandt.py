@@ -50,6 +50,8 @@ def finder(pl):
 	$command_t to add them). All Command-T finders have ``CommandT::`` module 
 	prefix, but it is stripped out (actually, any ``CommandT::`` substring will 
 	be stripped out).
+
+	Highlight groups used: ``commandt:finder``.
 	'''
 	initialize()
 	vim.command('ruby $powerline.commandt_set_active_finder')
@@ -80,6 +82,8 @@ def path(pl):
 	$command_t.active_finder is required in order to omit displaying path for 
 	finders ``MRUBufferFinder``, ``BufferFinder``, ``TagFinder`` and 
 	``JumpFinder`` (pretty much any finder, except ``FileFinder``).
+
+	Highlight groups used: ``commandt:path``.
 	'''
 	initialize()
 	vim.command('ruby $powerline.commandt_set_active_finder')

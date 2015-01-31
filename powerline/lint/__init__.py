@@ -233,6 +233,7 @@ segment_spec = Spec(
 	segments=sub_segments_spec,
 ).func(check_full_segment_data)
 sub_segments_spec.optional().list(segment_spec)
+del sub_segments_spec
 segments_spec = Spec().optional().list(segment_spec).copy
 segdict_spec = Spec(
 	left=segments_spec().context_message('Error while loading segments from left side (key {key})'),
@@ -546,6 +547,8 @@ def check(paths=None, debug=False, echoerr=echoerr, require_ext=None):
 				econfigs.get('__main__'),
 				ecconfigs,
 			)
+			if not (mconfigs[0] or mconfigs[2]):
+				continue
 			config = None
 			for mconfig in mconfigs:
 				if not mconfig:
@@ -554,7 +557,7 @@ def check(paths=None, debug=False, echoerr=echoerr, require_ext=None):
 					config = mergedicts_copy(config, mconfig)
 				else:
 					config = mconfig
-			colorscheme_configs[colorscheme] = config
+			colorscheme_configs[ext][colorscheme] = config
 
 	theme_configs = dict2(loaded_configs['themes'])
 	top_theme_configs = dict(loaded_configs['top_themes'])
