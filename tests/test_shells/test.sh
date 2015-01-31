@@ -117,6 +117,16 @@ do_run_test() {
 		attempts=$(( attempts - 1 ))
 		if test $attempts -eq 0 ; then
 			echo "Waiting for too long: assuming test failed"
+			echo "Failed ${SH}. Full output:"
+			echo '============================================================'
+			cat tests/shell/${SH}.${TEST_TYPE}.${TEST_CLIENT}.full.log
+			echo '____________________________________________________________'
+			if test "x$POWERLINE_TEST_NO_CAT_V" != "x1" ; then
+				echo "Full output (cat -v):"
+				echo '============================================================'
+				cat -v tests/shell/${SH}.${TEST_TYPE}.${TEST_CLIENT}.full.log
+				echo '____________________________________________________________'
+			fi
 			return 1
 		fi
 	done
