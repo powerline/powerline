@@ -151,3 +151,5 @@ class from :py:class:`pdb.Pdb` and decorate it with
    python -mpowerline.bindings.pdb path/to/script.py
 
 just like you used ``python -m pdb``.
+
+.. warning: PyPy is not supported, PyPy3 is.
