@@ -499,6 +499,56 @@ def check_segment_function(function_name, data, context, echoerr):
 	return True, False, False
 
 
+def hl_group_in_colorscheme(hl_group, cconfig, allow_gradients, data, context, echoerr):
+	havemarks(hl_group, cconfig)
+	if hl_group not in cconfig.get('groups', {}):
+		return False
+	elif not allow_gradients or allow_gradients == 'force':
+		group_config = cconfig['groups'][hl_group]
+		while isinstance(group_config, unicode):
+			try:
+				group_config = cconfig['groups'][group_config]
+			except KeyError:
+				# No such group. Error was already reported when checking 
+				# colorschemes.
+				return True
+		havemarks(group_config)
+		hadgradient = False
+		for ckey in ('fg', 'bg'):
+			color = group_config.get(ckey)
+			if not color:
+				# No color. Error was already reported when checking 
+				# colorschemes.
+				return True
+			havemarks(color)
+			# Gradients are only allowed for function segments. Note that 
+			# whether *either* color or gradient exists should have been 
+			# already checked
+			hascolor = color in data['colors_config'].get('colors', {})
+			hasgradient = color in data['colors_config'].get('gradients', {})
+			if hasgradient:
+				hadgradient = True
+			if allow_gradients is False and not hascolor and hasgradient:
+				echoerr(
+					context='Error while checking highlight group in theme (key {key})'.format(
+						key=context.key),
+					context_mark=hl_group.mark,
+					problem='group {0} is using gradient {1} instead of a color'.format(hl_group, color),
+					problem_mark=color.mark
+				)
+				return False
+		if allow_gradients == 'force' and not hadgradient:
+			echoerr(
+				context='Error while checking highlight group in theme (key {key})'.format(
+					key=context.key),
+				context_mark=hl_group.mark,
+				problem='group {0} should have at least one gradient color, but it has no'.format(hl_group),
+				problem_mark=group_config.mark
+			)
+			return False
+	return True
+
+
 def hl_exists(hl_group, data, context, echoerr, allow_gradients=False):
 	havemarks(hl_group)
 	ext = data['ext']
@@ -507,45 +557,14 @@ def hl_exists(hl_group, data, context, echoerr, allow_gradients=False):
 		# twice
 		return []
 	r = []
+	found = False
 	for colorscheme, cconfig in data['colorscheme_configs'][ext].items():
-		if hl_group not in cconfig.get('groups', {}):
+		if hl_group_in_colorscheme(hl_group, cconfig, allow_gradients, data, context, echoerr):
+			found = True
+		else:
 			r.append(colorscheme)
-		elif not allow_gradients or allow_gradients == 'force':
-			group_config = cconfig['groups'][hl_group]
-			havemarks(group_config)
-			hadgradient = False
-			for ckey in ('fg', 'bg'):
-				color = group_config.get(ckey)
-				if not color:
-					# No color. Error was already reported.
-					continue
-				havemarks(color)
-				# Gradients are only allowed for function segments. Note that 
-				# whether *either* color or gradient exists should have been 
-				# already checked
-				hascolor = color in data['colors_config'].get('colors', {})
-				hasgradient = color in data['colors_config'].get('gradients', {})
-				if hasgradient:
-					hadgradient = True
-				if allow_gradients is False and not hascolor and hasgradient:
-					echoerr(
-						context='Error while checking highlight group in theme (key {key})'.format(
-							key=context.key),
-						context_mark=hl_group.mark,
-						problem='group {0} is using gradient {1} instead of a color'.format(hl_group, color),
-						problem_mark=color.mark
-					)
-					r.append(colorscheme)
-					continue
-			if allow_gradients == 'force' and not hadgradient:
-				echoerr(
-					context='Error while checking highlight group in theme (key {key})'.format(
-						key=context.key),
-					context_mark=hl_group.mark,
-					problem='group {0} should have at least one gradient color, but it has no'.format(hl_group),
-					problem_mark=group_config.mark
-				)
-				r.append(colorscheme)
+	if not found:
+		pass
 	return r
 
 
