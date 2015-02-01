@@ -111,6 +111,8 @@ with codecs.open(fname, 'r', encoding='utf-8') as R:
 					if line == '\033[?1h\033=\033[?25l\033[1A\n':
 						line = ''
 					line = IPYPY_DEANSI_RE.subn('', line)[0]
+					if line == '\n':
+						line = ''
 				if line.startswith(('>',)):
 					line = ''
 				elif line == '-> self.quitting = 1\n':
