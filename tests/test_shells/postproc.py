@@ -38,10 +38,11 @@ with codecs.open(fname, 'r', encoding='utf-8') as R:
 		for line in (R if shell != 'fish' else R.read().split('\n')):
 			i += 1
 			if not found_cd:
-				if shell == 'pdb':
-					found_cd = (i > 1)
-				else:
-					found_cd = ('cd tests/shell/3rd' in line)
+				found_cd = (
+					'class Foo(object):' in line
+					if shell == 'pdb' else
+					'cd tests/shell/3rd' in line
+				)
 				continue
 			if 'true is the last line' in line:
 				break
