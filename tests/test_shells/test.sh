@@ -139,11 +139,13 @@ do_run_test() {
 		|| ( \
 			test "x${SH}" = "xpdb" \
 			&& ( \
-				test "$PYTHON_VERSION_MAJOR" -eq 3 \
-				&& test "$PYTHON_VERSION_MINOR" -eq 2 \
-				&& test "$PYTHON_IMPLEMENTATION" = "CPython" \
+				( \
+					test "$PYTHON_VERSION_MAJOR" -eq 3 \
+					&& test "$PYTHON_VERSION_MINOR" -eq 2 \
+					&& test "$PYTHON_IMPLEMENTATION" = "CPython" \
+				) \
+				|| test "$PYTHON_IMPLEMENTATION" = "PyPy" \
 			) \
-			|| test "$PYTHON_IMPLEMENTATION" = "PyPy"
 		) \
 	) ; then
 		# If I do not use this hack for dash then output will look like
