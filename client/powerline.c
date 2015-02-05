@@ -42,6 +42,26 @@ void do_write(int sd, const char *raw, size_t len) {
 	}
 }
 
+inline size_t true_sun_len(const struct sockaddr_un *ptr) {
+#ifdef __linux__
+	/* Because SUN_LEN uses strlen and abstract namespace paths begin
+	 * with a null byte, SUN_LEN is broken for these. Passing the full
+	 * struct size also fails on Linux, so compute manually. The
+	 * abstract namespace is Linux-only. */
+	if (ptr->sun_path[0] == '\0') {
+		return sizeof(ptr->sun_family) + strlen(ptr->sun_path + 1) + 1;
+	}
+#endif
+#ifdef SUN_LEN
+	/* If the vendor provided SUN_LEN, we may as well use it. */
+	return SUN_LEN(ptr);
+#else
+	/* SUN_LEN is not POSIX, so if it was not provided, use the struct
+	 * size as a fallback. */
+	return sizeof(struct sockaddr_un);
+#endif
+}
+
 #ifdef __linux__
 # define ADDRESS_TEMPLATE "powerline-ipc-%d"
 # define A +1
@@ -91,7 +111,7 @@ int main(int argc, char *argv[]) {
 	server.sun_family = AF_UNIX;
 	strncpy(server.sun_path A, address, strlen(address));
 
-	if (connect(sd, (struct sockaddr *) &server, (socklen_t) (sizeof(server.sun_family) + strlen(address) A)) < 0) {
+	if (connect(sd, (struct sockaddr *) &server, true_sun_len(&server)) < 0) {
 		close(sd);
 		/* We failed to connect to the daemon, execute powerline instead */
 		argc = (argc < NEW_ARGV_SIZE - 1) ? argc : NEW_ARGV_SIZE - 1;
