@@ -16,7 +16,7 @@ Powerline provides default configurations in the following locations:
 
 :ref:`Main configuration <config-main>`
     :file:`powerline/config.json`
-:ref:`Colorschemes <config-colors>`
+:ref:`Colorschemes <config-colorschemes>`
     :file:`powerline/colorschemes/{name}.json`, 
     :file:`powerline/colorscheme/{extension}/__main__.json`, 
     :file:`powerline/colorschemes/{extension}/{name}.json`
