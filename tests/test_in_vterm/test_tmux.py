@@ -27,6 +27,60 @@ def cell_properties_key_to_shell_escape(cell_properties_key):
 	))
 
 
+def test_expected_result(p, expected_result, cols, rows):
+	last_line = []
+	for col in range(cols):
+		last_line.append(p[rows - 1, col])
+	attempts = 10
+	result = None
+	while attempts:
+		result = tuple((
+			(key, ''.join((i.text for i in subline)))
+			for key, subline in groupby(last_line, lambda i: i.cell_properties_key)
+		))
+		if result == expected_result:
+			return True
+		attempts -= 1
+		print('Actual result does not match expected. Attempts left: {0}.'.format(attempts))
+		sleep(10)
+	print('Result:')
+	shesc_result = ''.join((
+		'{0}{1}\x1b[m'.format(cell_properties_key_to_shell_escape(key), text)
+		for key, text in result
+	))
+	print(shesc_result)
+	print('Expected:')
+	shesc_expected_result = ''.join((
+		'{0}{1}\x1b[m'.format(cell_properties_key_to_shell_escape(key), text)
+		for key, text in expected_result
+	))
+	print(shesc_expected_result)
+	p.send(b'powerline-config tmux setup\n')
+	sleep(5)
+	print('Screen:')
+	screen = []
+	for i in range(rows):
+		screen.append([])
+		for j in range(cols):
+			screen[-1].append(p[i, j])
+	print('\n'.join(
+		''.join((
+			'{0}{1}\x1b[m'.format(
+				cell_properties_key_to_shell_escape(i.cell_properties_key),
+				i.text
+			) for i in line
+		))
+		for line in screen
+	))
+	a = shesc_result.replace('\x1b', '\\e') + '\n'
+	b = shesc_expected_result.replace('\x1b', '\\e') + '\n'
+	print('_' * 80)
+	print('Diff:')
+	print('=' * 80)
+	print(''.join((u(line) for line in ndiff([a], [b]))))
+	return False
+
+
 def main():
 	VTERM_TEST_DIR = os.path.abspath('tests/vterm')
 	vterm_path = os.path.join(VTERM_TEST_DIR, 'path')
@@ -104,13 +158,6 @@ def main():
 		)
 		p.start()
 		sleep(10)
-		last_line = []
-		for col in range(cols):
-			last_line.append(p[rows - 1, col])
-		result = tuple((
-			(key, ''.join((i.text for i in subline)))
-			for key, subline in groupby(last_line, lambda i: i.cell_properties_key)
-		))
 		expected_result_new = (
 			(((0, 0, 0), (243, 243, 243), 1, 0, 0), ' 0 '),
 			(((243, 243, 243), (11, 11, 11), 0, 0, 0), ' '),
@@ -151,50 +198,12 @@ def main():
 			(((88, 88, 88), (11, 11, 11), 0, 0, 0), ' '),
 			(((199, 199, 199), (88, 88, 88), 0, 0, 0), ' S1 string here '),
 		)
-		print('Result:')
-		shesc_result = ''.join((
-			'{0}{1}\x1b[m'.format(cell_properties_key_to_shell_escape(key), text)
-			for key, text in result
-		))
-		print(shesc_result)
-		print('Expected:')
 		tmux_version = get_tmux_version(get_fallback_logger())
 		if tmux_version < (1, 8):
 			expected_result = expected_result_old
 		else:
 			expected_result = expected_result_new
-		shesc_expected_result = ''.join((
-			'{0}{1}\x1b[m'.format(cell_properties_key_to_shell_escape(key), text)
-			for key, text in expected_result
-		))
-		print(shesc_expected_result)
-		if result == expected_result:
-			return True
-		else:
-			p.send(b'powerline-config tmux setup\n')
-			sleep(5)
-			print('Screen:')
-			screen = []
-			for i in range(rows):
-				screen.append([])
-				for j in range(cols):
-					screen[-1].append(p[i, j])
-			print('\n'.join(
-				''.join((
-					'{0}{1}\x1b[m'.format(
-						cell_properties_key_to_shell_escape(i.cell_properties_key),
-						i.text
-					) for i in line
-				))
-				for line in screen
-			))
-			a = shesc_result.replace('\x1b', '\\e') + '\n'
-			b = shesc_expected_result.replace('\x1b', '\\e') + '\n'
-			print('_' * 80)
-			print('Diff:')
-			print('=' * 80)
-			print(''.join((u(line) for line in ndiff([a], [b]))))
-			return False
+		return test_expected_result(p, expected_result, cols, rows)
 	finally:
 		check_call([tmux_exe, '-S', socket_path, 'kill-server'], env={
 			'PATH': vterm_path,
