@@ -7,7 +7,7 @@ import os
 from functools import partial
 from collections import namedtuple
 
-from powerline.segments import shell, tmux
+from powerline.segments import shell, tmux, pdb
 from powerline.lib.vcs import get_fallback_create_watcher
 from powerline.lib.unicode import out_u
 
@@ -1306,6 +1306,52 @@ class TestVim(TestCase):
 	@classmethod
 	def tearDownClass(cls):
 		sys.path.pop(0)
+
+
+class TestPDB(TestCase):
+	def test_current_line(self):
+		pl = Pl()
+		self.assertEqual(pdb.current_line(pl=pl, segment_info={'curframe': Args(f_lineno=10)}), '10')
+
+	def test_current_file(self):
+		pl = Pl()
+		cf = lambda **kwargs: pdb.current_file(
+			pl=pl,
+			segment_info={'curframe': Args(f_code=Args(co_filename='/tmp/abc.py'))},
+			**kwargs
+		)
+		self.assertEqual(cf(), 'abc.py')
+		self.assertEqual(cf(basename=True), 'abc.py')
+		self.assertEqual(cf(basename=False), '/tmp/abc.py')
+
+	def test_current_code_name(self):
+		pl = Pl()
+		ccn = lambda **kwargs: pdb.current_code_name(
+			pl=pl,
+			segment_info={'curframe': Args(f_code=Args(co_name='<module>'))},
+			**kwargs
+		)
+		self.assertEqual(ccn(), '<module>')
+
+	def test_current_context(self):
+		pl = Pl()
+		cc = lambda **kwargs: pdb.current_context(
+			pl=pl,
+			segment_info={'curframe': Args(f_code=Args(co_name='<module>', co_filename='/tmp/abc.py'))},
+			**kwargs
+		)
+		self.assertEqual(cc(), 'abc.py')
+
+	def test_stack_depth(self):
+		pl = Pl()
+		sd = lambda **kwargs: pdb.stack_depth(
+			pl=pl,
+			segment_info={'pdb': Args(stack=[1, 2, 3]), 'initial_stack_length': 1},
+			**kwargs
+		)
+		self.assertEqual(sd(), '2')
+		self.assertEqual(sd(full_stack=False), '2')
+		self.assertEqual(sd(full_stack=True), '3')
 
 
 old_cwd = None

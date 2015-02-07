@@ -239,3 +239,9 @@ In order to keep shell prompt, but avoid launching Python twice to get unused
 In order to remove additional space from the end of the right prompt in fish 
 that was added in order to support multiline prompt ``$POWERLINE_NO_FISH_ABOVE`` 
 or ``$POWERLINE_NO_SHELL_ABOVE`` variable should be set.
+
+PDB overrides
+=============
+
+Like shell bindings :ref:`PDB bindings <pdb-prompt>` take overrides from 
+:ref:`environment variables <local-configuration-overrides-env>`.

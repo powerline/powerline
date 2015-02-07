@@ -15,7 +15,7 @@ fn _powerline_continuation_prompt {
 	_powerline_prompt --renderer-arg 'local_theme=continuation' $*
 }
 fn _powerline_prompt {
-	$POWERLINE_COMMAND $POWERLINE_COMMAND_ARGS shell aboveleft -r.rcsh --last-pipe-status $^_POWERLINE_STATUS --last-exit-code $_POWERLINE_STATUS($#_POWERLINE_STATUS) --jobnum $_POWERLINE_JOBNUM --renderer-arg 'client_id='$pid $*
+	$POWERLINE_COMMAND $POWERLINE_COMMAND_ARGS shell aboveleft -r.readline --last-pipe-status $^_POWERLINE_STATUS --last-exit-code $_POWERLINE_STATUS($#_POWERLINE_STATUS) --jobnum $_POWERLINE_JOBNUM --renderer-arg 'client_id='$pid $*
 }
 fn _powerline_set_prompt {
 	_POWERLINE_STATUS = ( $status )
