@@ -42,7 +42,7 @@ def test_expected_result(p, expected_result, cols, rows):
 			return True
 		attempts -= 1
 		print('Actual result does not match expected. Attempts left: {0}.'.format(attempts))
-		sleep(10)
+		sleep(2)
 	print('Result:')
 	shesc_result = ''.join((
 		'{0}{1}\x1b[m'.format(cell_properties_key_to_shell_escape(key), text)
@@ -157,7 +157,7 @@ def main():
 			},
 		)
 		p.start()
-		sleep(10)
+		sleep(2)
 		expected_result_new = (
 			(((0, 0, 0), (243, 243, 243), 1, 0, 0), ' 0 '),
 			(((243, 243, 243), (11, 11, 11), 0, 0, 0), ' '),
