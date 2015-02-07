@@ -33,6 +33,8 @@ corresponds to :file:`~/.config/powerline` on both platforms.
 If per-instance configuration is needed please refer to :ref:`Local 
 configuration overrides <local-configuration-overrides>`.
 
+.. _configuration-merging:
+
 .. note::
    Existing multiple configuration files that have the same name, but are placed 
    in different directories, will be merged. Merging happens in the following 
@@ -63,20 +65,21 @@ Quick setup guide
 
 This guide will help you with the initial configuration of Powerline.
 
-Start by copying the entire set of default configuration files to the 
-corresponding path in your user config directory:
-
-.. code-block:: sh
-
-   mkdir ~/.config/powerline
-   cp -R /path/to/powerline/config_files/* ~/.config/powerline
+Look at configuration in :file:`{powerline_root}/powerline/config_files`. If you 
+want to modify some file you can create :file:`~/.config/powerline` directory 
+and put modifications there: all configuration files are :ref:`merged 
+<configuration-merging>` with each other.
 
 Each extension (vim, tmux, etc.) has its own theme, and they are located in 
-:file:`{config directory}/themes/{extension}/default.json`.
+:file:`{config directory}/themes/{extension}/default.json`. Best way to modify 
+it is to copy this theme as a whole, remove ``segment_data`` key with 
+corresponding value if present (unless you need to modify it, in which case only 
+modifications must be left) and do necessary modifications in the list of 
+segments (lists are not subject to merging: this is why you need a copy).
 
-If you want to move, remove or customize any of the provided segments, you 
-can do that by updating the segment dictionary in the theme you want to 
-customize. A segment dictionary looks like this:
+If you want to move, remove or customize any of the provided segments in the 
+copy, you can do that by updating the segment dictionary in the theme you want 
+to customize. A segment dictionary looks like this:
 
 .. code-block:: javascript
 
@@ -92,6 +95,11 @@ prompt or statusline.
 .. note:: It’s essential that the contents of all your configuration files 
    is valid JSON! It’s strongly recommended that you run your configuration 
    files through ``jsonlint`` after changing them.
+
+.. note::
+   If your modifications appear not to work, run :ref:`powerline-lint script 
+   <command-powerline-lint>`. This script should show you the location of the 
+   error.
 
 Some segments need a user configuration to work properly. Here’s a couple of 
 segments that you may want to customize right away:
