@@ -29,7 +29,7 @@ def compile_client():
 	else:
 		from distutils.ccompiler import new_compiler
 		compiler = new_compiler().compiler
-		cflags = os.environ.get('CFLAGS', '-O3')
+		cflags = os.environ.get('CFLAGS', str('-O3'))
 		# A normal split would do a split on each space which might be incorrect. The
 		# shlex will not split if a space occurs in an arguments value.
 		subprocess.check_call(compiler + shlex.split(cflags) + ['client/powerline.c', '-o', 'scripts/powerline'])
