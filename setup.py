@@ -8,6 +8,7 @@ import subprocess
 import logging
 import shlex
 
+from traceback import print_exc
 from setuptools import setup, find_packages
 
 
@@ -58,10 +59,13 @@ else:
 
 
 def get_version():
+	base_version = '2.0'
+	base_version += '.dev9999'
 	try:
-		return 'dev-' + subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip()
-	except Exception as e:
-		return 'dev'
+		return base_version + '+git.' + str(subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip())
+	except Exception:
+		print_exc()
+		return base_version
 
 
 setup(
