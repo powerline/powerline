@@ -319,6 +319,24 @@ export ADDRESS="powerline-ipc-test-$$"
 export PYTHON
 echo "Powerline address: $ADDRESS"
 
+check_test_client() {
+	local executable="$1"
+	local client_type="$2"
+	local actual_mime_type="$(file --mime-type --brief "$executable")"
+	local expected_mime_type
+	case "$client_type" in
+		C)      expected_mime_type="application/x-executable" ;;
+		python) expected_mime_type="text/x-python" ;;
+		render) expected_mime_type="text/x-python" ;;
+		shell)  expected_mime_type="text/x-shellscript" ;;
+	esac
+	if test "$expected_mime_type" != "$actual_mime_type" ; then
+		echo "Expected $executable to have MIME type $expected_mime_type, but got $actual_mime_type"
+		FAILED=1
+		FAIL_SUMMARY="${FAIL_SUMMARY}${NL}M ${executable}"
+	fi
+}
+
 if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || test "x${ONLY_SHELL}" = xbusybox || test "x${ONLY_SHELL}" = xrc ; then
 	scripts/powerline-config shell command
 
@@ -356,6 +374,7 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 				*powerline.py)     TEST_CLIENT=python ;;
 				*powerline.sh)     TEST_CLIENT=shell ;;
 			esac
+			check_test_client "$POWERLINE_COMMAND" $TEST_CLIENT
 			if test "$TEST_CLIENT" = render && test "$TEST_TYPE" = daemon ; then
 				continue
 			fi
