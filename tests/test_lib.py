@@ -38,10 +38,19 @@ except ImportError:
 else:
 	use_mercurial = True
 
+try:
+	import pysvn
+	call(['svnadmin'], stdout=PIPE)
+except (ImportError, OSError):
+	use_subversion = False
+else:
+	use_subversion = True
+
 
 GIT_REPO = 'git_repo' + os.environ.get('PYTHON', '')
 HG_REPO = 'hg_repo' + os.environ.get('PYTHON', '')
 BZR_REPO = 'bzr_repo' + os.environ.get('PYTHON', '')
+SVN_REPO = 'svn_repo' + os.environ.get('PYTHON', '')
 
 
 def thread_number():
@@ -583,6 +592,25 @@ class TestVCS(TestCase):
 			self.assertEqual(repo.status('file'), 'A')
 		os.remove(os.path.join(HG_REPO, 'file'))
 
+	def test_subversion(self):
+		if not use_subversion:
+			raise SkipTest('PySVN/svnadmin is not available')
+		client = pysvn.Client()
+		create_watcher = get_fallback_create_watcher()
+		repo = guess(path=SVN_REPO, create_watcher=create_watcher)
+		self.assertNotEqual(repo, None)
+		self.assertEqual(repo.branch(), '/:r0')
+		self.assertEqual(repo.status(), None)
+		with open(os.path.join(SVN_REPO, 'file'), 'w') as f:
+			f.write('abc')
+			f.flush()
+			self.assertEqual(repo.status(), ' U')
+			self.assertEqual(repo.status('file'), 'U')
+			client.add(f.name)
+			self.assertEqual(repo.status(), 'D ')
+			self.assertEqual(repo.status('file'), 'A')
+		os.remove(os.path.join(SVN_REPO, 'file'))
+
 	def test_bzr(self):
 		if not use_bzr:
 			raise SkipTest('Bazaar is not available')
@@ -677,10 +705,14 @@ class TestVCS(TestCase):
 			call(['bzr', 'config', 'email=Foo <bar@example.org>'], cwd=BZR_REPO)
 			call(['bzr', 'config', 'nickname=test_powerline'], cwd=BZR_REPO)
 			call(['bzr', 'config', 'create_signatures=0'], cwd=BZR_REPO)
+		if use_subversion:
+			call(['svnadmin', 'create', SVN_REPO + '.base'], stdout=PIPE)
+			client = pysvn.Client()
+			client.checkout('file://' + os.path.abspath(SVN_REPO + '.base'), SVN_REPO)
 
 	@classmethod
 	def tearDownClass(cls):
-		for repo_dir in [GIT_REPO] + ([HG_REPO] if use_mercurial else []) + ([BZR_REPO] if use_bzr else []):
+		for repo_dir in [GIT_REPO] + ([HG_REPO] if use_mercurial else []) + ([BZR_REPO] if use_bzr else []) + ([SVN_REPO, SVN_REPO + '.base'] if use_subversion else []):
 			shutil.rmtree(repo_dir)
 		if use_mercurial:
 			if cls.powerline_old_HGRCPATH is None:
