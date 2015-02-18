@@ -1,0 +1,22 @@
+
+#------------------------------------------------------------------------------
+# $File: hitachi-sh,v 1.6 2013/01/29 19:31:33 christos Exp $
+# hitach-sh: file(1) magic for Hitachi Super-H
+#
+# Super-H COFF
+#
+# below test line conflicts with 2nd NTFS filesystem sector 
+0	beshort		0x0500		Hitachi SH big-endian COFF
+# 2nd NTFS filesystem sector often starts with 0x05004e00 for unicode string 5 NTLDR
+#0	ubelong&0xFFFFNMPQ	0x0500NMPQ     Hitachi SH big-endian COFF
+>18	beshort&0x0002	=0x0000		object
+>18	beshort&0x0002	=0x0002		executable
+>18	beshort&0x0008	=0x0008		\b, stripped
+>18	beshort&0x0008	=0x0000		\b, not stripped
+#
+0	leshort		0x0550		Hitachi SH little-endian COFF
+>18	leshort&0x0002	=0x0000		object
+>18	leshort&0x0002	=0x0002		executable
+>18	leshort&0x0008	=0x0008		\b, stripped
+>18	leshort&0x0008	=0x0000		\b, not stripped
+

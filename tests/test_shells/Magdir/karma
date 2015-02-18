@@ -1,0 +1,9 @@
+
+#------------------------------------------------------------------------------
+# $File: karma,v 1.7 2014/04/30 21:41:02 christos Exp $
+# karma:  file(1) magic for Karma data files
+#
+# From <rgooch@atnf.csiro.au>
+
+0	string		KarmaRHD Version	Karma Data Structure Version
+>16	belong		x		%u

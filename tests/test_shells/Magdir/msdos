@@ -1,0 +1,883 @@
+
+#------------------------------------------------------------------------------
+# $File: msdos,v 1.100 2014/06/03 19:17:27 christos Exp $
+# msdos:  file(1) magic for MS-DOS files
+#
+
+# .BAT files (Daniel Quinlan, quinlan@yggdrasil.com)
+# updated by Joerg Jenderek at Oct 2008,Apr 2011
+0	string/t	@			
+>1	string/cW	\ echo\ off	DOS batch file text
+!:mime	text/x-msdos-batch
+>1	string/cW	echo\ off	DOS batch file text
+!:mime	text/x-msdos-batch
+>1	string/cW	rem		DOS batch file text
+!:mime	text/x-msdos-batch
+>1	string/cW	set\ 		DOS batch file text
+!:mime	text/x-msdos-batch
+
+
+# OS/2 batch files are REXX. the second regex is a bit generic, oh well
+# the matched commands seem to be common in REXX and uncommon elsewhere
+100	search/0xffff   rxfuncadd
+>100	regex/c =^[\ \t]{0,10}call[\ \t]{1,10}rxfunc	OS/2 REXX batch file text
+100	search/0xffff   say
+>100	regex/c =^[\ \t]{0,10}say\ ['"]			OS/2 REXX batch file text
+
+0	leshort		0x14c	MS Windows COFF Intel 80386 object file
+#>4	ledate		x	stamp %s
+0	leshort		0x166	MS Windows COFF MIPS R4000 object file
+#>4	ledate		x	stamp %s
+0	leshort		0x184	MS Windows COFF Alpha object file
+#>4	ledate		x	stamp %s
+0	leshort		0x268	MS Windows COFF Motorola 68000 object file
+#>4	ledate		x	stamp %s
+0	leshort		0x1f0	MS Windows COFF PowerPC object file
+#>4	ledate		x	stamp %s
+0	leshort		0x290	MS Windows COFF PA-RISC object file
+#>4	ledate		x	stamp %s
+
+# Tests for various EXE types.
+#
+# Many of the compressed formats were extraced from IDARC 1.23 source code.
+#
+0	string/b	MZ
+# All non-DOS EXE extensions have the relocation table more than 0x40 bytes into the file.
+>0x18	leshort <0x40 MS-DOS executable
+!:mime	application/x-dosexec
+# These traditional tests usually work but not always.  When test quality support is
+# implemented these can be turned on.
+#>>0x18	leshort	0x1c	(Borland compiler)
+#>>0x18	leshort	0x1e	(MS compiler)
+
+# If the relocation table is 0x40 or more bytes into the file, it's definitely
+# not a DOS EXE.
+>0x18  leshort >0x3f
+
+# Maybe it's a PE?
+>>(0x3c.l) string PE\0\0 PE
+!:mime	application/x-dosexec
+>>>(0x3c.l+24)	leshort		0x010b	\b32 executable
+>>>(0x3c.l+24)	leshort		0x020b	\b32+ executable
+>>>(0x3c.l+24)	leshort		0x0107	ROM image
+>>>(0x3c.l+24)	default		x	Unknown PE signature
+>>>>&0 		leshort		x	0x%x
+>>>(0x3c.l+22)	leshort&0x2000	>0	(DLL)
+>>>(0x3c.l+92)	leshort		1	(native)
+>>>(0x3c.l+92)	leshort		2	(GUI)
+>>>(0x3c.l+92)	leshort		3	(console)
+>>>(0x3c.l+92)	leshort		7	(POSIX)
+>>>(0x3c.l+92)	leshort		9	(Windows CE)
+>>>(0x3c.l+92)	leshort		10	(EFI application)
+>>>(0x3c.l+92)	leshort		11	(EFI boot service driver)
+>>>(0x3c.l+92)	leshort		12	(EFI runtime driver)
+>>>(0x3c.l+92)	leshort		13	(EFI ROM)
+>>>(0x3c.l+92)	leshort		14	(XBOX)
+>>>(0x3c.l+92)	leshort		15	(Windows boot application)
+>>>(0x3c.l+92)	default		x	(Unknown subsystem
+>>>>&0		leshort		x	0x%x)
+>>>(0x3c.l+4)	leshort		0x14c	Intel 80386
+>>>(0x3c.l+4)	leshort		0x166	MIPS R4000
+>>>(0x3c.l+4)	leshort		0x168	MIPS R10000
+>>>(0x3c.l+4)	leshort		0x184	Alpha
+>>>(0x3c.l+4)	leshort		0x1a2	Hitachi SH3
+>>>(0x3c.l+4)	leshort		0x1a6	Hitachi SH4
+>>>(0x3c.l+4)	leshort		0x1c0	ARM
+>>>(0x3c.l+4)	leshort		0x1c2	ARM Thumb
+>>>(0x3c.l+4)	leshort		0x1c4	ARMv7 Thumb
+>>>(0x3c.l+4)	leshort		0x1f0	PowerPC
+>>>(0x3c.l+4)	leshort		0x200	Intel Itanium
+>>>(0x3c.l+4)	leshort		0x266	MIPS16
+>>>(0x3c.l+4)	leshort		0x268	Motorola 68000
+>>>(0x3c.l+4)	leshort		0x290	PA-RISC
+>>>(0x3c.l+4)	leshort		0x366	MIPSIV
+>>>(0x3c.l+4)	leshort		0x466	MIPS16 with FPU
+>>>(0x3c.l+4)	leshort		0xebc	EFI byte code
+>>>(0x3c.l+4)	leshort		0x8664	x86-64
+>>>(0x3c.l+4)	leshort		0xc0ee	MSIL
+>>>(0x3c.l+4)	default		x	Unknown processor type
+>>>>&0		leshort		x	0x%x
+>>>(0x3c.l+22)	leshort&0x0200	>0	(stripped to external PDB)
+>>>(0x3c.l+22)	leshort&0x1000	>0	system file
+>>>(0x3c.l+24)	leshort		0x010b
+>>>>(0x3c.l+232) lelong	>0	Mono/.Net assembly
+>>>(0x3c.l+24)	leshort		0x020b
+>>>>(0x3c.l+248) lelong	>0	Mono/.Net assembly
+
+# hooray, there's a DOS extender using the PE format, with a valid PE
+# executable inside (which just prints a message and exits if run in win)
+>>>(8.s*16)		string		32STUB	\b, 32rtm DOS extender
+>>>(8.s*16)		string		!32STUB	\b, for MS Windows
+>>>(0x3c.l+0xf8)	string		UPX0 \b, UPX compressed
+>>>(0x3c.l+0xf8)	search/0x140	PEC2 \b, PECompact2 compressed
+>>>(0x3c.l+0xf8)	search/0x140	UPX2
+>>>>(&0x10.l+(-4))	string		PK\3\4 \b, ZIP self-extracting archive (Info-Zip)
+>>>(0x3c.l+0xf8)	search/0x140	.idata
+>>>>(&0xe.l+(-4))	string		PK\3\4 \b, ZIP self-extracting archive (Info-Zip)
+>>>>(&0xe.l+(-4))	string		ZZ0 \b, ZZip self-extracting archive
+>>>>(&0xe.l+(-4))	string		ZZ1 \b, ZZip self-extracting archive
+>>>(0x3c.l+0xf8)	search/0x140	.rsrc
+>>>>(&0x0f.l+(-4))	string		a\\\4\5 \b, WinHKI self-extracting archive
+>>>>(&0x0f.l+(-4))	string		Rar! \b, RAR self-extracting archive
+>>>>(&0x0f.l+(-4))	search/0x3000	MSCF \b, InstallShield self-extracting archive
+>>>>(&0x0f.l+(-4))	search/32	Nullsoft \b, Nullsoft Installer self-extracting archive
+>>>(0x3c.l+0xf8)	search/0x140	.data
+>>>>(&0x0f.l)		string		WEXTRACT \b, MS CAB-Installer self-extracting archive
+>>>(0x3c.l+0xf8)	search/0x140	.petite\0 \b, Petite compressed
+>>>>(0x3c.l+0xf7)	byte		x
+>>>>>(&0x104.l+(-4))	string		=!sfx! \b, ACE self-extracting archive
+>>>(0x3c.l+0xf8)	search/0x140	.WISE \b, WISE installer self-extracting archive
+>>>(0x3c.l+0xf8)	search/0x140	.dz\0\0\0 \b, Dzip self-extracting archive
+>>>&(0x3c.l+0xf8)	search/0x100	_winzip_ \b, ZIP self-extracting archive (WinZip)
+>>>&(0x3c.l+0xf8)	search/0x100	SharedD \b, Microsoft Installer self-extracting archive
+>>>0x30			string		Inno \b, InnoSetup self-extracting archive
+
+# Hmm, not a PE but the relocation table is too high for a traditional DOS exe,
+# must be one of the unusual subformats.
+>>(0x3c.l) string !PE\0\0 MS-DOS executable
+!:mime	application/x-dosexec
+
+>>(0x3c.l)		string		NE \b, NE
+!:mime	application/x-dosexec
+>>>(0x3c.l+0x36)	byte		1 for OS/2 1.x
+>>>(0x3c.l+0x36)	byte		2 for MS Windows 3.x
+>>>(0x3c.l+0x36)	byte		3 for MS-DOS
+>>>(0x3c.l+0x36)	byte		4 for Windows 386
+>>>(0x3c.l+0x36)	byte		5 for Borland Operating System Services
+>>>(0x3c.l+0x36)	default		x
+>>>>(0x3c.l+0x36)	byte		x (unknown OS %x)
+>>>(0x3c.l+0x36)	byte		0x81 for MS-DOS, Phar Lap DOS extender
+>>>(0x3c.l+0x0c)	leshort&0x8003	0x8002 (DLL)
+>>>(0x3c.l+0x0c)	leshort&0x8003	0x8001 (driver)
+>>>&(&0x24.s-1)		string		ARJSFX \b, ARJ self-extracting archive
+>>>(0x3c.l+0x70)	search/0x80	WinZip(R)\ Self-Extractor \b, ZIP self-extracting archive (WinZip)
+
+>>(0x3c.l)		string		LX\0\0 \b, LX
+!:mime	application/x-dosexec
+>>>(0x3c.l+0x0a)	leshort		<1 (unknown OS)
+>>>(0x3c.l+0x0a)	leshort		1 for OS/2
+>>>(0x3c.l+0x0a)	leshort		2 for MS Windows
+>>>(0x3c.l+0x0a)	leshort		3 for DOS
+>>>(0x3c.l+0x0a)	leshort		>3 (unknown OS)
+>>>(0x3c.l+0x10)	lelong&0x28000	=0x8000 (DLL)
+>>>(0x3c.l+0x10)	lelong&0x20000	>0 (device driver)
+>>>(0x3c.l+0x10)	lelong&0x300	0x300 (GUI)
+>>>(0x3c.l+0x10)	lelong&0x28300	<0x300 (console)
+>>>(0x3c.l+0x08)	leshort		1 i80286
+>>>(0x3c.l+0x08)	leshort		2 i80386
+>>>(0x3c.l+0x08)	leshort		3 i80486
+>>>(8.s*16)		string		emx \b, emx
+>>>>&1			string		x %s
+>>>&(&0x54.l-3)		string		arjsfx \b, ARJ self-extracting archive
+
+# MS Windows system file, supposedly a collection of LE executables
+>>(0x3c.l)		string		W3 \b, W3 for MS Windows
+!:mime	application/x-dosexec
+
+>>(0x3c.l)		string		LE\0\0 \b, LE executable
+!:mime	application/x-dosexec
+>>>(0x3c.l+0x0a)	leshort		1
+# some DOS extenders use LE files with OS/2 header
+>>>>0x240		search/0x100	DOS/4G for MS-DOS, DOS4GW DOS extender
+>>>>0x240		search/0x200	WATCOM\ C/C++ for MS-DOS, DOS4GW DOS extender
+>>>>0x440		search/0x100	CauseWay\ DOS\ Extender for MS-DOS, CauseWay DOS extender
+>>>>0x40		search/0x40	PMODE/W for MS-DOS, PMODE/W DOS extender
+>>>>0x40		search/0x40	STUB/32A for MS-DOS, DOS/32A DOS extender (stub)
+>>>>0x40		search/0x80	STUB/32C for MS-DOS, DOS/32A DOS extender (configurable stub)
+>>>>0x40		search/0x80	DOS/32A for MS-DOS, DOS/32A DOS extender (embedded)
+# this is a wild guess; hopefully it is a specific signature
+>>>>&0x24		lelong		<0x50
+>>>>>(&0x4c.l)		string		\xfc\xb8WATCOM
+>>>>>>&0		search/8	3\xdbf\xb9 \b, 32Lite compressed
+# another wild guess: if real OS/2 LE executables exist, they probably have higher start EIP
+#>>>>(0x3c.l+0x1c)	lelong		>0x10000 for OS/2
+# fails with DOS-Extenders.
+>>>(0x3c.l+0x0a)	leshort		2 for MS Windows
+>>>(0x3c.l+0x0a)	leshort		3 for DOS
+>>>(0x3c.l+0x0a)	leshort		4 for MS Windows (VxD)
+>>>(&0x7c.l+0x26)	string		UPX \b, UPX compressed
+>>>&(&0x54.l-3)		string		UNACE \b, ACE self-extracting archive
+
+# looks like ASCII, probably some embedded copyright message.
+# and definitely not NE/LE/LX/PE
+>>0x3c		lelong	>0x20000000
+>>>(4.s*512)	leshort !0x014c \b, MZ for MS-DOS
+!:mime	application/x-dosexec
+# header data too small for extended executable
+>2		long	!0
+>>0x18		leshort <0x40
+>>>(4.s*512)	leshort !0x014c
+
+>>>>&(2.s-514)	string	!LE
+>>>>>&-2	string	!BW \b, MZ for MS-DOS
+!:mime	application/x-dosexec
+>>>>&(2.s-514)	string	LE \b, LE
+>>>>>0x240	search/0x100	DOS/4G for MS-DOS, DOS4GW DOS extender
+# educated guess since indirection is still not capable enough for complex offset
+# calculations (next embedded executable would be at &(&2*512+&0-2)
+# I suspect there are only LE executables in these multi-exe files
+>>>>&(2.s-514)	string	BW
+>>>>>0x240	search/0x100	DOS/4G	\b, LE for MS-DOS, DOS4GW DOS extender (embedded)
+>>>>>0x240	search/0x100	!DOS/4G	\b, BW collection for MS-DOS
+
+# This sequence skips to the first COFF segment, usually .text
+>(4.s*512)	leshort		0x014c \b, COFF
+!:mime	application/x-dosexec
+>>(8.s*16)	string		go32stub for MS-DOS, DJGPP go32 DOS extender
+>>(8.s*16)	string		emx
+>>>&1		string		x for DOS, Win or OS/2, emx %s
+>>&(&0x42.l-3)	byte		x 
+>>>&0x26	string		UPX \b, UPX compressed
+# and yet another guess: small .text, and after large .data is unusal, could be 32lite
+>>&0x2c		search/0xa0	.text
+>>>&0x0b	lelong		<0x2000
+>>>>&0		lelong		>0x6000 \b, 32lite compressed
+
+>(8.s*16) string $WdX \b, WDos/X DOS extender
+
+# By now an executable type should have been printed out.  The executable
+# may be a self-uncompressing archive, so look for evidence of that and 
+# print it out.  
+#
+# Some signatures below from Greg Roelofs, newt@uchicago.edu.
+#
+>0x35	string	\x8e\xc0\xb9\x08\x00\xf3\xa5\x4a\x75\xeb\x8e\xc3\x8e\xd8\x33\xff\xbe\x30\x00\x05 \b, aPack compressed
+>0xe7	string	LH/2\ 	Self-Extract \b, %s
+>0x1c	string	UC2X	\b, UCEXE compressed
+>0x1c	string	WWP\ 	\b, WWPACK compressed
+>0x1c	string	RJSX 	\b, ARJ self-extracting archive
+>0x1c	string	diet 	\b, diet compressed
+>0x1c	string	LZ09 	\b, LZEXE v0.90 compressed
+>0x1c	string	LZ91 	\b, LZEXE v0.91 compressed
+>0x1c	string	tz 	\b, TinyProg compressed
+>0x1e	string	Copyright\ 1989-1990\ PKWARE\ Inc.	Self-extracting PKZIP archive
+!:mime	application/zip
+# Yes, this really is "Copr", not "Corp."
+>0x1e	string	PKLITE\ Copr.	Self-extracting PKZIP archive
+!:mime	application/zip
+# winarj stores a message in the stub instead of the sig in the MZ header
+>0x20	search/0xe0	aRJsfX \b, ARJ self-extracting archive
+>0x20	string AIN
+>>0x23	string 2	\b, AIN 2.x compressed
+>>0x23	string <2	\b, AIN 1.x compressed
+>>0x23	string >2	\b, AIN 1.x compressed
+>0x24	string	LHa's\ SFX \b, LHa self-extracting archive
+!:mime	application/x-lha
+>0x24	string	LHA's\ SFX \b, LHa self-extracting archive
+!:mime	application/x-lha
+>0x24	string	\ $ARX \b, ARX self-extracting archive
+>0x24	string	\ $LHarc \b, LHarc self-extracting archive
+>0x20	string	SFX\ by\ LARC \b, LARC self-extracting archive
+>0x40	string aPKG \b, aPackage self-extracting archive
+>0x64	string	W\ Collis\0\0 \b, Compack compressed
+>0x7a	string		Windows\ self-extracting\ ZIP	\b, ZIP self-extracting archive
+>>&0xf4 search/0x140 \x0\x40\x1\x0
+>>>(&0.l+(4)) string MSCF \b, WinHKI CAB self-extracting archive
+>1638	string	-lh5- \b, LHa self-extracting archive v2.13S
+>0x17888 string Rar! \b, RAR self-extracting archive
+
+# Skip to the end of the EXE.  This will usually work fine in the PE case
+# because the MZ image is hardcoded into the toolchain and almost certainly
+# won't match any of these signatures.
+>(4.s*512)	long	x 
+>>&(2.s-517)	byte	x 
+>>>&0	string		PK\3\4 \b, ZIP self-extracting archive
+>>>&0	string		Rar! \b, RAR self-extracting archive
+>>>&0	string		=!\x11 \b, AIN 2.x self-extracting archive
+>>>&0	string		=!\x12 \b, AIN 2.x self-extracting archive
+>>>&0	string		=!\x17 \b, AIN 1.x self-extracting archive
+>>>&0	string		=!\x18 \b, AIN 1.x self-extracting archive
+>>>&7	search/400	**ACE** \b, ACE self-extracting archive
+>>>&0	search/0x480	UC2SFX\ Header \b, UC2 self-extracting archive
+
+# a few unknown ZIP sfxes, no idea if they are needed or if they are
+# already captured by the generic patterns above
+>(8.s*16)	search/0x20	PKSFX \b, ZIP self-extracting archive (PKZIP)
+# TODO: how to add this? >FileSize-34 string Windows\ Self-Installing\ Executable \b, ZIP self-extracting archive
+#
+
+# TELVOX Teleinformatica CODEC self-extractor for OS/2:
+>49801	string	\x79\xff\x80\xff\x76\xff	\b, CODEC archive v3.21
+>>49824 leshort		=1			\b, 1 file
+>>49824 leshort		>1			\b, %u files
+
+# added by Joerg Jenderek of http://www.freedos.org/software/?prog=kc
+# and http://www.freedos.org/software/?prog=kpdos
+# for FreeDOS files like KEYBOARD.SYS, KEYBRD2.SYS, KEYBRD3.SYS, *.KBD
+0	string/b	KCF		FreeDOS KEYBoard Layout collection
+# only version=0x100 found
+>3	uleshort	x		\b, version 0x%x
+# length of string containing author,info and special characters
+>6	ubyte		>0		
+#>>6	pstring		x		\b, name=%s
+>>7	string		>\0		\b, author=%-.14s
+>>7	search/254	\xff		\b, info=
+#>>>&0	string		x		\b%-s
+>>>&0	string		x		\b%-.15s
+# for FreeDOS *.KL files 
+0	string/b	KLF		FreeDOS KEYBoard Layout file
+# only version=0x100 or 0x101 found
+>3	uleshort	x		\b, version 0x%x
+# stringlength
+>5	ubyte		>0		
+>>8	string		x		\b, name=%-.2s
+0	string	\xffKEYB\ \ \ \0\0\0\0	
+>12	string	\0\0\0\0`\004\360	MS-DOS KEYBoard Layout file
+
+# .COM formats (Daniel Quinlan, quinlan@yggdrasil.com)
+# Uncommenting only the first two lines will cover about 2/3 of COM files,
+# but it isn't feasible to match all COM files since there must be at least
+# two dozen different one-byte "magics".
+# test too generic ?
+0	byte		0xe9		DOS executable (COM)
+>0x1FE leshort		0xAA55		\b, boot code
+>6	string		SFX\ of\ LHarc	(%s)
+
+# DOS device driver updated by Joerg Jenderek at May 2011
+# http://maben.homeip.net/static/S100/IBM/software/DOS/DOS%20techref/CHAPTER.009
+0	ulequad&0x07a0ffffffff		0xffffffff		DOS executable (
+>40	search/7			UPX!			\bUPX compressed 
+# DOS device driver attributes
+>4	uleshort&0x8000			0x0000			\bblock device driver
+# character device
+>4	uleshort&0x8000			0x8000			\b
+>>4	uleshort&0x0008			0x0008			\bclock 
+# fast video output by int 29h
+>>4	uleshort&0x0010			0x0010			\bfast 
+# standard input/output device
+>>4	uleshort&0x0003			>0			\bstandard 
+>>>4	uleshort&0x0001			0x0001			\binput
+>>>4	uleshort&0x0003			0x0003			\b/
+>>>4	uleshort&0x0002			0x0002			\boutput 
+>>4	uleshort&0x8000			0x8000			\bcharacter device driver
+>0	ubyte				x			
+# upx compressed device driver has garbage instead of real in name field of header
+>>40	search/7			UPX!			
+>>40	default				x			
+# leading/trailing nulls, zeros or non ASCII characters in 8-byte name field at offset 10 are skipped
+>>>12		ubyte			>0x27			\b 
+>>>>10		ubyte			>0x20			
+>>>>>10		ubyte			!0x2E			
+>>>>>>10	ubyte			!0x2A			\b%c
+>>>>11		ubyte			>0x20			
+>>>>>11		ubyte			!0x2E			\b%c
+>>>>12		ubyte			>0x20			
+>>>>>12		ubyte			!0x39			
+>>>>>>12	ubyte			!0x2E			\b%c
+>>>13		ubyte			>0x20			
+>>>>13		ubyte			!0x2E			\b%c
+>>>>14		ubyte			>0x20			
+>>>>>14		ubyte			!0x2E			\b%c
+>>>>15		ubyte			>0x20			
+>>>>>15		ubyte			!0x2E			\b%c
+>>>>16		ubyte			>0x20			
+>>>>>16		ubyte			!0x2E			
+>>>>>>16	ubyte			<0xCB			\b%c
+>>>>17		ubyte			>0x20			
+>>>>>17		ubyte			!0x2E			
+>>>>>>17	ubyte			<0x90			\b%c
+# some character device drivers like ASPICD.SYS, btcdrom.sys and Cr_atapi.sys contain only spaces or points in name field
+>>>4		uleshort&0x8000		0x8000			
+>>>>12		ubyte			<0x2F			
+# they have their real name at offset 22
+>>>>>22		string			>\0			\b%-.5s
+>4	uleshort&0x8000			0x0000			
+# 32 bit sector addressing ( > 32 MB) for block devices
+>>4	uleshort&0x0002			0x0002			\b,32-bit sector-
+# support by driver functions 13h, 17h, 18h
+>4	uleshort&0x0040			0x0040			\b,IOCTL-
+# open, close, removable media support by driver functions 0Dh, 0Eh, 0Fh
+>4	uleshort&0x0800			0x0800			\b,close media-
+# output until busy support by int 10h for character device driver
+>4	uleshort&0x8000			0x8000			
+>>4	uleshort&0x2000			0x2000			\b,until busy-
+# direct read/write support by driver functions 03h,0Ch
+>4	uleshort&0x4000			0x4000			\b,control strings-
+>4	uleshort&0x8000			0x8000			
+>>4	uleshort&0x6840			>0			\bsupport
+>4	uleshort&0x8000			0x0000			
+>>4	uleshort&0x4842			>0			\bsupport
+>0	ubyte				x			\b)
+# DOS driver cmd640x.sys has 0x12 instead of 0xffffffff for pointer field to next device header 
+# Too weak, matches files that only contain 0's
+#0	ulequad&0x000007a0ffffffed	0x0000000000000000	DOS-executable (
+#>4	uleshort&0x8000			0x8000			\bcharacter device driver
+#>>10	string				x			%-.8s
+#>4	uleshort&0x4000			0x4000			\b,control strings-support)
+
+# test too generic ?
+0	byte		0x8c		DOS executable (COM)
+# updated by Joerg Jenderek at Oct 2008
+0	ulelong		0xffff10eb	DR-DOS executable (COM)
+# byte 0xeb conflicts with "sequent" magic leshort 0xn2eb
+0	ubeshort&0xeb8d	>0xeb00		
+# DR-DOS STACKER.COM SCREATE.SYS missed
+>0	byte		0xeb
+>>0x1FE leshort		0xAA55		DOS executable (COM), boot code
+>>85	string		UPX		DOS executable (COM), UPX compressed
+>>4	string		\ $ARX		DOS executable (COM), ARX self-extracting archive
+>>4	string		\ $LHarc	DOS executable (COM), LHarc self-extracting archive
+>>0x20e string		SFX\ by\ LARC	DOS executable (COM), LARC self-extracting archive
+# updated by Joerg Jenderek at Oct 2008
+#0	byte		0xb8		COM executable
+0	uleshort&0x80ff	0x00b8		
+# modified by Joerg Jenderek
+>1	lelong		!0x21cd4cff	COM executable for DOS
+# http://syslinux.zytor.com/comboot.php
+# (32-bit COMBOOT) programs *.C32 contain 32-bit code and run in flat-memory 32-bit protected mode
+# start with assembler instructions mov eax,21cd4cffh
+0	uleshort&0xc0ff	0xc0b8		
+>1	lelong		0x21cd4cff	COM executable (32-bit COMBOOT)
+# syslinux:doc/comboot.txt
+# A COM32R program must start with the byte sequence B8 FE 4C CD 21 (mov
+# eax,21cd4cfeh) as a magic number.
+0       string/b	\xb8\xfe\x4c\xcd\x21	COM executable (COM32R)
+# start with assembler instructions mov eax,21cd4cfeh
+0	uleshort&0xc0ff	0xc0b8		
+>1	lelong		0x21cd4cfe	COM executable (32-bit COMBOOT, relocatable)
+0	string/b	\x81\xfc		
+>4	string	\x77\x02\xcd\x20\xb9	
+>>36	string	UPX!			FREE-DOS executable (COM), UPX compressed
+252	string Must\ have\ DOS\ version DR-DOS executable (COM)
+# added by Joerg Jenderek at Oct 2008
+# GRR search is not working
+#34	search/2	UPX!		FREE-DOS executable (COM), UPX compressed
+34	string	UPX!			FREE-DOS executable (COM), UPX compressed
+35	string	UPX!			FREE-DOS executable (COM), UPX compressed
+# GRR search is not working
+#2	search/28	\xcd\x21	COM executable for MS-DOS
+#WHICHFAT.cOM
+2	string	\xcd\x21		COM executable for DOS
+#DELTREE.cOM DELTREE2.cOM
+4	string	\xcd\x21		COM executable for DOS
+#IFMEMDSK.cOM ASSIGN.cOM COMP.cOM
+5	string	\xcd\x21		COM executable for DOS
+#DELTMP.COm HASFAT32.cOM
+7	string	\xcd\x21		
+>0	byte	!0xb8			COM executable for DOS
+#COMP.cOM MORE.COm
+10	string	\xcd\x21		
+>5	string	!\xcd\x21		COM executable for DOS
+#comecho.com
+13	string	\xcd\x21		COM executable for DOS
+#HELP.COm EDIT.coM
+18	string	\xcd\x21		COM executable for MS-DOS
+#NWRPLTRM.COm
+23	string	\xcd\x21		COM executable for MS-DOS
+#LOADFIX.cOm LOADFIX.cOm
+30	string	\xcd\x21		COM executable for MS-DOS
+#syslinux.com 3.11
+70	string	\xcd\x21		COM executable for DOS
+# many compressed/converted COMs start with a copy loop instead of a jump
+0x6	search/0xa	\xfc\x57\xf3\xa5\xc3	COM executable for MS-DOS
+0x6	search/0xa	\xfc\x57\xf3\xa4\xc3	COM executable for DOS
+>0x18	search/0x10	\x50\xa4\xff\xd5\x73	\b, aPack compressed
+0x3c	string		W\ Collis\0\0		COM executable for MS-DOS, Compack compressed
+# FIXME: missing diet .com compression
+
+# miscellaneous formats
+0	string/b	LZ		MS-DOS executable (built-in)
+#0	byte		0xf0		MS-DOS program library data
+#
+
+# AAF files:
+# <stuartc@rd.bbc.co.uk> Stuart Cunningham
+0	string/b	\320\317\021\340\241\261\032\341AAFB\015\000OM\006\016\053\064\001\001\001\377			AAF legacy file using MS Structured Storage
+>30	byte	9		(512B sectors)
+>30	byte	12		(4kB sectors)
+0	string/b	\320\317\021\340\241\261\032\341\001\002\001\015\000\002\000\000\006\016\053\064\003\002\001\001			AAF file using MS Structured Storage
+>30	byte	9		(512B sectors)
+>30	byte	12		(4kB sectors)
+
+# Popular applications
+2080	string	Microsoft\ Word\ 6.0\ Document	%s
+!:mime	application/msword
+2080	string	Documento\ Microsoft\ Word\ 6 Spanish Microsoft Word 6 document data
+!:mime	application/msword
+# Pawel Wiecek <coven@i17linuxb.ists.pwr.wroc.pl> (for polish Word)
+2112	string	MSWordDoc			Microsoft Word document data
+!:mime	application/msword
+#
+0	belong	0x31be0000			Microsoft Word Document
+!:mime	application/msword
+#
+0	string/b	PO^Q`				Microsoft Word 6.0 Document
+!:mime	application/msword
+#
+0	string/b	\376\067\0\043			Microsoft Office Document
+!:mime	application/msword
+0	string/b	\333\245-\0\0\0			Microsoft Office Document
+!:mime	application/msword
+512	string/b	\354\245\301			Microsoft Word Document
+!:mime	application/msword
+
+#
+0	string/b	\xDB\xA5\x2D\x00		Microsoft WinWord 2.0 Document
+!:mime application/msword
+#
+2080	string	Microsoft\ Excel\ 5.0\ Worksheet	%s
+!:mime	application/vnd.ms-excel
+#
+0	string/b	\xDB\xA5\x2D\x00		Microsoft WinWord 2.0 Document
+!:mime application/msword
+
+2080	string	Foglio\ di\ lavoro\ Microsoft\ Exce	%s
+!:mime	application/vnd.ms-excel
+#
+# Pawel Wiecek <coven@i17linuxb.ists.pwr.wroc.pl> (for polish Excel)
+2114	string	Biff5		Microsoft Excel 5.0 Worksheet
+!:mime	application/vnd.ms-excel
+# Italian MS-Excel
+2121	string	Biff5		Microsoft Excel 5.0 Worksheet
+!:mime	application/vnd.ms-excel
+0	string/b	\x09\x04\x06\x00\x00\x00\x10\x00	Microsoft Excel Worksheet
+!:mime	application/vnd.ms-excel
+#
+0	belong	0x00001a00	Lotus 1-2-3
+!:mime	application/x-123
+>4	belong	0x00100400	wk3 document data
+>4	belong	0x02100400	wk4 document data
+>4	belong	0x07800100	fm3 or fmb document data
+>4	belong	0x07800000	fm3 or fmb document data
+#
+0	belong	0x00000200	Lotus 1-2-3
+!:mime	application/x-123
+>4	belong	0x06040600	wk1 document data
+>4	belong	0x06800200	fmt document data
+0	string/b		WordPro\0	Lotus WordPro
+!:mime	application/vnd.lotus-wordpro
+0	string/b		WordPro\r\373	Lotus WordPro
+!:mime	application/vnd.lotus-wordpro
+
+
+# Summary: Script used by InstallScield to uninstall applications
+# Extension: .isu
+# Submitted by: unknown
+# Modified by (1): Abel Cheung <abelcheung@gmail.com> (replace useless entry)
+0		string		\x71\xa8\x00\x00\x01\x02
+>12		string		Stirling\ Technologies,		InstallShield Uninstall Script
+
+# Winamp .avs
+#0	string	Nullsoft\ AVS\ Preset\ \060\056\061\032 A plug in for Winamp ms-windows Freeware media player
+0	string/b	Nullsoft\ AVS\ Preset\ 	Winamp plug in
+
+# Windows Metafont .WMF
+0	string/b	\327\315\306\232	ms-windows metafont .wmf
+0	string/b	\002\000\011\000	ms-windows metafont .wmf
+0	string/b	\001\000\011\000	ms-windows metafont .wmf
+
+#tz3 files whatever that is (MS Works files)
+0	string/b	\003\001\001\004\070\001\000\000	tz3 ms-works file
+0	string/b	\003\002\001\004\070\001\000\000	tz3 ms-works file
+0	string/b	\003\003\001\004\070\001\000\000	tz3 ms-works file
+
+# PGP sig files .sig
+#0 string \211\000\077\003\005\000\063\237\127 065 to  \027\266\151\064\005\045\101\233\021\002 PGP sig
+0 string \211\000\077\003\005\000\063\237\127\065\027\266\151\064\005\045\101\233\021\002 PGP sig
+0 string \211\000\077\003\005\000\063\237\127\066\027\266\151\064\005\045\101\233\021\002 PGP sig
+0 string \211\000\077\003\005\000\063\237\127\067\027\266\151\064\005\045\101\233\021\002 PGP sig
+0 string \211\000\077\003\005\000\063\237\127\070\027\266\151\064\005\045\101\233\021\002 PGP sig
+0 string \211\000\077\003\005\000\063\237\127\071\027\266\151\064\005\045\101\233\021\002 PGP sig
+0 string \211\000\225\003\005\000\062\122\207\304\100\345\042 PGP sig
+
+# windows zips files .dmf
+0	string/b	MDIF\032\000\010\000\000\000\372\046\100\175\001\000\001\036\001\000 MS Windows special zipped file
+
+
+#ico files
+0	string/b	\102\101\050\000\000\000\056\000\000\000\000\000\000\000	Icon for MS Windows
+
+# Windows icons
+0   name    ico-dir
+# not entirely accurate, the number of icons is part of the header
+>0  byte    1   - 1 icon
+>0  ubyte   >1  - %d icons
+>2  byte    0   \b, 256x
+>2  byte    !0  \b, %dx
+>3  byte    0   \b256
+>3  byte    !0  \b%d
+>4  ubyte   !0  \b, %d colors
+
+0   belong  0x00000100
+>9  byte    0
+>>0 byte    x           MS Windows icon resource
+!:mime	image/x-icon
+>>4 use     ico-dir
+>9  ubyte   0xff
+>>0 byte    x           MS Windows icon resource
+!:mime	image/x-icon
+>>4 use     ico-dir
+
+# Windows non-animated cursors
+0   name    cur-dir
+# not entirely accurate, the number of icons is part of the header
+>0  byte        1   - 1 icon
+>0  ubyte       >1  - %d icons
+>2  byte        0   \b, 256x
+>2  byte        !0  \b, %dx
+>3  byte        0   \b256
+>3  byte        !0  \b%d
+>6  uleshort    x   \b, hotspot @%dx
+>8  uleshort    x   \b%d
+
+0   belong  0x00000200
+>9  byte    0
+>>0 byte    x           MS Windows cursor resource
+!:mime image/x-cur
+>>4 use     cur-dir
+>9  ubyte   0xff
+>>0 byte    x           MS Windows cursor resource
+!:mime image/x-cur
+>>4 use     cur-dir
+
+# .chr files
+0	string/b	PK\010\010BGI	Borland font 
+>4	string	>\0	%s
+# then there is a copyright notice
+
+
+# .bgi files
+0	string/b	pk\010\010BGI	Borland device 
+>4	string	>\0	%s
+# then there is a copyright notice
+
+
+# Windows Recycle Bin record file (named INFO2)
+# By Abel Cheung (abelcheung AT gmail dot com)
+# Version 4 always has 280 bytes (0x118) per record, version 5 has 800 bytes
+# Since Vista uses another structure, INFO2 structure probably won't change
+# anymore. Detailed analysis in:
+# http://www.cybersecurityinstitute.biz/downloads/INFO2.pdf
+0	lelong		0x00000004
+>12	lelong		0x00000118	Windows Recycle Bin INFO2 file (Win98 or below)
+
+0	lelong		0x00000005
+>12	lelong		0x00000320	Windows Recycle Bin INFO2 file (Win2k - WinXP)
+
+
+##### put in Either Magic/font or Magic/news
+# Acroread or something	 files wrongly identified as G3	 .pfm
+# these have the form \000 \001 any? \002 \000 \000
+# or \000 \001 any? \022 \000 \000
+0	belong&0xffff00ff	0x00010012	PFM data
+>4	string			\000\000
+>6	string			>\060		- %s
+
+0	belong&0xffff00ff	0x00010002	PFM data
+>4	string			\000\000
+>6	string			>\060		- %s
+#0	string	\000\001 pfm?
+#>3	string	\022\000\000Copyright\	yes
+#>3	string	\002\000\000Copyright\	yes
+#>3	string	>\0	oops, not a font file. Cancel that.
+#it clashes with ttf files so put it lower down.
+
+# From Doug Lee via a FreeBSD pr
+9	string		GERBILDOC	First Choice document
+9	string		GERBILDB	First Choice database
+9	string		GERBILCLIP	First Choice database
+0	string		GERBIL		First Choice device file
+9	string		RABBITGRAPH	RabbitGraph file
+0	string		DCU1		Borland Delphi .DCU file
+0	string		=!<spell>	MKS Spell hash list (old format)
+0	string		=!<spell2>	MKS Spell hash list
+# Too simple - MPi
+#0	string		AH		Halo(TM) bitmapped font file
+0	lelong		0x08086b70	TurboC BGI file
+0	lelong		0x08084b50	TurboC Font file
+
+# Debian#712046: The magic below identifies "Delphi compiled form data". 
+# An additional source of information is available at:
+# http://www.woodmann.com/fravia/dafix_t1.htm
+0	string		TPF0
+>4	pstring		>\0		Delphi compiled form '%s'
+
+# tests for DBase files moved, updated and merged to database
+
+0	string		PMCC		Windows 3.x .GRP file
+1	string		RDC-meg		MegaDots 
+>8	byte		>0x2F		version %c
+>9	byte		>0x2F		\b.%c file
+0	lelong		0x4C
+>4	lelong		0x00021401	Windows shortcut file
+
+# .PIF files added by Joerg Jenderek from http://smsoft.ru/en/pifdoc.htm
+# only for windows versions equal or greater 3.0
+0x171	string	MICROSOFT\ PIFEX\0	Windows Program Information File
+!:mime	application/x-dosexec
+#>2	string	 	>\0		\b, Title:%.30s
+>0x24	string		>\0		\b for %.63s
+>0x65	string		>\0		\b, directory=%.64s
+>0xA5	string		>\0		\b, parameters=%.64s
+#>0x181	leshort	x	\b, offset %x
+#>0x183	leshort	x	\b, offsetdata %x
+#>0x185	leshort	x	\b, section length %x
+>0x187	search/0xB55	WINDOWS\ VMM\ 4.0\0	
+>>&0x5e		ubyte	>0			
+>>>&-1		string	<PIFMGR.DLL		\b, icon=%s
+#>>>&-1		string	PIFMGR.DLL		\b, icon=%s
+>>>&-1		string	>PIFMGR.DLL		\b, icon=%s
+>>&0xF0		ubyte	>0			
+>>>&-1		string	<Terminal		\b, font=%.32s
+#>>>&-1		string	=Terminal		\b, font=%.32s
+>>>&-1		string	>Terminal		\b, font=%.32s
+>>&0x110	ubyte	>0			
+>>>&-1		string	<Lucida\ Console	\b, TrueTypeFont=%.32s
+#>>>&-1		string	=Lucida\ Console	\b, TrueTypeFont=%.32s
+>>>&-1		string	>Lucida\ Console	\b, TrueTypeFont=%.32s
+#>0x187	search/0xB55	WINDOWS\ 286\ 3.0\0	\b, Windows 3.X standard mode-style
+#>0x187	search/0xB55	WINDOWS\ 386\ 3.0\0	\b, Windows 3.X enhanced mode-style
+>0x187	search/0xB55	WINDOWS\ NT\ \ 3.1\0	\b, Windows NT-style
+#>0x187	search/0xB55	WINDOWS\ NT\ \ 4.0\0	\b, Windows NT-style
+>0x187	search/0xB55	CONFIG\ \ SYS\ 4.0\0	\b +CONFIG.SYS
+#>>&06		string	x			\b:%s
+>0x187	search/0xB55	AUTOEXECBAT\ 4.0\0	\b +AUTOEXEC.BAT
+#>>&06		string	x			\b:%s
+
+# DOS EPS Binary File Header
+# From: Ed Sznyter <ews@Black.Market.NET>
+0	belong		0xC5D0D3C6	DOS EPS Binary File
+>4	long		>0		Postscript starts at byte %d
+>>8	long		>0		length %d
+>>>12	long		>0		Metafile starts at byte %d
+>>>>16	long		>0		length %d
+>>>20	long		>0		TIFF starts at byte %d
+>>>>24	long		>0		length %d
+
+# TNEF magic From "Joomy" <joomy@se-ed.net> 
+# Microsoft Outlook's Transport Neutral Encapsulation Format (TNEF)
+0	leshort		0x223e9f78	TNEF
+!:mime	application/vnd.ms-tnef
+
+# Norton Guide (.NG , .HLP) files added by Joerg Jenderek from source NG2HTML.C
+# of http://www.davep.org/norton-guides/ng2h-105.tgz
+# http://en.wikipedia.org/wiki/Norton_Guides
+0	string		NG\0\001	
+# only value 0x100 found at offset 2
+>2	ulelong		0x00000100	Norton Guide
+# Title[40]
+>>8	string		>\0		"%-.40s"
+#>>6	uleshort	x		\b, MenuCount=%u
+# szCredits[5][66]
+>>48	string		>\0		\b, %-.66s
+>>114	string		>\0		%-.66s
+
+# 4DOS help (.HLP) files added by Joerg Jenderek from source TPHELP.PAS 
+# of http://www.4dos.info/
+# pointer,HelpID[8]=4DHnnnmm
+0	ulelong	0x48443408		4DOS help file
+>4	string	x			\b, version %-4.4s
+
+# old binary Microsoft (.HLP) files added by Joerg Jenderek from http://file-extension.net/seeker/file_extension_hlp
+0	ulequad	0x3a000000024e4c	MS Advisor help file
+
+# HtmlHelp files (.chm)
+0	string/b	ITSF\003\000\000\000\x60\000\000\000\001\000\000\000	MS Windows HtmlHelp Data
+
+# GFA-BASIC (Wolfram Kleff)
+2	string/b	GFA-BASIC3	GFA-BASIC 3 data
+
+#------------------------------------------------------------------------------
+# From Stuart Caie <kyzer@4u.net> (developer of cabextract)
+# Microsoft Cabinet files
+0	string/b	MSCF\0\0\0\0	Microsoft Cabinet archive data
+!:mime application/vnd.ms-cab-compressed
+>8	lelong		x		\b, %u bytes
+>28	leshort		1		\b, 1 file
+>28	leshort		>1		\b, %u files
+
+# InstallShield Cabinet files
+0	string/b	ISc(		InstallShield Cabinet archive data
+>5	byte&0xf0	=0x60		version 6,
+>5	byte&0xf0	!0x60		version 4/5,
+>(12.l+40)	lelong	x		%u files
+
+# Windows CE package files
+0	string/b	MSCE\0\0\0\0	Microsoft WinCE install header
+>20	lelong		0		\b, architecture-independent
+>20	lelong		103		\b, Hitachi SH3
+>20	lelong		104		\b, Hitachi SH4
+>20	lelong		0xA11		\b, StrongARM
+>20	lelong		4000		\b, MIPS R4000
+>20	lelong		10003		\b, Hitachi SH3
+>20	lelong		10004		\b, Hitachi SH3E
+>20	lelong		10005		\b, Hitachi SH4
+>20	lelong		70001		\b, ARM 7TDMI
+>52	leshort		1		\b, 1 file
+>52	leshort		>1		\b, %u files
+>56	leshort		1		\b, 1 registry entry
+>56	leshort		>1		\b, %u registry entries
+
+
+# Windows Enhanced Metafile (EMF)
+# See msdn.microsoft.com/archive/en-us/dnargdi/html/msdn_enhmeta.asp 
+# for further information.
+0	ulelong 1
+>40	string	\ EMF		Windows Enhanced Metafile (EMF) image data
+>>44	ulelong x		version 0x%x
+
+# from http://filext.com by Derek M Jones <derek@knosof.co.uk>
+# False positive with PPT (also currently this string is too long)
+#0	string/b	\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x3E\x00\x03\x00\xFE\xFF\x09\x00\x06	Microsoft Installer
+0	string/b	\320\317\021\340\241\261\032\341	Microsoft Office Document
+#>48	byte	0x1B					Excel Document
+#!:mime application/vnd.ms-excel
+>546	string	bjbj			Microsoft Word Document
+!:mime	application/msword
+>546	string	jbjb			Microsoft Word Document
+!:mime	application/msword
+
+0	string/b	\224\246\056		Microsoft Word Document
+!:mime	application/msword
+
+512	string	R\0o\0o\0t\0\ \0E\0n\0t\0r\0y	Microsoft Word Document
+!:mime	application/msword
+
+# From: "Nelson A. de Oliveira" <naoliv@gmail.com>
+# Magic type for Dell's BIOS .hdr files
+# Dell's .hdr
+0	string/b $RBU
+>23	string Dell			%s system BIOS
+>5	byte   2
+>>48	byte   x			version %d.
+>>49	byte   x			\b%d.
+>>50	byte   x			\b%d
+>5	byte   <2
+>>48	string x			version %.3s
+
+# Type: Microsoft DirectDraw Surface
+# URL:	http://msdn.microsoft.com/library/default.asp?url=/library/en-us/directx9_c/directx/graphics/reference/DDSFileReference/ddsfileformat.asp
+# From: Morten Hustveit <morten@debian.org>
+0	string/b	DDS\040\174\000\000\000 Microsoft DirectDraw Surface (DDS),
+>16	lelong	>0			%d x
+>12	lelong	>0			%d,
+>84	string	x			%.4s
+
+# Type: Microsoft Document Imaging Format (.mdi)
+# URL:	http://en.wikipedia.org/wiki/Microsoft_Document_Imaging_Format
+# From: Daniele Sempione <scrows@oziosi.org>
+0	short	0x5045			Microsoft Document Imaging Format
+
+# MS eBook format (.lit)
+0	string/b	ITOLITLS		Microsoft Reader eBook Data
+>8	lelong	x			\b, version %u
+!:mime					application/x-ms-reader
+
+# Windows CE Binary Image Data Format
+# From: Dr. Jesus <j@hug.gs>
+0	string/b	B000FF\n	Windows Embedded CE binary image
+
+# Windows Imaging (WIM) Image
+0	string/b	MSWIM\000\000\000	Windows imaging (WIM) image
+
+# The second byte of these signatures is a file version; I don't know what, 
+# if anything, produced files with version numbers 0-2.
+# From: John Elliott <johne@seasip.demon.co.uk>
+0	string	\xfc\x03\x00	Mallard BASIC program data (v1.11)
+0	string	\xfc\x04\x00	Mallard BASIC program data (v1.29+)
+0	string	\xfc\x03\x01	Mallard BASIC protected program data (v1.11)
+0	string	\xfc\x04\x01	Mallard BASIC protected program data (v1.29+)
+
+0	string	MIOPEN		Mallard BASIC Jetsam data
+0	string	Jetsam0		Mallard BASIC Jetsam index data
+

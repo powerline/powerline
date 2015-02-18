@@ -1,0 +1,28 @@
+
+#-----------------------------------------------------------------------------
+# $File: misctools,v 1.14 2014/03/06 16:08:58 christos Exp $
+# misctools:  file(1) magic for miscellaneous UNIX tools.
+#
+0	search/1	%%!!			X-Post-It-Note text
+0	string/c	BEGIN:VCALENDAR		vCalendar calendar file
+!:mime	text/calendar
+0	string/c	BEGIN:VCARD		vCard visiting card
+!:mime	text/x-vcard
+
+# Summary: Libtool library file
+# Extension: .la
+# Submitted by: Tomasz Trojanowski <tomek@uninet.com.pl>
+0	search/80	.la\ -\ a\ libtool\ library\ file	libtool library file
+
+# Summary: Libtool object file
+# Extension: .lo
+# Submitted by: Abel Cheung <abelcheung@gmail.com>
+0	search/80	.lo\ -\ a\ libtool\ object\ file	libtool object file
+
+# From: Daniel Novotny <dnovotny@redhat.com>
+0	string		MDMP\x93\xA7				MDMP crash report data
+
+# Summary: abook addressbook file
+# Submitted by: Mark Schreiber <mark7@alumni.cmu.edu>
+0	string	#\x20abook\x20addressbook\x20file abook address book
+!:mime application/x-abook-addressbook

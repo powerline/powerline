@@ -1,0 +1,337 @@
+
+#------------------------------------------------------------------------------
+# $File: windows,v 1.10 2014/09/24 19:52:46 christos Exp $
+# windows:  file(1) magic for Microsoft Windows
+#
+# This file is mainly reserved for files where programs
+# using them are run almost always on MS Windows 3.x or
+# above, or files only used exclusively in Windows OS,
+# where there is no better category to allocate for.
+# For example, even though WinZIP almost run on Windows
+# only, it is better to treat them as "archive" instead.
+# For format usable in DOS, such as generic executable
+# format, please specify under "msdos" file.
+#
+
+
+# Summary: Outlook Express DBX file
+# Extension: .dbx
+# Created by: Christophe Monniez
+0	string	\xCF\xAD\x12\xFE	MS Outlook Express DBX file
+>4	byte	=0xC5			\b, message database
+>4	byte	=0xC6			\b, folder database
+>4	byte	=0xC7			\b, account information
+>4	byte	=0x30			\b, offline database
+
+
+# Summary: Windows crash dump
+# Extension: .dmp
+# Created by: Andreas Schuster (http://computer.forensikblog.de/)
+# Reference (1): http://computer.forensikblog.de/en/2008/02/64bit_magic.html
+# Modified by (1): Abel Cheung (Avoid match with first 4 bytes only)
+0	string		PAGE		
+>4	string		DUMP		MS Windows 32bit crash dump
+>>0x05c	byte            0		\b, no PAE
+>>0x05c	byte            1		\b, PAE
+>>0xf88	lelong		1		\b, full dump
+>>0xf88	lelong		2		\b, kernel dump
+>>0xf88	lelong		3		\b, small dump
+>>0x068	lelong		x		\b, %d pages
+>4	string		DU64		MS Windows 64bit crash dump
+>>0xf98	lelong		1		\b, full dump
+>>0xf98	lelong		2		\b, kernel dump
+>>0xf98	lelong		3		\b, small dump
+>>0x090	lequad		x		\b, %lld pages
+
+
+# Summary: Vista Event Log
+# Extension: .evtx
+# Created by: Andreas Schuster (http://computer.forensikblog.de/)
+# Reference (1): http://computer.forensikblog.de/en/2007/05/some_magic.html
+0	string		ElfFile\0	MS Windows Vista Event Log
+>0x2a	leshort		x		\b, %d chunks
+>>0x10	lelong		x		\b (no. %d in use)
+>0x18	lelong		>1		\b, next record no. %d
+>0x18	lelong		=1		\b, empty
+>0x78	lelong		&1		\b, DIRTY
+>0x78	lelong		&2		\b, FULL
+
+
+# Summary: Windows 3.1 group files
+# Extension: .grp
+# Created by: unknown
+0	string		\120\115\103\103	MS Windows 3.1 group files
+
+
+# Summary: Old format help files
+# Extension: .hlp
+# Created by: Dirk Jagdmann <doj@cubic.org>
+0	lelong		0x00035f3f		MS Windows 3.x help file
+
+
+# Summary: Hyper terminal
+# Extension: .ht
+# Created by: unknown
+0	string		HyperTerminal\ 
+>15	string		1.0\ --\ HyperTerminal\ data\ file	MS Windows HyperTerminal profile
+
+# http://ithreats.files.wordpress.com/2009/05/\
+# lnk_the_windows_shortcut_file_format.pdf
+# Summary: Windows shortcut
+# Extension: .lnk
+# Created by: unknown
+# 'L' + GUUID
+0	string		\114\0\0\0\001\024\002\0\0\0\0\0\300\0\0\0\0\0\0\106	MS Windows shortcut
+>20	lelong&1	1	\b, Item id list present
+>20	lelong&2	2	\b, Points to a file or directory
+>20	lelong&4	4	\b, Has Description string
+>20	lelong&8	8	\b, Has Relative path
+>20	lelong&16	16	\b, Has Working directory
+>20	lelong&32	32	\b, Has command line arguments
+>20	lelong&64	64	\b, Icon
+>>56	lelong			\b number=%d
+>24	lelong&1	1	\b, Read-Only
+>24	lelong&2	2	\b, Hidden
+>24	lelong&4	4	\b, System
+>24	lelong&8	8	\b, Volume Label
+>24	lelong&16	16	\b, Directory
+>24	lelong&32	32	\b, Archive
+>24	lelong&64	64	\b, Encrypted
+>24	lelong&128	128	\b, Normal
+>24	lelong&256	256	\b, Temporary
+>24	lelong&512	512	\b, Sparse
+>24	lelong&1024	1024	\b, Reparse point
+>24	lelong&2048	2048	\b, Compressed
+>24	lelong&4096	4096	\b, Offline
+>28	leqwdate	x	\b, ctime=%s
+>36	leqwdate	x	\b, mtime=%s
+>44	leqwdate	x	\b, atime=%s
+>52	lelong		x	\b, length=%u, window=
+>60	lelong&1	1	\bhide
+>60	lelong&2	2	\bnormal
+>60	lelong&4	4	\bshowminimized
+>60	lelong&8	8	\bshowmaximized
+>60	lelong&16	16	\bshownoactivate
+>60	lelong&32	32	\bminimize
+>60	lelong&64	64	\bshowminnoactive
+>60	lelong&128	128	\bshowna
+>60	lelong&256	256	\brestore
+>60	lelong&512	512	\bshowdefault
+#>20	lelong&1	0
+#>>20	lelong&2	2
+#>>>(72.l-64)	pstring/h	x	\b [%s]
+#>20	lelong&1	1
+#>>20	lelong&2	2
+#>>>(72.s)	leshort	x
+#>>>&75	pstring/h	x	\b [%s]
+
+# Summary: Outlook Personal Folders
+# Created by: unknown
+0	lelong		0x4E444221	Microsoft Outlook email folder
+>10	leshort		0x0e		(<=2002)
+>10	leshort		0x17		(>=2003)
+
+
+# Summary: Windows help cache
+# Created by: unknown
+0	string		\164\146\115\122\012\000\000\000\001\000\000\000	MS Windows help cache
+
+
+# Summary: IE cache file
+# Created by: Christophe Monniez
+0	string	Client\ UrlCache\ MMF 	Internet Explorer cache file
+>20	string	>\0			version %s
+
+
+# Summary: Registry files
+# Created by: unknown
+# Modified by (1): Joerg Jenderek
+0	string		regf		MS Windows registry file, NT/2000 or above
+0	string		CREG		MS Windows 95/98/ME registry file
+0	string		SHCC3		MS Windows 3.1 registry file
+
+
+# Summary: Windows Registry text
+# Extension: .reg
+# Submitted by: Abel Cheung <abelcheung@gmail.com>
+0	string		REGEDIT4\r\n\r\n	Windows Registry text (Win95 or above)
+0	string		Windows\ Registry\ Editor\ 
+>&0	string		Version\ 5.00\r\n\r\n	Windows Registry text (Win2K or above)
+
+# Windows *.INF *.INI files updated by Joerg Jenderek at Apr 2013
+# empty ,comment , section
+# PR/383: remove unicode BOM because it is not portable across regex impls
+0	regex/s		\\`(\\r\\n|;|[[])
+# left bracket in section line
+>&0	search/8192	[						
+# http://en.wikipedia.org/wiki/Autorun.inf
+# http://msdn.microsoft.com/en-us/library/windows/desktop/cc144200.aspx
+>>&0	regex/c		\^(autorun)]\r\n				
+>>>&0	ubyte		=0x5b						INItialization configuration
+!:mime application/x-wine-extension-ini
+# From: Pal Tamas <folti@balabit.hu>
+# Autorun File
+>>>&0	ubyte		!0x5b						Microsoft Windows Autorun file
+!:mime application/x-setupscript
+# http://msdn.microsoft.com/en-us/library/windows/hardware/ff549520(v=vs.85).aspx
+# version strings ASCII coded case-independent for Windows setup information script file
+>>&0	regex/c		\^(version|strings)]				Windows setup INFormation
+!:mime	application/x-setupscript
+#!:mime application/inf
+#!:mime application/x-wine-extension-inf
+>>&0	regex/c		\^(WinsockCRCList|OEMCPL)]			Windows setup INFormation
+!:mime	text/inf
+# http://www.winfaq.de/faq_html/Content/tip2500/onlinefaq.php?h=tip2653.htm
+# http://msdn.microsoft.com/en-us/library/windows/desktop/cc144102.aspx
+# .ShellClassInfo DeleteOnCopy LocalizedFileNames ASCII coded case-independent
+>>&0	regex/c	\^(\.ShellClassInfo|DeleteOnCopy|LocalizedFileNames)]	Windows desktop.ini
+!:mime application/x-wine-extension-ini
+#!:mime text/plain
+# http://support.microsoft.com/kb/84709/
+>>&0	regex/c		\^(don't\ load)]				Windows CONTROL.INI
+!:mime application/x-wine-extension-ini
+>>&0	regex/c		\^(ndishlp\\$|protman\\$|NETBEUI\\$)]		Windows PROTOCOL.INI
+!:mime application/x-wine-extension-ini
+# http://technet.microsoft.com/en-us/library/cc722567.aspx
+# http://www.winfaq.de/faq_html/Content/tip0000/onlinefaq.php?h=tip0137.htm
+>>&0	regex/c		\^(windows|Compatibility|embedding)]		Windows WIN.INI
+!:mime application/x-wine-extension-ini
+# http://en.wikipedia.org/wiki/SYSTEM.INI
+>>&0	regex/c		\^(boot|386enh|drivers)]			Windows SYSTEM.INI
+!:mime application/x-wine-extension-ini
+# http://www.mdgx.com/newtip6.htm
+>>&0	regex/c		\^(SafeList)]					Windows IOS.INI
+!:mime application/x-wine-extension-ini
+# http://en.wikipedia.org/wiki/NTLDR	Windows Boot Loader information
+>>&0	regex/c		\^(boot\x20loader)]				Windows boot.ini
+!:mime application/x-wine-extension-ini
+>>>&0	ubyte		x						
+# http://en.wikipedia.org/wiki/CONFIG.SYS
+>>&0	regex/c		\^(menu)]\r\n					MS-DOS CONFIG.SYS
+# http://support.microsoft.com/kb/118579/
+>>&0	regex/c		\^(Paths)]\r\n					MS-DOS MSDOS.SYS
+# VERS string unicoded case-independent
+>>&0	ubequad&0xFFdfFFdfFFdfFFdf	0x0056004500520053		
+# ION] string unicoded case-independent
+>>>&0	ubequad&0xFFdfFFdfFFdfFFff	0x0049004f004e005d		Windows setup INFormation 
+!:mime application/x-setupscript
+# STRI string unicoded case-independent
+>>&0	ubequad&0xFFdfFFdfFFdfFFdf	0x0053005400520049		
+# NGS] string unicoded case-independent
+>>>&0	ubequad&0xFFdfFFdfFFdfFFff	0x004e00470053005D		Windows setup INFormation 
+!:mime application/x-setupscript
+# unknown keyword after opening bracket
+>>&0	default				x				
+>>>&0	search/8192			[				
+# version Strings FileIdentification
+>>>>&0	string/c			version				Windows setup INFormation 
+!:mime application/x-setupscript
+# VERS string unicoded case-independent
+>>>>&0	ubequad&0xFFdfFFdfFFdfFFdf	0x0056004500520053		
+# ION] string unicoded case-independent
+>>>>>&0	ubequad&0xFFdfFFdfFFdfFFff	0x0049004f004e005d		Windows setup INFormation 
+!:mime application/x-setupscript
+# http://en.wikipedia.org/wiki/Initialization_file	Windows Initialization File or other
+#>>>>&0	default				x				Generic INItialization configuration
+#!:mime application/x-wine-extension-ini
+
+# Windows Precompiled INF files *.PNF added by Joerg Jenderek at Mar 2013 of _PNF_HEADER inf.h
+# http://read.pudn.com/downloads3/sourcecode/windows/248345/win2k/private/windows/setup/setupapi/inf.h__.htm
+# GRR: line below too general as it catches also PDP-11 UNIX/RT ldp
+0		leshort&0xFeFe	0x0000		
+# test for unused null bits in PNF_FLAGs
+>4	ulelong&0xFCffFe00	0x00000000	
+# only found 58h for Offset of WinDirPath immediately after _PNF_HEADER structure
+>>68		ulelong		>0x57		
+# test for zero high byte of InfValueBlockSize, followed by WinDirPath like
+# C:\WINDOWS (ASCII 0x433a5c.. , unicode 0x43003a005c..) or X:\MININT
+>>>(68.l-1)	ubelong&0xffE0C519	=0x00400018	Windows Precompiled iNF
+!:mime	application/x-pnf
+# currently only found Major Version=1 and Minor Version=1
+#>>>>0		uleshort	=0x0101		
+#>>>>>1		ubyte		x		\b, version %u
+#>>>>>0		ubyte		x		\b.%u
+>>>>0		uleshort	!0x0101		
+>>>>>1		ubyte		x		\b, version %u
+>>>>>0		ubyte		x		\b.%u
+# 1 ,2 (windows 98 SE)
+#>>>>2		uleshort	=2		\b, InfStyle %u
+>>>>2		uleshort	!2		\b, InfStyle %u
+#	PNF_FLAG_IS_UNICODE		0x00000001
+#	PNF_FLAG_HAS_STRINGS		0x00000002
+#	PNF_FLAG_SRCPATH_IS_URL		0x00000004
+#	PNF_FLAG_HAS_VOLATILE_DIRIDS	0x00000008
+#	PNF_FLAG_INF_VERIFIED		0x00000010
+#	PNF_FLAG_INF_DIGITALLY_SIGNED	0x00000020
+#	??				0x00000100
+#	??				0x01000000
+#	??				0x02000000
+>>>>4	ulelong&0x00000001	0x00000001	\b, unicoded
+>>>>4	ulelong&0x00000020	0x00000020	\b, digitally signed
+#>>>>8		ulelong		x		\b, InfSubstValueListOffset 0x%x
+# many 0, 1 lmouusb.PNF, 2 linkfx10.PNF , f webfdr16.PNF
+#>>>>12		uleshort	x		\b, InfSubstValueCount 0x%x
+# only < 9 found
+#>>>>14		uleshort	x		\b, InfVersionDatumCount 0x%x
+# only found values lower 0x0000ffff
+#>>>>16		ulelong		x		\b, InfVersionDataSize 0x%x
+# only found positive values lower 0x00ffFFff for InfVersionDataOffset
+>>>>20		ulelong		x		\b, at 0x%x
+>>>>4	ulelong&0x00000001	=0x00000001	
+# case independent: CatalogFile Class DriverVer layoutfile LayoutFile SetupClass signature Signature    
+>>>>>(20.l)	lestring16	x		"%s"
+>>>>4	ulelong&0x00000001	!0x00000001	
+>>>>>(20.l)	string		x		"%s"
+# FILETIME is number of 100-nanosecond intervals since 1 January 1601
+#>>>>24		ulequad		x		\b, InfVersionLastWriteTime %16.16llx
+# only found values lower 0x00ffFFff
+#>>>>32		ulelong		x		\b, StringTableBlockOffset 0x%x
+#>>>>36		ulelong		x		\b, StringTableBlockSize 0x%x
+#>>>>40		ulelong		x		\b, InfSectionCount 0x%x
+#>>>>44		ulelong		x		\b, InfSectionBlockOffset 0x%x
+#>>>>48		ulelong		x		\b, InfSectionBlockSize 0x%x
+#>>>>52		ulelong		x		\b, InfLineBlockOffset 0x%x
+#>>>>56		ulelong		x		\b, InfLineBlockSize 0x%x
+#>>>>60		ulelong		x		\b, InfValueBlockOffset 0x%x
+#>>>>64		ulelong		x		\b, InfValueBlockSize 0x%x
+# WinDirPathOffset
+#>>>>68		ulelong		x		\b, at 0x%x
+>>>>68		ulelong		>0x57		
+>>>>>4	ulelong&0x00000001	=0x00000001	
+>>>>>>(68.l)	ubequad		=0x43003a005c005700			
+# normally unicoded C:\Windows
+#>>>>>>>(68.l)	lestring16	x		\b, WinDirPath "%s"
+>>>>>>(68.l)	ubequad		!0x43003a005c005700			
+>>>>>>>(68.l)	lestring16	x		\b, WinDirPath "%s"
+>>>>>4	ulelong&0x00000001	!0x00000001	
+# normally ASCII C:\WINDOWS
+#>>>>>>(68.l)	string		=C:\\WINDOWS	\b, WinDirPath "%s"
+>>>>>>(68.l)	string		!C:\\WINDOWS	\b, WinDirPath "%s"
+# found OsLoaderPathOffset values often 0 , once 70h corelist.PNF, once 68h ASCII machine.PNF 
+#>>>>72		ulelong		>0		\b, at 0x%x
+>>>>72		ulelong		>0		\b,
+>>>>>4	ulelong&0x00000001	=0x00000001	
+>>>>>>(72.l)	lestring16	x		OsLoaderPath "%s"
+>>>>>4	ulelong&0x00000001	!0x00000001	
+# seldom C:\ instead empty
+>>>>>>(72.l)	string		x		OsLoaderPath "%s"
+# 1fdh
+#>>>>76		uleshort	x		\b, StringTableHashBucketCount 0x%x
+>>>>78		uleshort	!0x407		\b, LanguageId %x
+# only 407h found
+#>>>>78		uleshort	=0x407		\b, LanguageId %x
+# InfSourcePathOffset often 0
+#>>>>80		ulelong		>0		\b, at 0x%x
+>>>>80		ulelong		>0		\b,
+>>>>>4	ulelong&0x00000001	=0x00000001	
+>>>>>>(80.l)	lestring16	x		SourcePath "%s"
+>>>>>4	ulelong&0x00000001	!0x00000001	
+>>>>>>(80.l)	string		>\0		SourcePath "%s"
+# OriginalInfNameOffset often 0
+#>>>>84		ulelong		>0		\b, at 0x%x
+>>>>84		ulelong		>0		\b,
+>>>>>4	ulelong&0x00000001	=0x00000001	
+>>>>>>(84.l)	lestring16	x		InfName "%s"
+>>>>>4	ulelong&0x00000001	!0x00000001	
+>>>>>>(84.l)	string		>\0		InfName "%s"
+

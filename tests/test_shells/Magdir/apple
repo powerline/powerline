@@ -1,0 +1,302 @@
+
+#------------------------------------------------------------------------------
+# $File: apple,v 1.29 2014/04/30 21:41:02 christos Exp $
+# apple:  file(1) magic for Apple file formats
+#
+0	search/1/t	FiLeStArTfIlEsTaRt	binscii (apple ][) text
+0	string		\x0aGL			Binary II (apple ][) data
+0	string		\x76\xff		Squeezed (apple ][) data
+0	string		NuFile			NuFile archive (apple ][) data
+0	string		N\xf5F\xe9l\xe5		NuFile archive (apple ][) data
+0	belong		0x00051600		AppleSingle encoded Macintosh file
+0	belong		0x00051607		AppleDouble encoded Macintosh file
+
+# Type: Apple Emulator 2IMG format
+# From: Radek Vokal <rvokal@redhat.com>
+0	string		2IMG	Apple ][ 2IMG Disk Image
+>4	string		XGS!	\b, XGS
+>4	string		CTKG	\b, Catakig
+>4	string		ShIm	\b, Sheppy's ImageMaker
+>4	string		WOOF	\b, Sweet 16
+>4	string		B2TR	\b, Bernie ][ the Rescue
+>4	string		!nfc	\b, ASIMOV2
+>4	string		x	\b, Unknown Format
+>0xc	byte		00	\b, DOS 3.3 sector order
+>>0x10	byte		00	\b, Volume 254
+>>0x10	byte&0x7f	x	\b, Volume %u
+>0xc	byte		01	\b, ProDOS sector order
+>>0x14	short		x	\b, %u Blocks
+>0xc	byte		02	\b, NIB data
+
+# magic for Newton PDA package formats
+# from Ruda Moura <ruda@helllabs.org>
+0	string	package0	Newton package, NOS 1.x,
+>12	belong	&0x80000000	AutoRemove,
+>12	belong	&0x40000000	CopyProtect,
+>12	belong	&0x10000000	NoCompression,
+>12	belong	&0x04000000	Relocation,
+>12	belong	&0x02000000	UseFasterCompression,
+>16	belong	x		version %d
+
+0	string	package1	Newton package, NOS 2.x,
+>12	belong	&0x80000000	AutoRemove,
+>12	belong	&0x40000000	CopyProtect,
+>12	belong	&0x10000000	NoCompression,
+>12	belong	&0x04000000	Relocation,
+>12	belong	&0x02000000	UseFasterCompression,
+>16	belong	x		version %d
+
+0	string	package4	Newton package,
+>8	byte	8		NOS 1.x,
+>8	byte	9		NOS 2.x,
+>12	belong	&0x80000000	AutoRemove,
+>12	belong	&0x40000000	CopyProtect,
+>12	belong	&0x10000000	NoCompression,
+
+# The following entries for the Apple II are for files that have
+# been transferred as raw binary data from an Apple, without having
+# been encapsulated by any of the above archivers.
+#
+# In general, Apple II formats are hard to identify because Apple DOS
+# and especially Apple ProDOS have strong typing in the file system and
+# therefore programmers never felt much need to include type information
+# in the files themselves.
+#
+# Eric Fischer <enf@pobox.com>
+
+# AppleWorks word processor:
+#
+# This matches the standard tab stops for an AppleWorks file, but if
+# a file has a tab stop set in the first four columns this will fail.
+#
+# The "O" is really the magic number, but that's so common that it's
+# necessary to check the tab stops that follow it to avoid false positives.
+
+4       string          O====   AppleWorks word processor data
+>85     byte&0x01       >0      \b, zoomed
+>90     byte&0x01       >0      \b, paginated
+>92     byte&0x01       >0      \b, with mail merge
+#>91    byte            x       \b, left margin %d
+
+# AppleWorks database:
+#
+# This isn't really a magic number, but it's the closest thing to one
+# that I could find.  The 1 and 2 really mean "order in which you defined
+# categories" and "left to right, top to bottom," respectively; the D and R
+# mean that the cursor should move either down or right when you press Return.
+
+#30	string		\x01D	AppleWorks database data
+#30	string		\x02D	AppleWorks database data
+#30	string		\x01R	AppleWorks database data
+#30	string		\x02R	AppleWorks database data
+
+# AppleWorks spreadsheet:
+#
+# Likewise, this isn't really meant as a magic number.  The R or C means
+# row- or column-order recalculation; the A or M means automatic or manual
+# recalculation.
+
+#131	string		RA	AppleWorks spreadsheet data
+#131	string		RM	AppleWorks spreadsheet data
+#131	string		CA	AppleWorks spreadsheet data
+#131	string		CM	AppleWorks spreadsheet data
+
+# Applesoft BASIC:
+#
+# This is incredibly sloppy, but will be true if the program was
+# written at its usual memory location of 2048 and its first line
+# number is less than 256.  Yuck.
+# update by Joerg Jenderek at Feb 2013
+
+# GRR: this test is still too general as it catches also Gujin BOOT144.SYS (0xfa080000)
+#0       belong&0xff00ff 0x80000 Applesoft BASIC program data
+0	belong&0x00ff00ff	0x00080000	
+# assuming that line number must be positive
+>2	leshort			>0		Applesoft BASIC program data, first line number %d
+#>2     leshort         x       \b, first line number %d
+
+# ORCA/EZ assembler:
+# 
+# This will not identify ORCA/M source files, since those have
+# some sort of date code instead of the two zero bytes at 6 and 7
+# XXX Conflicts with ELF
+#4       belong&0xff00ffff       0x01000000      ORCA/EZ assembler source data
+#>5      byte                    x               \b, build number %d
+
+# Broderbund Fantavision
+#
+# I don't know what these values really mean, but they seem to recur.
+# Will they cause too many conflicts?
+
+# Probably :-)
+#2	belong&0xFF00FF		0x040008	Fantavision movie data
+
+# Some attempts at images.
+#
+# These are actually just bit-for-bit dumps of the frame buffer, so
+# there's really no reasonably way to distinguish them except for their
+# address (if preserved) -- 8192 or 16384 -- and their length -- 8192
+# or, occasionally, 8184.
+#
+# Nevertheless this will manage to catch a lot of images that happen
+# to have a solid-colored line at the bottom of the screen.
+
+# GRR: Magic too weak
+#8144	string	\x7F\x7F\x7F\x7F\x7F\x7F\x7F\x7F	Apple II image with white background
+#8144	string	\x55\x2A\x55\x2A\x55\x2A\x55\x2A	Apple II image with purple background
+#8144	string	\x2A\x55\x2A\x55\x2A\x55\x2A\x55	Apple II image with green background
+#8144	string	\xD5\xAA\xD5\xAA\xD5\xAA\xD5\xAA	Apple II image with blue background
+#8144	string	\xAA\xD5\xAA\xD5\xAA\xD5\xAA\xD5	Apple II image with orange background
+
+# Beagle Bros. Apple Mechanic fonts
+
+0	belong&0xFF00FFFF	0x6400D000	Apple Mechanic font
+
+# Apple Universal Disk Image Format (UDIF) - dmg files.
+# From Johan Gade.
+# These entries are disabled for now until we fix the following issues.
+#
+# Note there might be some problems with the "VAX COFF executable" 
+# entry. Note this entry should be placed before the mac filesystem section, 
+# particularly the "Apple Partition data" entry.
+#
+# The intended meaning of these tests is, that the file is only of the 
+# specified type if both of the lines are correct - i.e. if the first
+# line matches and the second doesn't then it is not of that type.
+#
+#0	long	0x7801730d
+#>4	long	0x62626060	UDIF read-only zlib-compressed image (UDZO)
+#
+# Note that this entry is recognized correctly by the "Apple Partition 
+# data" entry - however since this entry is more specific - this
+# information seems to be more useful.
+#0	long	0x45520200
+#>0x410	string	disk\ image	UDIF read/write image (UDRW)
+
+# From: Toby Peterson <toby@apple.com>
+0	string	bplist00	Apple binary property list
+
+# Apple binary property list (bplist)
+#  Assumes version bytes are hex.
+#  Provides content hints for version 0 files. Assumes that the root
+#  object is the first object (true for CoreFoundation implementation).
+# From: David Remahl <dremahl@apple.com>
+0		string	bplist
+>6		byte	x	\bCoreFoundation binary property list data, version 0x%c
+>>7		byte	x	\b%c
+>6		string		00		\b
+>>8		byte&0xF0	0x00	\b
+>>>8	byte&0x0F	0x00	\b, root type: null
+>>>8	byte&0x0F	0x08	\b, root type: false boolean
+>>>8	byte&0x0F	0x09	\b, root type: true boolean
+>>8		byte&0xF0	0x10	\b, root type: integer
+>>8		byte&0xF0	0x20	\b, root type: real
+>>8		byte&0xF0	0x30	\b, root type: date
+>>8		byte&0xF0	0x40    \b, root type: data
+>>8		byte&0xF0	0x50	\b, root type: ascii string
+>>8		byte&0xF0	0x60	\b, root type: unicode string
+>>8		byte&0xF0	0x80	\b, root type: uid (CORRUPT)
+>>8		byte&0xF0	0xa0	\b, root type: array
+>>8		byte&0xF0	0xd0	\b, root type: dictionary
+
+# Apple/NeXT typedstream data
+#  Serialization format used by NeXT and Apple for various
+#  purposes in YellowStep/Cocoa, including some nib files.
+# From: David Remahl <dremahl@apple.com>
+2		string		typedstream	NeXT/Apple typedstream data, big endian
+>0		byte		x		\b, version %d
+>0		byte		<5		\b
+>>13	byte		0x81	\b
+>>>14	ubeshort	x		\b, system %d
+2		string		streamtyped NeXT/Apple typedstream data, little endian
+>0		byte		x		\b, version %d
+>0		byte		<5		\b
+>>13	byte		0x81	\b
+>>>14	uleshort	x		\b, system %d
+
+#------------------------------------------------------------------------------
+# CAF: Apple CoreAudio File Format
+#
+# Container format for high-end audio purposes.
+# From: David Remahl <dremahl@apple.com>
+#
+0	string		caff		CoreAudio Format audio file
+>4	beshort		<10		version %d
+>6	beshort		x
+
+
+#------------------------------------------------------------------------------
+# Keychain database files
+0	string		kych		Mac OS X Keychain File
+
+#------------------------------------------------------------------------------
+# Code Signing related file types
+0	belong		0xfade0c00	Mac OS X Code Requirement
+>8	belong		1			(opExpr)
+>4	belong		x			- %d bytes
+
+0	belong		0xfade0c01	Mac OS X Code Requirement Set
+>8	belong		>1			containing %d items
+>4	belong		x			- %d bytes
+
+0	belong		0xfade0c02	Mac OS X Code Directory
+>8	belong		x			version %x
+>12	belong		>0			flags 0x%x
+>4	belong		x			- %d bytes
+
+0	belong		0xfade0cc0	Mac OS X Detached Code Signature (non-executable)
+>4	belong		x			- %d bytes
+
+0	belong		0xfade0cc1	Mac OS X Detached Code Signature
+>8	belong		>1			(%d elements)
+>4	belong		x			- %d bytes
+
+# From: "Nelson A. de Oliveira" <naoliv@gmail.com>
+# .vdi
+4	string innotek\ VirtualBox\ Disk\ Image %s
+
+# Apple disk partition stuff, strengthen the magic using byte 4
+0	beshort	0x4552
+>4	byte	0			Apple Driver Map
+>>2	beshort	x			\b, blocksize %d
+>>4	belong	x			\b, blockcount %d
+>>10	beshort	x			\b, devtype %d
+>>12	beshort	x			\b, devid %d
+>>20	beshort x			\b, descriptors %d
+# Assume 	8 partitions each at a multiple of the sector size.
+# We could glean this from the partition descriptors, but they are empty!?!?
+>>(2.S*1)	indirect		\b, contains[@0x%x]: 
+>>(2.S*2)	indirect		\b, contains[@0x%x]: 
+>>(2.S*3)	indirect		\b, contains[@0x%x]: 
+>>(2.S*4)	indirect		\b, contains[@0x%x]: 
+>>(2.S*5)	indirect		\b, contains[@0x%x]: 
+>>(2.S*6)	indirect		\b, contains[@0x%x]: 
+>>(2.S*7)	indirect		\b, contains[@0x%x]: 
+>>(2.S*8)	indirect		\b, contains[@0x%x]: 
+
+# Yes, the 3rd and 4th bytes are reserved, but we use them to make the
+# magic stronger.
+0	belong	0x504d0000		Apple Partition Map
+>4	belong	x			\b, map block count %d
+>8	belong	x			\b, start block %d
+>12	belong	x			\b, block count %d
+>16	string >0			\b, name %s
+>48	string >0			\b, type %s
+>124	string >0			\b, processor %s
+>140	string >0			\b, boot arguments %s
+>92	belong	& 1			\b, valid
+>92	belong	& 2			\b, allocated
+>92	belong	& 4			\b, in use
+>92	belong	& 8			\b, has boot info
+>92	belong	& 16			\b, readable
+>92	belong	& 32			\b, writable
+>92	belong	& 64			\b, pic boot code
+>92	belong	& 128			\b, chain compatible driver
+>92	belong	& 256			\b, real driver
+>92	belong	& 512			\b, chain driver
+>92	belong	& 1024			\b, mount at startup
+>92	belong	& 2048			\b, is the startup partition
+
+#http://wiki.mozilla.org/DS_Store_File_Format`
+#http://en.wikipedia.org/wiki/.DS_Store
+0	string	\0\0\0\1Bud1\0		Apple Desktop Services Store

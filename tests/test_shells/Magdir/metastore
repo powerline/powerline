@@ -1,0 +1,8 @@
+
+#------------------------------------------------------------------------------
+# $File: metastore,v 1.1 2011/04/06 12:37:44 christos Exp $
+# metastore:  file(1) magic for metastore files
+# From: Thomas Wissen
+# see http://david.hardeman.nu/software.php#metastore
+0	string		MeTaSt00r3	Metastore data file, 
+>10	bequad		x		version %0llx

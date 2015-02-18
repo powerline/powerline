@@ -1,0 +1,100 @@
+
+#------------------------------------------------------------------------------
+# $File: fonts,v 1.27 2014/04/30 21:41:02 christos Exp $
+# fonts:  file(1) magic for font data
+#
+0	search/1	FONT		ASCII vfont text
+0	short		0436		Berkeley vfont data
+0	short		017001		byte-swapped Berkeley vfont data
+
+# PostScript fonts (must precede "printer" entries), quinlan@yggdrasil.com
+0	string		%!PS-AdobeFont-1.	PostScript Type 1 font text
+>20	string		>\0			(%s)
+6	string		%!PS-AdobeFont-1.	PostScript Type 1 font program data
+0	string		%!FontType1	PostScript Type 1 font program data
+6	string		%!FontType1	PostScript Type 1 font program data
+0	string		%!PS-Adobe-3.0\ Resource-Font	PostScript Type 1 font text
+
+# X11 font files in SNF (Server Natural Format) format
+# updated by Joerg Jenderek at Feb 2013
+# http://computer-programming-forum.com/51-perl/8f22fb96d2e34bab.htm
+0	belong		00000004		X11 SNF font data, MSB first
+#>104	belong		00000004		X11 SNF font data, MSB first
+!:mime	application/x-font-sfn
+# GRR: line below too general as it catches also Xbase index file t3-CHAR.NDX
+0	lelong		00000004		
+>104	lelong		00000004		X11 SNF font data, LSB first
+!:mime	application/x-font-sfn
+
+# X11 Bitmap Distribution Format, from Daniel Quinlan (quinlan@yggdrasil.com)
+0	search/1	STARTFONT\ 		X11 BDF font text
+
+# X11 fonts, from Daniel Quinlan (quinlan@yggdrasil.com)
+# PCF must come before SGI additions ("MIPSEL MIPS-II COFF" collides)
+0	string		\001fcp			X11 Portable Compiled Font data
+>12	byte		0x02			\b, LSB first
+>12	byte		0x0a			\b, MSB first
+0	string		D1.0\015		X11 Speedo font data
+
+#------------------------------------------------------------------------------
+# FIGlet fonts and controlfiles
+# From figmagic supplied with Figlet version 2.2
+# "David E. O'Brien" <obrien@FreeBSD.ORG>
+0	string		flf		FIGlet font
+>3	string		>2a		version %-2.2s
+0	string		flc		FIGlet controlfile
+>3	string		>2a		version %-2.2s
+
+# libGrx graphics lib fonts, from Albert Cahalan (acahalan@cs.uml.edu)
+# Used with djgpp (DOS Gnu C++), sometimes Linux or Turbo C++
+0	belong		0x14025919	libGrx font data,
+>8	leshort		x		%dx
+>10	leshort		x		\b%d
+>40	string		x		%s
+# Misc. DOS VGA fonts, from Albert Cahalan (acahalan@cs.uml.edu)
+0	belong		0xff464f4e	DOS code page font data collection
+7	belong		0x00454741	DOS code page font data
+7	belong		0x00564944	DOS code page font data (from Linux?)
+4098	string		DOSFONT		DOSFONT2 encrypted font data
+
+# downloadable fonts for browser (prints type) anthon@mnt.org
+0	string		PFR1		PFR1 font
+>102	string		>0		\b: %s
+
+# True Type fonts
+0	string	\000\001\000\000\000	TrueType font data
+!:mime application/x-font-ttf
+
+0	string		\007\001\001\000Copyright\ (c)\ 199	Adobe Multiple Master font
+0	string		\012\001\001\000Copyright\ (c)\ 199	Adobe Multiple Master font
+
+# TrueType/OpenType font collections (.ttc)
+# http://www.microsoft.com/typography/otspec/otff.htm
+0	string		ttcf		TrueType font collection data
+>4	belong		0x00010000	\b, 1.0
+>>8	belong		>0		\b, %d fonts
+>4	belong		0x00020000	\b, 2.0
+>>8	belong		>0		\b, %d fonts
+# 0x44454947 = 'DSIG'
+>>>16	belong		0x44534947	\b, digitally signed
+
+# Opentype font data from Avi Bercovich
+0	string		OTTO		OpenType font data
+!:mime application/vnd.ms-opentype
+
+# Gurkan Sengun <gurkan@linuks.mine.nu>, www.linuks.mine.nu 
+0	string		SplineFontDB:	Spline Font Database 
+!:mime application/vnd.font-fontforge-sfd
+>14	string		x		version %s
+
+# EOT
+34	string		LP		Embedded OpenType (EOT)
+!:mime application/vnd.ms-fontobject
+
+# Web Open Font Format (.woff)
+# http://www.w3.org/TR/WOFF/
+0	string		wOFF	Web Open Font Format
+>4	belong		x	\b, flavor %d
+>8	belong		x	\b, length %d
+>20	beshort		x	\b, version %d
+>22	beshort		x	\b.%d

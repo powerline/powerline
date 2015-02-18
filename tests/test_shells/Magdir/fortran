@@ -1,0 +1,7 @@
+
+#------------------------------------------------------------------------------
+# $File: fortran,v 1.8 2014/06/03 19:01:34 christos Exp $
+# FORTRAN source
+0	regex/100l	\^[Cc][\ \t]	FORTRAN program
+!:mime	text/x-fortran
+!:strength - 5

@@ -1,0 +1,45 @@
+
+#------------------------------------------------------------------------------
+# $File: msvc,v 1.5 2009/09/19 16:28:11 christos Exp $
+# msvc:  file(1) magic for msvc
+# "H. Nanosecond" <aldomel@ix.netcom.com>
+# Microsoft visual C
+# 
+# I have version 1.0
+
+# .aps
+0	string	HWB\000\377\001\000\000\000	Microsoft Visual C .APS file
+
+# .ide
+#too long 0	string	\102\157\162\154\141\156\144\040\103\053\053\040\120\162\157\152\145\143\164\040\106\151\154\145\012\000\032\000\002\000\262\000\272\276\372\316	MSVC .ide
+0	string	\102\157\162\154\141\156\144\040\103\053\053\040\120\162\157	MSVC .ide
+
+# .res
+0	string	\000\000\000\000\040\000\000\000\377	MSVC .res
+0	string	\377\003\000\377\001\000\020\020\350	MSVC .res
+0	string	\377\003\000\377\001\000\060\020\350	MSVC .res
+
+#.lib
+0	string	\360\015\000\000	Microsoft Visual C library
+0	string	\360\075\000\000	Microsoft Visual C library
+0	string	\360\175\000\000	Microsoft Visual C library
+
+#.pch
+0	string	DTJPCH0\000\022\103\006\200	Microsoft Visual C .pch
+
+# .pdb
+# too long 0	string	Microsoft\ C/C++\ program\ database\ 
+0	string	Microsoft\ C/C++\ 	MSVC program database
+>18	string	program\ database\ 	
+>33	string	>\0	ver %s
+
+#.sbr
+0	string	\000\002\000\007\000	MSVC .sbr
+>5	string 	>\0	%s
+
+#.bsc
+0	string	\002\000\002\001	MSVC .bsc
+
+#.wsp
+0	string	1.00\ .0000.0000\000\003	MSVC .wsp version 1.0000.0000
+# these seem to start with the version and contain menus

@@ -1,0 +1,83 @@
+
+#------------------------------------------------------------------------------
+# $File: sql,v 1.15 2014/04/30 21:41:02 christos Exp $
+# sql:  file(1) magic for SQL files
+#
+# From: "Marty Leisner" <mleisner@eng.mc.xerox.com>
+# Recognize some MySQL files.
+# Elan Ruusamae <glen@delfi.ee>, added MariaDB signatures
+# from https://bazaar.launchpad.net/~maria-captains/maria/5.5/view/head:/support-files/magic
+#
+0	beshort			0xfe01		MySQL table definition file
+>2	byte			x		Version %d
+0	belong&0xffffff00	0xfefe0700	MySQL MyISAM index file
+>3	byte			x		Version %d
+0	belong&0xffffff00	0xfefe0800	MySQL MyISAM compressed data file
+>3	byte			x		Version %d
+0	belong&0xffffff00	0xfefe0900	MySQL Maria index file
+>3	byte			x		Version %d
+0	belong&0xffffff00	0xfefe0A00	MySQL Maria compressed data file
+>3	byte			x		Version %d
+0	belong&0xffffff00	0xfefe0500	MySQL ISAM index file
+>3	byte			x		Version %d
+0	belong&0xffffff00	0xfefe0600	MySQL ISAM compressed data file
+>3	byte			x		Version %d
+0	string			\376bin		MySQL replication log
+0	belong&0xffffff00	0xfefe0b00
+>4	string			MARIALOG	MySQL Maria transaction log file
+>>3	byte			x		Version %d
+0	belong&0xffffff00	0xfefe0c00
+>4	string			MACF		MySQL Maria control file
+>>3	byte			x		Version %d
+
+#------------------------------------------------------------------------------
+# iRiver H Series database file 
+# From Ken Guest <ken@linux.ie>
+# As observed from iRivNavi.iDB and unencoded firmware
+#
+0   string		iRivDB	iRiver Database file
+>11  string	>\0	Version %s
+>39  string		iHP-100	[H Series]
+
+#------------------------------------------------------------------------------
+# SQLite database files
+# Ken Guest <ken@linux.ie>, Ty Sarna, Zack Weinberg
+#
+# Version 1 used GDBM internally; its files cannot be distinguished
+# from other GDBM files.
+#
+# Version 2 used this format:
+0	string	**\ This\ file\ contains\ an\ SQLite  SQLite 2.x database
+
+# Version 3 of SQLite allows applications to embed their own "user version"
+# number in the database at offset 60.  Later, SQLite added an "application id"
+# at offset 68 that is preferred over "user version" for indicating the
+# associated application.
+#
+0   string  SQLite\ format\ 3
+>60 belong  =0x5f4d544e  Monotone source repository - SQLite3 database
+>68 belong  =0x0f055112  Fossil checkout - SQLite3 database
+>68 belong  =0x0f055113  Fossil global configuration - SQLite3 database
+>68 belong  =0x0f055111  Fossil repository - SQLite3 database
+>68 belong  =0x42654462  Bentley Systems BeSQLite Database - SQLite3 database
+>68 belong  =0x42654c6e  Bentley Systems Localization File - SQLite3 database
+>68 belong  =0x47504b47  OGC GeoPackage file - SQLite3 database
+>68 default x            SQLite 3.x database
+>>68 belong  !0          \b, application id %u
+>>60 belong  !0          \b, user version %d
+
+# SQLite Write-Ahead Log from SQLite version >= 3.7.0
+# http://www.sqlite.org/fileformat.html#walformat
+0	belong&0xfffffffe	0x377f0682	SQLite Write-Ahead Log,
+>4	belong	x	version %d
+
+# SQLite Rollback Journal
+# http://www.sqlite.org/fileformat.html#rollbackjournal
+0	string	\xd9\xd5\x05\xf9\x20\xa1\x63\xd7	SQLite Rollback Journal
+
+# Panasonic channel list database svl.bin or svl.db added by Joerg Jenderek
+# http://www.ullrich.es/job/service-menue/panasonic/panasonic-sendersortierung-sat-am-pc/
+# pceditor_V2003.jar
+0	string		PSDB\0			Panasonic channel list database
+>126	string		SQLite\ format\ 3	
+>>&-15	indirect	x			\b; contains 

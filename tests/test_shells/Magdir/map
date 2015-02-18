@@ -1,0 +1,25 @@
+
+
+#------------------------------------------------------------------------------
+# $File: map,v 1.1 2014/06/03 18:22:25 christos Exp $
+# map:  file(1) magic for Map data
+#
+
+# Garmin .FIT files http://pub.ks-and-ks.ne.jp/cycling/edge500_fit.shtml
+8	string	.FIT		FIT Map data
+>15	byte	0
+>>35	belong	x		\b, unit id %d
+# 20 years after unix epoch
+>>39	lelong	x		\b, serial %u
+>>43	ledate/631152000 x	\b, %s
+
+>>47	leshort x		\b, manufacturer %d
+>>47	leshort	1		\b (garmin)
+>>49	leshort x		\b, product %d
+>>53	byte	x		\b, type %d
+>>53	byte	1		\b (Device)
+>>53	byte	2		\b (Settings)
+>>53	byte	3		\b (Sports/Cycling)
+>>53	byte	4		\b (Activity)
+>>53	byte	8		\b (Elevations)
+>>53	byte	10		\b (Totals)

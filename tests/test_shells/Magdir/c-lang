@@ -1,0 +1,57 @@
+#------------------------------------------------------------------------------
+# $File: c-lang,v 1.19 2014/06/03 19:17:27 christos Exp $
+# c-lang:  file(1) magic for C and related languages programs
+#
+
+# BCPL
+0	search/8192	"libhdr"	BCPL source text
+!:mime	text/x-bcpl
+0	search/8192	"LIBHDR"	BCPL source text
+!:mime	text/x-bcpl
+
+# C
+0	regex	\^#include	C source text
+!:mime	text/x-c
+0	regex	\^char[\ \t\n]+	C source text
+!:mime	text/x-c
+0	regex	\^double[\ \t\n]+		C source text
+!:mime	text/x-c
+0	regex	\^extern[\ \t\n]+		C source text
+!:mime	text/x-c
+0	regex	\^float[\ \t\n]+		C source text
+!:mime	text/x-c
+0	regex	\^struct[\ \t\n]+		C source text
+!:mime	text/x-c
+0	regex	\^union[\ \t\n]+		C source text
+!:mime	text/x-c
+0	search/8192	main(		C source text
+!:mime	text/x-c
+
+# C++
+# The strength of these rules is increased so they beat the C rules above
+0	regex	\^template[\ \t\n]+	C++ source text
+!:strength + 5
+!:mime	text/x-c++
+0	regex	\^virtual[\ \t\n]+		C++ source text
+!:strength + 5
+!:mime	text/x-c++
+0	regex	\^class[\ \t\n]+		C++ source text
+!:strength + 5
+!:mime	text/x-c++
+0	regex	\^public:		C++ source text
+!:strength + 5
+!:mime	text/x-c++
+0	regex	\^private:		C++ source text
+!:strength + 5
+!:mime	text/x-c++
+
+# From: Mikhail Teterin <mi@aldan.algebra.com> 
+0	string		cscope		cscope reference data
+>7	string		x		version %.2s
+# We skip the path here, because it is often long (so file will
+# truncate it) and mostly redundant.
+# The inverted index functionality was added some time between
+# versions 11 and 15, so look for -q if version is above 14:
+>7	string		>14
+>>10	search/100	\ -q\ 		with inverted index
+>10	search/100	\ -c\ 		text (non-compressed)

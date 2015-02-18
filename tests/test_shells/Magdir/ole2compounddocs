@@ -1,0 +1,14 @@
+
+#------------------------------------------------------------------------------
+# $File: ole2compounddocs,v 1.4 2009/09/19 16:28:11 christos Exp $
+# Microsoft OLE 2 Compound Documents : file(1) magic for Microsoft Structured
+# storage (http://en.wikipedia.org/wiki/Structured_Storage)
+# Additional tests for OLE 2 Compound Documents should be under this recipe.
+
+0   string  \320\317\021\340\241\261\032\341      OLE 2 Compound Document
+# - Microstation V8 DGN files (www.bentley.com)
+#   Last update on 10/23/2006 by Lester Hightower
+> 0x480  string  D\000g\000n\000~\000H                : Microstation V8 DGN
+# - Visio documents
+#   Last update on 10/23/2006 by Lester Hightower
+> 0x480  string  V\000i\000s\000i\000o\000D\000o\000c : Visio Document

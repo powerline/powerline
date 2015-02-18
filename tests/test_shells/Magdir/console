@@ -1,0 +1,264 @@
+
+#------------------------------------------------------------------------------
+# $File: console,v 1.19 2013/02/06 14:18:52 christos Exp $
+# Console game magic
+# Toby Deshane <hac@shoelace.digivill.net>
+#    ines:  file(1) magic for Marat's iNES Nintendo Entertainment System
+#           ROM dump format
+
+0 string NES\032 iNES ROM dump,
+>4 byte  x     %dx16k PRG
+>5 byte  x     \b, %dx8k CHR
+>6 byte&0x01  =0x1  \b, [Vert.]
+>6 byte&0x01  =0x0  \b, [Horiz.]
+>6 byte&0x02  =0x2  \b, [SRAM]
+>6 byte&0x04  =0x4  \b, [Trainer]
+>6 byte&0x04  =0x8  \b, [4-Scr]
+
+#------------------------------------------------------------------------------
+# gameboy:  file(1) magic for the Nintendo (Color) Gameboy raw ROM format
+#
+0x104 belong 0xCEED6666 Gameboy ROM:
+>0x134 string >\0 "%.16s"
+>0x146 byte 0x03  \b,[SGB]
+>0x147 byte 0x00  \b, [ROM ONLY]
+>0x147 byte 0x01  \b, [ROM+MBC1]
+>0x147 byte 0x02  \b, [ROM+MBC1+RAM]
+>0x147 byte 0x03  \b, [ROM+MBC1+RAM+BATT]
+>0x147 byte 0x05  \b, [ROM+MBC2]
+>0x147 byte 0x06  \b, [ROM+MBC2+BATTERY]
+>0x147 byte 0x08  \b, [ROM+RAM]
+>0x147 byte 0x09  \b, [ROM+RAM+BATTERY]
+>0x147 byte 0x0B  \b, [ROM+MMM01]
+>0x147 byte 0x0C  \b, [ROM+MMM01+SRAM]
+>0x147 byte 0x0D  \b, [ROM+MMM01+SRAM+BATT]
+>0x147 byte 0x0F  \b, [ROM+MBC3+TIMER+BATT]
+>0x147 byte 0x10  \b, [ROM+MBC3+TIMER+RAM+BATT]
+>0x147 byte 0x11  \b, [ROM+MBC3]
+>0x147 byte 0x12  \b, [ROM+MBC3+RAM]
+>0x147 byte 0x13  \b, [ROM+MBC3+RAM+BATT]
+>0x147 byte 0x19  \b, [ROM+MBC5]
+>0x147 byte 0x1A  \b, [ROM+MBC5+RAM]
+>0x147 byte 0x1B  \b, [ROM+MBC5+RAM+BATT]
+>0x147 byte 0x1C  \b, [ROM+MBC5+RUMBLE]
+>0x147 byte 0x1D  \b, [ROM+MBC5+RUMBLE+SRAM]
+>0x147 byte 0x1E  \b, [ROM+MBC5+RUMBLE+SRAM+BATT]
+>0x147 byte 0x1F  \b, [Pocket Camera]
+>0x147 byte 0xFD  \b, [Bandai TAMA5]
+>0x147 byte 0xFE  \b, [Hudson HuC-3]
+>0x147 byte 0xFF  \b, [Hudson HuC-1]
+
+>0x148 byte 0     \b, ROM: 256Kbit
+>0x148 byte 1     \b, ROM: 512Kbit
+>0x148 byte 2     \b, ROM: 1Mbit
+>0x148 byte 3     \b, ROM: 2Mbit
+>0x148 byte 4     \b, ROM: 4Mbit
+>0x148 byte 5     \b, ROM: 8Mbit
+>0x148 byte 6     \b, ROM: 16Mbit
+>0x148 byte 0x52  \b, ROM: 9Mbit
+>0x148 byte 0x53  \b, ROM: 10Mbit
+>0x148 byte 0x54  \b, ROM: 12Mbit
+
+>0x149 byte 1     \b, RAM: 16Kbit
+>0x149 byte 2     \b, RAM: 64Kbit
+>0x149 byte 3     \b, RAM: 128Kbit
+>0x149 byte 4     \b, RAM: 1Mbit
+
+#>0x14e long  x     \b, CRC: %x
+
+#------------------------------------------------------------------------------
+# genesis:  file(1) magic for the Sega MegaDrive/Genesis raw ROM format
+#
+0x100 string SEGA  Sega MegaDrive/Genesis raw ROM dump
+>0x120 string >\0 Name: "%.16s"
+>0x110 string >\0 %.16s
+>0x1B0 string RA with SRAM
+
+#------------------------------------------------------------------------------
+# genesis:  file(1) magic for the Super MegaDrive ROM dump format
+#
+0x280 string EAGN  Super MagicDrive ROM dump
+>0 byte x %dx16k blocks
+>2 byte 0 \b, last in series or standalone
+>2 byte >0 \b, split ROM
+>8 byte 0xAA
+>9 byte 0xBB
+
+#------------------------------------------------------------------------------
+# genesis:  file(1) alternate magic for the Super MegaDrive ROM dump format
+#
+0x280 string EAMG  Super MagicDrive ROM dump
+>0 byte x %dx16k blocks
+>2 byte x \b, last in series or standalone
+>8 byte 0xAA
+>9 byte 0xBB
+
+#------------------------------------------------------------------------------
+# smsgg:  file(1) magic for Sega Master System and Game Gear ROM dumps
+#
+# Does not detect all images.  Very preliminary guesswork.  Need more data
+# on format.
+#
+# FIXME: need a little more info...;P
+#
+#0 byte 0xF3
+#>1 byte 0xED  Sega Master System/Game Gear ROM dump
+#>1 byte 0x31  Sega Master System/Game Gear ROM dump
+#>1 byte 0xDB  Sega Master System/Game Gear ROM dump
+#>1 byte 0xAF  Sega Master System/Game Gear ROM dump
+#>1 byte 0xC3  Sega Master System/Game Gear ROM dump
+
+#------------------------------------------------------------------------------
+# dreamcast:  file(1) uncertain magic for the Sega Dreamcast VMU image format
+#
+0 belong 0x21068028   Sega Dreamcast VMU game image
+0 string LCDi         Dream Animator file
+
+#------------------------------------------------------------------------------
+# v64: file(1) uncertain magic for the V64 format N64 ROM dumps
+#
+0 belong 0x37804012    V64 Nintendo 64 ROM dump
+
+# From: "Nelson A. de Oliveira" <naoliv@gmail.com>
+# Nintendo .nds
+192	string	\044\377\256Qi\232	Nintendo DS Game ROM Image
+# Nintendo .gba
+0	string	\056\000\000\352$\377\256Qi	Nintendo Game Boy Advance ROM Image
+
+#------------------------------------------------------------------------------
+# msx: file(1) magic for MSX game cartridge dumps
+# Too simple - MPi
+#0 beshort 0x4142 MSX game cartridge dump 
+
+#------------------------------------------------------------------------------
+# Sony Playstation executables (Adam Sjoegren <asjo@diku.dk>) :
+0	string	PS-X\ EXE	Sony Playstation executable
+#  Area:
+>113	string	x		(%s)
+
+#------------------------------------------------------------------------------
+# Microsoft Xbox executables .xbe (Esa Hyytia <ehyytia@cc.hut.fi>)
+0       string          XBEH            XBE, Microsoft Xbox executable
+# probabilistic checks whether signed or not
+>0x0004 ulelong =0x0
+>>&2    ulelong =0x0
+>>>&2   ulelong =0x0  \b, not signed
+>0x0004 ulelong >0
+>>&2    ulelong >0
+>>>&2   ulelong >0    \b, signed
+# expect base address of 0x10000
+>0x0104               ulelong =0x10000
+>>(0x0118-0x0FF60)    ulelong&0x80000007  0x80000007 \b, all regions
+>>(0x0118-0x0FF60)    ulelong&0x80000007  !0x80000007
+>>>(0x0118-0x0FF60)   ulelong >0           (regions:
+>>>>(0x0118-0x0FF60)  ulelong &0x00000001  NA
+>>>>(0x0118-0x0FF60)  ulelong &0x00000002  Japan
+>>>>(0x0118-0x0FF60)  ulelong &0x00000004  Rest_of_World
+>>>>(0x0118-0x0FF60)  ulelong &0x80000000  Manufacturer
+>>>(0x0118-0x0FF60)   ulelong >0           \b)
+
+# --------------------------------
+# Microsoft Xbox data file formats
+0       string          XIP0            XIP, Microsoft Xbox data
+0       string          XTF0            XTF, Microsoft Xbox data
+
+# Atari Lynx cartridge dump (EXE/BLL header)
+# From: "Stefan A. Haubenthal" <polluks@web.de>
+
+# Double-check that the image type matches too, 0x8008 conflicts with
+# 8 character OMF-86 object file headers.
+0	beshort		0x8008		
+>6	string		BS93		Lynx homebrew cartridge
+>>2	beshort		x		\b, RAM start $%04x
+>6	string		LYNX		Lynx cartridge
+>>2	beshort		x		\b, RAM start $%04x
+
+# Opera file system that is used on the 3DO console
+# From: Serge van den Boom <svdb@stack.nl>
+0	string		\x01ZZZZZ\x01	3DO "Opera" file system
+
+# From Gurkan Sengun <gurkan@linuks.mine.nu>, www.linuks.mine.nu
+0	string		GBS		Nintendo Gameboy Music/Audio Data
+12	string		GameBoy\ Music\ Module	Nintendo Gameboy Music Module
+
+# Playstations Patch Files from: From: Thomas Klausner <tk@giga.or.at>
+0	string	PPF30			Playstation Patch File version 3.0
+>5	byte	0			\b, PPF 1.0 patch
+>5	byte	1			\b, PPF 2.0 patch
+>5	byte	2			\b, PPF 3.0 patch
+>>56	byte	0			\b, Imagetype BIN (any)
+>>56	byte	1			\b, Imagetype GI (PrimoDVD)
+>>57	byte	0			\b, Blockcheck disabled
+>>57	byte	1			\b, Blockcheck enabled
+>>58	byte	0			\b, Undo data not available
+>>58	byte	1			\b, Undo data available
+>6	string	x			\b, description: %s
+
+0	string	PPF20			Playstation Patch File version 2.0
+>5	byte	0			\b, PPF 1.0 patch
+>5	byte	1			\b, PPF 2.0 patch
+>>56	lelong	>0			\b, size of file to patch %d
+>6	string	x			\b, description: %s
+
+0	string	PPF10			Playstation Patch File version 1.0
+>5	byte	0			\b, Simple Encoding
+>6	string	x			\b, description: %s
+
+# From: Daniel Dawson <ddawson@icehouse.net>
+# SNES9x .smv "movie" file format.
+0		string		SMV\x1A	SNES9x input recording
+>0x4		lelong		x	\b, version %d
+# version 4 is latest so far 
+>0x4		lelong		<5
+>>0x8		ledate		x	\b, recorded at %s
+>>0xc		lelong		>0	\b, rerecorded %d times
+>>0x10		lelong		x	\b, %d frames long
+>>0x14		byte		>0	\b, data for controller(s):
+>>>0x14		byte		&0x1	#1
+>>>0x14		byte		&0x2	#2
+>>>0x14		byte		&0x4	#3
+>>>0x14		byte		&0x8	#4
+>>>0x14		byte		&0x10	#5
+>>0x15		byte		^0x1	\b, begins from snapshot
+>>0x15		byte		&0x1	\b, begins from reset
+>>0x15		byte		^0x2	\b, NTSC standard
+>>0x15		byte		&0x2	\b, PAL standard
+>>0x17		byte		&0x1    \b, settings:
+# WIP1Timing not used as of version 4
+>>>0x4		lelong		<4
+>>>>0x17	byte		&0x2	WIP1Timing
+>>>0x17		byte		&0x4	Left+Right
+>>>0x17		byte		&0x8	VolumeEnvX
+>>>0x17		byte		&0x10	FakeMute
+>>>0x17		byte		&0x20	SyncSound
+# New flag as of version 4
+>>>0x4		lelong		>3
+>>>>0x17	byte		&0x80	NoCPUShutdown
+>>0x4		lelong		<4
+>>>0x18		lelong		>0x23
+>>>>0x20	leshort		!0
+>>>>>0x20	lestring16	x	\b, metadata: "%s"
+>>0x4		lelong		>3
+>>>0x24		byte		>0	\b, port 1:
+>>>>0x24	byte		1	joypad
+>>>>0x24	byte		2	mouse
+>>>>0x24	byte		3	SuperScope
+>>>>0x24	byte		4	Justifier
+>>>>0x24	byte		5	multitap
+>>>0x24		byte		>0	\b, port 2:
+>>>>0x25	byte		1	joypad
+>>>>0x25	byte		2	mouse
+>>>>0x25	byte		3	SuperScope
+>>>>0x25	byte		4	Justifier
+>>>>0x25	byte		5	multitap
+>>>0x18		lelong		>0x43
+>>>>0x40	leshort		!0
+>>>>>0x40	lestring16	x	\b, metadata: "%s"
+>>0x17		byte		&0x40   \b, ROM:
+>>>(0x18.l-26)	lelong		x	CRC32 0x%08x
+>>>(0x18.l-23)	string		x	"%s"
+
+# Type: scummVM savegame files
+# From: Sven Hartge <debian@ds9.argh.org>
+0	string	SCVM	ScummVM savegame
+>12	string	>\0	"%s"

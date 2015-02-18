@@ -1,0 +1,68 @@
+
+#------------------------------------------------------------------------------
+# $File: python,v 1.26 2014/08/04 05:58:40 christos Exp $
+# python:  file(1) magic for python
+#
+# Outlook puts """ too for urgent messages
+# From: David Necas <yeti@physics.muni.cz>
+# often the module starts with a multiline string
+0	string/t	"""	Python script text executable
+# MAGIC as specified in Python/import.c (1.5 to 2.7a0 and 3.1a0, assuming
+# that Py_UnicodeFlag is off for Python 2)
+# 20121  ( YEAR - 1995 ) + MONTH  + DAY (little endian followed by "\r\n"
+0	belong		0x994e0d0a	python 1.5/1.6 byte-compiled
+0	belong		0x87c60d0a	python 2.0 byte-compiled
+0	belong		0x2aeb0d0a	python 2.1 byte-compiled
+0	belong		0x2ded0d0a	python 2.2 byte-compiled
+0	belong		0x3bf20d0a	python 2.3 byte-compiled
+0	belong		0x6df20d0a	python 2.4 byte-compiled
+0	belong		0xb3f20d0a	python 2.5 byte-compiled
+0	belong		0xd1f20d0a	python 2.6 byte-compiled
+0	belong		0x03f30d0a	python 2.7 byte-compiled
+0	belong		0x3b0c0d0a	python 3.0 byte-compiled
+0	belong		0x4f0c0d0a	python 3.1 byte-compiled
+0	belong		0x6c0c0d0a	python 3.2 byte-compiled
+0	belong		0x9e0c0d0a	python 3.3 byte-compiled
+0	belong		0xee0c0d0a	python 3.4 byte-compiled
+
+0	search/1/w	#!\ /usr/bin/python	Python script text executable
+!:mime text/x-python
+0	search/1/w	#!\ /usr/local/bin/python	Python script text executable
+!:mime text/x-python
+0	search/1	#!/usr/bin/env\ python	Python script text executable
+!:mime text/x-python
+0	search/1	#!\ /usr/bin/env\ python	Python script text executable
+!:mime text/x-python
+
+
+# from module.submodule import func1, func2
+0	regex	\^from\\s+(\\w|\\.)+\\s+import.*$	Python script text executable
+!:mime text/x-python
+
+# def __init__ (self, ...):
+0	search/4096	def\ __init__
+>&0	search/64 self	Python script text executable
+!:mime text/x-python
+
+# comments
+#0	search/4096	'''
+#>&0	regex	.*'''$	Python script text executable
+#!:mime text/x-python
+
+#0	search/4096	"""
+#>&0	regex	.*"""$	Python script text executable
+#!:mime text/x-python
+
+# try:
+# except: or finally:
+# block
+0	search/4096	try:
+>&0	regex	\^\\s*except.*:	Python script text executable
+!:mime text/x-python
+>&0	search/4096	finally:	Python script text executable
+!:mime text/x-python
+
+# def name(args, args):
+0	regex	 \^(\ |\\t){0,50}def\ {1,50}[a-zA-Z]{1,100}
+>&0	regex	\ {0,50}\\(([a-zA-Z]|,|\ ){1,255}\\):$ Python script text executable
+!:mime text/x-python

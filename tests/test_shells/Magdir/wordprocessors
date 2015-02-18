@@ -1,0 +1,172 @@
+
+#------------------------------------------------------------------------------
+# $File: wordprocessors,v 1.18 2013/06/03 19:07:29 christos Exp $
+# wordprocessors:  file(1) magic fo word processors.
+#
+####### PWP file format used on Smith Corona Personal Word Processors:
+2	string	\040\040\040\040\040\040\040\040\040\040\040ML4D\040'92	Smith Corona PWP
+>24	byte	2	\b, single spaced
+>24	byte	3	\b, 1.5 spaced
+>24	byte	4	\b, double spaced
+>25	byte	0x42	\b, letter
+>25	byte	0x54	\b, legal
+>26	byte	0x46	\b, A4
+
+#WordPerfect type files Version 1.6 - PLEASE DO NOT REMOVE THIS LINE
+0	string	\377WPC\020\000\000\000\022\012\001\001\000\000\000\000	(WP) loadable file
+>15	byte	0	Optimized for Intel
+>15	byte	1	Optimized for Non-Intel
+1	string	WPC	(Corel/WP)
+>8	short	257	WordPerfect macro
+>8	short	258	WordPerfect help file
+>8	short	259	WordPerfect keyboard file
+>8	short	266	WordPerfect document
+>8	short	267	WordPerfect dictionary
+>8	short	268	WordPerfect thesaurus
+>8	short	269	WordPerfect block
+>8	short	270	WordPerfect rectangular block
+>8	short	271	WordPerfect column block
+>8	short	272	WordPerfect printer data
+>8	short	275	WordPerfect printer data
+>8	short	276	WordPerfect driver resource data
+>8	short	279	WordPerfect hyphenation code
+>8	short	280	WordPerfect hyphenation data
+>8	short	281	WordPerfect macro resource data
+>8	short	283	WordPerfect hyphenation lex
+>8	short	285	WordPerfect wordlist
+>8	short	286	WordPerfect equation resource data
+>8	short	289	WordPerfect spell rules
+>8	short	290	WordPerfect dictionary rules
+>8	short	295	WordPerfect spell rules (Microlytics)
+>8	short	299	WordPerfect settings file
+>8	short	301	WordPerfect 4.2 document
+>8	short	325	WordPerfect dialog file
+>8	short	332	WordPerfect button bar
+>8	short	513	Shell macro
+>8	short	522	Shell definition
+>8	short	769	Notebook macro
+>8	short	770	Notebook help file
+>8	short	771	Notebook keyboard file
+>8	short	778	Notebook definition
+>8	short	1026	Calculator help file
+>8	short 	1538	Calendar help file
+>8	short 	1546	Calendar data file
+>8	short	1793	Editor macro
+>8	short	1794	Editor help file
+>8	short	1795	Editor keyboard file
+>8	short	1817	Editor macro resource file
+>8	short 	2049	Macro editor macro
+>8	short 	2050	Macro editor help file
+>8	short	2051	Macro editor keyboard file
+>8	short	2305	PlanPerfect macro
+>8	short	2306	PlanPerfect help file
+>8	short	2307	PlanPerfect keyboard file
+>8	short	2314	PlanPerfect worksheet
+>8	short	2319	PlanPerfect printer definition
+>8	short	2322	PlanPerfect graphic definition
+>8	short	2323	PlanPerfect data
+>8	short	2324	PlanPerfect temporary printer
+>8	short	2329	PlanPerfect macro resource data
+>8	byte	11	Mail
+>8	short	2818	help file
+>8	short	2821	distribution list
+>8	short	2826	out box
+>8	short	2827	in box
+>8	short	2836	users archived mailbox
+>8	short	2837	archived message database
+>8	short	2838	archived attachments
+>8	short	3083	Printer temporary file
+>8	short	3330	Scheduler help file
+>8	short	3338	Scheduler in file
+>8	short	3339	Scheduler out file
+>8	short	3594	GroupWise settings file
+>8	short	3601	GroupWise directory services
+>8	short	3627	GroupWise settings file
+>8	short	4362	Terminal resource data
+>8	short	4363	Terminal resource data
+>8	short	4395	Terminal resource data
+>8	short	4619	GUI loadable text
+>8	short	4620	graphics resource data
+>8	short	4621	printer settings file
+>8	short	4622	port definition file
+>8	short	4623	print queue parameters
+>8	short	4624	compressed file
+>8	short	5130	Network service msg file
+>8	short	5131	Network service msg file
+>8	short	5132	Async gateway login msg
+>8	short	5134	GroupWise message file
+>8	short	7956	GroupWise admin domain database
+>8	short	7957	GroupWise admin host database
+>8	short	7959	GroupWise admin remote host database
+>8	short	7960	GroupWise admin ADS deferment data file
+>8	short	8458	IntelliTAG (SGML) compiled DTD
+>8	long	18219264	WordPerfect graphic image (1.0)
+>8	long	18219520	WordPerfect graphic image (2.0)
+#end of WordPerfect type files Version 1.6 - PLEASE DO NOT REMOVE THIS LINE
+
+# Hangul (Korean) Word Processor File
+0	string	HWP\ Document\ File	Hangul (Korean) Word Processor File 3.0
+# From: Won-Kyu Park <wkpark@kldp.org>
+512	string		R\0o\0o\0t\0	Hangul (Korean) Word Processor File 2000
+!:mime	application/x-hwp
+
+# CosmicBook, from Benoit Rouits
+0       string  CSBK    Ted Neslson's CosmicBook hypertext file
+
+2       string  EYWR    AmigaWriter file
+
+# chi:  file(1) magic for ChiWriter files
+0       string          \\1cw\          ChiWriter file
+>5      string          >\0             version %s
+0       string          \\1cw           ChiWriter file
+
+# Quark Express from http://www.garykessler.net/library/file_sigs.html
+2	string	IIXPR3			Intel Quark Express Document (English)
+2	string	IIXPRa			Intel Quark Express Document (Korean)
+2	string	MMXPR3			Motorola Quark Express Document (English)
+!:mime	application/x-quark-xpress-3
+2	string	MMXPRa			Motorola Quark Express Document (Korean)
+
+# adobe indesign (document, whatever...) from querkan
+0	belong	0x0606edf5		Adobe InDesign
+>16	string	DOCUMENT		Document
+
+#------------------------------------------------------------------------------
+# ichitaro456: file(1) magic for Just System Word Processor Ichitaro
+#
+# Contributor kenzo-:
+# Reversed-engineered JS Ichitaro magic numbers
+#
+
+0	string		DOC
+>43	byte		0x14	Just System Word Processor Ichitaro v4
+!:mime	application/x-ichitaro4
+>144	string	JDASH		application/x-ichitaro4
+
+0	string		DOC
+>43	byte		0x15	Just System Word Processor Ichitaro v5
+!:mime	application/x-ichitaro5
+
+0	string		DOC
+>43	byte		0x16	Just System Word Processor Ichitaro v6
+!:mime	application/x-ichitaro6
+
+# Type: Freemind mindmap documents
+# From: Jamie Thompson <debian-bugs@jamie-thompson.co.uk>
+0	string/w	\<map\ version	Freemind document
+!:mime	application/x-freemind
+
+# Type: Freeplane mindmap documents
+# From: Felix Natter <fnatter@gmx.net>
+0       string/w        \<map\ version="freeplane  Freeplane document
+!:mime  application/x-freeplane
+
+# Type:        Scribus
+# From:        Werner Fink <werner@suse.de>
+0	string	\<SCRIBUSUTF8\ Version		Scribus Document
+0	string	\<SCRIBUSUTF8NEW\ Version	Scribus Document
+!:mime	application/x-scribus
+
+# help files .hlp compiled from html and used by gfxboot added by Joerg Jenderek
+# markups page=0x04,label=0x12, followed by strings like "opt" or "main" and title=0x14
+0	ulelong&0x8080FFFF	0x00001204	gfxboot compiled html help file
