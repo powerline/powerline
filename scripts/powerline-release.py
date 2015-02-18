@@ -86,7 +86,8 @@ def merge(version_string, rev, **kwargs):
 	                            '--strategy', 'recursive',
 	                            '--strategy-option', 'theirs',
 	                            '--commit',
-	                            '-m', 'Merge branch \'{0}\' into {1}'.format(temp_branch_name, rev)])
+	                            '-m', 'Merge branch \'{0}\' into {1}'.format(temp_branch_name, rev),
+	                            temp_branch_name])
 	check_call(['git', 'branch', '-d', temp_branch_name])
 
 	rev = check_output(['git', 'rev-parse', 'HEAD']).strip()
