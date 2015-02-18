@@ -1,5 +1,7 @@
 :orphan:
 
+.. _command-powerline-lint:
+
 powerline-lint manual page
 ==========================
 

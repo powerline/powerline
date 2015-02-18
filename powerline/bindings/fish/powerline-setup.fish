@@ -76,7 +76,6 @@ function powerline-setup
 			"
 			_powerline_set_columns
 		end
-		_powerline_bind_mode
 		_powerline_set_default_mode
 		_powerline_update
 	end

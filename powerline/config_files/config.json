@@ -12,6 +12,10 @@
 				"in2": "in2"
 			}
 		},
+		"pdb": {
+			"colorscheme": "default",
+			"theme": "default"
+		},
 		"shell": {
 			"colorscheme": "default",
 			"theme": "default",

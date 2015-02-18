@@ -43,6 +43,10 @@ config = {
 				'theme': 'default',
 				'colorscheme': 'default',
 			},
+			'wm': {
+				'theme': 'default',
+				'colorscheme': 'default',
+			},
 		},
 	},
 	'colors': {
@@ -89,6 +93,14 @@ config = {
 	'colorschemes/vim/default': {
 		'groups': {
 			'environment': {'fg': 'col3', 'bg': 'col4', 'attrs': ['underline']},
+		},
+	},
+	'colorschemes/wm/default': {
+		'groups': {
+			'hl1': {'fg': 'col1', 'bg': 'col2', 'attrs': ['underline']},
+			'hl2': {'fg': 'col2', 'bg': 'col1', 'attrs': []},
+			'hl3': {'fg': 'col3', 'bg': 'col1', 'attrs': ['underline']},
+			'hl4': {'fg': 'col2', 'bg': 'col4', 'attrs': []},
 		},
 	},
 	'themes/test/default': {
@@ -139,6 +151,19 @@ config = {
 		'segments': {
 			'left': [
 				highlighted_string('s', 'g1', width='auto'),
+			],
+		},
+	},
+	'themes/wm/default': {
+		'default_module': 'powerline.segments.common',
+		'segments': {
+			'left': [
+				highlighted_string('A', 'hl1'),
+				highlighted_string('B', 'hl2'),
+			],
+			'right': [
+				highlighted_string('C', 'hl3'),
+				highlighted_string('D', 'hl4'),
 			],
 		},
 	},
@@ -750,26 +775,26 @@ class TestVim(TestCase):
 	def test_environ_update(self):
 		# Regression test: test that segment obtains environment from vim, not 
 		# from os.environ.
-		from powerline.vim import VimPowerline
-		import powerline as powerline_module
-		import vim
-		vim.vars['powerline_config_paths'] = ['/']
-		with swap_attributes(config, powerline_module):
-			with vim_module._with('environ', TEST='abc'):
-				with get_powerline_raw(config, VimPowerline) as powerline:
-					window = vim_module.current.window
-					window_id = 1
-					winnr = window.number
-					self.assertEqual(powerline.render(window, window_id, winnr), b'%#Pl_3_8404992_4_192_underline#\xc2\xa0abc%#Pl_4_192_NONE_None_NONE#>>')
-					vim_module._environ['TEST'] = 'def'
-					self.assertEqual(powerline.render(window, window_id, winnr), b'%#Pl_3_8404992_4_192_underline#\xc2\xa0def%#Pl_4_192_NONE_None_NONE#>>')
+		import tests.vim as vim_module
+		with vim_module._with('globals', powerline_config_paths=['/']):
+			from powerline.vim import VimPowerline
+			import powerline as powerline_module
+			with swap_attributes(config, powerline_module):
+				with vim_module._with('environ', TEST='abc'):
+					with get_powerline_raw(config, VimPowerline) as powerline:
+						window = vim_module.current.window
+						window_id = 1
+						winnr = window.number
+						self.assertEqual(powerline.render(window, window_id, winnr), b'%#Pl_3_8404992_4_192_underline#\xc2\xa0abc%#Pl_4_192_NONE_None_NONE#>>')
+						vim_module._environ['TEST'] = 'def'
+						self.assertEqual(powerline.render(window, window_id, winnr), b'%#Pl_3_8404992_4_192_underline#\xc2\xa0def%#Pl_4_192_NONE_None_NONE#>>')
 
 	def test_local_themes(self):
 		# Regression test: VimPowerline.add_local_theme did not work properly.
 		from powerline.vim import VimPowerline
 		import powerline as powerline_module
 		with swap_attributes(config, powerline_module):
-			with get_powerline_raw(config, VimPowerline) as powerline:
+			with get_powerline_raw(config, VimPowerline, replace_gcp=True) as powerline:
 				powerline.add_local_theme('tests.matchers.always_true', {
 					'segment_data': {
 						'foo': {
@@ -798,6 +823,31 @@ class TestVim(TestCase):
 	@classmethod
 	def tearDownClass(cls):
 		sys.path.pop(0)
+
+
+class TestBar(TestRender):
+	def test_bar(self):
+		import powerline as powerline_module
+		with swap_attributes(config, powerline_module):
+			with get_powerline_raw(config, powerline_module.Powerline, replace_gcp=True, ext='wm', renderer_module='bar') as powerline:
+				self.assertRenderEqual(
+					powerline,
+					'%{l}%{F#ffc00000}%{B#ff008000}%{+u} A%{F-B--u}%{F#ff008000}%{B#ffc00000}>>%{F-B--u}%{F#ff008000}%{B#ffc00000}B%{F-B--u}%{F#ffc00000}>>%{F-B--u}%{r}%{F#ffc00000}<<%{F-B--u}%{F#ff804000}%{B#ffc00000}%{+u}C%{F-B--u}%{F#ff0000c0}%{B#ffc00000}<<%{F-B--u}%{F#ff008000}%{B#ff0000c0}D %{F-B--u}'
+				)
+
+	@with_new_config
+	def test_bar_escape(self, config):
+		import powerline as powerline_module
+		config['themes/wm/default']['segments']['left'] = (
+			highlighted_string('%{asd}', 'hl1'),
+			highlighted_string('10% %', 'hl2'),
+		)
+		with swap_attributes(config, powerline_module):
+			with get_powerline_raw(config, powerline_module.Powerline, replace_gcp=True, ext='wm', renderer_module='bar') as powerline:
+				self.assertRenderEqual(
+					powerline,
+					'%{l}%{F#ffc00000}%{B#ff008000}%{+u} %%{asd}%{F-B--u}%{F#ff008000}%{B#ffc00000}>>%{F-B--u}%{F#ff008000}%{B#ffc00000}10%% %%%{F-B--u}%{F#ffc00000}>>%{F-B--u}%{r}%{F#ffc00000}<<%{F-B--u}%{F#ff804000}%{B#ffc00000}%{+u}C%{F-B--u}%{F#ff0000c0}%{B#ffc00000}<<%{F-B--u}%{F#ff008000}%{B#ff0000c0}D %{F-B--u}'
+				)
 
 
 if __name__ == '__main__':

@@ -8,6 +8,7 @@ import subprocess
 import logging
 import shlex
 
+from traceback import print_exc
 from setuptools import setup, find_packages
 
 
@@ -28,7 +29,7 @@ def compile_client():
 	else:
 		from distutils.ccompiler import new_compiler
 		compiler = new_compiler().compiler
-		cflags = os.environ.get('CFLAGS', '-O3')
+		cflags = os.environ.get('CFLAGS', str('-O3'))
 		# A normal split would do a split on each space which might be incorrect. The
 		# shlex will not split if a space occurs in an arguments value.
 		subprocess.check_call(compiler + shlex.split(cflags) + ['client/powerline.c', '-o', 'scripts/powerline'])
@@ -58,15 +59,18 @@ else:
 
 
 def get_version():
+	base_version = '2.1'
+	base_version += '.dev9999'
 	try:
-		return 'dev-' + subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip()
-	except Exception as e:
-		return 'dev'
+		return base_version + '+git.' + str(subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip())
+	except Exception:
+		print_exc()
+		return base_version
 
 
 setup(
 	name='powerline-status',
-	version='2.0',
+	version='2.1',
 	description='The ultimate statusline/prompt utility.',
 	long_description=README,
 	classifiers=[

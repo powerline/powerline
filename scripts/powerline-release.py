@@ -48,24 +48,57 @@ def parse_version(s):
 		return tuple(map(int, s.split('.')))
 
 
+def setup_py_filter(filter_func):
+	with codecs.open('.setup.py.new', 'w', encoding='utf-8') as NS:
+		with codecs.open('setup.py', 'r', encoding='utf-8') as OS:
+			for line in OS:
+				line = filter_func(line)
+				NS.write(line)
+
+	os.unlink('setup.py')
+	os.rename('.setup.py.new', 'setup.py')
+
+
+def setup_py_develop_filter(line, version_string):
+	if line.startswith('\tbase_version = '):
+		line = '\tbase_version = \'' + version_string + '\'\n'
+	return line
+
+
+def setup_py_master_filter(line, version_string):
+	if line.startswith('\tversion='):
+		line = '\tversion=\'' + version_string + '\',\n'
+	elif 'Development Status' in line:
+		line = '\t\t\'Development Status :: 5 - Production/Stable\',\n'
+	return line
+
+
 def merge(version_string, rev, **kwargs):
+	check_call(['git', 'checkout', rev])
+
+	temp_branch_name = 'release-' + version_string
+	check_call(['git', 'checkout', '-b', temp_branch_name])
+	setup_py_filter(lambda line: setup_py_develop_filter(line, version_string))
+	check_call(['git', 'add', 'setup.py'])
+	check_call(['git', 'commit', '-m', 'Update base version'])
+	check_call(['git', 'checkout', rev])
+	check_call(['git', 'merge', '--no-ff',
+	                            '--strategy', 'recursive',
+	                            '--strategy-option', 'theirs',
+	                            '--commit',
+	                            '-m', 'Merge branch \'{0}\' into {1}'.format(temp_branch_name, rev),
+	                            temp_branch_name])
+	check_call(['git', 'branch', '-d', temp_branch_name])
+
+	rev = check_output(['git', 'rev-parse', 'HEAD']).strip()
+
 	check_call(['git', 'checkout', 'master'])
 	try:
 		check_call(['git', 'merge', '--no-ff', '--no-commit', '--log', rev])
 	except CalledProcessError:
 		check_call(['git', 'mergetool', '--tool', 'vimdiff2'])
 
-	with codecs.open('.setup.py.new', 'w', encoding='utf-8') as NS:
-		with codecs.open('setup.py', 'r', encoding='utf-8') as OS:
-			for line in OS:
-				if line.startswith('\tversion='):
-					line = '\tversion=\'' + version_string + '\',\n'
-				elif 'Development Status' in line:
-					line = '\t\t\'Development Status :: 5 - Production/Stable\',\n'
-				NS.write(line)
-
-	os.unlink('setup.py')
-	os.rename('.setup.py.new', 'setup.py')
+	setup_py_filter(lambda line: setup_py_master_filter(line, version_string))
 	check_call(['git', 'add', 'setup.py'])
 
 	check_call(['git', 'commit'])

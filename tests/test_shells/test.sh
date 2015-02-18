@@ -1,5 +1,7 @@
 #!/bin/sh
-set -e
+. tests/bot-ci/scripts/common/main.sh
+set +x
+
 : ${PYTHON:=python}
 FAIL_SUMMARY=""
 FAILED=0
@@ -109,14 +111,41 @@ do_run_test() {
 	done
 	# Wait for screen to initialize
 	sleep 1
-	while ! screen -S "$SESNAME" -p 0 -X width 300 1 ; do
+	local attempts=100
+	while ! screen -S "$SESNAME" -p 0 -X width 300 1 >/dev/null ; do
 		sleep 0.1s
+		attempts=$(( attempts - 1 ))
+		if test $attempts -eq 0 ; then
+			echo "Waiting for too long: assuming test failed"
+			echo "Failed ${SH}. Full output:"
+			echo '============================================================'
+			cat tests/shell/${SH}.${TEST_TYPE}.${TEST_CLIENT}.full.log
+			echo '____________________________________________________________'
+			if test "x$POWERLINE_TEST_NO_CAT_V" != "x1" ; then
+				echo "Full output (cat -v):"
+				echo '============================================================'
+				cat -v tests/shell/${SH}.${TEST_TYPE}.${TEST_CLIENT}.full.log
+				echo '____________________________________________________________'
+			fi
+			return 1
+		fi
 	done
 	if ( \
-		test "x${SH}" = "xdash" ||
-		( \
+		test "x${SH}" = "xdash" \
+		|| ( \
 			test "x${SH}" = "xipython" \
-			&& ${PYTHON} -c 'import platform, sys; sys.exit(1 - (platform.python_implementation() == "PyPy"))' \
+			&& test "$PYTHON_IMPLEMENTATION" = "PyPy" \
+		) \
+		|| ( \
+			test "x${SH}" = "xpdb" \
+			&& ( \
+				( \
+					test "$PYTHON_VERSION_MAJOR" -eq 3 \
+					&& test "$PYTHON_VERSION_MINOR" -eq 2 \
+					&& test "$PYTHON_IMPLEMENTATION" = "CPython" \
+				) \
+				|| test "$PYTHON_IMPLEMENTATION" = "PyPy" \
+			) \
 		) \
 	) ; then
 		# If I do not use this hack for dash then output will look like
@@ -126,7 +155,9 @@ do_run_test() {
 		#     …
 		#     prompt1> prompt2> …
 		while read -r line ; do
-			screen -S "$SESNAME" -p 0 -X stuff "$line$NL"
+			if test "$(screen -S "$SESNAME" -p 0 -X stuff "$line$NL")" = "No screen session found." ; then
+				break
+			fi
 			sleep 1
 		done < tests/test_shells/input.$SH
 	else
@@ -185,6 +216,9 @@ run_test() {
 	TEST_CLIENT="$2"
 	SH="$3"
 	local attempts=3
+	if test -n "$ONLY_SHELL$ONLY_TEST_TYPE$ONLY_TEST_CLIENT" ; then
+		attempts=1
+	fi
 	while test $attempts -gt 0 ; do
 		rm -f tests/shell/${SH}.${TEST_TYPE}.${TEST_CLIENT}.log
 		rm -f tests/shell/${SH}.${TEST_TYPE}.${TEST_CLIENT}.full.log
@@ -245,9 +279,11 @@ ln -s ../../test_shells/waitpid.sh tests/shell/path
 if which socat ; then
 	ln -s "$(which socat)" tests/shell/path
 fi
-for pexe in powerline powerline-config ; do
+for pexe in powerline powerline-config powerline-render powerline.sh powerline.py ; do
 	if test -e scripts/$pexe ; then
 		ln -s "$PWD/scripts/$pexe" tests/shell/path
+	elif test -e client/$pexe ; then
+		ln -s "$PWD/client/$pexe" tests/shell/path
 	elif which $pexe ; then
 		ln -s "$(which $pexe)" tests/shell/path
 	else
@@ -255,6 +291,9 @@ for pexe in powerline powerline-config ; do
 		exit 1
 	fi
 done
+
+ln -s python tests/shell/path/pdb
+PDB_PYTHON=pdb
 
 if test -z "$POWERLINE_RC_EXE" ; then
 	if which rc-status >/dev/null ; then
@@ -282,6 +321,25 @@ export ADDRESS="powerline-ipc-test-$$"
 export PYTHON
 echo "Powerline address: $ADDRESS"
 
+check_test_client() {
+	local executable="$1"
+	local client_type="$2"
+	local actual_mime_type="$(file --mime-type --brief --dereference "tests/shell/path/$executable" | cut -d/ -f1)"
+	local expected_mime_type
+	case "$client_type" in
+		C)      expected_mime_type="application/x-executable" ;;
+		python) expected_mime_type="text/x-python" ;;
+		render) expected_mime_type="text/x-python" ;;
+		shell)  expected_mime_type="text/x-shellscript" ;;
+	esac
+	expected_mime_type="${expected_mime_type%/*}"
+	if test "$expected_mime_type" != "$actual_mime_type" ; then
+		echo "Expected $executable to have MIME type $expected_mime_type, but got $actual_mime_type"
+		FAILED=1
+		FAIL_SUMMARY="${FAIL_SUMMARY}${NL}M ${executable}"
+	fi
+}
+
 if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || test "x${ONLY_SHELL}" = xbusybox || test "x${ONLY_SHELL}" = xrc ; then
 	scripts/powerline-config shell command
 
@@ -308,17 +366,18 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 		echo "> Testing $TEST_TYPE"
 		I=-1
 		for POWERLINE_COMMAND in \
-			$PWD/scripts/powerline \
-			$PWD/scripts/powerline-render \
-			$PWD/client/powerline.py \
-			$PWD/client/powerline.sh
+			powerline \
+			powerline-render \
+			powerline.py \
+			powerline.sh
 		do
 			case "$POWERLINE_COMMAND" in
-				*powerline)        TEST_CLIENT=C ;;
-				*powerline-render) TEST_CLIENT=render ;;
-				*powerline.py)     TEST_CLIENT=python ;;
-				*powerline.sh)     TEST_CLIENT=shell ;;
+				powerline)        TEST_CLIENT=C ;;
+				powerline-render) TEST_CLIENT=render ;;
+				powerline.py)     TEST_CLIENT=python ;;
+				powerline.sh)     TEST_CLIENT=shell ;;
 			esac
+			check_test_client "$POWERLINE_COMMAND" $TEST_CLIENT
 			if test "$TEST_CLIENT" = render && test "$TEST_TYPE" = daemon ; then
 				continue
 			fi
@@ -415,6 +474,29 @@ if ( test "x${ONLY_SHELL}" = "x" || test "x${ONLY_SHELL}" = "xzsh" ) \
 	if ! run_test zpython zpython zsh -f -i ; then
 		FAILED=1
 		FAIL_SUMMARY="${FAIL_SUMMARY}${NL}T zpython zsh -f -i"
+	fi
+fi
+
+if  test "x${ONLY_SHELL}" = "x" || test "x${ONLY_SHELL}" = "xpdb" ; then
+	if ! ( test "$PYTHON_IMPLEMENTATION" = "PyPy" && test "$PYTHON_VERSION_MAJOR" = 2 ) ; then
+		if test "x${ONLY_TEST_TYPE}" = "x" || test "x${ONLY_TEST_TYPE}" = "xsubclass" ; then
+			echo "> pdb subclass"
+			if ! run_test subclass python $PDB_PYTHON "$PWD/tests/test_shells/pdb-main.py" ; then
+				FAILED=1
+				FAIL_SUMMARY="${FAIL_SUMMARY}${NL}T pdb $PDB_PYTHON $PWD/tests/test_shells/pdb-main.py"
+			fi
+		fi
+		if test "x${ONLY_TEST_TYPE}" = "x" || test "x${ONLY_TEST_TYPE}" = "xmodule" ; then
+			echo "> pdb module"
+			MODULE="powerline.bindings.pdb"
+			if test "$PYTHON_MM" = "2.6" ; then
+				MODULE="powerline.bindings.pdb.__main__"
+			fi
+			if ! run_test module python $PDB_PYTHON -m$MODULE "$PWD/tests/test_shells/pdb-script.py" ; then
+				FAILED=1
+				FAIL_SUMMARY="${FAIL_SUMMARY}${NL}T pdb $PDB_PYTHON -m$MODULE $PWD/tests/test_shells/pdb-script"
+			fi
+		fi
 	fi
 fi
 

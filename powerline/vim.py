@@ -217,10 +217,6 @@ class VimPowerline(Powerline):
 		for args in _local_themes:
 			self.add_local_theme(*args)
 
-	@staticmethod
-	def get_segment_info():
-		return {}
-
 	def reset_highlight(self):
 		try:
 			self.renderer.reset_highlight()

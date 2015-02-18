@@ -182,10 +182,17 @@ def select_renderer(simpler_renderer=False):
 	renderer = EvenSimplerRenderer if simpler_renderer else SimpleRenderer
 
 
-def get_powerline_raw(helpers, PowerlineClass, **kwargs):
+def get_powerline_raw(helpers, PowerlineClass, replace_gcp=False, **kwargs):
 	if not isinstance(helpers, TestHelpers):
 		helpers = TestHelpers(helpers)
 	select_renderer(kwargs.pop('simpler_renderer', False))
+
+	if replace_gcp:
+		class PowerlineClass(PowerlineClass):
+			@staticmethod
+			def get_config_paths():
+				return ['/']
+
 	pl = PowerlineClass(
 		config_loader=TestConfigLoader(
 			_helpers=helpers,

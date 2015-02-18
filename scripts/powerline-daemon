@@ -17,7 +17,7 @@ from io import BytesIO
 from powerline.shell import ShellPowerline
 from powerline.commands.main import finish_args, write_output
 from powerline.lib.monotonic import monotonic
-from powerline.lib.encoding import get_preferred_output_encoding
+from powerline.lib.encoding import get_preferred_output_encoding, get_preferred_arguments_encoding, get_unicode_writer
 
 from powerline.commands.main import get_argparser as get_main_argparser
 from powerline.commands.daemon import get_argparser as get_daemon_argparser
@@ -107,7 +107,7 @@ def render(args, environ, cwd):
 			else:
 				return 'Failed to render {0}: {1}'.format(str(key), str(e))
 	s = BytesIO()
-	write_output(args, powerline, segment_info, s.write, encoding)
+	write_output(args, powerline, segment_info, get_unicode_writer(stream=s))
 	s.seek(0)
 	return s.read()
 
@@ -150,10 +150,7 @@ def do_write(conn, result):
 		pass
 
 
-encoding = get_preferred_output_encoding()
-
-
-def safe_bytes(o, encoding=encoding):
+def safe_bytes(o, encoding=get_preferred_output_encoding()):
 	'''Return bytes instance without ever throwing an exception.'''
 	try:
 		try:
@@ -171,7 +168,7 @@ def safe_bytes(o, encoding=encoding):
 		return safe_bytes(str(e), encoding)
 
 
-def parse_args(req):
+def parse_args(req, encoding=get_preferred_arguments_encoding()):
 	args = [x.decode(encoding) for x in req.split(b'\0') if x]
 	numargs = int(args[0], 16)
 	shell_args = parser.parse_args(args[1:numargs + 1])

@@ -2,6 +2,7 @@
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 from powerline.renderers.shell import ShellRenderer
+from powerline.renderers.shell.readline import ReadlineRenderer
 from powerline.theme import Theme
 
 
@@ -45,10 +46,9 @@ class IPythonRenderer(ShellRenderer):
 		)
 
 
-class IPythonPromptRenderer(IPythonRenderer):
+class IPythonPromptRenderer(IPythonRenderer, ReadlineRenderer):
 	'''Powerline ipython prompt (in and in2) renderer'''
-	escape_hl_start = '\x01'
-	escape_hl_end = '\x02'
+	pass
 
 
 class IPythonNonPromptRenderer(IPythonRenderer):
