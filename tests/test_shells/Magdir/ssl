@@ -1,8 +1,0 @@
-# Type: OpenSSL certificates/key files
-# From: Nicolas Collignon <tsointsoin@gmail.com>
-
-0	string	-----BEGIN\ CERTIFICATE-----	PEM certificate
-0	string	-----BEGIN\ CERTIFICATE\ REQ	PEM certificate request
-0	string	-----BEGIN\ RSA\ PRIVATE	PEM RSA private key
-0	string	-----BEGIN\ DSA\ PRIVATE	PEM DSA private key
-0	string	-----BEGIN\ EC\ PRIVATE	PEM EC private key

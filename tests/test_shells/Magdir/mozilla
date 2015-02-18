@@ -1,9 +1,0 @@
-
-#------------------------------------------------------------------------------
-# $File: mozilla,v 1.4 2009/09/19 16:28:11 christos Exp $
-# mozilla:  file(1) magic for Mozilla XUL fastload files 
-# (XUL.mfasl and XPC.mfasl)
-# URL:	http://www.mozilla.org/
-# From:	Josh Triplett <josh@freedesktop.org>
-
-0	string	XPCOM\nMozFASL\r\n\x1A		Mozilla XUL fastload data

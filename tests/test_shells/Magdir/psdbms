@@ -1,8 +1,0 @@
-
-#------------------------------------------------------------------------------
-# $File: psdbms,v 1.6 2009/09/19 16:28:11 christos Exp $
-# psdbms:  file(1) magic for psdatabase
-#
-0	belong&0xff00ffff	0x56000000	ps database
->1	string	>\0	version %s
->4	string	>\0	from kernel %s
