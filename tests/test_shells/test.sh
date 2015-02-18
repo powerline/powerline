@@ -279,9 +279,11 @@ ln -s ../../test_shells/waitpid.sh tests/shell/path
 if which socat ; then
 	ln -s "$(which socat)" tests/shell/path
 fi
-for pexe in powerline powerline-config ; do
+for pexe in powerline powerline-config powerline-render powerline.sh powerline.py ; do
 	if test -e scripts/$pexe ; then
 		ln -s "$PWD/scripts/$pexe" tests/shell/path
+	elif test -e client/$pexe ; then
+		ln -s "$PWD/client/$pexe" tests/shell/path
 	elif which $pexe ; then
 		ln -s "$(which $pexe)" tests/shell/path
 	else
@@ -319,6 +321,25 @@ export ADDRESS="powerline-ipc-test-$$"
 export PYTHON
 echo "Powerline address: $ADDRESS"
 
+check_test_client() {
+	local executable="$1"
+	local client_type="$2"
+	local actual_mime_type="$(file --mime-type --brief --dereference "tests/shell/path/$executable" | cut -d/ -f1)"
+	local expected_mime_type
+	case "$client_type" in
+		C)      expected_mime_type="application/x-executable" ;;
+		python) expected_mime_type="text/x-python" ;;
+		render) expected_mime_type="text/x-python" ;;
+		shell)  expected_mime_type="text/x-shellscript" ;;
+	esac
+	expected_mime_type="${expected_mime_type%/*}"
+	if test "$expected_mime_type" != "$actual_mime_type" ; then
+		echo "Expected $executable to have MIME type $expected_mime_type, but got $actual_mime_type"
+		FAILED=1
+		FAIL_SUMMARY="${FAIL_SUMMARY}${NL}M ${executable}"
+	fi
+}
+
 if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || test "x${ONLY_SHELL}" = xbusybox || test "x${ONLY_SHELL}" = xrc ; then
 	scripts/powerline-config shell command
 
@@ -345,17 +366,18 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 		echo "> Testing $TEST_TYPE"
 		I=-1
 		for POWERLINE_COMMAND in \
-			$PWD/scripts/powerline \
-			$PWD/scripts/powerline-render \
-			$PWD/client/powerline.py \
-			$PWD/client/powerline.sh
+			powerline \
+			powerline-render \
+			powerline.py \
+			powerline.sh
 		do
 			case "$POWERLINE_COMMAND" in
-				*powerline)        TEST_CLIENT=C ;;
-				*powerline-render) TEST_CLIENT=render ;;
-				*powerline.py)     TEST_CLIENT=python ;;
-				*powerline.sh)     TEST_CLIENT=shell ;;
+				powerline)        TEST_CLIENT=C ;;
+				powerline-render) TEST_CLIENT=render ;;
+				powerline.py)     TEST_CLIENT=python ;;
+				powerline.sh)     TEST_CLIENT=shell ;;
 			esac
+			check_test_client "$POWERLINE_COMMAND" $TEST_CLIENT
 			if test "$TEST_CLIENT" = render && test "$TEST_TYPE" = daemon ; then
 				continue
 			fi
