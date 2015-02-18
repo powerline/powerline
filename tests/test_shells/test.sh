@@ -324,7 +324,7 @@ echo "Powerline address: $ADDRESS"
 check_test_client() {
 	local executable="$1"
 	local client_type="$2"
-	local actual_mime_type="$(file --mime-type --brief --dereference "tests/shell/$executable" | cut -d/ -f1)"
+	local actual_mime_type="$(file --mime-type --brief --dereference "tests/shell/path/$executable" | cut -d/ -f1)"
 	local expected_mime_type
 	case "$client_type" in
 		C)      expected_mime_type="application/x-executable" ;;
