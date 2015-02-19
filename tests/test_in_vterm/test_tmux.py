@@ -3,17 +3,22 @@
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 import os
+import sys
 
 from time import sleep
 from subprocess import check_call
 from itertools import groupby
 from difflib import ndiff
+from glob import glob1
 
 from powerline.lib.unicode import u
 from powerline.bindings.tmux import get_tmux_version
 from powerline import get_fallback_logger
 
 from tests.lib.terminal import ExpectProcess
+
+
+VTERM_TEST_DIR = os.path.abspath('tests/vterm')
 
 
 def cell_properties_key_to_shell_escape(cell_properties_key):
@@ -27,7 +32,7 @@ def cell_properties_key_to_shell_escape(cell_properties_key):
 	))
 
 
-def test_expected_result(p, expected_result, cols, rows):
+def test_expected_result(p, expected_result, cols, rows, print_logs):
 	last_line = []
 	for col in range(cols):
 		last_line.append(p[rows - 1, col])
@@ -78,11 +83,19 @@ def test_expected_result(p, expected_result, cols, rows):
 	print('Diff:')
 	print('=' * 80)
 	print(''.join((u(line) for line in ndiff([a], [b]))))
+	if print_logs:
+		for f in glob1(VTERM_TEST_DIR, '*.log'):
+			print('_' * 80)
+			print(os.path.basename(f) + ':')
+			print('=' * 80)
+			with open(f, 'r') as F:
+				for line in F:
+					sys.stdout.write(line)
+			os.unlink(f)
 	return False
 
 
 def main(attempts=3):
-	VTERM_TEST_DIR = os.path.abspath('tests/vterm')
 	vterm_path = os.path.join(VTERM_TEST_DIR, 'path')
 	socket_path = os.path.join(VTERM_TEST_DIR, 'tmux-socket')
 	rows = 50
@@ -203,7 +216,7 @@ def main(attempts=3):
 			expected_result = expected_result_old
 		else:
 			expected_result = expected_result_new
-		if not test_expected_result(p, expected_result, cols, rows):
+		if not test_expected_result(p, expected_result, cols, rows, not attempts):
 			if attempts:
 				return main(attempts=(attempts - 1))
 			else:

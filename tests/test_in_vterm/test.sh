@@ -32,24 +32,12 @@ test_tmux() {
 		echo "Failed vterm test $f"
 		FAILED=1
 		FAIL_SUMMARY="$FAIL_SUMMARY${NL}F $POWERLINE_TMUX_EXE $f"
-		for file in tests/vterm/*.log ; do
-			if ! test -e "$file" ; then
-				break
-			fi
-			echo '____________________________________________________________'
-			echo "$file:"
-			echo '============================================================'
-			cat -v $file
-		done
 	fi
 }
 
 if test -z "$POWERLINE_TMUX_EXE" && test -d tests/bot-ci/deps/tmux ; then
 	for tmux in tests/bot-ci/deps/tmux/tmux-*/tmux ; do
 		export POWERLINE_TMUX_EXE="$PWD/$tmux"
-		if test_tmux ; then
-			rm -f tests/vterm/*.log
-		fi
 	done
 else
 	test_tmux || true
