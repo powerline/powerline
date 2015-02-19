@@ -105,9 +105,10 @@ def merge(version_string, rev, **kwargs):
 	check_call(['git', 'tag', '-m', 'Release ' + version_string, '-a', version_string])
 
 
-def push(version_string, **kwargs):
+def push(version_string, rev, **kwargs):
 	check_call(['git', 'push', 'upstream', 'master'])
 	check_call(['git', 'push', 'upstream', version_string])
+	check_call(['git', 'push', 'upstream', rev])
 
 
 def upload(**args):
