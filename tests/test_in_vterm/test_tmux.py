@@ -81,7 +81,7 @@ def test_expected_result(p, expected_result, cols, rows):
 	return False
 
 
-def main():
+def main(attempts=3):
 	VTERM_TEST_DIR = os.path.abspath('tests/vterm')
 	vterm_path = os.path.join(VTERM_TEST_DIR, 'path')
 	socket_path = os.path.join(VTERM_TEST_DIR, 'tmux-socket')
@@ -203,7 +203,13 @@ def main():
 			expected_result = expected_result_old
 		else:
 			expected_result = expected_result_new
-		return test_expected_result(p, expected_result, cols, rows)
+		if not test_expected_result(p, expected_result, cols, rows):
+			if attempts:
+				return main(attempts=(attempts - 1))
+			else:
+				return False
+		else:
+			return True
 	finally:
 		check_call([tmux_exe, '-S', socket_path, 'kill-server'], env={
 			'PATH': vterm_path,
