@@ -22,6 +22,14 @@ Vim version 7.4 or newer is recommended for performance reasons, but Powerline
 is known to work on vim-7.0.112 (some segments may not work though as it was not 
 actually tested).
 
+Shell prompts requirements
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Due to fish having incorrect code for prompt width calculations up to version 
+2.1 and no way to tell that certain sequence of characters has no width 
+(``%{…%}`` in zsh and ``\[…\]`` in bash prompts serve exactly this purpose) 
+users that have fish versions below 2.1 are not supported..
+
 .. _usage-terminal-emulators:
 
 Terminal emulator requirements

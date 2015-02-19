@@ -65,6 +65,8 @@ the absolute path to the Powerline installation directory:
    set fish_function_path $fish_function_path "{repository_root}/powerline/bindings/fish"
    powerline-setup
 
+.. warning:: Fish is supported only starting from version 2.1.
+
 Rcsh prompt
 ===========
 
