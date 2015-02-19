@@ -125,6 +125,7 @@ def _get_battery(pl):
 			pl.debug('Using windll to communicate with kernel32 (Windows)')
 			from ctypes import windll
 			library_loader = windll
+
 		class PowerClass(Structure):
 			_fields_ = [
 				('ACLineStatus', c_byte),
