@@ -19,8 +19,7 @@ related Python headers to be installed. Please consult distribution’s
 documentation for details on how to compile and install packages.
 
 Vim version 7.4 or newer is recommended for performance reasons, but Powerline 
-is known to work on vim-7.0.112 (some segments may not work though as it was not 
-actually tested).
+supports Vim 7.0.112 and higher.
 
 Shell prompts requirements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
