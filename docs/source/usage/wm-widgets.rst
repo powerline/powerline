@@ -33,15 +33,16 @@ Add the following to :file:`~/.config/qtile/config.py`:
 
    from libqtile.bar import Bar
    from libqtile.config import Screen
+   from libqtile.widget import Spacer
 
-   from powerline.bindings.qtile.widget import Powerline
+   from powerline.bindings.qtile.widget import PowerlineTextBox
 
    screens = [
        Screen(
            top=Bar([
-                   # ...
-                   Powerline(timeout=2),
-                   # ...
+                   PowerlineTextBox(timeout=2, side='left'),
+                   Spacer(),
+                   PowerlineTextBox(timeout=2, side='right'),
                ],
                35 # width
            ),
