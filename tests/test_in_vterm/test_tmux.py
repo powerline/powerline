@@ -103,9 +103,14 @@ def main(attempts=3):
 
 	tmux_exe = os.path.join(vterm_path, 'tmux')
 
+	if os.path.exists('tests/bot-ci/deps/libvterm/libvterm.so'):
+		lib = 'tests/bot-ci/deps/libvterm/libvterm.so'
+	else:
+		lib = 'libvterm.so'
+
 	try:
 		p = ExpectProcess(
-			lib='tests/bot-ci/deps/libvterm/libvterm.so',
+			lib=lib,
 			rows=rows,
 			cols=cols,
 			cmd=tmux_exe,
