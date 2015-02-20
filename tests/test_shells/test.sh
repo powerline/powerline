@@ -99,11 +99,13 @@ print_full_output() {
 	echo "Full output:"
 	echo '============================================================'
 	cat tests/shell/${SH}.${TEST_TYPE}.${TEST_CLIENT}.full.log
+	echo
 	echo '____________________________________________________________'
 	if test "x$POWERLINE_TEST_NO_CAT_V" != "x1" ; then
 		echo "Full output (cat -v):"
 		echo '============================================================'
 		cat -v tests/shell/${SH}.${TEST_TYPE}.${TEST_CLIENT}.full.log
+		echo
 		echo '____________________________________________________________'
 	fi
 }
