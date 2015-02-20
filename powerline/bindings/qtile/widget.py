@@ -13,10 +13,12 @@ class QTilePowerline(Powerline):
 
 
 class PowerlineTextBox(TextBox):
-	def __init__(self, timeout=2, text=' ', width=CALCULATED, side='right', **config):
+	# TODO Replace timeout argument with update_interval argument in next major 
+	#      release.
+	def __init__(self, timeout=2, text=b' ', width=CALCULATED, side='right', update_interval=None, **config):
 		super(PowerlineTextBox, self).__init__(text, width, **config)
 		self.side = side
-		self.update_interval = timeout
+		self.update_interval = update_interval or timeout
 		self.did_run_timer_setup = False
 		powerline = QTilePowerline(ext='wm', renderer_module='pango_markup')
 		powerline.setup(self)

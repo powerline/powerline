@@ -40,9 +40,9 @@ Add the following to :file:`~/.config/qtile/config.py`:
    screens = [
        Screen(
            top=Bar([
-                   PowerlineTextBox(timeout=2, side='left'),
+                   PowerlineTextBox(update_interval=2, side='left'),
                    Spacer(),
-                   PowerlineTextBox(timeout=2, side='right'),
+                   PowerlineTextBox(update_interval=2, side='right'),
                ],
                35 # width
            ),
