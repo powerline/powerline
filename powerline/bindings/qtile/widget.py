@@ -40,7 +40,8 @@ class PowerlineTextBox(TextBox):
 			self.font,
 			self.fontsize,
 			self.fontshadow,
-			markup=True)
+			markup=True,
+		)
 
 
 # TODO: Remove this at next major release
