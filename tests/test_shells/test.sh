@@ -315,24 +315,27 @@ for exe in bash zsh busybox fish tcsh mksh dash ipython ; do
 			fish_version="$(fish --version 2>&1)"
 			fish_version="${fish_version##* }"
 			fish_version_major="${fish_version%%.*}"
-			fish_version_minor="${fish_version#*.}"
-			fish_version_patch="${fish_version_minor#*.}"
-			fish_version_dev="${fish_version_patch#*-}"
-			if test "$fish_version_dev" = "$fish_version_patch" ; then
-				fish_version_dev=""
-			fi
-			fish_version_minor="${fish_version_minor%%.*}"
-			fish_version_patch="${fish_version_patch%%-*}"
-			if test $fish_version_major -lt 2 || ( \
-				test $fish_version_major -eq 2 && (\
-					test $fish_version_minor -lt 1 || (\
-						test $fish_version_minor -eq 1 &&
-						test $fish_version_patch -lt 2 && \
-						test -z "$fish_version_dev"
+			if test "$fish_version_major" != "$fish_version" ; then
+				# No dot is in development version compiled by bot-ci
+				fish_version_minor="${fish_version#*.}"
+				fish_version_patch="${fish_version_minor#*.}"
+				fish_version_dev="${fish_version_patch#*-}"
+				if test "$fish_version_dev" = "$fish_version_patch" ; then
+					fish_version_dev=""
+				fi
+				fish_version_minor="${fish_version_minor%%.*}"
+				fish_version_patch="${fish_version_patch%%-*}"
+				if test $fish_version_major -lt 2 || ( \
+					test $fish_version_major -eq 2 && (\
+						test $fish_version_minor -lt 1 || (\
+							test $fish_version_minor -eq 1 &&
+							test $fish_version_patch -lt 2 && \
+							test -z "$fish_version_dev"
+						) \
 					) \
-				) \
-			) ; then
-				continue
+				) ; then
+					continue
+				fi
 			fi
 		fi
 		ln -s "$(which $exe)" tests/shell/path
