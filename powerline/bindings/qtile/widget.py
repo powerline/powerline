@@ -43,6 +43,9 @@ class PowerlineTextBox(TextBox):
 
 	def _configure(self, qtile, bar):
 		super(PowerlineTextBox, self)._configure(qtile, bar)
+		if self.layout.markup:
+			# QTile-0.9.1: no need to recreate layout or run timer_setup
+			return
 		self.layout = self.drawer.textlayout(
 			self.text,
 			self.foreground,
