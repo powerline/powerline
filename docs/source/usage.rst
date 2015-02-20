@@ -29,6 +29,13 @@ Due to fish having incorrect code for prompt width calculations up to version
 (``%{…%}`` in zsh and ``\[…\]`` in bash prompts serve exactly this purpose) 
 users that have fish versions below 2.1 are not supported..
 
+
+WM widgets requirements
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Awesome is supported starting from version 3.5.1, inclusive. QTile is supported 
+from version 0.6, inclusive.
+
 .. _usage-terminal-emulators:
 
 Terminal emulator requirements
