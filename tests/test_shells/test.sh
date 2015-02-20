@@ -92,6 +92,22 @@ run() {
 NL="$(printf '\nE')"
 NL="${NL%E}"
 
+print_full_output() {
+	TEST_TYPE="$1"
+	TEST_CLIENT="$2"
+	SH="$3"
+	echo "Full output:"
+	echo '============================================================'
+	cat tests/shell/${SH}.${TEST_TYPE}.${TEST_CLIENT}.full.log
+	echo '____________________________________________________________'
+	if test "x$POWERLINE_TEST_NO_CAT_V" != "x1" ; then
+		echo "Full output (cat -v):"
+		echo '============================================================'
+		cat -v tests/shell/${SH}.${TEST_TYPE}.${TEST_CLIENT}.full.log
+		echo '____________________________________________________________'
+	fi
+}
+
 do_run_test() {
 	TEST_TYPE="$1"
 	shift
@@ -106,8 +122,16 @@ do_run_test() {
 		screen -L -c tests/test_shells/screenrc -d -m -S "$SESNAME" \
 			env LD_LIBRARY_PATH="${LD_LIBRARY_PATH}" \
 			"$@"
+	local attempts=100
 	while ! screen -S "$SESNAME" -X readreg a tests/test_shells/input.$SH ; do
 		sleep 0.1s
+		attempts=$(( attempts - 1 ))
+		if test $attempts -eq 0 ; then
+			echo "Waiting for too long: assuming test failed"
+			echo "Failed ${SH}: failed to put input.$SH contents to the screen register."
+			print_full_output ${TEST_TYPE} ${TEST_CLIENT} ${SH}
+			return 1
+		fi
 	done
 	# Wait for screen to initialize
 	sleep 1
@@ -117,16 +141,8 @@ do_run_test() {
 		attempts=$(( attempts - 1 ))
 		if test $attempts -eq 0 ; then
 			echo "Waiting for too long: assuming test failed"
-			echo "Failed ${SH}. Full output:"
-			echo '============================================================'
-			cat tests/shell/${SH}.${TEST_TYPE}.${TEST_CLIENT}.full.log
-			echo '____________________________________________________________'
-			if test "x$POWERLINE_TEST_NO_CAT_V" != "x1" ; then
-				echo "Full output (cat -v):"
-				echo '============================================================'
-				cat -v tests/shell/${SH}.${TEST_TYPE}.${TEST_CLIENT}.full.log
-				echo '____________________________________________________________'
-			fi
+			echo -n "Failed ${SH}. "
+			print_full_output ${TEST_TYPE} ${TEST_CLIENT} ${SH}
 			return 1
 		fi
 	done
@@ -179,16 +195,8 @@ do_run_test() {
 			check_screen_log  ${TEST_TYPE} ${TEST_CLIENT} ${SH} | cat -v
 			echo '____________________________________________________________'
 		fi
-		echo "Failed ${SH}. Full output:"
-		echo '============================================================'
-		cat tests/shell/${SH}.${TEST_TYPE}.${TEST_CLIENT}.full.log
-		echo '____________________________________________________________'
-		if test "x$POWERLINE_TEST_NO_CAT_V" != "x1" ; then
-			echo "Full output (cat -v):"
-			echo '============================================================'
-			cat -v tests/shell/${SH}.${TEST_TYPE}.${TEST_CLIENT}.full.log
-			echo '____________________________________________________________'
-		fi
+		echo -n "Failed ${SH}. "
+		print_full_output ${TEST_TYPE} ${TEST_CLIENT} ${SH}
 		case ${SH} in
 			*ksh)
 				${SH} -c 'echo ${KSH_VERSION}'
