@@ -17,8 +17,12 @@ if test -z "$VIM" ; then
 		if test "$PYTHON_IMPLEMENTATION" != "CPython" ; then
 			exit 0
 		fi
-		NEW_VIM="$ROOT/tests/bot-ci/deps/vim/tip-$PYTHON_MM/vim"
-		OLD_VIM="$ROOT/tests/bot-ci/deps/vim/v7-0-112-$PYTHON_MM/vim"
+		if test -d "$ROOT/tests/bot-ci/deps" ; then
+			NEW_VIM="$ROOT/tests/bot-ci/deps/vim/tip-$PYTHON_MM/vim"
+			OLD_VIM="$ROOT/tests/bot-ci/deps/vim/v7-0-112-$PYTHON_MM/vim"
+		else
+			NEW_VIM="vim"
+		fi
 		if test -e "$OLD_VIM" ; then
 			VIMS="NEW_VIM OLD_VIM"
 		else
@@ -39,6 +43,9 @@ test_script() {
 	local vim="$1"
 	local script="$2"
 	echo "Running script $script with $vim"
+	if ! test -e "$vim" ; then
+		return 0
+	fi
 	if ! "$vim" -u NONE -S $script || test -f message.fail ; then
 		echo "Failed script $script run with $VIM" >&2
 		cat message.fail >&2
