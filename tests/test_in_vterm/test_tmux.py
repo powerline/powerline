@@ -106,7 +106,7 @@ def main(attempts=3):
 	if os.path.exists('tests/bot-ci/deps/libvterm/libvterm.so'):
 		lib = 'tests/bot-ci/deps/libvterm/libvterm.so'
 	else:
-		lib = 'libvterm.so'
+		lib = os.environ.get('POWERLINE_LIBVTERM', 'libvterm.so')
 
 	try:
 		p = ExpectProcess(
