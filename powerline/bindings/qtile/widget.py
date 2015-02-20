@@ -13,16 +13,17 @@ class QTilePowerline(Powerline):
 
 
 class PowerlineTextBox(TextBox):
-	def __init__(self, timeout=2, text=' ', width=CALCULATED, **config):
+	def __init__(self, timeout=2, text=' ', width=CALCULATED, side='right', **config):
 		super(PowerlineTextBox, self).__init__(text, width, **config)
 		self.timeout_add(timeout, self.update)
+		self.side = side
 		powerline = QTilePowerline(ext='wm', renderer_module='pango_markup')
 		powerline.setup(self)
 
 	def update(self):
 		if not self.configured:
 			return True
-		self.text = self.powerline.render(side='right')
+		self.text = self.powerline.render(side=self.side)
 		self.bar.draw()
 		return True
 
