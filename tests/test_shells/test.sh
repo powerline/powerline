@@ -311,6 +311,19 @@ fi
 
 for exe in bash zsh busybox fish tcsh mksh dash ipython ; do
 	if which $exe >/dev/null ; then
+		if test "$exe" = "fish" ; then
+			fish_version="$(fish --version 2>&1)"
+			fish_version="${fish_version##* }"
+			fish_version_major="${fish_version%%.*}"
+			fish_version_minor="${fish_version#*.}"
+			fish_version_minor="${fish_version_minor%%.*}"
+			if test $fish_version_major -lt 2 || ( \
+				test $fish_version_major -eq 2 && \
+				test $fish_version_minor -lt 1 \
+			) ; then
+				continue
+			fi
+		fi
 		ln -s "$(which $exe)" tests/shell/path
 	fi
 done
@@ -389,7 +402,7 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 					continue
 				fi
 			fi
-			if test "$TEST_CLIENT" = "shell" && ! which socat >/dev/null ; then
+			if test "$TEST_CLIENT" = "shell" && ! test -x tests/shell/path/socat ; then
 				continue
 			fi
 			if test "x$ONLY_TEST_CLIENT" != "x" && test "x$TEST_CLIENT" != "x$ONLY_TEST_CLIENT" ; then
