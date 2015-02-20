@@ -1,6 +1,11 @@
 #!/bin/bash
 . tests/bot-ci/scripts/common/main.sh
 
+: ${USER:=`id -un`}
+: ${HOME:=`getent passwd $USER | cut -d: -f6`}
+
+export USER HOME
+
 FAILED=0
 
 export PATH="/opt/fish/bin:${PATH}"
