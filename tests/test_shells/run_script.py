@@ -8,6 +8,7 @@ import re
 
 from time import sleep
 from subprocess import check_call
+from io import BytesIO
 
 import pexpect
 
@@ -18,7 +19,7 @@ def get_argparser(ArgumentParser=argparse.ArgumentParser):
 	parser.add_argument('--type', metavar='TYPE', help='Test type (daemon, nodaemon, …).')
 	parser.add_argument('--client', metavar='CLIENT', help='Type of the client used (C, shell, zpython, …).')
 	parser.add_argument('--shell', metavar='SHELL', help='Shell name.')
-	parser.add_argument('command', required=True, nargs=argparse.REMAINDER, metavar='COMMAND',
+	parser.add_argument('command', nargs=argparse.REMAINDER, metavar='COMMAND',
 	                    help='Command to run and its argument.')
 	return parser
 
@@ -28,8 +29,8 @@ def main():
 	args = parser.parse_args()
 
 	shell = args.shell or args.command[0]
-	test_type = args.test_type or shell
-	test_client = args.test_client or test_type
+	test_type = args.type or shell
+	test_client = args.client or test_type
 
 	log_file_base = '{0}.{1}.{2}'.format(shell, test_type, test_client)
 	full_log_file_name = os.path.join('tests', 'shell', '{0}.full.log'.format(log_file_base))
@@ -65,17 +66,24 @@ def main():
 		'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
 	}
 
+	os.environ['PATH'] = environ['PATH']
+
 	if test_type == 'daemon':
 		environ['POWERLINE_SHELL_CONTINUATION'] = '1'
 		environ['POWERLINE_SHELL_SELECT'] = '1'
 
+	if test_type != 'zpython' and shell == 'zsh':
+		environ['POWERLINE_NO_ZSH_ZPYTHON'] = '1'
+
+	sio = BytesIO()
+
 	child = pexpect.spawn(
 		args.command[0],
 		args.command[1:],
-		logfile=open(full_log_file_name),
 		env=environ,
+		logfile=sio,
 	)
-	child.expect(re.compile('.*'))
+	child.expect(re.compile(b'.*'))
 	sleep(0.5)
 	child.setwinsize(1, 300)
 
@@ -89,6 +97,9 @@ def main():
 				# TODO Implement something more smart
 
 	child.wait()
+
+	with open(full_log_file_name, 'w') as LF:
+		LF.write(child.read())
 
 	check_call([
 		os.path.join('tests', 'shell', 'path', 'python'),

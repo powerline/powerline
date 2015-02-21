@@ -173,7 +173,6 @@ cp -r tests/test_shells/ipython_home tests/shell
 
 mkdir tests/shell/path
 ln -s "$(which "${PYTHON}")" tests/shell/path/python
-ln -s "$(which screen)" tests/shell/path
 ln -s "$(which env)" tests/shell/path
 ln -s "$(which git)" tests/shell/path
 ln -s "$(which sleep)" tests/shell/path
@@ -347,9 +346,8 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 			if test "x$ONLY_TEST_CLIENT" != "x" && test "x$TEST_CLIENT" != "x$ONLY_TEST_CLIENT" ; then
 				continue
 			fi
-			POWERLINE_COMMAND_ARGS="--socket $ADDRESS"
-			POWERLINE_COMMAND="$POWERLINE_COMMAND"
-			export POWERLINE_COMMAND
+			export POWERLINE_COMMAND_ARGS="--socket $ADDRESS"
+			export POWERLINE_COMMAND="$POWERLINE_COMMAND"
 			echo ">> powerline command is ${POWERLINE_COMMAND:-empty}"
 			J=-1
 			for TEST_COMMAND in \
@@ -455,8 +453,8 @@ fi
 if test "x${ONLY_SHELL}" = "x" || test "x${ONLY_SHELL}" = "xipython" ; then
 	if which ipython >/dev/null ; then
 		# Define some overrides which should be ignored by IPython.
-		POWERLINE_CONFIG_OVERRIDES='common.term_escape_style=fbterm'
-		POWERLINE_THEME_OVERRIDES='in.segments.left=[]'
+		export POWERLINE_CONFIG_OVERRIDES='common.term_escape_style=fbterm'
+		export POWERLINE_THEME_OVERRIDES='in.segments.left=[]'
 		echo "> $(which ipython)"
 		if ! run_test ipython ipython ipython ; then
 			FAILED=1
