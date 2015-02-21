@@ -426,7 +426,7 @@ if ( test "x${ONLY_SHELL}" = "x" || test "x${ONLY_SHELL}" = "xzsh" ) \
 fi
 
 if  test "x${ONLY_SHELL}" = "x" || test "x${ONLY_SHELL}" = "xpdb" ; then
-	if ! ( test "$PYTHON_IMPLEMENTATION" = "PyPy" && test "$PYTHON_VERSION_MAJOR" = 2 ) ; then
+	if test "$PYTHON_IMPLEMENTATION" != "PyPy" ; then
 		if test "x${ONLY_TEST_TYPE}" = "x" || test "x${ONLY_TEST_TYPE}" = "xsubclass" ; then
 			echo "> pdb subclass"
 			if ! run_test subclass python $PDB_PYTHON "$PWD/tests/test_shells/pdb-main.py" ; then
