@@ -80,10 +80,6 @@ do_run_test() {
 	if ( \
 		test "x${SH}" = "xdash" \
 		|| ( \
-			test "x${SH}" = "xipython" \
-			&& test "$PYTHON_IMPLEMENTATION" = "PyPy" \
-		) \
-		|| ( \
 			test "x${SH}" = "xpdb" \
 			&& ( \
 				( \
