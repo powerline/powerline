@@ -47,47 +47,6 @@ check_screen_log() {
 	fi
 }
 
-run() {
-	TEST_TYPE="$1"
-	shift
-	TEST_CLIENT="$1"
-	shift
-	SH="$1"
-	shift
-	local local_path="$PWD/tests/shell/path:$PWD/scripts"
-	if test "x$SH" = "xfish" ; then
-		local_path="${local_path}:/usr/bin:/bin"
-	fi
-	if test $TEST_TYPE = daemon ; then
-		local additional_prompts=1
-	else
-		local additional_prompts=
-	fi
-	env -i \
-		LANG=en_US.UTF-8 \
-		PATH="$local_path" \
-		TERM="screen-256color" \
-		COLUMNS="${COLUMNS}" \
-		LINES="${LINES}" \
-		TEST_TYPE="${TEST_TYPE}" \
-		TEST_CLIENT="${TEST_CLIENT}" \
-		SH="${SH}" \
-		DIR1="${DIR1}" \
-		POWERLINE_NO_ZSH_ZPYTHON="$(test $TEST_TYPE = zpython || echo 1)" \
-		DIR2="${DIR2}" \
-		XDG_CONFIG_HOME="$PWD/tests/shell/fish_home" \
-		IPYTHONDIR="$PWD/tests/shell/ipython_home" \
-		PYTHONPATH="${PWD}${PYTHONPATH:+:}$PYTHONPATH" \
-		POWERLINE_CONFIG_OVERRIDES="${POWERLINE_CONFIG_OVERRIDES}" \
-		POWERLINE_THEME_OVERRIDES="${POWERLINE_THEME_OVERRIDES}" \
-		POWERLINE_SHELL_CONTINUATION=$additional_prompts \
-		POWERLINE_SHELL_SELECT=$additional_prompts \
-		POWERLINE_CONFIG_PATHS="$PWD/powerline/config_files" \
-		POWERLINE_COMMAND_ARGS="${POWERLINE_COMMAND_ARGS}" \
-		POWERLINE_COMMAND="${POWERLINE_COMMAND}" \
-		"$@"
-}
-
 # HACK: get newline for use in strings given that "\n" and $'' do not work.
 NL="$(printf '\nE')"
 NL="${NL%E}"
@@ -116,38 +75,8 @@ do_run_test() {
 	TEST_CLIENT="$1"
 	shift
 	SH="$1"
-	SESNAME="powerline-shell-test-${SH}-$$"
 
-	# Note: when running screen with setuid libc unsets LD_LIBRARY_PATH, so it 
-	# cannot be added to the `env -i` call above.
-	run "${TEST_TYPE}" "${TEST_CLIENT}" "${SH}" \
-		screen -L -c tests/test_shells/screenrc -d -m -S "$SESNAME" \
-			env LD_LIBRARY_PATH="${LD_LIBRARY_PATH}" \
-			"$@"
-	local attempts=100
-	while ! screen -S "$SESNAME" -X readreg a tests/test_shells/input.$SH ; do
-		sleep 0.1s
-		attempts=$(( attempts - 1 ))
-		if test $attempts -eq 0 ; then
-			echo "Waiting for too long: assuming test failed"
-			echo "Failed ${SH}: failed to put input.$SH contents to the screen register."
-			print_full_output ${TEST_TYPE} ${TEST_CLIENT} ${SH}
-			return 1
-		fi
-	done
-	# Wait for screen to initialize
-	sleep 1
-	local attempts=100
-	while ! screen -S "$SESNAME" -p 0 -X width 300 1 >/dev/null ; do
-		sleep 0.1s
-		attempts=$(( attempts - 1 ))
-		if test $attempts -eq 0 ; then
-			echo "Waiting for too long: assuming test failed"
-			echo -n "Failed ${SH}. "
-			print_full_output ${TEST_TYPE} ${TEST_CLIENT} ${SH}
-			return 1
-		fi
-	done
+	local wait_for_echo_arg=
 	if ( \
 		test "x${SH}" = "xdash" \
 		|| ( \
@@ -166,28 +95,11 @@ do_run_test() {
 			) \
 		) \
 	) ; then
-		# If I do not use this hack for dash then output will look like
-		#
-		#     command1
-		#     command2
-		#     …
-		#     prompt1> prompt2> …
-		while read -r line ; do
-			if test "$(screen -S "$SESNAME" -p 0 -X stuff "$line$NL")" = "No screen session found." ; then
-				break
-			fi
-			sleep 1
-		done < tests/test_shells/input.$SH
-	else
-		screen -S "$SESNAME" -p 0 -X paste a
+		wait_for_echo_arg="--wait-for-echo"
 	fi
-	# Wait for screen to exit (sending command to non-existing screen session 
-	# fails; when launched instance exits corresponding session is deleted)
-	while screen -S "$SESNAME" -X blankerprg "" > /dev/null ; do
-		sleep 0.1s
-	done
-	${PYTHON} ./tests/test_shells/postproc.py ${TEST_TYPE} ${TEST_CLIENT} ${SH}
-	rm -f tests/shell/3rd/pid
+	"${PYTHON}" tests/test_shells/run_script.py \
+		$wait_for_echo_arg --type=${TEST_TYPE} --client=${TEST_CLIENT} --shell=${SH} \
+		"$@"
 	if ! check_screen_log ${TEST_TYPE} ${TEST_CLIENT} ${SH} ; then
 		echo '____________________________________________________________'
 		if test "x$POWERLINE_TEST_NO_CAT_V" != "x1" ; then
