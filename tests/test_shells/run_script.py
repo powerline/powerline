@@ -82,6 +82,7 @@ def main():
 		args.command[1:],
 		env=environ,
 		logfile=sio,
+		timeout=60 * 3,
 	)
 	child.expect(re.compile(b'.*'))
 	sleep(0.5)
