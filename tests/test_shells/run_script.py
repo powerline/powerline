@@ -108,6 +108,8 @@ def main():
 			else:
 				LF.write(s)
 
+	child.close(force=True)
+
 	check_call([
 		os.path.join('tests', 'shell', 'path', 'python'),
 		os.path.join('tests', 'test_shells', 'postproc.py'),
