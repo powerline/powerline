@@ -97,7 +97,7 @@ def test_expected_result(p, expected_result, cols, rows, print_logs):
 
 def main(attempts=3):
 	vterm_path = os.path.join(VTERM_TEST_DIR, 'path')
-	socket_path = os.path.join(VTERM_TEST_DIR, 'tmux-socket')
+	socket_path = 'tmux-socket'
 	rows = 50
 	cols = 200
 
@@ -161,7 +161,7 @@ def main(attempts=3):
 				'TERMINFO': os.path.join(VTERM_TEST_DIR, 'terminfo'),
 				'TERM': 'st-256color',
 				'PATH': vterm_path,
-				'SHELL': os.path.join(''),
+				'SHELL': os.path.join(VTERM_TEST_DIR, 'path', 'bash'),
 				'POWERLINE_CONFIG_PATHS': os.path.abspath('powerline/config_files'),
 				'POWERLINE_COMMAND': 'powerline-render',
 				'POWERLINE_THEME_OVERRIDES': (
@@ -223,7 +223,8 @@ def main(attempts=3):
 			expected_result = expected_result_new
 		if not test_expected_result(p, expected_result, cols, rows, not attempts):
 			if attempts:
-				return main(attempts=(attempts - 1))
+				pass
+				# Will rerun main later.
 			else:
 				return False
 		else:
@@ -232,7 +233,8 @@ def main(attempts=3):
 		check_call([tmux_exe, '-S', socket_path, 'kill-server'], env={
 			'PATH': vterm_path,
 			'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
-		})
+		}, cwd=VTERM_TEST_DIR)
+	return main(attempts=(attempts - 1))
 
 
 if __name__ == '__main__':

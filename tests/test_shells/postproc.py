@@ -31,6 +31,10 @@ user = os.environ['USER']
 REFS_RE = re.compile(r'^\[\d+ refs\]\n')
 IPYPY_DEANSI_RE = re.compile(r'\033(?:\[(?:\?\d+[lh]|[^a-zA-Z]+[a-ln-zA-Z])|[=>])')
 
+start_str = 'cd tests/shell/3rd'
+if shell == 'pdb':
+	start_str = 'class Foo(object):'
+
 with codecs.open(fname, 'r', encoding='utf-8') as R:
 	with codecs.open(new_fname, 'w', encoding='utf-8') as W:
 		found_cd = False
@@ -38,11 +42,7 @@ with codecs.open(fname, 'r', encoding='utf-8') as R:
 		for line in (R if shell != 'fish' else R.read().split('\n')):
 			i += 1
 			if not found_cd:
-				found_cd = (
-					'class Foo(object):' in line
-					if shell == 'pdb' else
-					'cd tests/shell/3rd' in line
-				)
+				found_cd = (start_str in line)
 				continue
 			if 'true is the last line' in line:
 				break
@@ -118,4 +118,8 @@ with codecs.open(fname, 'r', encoding='utf-8') as R:
 					line = ''
 				elif line == '-> self.quitting = 1\n':
 					line = '-> self.quitting = True\n'
+				elif line == '\n':
+					line = ''
+				if line == '-> self.quitting = True\n':
+					break
 			W.write(line)

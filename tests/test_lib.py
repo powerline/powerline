@@ -39,9 +39,9 @@ else:
 	use_mercurial = True
 
 
-GIT_REPO = 'git_repo' + os.environ.get('PYTHON', '')
-HG_REPO = 'hg_repo' + os.environ.get('PYTHON', '')
-BZR_REPO = 'bzr_repo' + os.environ.get('PYTHON', '')
+GIT_REPO = 'git_repo'
+HG_REPO = 'hg_repo'
+BZR_REPO = 'bzr_repo'
 
 
 def thread_number():
