@@ -161,7 +161,7 @@ def main(attempts=3):
 				'TERMINFO': os.path.join(VTERM_TEST_DIR, 'terminfo'),
 				'TERM': 'st-256color',
 				'PATH': vterm_path,
-				'SHELL': os.path.join(''),
+				'SHELL': os.path.join(VTERM_TEST_DIR, 'path', 'bash'),
 				'POWERLINE_CONFIG_PATHS': os.path.abspath('powerline/config_files'),
 				'POWERLINE_COMMAND': 'powerline-render',
 				'POWERLINE_THEME_OVERRIDES': (
