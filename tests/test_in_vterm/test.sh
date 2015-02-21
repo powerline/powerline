@@ -19,8 +19,9 @@ cp -r tests/terminfo tests/vterm
 FAIL_SUMMARY=""
 
 test_tmux() {
-	if test "$PYTHON_IMPLEMENTATION" = PyPy && test "$PYTHON_VERSION_MAJOR" -eq 3 ; then
-		# FIXME PyPy3 segfaults for some reason
+	if test "$PYTHON_IMPLEMENTATION" = PyPy; then
+		# FIXME PyPy3 segfaults for some reason, PyPy does it as well, but 
+		# occasionally.
 		return 0
 	fi
 	if ! which "${POWERLINE_TMUX_EXE}" ; then
