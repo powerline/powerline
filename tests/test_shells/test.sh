@@ -215,6 +215,8 @@ done
 
 ln -s python tests/shell/path/pdb
 PDB_PYTHON=pdb
+ln -s python tests/shell/path/ipython
+IPYTHON_PYTHON=ipython
 
 if test -z "$POWERLINE_RC_EXE" ; then
 	if which rc-status >/dev/null ; then
@@ -230,7 +232,7 @@ if which "$POWERLINE_RC_EXE" >/dev/null ; then
 	ln -s "$(which $POWERLINE_RC_EXE)" tests/shell/path/rc
 fi
 
-for exe in bash zsh busybox fish tcsh mksh dash ipython ; do
+for exe in bash zsh busybox fish tcsh mksh dash ; do
 	if which $exe >/dev/null ; then
 		if test "$exe" = "fish" ; then
 			fish_version="$(fish --version 2>&1)"
@@ -451,12 +453,12 @@ if  test "x${ONLY_SHELL}" = "x" || test "x${ONLY_SHELL}" = "xpdb" ; then
 fi
 
 if test "x${ONLY_SHELL}" = "x" || test "x${ONLY_SHELL}" = "xipython" ; then
-	if which ipython >/dev/null ; then
+	if "${PYTHON}" -c "try: import IPython${NL}except ImportError: raise SystemExit(1)" ; then
 		# Define some overrides which should be ignored by IPython.
 		export POWERLINE_CONFIG_OVERRIDES='common.term_escape_style=fbterm'
 		export POWERLINE_THEME_OVERRIDES='in.segments.left=[]'
 		echo "> $(which ipython)"
-		if ! run_test ipython ipython ipython ; then
+		if ! run_test ipython ipython ${IPYTHON_PYTHON} -mIPython ; then
 			FAILED=1
 			FAIL_SUMMARY="${FAIL_SUMMARY}${NL}T ipython"
 		fi
