@@ -98,7 +98,7 @@ def main():
 
 	child.wait()
 
-	with open(full_log_file_name, 'w') as LF:
+	with open(full_log_file_name, 'wb') as LF:
 		LF.write(child.read())
 
 	check_call([
