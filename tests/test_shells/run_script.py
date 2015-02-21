@@ -98,7 +98,15 @@ def main():
 				# TODO Implement something more smart
 
 	with open(full_log_file_name, 'wb') as LF:
-		LF.write(child.read())
+		while True:
+			try:
+				s = child.read_nonblocking(1000)
+			except pexpect.TIMEOUT:
+				break
+			except pexpect.EOF:
+				break
+			else:
+				LF.write(s)
 
 	check_call([
 		os.path.join('tests', 'shell', 'path', 'python'),
