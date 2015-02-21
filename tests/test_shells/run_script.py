@@ -12,6 +12,8 @@ from io import BytesIO
 
 import pexpect
 
+from powerline.lib.monotonic import monotonic
+
 
 def get_argparser(ArgumentParser=argparse.ArgumentParser):
 	parser = ArgumentParser(description='Run powerline shell test using pexpect')
@@ -96,7 +98,13 @@ def main():
 				sleep(1)
 				# TODO Implement something more smart
 
-	child.wait()
+	start = monotonic()
+	while child.isalive():
+		sleep(0.1)
+		if monotonic() - start > 60 * 3:
+			# Waiting for three minutes. This is long enough.
+			child.kill()
+			break
 
 	with open(full_log_file_name, 'wb') as LF:
 		LF.write(child.read())
