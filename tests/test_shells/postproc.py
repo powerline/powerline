@@ -120,4 +120,6 @@ with codecs.open(fname, 'r', encoding='utf-8') as R:
 					line = '-> self.quitting = True\n'
 				elif line == '\n':
 					line = ''
+				if line == '-> self.quitting = True\n':
+					break
 			W.write(line)
