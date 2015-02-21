@@ -223,7 +223,8 @@ def main(attempts=3):
 			expected_result = expected_result_new
 		if not test_expected_result(p, expected_result, cols, rows, not attempts):
 			if attempts:
-				return main(attempts=(attempts - 1))
+				pass
+				# Will rerun main later.
 			else:
 				return False
 		else:
@@ -233,6 +234,7 @@ def main(attempts=3):
 			'PATH': vterm_path,
 			'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
 		})
+	return main(attempts=(attempts - 1))
 
 
 if __name__ == '__main__':
