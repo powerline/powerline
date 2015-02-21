@@ -97,7 +97,7 @@ def test_expected_result(p, expected_result, cols, rows, print_logs):
 
 def main(attempts=3):
 	vterm_path = os.path.join(VTERM_TEST_DIR, 'path')
-	socket_path = os.path.join(VTERM_TEST_DIR, 'tmux-socket')
+	socket_path = 'tmux-socket'
 	rows = 50
 	cols = 200
 
@@ -233,7 +233,7 @@ def main(attempts=3):
 		check_call([tmux_exe, '-S', socket_path, 'kill-server'], env={
 			'PATH': vterm_path,
 			'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
-		})
+		}, cwd=VTERM_TEST_DIR)
 	return main(attempts=(attempts - 1))
 
 
