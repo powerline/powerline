@@ -421,7 +421,7 @@ fi
 
 if ( test "x${ONLY_SHELL}" = "x" || test "x${ONLY_SHELL}" = "xzsh" ) \
 	&& ( test "x${ONLY_TEST_TYPE}" = "x" || test "x${ONLY_TEST_TYPE}" = "xzpython" ) \
-	&& zsh -f -c 'zmodload libzpython' 2>/dev/null; then
+	&& zsh tests/test_shells/zsh_test_script.zsh 2>/dev/null; then
 	echo "> zpython"
 	if ! run_test zpython zpython zsh -f -i ; then
 		FAILED=1
