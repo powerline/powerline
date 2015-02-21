@@ -352,6 +352,9 @@ for exe in bash zsh busybox fish tcsh mksh dash ipython ; do
 	fi
 done
 
+mkdir tests/shell/home
+export HOME="$PWD/tests/shell/home"
+
 unset ENV
 
 export ADDRESS="powerline-ipc-test-$$"
