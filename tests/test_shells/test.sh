@@ -457,7 +457,7 @@ if test "x${ONLY_SHELL}" = "x" || test "x${ONLY_SHELL}" = "xipython" ; then
 		# Define some overrides which should be ignored by IPython.
 		export POWERLINE_CONFIG_OVERRIDES='common.term_escape_style=fbterm'
 		export POWERLINE_THEME_OVERRIDES='in.segments.left=[]'
-		echo "> $(which ipython)"
+		echo "> ipython"
 		if ! run_test ipython ipython ${IPYTHON_PYTHON} -mIPython ; then
 			FAILED=1
 			FAIL_SUMMARY="${FAIL_SUMMARY}${NL}T ipython"
