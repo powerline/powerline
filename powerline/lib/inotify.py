@@ -7,7 +7,10 @@ import errno
 import ctypes
 import struct
 
-from ctypes.util import find_library
+try:
+	from ctypes.util import find_library
+except ImportError:
+	from powerline.lib.ctypes_util import find_library
 
 from powerline.lib.encoding import get_preferred_file_name_encoding
 

@@ -42,8 +42,8 @@ characters, not even paired ones. Python-2 contains a bug that allows such
 action, but printing them in any case makes no sense.
 '''
 
-# XXX: not using `r` because it makes no sense.
-np_invalid_character_re = re.compile('(?<![\uD800-\uDBFF])[\uDC80-\uDD00]')
+# XXX: using `r` because otherwise Jython is unable to parse this code
+np_invalid_character_re = re.compile(r'(?<![\uD800-\uDBFF])[\uDC80-\uDD00]')
 '''Regex that finds unpaired surrogate escape characters
 
 Search is only limited to the ones obtained from ``surrogateescape`` error 

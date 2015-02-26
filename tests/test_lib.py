@@ -493,7 +493,8 @@ class TestUnicode(TestCase):
 		self.assertEqual(4, plu.strwidth_ucs_2(width_data, 'ＡＢ'))
 		if not sys.maxunicode < 0x10FFFF:
 			raise SkipTest('Can only test strwidth_ucs_2 in UCS-2 Pythons')
-		self.assertEqual(2, plu.strwidth_ucs_2(width_data, '\ud83d\udc8e'))
+		# XXX: Using eval() because otherwise Jython is unable to parse text.
+		self.assertEqual(2, plu.strwidth_ucs_2(width_data, eval(r"'\ud83d\udc8e'")))
 
 
 class TestVCS(TestCase):
