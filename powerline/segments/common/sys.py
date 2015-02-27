@@ -3,11 +3,19 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 
 import os
 
-from multiprocessing import cpu_count as _cpu_count
-
 from powerline.lib.threaded import ThreadedSegment
 from powerline.lib import add_divider_highlight_group
 from powerline.segments import with_docstring
+
+
+try:
+	_cpu_count = os.cpu_count
+except AttributeError:
+	try:
+		from multiprocessing import cpu_count as _cpu_count
+	except ImportError:
+		# Jython does not have multiprocessing module or cpu_count in os
+		_cpu_count = lambda: 1
 
 
 cpu_count = None
