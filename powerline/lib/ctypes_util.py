@@ -61,7 +61,7 @@ def _get_soname(f):
 
 def _findSoname_ldconfig(name):
 	import struct
-	machine = subprocess.check_output('uname -m')[:-1]
+	machine = subprocess.check_output(['uname', '-m'])[:-1]
 	if struct.calcsize('l') == 4:
 		machine += '-32'
 	else:
@@ -78,14 +78,17 @@ def _findSoname_ldconfig(name):
 	# XXX assuming GLIBC's ldconfig (with option -p)
 	regex = '\s+(lib%s\.[^\s]+)\s+\(%s' % (re.escape(name), abi_type)
 	try:
-		with subprocess.Popen(['/sbin/ldconfig', '-p'],
-								stdin=subprocess.PIPE,
-								stderr=subprocess.PIPE,
-								stdout=subprocess.PIPE,
-								env={'LC_ALL': 'C', 'LANG': 'C'}) as p:
+		p = subprocess.Popen(['/sbin/ldconfig', '-p'],
+		                     stdin=subprocess.PIPE,
+		                     stderr=subprocess.PIPE,
+		                     stdout=subprocess.PIPE,
+		                     env={'LC_ALL': 'C', 'LANG': 'C'})
+		try:
 			res = re.search(regex, p.stdout.read())
 			if res:
-				return os.fsdecode(res.group(1))
+				return res.group(1)
+		finally:
+			p.terminate()
 	except OSError:
 		pass
 

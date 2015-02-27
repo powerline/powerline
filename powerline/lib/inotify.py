@@ -38,7 +38,7 @@ def load_inotify():
 			raise INotifyError('INotify not available on windows')
 		if sys.platform == 'darwin':
 			raise INotifyError('INotify not available on OS X')
-		if not hasattr(ctypes, 'c_ssize_t'):
+		if not hasattr(ctypes, 'c_ssize_t') or not hasattr(ctypes, 'CFUNCTYPE'):
 			raise INotifyError('You need python >= 2.7 to use inotify')
 		name = find_library('c')
 		if not name:
