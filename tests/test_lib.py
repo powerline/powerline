@@ -4,7 +4,6 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 import threading
 import os
 import sys
-import re
 import shutil
 
 from time import sleep
@@ -39,9 +38,11 @@ else:
 	use_mercurial = True
 
 
-GIT_REPO = 'git_repo'
-HG_REPO = 'hg_repo'
-BZR_REPO = 'bzr_repo'
+TEST_DIR = os.path.dirname(os.path.abspath(__file__))
+
+GIT_REPO = os.path.join(TEST_DIR, 'git_repo')
+HG_REPO = os.path.join(TEST_DIR, 'hg_repo')
+BZR_REPO = os.path.join(TEST_DIR, 'bzr_repo')
 
 
 def thread_number():
@@ -497,6 +498,13 @@ class TestUnicode(TestCase):
 		self.assertEqual(2, plu.strwidth_ucs_2(width_data, eval(r"'\ud83d\udc8e'")))
 
 
+def is_lowerdigits(s):
+	return all((
+		'a' <= c <= 'z' or '0' <= c <= '9'
+		for c in s
+	))
+
+
 class TestVCS(TestCase):
 	def do_branch_rename_test(self, repo, q):
 		st = monotonic()
@@ -511,7 +519,7 @@ class TestVCS(TestCase):
 					break
 			sleep(0.01)
 		if hasattr(q, '__call__'):
-			self.assertTrue(q(ans))
+			self.assertTrue(q(ans), msg='{0!r}({1!r}) is not true'.format(q, ans))
 		else:
 			self.assertEqual(ans, q)
 
@@ -545,7 +553,7 @@ class TestVCS(TestCase):
 			call(['git', 'checkout', '-q', 'branch2'], cwd=GIT_REPO)
 			self.do_branch_rename_test(repo, 'branch2')
 			call(['git', 'checkout', '-q', '--detach', 'branch1'], cwd=GIT_REPO)
-			self.do_branch_rename_test(repo, lambda b: re.match(r'^[a-f0-9]+$', b))
+			self.do_branch_rename_test(repo, is_lowerdigits)
 		finally:
 			call(['git', 'checkout', '-q', 'master'], cwd=GIT_REPO)
 
@@ -660,7 +668,7 @@ class TestVCS(TestCase):
 	@classmethod
 	def setUpClass(cls):
 		cls.powerline_old_cwd = os.getcwd()
-		os.chdir(os.path.dirname(__file__))
+		os.chdir(TEST_DIR)
 		call(['git', 'init', '--quiet', GIT_REPO])
 		assert os.path.isdir(GIT_REPO)
 		call(['git', 'config', '--local', 'user.name', 'Foo'], cwd=GIT_REPO)
