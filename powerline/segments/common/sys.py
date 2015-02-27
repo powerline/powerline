@@ -15,7 +15,7 @@ except AttributeError:
 		from multiprocessing import cpu_count as _cpu_count
 	except ImportError:
 		# Jython does not have multiprocessing module or cpu_count in os
-		_cpu_count = lambda: 1
+		_cpu_count = None
 
 
 cpu_count = None
@@ -72,6 +72,15 @@ def system_load(pl, format='{avg:.1f}', threshold_good=1, threshold_bad=2, track
 	ret[0]['contents'] += ' '
 	ret[1]['contents'] += ' '
 	return ret
+
+
+if _cpu_count is None or not hasattr(os, 'getloadavg'):
+	def system_load(pl, **kwargs):  # NOQA
+		if _cpu_count is None:
+			pl.error('Your Python version does not have os.cpu_count() or multiprocessing.cpu_count() functions')
+		elif not hasattr(os, 'getloadavg'):
+			pl.error('Your Python version does not have os.getloadavg()')
+		return None
 
 
 try:

@@ -733,6 +733,8 @@ class TestSys(TestCommon):
 
 	def test_system_load(self):
 		pl = Pl()
+		if self.module._cpu_count is None or not hasattr(os, 'getloadavg'):
+			raise SkipTest('Python functions necessary for system_load are not available')
 		with replace_module_module(self.module, 'os', getloadavg=lambda: (7.5, 3.5, 1.5)):
 			with replace_attr(self.module, '_cpu_count', lambda: 2):
 				self.assertEqual(self.module.system_load(pl=pl), [
