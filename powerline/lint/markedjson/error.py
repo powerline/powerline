@@ -139,10 +139,10 @@ class Mark:
 		return self.to_string()
 
 
-def echoerr(*args, **kwargs):
+def echoerr(**kwargs):
 	stream = kwargs.pop('stream', sys.stderr)
 	stream.write('\n')
-	stream.write(format_error(*args, **kwargs) + '\n')
+	stream.write(format_error(**kwargs) + '\n')
 
 
 def format_error(context=None, context_mark=None, problem=None, problem_mark=None, note=None):
@@ -180,8 +180,8 @@ class EchoErr(object):
 		self.echoerr = echoerr
 		self.logger = logger
 
-	def __call__(self, *args, **kwargs):
-		self.echoerr(*args, **kwargs)
+	def __call__(self, **kwargs):
+		self.echoerr(**kwargs)
 
 
 class DelayedEchoErr(EchoErr):
@@ -191,12 +191,12 @@ class DelayedEchoErr(EchoErr):
 		super(DelayedEchoErr, self).__init__(echoerr, echoerr.logger)
 		self.errs = []
 
-	def __call__(self, *args, **kwargs):
-		self.errs.append((args, kwargs))
+	def __call__(self, **kwargs):
+		self.errs.append(kwargs)
 
 	def echo_all(self):
-		for args, kwargs in self.errs:
-			self.echoerr(*args, **kwargs)
+		for kwargs in self.errs:
+			self.echoerr(**kwargs)
 
 	def __nonzero__(self):
 		return not not self.errs
