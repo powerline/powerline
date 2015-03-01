@@ -9,7 +9,7 @@ from time import sleep
 from subprocess import check_call
 from itertools import groupby
 from difflib import ndiff
-from glob import glob1
+from glob import glob
 
 from powerline.lib.unicode import u
 from powerline.bindings.tmux import get_tmux_version
@@ -84,14 +84,19 @@ def test_expected_result(p, expected_result, cols, rows, print_logs):
 	print('=' * 80)
 	print(''.join((u(line) for line in ndiff([a], [b]))))
 	if print_logs:
-		for f in glob1(VTERM_TEST_DIR, '*.log'):
-			print('_' * 80)
-			print(os.path.basename(f) + ':')
-			print('=' * 80)
-			with open(f, 'r') as F:
-				for line in F:
-					sys.stdout.write(line)
-			os.unlink(f)
+		old_pwd = os.getcwd()
+		os.chdir(VTERM_TEST_DIR)
+		try:
+			for f in glob('*.log'):
+				print('_' * 80)
+				print(os.path.basename(f) + ':')
+				print('=' * 80)
+				with open(f, 'r') as F:
+					for line in F:
+						sys.stdout.write(line)
+				os.unlink(f)
+		finally:
+			os.chdir(old_pwd)
 	return False
 
 
