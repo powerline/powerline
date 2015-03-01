@@ -10,7 +10,8 @@ from powerline.lib.shell import which
 from powerline.lib.overrides import get_env_config_paths, get_env_config_overrides, override_main_config
 from powerline.lib.dict import mergeargs
 from powerline.lib.encoding import get_preferred_output_encoding
-from powerline.bindings.tmux import TmuxVersionInfo, run_tmux_command, set_tmux_environment, get_tmux_version
+from powerline.bindings.tmux import (TmuxVersionInfo, TmuxCommandError,
+                                     run_tmux_command, set_tmux_environment, get_tmux_version)
 from powerline.commands.main import finish_args
 from powerline.renderers.tmux import attrs_to_tmux_attrs
 from powerline.config import POWERLINE_ROOT, TMUX_CONFIG_DIRECTORY
@@ -78,7 +79,11 @@ def source_tmux_files(pl, args):
 		cmd = deduce_command()
 		if cmd:
 			set_tmux_environment('POWERLINE_COMMAND', deduce_command(), remove=False)
-	run_tmux_command('refresh-client')
+	try:
+		run_tmux_command('refresh-client')
+	except TmuxCommandError:
+		# This exception is for some reason raised in tmux-1.9
+		pass
 
 
 class EmptyArgs(object):
