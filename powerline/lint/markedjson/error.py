@@ -138,6 +138,13 @@ class Mark:
 	def __str__(self):
 		return self.to_string()
 
+	def __eq__(self, other):
+		return self is other or (
+			self.name == other.name
+			and self.line == other.line
+			and self.column == other.column
+		)
+
 
 def echoerr(**kwargs):
 	stream = kwargs.pop('stream', sys.stderr)
@@ -154,9 +161,7 @@ def format_error(context=None, context_mark=None, problem=None, problem_mark=Non
 		context_mark is not None
 		and (
 			problem is None or problem_mark is None
-			or context_mark.name != problem_mark.name
-			or context_mark.line != problem_mark.line
-			or context_mark.column != problem_mark.column
+			or context_mark != problem_mark
 		)
 	):
 		lines.append(context_mark.to_string(indent=indent))
