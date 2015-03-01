@@ -138,33 +138,39 @@ class Mark:
 	def __str__(self):
 		return self.to_string()
 
+	def __eq__(self, other):
+		return self is other or (
+			self.name == other.name
+			and self.line == other.line
+			and self.column == other.column
+		)
 
-def echoerr(*args, **kwargs):
+
+def echoerr(**kwargs):
 	stream = kwargs.pop('stream', sys.stderr)
 	stream.write('\n')
-	stream.write(format_error(*args, **kwargs) + '\n')
+	stream.write(format_error(**kwargs) + '\n')
 
 
-def format_error(context=None, context_mark=None, problem=None, problem_mark=None, note=None):
+def format_error(context=None, context_mark=None, problem=None, problem_mark=None, note=None, indent=0):
 	lines = []
+	indentstr = ' ' * indent
 	if context is not None:
-		lines.append(context)
+		lines.append(indentstr + context)
 	if (
 		context_mark is not None
 		and (
 			problem is None or problem_mark is None
-			or context_mark.name != problem_mark.name
-			or context_mark.line != problem_mark.line
-			or context_mark.column != problem_mark.column
+			or context_mark != problem_mark
 		)
 	):
-		lines.append(str(context_mark))
+		lines.append(context_mark.to_string(indent=indent))
 	if problem is not None:
-		lines.append(problem)
+		lines.append(indentstr + problem)
 	if problem_mark is not None:
-		lines.append(str(problem_mark))
+		lines.append(problem_mark.to_string(indent=indent))
 	if note is not None:
-		lines.append(note)
+		lines.append(indentstr + note)
 	return '\n'.join(lines)
 
 
@@ -174,29 +180,48 @@ class MarkedError(Exception):
 
 
 class EchoErr(object):
-	__slots__ = ('echoerr', 'logger',)
+	__slots__ = ('echoerr', 'logger', 'indent')
 
-	def __init__(self, echoerr, logger):
+	def __init__(self, echoerr, logger, indent=0):
 		self.echoerr = echoerr
 		self.logger = logger
+		self.indent = indent
 
-	def __call__(self, *args, **kwargs):
-		self.echoerr(*args, **kwargs)
+	def __call__(self, **kwargs):
+		kwargs = kwargs.copy()
+		kwargs.setdefault('indent', self.indent)
+		self.echoerr(**kwargs)
 
 
 class DelayedEchoErr(EchoErr):
-	__slots__ = ('echoerr', 'logger', 'errs')
+	__slots__ = ('echoerr', 'logger', 'errs', 'message', 'separator_message', 'indent', 'indent_shift')
 
-	def __init__(self, echoerr):
+	def __init__(self, echoerr, message='', separator_message=''):
 		super(DelayedEchoErr, self).__init__(echoerr, echoerr.logger)
-		self.errs = []
+		self.errs = [[]]
+		self.message = message
+		self.separator_message = separator_message
+		self.indent_shift = (4 if message or separator_message else 0)
+		self.indent = echoerr.indent + self.indent_shift
 
-	def __call__(self, *args, **kwargs):
-		self.errs.append((args, kwargs))
+	def __call__(self, **kwargs):
+		kwargs = kwargs.copy()
+		kwargs['indent'] = kwargs.get('indent', 0) + self.indent
+		self.errs[-1].append(kwargs)
+
+	def next_variant(self):
+		self.errs.append([])
 
 	def echo_all(self):
-		for args, kwargs in self.errs:
-			self.echoerr(*args, **kwargs)
+		if self.message:
+			self.echoerr(problem=self.message, indent=(self.indent - self.indent_shift))
+		for variant in self.errs:
+			if not variant:
+				continue
+			if self.separator_message and variant is not self.errs[0]:
+				self.echoerr(problem=self.separator_message, indent=(self.indent - self.indent_shift))
+			for kwargs in variant:
+				self.echoerr(**kwargs)
 
 	def __nonzero__(self):
 		return not not self.errs

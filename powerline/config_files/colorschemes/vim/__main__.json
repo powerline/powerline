@@ -23,9 +23,10 @@
 		"csv:column_number": "line_current",
 		"csv:column_name":   "line_current_symbol",
 
-		"tab_nc:file_directory": "information:unimportant",
-		"tab_nc:file_name":      "tab_nc:file_directory",
-		"tab_nc:tabnr":          "tab_nc:file_directory",
+		"tab_nc:modified_indicator": "modified_indicator",
+		"tab_nc:file_directory":     "information:unimportant",
+		"tab_nc:file_name":          "tab_nc:file_directory",
+		"tab_nc:tabnr":              "tab_nc:file_directory",
 
 		"buf_nc:file_directory":     "tab_nc:file_directory",
 		"buf_nc:file_name":          "tab_nc:file_name",
