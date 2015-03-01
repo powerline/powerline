@@ -168,6 +168,10 @@ def main(attempts=3):
 				'PATH': vterm_path,
 				'SHELL': os.path.join(VTERM_TEST_DIR, 'path', 'bash'),
 				'POWERLINE_CONFIG_PATHS': os.path.abspath('powerline/config_files'),
+				'POWERLINE_CONFIG_OVERRIDES': (
+					'common.log_level=DEBUG;'
+					'common.log_file=powerline.log;'
+				),
 				'POWERLINE_COMMAND': 'powerline-render',
 				'POWERLINE_THEME_OVERRIDES': (
 					'default.segments.right=[{"type":"string","name":"s1","highlight_groups":["cwd"]}];'
