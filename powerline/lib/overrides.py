@@ -78,3 +78,58 @@ def parse_override_var(s):
 		for item in s.split(';')
 		if item
 	)
+
+
+def get_env_config_paths(environ):
+	'''Get config paths from environment
+
+	:param dict environ:
+		Environment from which paths should be obtained.
+
+	:return: Paths from ``POWERLINE_CONFIG_PATHS`` as a list. List may be empty.
+	'''
+	return [path for path in environ.get('POWERLINE_CONFIG_PATHS', '').split(':') if path]
+
+
+def _get_env_overrides(environ, varname):
+	'''Get overrides from environment
+
+	:param dict environ:
+		Environment from which overrides should be obtained.
+	:param str varname:
+		Name of the variable containing overrides.
+
+	:return:
+		Iterable (may be empty) containing a sequence of overrides, where each 
+		item is similar to what :py:func:`powerline.lib.overrides.parsedotval` 
+		returns.
+	'''
+	return parse_override_var(environ.get(varname, ''))
+
+
+def get_env_config_overrides(environ):
+	'''Get config overrides from environment
+
+	:param dict environ:
+		Environment from which overrides should be obtained.
+
+	:return:
+		Iterable (may be empty) containing a sequence of overrides, where each 
+		item is similar to what :py:func:`powerline.lib.overrides.parsedotval` 
+		returns.
+	'''
+	return _get_env_overrides('POWERLINE_CONFIG_OVERRIDES')
+
+
+def get_env_theme_overrides(environ):
+	'''Get config overrides from environment
+
+	:param dict environ:
+		Environment from which overrides should be obtained.
+
+	:return:
+		Iterable (may be empty) containing a sequence of overrides, where each 
+		item is similar to what :py:func:`powerline.lib.overrides.parsedotval` 
+		returns.
+	'''
+	return _get_env_overrides('POWERLINE_THEME_OVERRIDES')
