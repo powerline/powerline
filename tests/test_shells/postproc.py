@@ -70,7 +70,7 @@ with codecs.open(fname, 'r', encoding='utf-8') as R:
 				try:
 					start = line.index('\033[0;')
 					end = line.index(' ', start)
-					line = line[start:end] + '\033[0m\n'
+					line = line[start:end] + '\n'
 				except ValueError:
 					line = ''
 			elif shell == 'mksh':

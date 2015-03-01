@@ -5,6 +5,30 @@ set_theme() {
 	export POWERLINE_CONFIG_OVERRIDES="ext.shell.theme=$1"
 }
 set_theme_option default_leftonly.segment_data.hostname.args.only_if_ssh false
+ABOVE_LEFT='[{
+    "left": [
+        {
+            "function": "powerline.segments.common.env.environment",
+            "args": {"variable": "DISPLAYED_ENV_VAR"}
+        }
+    ]
+}]'
+ABOVE_FULL='[{
+    "left": [
+        {
+            "type": "string",
+            "name": "background",
+            "draw_hard_divider": false,
+            "width": "auto"
+        }
+    ],
+    "right": [
+        {
+            "function": "powerline.segments.common.env.environment",
+            "args": {"variable": "DISPLAYED_ENV_VAR"}
+        }
+    ]
+}]'
 set_theme default_leftonly
 export VIRTUAL_ENV=
 source powerline/bindings/bash/powerline.sh
@@ -31,6 +55,13 @@ cd ../'(echo)'
 cd ../'$(echo)'
 cd ../'`echo`'
 cd ../'«Unicode!»'
+set_theme_option default_leftonly.segments.above "$ABOVE_LEFT"
+export DISPLAYED_ENV_VAR=foo
+unset DISPLAYED_ENV_VAR
+set_theme_option default_leftonly.segments.above "$ABOVE_FULL"
+export DISPLAYED_ENV_VAR=foo
+unset DISPLAYED_ENV_VAR
+set_theme_option default_leftonly.segments.above
 set_theme_option default_leftonly.dividers.left.hard \$ABC
 false
 true is the last line

@@ -178,7 +178,8 @@ class Prompt(object):
 				width=zsh.columns() - zle_rprompt_indent,
 				segment_info=segment_info,
 			):
-				r += line + '\n'
+				if line:
+					r += line + '\n'
 		r += self.powerline.render(
 			width=zsh.columns(),
 			side=self.side,

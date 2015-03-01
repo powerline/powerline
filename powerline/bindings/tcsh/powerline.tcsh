@@ -43,7 +43,7 @@ if ( { $POWERLINE_CONFIG_COMMAND shell --shell=tcsh uses prompt } ) then
 	endif
 
 	alias _powerline_set_prompt 'set prompt="`$POWERLINE_COMMAND:q $POWERLINE_COMMAND_ARGS shell left -r .tcsh --renderer-arg=client_id=$$ --last-exit-code=$POWERLINE_STATUS --width=$POWERLINE_COLUMNS`"'
-	alias _powerline_set_rprompt 'set rprompt="`$POWERLINE_COMMAND:q $POWERLINE_COMMAND_ARGS shell right -r .tcsh --renderer-arg=client_id=$$ --last-exit-code=$POWERLINE_STATUS --width=$POWERLINE_COLUMNS` "'
+	alias _powerline_set_rprompt 'set rprompt="`$POWERLINE_COMMAND:q $POWERLINE_COMMAND_ARGS shell right -r .tcsh --renderer-arg=client_id=$$ --last-exit-code=$POWERLINE_STATUS --width=$POWERLINE_COLUMNS`"'
 	alias _powerline_set_columns 'set POWERLINE_COLUMNS=`stty size|cut -d" " -f2` ; set POWERLINE_COLUMNS=`expr $POWERLINE_COLUMNS - 2`'
 
 	alias precmd 'set POWERLINE_STATUS=$? ; '"`alias precmd`"' ; _powerline_set_columns ; _powerline_above ; _powerline_set_prompt ; _powerline_set_rprompt'

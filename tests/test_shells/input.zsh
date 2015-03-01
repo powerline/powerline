@@ -16,6 +16,30 @@ fi
 source powerline/bindings/zsh/powerline.zsh
 set_theme_option default_leftonly.segment_data.hostname.args.only_if_ssh false
 set_theme_option default.segment_data.hostname.args.only_if_ssh false
+ABOVE_LEFT='[{
+	"left": [
+		{
+			"function": "powerline.segments.common.env.environment",
+			"args": {"variable": "DISPLAYED_ENV_VAR"}
+		}
+	]
+}]'
+ABOVE_FULL='[{
+	"left": [
+		{
+			"type": "string",
+			"name": "background",
+			"draw_hard_divider": false,
+			"width": "auto"
+		}
+	],
+	"right": [
+		{
+			"function": "powerline.segments.common.env.environment",
+			"args": {"variable": "DISPLAYED_ENV_VAR"}
+		}
+	]
+}]'
 set_theme default_leftonly
 export VIRTUAL_ENV=
 cd tests/shell/3rd
@@ -51,6 +75,13 @@ done
 1
 cd .
 cd .
+set_theme_option default.segments.above "$ABOVE_LEFT"
+export DISPLAYED_ENV_VAR=foo
+unset DISPLAYED_ENV_VAR
+set_theme_option default.segments.above "$ABOVE_FULL"
+export DISPLAYED_ENV_VAR=foo
+unset DISPLAYED_ENV_VAR
+set_theme_option default.segments.above
 hash -d foo=$PWD:h ; cd .
 set_theme_option default.dividers.left.hard \$ABC
 true
