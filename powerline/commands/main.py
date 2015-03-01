@@ -159,7 +159,8 @@ def write_output(args, powerline, segment_info, write):
 			segment_info=segment_info,
 			mode=segment_info.get('mode', None),
 		):
-			write(line + '\n')
+			if line:
+				write(line + '\n')
 		args.side = args.side[len('above'):]
 
 	if args.side:
