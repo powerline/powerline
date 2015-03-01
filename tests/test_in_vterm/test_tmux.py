@@ -32,7 +32,23 @@ def cell_properties_key_to_shell_escape(cell_properties_key):
 	))
 
 
-def test_expected_result(p, expected_result, cols, rows, print_logs):
+def print_logs():
+	old_pwd = os.getcwd()
+	os.chdir(VTERM_TEST_DIR)
+	try:
+		for f in glob('*.log'):
+			print('_' * 80)
+			print(os.path.basename(f) + ':')
+			print('=' * 80)
+			with open(f, 'r') as F:
+				for line in F:
+					sys.stdout.write(line)
+			os.unlink(f)
+	finally:
+		os.chdir(old_pwd)
+
+
+def test_expected_result(p, expected_result, cols, rows, need_to_print_logs):
 	last_line = []
 	for col in range(cols):
 		last_line.append(p[rows - 1, col])
@@ -83,20 +99,8 @@ def test_expected_result(p, expected_result, cols, rows, print_logs):
 	print('Diff:')
 	print('=' * 80)
 	print(''.join((u(line) for line in ndiff([a], [b]))))
-	if print_logs:
-		old_pwd = os.getcwd()
-		os.chdir(VTERM_TEST_DIR)
-		try:
-			for f in glob('*.log'):
-				print('_' * 80)
-				print(os.path.basename(f) + ':')
-				print('=' * 80)
-				with open(f, 'r') as F:
-					for line in F:
-						sys.stdout.write(line)
-				os.unlink(f)
-		finally:
-			os.chdir(old_pwd)
+	if need_to_print_logs:
+		print_logs()
 	return False
 
 
