@@ -48,7 +48,7 @@ def print_logs():
 		os.chdir(old_pwd)
 
 
-def test_expected_result(p, expected_result, cols, rows, need_to_print_logs):
+def test_expected_result(p, expected_result, cols, rows):
 	last_line = []
 	for col in range(cols):
 		last_line.append(p[rows - 1, col])
@@ -99,8 +99,7 @@ def test_expected_result(p, expected_result, cols, rows, need_to_print_logs):
 	print('Diff:')
 	print('=' * 80)
 	print(''.join((u(line) for line in ndiff([a], [b]))))
-	if need_to_print_logs:
-		print_logs()
+	print_logs()
 	return False
 
 
@@ -234,7 +233,7 @@ def main(attempts=3):
 			expected_result = expected_result_old
 		else:
 			expected_result = expected_result_new
-		if not test_expected_result(p, expected_result, cols, rows, not attempts):
+		if not test_expected_result(p, expected_result, cols, rows):
 			if attempts:
 				pass
 				# Will rerun main later.
