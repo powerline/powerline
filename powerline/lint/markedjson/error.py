@@ -4,6 +4,8 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 import sys
 import re
 
+from powerline.lib.encoding import get_preferred_output_encoding
+
 
 NON_PRINTABLE_STR = (
 	'[^'
@@ -130,13 +132,17 @@ class Mark:
 			mark = mark.old_mark
 			if id(mark) in processed_marks:
 				raise ValueError('Trying to dump recursive mark')
-		if type(where) is str:
-			return where
-		else:
-			return where.encode('utf-8')
+		return where
 
-	def __str__(self):
-		return self.to_string()
+	if sys.version_info < (3,):
+		def __str__(self):
+			return self.to_string().encode('utf-8')
+
+		def __unicode__(self):
+			return self.to_string()
+	else:
+		def __str__(self):
+			return self.to_string()
 
 	def __eq__(self, other):
 		return self is other or (
@@ -146,10 +152,16 @@ class Mark:
 		)
 
 
-def echoerr(**kwargs):
-	stream = kwargs.pop('stream', sys.stderr)
-	stream.write('\n')
-	stream.write(format_error(**kwargs) + '\n')
+if sys.version_info < (3,):
+	def echoerr(**kwargs):
+		stream = kwargs.pop('stream', sys.stderr)
+		stream.write('\n')
+		stream.write((format_error(**kwargs) + '\n').encode(get_preferred_output_encoding()))
+else:
+	def echoerr(**kwargs):
+		stream = kwargs.pop('stream', sys.stderr)
+		stream.write('\n')
+		stream.write(format_error(**kwargs) + '\n')
 
 
 def format_error(context=None, context_mark=None, problem=None, problem_mark=None, note=None, indent=0):
