@@ -4,3 +4,6 @@ for signal in ABRT ALRM BUS CHLD CONT FPE HUP ILL INT PIPE QUIT SEGV TERM TSTP \
 	trap "echo Got signal $signal >> signal.log" $signal
 done
 real-powerline-config "$@" > powerline-config.out.log 2>&1
+exitcode=$?
+echo Returned $exitcode >> returncode.log
+exit $exitcode
