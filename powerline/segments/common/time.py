@@ -2,22 +2,27 @@
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 from datetime import datetime
+from pytz import (timezone, utc)
 
 
-def date(pl, format='%Y-%m-%d', istime=False):
+def date(pl, format='%Y-%m-%d', istime=False, tz=None):
 	'''Return the current date.
 
 	:param str format:
 		strftime-style date format string
 	:param bool istime:
 		If true then segment uses ``time`` highlight group.
+	:param string tz:
+		Timezone parseable by pytz
 
 	Divider highlight group used: ``time:divider``.
 
 	Highlight groups used: ``time`` or ``date``.
 	'''
+
+	tztime = utc.localize(datetime.utcnow()).astimezone(timezone(tz)) if tz else datetime.now()
 	return [{
-		'contents': datetime.now().strftime(format),
+		'contents': tztime.strftime(format),
 		'highlight_groups': (['time'] if istime else []) + ['date'],
 		'divider_highlight_group': 'time:divider' if istime else None,
 	}]
