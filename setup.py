@@ -124,7 +124,9 @@ setup(
 	packages=find_packages(exclude=('tests', 'tests.*')),
 	include_package_data=True,
 	zip_safe=False,
-	install_requires=[],
+	install_requires=[
+		'pytz'
+	],
 	extras_require={
 		'docs': [
 			'Sphinx',
