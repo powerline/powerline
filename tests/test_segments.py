@@ -684,11 +684,19 @@ class TestTime(TestCommon):
 
 	def test_date(self):
 		pl = Pl()
-		with replace_attr(self.module, 'datetime', Args(now=lambda: Args(strftime=lambda fmt: fmt), utcnow=lambda: Args(strftime=lambda fmt: fmt))):
-			with replace_attr(self.module, 'utc', Args(localize=lambda lcl: Args(astimezone=lambda tz: Args(strftime=lambda fmt: fmt)))):
+		try:
+			import pytz
+		except ImportError:
+			with replace_attr(self.module, 'datetime', Args(now=lambda: Args(strftime=lambda fmt: fmt))):
 				self.assertEqual(self.module.date(pl=pl), [{'contents': '%Y-%m-%d', 'highlight_groups': ['date'], 'divider_highlight_group': None}])
 				self.assertEqual(self.module.date(pl=pl, format='%H:%M', istime=True), [{'contents': '%H:%M', 'highlight_groups': ['time', 'date'], 'divider_highlight_group': 'time:divider'}])
-				self.assertEqual(self.module.date(pl=pl, format='%H:%M', istime=True, tz="America/New_York"), [{'contents': '%H:%M', 'highlight_groups': ['time', 'date'], 'divider_highlight_group': 'time:divider'}])
+		else:
+			localized = Args(tzinfo=None, replace=lambda tzinfo: Args(astimezone=lambda tz: Args(strftime=lambda fmt: fmt)))
+			with replace_attr(self.module, 'utc', Args(localize=lambda time: localized)):
+				with replace_attr(self.module, 'datetime', Args(now=lambda: Args(strftime=lambda fmt: fmt), utcnow=lambda: localized)):
+					self.assertEqual(self.module.date(pl=pl), [{'contents': '%Y-%m-%d', 'highlight_groups': ['date'], 'divider_highlight_group': None}])
+					self.assertEqual(self.module.date(pl=pl, format='%H:%M', istime=True), [{'contents': '%H:%M', 'highlight_groups': ['time', 'date'], 'divider_highlight_group': 'time:divider'}])
+					self.assertEqual(self.module.date(pl=pl, format='%H:%M', istime=True, tz="America/New_York"), [{'contents': '%H:%M', 'highlight_groups': ['time', 'date'], 'divider_highlight_group': 'time:divider'}])
 
 	def test_fuzzy_time(self):
 		time = Args(hour=0, minute=45)

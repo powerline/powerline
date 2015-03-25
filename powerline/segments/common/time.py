@@ -3,9 +3,6 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 
 from datetime import datetime
 
-from pytz import (timezone, utc)
-
-
 def date(pl, format='%Y-%m-%d', istime=False, tz=None):
 	'''Return the current date.
 
@@ -14,14 +11,24 @@ def date(pl, format='%Y-%m-%d', istime=False, tz=None):
 	:param bool istime:
 		If true then segment uses ``time`` highlight group.
 	:param string tz:
-		Timezone parseable by pytz
+		Timezone parseable by pytz (requires ``pytz`` module).
 
 	Divider highlight group used: ``time:divider``.
 
 	Highlight groups used: ``time`` or ``date``.
 	'''
 
-	tztime = utc.localize(datetime.utcnow()).astimezone(timezone(tz)) if tz else datetime.now()
+	if (tz):
+		try:
+			from pytz import timezone, utc
+		except:
+			tztime = datetime.now()
+			pl.error('Custom timezones require pytz module')
+		else:
+			tztime = utc.localize(datetime.utcnow()).astimezone(timezone(tz))
+	else:
+		tztime = datetime.now()
+
 	return [{
 		'contents': tztime.strftime(format),
 		'highlight_groups': (['time'] if istime else []) + ['date'],
