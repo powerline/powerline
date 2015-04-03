@@ -223,13 +223,13 @@ My vim statusline is not displayed completely and has too much spaces
 Powerline loses color after editing vimrc
 -----------------------------------------
 
-If your vimrc has something like
+If your vimrc is using buffer events with autocmd:
 
 .. code-block:: vim
 
     autocmd! BufWritePost vimrc :source ~/.vimrc
 
-to automatically source vimrc after saving it you must then add ``nested`` after 
+then to automatically source vimrc after saving it you must add ``nested`` after 
 pattern (``vimrc`` in this case):
 
 .. code-block:: vim
