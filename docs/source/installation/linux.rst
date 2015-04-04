@@ -6,8 +6,8 @@ The following distribution-specific packages are officially supported, and they
 provide an easy way of installing and upgrading Powerline. The packages will 
 automatically do most of the configuration.
 
-* `Arch Linux (AUR), Python 2 version <https://aur.archlinux.org/packages/python2-powerline-git/>`_ (This package is currently outdated. It is discouraged to use them)
-* `Arch Linux (AUR), Python 3 version <https://aur.archlinux.org/packages/python-powerline-git/>`_ (This package is currently outdated. It is discouraged to use them)
+* `Arch Linux (AUR), Python 2 version <https://aur.archlinux.org/packages/python2-powerline-git/>`_
+* `Arch Linux (AUR), Python 3 version <https://aur.archlinux.org/packages/python-powerline-git/>`_
 * Gentoo Live ebuild in `raiagent <https://github.com/leycec/raiagent>`_ overlay
 * Powerline package is available for Debian starting from Wheezy (via `backports 
   <https://packages.debian.org/wheezy-backports/powerline>`_). Use `search 
