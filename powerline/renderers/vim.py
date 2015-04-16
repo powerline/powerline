@@ -3,19 +3,13 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 
 import sys
 
-import vim
-
-from powerline.bindings.vim import vim_get_func, vim_getoption, environ, current_tabpage, get_vim_encoding
+from powerline.bindings.vim import vim_getoption, environ, current_tabpage, get_vim_encoding
 from powerline.renderer import Renderer
 from powerline.colorscheme import ATTR_BOLD, ATTR_ITALIC, ATTR_UNDERLINE
-from powerline.theme import Theme
 from powerline.lib.unicode import unichr, register_strwidth_error
+from powerline.editors.vim import VimPyEditor
+from powerline.vim import theme_to_reqs_dict
 
-
-vim_mode = vim_get_func('mode', rettype='unicode')
-if int(vim.eval('v:version')) >= 702:
-	_vim_mode = vim_mode
-	vim_mode = lambda: _vim_mode(1)
 
 mode_translations = {
 	unichr(ord('V') - 0x40): '^V',
@@ -32,90 +26,122 @@ class VimRenderer(Renderer):
 	segment_info = Renderer.segment_info.copy()
 	segment_info.update(environ=environ)
 
-	def __init__(self, *args, **kwargs):
-		if not hasattr(vim, 'strwidth'):
+	def __init__(self, vim=None, is_old_vim=False, const_reqs=[], vim_funcs=None, **kwargs):
+		self.vim = vim
+		self.is_old_vim = is_old_vim
+		if hasattr(self.vim, 'strwidth'):
+			if sys.version_info < (3,):
+				def strwidth(string):
+					# Does not work with tabs, but neither is strwidth from default 
+					# renderer
+					return vim.strwidth(string.encode(self.encoding, 'replace'))
+			else:
+				def strwidth(string):
+					return vim.strwidth(string)
+
+			self.strwidth = strwidth
+		else:
 			# Hope nobody want to change this at runtime
-			if vim.eval('&ambiwidth') == 'double':
+			if self.vim.eval('&ambiwidth') == 'double':
 				kwargs = dict(**kwargs)
 				kwargs['ambigious'] = 2
-		super(VimRenderer, self).__init__(*args, **kwargs)
+			else:
+				pass
+		super(VimRenderer, self).__init__(**kwargs)
+		self.theme_reqs_dict = theme_to_reqs_dict(self.theme, const_reqs)
+		self.theme_dict = {
+			'theme': self.theme,
+			'reqs_dict': self.theme_reqs_dict,
+		}
 		self.hl_groups = {}
 		self.prev_highlight = None
 		self.strwidth_error_name = register_strwidth_error(self.strwidth)
 		self.encoding = get_vim_encoding()
+		self.uses_vim_python = True
+		if not is_old_vim:
+			self.theme_selector = VimPyEditor.compile_themes_getter(self.local_themes, vim_funcs, vim)
+		self.vim_funcs = vim_funcs
+		self.themelambda = None
 
 	def shutdown(self):
 		self.theme.shutdown()
-		for match in self.local_themes.values():
-			if 'theme' in match:
-				match['theme'].shutdown()
+		for _, theme in self.local_themes:
+			if 'theme' in theme:
+				theme['theme'].shutdown()
 
 	def add_local_theme(self, matcher, theme):
-		if matcher in self.local_themes:
+		if matcher in (m for m, _ in self.local_themes):
 			raise KeyError('There is already a local theme with given matcher')
-		self.local_themes[matcher] = theme
-
-	def get_matched_theme(self, match):
-		try:
-			return match['theme']
-		except KeyError:
-			match['theme'] = Theme(theme_config=match['config'], main_theme_config=self.theme_config, **self.theme_kwargs)
-			return match['theme']
+		self.local_themes.append((matcher, theme))
 
 	def get_theme(self, matcher_info):
-		if matcher_info is None:
-			return self.get_matched_theme(self.local_themes[None])
-		for matcher in self.local_themes.keys():
-			if matcher and matcher(matcher_info):
-				return self.get_matched_theme(self.local_themes[matcher])
-		else:
-			return self.theme
-
-	if hasattr(vim, 'strwidth'):
-		if sys.version_info < (3,):
-			def strwidth(self, string):
-				# Does not work with tabs, but neither is strwidth from default 
-				# renderer
-				return vim.strwidth(string.encode(self.encoding, 'replace'))
-		else:
-			@staticmethod
-			def strwidth(string):
-				return vim.strwidth(string)
+		return matcher_info['theme']
 
 	def get_segment_info(self, segment_info, mode):
 		return segment_info or self.segment_info
 
-	def render(self, window=None, window_id=None, winnr=None, is_tabline=False):
+	def render(self, input=None, themenr=None, window_id=None, window=None, winnr=None, is_tabline=False):
+		# def render(self, window=None, window_id=None, winnr=None, 
+		# is_tabline=False, local_theme=None):
 		'''Render all segments.'''
 		segment_info = self.segment_info.copy()
+		if not themenr:
+			if self.themelambda is not None:
+				themenr = self.themelambda(self.pl, segment_info)
 
-		if window is vim.current.window:
-			mode = vim_mode()
-			mode = mode_translations.get(mode, mode)
-		else:
-			mode = 'nc'
+		buffer = window.buffer if window else None
+		tabpage = current_tabpage()
 
 		segment_info.update(
 			window=window,
-			mode=mode,
 			window_id=window_id,
 			winnr=winnr,
-			buffer=window.buffer,
-			tabpage=current_tabpage(),
+			buffer=buffer,
+			tabpage=tabpage,
 			encoding=self.encoding,
 		)
-		segment_info['tabnr'] = segment_info['tabpage'].number
-		segment_info['bufnr'] = segment_info['buffer'].number
+		segment_info['tabnr'] = tabpage.number
+		segment_info['bufnr'] = buffer.number if buffer else None
 		if is_tabline:
 			winwidth = int(vim_getoption('columns'))
 		else:
 			winwidth = segment_info['window'].width
 
+		if themenr is None:
+			theme = self.theme_selector(
+				pl=self.pl,
+				matcher_info=segment_info,
+				theme=self.theme_dict,
+				buffer=buffer,
+				window=window,
+				tabpage=tabpage,
+			)
+		elif themenr == 0:
+			theme = self.theme_dict
+		else:
+			theme = self.local_themes[themenr - 1][1]
+
+		if input is None:
+			try:
+				input = theme['input_getter'](buffer, window, tabpage)
+			except KeyError:
+				theme['input_getter'] = VimPyEditor.compile_reqs_dict(
+					theme['reqs_dict'], self.vim_funcs, self.vim)
+				input = theme['input_getter'](buffer, window, tabpage)
+
+		if is_tabline or winnr == input['current_window_number']:
+			mode = input['mode']
+			mode = mode_translations.get(mode, mode)
+		else:
+			mode = 'nc'
+
+		segment_info.update(input=input, mode=mode)
+
 		statusline = super(VimRenderer, self).render(
 			mode=mode,
 			width=winwidth,
 			segment_info=segment_info,
-			matcher_info=(None if is_tabline else segment_info),
+			matcher_info=theme,
 		)
 		statusline = statusline.encode(self.encoding, self.strwidth_error_name)
 		return statusline
@@ -174,7 +200,7 @@ class VimRenderer(Renderer):
 				+ ''.join(hl_group['attrs'])
 			)
 			self.hl_groups[(fg, bg, attrs)] = hl_group
-			vim.command('hi {group} ctermfg={ctermfg} guifg={guifg} guibg={guibg} ctermbg={ctermbg} cterm={attrs} gui={attrs}'.format(
+			self.vim.command('hi {group} ctermfg={ctermfg} guifg={guifg} guibg={guibg} ctermbg={ctermbg} cterm={attrs} gui={attrs}'.format(
 				group=hl_group['name'],
 				ctermfg=hl_group['ctermfg'],
 				guifg='#{0:06x}'.format(hl_group['guifg']) if hl_group['guifg'] is not None else 'NONE',

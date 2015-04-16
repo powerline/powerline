@@ -2,34 +2,51 @@
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 import sys
-import json
 import logging
 
-from itertools import count
-
-try:
-	import vim
-except ImportError:
-	vim = object()
-
-from powerline.bindings.vim import vim_get_func, vim_getvar, get_vim_encoding, python_to_vim
-from powerline import Powerline, FailedUnicode, finish_common_config
+from powerline import Powerline
 from powerline.lib.dict import mergedicts
 from powerline.lib.unicode import u
+from powerline.theme import Theme
+from powerline.editors import (EditorList, EditorMap,
+                               EditorTabList, EditorBufferList, EditorWindowList)
+from powerline.editors.vim import VimFuncsDict, VimGlobalVar, VimVimEditor, VimPyEditor
+from powerline.bindings.vim import python_to_vim
 
 
-def _override_from(config, override_varname, key=None):
-	try:
-		overrides = vim_getvar(override_varname)
-	except KeyError:
-		return config
-	if key is not None:
-		try:
-			overrides = overrides[key]
-		except KeyError:
-			return config
-	mergedicts(config, overrides)
-	return config
+def segments_to_reqs_iter(seglist):
+	for segment in seglist:
+		for key in ['ext_editor_input', 'inc_ext_editor_input', 'exc_ext_editor_input']:
+			try:
+				yield segment[key]
+			except KeyError:
+				pass
+		if segment['type'] == 'segments_list' and 'ext_editor_list' in segment:
+			lname = segment['ext_editor_list']
+			yield [lname]
+			lobj = {
+				'list_tabs': EditorTabList,
+				'list_buffers': EditorBufferList,
+				'list_windows': EditorWindowList,
+			}[lname]()
+			yield [
+				(
+					lname + '_inputs',
+					EditorMap(FIXME, lobj, FIXME),
+				)
+			]
+
+
+def theme_to_reqs_iter(theme, const_reqs):
+	for line in theme.segments:
+		for seglist in line.values():
+			for reqs in segments_to_reqs_iter(seglist):
+				yield reqs
+	yield const_reqs
+
+
+def theme_to_reqs_dict(theme, const_reqs):
+	return VimVimEditor.reqss_to_reqs_dict(theme_to_reqs_iter(theme, const_reqs))
 
 
 class VimVarHandler(logging.Handler, object):
@@ -38,32 +55,57 @@ class VimVarHandler(logging.Handler, object):
 	:param str varname:
 		Variable where
 	'''
-	def __init__(self, varname):
+	def __init__(self, vim, varname):
 		super(VimVarHandler, self).__init__()
 		utf_varname = u(varname)
 		self.vim_varname = utf_varname.encode('ascii')
 		vim.command('unlet! g:' + utf_varname)
 		vim.command('let g:' + utf_varname + ' = []')
+		self.vim = vim
 
 	def emit(self, record):
 		message = u(record.message)
 		if record.exc_text:
 			message += '\n' + u(record.exc_text)
-		vim.eval(b'add(g:' + self.vim_varname + b', ' + python_to_vim(message) + b')')
+		self.vim.eval(b'add(g:' + self.vim_varname + b', ' + python_to_vim(message) + b')')
 
 
 class VimPowerline(Powerline):
-	def init(self, pyeval='PowerlinePyeval', **kwargs):
+	prereqs = [
+		'editor_overrides', 'editor_encoding',
+		('use_var_handler', (VimGlobalVar('powerline_use_var_handler'),), 'bool')
+	]
+	'''Data which is required first'''
+
+	def init(self, pyeval='pyeval', **kwargs):
+		import vim
+		self.vim = vim
+		self.is_old_vim = bool(int(self.vim.eval('v:version < 704')))
+		self.vim_funcs = VimFuncsDict(vim)
+
+		if self.is_old_vim:
+			prereqs_vim_expr, prereqs_finfunc = (
+				VimVimEditor.compile_reqs_dict(VimVimEditor.reqss_to_reqs_dict([self.prereqs])))
+			self.prereqs_input = prereqs_finfunc(self.vim.eval(prereqs_vim_expr))
+		else:
+			reqs_dict = VimVimEditor.reqss_to_reqs_dict([self.prereqs])
+			self.prereqs_input = VimPyEditor.compile_reqs_dict(reqs_dict, self.vim_funcs, self.vim)(
+				self.vim.current.buffer, self.vim.current.window, self.vim.current.tabpage)
+
+		self.encoding = self.prereqs_input['editor_encoding'] or 'ascii'
+
 		super(VimPowerline, self).init('vim', **kwargs)
 		self.last_window_id = 1
 		self.pyeval = pyeval
 		self.construct_window_statusline = self.create_window_statusline_constructor()
-		if all((hasattr(vim.current.window, attr) for attr in ('options', 'vars', 'number'))):
-			self.win_idx = self.new_win_idx
-		else:
-			self.win_idx = self.old_win_idx
-			self._vim_getwinvar = vim_get_func('getwinvar', 'bytes')
-			self._vim_setwinvar = vim_get_func('setwinvar')
+		self.renderer_options['vim'] = vim
+		self.const_reqs = ['mode', 'current_window_number']
+		'''Data which is always required from Vim'''
+		if self.is_old_vim:
+			self.const_reqs.append('stl_winlist')
+		self.const_tabline_reqs = ['mode']
+		self.renderer_options['const_reqs'] = self.const_reqs
+		self.renderer_options['vim_funcs'] = self.vim_funcs
 
 	if sys.version_info < (3,):
 		def create_window_statusline_constructor(self):
@@ -122,7 +164,7 @@ class VimPowerline(Powerline):
 				mergedicts(theme_config, lvl_config)
 		mergedicts(theme_config, config)
 		try:
-			self.renderer.add_local_theme(matcher, {'config': theme_config})
+			self.renderer.add_local_theme(matcher, self.process_local_theme_config(theme_config))
 		except KeyError:
 			return False
 		else:
@@ -131,35 +173,60 @@ class VimPowerline(Powerline):
 			# this function arguments will be saved here for calling from 
 			# .do_setup().
 			self.setup_kwargs.setdefault('_local_themes', []).append((key, config))
+			self.create_old_vim_funcs()
 			return True
 
-	get_encoding = staticmethod(get_vim_encoding)
+	def get_encoding(self):
+		return self.encoding
+
+	def _override_from(self, config, override_name, key=None):
+		overrides = self.prereqs_input['editor_overrides'][override_name]
+		if not overrides:
+			return config
+		if key is not None:
+			try:
+				overrides = overrides[key]
+			except KeyError:
+				return config
+		mergedicts(config, overrides)
+		return config
 
 	def load_main_config(self):
-		main_config = _override_from(super(VimPowerline, self).load_main_config(), 'powerline_config_overrides')
-		try:
-			use_var_handler = bool(int(vim_getvar('powerline_use_var_handler')))
-		except KeyError:
-			use_var_handler = False
-		if use_var_handler:
+		main_config = self._override_from(super(VimPowerline, self).load_main_config(), 'config_overrides')
+		if self.prereqs_input['use_var_handler']:
 			main_config.setdefault('common', {})
 			main_config['common'] = finish_common_config(self.get_encoding(), main_config['common'])
 			main_config['common']['log_file'].append(['powerline.vim.VimVarHandler', [['powerline_log_messages']]])
 		return main_config
 
 	def load_theme_config(self, name):
-		return _override_from(
+		return self._override_from(
 			super(VimPowerline, self).load_theme_config(name),
-			'powerline_theme_overrides',
+			'theme_overrides',
 			name
 		)
 
+	def process_local_theme_config(self, config, is_tabline=False):
+		theme = Theme(
+			theme_config=config,
+			main_theme_config=self.renderer_options['theme_config'],
+			**self.renderer_options['theme_kwargs']
+		)
+		return {
+			'config': config,
+			'theme': theme,
+			'reqs_dict': theme_to_reqs_dict(
+				theme,
+				self.const_tabline_reqs if is_tabline else self.const_reqs
+			),
+		}
+
 	def get_local_themes(self, local_themes):
 		if not local_themes:
-			return {}
+			return []
 
-		return dict((
-			(matcher, {'config': self.load_theme_config(val)})
+		return list((
+			(matcher, self.process_local_theme_config(self.load_theme_config(val), matcher is None))
 			for matcher, key, val in (
 				(
 					(None if k == '__tabline__' else self.get_matcher(k)),
@@ -181,41 +248,99 @@ class VimPowerline(Powerline):
 		return self.get_module_attr(match_module, match_function, prefix='matcher_generator')
 
 	def get_config_paths(self):
-		try:
-			return vim_getvar('powerline_config_paths')
-		except KeyError:
-			return super(VimPowerline, self).get_config_paths()
+		return self.prereqs_input['editor_overrides']['config_paths'] or super(VimPowerline, self).get_config_paths()
+
+	def create_old_vim_funcs(self):
+		if not self.is_old_vim:
+			return
+		inputdefs = [VimVimEditor.compile_reqs_dict(self.renderer.theme_reqs_dict)] + [
+			VimVimEditor.compile_reqs_dict(theme['reqs_dict'], tabscope=(matcher is None))
+			for matcher, theme in self.renderer.local_themes
+		]
+		self.finishers = [func for expr, func in inputdefs]
+		themeexpr, themelambda = VimVimEditor.compile_themes_getter(self.renderer.local_themes)
+		self.renderer.themelambda = themelambda
+		self.vim.command(('''
+			if !exists("g:_powerline_next_window_id")
+				let g:_powerline_next_window_id = 1
+			endif
+			function! _PowerlineWindowNr(winid)
+				let ret = 0
+				for window in range(1, winnr('$'))
+					let winid = getwinvar(window, '_powerline_window_id')
+					if empty(winid)
+						call setwinvar(window, '_powerline_window_id', g:_powerline_next_window_id)
+						call setwinvar(window, 'statusline', '%!_PowerlineStatusline('.g:_powerline_next_window_id.')')
+						let g:_powerline_next_window_id += 1
+					elif getwinvar(window, '&statusline') isnot# '%!_PowerlineStatusline('.g:_powerline_next_window_id.')'
+						call setwinvar(window, '&statusline', '%!_PowerlineStatusline('.g:_powerline_next_window_id.')')
+					endif
+					if winid == a:winid || (a:winid == 0 && window == winnr())
+						let ret = window
+					endif
+				endfor
+				return ret
+			endfunction
+			function! _PowerlineNewStatusline()
+				return _PowerlineStatusline(0)
+			endfunction
+			let g:_powerline_inputs = {inputs}
+			function! _PowerlineStatusline(winid)
+				let window = _PowerlineWindowNr(a:winid)
+				let buffer = winbufnr(window)
+				let tabpage = tabpagenr()
+				let themenr = {themeexpr}
+				let input = eval(g:_powerline_inputs[themenr])
+				{pycmd} powerline.statusline(input=powerline.finishers[int(vim.eval("themenr"))](powerline.vim.eval("input")), winnr=int(vim.eval("window")), themenr=int(vim.eval("themenr")))
+			endfunction
+			function! _PowerlineTabline()
+				let window = winnr()
+				let buffer = winbufnr(window)
+				let tabpage = tabpagenr()
+				let input = eval(g:_powerline_inputs[{tablineinputnr}])
+				{pycmd} powerline.tabline(powerline.finishers[{tablineinputnr}](input=powerline.vim.eval("input")))
+			endfunction
+		''').format(
+			pycmd=self.pycmd,
+			themeexpr=themeexpr,
+			inputs=VimVimEditor.toed(
+				EditorList(*[expr for expr, func in inputdefs])
+			),
+			tablineinputnr=self.tablineinputnr,
+		))
 
 	def do_setup(self, pyeval=None, pycmd=None, can_replace_pyeval=True, _local_themes=()):
 		import __main__
 		if not pyeval:
 			pyeval = 'pyeval' if sys.version_info < (3,) else 'py3eval'
-			can_replace_pyeval = True
 		if not pycmd:
 			pycmd = get_default_pycmd()
 
+		self.renderer_options['is_old_vim'] = self.is_old_vim
+		self.pycmd = pycmd
 		set_pycmd(pycmd)
 
-		# pyeval() and vim.bindeval were both introduced in one patch
-		if (not hasattr(vim, 'bindeval') and can_replace_pyeval) or pyeval == 'PowerlinePyeval':
-			vim.command(('''
-				function! PowerlinePyeval(e)
-					{pycmd} powerline.do_pyeval()
-				endfunction
-			''').format(pycmd=pycmd))
-			pyeval = 'PowerlinePyeval'
+		self.update_renderer()
+
+		try:
+			self.tablineinputnr = next((
+				i
+				for i, v in enumerate(self.renderer.local_themes)
+				if v[0] is None
+			))
+		except StopIteration:
+			self.tablineinputnr = None
 
 		self.pyeval = pyeval
 		self.construct_window_statusline = self.create_window_statusline_constructor()
 
-		self.update_renderer()
 		__main__.powerline = self
 
 		try:
 			if (
-				bool(int(vim.eval('has(\'gui_running\') && argc() == 0')))
-				and not vim.current.buffer.name
-				and len(vim.windows) == 1
+				bool(int(self.vim.eval('has(\'gui_running\') && argc() == 0')))
+				and not self.vim.current.buffer.name
+				and len(self.vim.windows) == 1
 			):
 				# Hack to show startup screen. Problems in GUI:
 				# - Defining local value of &statusline option while computing
@@ -229,7 +354,10 @@ class VimPowerline(Powerline):
 				# Vim did not open any files and there is only one window. 
 				# Without GUI everything works, in other cases startup screen is 
 				# not shown.
-				self.new_window()
+				if self.is_old_vim:
+					self.new_window()
+				else:
+					self.vim.eval('_PowerlineNewStatusline()')
 		except UnicodeDecodeError:
 			# vim.current.buffer.name may raise UnicodeDecodeError when using 
 			# Python-3*. Fortunately, this means that current buffer is not 
@@ -240,10 +368,10 @@ class VimPowerline(Powerline):
 		# context newline is considered part of the command in just the same cases 
 		# when bar is considered part of the command (unless defining function 
 		# inside :execute)). vim.command is :execute equivalent regarding this case.
-		vim.command('augroup Powerline')
-		vim.command('	autocmd! ColorScheme * :{pycmd} powerline.reset_highlight()'.format(pycmd=pycmd))
-		vim.command('	autocmd! VimLeavePre * :{pycmd} powerline.shutdown()'.format(pycmd=pycmd))
-		vim.command('augroup END')
+		self.vim.command('augroup Powerline')
+		self.vim.command('	autocmd! ColorScheme * :{pycmd} powerline.reset_highlight()'.format(pycmd=self.pycmd))
+		self.vim.command('	autocmd! VimLeavePre * :{pycmd} powerline.shutdown()'.format(pycmd=self.pycmd))
+		self.vim.command('augroup END')
 
 		# Hack for local themes support after reloading.
 		for args in _local_themes:
@@ -260,62 +388,59 @@ class VimPowerline(Powerline):
 			# do anything.
 			pass
 
-	def new_win_idx(self, window_id):
-		r = None
-		for window in vim.windows:
-			try:
-				curwindow_id = window.vars['powerline_window_id']
-				if r is not None and curwindow_id == window_id:
-					raise KeyError
-			except KeyError:
+	def set_stls(self, window_id):
+		assert window_id is not None
+		retwindow = None
+		retwinnr = None
+		for i, window in enumerate(self.vim.windows):
+			curwindow_id = window.vars.get('_powerline_window_id', None)
+			if not curwindow_id:
 				curwindow_id = self.last_window_id
 				self.last_window_id += 1
-				window.vars['powerline_window_id'] = curwindow_id
-			statusline = self.construct_window_statusline(curwindow_id)
-			if window.options['statusline'] != statusline:
-				window.options['statusline'] = statusline
-			if curwindow_id == window_id if window_id else window is vim.current.window:
-				r = (window, curwindow_id, window.number)
-		return r
-
-	def old_win_idx(self, window_id):
-		r = None
-		for winnr, window in zip(count(1), vim.windows):
-			curwindow_id = self._vim_getwinvar(winnr, 'powerline_window_id')
-			if curwindow_id and not (r is not None and curwindow_id == window_id):
-				curwindow_id = int(curwindow_id)
+				window.vars['_powerline_window_id'] = curwindow_id
+				window.options['statusline'] = self.construct_window_statusline(curwindow_id)
 			else:
+				needed_stl = self.construct_window_statusline(curwindow_id)
+				if needed_stl != window.options['statusline']:
+					window.options['statusline'] = needed_stl
+			if window_id == curwindow_id:
+				retwindow = window
+				retwinnr = i + 1
+		return retwindow, retwinnr
+
+	def find_window(self, window_id):
+		assert window_id is not None
+		for i, curwindow in enumerate(self.vim.windows):
+			if curwindow.vars.get('_powerline_window_id') == window_id:
+				return curwindow, i + 1
+		return None, None
+
+	def statusline(self, window_id=None, input=None, themenr=None):
+		if self.is_old_vim:
+			window, winnr = self.find_window(window_id)
+		else:
+			window, winnr = self.set_stls(window_id)
+		return self.render(input=input, themenr=themenr, window_id=window_id, window=window, winnr=winnr)
+
+	def tabline(self, input=None):
+		return self.render(input=input, themenr=self.tablineinputnr + 1, is_tabline=True)
+
+	def new_window(self, input=None):
+		window_id = None
+		winnr = None
+		window = None
+		for i, window in enumerate(self.vim.windows):
+			curwindow_id = window.vars.get('_powerline_window_id', None)
+			if not curwindow_id:
 				curwindow_id = self.last_window_id
 				self.last_window_id += 1
-				self._vim_setwinvar(winnr, 'powerline_window_id', curwindow_id)
-			statusline = self.construct_window_statusline(curwindow_id)
-			if self._vim_getwinvar(winnr, '&statusline') != statusline:
-				self._vim_setwinvar(winnr, '&statusline', statusline)
-			if curwindow_id == window_id if window_id else window is vim.current.window:
-				r = (window, curwindow_id, winnr)
-		return r
-
-	def statusline(self, window_id):
-		window, window_id, winnr = self.win_idx(window_id) or (None, None, None)
-		if not window:
-			return FailedUnicode('No window {0}'.format(window_id))
-		return self.render(window, window_id, winnr)
-
-	def tabline(self):
-		return self.render(*self.win_idx(None), is_tabline=True)
-
-	def new_window(self):
-		return self.render(*self.win_idx(None))
-
-	@staticmethod
-	def do_pyeval():
-		'''Evaluate python string passed to PowerlinePyeval
-
-		Is here to reduce the number of requirements to __main__ globals to just 
-		one powerline object (previously it required as well vim and json).
-		'''
-		import __main__
-		vim.command('return ' + json.dumps(eval(vim.eval('a:e'), __main__.__dict__)))
+				window.vars['_powerline_window_id'] = curwindow_id
+				window.options['statusline'] = self.construct_window_statusline(curwindow_id)
+			if window is self.vim.current.window:
+				window_id = curwindow_id
+				window = self.vim.current.window
+				winnr = i + 1
+		return self.render(input, window_id=window_id, window=window, winnr=winnr)
 
 	def setup_components(self, components):
 		if components is None:
@@ -323,11 +448,21 @@ class VimPowerline(Powerline):
 		if 'statusline' in components:
 			# Is immediately changed after new_window function is run. Good for 
 			# global value.
-			vim.command('set statusline=%!{pyeval}(\'powerline.new_window()\')'.format(
-				pyeval=self.pyeval))
+			if self.is_old_vim:
+				self.vim.command('set statusline=%!_PowerlineNewStatusline()')
+			else:
+				self.vim.command('set statusline=%!{pyeval}(\'powerline.new_window()\')'.format(
+					pyeval=self.pyeval))
 		if 'tabline' in components:
-			vim.command('set tabline=%!{pyeval}(\'powerline.tabline()\')'.format(
-				pyeval=self.pyeval))
+			if self.is_old_vim:
+				self.vim.command('set tabline=%!_PowerlineTabline()')
+			else:
+				self.vim.command('set tabline=%!{pyeval}(\'powerline.tabline()\')'.format(
+					pyeval=self.pyeval))
+
+
+def get_default_pycmd():
+	return 'python' if sys.version_info < (3,) else 'python3'
 
 
 pycmd = None
@@ -336,10 +471,6 @@ pycmd = None
 def set_pycmd(new_pycmd):
 	global pycmd
 	pycmd = new_pycmd
-
-
-def get_default_pycmd():
-	return 'python' if sys.version_info < (3,) else 'python3'
 
 
 def setup(*args, **kwargs):

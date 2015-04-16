@@ -16,7 +16,7 @@ from powerline.lib.unicode import unicode
 from powerline.lib.path import join
 from powerline.lint.markedjson import load
 from powerline.lint.markedjson.error import echoerr, EchoErr, MarkedError
-from powerline.lint.checks import (check_matcher_func, check_ext, check_config, check_top_theme,
+from powerline.lint.checks import (check_editor_matcher_func, check_ext, check_config, check_top_theme,
                                    check_color, check_translated_group_name, check_group,
                                    check_segment_module, check_exinclude_function, type_keys,
                                    check_segment_function, check_args, get_one_segment_function,
@@ -108,7 +108,7 @@ main_spec = (Spec(
 			local_themes=Spec(
 				__tabline__=ext_theme_spec(),
 			).unknown_spec(
-				Spec().re(function_name_re).func(partial(check_matcher_func, 'vim')),
+				Spec().re(function_name_re).func(partial(check_editor_matcher_func, 'vim')),
 				ext_theme_spec()
 			),
 		).optional(),

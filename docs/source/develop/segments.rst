@@ -381,6 +381,11 @@ Vim
 
 Vim ``segment_info`` argument is a dictionary with the following keys:
 
+.. warning::
+   All keys, except ``input`` one are deprecated. Code that supports editors is 
+   now migrating to a new API which allows using editors without embedded Python 
+   interpreter.
+
 ``window``
     ``vim.Window`` object. ``vim.current.window`` or ``vim.windows[number - 1]`` 
     may be used to obtain such object. May be a false object, in which case any 
@@ -422,6 +427,13 @@ Vim ``segment_info`` argument is a dictionary with the following keys:
 ``encoding``
     Value of ``&encoding`` from the time when powerline was initialized. It 
     should be used to convert return values.
+
+.. _dev-segment_info-vim-input:
+
+``input``
+    Dictionary where keys are identifiers of some pieces of data obtained from 
+    the editor and values are these pieces. More details in :ref:`Editors 
+    support <dev-editors>` document.
 
 .. note::
    Segment generally should not assume that it is run for the current window, 

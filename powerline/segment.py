@@ -284,37 +284,40 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, ge
 		except KeyError:
 			modes = None
 
+		extensions = getattr(function, 'powerline_extensions', None)
+
 		if modes:
 			if function:
-				return lambda pl, segment_info, mode: (
+				return extensions, lambda pl, segment_info, mode: (
 					mode in modes
 					or function(pl=pl, segment_info=segment_info, mode=mode)
 				)
 			else:
-				return lambda pl, segment_info, mode: mode in modes
+				return extensions, lambda pl, segment_info, mode: mode in modes
 		else:
 			if function:
-				return lambda pl, segment_info, mode: (
+				return extensions, lambda pl, segment_info, mode: (
 					function(pl=pl, segment_info=segment_info, mode=mode)
 				)
 			else:
-				return None
+				return None, None
 
 	def gen_display_condition(segment):
-		include_function = get_segment_selector(segment, 'include')
-		exclude_function = get_segment_selector(segment, 'exclude')
+		incext, include_function = get_segment_selector(segment, 'include')
+		excext, exclude_function = get_segment_selector(segment, 'exclude')
 		if include_function:
 			if exclude_function:
-				return lambda *args: (
+				ret = lambda *args: (
 					include_function(*args)
 					and not exclude_function(*args))
 			else:
-				return include_function
+				ret = include_function
 		else:
 			if exclude_function:
-				return lambda *args: not exclude_function(*args)
+				ret = lambda *args: not exclude_function(*args)
 			else:
-				return always_true
+				ret = always_true
+		return incext, excext, ret
 
 	def get(segment, side):
 		segment_type = segment.get('type', 'function')
@@ -352,7 +355,7 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, ge
 				get_key(True, segment, module, function_name, name, 'args', {}).items()
 			))
 
-		display_condition = gen_display_condition(segment)
+		incext, excext, display_condition = gen_display_condition(segment)
 
 		if segment_type == 'segment_list':
 			# Handle startup and shutdown of _contents_func?
@@ -378,6 +381,7 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, ge
 						lister=_contents_func,
 					)
 				),
+				'segments': subsegments,
 				'contents': None,
 				'literal_contents': None,
 				'priority': None,
@@ -398,11 +402,15 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, ge
 				'_contents_len': None,
 			}
 
+		extensions = None
+
 		if segment_type == 'function':
 			startup_func = get_attr_func(_contents_func, 'startup', args)
 			shutdown_func = getattr(_contents_func, 'shutdown', None)
 			expand_func = get_attr_func(_contents_func, 'expand', args, True)
 			truncate_func = get_attr_func(_contents_func, 'truncate', args, True)
+
+			extensions = getattr(_contents_func, 'powerline_extensions', None)
 
 			if hasattr(_contents_func, 'powerline_requires_filesystem_watcher'):
 				create_watcher = lambda: create_file_watcher(pl, common_config['watcher'])
@@ -419,7 +427,7 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, ge
 			expand_func = None
 			truncate_func = None
 
-		return {
+		ret = {
 			'name': name or function_name,
 			'type': segment_type,
 			'highlight_groups': highlight_groups,
@@ -446,5 +454,15 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, ge
 			'_len': None,
 			'_contents_len': None,
 		}
+		if extensions:
+			for ext_key, ext_val in extensions.items():
+				ret['ext_' + ext_key] = ext_val
+		if incext:
+			for ext_key, ext_val in incext.items():
+				ret['inc_ext_' + ext_key] = ext_val
+		if excext:
+			for ext_key, ext_val in excext.items():
+				ret['exc_ext_' + ext_key] = ext_val
+		return ret
 
 	return get

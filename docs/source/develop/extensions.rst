@@ -30,9 +30,12 @@ segments in some set of applications. Specifically this means
    referenced in ``renderer`` module attribute thus allowing only one renderer 
    per one module.
 #. Creating an extension bindings. These are to be placed in 
-   :file:`powerline/bindings/{ext}` and may contain virtually anything which may 
-   be required for powerline to work inside given applications, assuming it does 
-   not fit in other places.
+   :file:`powerline/bindings/{ext}.py` and may contain virtually anything which 
+   may be required for powerline to work inside given applications, assuming it 
+   does not fit in other places.
+#. Creating editor-specific stuff, given that extension adds editor support. It 
+   is to be placed into :file:`powerline/editors/{ext}.py` and must contain, at 
+   least, a :py:class:`powerline.editors.Editor` subclass.
 
 Powerline class
 ===============

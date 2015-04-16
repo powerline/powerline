@@ -1,19 +1,10 @@
 # vim:fileencoding=utf-8:noet
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
-import os
-
-from powerline.bindings.vim import vim_getbufoption, buffer_name
-
-
-def help(matcher_info):
-	return vim_getbufoption(matcher_info, 'buftype') == 'help'
+from powerline.editors import EditorBufferNameBase
+from powerline.editors.vim import VimBufferOption
 
 
-def cmdwin(matcher_info):
-	name = buffer_name(matcher_info)
-	return name and os.path.basename(name) == b'[Command Line]'
-
-
-def quickfix(matcher_info):
-	return vim_getbufoption(matcher_info, 'buftype') == 'quickfix'
+help = VimBufferOption('buftype').equals('help')
+quickfix = VimBufferOption('buftype').equals('quickfix')
+cmdwin = EditorBufferNameBase().equals('[Command Line]')

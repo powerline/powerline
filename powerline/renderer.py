@@ -162,7 +162,6 @@ class Renderer(object):
 	             **options):
 		self.__dict__.update(options)
 		self.theme_config = theme_config
-		theme_kwargs['pl'] = pl
 		self.pl = pl
 		if theme_config.get('use_non_breaking_spaces', True):
 			self.character_translations = self.character_translations.copy()

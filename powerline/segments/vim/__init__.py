@@ -13,10 +13,7 @@ try:
 except ImportError:
 	vim = object()
 
-from powerline.bindings.vim import (vim_get_func, getbufvar, vim_getbufoption,
-                                    buffer_name, vim_getwinvar,
-                                    register_buffer_cache, current_tabpage,
-                                    list_tabpage_buffers_segment_info)
+from powerline.bindings.vim import register_buffer_cache
 from powerline.theme import requires_segment_info, requires_filesystem_watcher
 from powerline.lib import add_divider_highlight_group
 from powerline.lib.vcs import guess
@@ -25,20 +22,7 @@ from powerline.lib import wraps_saveargs as wraps
 from powerline.segments.common.vcs import BranchSegment, StashSegment
 from powerline.segments import with_docstring
 from powerline.lib.unicode import string, unicode
-
-try:
-	from __builtin__ import xrange as range
-except ImportError:
-	pass
-
-
-vim_funcs = {
-	'virtcol': vim_get_func('virtcol', rettype='int'),
-	'getpos': vim_get_func('getpos'),
-	'fnamemodify': vim_get_func('fnamemodify', rettype='bytes'),
-	'line2byte': vim_get_func('line2byte', rettype='int'),
-	'line': vim_get_func('line', rettype='int'),
-}
+from powerline.editors import with_input, requires_buffer_access
 
 vim_modes = {
 	'n': 'NORMAL',
@@ -115,7 +99,7 @@ def mode(pl, segment_info, override=None):
 
 
 @window_cached
-@requires_segment_info
+@with_input('visual_range')
 def visual_range(pl, segment_info, CTRL_V_text='{rows} x {vcols}', v_text_oneline='C:{vcols}', v_text_multiline='L:{rows}', V_text='L:{rows}'):
 	'''Return the current visual selection range.
 
@@ -146,10 +130,8 @@ def visual_range(pl, segment_info, CTRL_V_text='{rows} x {vcols}', v_text_onelin
 	vcols      Number of virtual columns in the selection
 	=========  =============================================================
 	'''
-	sline, scol, soff = [int(v) for v in vim_funcs['getpos']('v')[1:]]
-	eline, ecol, eoff = [int(v) for v in vim_funcs['getpos']('.')[1:]]
-	svcol = vim_funcs['virtcol']([sline, scol, soff])
-	evcol = vim_funcs['virtcol']([eline, ecol, eoff])
+	sbuf, sline, scol, soff, svcol = segment_info['input']['visual_range'][0]
+	ebuf, eline, ecol, eoff, evcol = segment_info['input']['visual_range'][1]
 	rows = abs(eline - sline) + 1
 	cols = abs(ecol - scol) + 1
 	vcols = abs(evcol - svcol) + 1
@@ -167,17 +149,17 @@ def visual_range(pl, segment_info, CTRL_V_text='{rows} x {vcols}', v_text_onelin
 	)
 
 
-@requires_segment_info
+@with_input('modified_indicator')
 def modified_indicator(pl, segment_info, text='+'):
 	'''Return a file modified indicator.
 
 	:param string text:
 		text to display if the current buffer is modified
 	'''
-	return text if int(vim_getbufoption(segment_info, 'modified')) else None
+	return text if segment_info['input']['modified_indicator'] else None
 
 
-@requires_segment_info
+@with_input('tab_modified_indicator')
 def tab_modified_indicator(pl, segment_info, text='+'):
 	'''Return a file modified indicator for tabpages.
 
@@ -186,39 +168,38 @@ def tab_modified_indicator(pl, segment_info, text='+'):
 
 	Highlight groups used: ``tab_modified_indicator`` or ``modified_indicator``.
 	'''
-	for buf_segment_info in list_tabpage_buffers_segment_info(segment_info):
-		if int(vim_getbufoption(buf_segment_info, 'modified')):
-			return [{
-				'contents': text,
-				'highlight_groups': ['tab_modified_indicator', 'modified_indicator'],
-			}]
+	if segment_info['input']['tab_modified_indicator']:
+		return [{
+			'contents': text,
+			'highlight_groups': ['tab_modified_indicator', 'modified_indicator'],
+		}]
 	return None
 
 
-@requires_segment_info
+@with_input('paste_indicator')
 def paste_indicator(pl, segment_info, text='PASTE'):
 	'''Return a paste mode indicator.
 
 	:param string text:
 		text to display if paste mode is enabled
 	'''
-	return text if int(vim.eval('&paste')) else None
+	return text if segment_info['input']['paste_indicator'] else None
 
 
-@requires_segment_info
+@with_input('readonly_indicator')
 def readonly_indicator(pl, segment_info, text='RO'):
 	'''Return a read-only indicator.
 
 	:param string text:
 		text to display if the current buffer is read-only
 	'''
-	return text if int(vim_getbufoption(segment_info, 'readonly')) else None
+	return text if segment_info['input']['readonly_indicator'] else None
 
 
 SCHEME_RE = re.compile(b'^\\w[\\w\\d+\\-.]*(?=:)')
 
 
-@requires_segment_info
+@with_input('buffer_name')
 def file_scheme(pl, segment_info):
 	'''Return the protocol part of the file.
 
@@ -236,7 +217,7 @@ def file_scheme(pl, segment_info):
 		name will look like :file:`zipfile:/path/to/archive.zip::file.txt`. 
 		``file_scheme`` segment will catch ``zipfile`` part here.
 	'''
-	name = buffer_name(segment_info)
+	name = segment_info['input']['buffer_name']
 	if not name:
 		return None
 	match = SCHEME_RE.match(name)
@@ -244,7 +225,7 @@ def file_scheme(pl, segment_info):
 		return match.group(0).decode('ascii')
 
 
-@requires_segment_info
+@with_input('buffer_name')
 def file_directory(pl, segment_info, remove_scheme=True, shorten_user=True, shorten_cwd=True, shorten_home=False):
 	'''Return file directory (head component of the file path).
 
@@ -265,28 +246,32 @@ def file_directory(pl, segment_info, remove_scheme=True, shorten_user=True, shor
 		Shorten all directories in :file:`/home/` to :file:`~user/` instead of 
 		:file:`/home/user/`. Does not work for files with scheme present.
 	'''
-	name = buffer_name(segment_info)
+	name = segment_info['input']['buffer_name']
 	if not name:
 		return None
 	match = SCHEME_RE.match(name)
 	if match:
 		if remove_scheme:
 			name = name[len(match.group(0)) + 1:]  # Remove scheme and colon
-		file_directory = vim_funcs['fnamemodify'](name, ':h')
+		file_directory = os.path.dirname(name)
+		file_directory = file_directory.decode(segment_info['encoding'], 'powerline_vim_strtrans_error')
 	else:
-		file_directory = vim_funcs['fnamemodify'](
-			name,
-			(':~' if shorten_user else '') + (':.' if shorten_cwd else '') + ':h'
-		)
+		file_directory = os.path.dirname(name)
 		if not file_directory:
 			return None
-		if shorten_home and file_directory.startswith('/home/'):
-			file_directory = b'~' + file_directory[6:]
-	file_directory = file_directory.decode(segment_info['encoding'], 'powerline_vim_strtrans_error')
+		file_directory = file_directory.decode(segment_info['encoding'], 'powerline_vim_strtrans_error')
+		variants = [file_directory]
+		if shorten_cwd:
+			variants.append(os.path.relpath(file_directory, segment_info['getcwd']()))
+		if shorten_user and segment_info['home'] and file_directory.startswith(segment_info['home']):
+			variants.append('~' + file_directory[len(segment_info['home']):])
+		elif shorten_home and file_directory.startswith('/home/'):
+			variants.append('~' + file_directory[6:])
+		file_directory = min(variants, key=len)
 	return file_directory + os.sep
 
 
-@requires_segment_info
+@with_input('buffer_name')
 def file_name(pl, segment_info, display_no_file=False, no_file_text='[No file]'):
 	'''Return file name (tail component of the file path).
 
@@ -297,7 +282,7 @@ def file_name(pl, segment_info, display_no_file=False, no_file_text='[No file]')
 
 	Highlight groups used: ``file_name_no_file`` or ``file_name``, ``file_name``.
 	'''
-	name = buffer_name(segment_info)
+	name = segment_info['input']['buffer_name']
 	if not name:
 		if display_no_file:
 			return [{
@@ -310,7 +295,8 @@ def file_name(pl, segment_info, display_no_file=False, no_file_text='[No file]')
 
 
 @window_cached
-def file_size(pl, suffix='B', si_prefix=False):
+@with_input('file_size')
+def file_size(pl, segment_info, suffix='B', si_prefix=False):
 	'''Return file size in &encoding.
 
 	:param str suffix:
@@ -321,13 +307,13 @@ def file_size(pl, suffix='B', si_prefix=False):
 	'''
 	# Note: returns file size in &encoding, not in &fileencoding. But returned 
 	# size is updated immediately; and it is valid for any buffer
-	file_size = vim_funcs['line2byte'](len(vim.current.buffer) + 1) - 1
+	file_size = segment_info['input']['file_size']
 	if file_size < 0:
 		file_size = 0
 	return humanize_bytes(file_size, suffix, si_prefix)
 
 
-@requires_segment_info
+@with_input('file_format')
 @add_divider_highlight_group('background:divider')
 def file_format(pl, segment_info):
 	'''Return file format (i.e. line ending type).
@@ -336,10 +322,10 @@ def file_format(pl, segment_info):
 
 	Divider highlight group used: ``background:divider``.
 	'''
-	return vim_getbufoption(segment_info, 'fileformat') or None
+	return segment_info['input']['file_format'] or None
 
 
-@requires_segment_info
+@with_input('file_encoding')
 @add_divider_highlight_group('background:divider')
 def file_encoding(pl, segment_info):
 	'''Return file encoding/character set.
@@ -348,10 +334,10 @@ def file_encoding(pl, segment_info):
 
 	Divider highlight group used: ``background:divider``.
 	'''
-	return vim_getbufoption(segment_info, 'fileencoding') or None
+	return segment_info['input']['file_encoding'] or None
 
 
-@requires_segment_info
+@with_input('file_type')
 @add_divider_highlight_group('background:divider')
 def file_type(pl, segment_info):
 	'''Return file type.
@@ -360,10 +346,10 @@ def file_type(pl, segment_info):
 
 	Divider highlight group used: ``background:divider``.
 	'''
-	return vim_getbufoption(segment_info, 'filetype') or None
+	return segment_info['input']['file_type'] or None
 
 
-@requires_segment_info
+@with_input('window_title')
 def window_title(pl, segment_info):
 	'''Return the window title.
 
@@ -371,13 +357,10 @@ def window_title(pl, segment_info):
 	which is used by Syntastic and Vim itself.
 
 	It is used in the quickfix theme.'''
-	try:
-		return vim_getwinvar(segment_info, 'quickfix_title')
-	except KeyError:
-		return None
+	return segment_info['input']['window_title'] or None
 
 
-@requires_segment_info
+@with_input('window_position', 'buffer_len')
 def line_percent(pl, segment_info, gradient=False):
 	'''Return the cursor position in the file as a percentage.
 
@@ -386,8 +369,8 @@ def line_percent(pl, segment_info, gradient=False):
 
 	Highlight groups used: ``line_percent_gradient`` (gradient), ``line_percent``.
 	'''
-	line_current = segment_info['window'].cursor[0]
-	line_last = len(segment_info['buffer'])
+	line_current = segment_info['input']['window_position'].line
+	line_last = segment_info['input']['buffer_len']
 	percentage = line_current * 100.0 / line_last
 	if not gradient:
 		return str(int(round(percentage)))
@@ -399,7 +382,8 @@ def line_percent(pl, segment_info, gradient=False):
 
 
 @window_cached
-def position(pl, position_strings={'top': 'Top', 'bottom': 'Bot', 'all': 'All'}, gradient=False):
+@with_input('displayed_lines', 'buffer_len')
+def position(pl, segment_info, position_strings={'top': 'Top', 'bottom': 'Bot', 'all': 'All'}, gradient=False):
 	'''Return the position of the current view in the file as a percentage.
 
 	:param dict position_strings:
@@ -410,10 +394,9 @@ def position(pl, position_strings={'top': 'Top', 'bottom': 'Bot', 'all': 'All'},
 
 	Highlight groups used: ``position_gradient`` (gradient), ``position``.
 	'''
-	line_last = len(vim.current.buffer)
+	line_last = segment_info['input']['buffer_len']
+	winline_first, winline_last = segment_info['input']['displayed_lines']
 
-	winline_first = vim_funcs['line']('w0')
-	winline_last = vim_funcs['line']('w$')
 	if winline_first == 1 and winline_last == line_last:
 		percentage = 0.0
 		content = position_strings['all']
@@ -436,27 +419,28 @@ def position(pl, position_strings={'top': 'Top', 'bottom': 'Bot', 'all': 'All'},
 	}]
 
 
-@requires_segment_info
+@with_input('window_position')
 def line_current(pl, segment_info):
 	'''Return the current cursor line.'''
-	return str(segment_info['window'].cursor[0])
+	return str(segment_info['input']['window_position'].line)
 
 
-@requires_segment_info
+@with_input('buffer_len')
 def line_count(pl, segment_info):
 	'''Return the line count of the current buffer.'''
-	return str(len(segment_info['buffer']))
+	return str(segment_info['input']['buffer_len'])
 
 
-@requires_segment_info
+@with_input('window_position')
 def col_current(pl, segment_info):
 	'''Return the current cursor column.
 	'''
-	return str(segment_info['window'].cursor[1] + 1)
+	return str(segment_info['input']['window_position'].col)
 
 
 @window_cached
-def virtcol_current(pl, gradient=True):
+@with_input('virtcol', 'textwidth')
+def virtcol_current(pl, segment_info, gradient=True):
 	'''Return current visual column with concealed characters ingored
 
 	:param bool gradient:
@@ -464,16 +448,17 @@ def virtcol_current(pl, gradient=True):
 
 	Highlight groups used: ``virtcol_current_gradient`` (gradient), ``virtcol_current`` or ``col_current``.
 	'''
-	col = vim_funcs['virtcol']('.')
+	col = segment_info['input']['virtcol']
 	r = [{'contents': str(col), 'highlight_groups': ['virtcol_current', 'col_current']}]
 	if gradient:
-		textwidth = int(getbufvar('%', '&textwidth'))
+		textwidth = segment_info['input']['textwidth']
 		r[-1]['gradient_level'] = min(col * 100 / textwidth, 100) if textwidth else 0
 		r[-1]['highlight_groups'].insert(0, 'virtcol_current_gradient')
 	return r
 
 
-def modified_buffers(pl, text='+ ', join_str=','):
+@with_input('modified_buffers')
+def modified_buffers(pl, segment_info, text='+ ', join_str=','):
 	'''Return a comma-separated list of modified buffers.
 
 	:param str text:
@@ -482,9 +467,8 @@ def modified_buffers(pl, text='+ ', join_str=','):
 		string to use for joining the modified buffer list
 	'''
 	buffer_mod_text = join_str.join((
-		str(buffer.number)
-		for buffer in vim.buffers
-		if int(vim_getbufoption({'buffer': buffer, 'bufnr': buffer.number}, 'modified'))
+		str(buffer if type(buffer) is int else buffer.number)
+		for buffer in segment_info['input']['modified_buffers']
 	))
 	if buffer_mod_text:
 		return text + buffer_mod_text
@@ -492,15 +476,15 @@ def modified_buffers(pl, text='+ ', join_str=','):
 
 
 @requires_filesystem_watcher
-@requires_segment_info
+@with_input('buffer_type', 'buffer_name')
 class VimBranchSegment(BranchSegment):
 	divider_highlight_group = 'branch:divider'
 
 	@staticmethod
 	def get_directory(segment_info):
-		if vim_getbufoption(segment_info, 'buftype'):
+		if segment_info['input']['buffer_type']:
 			return None
-		return buffer_name(segment_info)
+		return segment_info['input']['buffer_name']
 
 
 branch = with_docstring(VimBranchSegment(),
@@ -524,15 +508,15 @@ Divider highlight group used: ``branch:divider``.
 
 
 @requires_filesystem_watcher
-@requires_segment_info
+@with_input('buffer_type', 'buffer_name')
 class VimStashSegment(StashSegment):
 	divider_highlight_group = 'stash:divider'
 
 	@staticmethod
 	def get_directory(segment_info):
-		if vim_getbufoption(segment_info, 'buftype'):
+		if segment_info['input']['buffer_type']:
 			return None
-		return buffer_name(segment_info)
+		return segment_info['input']['buffer_name']
 
 
 stash = with_docstring(VimStashSegment(),
@@ -543,14 +527,14 @@ Highlight groups used: ``stash``.
 
 
 @requires_filesystem_watcher
-@requires_segment_info
+@with_input('buffer_type', 'buffer_name')
 def file_vcs_status(pl, segment_info, create_watcher):
 	'''Return the VCS status for this buffer.
 
 	Highlight groups used: ``file_vcs_status``.
 	'''
-	name = buffer_name(segment_info)
-	skip = not (name and (not vim_getbufoption(segment_info, 'buftype')))
+	name = segment_info['input']['buffer_name']
+	skip = not (name and (not segment_info['input']['buffer_type']))
 	if not skip:
 		repo = guess(path=name, create_watcher=create_watcher)
 		if repo is not None:
@@ -567,10 +551,8 @@ def file_vcs_status(pl, segment_info, create_watcher):
 			return ret
 
 
-trailing_whitespace_cache = None
-
-
-@requires_segment_info
+@window_cached
+@with_input('trailing_whitespace')
 def trailing_whitespace(pl, segment_info):
 	'''Return the line number for trailing whitespaces
 
@@ -581,45 +563,16 @@ def trailing_whitespace(pl, segment_info):
 
 	Highlight groups used: ``trailing_whitespace`` or ``warning``.
 	'''
-	global trailing_whitespace_cache
-	if trailing_whitespace_cache is None:
-		trailing_whitespace_cache = register_buffer_cache(defaultdict(lambda: (0, None)))
-	bufnr = segment_info['bufnr']
-	changedtick = getbufvar(bufnr, 'changedtick')
-	if trailing_whitespace_cache[bufnr][0] == changedtick:
-		return trailing_whitespace_cache[bufnr][1]
+	if segment_info['input']['trailing_whitespace']:
+		return [{
+			'contents': str(segment_info['input']['trailing_whitespace']),
+			'highlight_groups': ['trailing_whitespace', 'warning'],
+		}]
 	else:
-		buf = segment_info['buffer']
-		bws = b' \t'
-		sws = str(' \t')  # Ignore unicode_literals and use native str.
-		for i in range(len(buf)):
-			try:
-				line = buf[i]
-			except UnicodeDecodeError:  # May happen in Python 3
-				if hasattr(vim, 'bindeval'):
-					line = vim.bindeval('getbufline({0}, {1})'.format(
-						bufnr, i + 1))
-					has_trailing_ws = (line[-1] in bws)
-				else:
-					line = vim.eval('strtrans(getbufline({0}, {1}))'.format(
-						bufnr, i + 1))
-					has_trailing_ws = (line[-1] in bws)
-			else:
-				has_trailing_ws = (line and line[-1] in sws)
-			if has_trailing_ws:
-				break
-		if has_trailing_ws:
-			ret = [{
-				'contents': str(i + 1),
-				'highlight_groups': ['trailing_whitespace', 'warning'],
-			}]
-		else:
-			ret = None
-		trailing_whitespace_cache[bufnr] = (changedtick, ret)
-		return ret
+		return None
 
 
-@requires_segment_info
+@with_input('current_tab_number')
 def tabnr(pl, segment_info, show_current=True):
 	'''Show tabpage number
 
@@ -631,11 +584,11 @@ def tabnr(pl, segment_info, show_current=True):
 		tabnr = segment_info['tabnr']
 	except KeyError:
 		return None
-	if show_current or tabnr != current_tabpage().number:
+	if show_current or tabnr != segment_info['input']['current_tab_number']:
 		return str(tabnr)
 
 
-@requires_segment_info
+@with_input('current_buffer_number')
 def bufnr(pl, segment_info, show_current=True):
 	'''Show buffer number
 
@@ -643,11 +596,11 @@ def bufnr(pl, segment_info, show_current=True):
 		If False do not show current window number.
 	'''
 	bufnr = segment_info['bufnr']
-	if show_current or bufnr != vim.current.buffer.number:
+	if show_current or bufnr != segment_info['input']['current_buffer_number']:
 		return str(bufnr)
 
 
-@requires_segment_info
+@with_input('current_window_number')
 def winnr(pl, segment_info, show_current=True):
 	'''Show window number
 
@@ -655,7 +608,7 @@ def winnr(pl, segment_info, show_current=True):
 		If False do not show current window number.
 	'''
 	winnr = segment_info['winnr']
-	if show_current or winnr != vim.current.window.number:
+	if show_current or winnr != segment_info['input']['current_window_number']:
 		return str(winnr)
 
 
@@ -742,7 +695,8 @@ def process_csv_buffer(pl, buffer, line, col, display_name):
 	return unicode(column_number), column_name
 
 
-@requires_segment_info
+@requires_buffer_access
+@with_input('file_type')
 def csv_col_current(pl, segment_info, display_name='auto', name_format=' ({column_name:.15})'):
 	'''Display CSV column number and column name
 
@@ -759,7 +713,7 @@ def csv_col_current(pl, segment_info, display_name='auto', name_format=' ({colum
 
 	Highlight groups used: ``csv:column_number`` or ``csv``, ``csv:column_name`` or ``csv``.
 	'''
-	if vim_getbufoption(segment_info, 'filetype') != 'csv':
+	if segment_info['input']['file_type'] != 'csv':
 		return None
 	line, col = segment_info['window'].cursor
 	column_number, column_name = process_csv_buffer(pl, segment_info['buffer'], line, col, display_name)

@@ -1,8 +1,8 @@
 # vim:fileencoding=utf-8:noet
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
-from powerline.theme import requires_segment_info
 from powerline.bindings.vim import (current_tabpage, list_tabpages)
+from powerline.editors import with_list
 
 try:
 	import vim
@@ -22,11 +22,13 @@ def tabpage_updated_segment_info(segment_info, tabpage):
 		window_id=int(window.vars.get('powerline_window_id', -1)),
 		buffer=buffer,
 		bufnr=buffer.number,
+		input=segment_info['input'].copy(),
 	)
+	segment_info['input'].update(segment_info['list_tabs_inputs'][tabpage.number - 1])
 	return segment_info
 
 
-@requires_segment_info
+@with_list('list_tabs')
 def tablister(pl, segment_info, **kwargs):
 	'''List all tab pages in segment_info format
 
@@ -70,7 +72,7 @@ def buffer_updated_segment_info(segment_info, buffer):
 	return segment_info
 
 
-@requires_segment_info
+@with_list('list_buffers')
 def bufferlister(pl, segment_info, show_unlisted=False, **kwargs):
 	'''List all buffers in segment_info format
 

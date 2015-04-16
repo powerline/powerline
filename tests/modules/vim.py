@@ -33,7 +33,7 @@ _set_thread_id()
 
 def _print_log():
 	for item in _log:
-		print (item)
+		print(item)
 	_log[:] = ()
 
 
@@ -240,7 +240,7 @@ def eval(expr):
 		return '0'
 	elif expr.startswith('getwinvar('):
 		import re
-		match = re.match(r'^getwinvar\((\d+), "(\w+)"\)$', expr)
+		match = re.match(r'^getwinvar\((\d+), ["\'](\w+)["\']\)$', expr)
 		if not match:
 			raise NotImplementedError(expr)
 		winnr = int(match.group(1))
@@ -273,6 +273,17 @@ def eval(expr):
 		bufnr = int(match.group(1))
 		varname = match.group(2)
 		return _emul_getbufvar(bufnr, varname)
+	elif expr == 'bufnr(\'%\')':
+		return current.buffer.number
+	elif expr == '[line("."), col(".")]':
+		return [current.window.cursor[0], current.window.cursor[1] + 1]
+	elif expr.startswith('bufname('):
+		import re
+		match = re.match(r'bufname\((\d+)\)', expr)
+		if not match:
+			raise NotImplementedError(expr)
+		bufnr = int(match.group(1))
+		return _emul_bufname(bufnr)
 	elif expr == 'tabpagenr()':
 		return current.tabpage.number
 	elif expr == 'tabpagenr("$")':
@@ -298,6 +309,44 @@ def eval(expr):
 		match = re.match(r'^type\(function\("([^"]+)"\)\) == 2$', expr)
 		if not match:
 			raise NotImplementedError(expr)
+		return 0
+	elif expr == 'winnr()':
+		return current.window.number
+	elif expr == "[getpos('v')+[virtcol(getpos('v'))[1 : ]],getpos('.')+[virtcol(getpos('.'))[1 : ]]]":
+		vpos = _emul_getpos('v')
+		dpos = _emul_getpos('.')
+		return [vpos + [_emul_virtcol(vpos[1:])], dpos + [_emul_virtcol(dpos[1:])]]
+	elif expr == 'virtcol(\'.\')':
+		return _emul_virtcol('.')
+	elif expr == 'line2byte(line(\'$\')+1)-1':
+		return _emul_line2byte(_emul_line('$') + 1) - 1
+	elif expr.startswith('line('):
+		import re
+		match = re.match(r'line\(\'(.*)\'\)', expr)
+		if not match:
+			raise NotImplementedError(expr)
+		return _emul_line(match.group(1))
+	elif expr == '[line(\'w0\'),line(\'w$\')]':
+		return [_emul_line('w0'), _emul_line('w$')]
+	elif expr == "(!(empty(filter(map(copy(filter(range(1, bufnr('$')), 'bufexists(v:val)')), 'getbufvar(v:val, ''&modified'')'), 'v:val'))))":
+		for buf in buffers:
+			if buf.options['modified']:
+				return 1
+		return 0
+	elif expr == "filter(copy(filter(range(1, bufnr('$')), 'bufexists(v:val)')), 'getbufvar(v:val, ''&modified'')')":
+		ret = []
+		for buf in buffers:
+			if buf.options['modified']:
+				ret.append(buf.number)
+		return ret
+	elif expr.startswith('(buffer_cache'):
+		import re
+		match = re.match(r"^\(buffer_cache\[(\d+)\]\['trailing_whitespace'\]\[0\]==getbufvar\(\1, 'changedtick'\)\)\? \(buffer_cache\[\1\]\['trailing_whitespace'\]\[1\]\): \(extend\(buffer_cache\[\1\], \{'trailing_whitespace':\[getbufvar\(\1, 'changedtick'\),search\('\\m\\C\\s\$', 'nw'\)\]\}\)\['trailing_whitespace'\]\[1\]\)$", expr)
+		if not match:
+			raise NotImplementedError(expr)
+		for line in buffers[int(match.group(1))]:
+			if line.endswith((' ', '\t')):
+				return 1
 		return 0
 	raise NotImplementedError(expr)
 
@@ -441,6 +490,8 @@ def _emul_line(expr):
 		return max(cursorline - 5, 1)
 	if expr == 'w$':
 		return min(cursorline + 5, numlines)
+	if expr == '$':
+		return numlines
 	raise NotImplementedError
 
 
@@ -858,7 +909,6 @@ class _WithBufName(object):
 		self.new = new
 
 	def __enter__(self):
-		import os
 		buffer = current.buffer
 		self.buffer = buffer
 		self.old = buffer.name

@@ -1,25 +1,19 @@
 # vim:fileencoding=utf-8:noet
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
-try:
-	import vim
-except ImportError:
-	vim = object()
-
-from powerline.bindings.vim import bufvar_exists
-from powerline.segments.vim import window_cached
+from powerline.editors import with_input
+from powerline.editors.vim import VimBufferVar
 
 
-@window_cached
-def nerdtree(pl):
+@with_input(('nerd_tree_root', VimBufferVar('NERDTreeRoot'), 'str'))
+def nerdtree(pl, segment_info):
 	'''Return directory that is shown by the current buffer.
 
 	Highlight groups used: ``nerdtree:path`` or ``file_name``.
 	'''
-	if not bufvar_exists(None, 'NERDTreeRoot'):
+	if not segment_info['input']['nerd_tree_root']:
 		return None
-	path_str = vim.eval('getbufvar("%", "NERDTreeRoot").path.str()')
 	return [{
-		'contents': path_str,
+		'contents': segment_info['input']['nerd_tree_root'],
 		'highlight_groups': ['nerdtree:path', 'file_name'],
 	}]
