@@ -19,4 +19,8 @@ if __name__ == '__main__':
 
 	pl = config.create_powerline_logger(args)
 
-	args.function(pl, args)
+	try:
+		args.function(pl, args)
+	except Exception as e:
+		pl.exception('Failed to run {0!r}: {1}', args.function, e)
+		raise

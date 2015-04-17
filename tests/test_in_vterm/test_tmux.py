@@ -9,7 +9,7 @@ from time import sleep
 from subprocess import check_call
 from itertools import groupby
 from difflib import ndiff
-from glob import glob1
+from glob import glob
 
 from powerline.lib.unicode import u
 from powerline.bindings.tmux import get_tmux_version
@@ -32,7 +32,23 @@ def cell_properties_key_to_shell_escape(cell_properties_key):
 	))
 
 
-def test_expected_result(p, expected_result, cols, rows, print_logs):
+def print_logs():
+	old_pwd = os.getcwd()
+	os.chdir(VTERM_TEST_DIR)
+	try:
+		for f in glob('*.log'):
+			print('_' * 80)
+			print(os.path.basename(f) + ':')
+			print('=' * 80)
+			with open(f, 'r') as F:
+				for line in F:
+					sys.stdout.write(line)
+			os.unlink(f)
+	finally:
+		os.chdir(old_pwd)
+
+
+def test_expected_result(p, expected_result, cols, rows):
 	last_line = []
 	for col in range(cols):
 		last_line.append(p[rows - 1, col])
@@ -83,15 +99,7 @@ def test_expected_result(p, expected_result, cols, rows, print_logs):
 	print('Diff:')
 	print('=' * 80)
 	print(''.join((u(line) for line in ndiff([a], [b]))))
-	if print_logs:
-		for f in glob1(VTERM_TEST_DIR, '*.log'):
-			print('_' * 80)
-			print(os.path.basename(f) + ':')
-			print('=' * 80)
-			with open(f, 'r') as F:
-				for line in F:
-					sys.stdout.write(line)
-			os.unlink(f)
+	print_logs()
 	return False
 
 
@@ -163,6 +171,10 @@ def main(attempts=3):
 				'PATH': vterm_path,
 				'SHELL': os.path.join(VTERM_TEST_DIR, 'path', 'bash'),
 				'POWERLINE_CONFIG_PATHS': os.path.abspath('powerline/config_files'),
+				'POWERLINE_CONFIG_OVERRIDES': (
+					'common.log_level=DEBUG;'
+					'common.log_file=powerline.log;'
+				),
 				'POWERLINE_COMMAND': 'powerline-render',
 				'POWERLINE_THEME_OVERRIDES': (
 					'default.segments.right=[{"type":"string","name":"s1","highlight_groups":["cwd"]}];'
@@ -221,7 +233,7 @@ def main(attempts=3):
 			expected_result = expected_result_old
 		else:
 			expected_result = expected_result_new
-		if not test_expected_result(p, expected_result, cols, rows, not attempts):
+		if not test_expected_result(p, expected_result, cols, rows):
 			if attempts:
 				pass
 				# Will rerun main later.

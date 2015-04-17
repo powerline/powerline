@@ -3,7 +3,7 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 
 import json
 
-from powerline.lib.dict import REMOVE_THIS_KEY
+from powerline.lib.dict import REMOVE_THIS_KEY, mergedicts
 
 
 def parse_value(s):
@@ -78,3 +78,92 @@ def parse_override_var(s):
 		for item in s.split(';')
 		if item
 	)
+
+
+def get_env_config_paths(environ):
+	'''Get config paths from environment
+
+	:param dict environ:
+		Environment from which paths should be obtained.
+
+	:return: Paths from ``POWERLINE_CONFIG_PATHS`` as a list. List may be empty.
+	'''
+	return [path for path in environ.get('POWERLINE_CONFIG_PATHS', '').split(':') if path]
+
+
+def _get_env_overrides(environ, varname):
+	'''Get overrides from environment
+
+	:param dict environ:
+		Environment from which overrides should be obtained.
+	:param str varname:
+		Name of the variable containing overrides.
+
+	:return:
+		Iterable (may be empty) containing a sequence of overrides, where each 
+		item is similar to what :py:func:`powerline.lib.overrides.parsedotval` 
+		returns.
+	'''
+	return parse_override_var(environ.get(varname, ''))
+
+
+def get_env_config_overrides(environ):
+	'''Get config overrides from environment
+
+	:param dict environ:
+		Environment from which overrides should be obtained.
+
+	:return:
+		Iterable (may be empty) containing a sequence of overrides, where each 
+		item is similar to what :py:func:`powerline.lib.overrides.parsedotval` 
+		returns.
+	'''
+	return _get_env_overrides(environ, 'POWERLINE_CONFIG_OVERRIDES')
+
+
+def get_env_theme_overrides(environ):
+	'''Get config overrides from environment
+
+	:param dict environ:
+		Environment from which overrides should be obtained.
+
+	:return:
+		Iterable (may be empty) containing a sequence of overrides, where each 
+		item is similar to what :py:func:`powerline.lib.overrides.parsedotval` 
+		returns.
+	'''
+	return _get_env_overrides(environ, 'POWERLINE_THEME_OVERRIDES')
+
+
+def override_theme_config(theme, name, override):
+	'''Update theme with given overrides
+
+	:param dict theme:
+		Updated theme.
+	:param str name:
+		Theme name.
+	:param dict override:
+		Dictionary containing overrides. May be any false value in which case 
+		nothing is done.
+
+	:return: ``theme`` argument, possibly modified.
+	'''
+	if override and name in override:
+		mergedicts(theme, override[name])
+	return theme
+
+
+def override_main_config(config, override):
+	'''Update main config with given overrides
+
+	:param dict config:
+		Updated config.
+	:param dict override:
+		Dictionary containing overrides. May be any false value in which case 
+		nothing is done.
+
+	:return: ``config`` argument, possibly modified.
+	'''
+	if override:
+		mergedicts(config, override)
+	return config

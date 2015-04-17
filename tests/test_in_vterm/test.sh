@@ -12,7 +12,8 @@ ln -s "$(which "${PYTHON}")" tests/vterm/path/python
 ln -s "$(which bash)" tests/vterm/path
 ln -s "$(which env)" tests/vterm/path
 ln -s "$PWD/scripts/powerline-render" tests/vterm/path
-ln -s "$PWD/scripts/powerline-config" tests/vterm/path
+ln -s "$PWD/scripts/powerline-config" tests/vterm/path/real-powerline-config
+ln -s "$PWD/tests/test_in_vterm/powerline-config-wrapper.sh" tests/vterm/path/powerline-config
 
 cp -r tests/terminfo tests/vterm
 

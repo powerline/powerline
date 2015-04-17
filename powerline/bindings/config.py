@@ -5,15 +5,19 @@ import os
 import re
 import sys
 
-from powerline.config import POWERLINE_ROOT, TMUX_CONFIG_DIRECTORY
 from powerline.lib.config import ConfigLoader
-from powerline import generate_config_finder, load_config, create_logger, PowerlineLogger, finish_common_config
-from powerline.shell import ShellPowerline
 from powerline.lib.shell import which
-from powerline.bindings.tmux import TmuxVersionInfo, run_tmux_command, set_tmux_environment, get_tmux_version
+from powerline.lib.overrides import get_env_config_paths, get_env_config_overrides, override_main_config
+from powerline.lib.dict import mergeargs
 from powerline.lib.encoding import get_preferred_output_encoding
-from powerline.renderers.tmux import attrs_to_tmux_attrs
+from powerline.bindings.tmux import (TmuxVersionInfo, TmuxCommandError,
+                                     run_tmux_command, set_tmux_environment, get_tmux_version)
 from powerline.commands.main import finish_args
+from powerline.renderers.tmux import attrs_to_tmux_attrs
+from powerline.config import POWERLINE_ROOT, TMUX_CONFIG_DIRECTORY
+from powerline.shell import ShellPowerline
+from powerline import (generate_config_finder, load_config, create_logger, PowerlineLogger, finish_common_config,
+                       get_config_paths)
 
 
 CONFIG_FILE_NAME = re.compile(r'powerline_tmux_(?P<major>\d+)\.(?P<minor>\d+)(?P<suffix>[a-z]+)?(?:_(?P<mod>plus|minus))?\.conf')
@@ -75,7 +79,11 @@ def source_tmux_files(pl, args):
 		cmd = deduce_command()
 		if cmd:
 			set_tmux_environment('POWERLINE_COMMAND', deduce_command(), remove=False)
-	run_tmux_command('refresh-client')
+	try:
+		run_tmux_command('refresh-client')
+	except TmuxCommandError:
+		# This exception is for some reason raised in tmux-1.9
+		pass
 
 
 class EmptyArgs(object):
@@ -169,10 +177,17 @@ def tmux_setup(pl, args):
 	source_tmux_files(pl, args)
 
 
+def get_config_config_paths():
+	return get_env_config_paths(os.environ) or get_config_paths()
+
+
 def get_main_config(args):
-	find_config_files = generate_config_finder()
+	find_config_files = generate_config_finder(get_config_config_paths)
 	config_loader = ConfigLoader(run_once=True)
-	return load_config('config', find_config_files, config_loader)
+	return override_main_config(
+		config=load_config('config', find_config_files, config_loader),
+		override=mergeargs(get_env_config_overrides(os.environ)),
+	)
 
 
 def create_powerline_logger(args):

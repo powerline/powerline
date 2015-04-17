@@ -2,7 +2,7 @@
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 from powerline import Powerline
-from powerline.lib.dict import mergedicts
+from powerline.lib.overrides import override_theme_config, override_main_config
 
 
 class ShellPowerline(Powerline):
@@ -11,16 +11,17 @@ class ShellPowerline(Powerline):
 		super(ShellPowerline, self).init(args.ext[0], args.renderer_module, **kwargs)
 
 	def load_main_config(self):
-		r = super(ShellPowerline, self).load_main_config()
-		if self.args.config_override:
-			mergedicts(r, self.args.config_override)
-		return r
+		return override_main_config(
+			config=super(ShellPowerline, self).load_main_config(),
+			override=self.args.config_override,
+		)
 
 	def load_theme_config(self, name):
-		r = super(ShellPowerline, self).load_theme_config(name)
-		if self.args.theme_override and name in self.args.theme_override:
-			mergedicts(r, self.args.theme_override[name])
-		return r
+		return override_theme_config(
+			theme=super(ShellPowerline, self).load_theme_config(name),
+			name=name,
+			override=self.args.theme_override,
+		)
 
 	def get_config_paths(self):
 		return self.args.config_path or super(ShellPowerline, self).get_config_paths()

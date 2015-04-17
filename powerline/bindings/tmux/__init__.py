@@ -10,6 +10,10 @@ from collections import namedtuple
 from powerline.lib.shell import run_cmd
 
 
+class TmuxCommandError(subprocess.CalledProcessError):
+	pass
+
+
 TmuxVersionInfo = namedtuple('TmuxVersionInfo', ('major', 'minor', 'suffix'))
 
 
@@ -24,7 +28,10 @@ def get_tmux_executable_name():
 
 
 def _run_tmux(runner, args):
-	return runner([get_tmux_executable_name()] + list(args))
+	try:
+		return runner([get_tmux_executable_name()] + list(args))
+	except subprocess.CalledProcessError as e:
+		raise TmuxCommandError(**e.__dict__)
 
 
 def run_tmux_command(*args):

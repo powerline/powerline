@@ -210,7 +210,7 @@ def _get_log_handler(common_config, stream=None):
 	'''
 	log_file = common_config['log_file']
 	if log_file:
-		log_file = os.path.expanduser(log_file)
+		log_file = os.path.abspath(os.path.expanduser(log_file))
 		log_dir = os.path.dirname(log_file)
 		if not os.path.isdir(log_dir):
 			os.mkdir(log_dir)

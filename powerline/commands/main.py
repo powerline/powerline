@@ -7,7 +7,8 @@ import sys
 
 from itertools import chain
 
-from powerline.lib.overrides import parsedotval, parse_override_var
+from powerline.lib.overrides import (parsedotval, get_env_config_paths, get_env_config_overrides,
+                                     get_env_theme_overrides)
 from powerline.lib.dict import mergeargs
 from powerline.lib.encoding import get_preferred_arguments_encoding
 from powerline.lib.unicode import u
@@ -40,19 +41,16 @@ def finish_args(environ, args):
 	:return: Object received as second (``args``) argument.
 	'''
 	args.config_override = mergeargs(chain(
-		parse_override_var(environ.get('POWERLINE_CONFIG_OVERRIDES', '')),
+		get_env_config_overrides(environ),
 		(parsedotval(v) for v in args.config_override or ()),
 	))
 	args.theme_override = mergeargs(chain(
-		parse_override_var(environ.get('POWERLINE_THEME_OVERRIDES', '')),
+		get_env_theme_overrides(environ),
 		(parsedotval(v) for v in args.theme_override or ()),
 	))
 	if args.renderer_arg:
 		args.renderer_arg = mergeargs((parsedotval(v) for v in args.renderer_arg), remove=True)
-	args.config_path = (
-		[path for path in environ.get('POWERLINE_CONFIG_PATHS', '').split(':') if path]
-		+ (args.config_path or [])
-	)
+	args.config_path = (get_env_config_paths(environ) + (args.config_path or []))
 	return args
 
 
