@@ -4,6 +4,7 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 import os
 import re
 import sys
+import subprocess
 
 from powerline.config import POWERLINE_ROOT, TMUX_CONFIG_DIRECTORY
 from powerline.lib.config import ConfigLoader
@@ -75,7 +76,12 @@ def source_tmux_files(pl, args):
 		cmd = deduce_command()
 		if cmd:
 			set_tmux_environment('POWERLINE_COMMAND', deduce_command(), remove=False)
-	run_tmux_command('refresh-client')
+	try:
+		run_tmux_command('refresh-client')
+	except subprocess.CalledProcessError:
+		# On tmux-2.0 this command may fail for whatever reason. Since it is 
+		# critical just ignore the failure.
+		pass
 
 
 class EmptyArgs(object):
