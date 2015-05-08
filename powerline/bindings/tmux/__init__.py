@@ -58,6 +58,15 @@ def set_tmux_environment(varname, value, remove=True):
 			pass
 
 
+def source_tmux_file(fname):
+	'''Source tmux configuration file
+
+	:param str fname:
+		Full path to the sourced file.
+	'''
+	run_tmux_command('source', fname)
+
+
 NON_DIGITS = re.compile('[^0-9]+')
 DIGITS = re.compile('[0-9]+')
 NON_LETTERS = re.compile('[^a-z]+')

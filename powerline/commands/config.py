@@ -22,6 +22,7 @@ TMUX_ACTIONS = {
 	'source': StrFunction(config.source_tmux_files, 'source'),
 	'setenv': StrFunction(config.init_tmux_environment, 'setenv'),
 	'setup': StrFunction(config.tmux_setup, 'setup'),
+	'setup-nosource': StrFunction(config.tmux_setup_nosource, 'setup-nosource'),
 }
 
 

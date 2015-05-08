@@ -5,13 +5,15 @@ import os
 import re
 import sys
 import subprocess
+import shlex
 
 from powerline.config import POWERLINE_ROOT, TMUX_CONFIG_DIRECTORY
 from powerline.lib.config import ConfigLoader
 from powerline import generate_config_finder, load_config, create_logger, PowerlineLogger, finish_common_config
 from powerline.shell import ShellPowerline
 from powerline.lib.shell import which
-from powerline.bindings.tmux import TmuxVersionInfo, run_tmux_command, set_tmux_environment, get_tmux_version
+from powerline.bindings.tmux import (TmuxVersionInfo, run_tmux_command, set_tmux_environment, get_tmux_version,
+                                     source_tmux_file)
 from powerline.lib.encoding import get_preferred_output_encoding
 from powerline.renderers.tmux import attrs_to_tmux_attrs
 from powerline.commands.main import finish_args
@@ -60,7 +62,7 @@ def get_tmux_configs(version):
 			yield (fname, priority + file_version.minor * 10 + file_version.major * 10000)
 
 
-def source_tmux_files(pl, args):
+def source_tmux_files(pl, args, source_tmux_file=source_tmux_file):
 	'''Source relevant version-specific tmux configuration files
 
 	Files are sourced in the following order:
@@ -69,9 +71,9 @@ def source_tmux_files(pl, args):
 	  sourced, then _plus files and then files without _minus or _plus suffixes.
 	'''
 	version = get_tmux_version(pl)
-	run_tmux_command('source', os.path.join(TMUX_CONFIG_DIRECTORY, 'powerline-base.conf'))
+	source_tmux_file(os.path.join(TMUX_CONFIG_DIRECTORY, 'powerline-base.conf'))
 	for fname, priority in sorted(get_tmux_configs(version), key=(lambda v: v[1])):
-		run_tmux_command('source', fname)
+		source_tmux_file(fname)
 	if not os.environ.get('POWERLINE_COMMAND'):
 		cmd = deduce_command()
 		if cmd:
@@ -93,7 +95,7 @@ class EmptyArgs(object):
 		return None
 
 
-def init_tmux_environment(pl, args):
+def init_tmux_environment(pl, args, set_tmux_environment=set_tmux_environment):
 	'''Initialize tmux environment from tmux configuration
 	'''
 	powerline = ShellPowerline(finish_args(os.environ, EmptyArgs('tmux', args.config_path)))
@@ -173,6 +175,35 @@ def init_tmux_environment(pl, args):
 def tmux_setup(pl, args):
 	init_tmux_environment(pl, args)
 	source_tmux_files(pl, args)
+
+
+TMUX_VAR_RE = re.compile('\$(_POWERLINE_\w+)')
+
+
+def tmux_setup_nosource(pl, args):
+	tmux_environ = {}
+
+	def set_tmux_environment(varname, value, remove=True):
+		tmux_environ[varname] = value
+
+	init_tmux_environment(pl, args, set_tmux_environment=set_tmux_environment)
+
+	def replace_cb(match):
+		return tmux_environ[match.group(1)]
+
+	def replace_env(s):
+		return TMUX_VAR_RE.subn(replace_cb, s)[0]
+
+	def source_tmux_file(fname):
+		with open(fname) as fd:
+			for line in fd:
+				if line.startswith('#') or line == '\n':
+					continue
+				args = shlex.split(line)
+				args = [args[0]] + [replace_env(arg) for arg in args[1:]]
+				run_tmux_command(*args)
+
+	source_tmux_files(pl, args, source_tmux_file=source_tmux_file)
 
 
 def get_main_config(args):
