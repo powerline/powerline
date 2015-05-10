@@ -191,6 +191,7 @@ ln -s "$(which rm)" tests/shell/path
 ln -s "$(which uname)" tests/shell/path
 ln -s "$(which test)" tests/shell/path
 ln -s "$(which pwd)" tests/shell/path
+ln -s "$(which hostname)" tests/shell/path
 ln -s ../../test_shells/bgscript.sh tests/shell/path
 ln -s ../../test_shells/waitpid.sh tests/shell/path
 if which socat ; then
