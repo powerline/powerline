@@ -1,4 +1,8 @@
 sudo: false
+cache:
+    directories:
+        - $HOME/.cache/pip
+        - tests/bot-ci
 addons:
     apt:
         packages:

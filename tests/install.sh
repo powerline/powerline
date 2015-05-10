@@ -1,6 +1,28 @@
 #!/bin/bash
-git clone --depth=1 git://github.com/powerline/bot-ci tests/bot-ci
-git clone --depth=1 git://github.com/powerline/deps tests/bot-ci/deps
+
+set -e
+
+remote_master_hex() {
+	local url="$1"
+	git ls-remote "$url" refs/heads/master | cut -f1
+}
+
+checkout_cached_dir() {
+	local url="$1"
+	local target="$2"
+	if ! test -e "$target/.version" || \
+		test "$(cat "$target/.version")" != "$(remote_master_hex "$url")" ; then
+		rm -rf "$target"
+	fi
+	if ! test -d "$target" ; then
+		git clone --depth=1 "$url" "$target"
+		mv "$target"/.git/refs/heads/master .version
+		rm -r "$target"/.git
+	fi
+}
+
+checkout_cached_dir git://github.com/powerline/bot-ci tests/bot-ci
+checkout_cached_dir git://github.com/powerline/deps tests/bot-ci/deps
 
 . tests/bot-ci/scripts/common/main.sh
 
