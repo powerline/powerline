@@ -17,7 +17,7 @@ checkout_cached_dir() {
 	if ! test -d "$target" ; then
 		git clone --depth=1 "$url" "$target"
 		mv "$target"/.git/refs/heads/master .version
-		rm -r "$target"/.git
+		rm -rf "$target"/.git
 	fi
 }
 
