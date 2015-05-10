@@ -53,6 +53,7 @@ def finish_args(environ, args):
 		[path for path in environ.get('POWERLINE_CONFIG_PATHS', '').split(':') if path]
 		+ (args.config_path or [])
 	)
+	args.side = args.side[0]
 	return args
 
 
