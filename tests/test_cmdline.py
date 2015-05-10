@@ -61,8 +61,8 @@ class TestParser(TestCase):
 		err = StrIO()
 		with replace_attr(sys, 'stdout', out, 'stderr', err):
 			for argv, expargs in [
-				(['shell'],               {'ext': ['shell']}),
-				(['shell', '-r', '.zsh'], {'ext': ['shell'], 'renderer_module': '.zsh'}),
+				(['shell', 'left'],       {'ext': ['shell'], 'side': 'left'}),
+				(['shell', 'left', '-r', '.zsh'], {'ext': ['shell'], 'renderer_module': '.zsh', 'side': 'left'}),
 				([
 					'shell',
 					'left',
@@ -98,11 +98,20 @@ class TestParser(TestCase):
 					'config_path': ['.', '..'],
 					'renderer_arg': {'smth': {'abc': 'def'}},
 				}),
-				(['shell', '-R', 'arg=true'], {'ext': ['shell'], 'renderer_arg': {'arg': True}}),
-				(['shell', '-R', 'arg=true', '-R', 'arg='], {'ext': ['shell'], 'renderer_arg': {}}),
-				(['shell', '-R', 'arg='], {'ext': ['shell'], 'renderer_arg': {}}),
-				(['shell', '-t', 'default.segment_info={"hostname": {}}'], {
+				(['shell', 'left', '-R', 'arg=true'], {
 					'ext': ['shell'],
+					'side': 'left',
+					'renderer_arg': {'arg': True},
+				}),
+				(['shell', 'left', '-R', 'arg=true', '-R', 'arg='], {
+					'ext': ['shell'],
+					'side': 'left',
+					'renderer_arg': {},
+				}),
+				(['shell', 'left', '-R', 'arg='], {'ext': ['shell'], 'renderer_arg': {}, 'side': 'left'}),
+				(['shell', 'left', '-t', 'default.segment_info={"hostname": {}}'], {
+					'ext': ['shell'],
+					'side': 'left',
 					'theme_override': {
 						'default': {
 							'segment_info': {
@@ -111,7 +120,11 @@ class TestParser(TestCase):
 						}
 					},
 				}),
-				(['shell', '-c', 'common={ }'], {'ext': ['shell'], 'config_override': {'common': {}}}),
+				(['shell', 'left', '-c', 'common={ }'], {
+					'ext': ['shell'],
+					'side': 'left',
+					'config_override': {'common': {}},
+				}),
 			]:
 				args = parser.parse_args(argv)
 				finish_args({}, args)
