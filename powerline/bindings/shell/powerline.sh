@@ -224,8 +224,7 @@ fi
 
 # Strips the leading `-`: it may be present when shell is a login shell
 _POWERLINE_USED_SHELL=${0#-}
-_POWERLINE_USED_SHELL=${_POWERLINE_USED_SHELL#/usr}
-_POWERLINE_USED_SHELL=${_POWERLINE_USED_SHELL#/bin/}
+_POWERLINE_USED_SHELL=${_POWERLINE_USED_SHELL##*/}
 
 if "${POWERLINE_CONFIG_COMMAND}" shell uses tmux ; then
 	_powerline_init_tmux_support $_POWERLINE_USED_SHELL

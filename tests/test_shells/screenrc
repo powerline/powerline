@@ -1,7 +1,0 @@
-width  1024
-height    1
-logfile "tests/shell/${SH}.${TEST_TYPE}.${TEST_CLIENT}.full.log"
-# Having utf8 setting on causes screen to recode file passed to readreg. Adding 
-# `-e utf8` just after `readreg` causes screen to fail with `-X: copyreg: 
-# character, ^x, or (octal) \032 expected.` in place of fixing the issue.
-defutf8 off

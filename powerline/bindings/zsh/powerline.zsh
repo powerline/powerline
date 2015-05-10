@@ -12,6 +12,12 @@ _powerline_columns_fallback() {
 	return 0
 }
 
+_powerline_append_precmd_function() {
+	if test -z "${precmd_functions[(re)$1]}" ; then
+		precmd_functions+=( $1 )
+	fi
+}
+
 integer _POWERLINE_JOBNUM
 
 _powerline_init_tmux_support() {
@@ -86,7 +92,7 @@ _powerline_init_modes_support() {
 		_POWERLINE_DEFAULT_MODE="$_POWERLINE_MODE"
 	fi
 
-	precmd_functions+=( _powerline_set_main_keymap_name )
+	_powerline_append_precmd_function _powerline_set_main_keymap_name
 }
 
 _powerline_set_jobnum() {
@@ -110,17 +116,12 @@ _powerline_update_counter() {
 _powerline_setup_prompt() {
 	emulate -L zsh
 
-	for f in "${precmd_functions[@]}"; do
-		if [[ "$f" = '_powerline_set_jobnum' ]]; then
-			return
-		fi
-	done
-	precmd_functions+=( _powerline_set_jobnum )
+	_powerline_append_precmd_function _powerline_set_jobnum
 
 	VIRTUAL_ENV_DISABLE_PROMPT=1
 
 	if test -z "${POWERLINE_NO_ZSH_ZPYTHON}" && { zmodload libzpython || zmodload zsh/zpython } &>/dev/null ; then
-		precmd_functions+=( _powerline_update_counter )
+		_powerline_append_precmd_function _powerline_update_counter
 		zpython 'from powerline.bindings.zsh import setup as _powerline_setup'
 		zpython '_powerline_setup(globals())'
 		zpython 'del _powerline_setup'

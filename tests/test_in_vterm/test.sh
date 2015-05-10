@@ -19,8 +19,9 @@ cp -r tests/terminfo tests/vterm
 FAIL_SUMMARY=""
 
 test_tmux() {
-	if test "$PYTHON_IMPLEMENTATION" = PyPy && test "$PYTHON_VERSION_MAJOR" -eq 3 ; then
-		# FIXME PyPy3 segfaults for some reason
+	if test "$PYTHON_IMPLEMENTATION" = PyPy; then
+		# FIXME PyPy3 segfaults for some reason, PyPy does it as well, but 
+		# occasionally.
 		return 0
 	fi
 	if ! which "${POWERLINE_TMUX_EXE}" ; then
@@ -32,26 +33,16 @@ test_tmux() {
 		echo "Failed vterm test $f"
 		FAILED=1
 		FAIL_SUMMARY="$FAIL_SUMMARY${NL}F $POWERLINE_TMUX_EXE $f"
-		for file in tests/vterm/*.log ; do
-			if ! test -e "$file" ; then
-				break
-			fi
-			echo '____________________________________________________________'
-			echo "$file:"
-			echo '============================================================'
-			cat -v $file
-		done
 	fi
 }
 
 if test -z "$POWERLINE_TMUX_EXE" && test -d tests/bot-ci/deps/tmux ; then
 	for tmux in tests/bot-ci/deps/tmux/tmux-*/tmux ; do
 		export POWERLINE_TMUX_EXE="$PWD/$tmux"
-		if test_tmux ; then
-			rm -f tests/vterm/*.log
-		fi
+		test_tmux || true
 	done
 else
+	export POWERLINE_TMUX_EXE="${POWERLINE_TMUX_EXE:-tmux}"
 	test_tmux || true
 fi
 

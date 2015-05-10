@@ -52,7 +52,31 @@ class VimPowerline(Powerline):
 		super(VimPowerline, self).init('vim', **kwargs)
 		self.last_window_id = 1
 		self.pyeval = pyeval
-		self.window_statusline = '%!' + pyeval + '(\'powerline.statusline({0})\')'
+		self.construct_window_statusline = self.create_window_statusline_constructor()
+
+	if sys.version_info < (3,):
+		def create_window_statusline_constructor(self):
+			window_statusline = b'%!' + str(self.pyeval) + b'(\'powerline.statusline({0})\')'
+			return window_statusline.format
+	else:
+		def create_window_statusline_constructor(self):
+			startstr = b'%!' + self.pyeval.encode('ascii') + b'(\'powerline.statusline('
+			endstr = b')\')'
+			return lambda idx: (
+				startstr + str(idx).encode('ascii') + endstr
+			)
+
+	create_window_statusline_constructor.__doc__ = (
+		'''Create function which returns &l:stl value being given window index
+
+		Created function must return :py:class:`bytes` instance because this is 
+		what ``window.options['statusline']`` returns (``window`` is 
+		:py:class:`vim.Window` instance).
+
+		:return:
+			Function with type ``int → bytes``.
+		'''
+	)
 
 	default_log_stream = sys.stdout
 
@@ -174,7 +198,7 @@ class VimPowerline(Powerline):
 			pyeval = 'PowerlinePyeval'
 
 		self.pyeval = pyeval
-		self.window_statusline = '%!' + pyeval + '(\'powerline.statusline({0})\')'
+		self.construct_window_statusline = self.create_window_statusline_constructor()
 
 		self.update_renderer()
 		__main__.powerline = self
@@ -240,14 +264,14 @@ class VimPowerline(Powerline):
 					curwindow_id = self.last_window_id
 					self.last_window_id += 1
 					window.vars['powerline_window_id'] = curwindow_id
-				statusline = self.window_statusline.format(curwindow_id)
+				statusline = self.construct_window_statusline(curwindow_id)
 				if window.options['statusline'] != statusline:
 					window.options['statusline'] = statusline
 				if curwindow_id == window_id if window_id else window is vim.current.window:
 					r = (window, curwindow_id, window.number)
 			return r
 	else:
-		_vim_getwinvar = staticmethod(vim_get_func('getwinvar'))
+		_vim_getwinvar = staticmethod(vim_get_func('getwinvar', 'bytes'))
 		_vim_setwinvar = staticmethod(vim_get_func('setwinvar'))
 
 		def win_idx(self, window_id):
@@ -260,7 +284,7 @@ class VimPowerline(Powerline):
 					curwindow_id = self.last_window_id
 					self.last_window_id += 1
 					self._vim_setwinvar(winnr, 'powerline_window_id', curwindow_id)
-				statusline = self.window_statusline.format(curwindow_id)
+				statusline = self.construct_window_statusline(curwindow_id)
 				if self._vim_getwinvar(winnr, '&statusline') != statusline:
 					self._vim_setwinvar(winnr, '&statusline', statusline)
 				if curwindow_id == window_id if window_id else window is vim.current.window:

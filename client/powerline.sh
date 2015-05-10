@@ -46,7 +46,7 @@ fi
 	done
 	printf '%s\0' "$PWD"
 	$ENV -0
-) | socat -lf/dev/null -t 10 - "$ADDRESS"
+) 2>/dev/null | socat -lf/dev/null -t 10 - "$ADDRESS"
 
 if test $? -ne 0 ; then
 	powerline-render "$@"

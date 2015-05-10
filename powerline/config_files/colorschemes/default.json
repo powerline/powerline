@@ -5,6 +5,7 @@
 		"information:regular":       { "fg": "gray10", "bg": "gray4", "attrs": ["bold"] },
 		"information:highlighted":   { "fg": "white", "bg": "gray4", "attrs": [] },
 		"information:priority":      { "fg": "brightyellow", "bg": "mediumorange", "attrs": [] },
+		"warning:regular":           { "fg": "white", "bg": "brightred", "attrs": ["bold"] },
 		"critical:failure":          { "fg": "white", "bg": "darkestred", "attrs": [] },
 		"critical:success":          { "fg": "white", "bg": "darkestgreen", "attrs": [] },
 		"background":                { "fg": "white", "bg": "gray0", "attrs": [] },

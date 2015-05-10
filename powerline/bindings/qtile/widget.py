@@ -1,22 +1,32 @@
 # vim:fileencoding=utf-8:noet
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
-from libqtile import bar
-from libqtile.widget import base
+from libqtile.bar import CALCULATED
+from libqtile.widget import TextBox
 
-from powerline import Powerline as PowerlineCore
+from powerline import Powerline
 
 
-class Powerline(base._TextBox):
-	def __init__(self, timeout=2, text=' ', width=bar.CALCULATED, **config):
-		base._TextBox.__init__(self, text, width, **config)
-		self.timeout_add(timeout, self.update)
-		self.powerline = PowerlineCore(ext='wm', renderer_module='pango_markup')
+class QTilePowerline(Powerline):
+	def do_setup(self, obj):
+		obj.powerline = self
+
+
+class PowerlineTextBox(TextBox):
+	# TODO Replace timeout argument with update_interval argument in next major 
+	#      release.
+	def __init__(self, timeout=2, text=b' ', width=CALCULATED, side='right', update_interval=None, **config):
+		super(PowerlineTextBox, self).__init__(text, width, **config)
+		self.side = side
+		self.update_interval = update_interval or timeout
+		self.did_run_timer_setup = False
+		powerline = QTilePowerline(ext='wm', renderer_module='pango_markup')
+		powerline.setup(self)
 
 	def update(self):
 		if not self.configured:
 			return True
-		self.text = self.powerline.render(side='right')
+		self.text = self.powerline.render(side=self.side).encode('utf-8')
 		self.bar.draw()
 		return True
 
@@ -26,12 +36,26 @@ class Powerline(base._TextBox):
 	def cmd_get(self):
 		return self.text
 
+	def timer_setup(self):
+		if not self.did_run_timer_setup:
+			self.did_run_timer_setup = True
+			self.timeout_add(self.update_interval, self.update)
+
 	def _configure(self, qtile, bar):
-		base._TextBox._configure(self, qtile, bar)
+		super(PowerlineTextBox, self)._configure(qtile, bar)
+		if self.layout.markup:
+			# QTile-0.9.1: no need to recreate layout or run timer_setup
+			return
 		self.layout = self.drawer.textlayout(
 			self.text,
 			self.foreground,
 			self.font,
 			self.fontsize,
 			self.fontshadow,
-			markup=True)
+			markup=True,
+		)
+		self.timer_setup()
+
+
+# TODO: Remove this at next major release
+Powerline = PowerlineTextBox

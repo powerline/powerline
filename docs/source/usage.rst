@@ -19,8 +19,22 @@ related Python headers to be installed. Please consult distribution’s
 documentation for details on how to compile and install packages.
 
 Vim version 7.4 or newer is recommended for performance reasons, but Powerline 
-is known to work on vim-7.0.112 (some segments may not work though as it was not 
-actually tested).
+supports Vim 7.0.112 and higher.
+
+Shell prompts requirements
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Due to fish having incorrect code for prompt width calculations up to version 
+2.1 and no way to tell that certain sequence of characters has no width 
+(``%{…%}`` in zsh and ``\[…\]`` in bash prompts serve exactly this purpose) 
+users that have fish versions below 2.1 are not supported..
+
+
+WM widgets requirements
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Awesome is supported starting from version 3.5.1, inclusive. QTile is supported 
+from version 0.6, inclusive.
 
 .. _usage-terminal-emulators:
 

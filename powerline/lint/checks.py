@@ -173,41 +173,47 @@ def check_group(group, data, context, echoerr):
 		return True, False, False
 	colorscheme = data['colorscheme']
 	ext = data['ext']
-	configs = []
+	configs = None
 	if ext:
+		def listed_key(d, k):
+			try:
+				return [d[k]]
+			except KeyError:
+				return []
+
 		if colorscheme == '__main__':
-			configs.append([config for config in data['ext_colorscheme_configs'][ext].items()])
-			configs.append([config for config in data['top_colorscheme_configs'].items()])
+			colorscheme_names = set(data['ext_colorscheme_configs'][ext])
+			colorscheme_names.update(data['top_colorscheme_configs'])
+			colorscheme_names.discard('__main__')
+			configs = [
+				(
+					name,
+					listed_key(data['ext_colorscheme_configs'][ext], name)
+					+ listed_key(data['ext_colorscheme_configs'][ext], '__main__')
+					+ listed_key(data['top_colorscheme_configs'], name)
+				)
+				for name in colorscheme_names
+			]
 		else:
-			try:
-				configs.append([data['ext_colorscheme_configs'][ext][colorscheme]])
-			except KeyError:
-				pass
-			try:
-				configs.append([data['ext_colorscheme_configs'][ext]['__main__']])
-			except KeyError:
-				pass
-			try:
-				configs.append([data['top_colorscheme_configs'][colorscheme]])
-			except KeyError:
-				pass
+			configs = [
+				(
+					colorscheme,
+					listed_key(data['ext_colorscheme_configs'][ext], colorscheme)
+					+ listed_key(data['ext_colorscheme_configs'][ext], '__main__')
+					+ listed_key(data['top_colorscheme_configs'], colorscheme)
+				)
+			]
 	else:
 		try:
-			configs.append([data['top_colorscheme_configs'][colorscheme]])
+			configs = [(colorscheme, [data['top_colorscheme_configs'][colorscheme]])]
 		except KeyError:
 			pass
-	new_echoerr = DelayedEchoErr(echoerr)
 	hadproblem = False
-	for config_lst in configs:
-		tofind = len(config_lst)
+	for new_colorscheme, config_lst in configs:
 		not_found = []
+		new_data = data.copy()
+		new_data['colorscheme'] = new_colorscheme
 		for config in config_lst:
-			if isinstance(config, tuple):
-				new_colorscheme, config = config
-				new_data = data.copy()
-				new_data['colorscheme'] = new_colorscheme
-			else:
-				new_data = data
 			havemarks(config)
 			try:
 				group_data = config['groups'][group]
@@ -222,21 +228,17 @@ def check_group(group, data, context, echoerr):
 				)
 				if chadproblem:
 					hadproblem = True
-				else:
-					tofind -= 1
-					if not tofind:
-						return proceed, echo, hadproblem
 				if not proceed:
 					break
-		if not_found:
-			new_echoerr(
+		if not_found and len(not_found) == len(config_lst):
+			echoerr(
 				context='Error while checking group definition in colorscheme (key {key})'.format(
 					key=context.key),
-				problem='name {0} is not present in {1} {2} colorschemes: {3}'.format(
-					group, tofind, ext, ', '.join(not_found)),
+				problem='name {0} is not present anywhere in {1} {2} {3} colorschemes: {4}'.format(
+					group, len(not_found), ext, new_colorscheme, ', '.join(not_found)),
 				problem_mark=group.mark
 			)
-	new_echoerr.echo_all()
+			hadproblem = True
 	return True, False, hadproblem
 
 

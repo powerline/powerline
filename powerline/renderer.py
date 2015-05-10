@@ -378,7 +378,9 @@ class Renderer(object):
 		elif output_width:
 			current_width = self._render_length(theme, segments, divider_widths)
 
-		rendered_highlighted = ''.join([segment['_rendered_hl'] for segment in self._render_segments(theme, segments)]) + self.hlstyle()
+		rendered_highlighted = ''.join([segment['_rendered_hl'] for segment in self._render_segments(theme, segments)])
+		if rendered_highlighted:
+			rendered_highlighted += self.hlstyle()
 
 		return construct_returned_value(rendered_highlighted, segments, current_width, output_raw, output_width)
 

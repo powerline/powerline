@@ -71,7 +71,7 @@ def get_argparser(ArgumentParser=argparse.ArgumentParser):
 		     '(usually `shell\' or `tmux\').'
 	)
 	parser.add_argument(
-		'side', nargs='?', choices=('left', 'right', 'above', 'aboveleft'),
+		'side', nargs=1, choices=('left', 'right', 'above', 'aboveleft'),
 		help='Side: `left\' and `right\' represent left and right side '
 		     'respectively, `above\' emits lines that are supposed to be printed '
 		     'just above the prompt and `aboveleft\' is like concatenating '
@@ -159,7 +159,8 @@ def write_output(args, powerline, segment_info, write):
 			segment_info=segment_info,
 			mode=segment_info.get('mode', None),
 		):
-			write(line + '\n')
+			if line:
+				write(line + '\n')
 		args.side = args.side[len('above'):]
 
 	if args.side:
