@@ -60,7 +60,24 @@ def get_argparser(ArgumentParser=ConfigArgParser):
 		help='If action is `source\' then version-specific tmux configuration '
 		     'files are sourced, if it is `setenv\' then special '
 		     '(prefixed with `_POWERLINE\') tmux global environment variables '
-		     'are filled with data from powerline configuration.'
+		     'are filled with data from powerline configuration. '
+		     'Action `setup\' is just doing `setenv\' then `source\'.'
+	)
+	tpg = tmux_parser.add_mutually_exclusive_group()
+	tpg.add_argument(
+		'-s', '--source', action='store_true', default=None,
+		help='When using `setup\': always use configuration file sourcing. '
+		     'By default this is determined automatically based on tmux '
+		     'version: this is the default for tmux 1.8 and below.',
+	)
+	tpg.add_argument(
+		'-n', '--no-source', action='store_false', dest='source', default=None,
+		help='When using `setup\': in place of sourcing directly execute '
+		     'configuration files. That is, read each needed '
+		     'powerline-specific configuration file, substitute '
+		     '`$_POWERLINE_…\' variables with appropriate values and run '
+		     '`tmux config line\'. This is the default behaviour for '
+		     'tmux 1.9 and above.'
 	)
 
 	shell_parser = subparsers.add_parser('shell', help='Shell-specific commands')

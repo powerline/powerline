@@ -50,7 +50,21 @@ def set_tmux_environment(varname, value, remove=True):
 	'''
 	run_tmux_command('set-environment', '-g', varname, value)
 	if remove:
-		run_tmux_command('set-environment', '-r', varname)
+		try:
+			run_tmux_command('set-environment', '-r', varname)
+		except subprocess.CalledProcessError:
+			# On tmux-2.0 this command may fail for whatever reason. Since it is 
+			# critical just ignore the failure.
+			pass
+
+
+def source_tmux_file(fname):
+	'''Source tmux configuration file
+
+	:param str fname:
+		Full path to the sourced file.
+	'''
+	run_tmux_command('source', fname)
 
 
 NON_DIGITS = re.compile('[^0-9]+')
