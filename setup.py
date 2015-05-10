@@ -59,7 +59,7 @@ else:
 
 
 def get_version():
-	base_version = '2.1.3'
+	base_version = '2.1.4'
 	base_version += '.dev9999'
 	try:
 		return base_version + '+git.' + str(subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip())
@@ -70,7 +70,7 @@ def get_version():
 
 setup(
 	name='powerline-status',
-	version='2.1.3',
+	version='2.1.4',
 	description='The ultimate statusline/prompt utility.',
 	long_description=README,
 	classifiers=[
