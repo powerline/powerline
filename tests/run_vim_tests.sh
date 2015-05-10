@@ -6,7 +6,7 @@ if test -z "$VIM" ; then
 	if test -n "$USE_UCS2_PYTHON" ; then
 		NEW_VIM="$ROOT/tests/bot-ci/deps/vim/tip-$UCS2_PYTHON_VARIANT-ucs2-double/vim"
 		OLD_VIM="$ROOT/tests/bot-ci/deps/vim/v7-0-112-$UCS2_PYTHON_VARIANT-ucs2/vim"
-		opt_dir="/opt/cpython-ucs2-$UCS2_PYTHON_VARIANT"
+		opt_dir="$HOME/opt/cpython-ucs2-$UCS2_PYTHON_VARIANT"
 		main_path="$opt_dir/lib/python$UCS2_PYTHON_VARIANT"
 		site_path="$main_path/site-packages"
 		venv_main_path="$VIRTUAL_ENV/lib/python$UCS2_PYTHON_VARIANT"
