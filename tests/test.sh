@@ -29,6 +29,12 @@ if test "$TRAVIS" = true ; then
 	fi
 fi
 
+if ! which realpath ; then
+	realpath() {
+		$PYTHON -c 'import os, sys; print(os.path.realpath(sys.argv[1]))' "$1"
+	}
+fi
+
 export PYTHON="${PYTHON:=python}"
 export PYTHONPATH="${PYTHONPATH}${PYTHONPATH:+:}`realpath .`"
 for script in tests/run_*_tests.sh ; do
