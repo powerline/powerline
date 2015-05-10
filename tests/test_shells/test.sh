@@ -370,6 +370,9 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 				if test x$FAST$SH = x1dash ; then
 					continue
 				fi
+				if test x$FAST$SH = x1fish ; then
+					continue
+				fi
 				if test "x$ONLY_SHELL" != "x" && test "x$ONLY_SHELL" != "x$SH" ; then
 					continue
 				fi
