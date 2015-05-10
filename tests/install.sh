@@ -1,11 +1,32 @@
 #!/bin/bash
-git clone --depth=1 git://github.com/powerline/bot-ci tests/bot-ci
-git clone --depth=1 git://github.com/powerline/deps tests/bot-ci/deps
+
+set -e
+
+remote_master_hex() {
+	local url="$1"
+	git ls-remote "$url" refs/heads/master | cut -f1
+}
+
+checkout_cached_dir() {
+	local url="$1"
+	local target="$2"
+	if ! test -e "$target/.version" || \
+		test "$(cat "$target/.version")" != "$(remote_master_hex "$url")" ; then
+		rm -rf "$target"
+	fi
+	if ! test -d "$target" ; then
+		git clone --depth=1 "$url" "$target"
+		mv "$target"/.git/refs/heads/master .version
+		rm -rf "$target"/.git
+	fi
+}
+
+checkout_cached_dir git://github.com/powerline/bot-ci tests/bot-ci
+checkout_cached_dir git://github.com/powerline/deps tests/bot-ci/deps
 
 . tests/bot-ci/scripts/common/main.sh
 
-sudo apt-get install -qq libssl1.0.0
-sudo apt-get install -qq zsh tcsh mksh busybox socat realpath bc rc tmux
+mkdir -p "$HOME/opt"
 
 if test -n "$USE_UCS2_PYTHON" ; then
 	pip install virtualenvwrapper
@@ -13,9 +34,9 @@ if test -n "$USE_UCS2_PYTHON" ; then
 	. virtualenvwrapper.sh
 	set -e
 	archive="${PWD:-$(pwd)}/tests/bot-ci/deps/cpython-ucs2/cpython-ucs2-${UCS2_PYTHON_VARIANT}.tar.gz"
-	sudo sh -c "cd /opt && tar xzf $archive"
-	PYTHON="/opt/cpython-ucs2-$UCS2_PYTHON_VARIANT/bin/python$UCS2_PYTHON_VARIANT"
-	export LD_LIBRARY_PATH="/opt/cpython-ucs2-$UCS2_PYTHON_VARIANT/lib${LD_LIBRARY_PATH:+:}${LD_LIBRARY_PATH}"
+	sh -c "cd $HOME/opt && tar xzf $archive"
+	PYTHON="$HOME/opt/cpython-ucs2-$UCS2_PYTHON_VARIANT/bin/python$UCS2_PYTHON_VARIANT"
+	export LD_LIBRARY_PATH="$HOME/opt/cpython-ucs2-$UCS2_PYTHON_VARIANT/lib${LD_LIBRARY_PATH:+:}${LD_LIBRARY_PATH}"
 	set +e
 	mkvirtualenv -p "$PYTHON" cpython-ucs2-$UCS2_PYTHON_VARIANT
 	set -e
@@ -37,11 +58,11 @@ else
 fi
 if test "$PYTHON_IMPLEMENTATION" = "CPython" ; then
 	archive="${PWD:-$(pwd)}/tests/bot-ci/deps/zpython/zsh-${PYTHON_MM}${USE_UCS2_PYTHON:+-ucs2}.tar.gz"
-	sudo sh -c "cd /opt && tar xzf $archive"
+	sh -c "cd $HOME/opt && tar xzf $archive"
 fi
 
 archive="${PWD:-$(pwd)}/tests/bot-ci/deps/fish/fish.tar.gz"
-sudo sh -c "cd /opt && tar xzf $archive"
+sh -c "cd $HOME/opt && tar xzf $archive"
 
 mkdir tests/vim-plugins
 
@@ -52,6 +73,4 @@ for archive in "$ROOT"/tests/bot-ci/deps/vim-plugins/*.tar.gz ; do
 	)
 done
 
-# Travis has too outdated fish. It cannot be used for tests.
-# sudo apt-get install fish
 true
