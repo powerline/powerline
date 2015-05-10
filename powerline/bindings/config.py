@@ -62,7 +62,7 @@ def get_tmux_configs(version):
 			yield (fname, priority + file_version.minor * 10 + file_version.major * 10000)
 
 
-def source_tmux_files(pl, args, source_tmux_file=source_tmux_file):
+def source_tmux_files(pl, args, tmux_version=None, source_tmux_file=source_tmux_file):
 	'''Source relevant version-specific tmux configuration files
 
 	Files are sourced in the following order:
@@ -70,9 +70,9 @@ def source_tmux_files(pl, args, source_tmux_file=source_tmux_file):
 	* If files for same versions are to be sourced then first _minus files are 
 	  sourced, then _plus files and then files without _minus or _plus suffixes.
 	'''
-	version = get_tmux_version(pl)
+	tmux_version = tmux_version or get_tmux_version(pl)
 	source_tmux_file(os.path.join(TMUX_CONFIG_DIRECTORY, 'powerline-base.conf'))
-	for fname, priority in sorted(get_tmux_configs(version), key=(lambda v: v[1])):
+	for fname, priority in sorted(get_tmux_configs(tmux_version), key=(lambda v: v[1])):
 		source_tmux_file(fname)
 	if not os.environ.get('POWERLINE_COMMAND'):
 		cmd = deduce_command()
@@ -172,21 +172,15 @@ def init_tmux_environment(pl, args, set_tmux_environment=set_tmux_environment):
 		' ' * powerline.renderer.strwidth(left_dividers['hard'])))
 
 
-def tmux_setup(pl, args):
-	init_tmux_environment(pl, args)
-	source_tmux_files(pl, args)
-
-
 TMUX_VAR_RE = re.compile('\$(_POWERLINE_\w+)')
 
 
-def tmux_setup_nosource(pl, args):
+def tmux_setup(pl, args):
 	tmux_environ = {}
+	tmux_version = get_tmux_version(pl)
 
-	def set_tmux_environment(varname, value, remove=True):
+	def set_tmux_environment_nosource(varname, value, remove=True):
 		tmux_environ[varname] = value
-
-	init_tmux_environment(pl, args, set_tmux_environment=set_tmux_environment)
 
 	def replace_cb(match):
 		return tmux_environ[match.group(1)]
@@ -194,7 +188,7 @@ def tmux_setup_nosource(pl, args):
 	def replace_env(s):
 		return TMUX_VAR_RE.subn(replace_cb, s)[0]
 
-	def source_tmux_file(fname):
+	def source_tmux_file_nosource(fname):
 		with open(fname) as fd:
 			for line in fd:
 				if line.startswith('#') or line == '\n':
@@ -203,7 +197,18 @@ def tmux_setup_nosource(pl, args):
 				args = [args[0]] + [replace_env(arg) for arg in args[1:]]
 				run_tmux_command(*args)
 
-	source_tmux_files(pl, args, source_tmux_file=source_tmux_file)
+	if args.source is None:
+		args.source = tmux_version < (1, 9)
+
+	if args.source:
+		ste = set_tmux_environment
+		stf = source_tmux_file
+	else:
+		ste = set_tmux_environment_nosource
+		stf = source_tmux_file_nosource
+
+	init_tmux_environment(pl, args, set_tmux_environment=ste)
+	source_tmux_files(pl, args, tmux_version=tmux_version, source_tmux_file=stf)
 
 
 def get_main_config(args):
