@@ -89,6 +89,7 @@ def source_tmux_files(pl, args, tmux_version=None, source_tmux_file=source_tmux_
 class EmptyArgs(object):
 	def __init__(self, ext, config_path):
 		self.ext = [ext]
+		self.side = 'left'
 		self.config_path = None
 
 	def __getattr__(self, attr):
