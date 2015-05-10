@@ -20,6 +20,7 @@
 		"cwd":                     "information:additional",
 		"cwd:current_folder":      "information:regular",
 		"cwd:divider":             { "fg": "solarized:base1", "bg": "solarized:base01", "attrs": [] },
+		"network_load":            { "fg": "solarized:base1", "bg": "solarized:base03", "attrs": [] },
 		"hostname":                { "fg": "solarized:base3", "bg": "solarized:base01", "attrs": [] },
 		"environment":             { "fg": "solarized:base3", "bg": "solarized:green", "attrs": [] },
 		"attached_clients":        { "fg": "solarized:base3", "bg": "solarized:green", "attrs": [] },
