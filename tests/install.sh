@@ -4,9 +4,6 @@ git clone --depth=1 git://github.com/powerline/deps tests/bot-ci/deps
 
 . tests/bot-ci/scripts/common/main.sh
 
-sudo apt-get install -qq libssl1.0.0
-sudo apt-get install -qq zsh tcsh mksh busybox socat realpath bc rc tmux
-
 mkdir -p "$HOME/opt"
 
 if test -n "$USE_UCS2_PYTHON" ; then
@@ -54,6 +51,4 @@ for archive in "$ROOT"/tests/bot-ci/deps/vim-plugins/*.tar.gz ; do
 	)
 done
 
-# Travis has too outdated fish. It cannot be used for tests.
-# sudo apt-get install fish
 true
