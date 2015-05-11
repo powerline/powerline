@@ -478,7 +478,9 @@ def _emul_exists(ident):
 def _emul_line2byte(line):
 	buflines = current.buffer._buf_lines
 	if line == len(buflines) + 1:
-		return sum((len(s) for s in buflines)) + 1
+		if buflines == ['']:
+			return 0
+		return sum((len(s) for s in buflines)) + len(buflines) + 1
 	raise NotImplementedError
 
 
@@ -573,6 +575,7 @@ _abuf = None
 class _Buffer(object):
 	def __init__(self, name=None):
 		global _last_bufnr
+		import os
 		_last_bufnr += 1
 		bufnr = _last_bufnr
 		self.number = bufnr
@@ -591,6 +594,7 @@ class _Buffer(object):
 		self._buf_lines = ['']
 		self._undostate = [self._buf_lines[:]]
 		self._undo_written = len(self._undostate)
+		self._cwd = getattr(os, 'getcwdu', os.getcwd)()
 		buffers[bufnr] = self
 
 	@property
@@ -706,6 +710,8 @@ def _get_segment_info():
 	window = current.window
 	buffer = current.buffer
 	tabpage = current.tabpage
+	vpos = _emul_getpos('v')
+	dpos = _emul_getpos('.')
 	return {
 		'window': window,
 		'winnr': window.number,
@@ -716,6 +722,36 @@ def _get_segment_info():
 		'window_id': window._window_id,
 		'mode': mode,
 		'encoding': options['encoding'],
+		'input': {
+			'visual_range': [
+				vpos + [_emul_virtcol(vpos[1:])],
+				dpos + [_emul_virtcol(dpos[1:])]
+			],
+			'modified_indicator': buffer.options['modified'],
+			'paste_indicator': options['paste'],
+			'readonly_indicator': buffer.options['readonly'],
+			'buffer_name': buffer.name,
+			'file_size': _emul_line2byte(_emul_line('$') + 1) - 1,
+			'file_format': buffer.options['fileformat'],
+			'file_encoding': buffer.options['fileencoding'],
+			'file_type': buffer.options['filetype'],
+			'window_title': window.vars.get('quickfix_title', ''),
+			'window_position': [window.cursor[0], window.cursor[1] + 1],
+			'buffer_len': len(buffer),
+			'displayed_lines': [_emul_line('w0'), _emul_line('w$')],
+			'virtcol': _emul_virtcol('.'),
+			'textwidth': buffer.options['textwidth'],
+			'modified_buffers': [buf.number for buf in buffers if buf.options['modified']],
+			'buffer_type': buffer.options['buftype'],
+			'trailing_whitespace': dict(enumerate(list((i + 1 for i, line in enumerate(buffer) if line.endswith((' ', '\t')))))).get(0),
+			'current_tab_number': current.tabpage.number,
+			'current_window_number': current.window.number,
+			'current_buffer_number': current.buffer.number,
+			'tab_modified_indicator': any((win.buffer.options['modified'] for win in tabpage.windows)),
+		},
+		'environ': _environ,
+		'getcwd': lambda: buffer._cwd,
+		'home': _environ.get('HOME'),
 	}
 
 
@@ -864,6 +900,7 @@ class _WithBufOption(object):
 	def __enter__(self):
 		self.buffer = current.buffer
 		self.old = _set_dict(self.buffer.options, self.new, _set_bufoption)[0]
+		return _get_segment_info()
 
 	def __exit__(self, *args):
 		self.buffer.options.update(self.old)
@@ -889,6 +926,7 @@ class _WithDict(object):
 
 	def __enter__(self):
 		self.old, self.na = _set_dict(self.d, self.new)
+		return _get_segment_info()
 
 	def __exit__(self, *args):
 		self.d.update(self.old)
@@ -938,6 +976,7 @@ class _WithGlobal(object):
 		self.empty = object()
 		self.old = dict(((key, globals().get(key, self.empty)) for key in self.kwargs))
 		globals().update(self.kwargs)
+		return _get_segment_info()
 
 	def __exit__(self, *args):
 		for k, v in self.old.items():
