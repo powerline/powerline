@@ -146,7 +146,7 @@ def visual_range(pl, segment_info, CTRL_V_text='{rows} x {vcols}', v_text_onelin
 		scol=scol, ecol=ecol,
 		svcol=svcol, evcol=evcol,
 		rows=rows, cols=cols, vcols=vcols,
-	)
+	) or None
 
 
 @with_input('modified_indicator')
