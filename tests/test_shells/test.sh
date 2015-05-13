@@ -188,6 +188,7 @@ ln -s "$(which mktemp)" tests/shell/path
 ln -s "$(which grep)" tests/shell/path
 ln -s "$(which sed)" tests/shell/path
 ln -s "$(which rm)" tests/shell/path
+ln -s "$(which tr)" tests/shell/path
 ln -s "$(which uname)" tests/shell/path
 ln -s "$(which test)" tests/shell/path
 ln -s "$(which pwd)" tests/shell/path
