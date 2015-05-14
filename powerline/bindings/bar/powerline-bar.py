@@ -5,7 +5,7 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 import sys
 import time
 
-from threading import Lock
+from threading import Lock, Timer
 from argparse import ArgumentParser
 
 from powerline import Powerline
@@ -20,13 +20,15 @@ class BarPowerline(Powerline):
 		super(BarPowerline, self).init(ext='wm', renderer_module='bar')
 
 
-def render(event=None, data=None, sub=None):
+def render(reschedule=False):
+	if reschedule:
+		Timer(0.5, render, kwargs={"reschedule": True}).start()
+
 	global lock
 	with lock:
 		write(powerline.render())
 		write('\n')
 		sys.stdout.flush()
-
 
 if __name__ == '__main__':
 	parser = ArgumentParser(description='Powerline BAR bindings.')
@@ -37,16 +39,19 @@ if __name__ == '__main__':
 	args = parser.parse_args()
 	powerline = BarPowerline()
 
-	interval = 0.5
 	lock = Lock()
 
 	write = get_unicode_writer(encoding='utf-8')
+	render(reschedule=True)
 
 	if args.i3:
-		import i3
-		sub = i3.Subscription(render, 'workspace')
+		try:
+			import i3ipc
+			conn = i3ipc.Connection()
+			conn.on('workspace::focus', lambda conn, evt: render())
+			conn.main()
+		except ImportError:
+			import i3
+			i3.Subscription(lambda evt, data, sub: print(render()), 'workspace')
 
-	while True:
-		start_time = monotonic()
-		render()
-		time.sleep(max(interval - (monotonic() - start_time), 0.1))
+	while True: pass
