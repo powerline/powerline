@@ -30,6 +30,7 @@ def render(reschedule=False):
 		write('\n')
 		sys.stdout.flush()
 
+
 if __name__ == '__main__':
 	parser = ArgumentParser(description='Powerline BAR bindings.')
 	parser.add_argument(
@@ -47,11 +48,14 @@ if __name__ == '__main__':
 	if args.i3:
 		try:
 			import i3ipc
-			conn = i3ipc.Connection()
-			conn.on('workspace::focus', lambda conn, evt: render())
-			conn.main()
 		except ImportError:
 			import i3
 			i3.Subscription(lambda evt, data, sub: print(render()), 'workspace')
+		else:
+			conn = i3ipc.Connection()
+			conn.on('workspace::focus', lambda conn, evt: render())
+			conn.on('mode', lambda conn, evt: render())
+			conn.main()
 
-	while True: pass
+	while True:
+		time.sleep(0.5)
