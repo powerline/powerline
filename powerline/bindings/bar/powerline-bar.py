@@ -20,17 +20,6 @@ class BarPowerline(Powerline):
 		super(BarPowerline, self).init(ext='wm', renderer_module='bar')
 
 
-def render(reschedule=False):
-	if reschedule:
-		Timer(0.5, render, kwargs={"reschedule": True}).start()
-
-	global lock
-	with lock:
-		write(powerline.render())
-		write('\n')
-		sys.stdout.flush()
-
-
 if __name__ == '__main__':
 	parser = ArgumentParser(description='Powerline BAR bindings.')
 	parser.add_argument(
@@ -39,10 +28,24 @@ if __name__ == '__main__':
 	)
 	args = parser.parse_args()
 	powerline = BarPowerline()
-
 	lock = Lock()
-
+	modes = [None]
 	write = get_unicode_writer(encoding='utf-8')
+
+	def render(reschedule=False):
+		if reschedule:
+			Timer(0.5, render, kwargs={"reschedule": True}).start()
+
+		global lock
+		with lock:
+			write(powerline.render(mode=modes[0]))
+			write('\n')
+			sys.stdout.flush()
+
+	def update(evt):
+		modes[0] = evt.change
+		render()
+
 	render(reschedule=True)
 
 	if args.i3:
@@ -54,8 +57,8 @@ if __name__ == '__main__':
 		else:
 			conn = i3ipc.Connection()
 			conn.on('workspace::focus', lambda conn, evt: render())
-			conn.on('mode', lambda conn, evt: render())
+			conn.on('mode', lambda conn, evt: update(evt))
 			conn.main()
 
 	while True:
-		time.sleep(0.5)
+		time.sleep(1e10)

@@ -3,6 +3,7 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 
 from threading import Thread
 
+from powerline.theme import requires_segment_info
 from powerline.segments import Segment, with_docstring
 
 
@@ -25,8 +26,13 @@ def calcgrp(w):
 	return group
 
 
-def workspaces(pl, strip=0):
+def workspaces(pl, only_show=None, strip=0):
 	'''Return list of used workspaces
+
+	:param list only_show:
+		Specifies which workspaces to show.
+		Valid entries are "visible", "urgent" and "focused".
+		If omitted or ``null`` all workspaces are shown.
 
 	:param int strip:
 		Specifies how many characters from the front of each workspace name should
@@ -40,33 +46,20 @@ def workspaces(pl, strip=0):
 	return [{
 		'contents': w['name'][min(len(w['name']),strip):],
 		'highlight_groups': calcgrp(w)
-	} for w in conn.get_workspaces()]
-
-class ModeSegment(Segment):
-	def startup(self, pl, shutdown_event):
-		self.mode = 'default'
-
-		def callback(conn, e):
-			self.mode = e.change
-
-		conn = i3ipc.Connection()
-		conn.on('mode', callback)
-		self.thread = Thread(target=conn.main)
-		self.thread.daemon = True
-		self.thread.start()
-
-	def __call__(self, pl, default=None):
-		if self.mode == 'default':
-			return default
-		return self.mode
+	} for w in conn.get_workspaces() if not only_show or any(w[typ] for typ in only_show)]
 
 
-mode = with_docstring(ModeSegment(),
-'''Returns the current i3 mode
+@requires_segment_info
+def mode(pl, segment_info, names={"default": None}):
+	'''Returns current i3 mode
 
-:param str default:
-	Specifies the name to be displayed instead of "default".
-	By default the segment is left out in the default mode.
+	:param dict names:
+		Specifies the string to show for various modes.
+		Use ``null`` to hide a mode (``default`` is hidden by default).
 
-Highligh groups used: ``mode``
-''')
+	Highligh groups used: ``mode``
+	'''
+	mode = segment_info['mode']
+	if mode in names:
+		return names[mode]
+	return mode
