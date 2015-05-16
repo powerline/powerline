@@ -29,7 +29,7 @@ if __name__ == '__main__':
 	args = parser.parse_args()
 	powerline = BarPowerline()
 	lock = Lock()
-	modes = [None]
+	modes = ["default"]
 	write = get_unicode_writer(encoding='utf-8')
 
 	def render(reschedule=False):
