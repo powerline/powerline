@@ -51,8 +51,8 @@ Add the following to :file:`~/.config/qtile/config.py`:
 
 .. _bar-usage:
 
-LemonBoy’s bar
-==============
+bar-aint-recursive
+==================
 
 To run the bar simply pipe the output of the binding script into ``bar`` and 
 specify appropriate options, for example like this::
@@ -62,6 +62,9 @@ specify appropriate options, for example like this::
 to run with i3, simply ``exec`` this in i3 config file::
 
     exec python /path/to/powerline/bindings/bar/powerline-bar.py --i3 | bar
+
+Running the binding in i3-mode will require `i3ipc <https://github.com/acrisci/i3ipc-python>`_
+(or the outdated `i3-py <https://github.com/ziberna/i3-py>`_).
 
 See the `bar documentation <https://github.com/LemonBoy/bar>`_ for more 
 information and options.
