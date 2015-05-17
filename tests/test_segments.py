@@ -6,6 +6,7 @@ import os
 
 from functools import partial
 from collections import namedtuple
+from time import sleep
 
 from powerline.segments import shell, tmux, pdb
 from powerline.lib.vcs import get_fallback_create_watcher
@@ -397,8 +398,6 @@ class TestNet(TestCommon):
 			self.assertEqual(self.module.internal_ip(pl=pl, ipv=6), None)
 
 	def test_network_load(self):
-		from time import sleep
-
 		def gb(interface):
 			return None
 
@@ -430,24 +429,24 @@ class TestNet(TestCommon):
 				while not self.module.network_load.interfaces.get('eth0', {}).get('prev', (None, None))[1]:
 					sleep(0.1)
 				self.assertEqual(self.module.network_load(pl=pl, interface='eth0'), [
-					{'divider_highlight_group': 'background:divider', 'contents': 'DL  1 KiB/s', 'highlight_groups': ['network_load_recv', 'network_load']},
-					{'divider_highlight_group': 'background:divider', 'contents': 'UL  2 KiB/s', 'highlight_groups': ['network_load_sent', 'network_load']},
+					{'divider_highlight_group': 'network_load:divider', 'contents': 'DL  1 KiB/s', 'highlight_groups': ['network_load_recv', 'network_load']},
+					{'divider_highlight_group': 'network_load:divider', 'contents': 'UL  2 KiB/s', 'highlight_groups': ['network_load_sent', 'network_load']},
 				])
 				self.assertEqual(self.module.network_load(pl=pl, interface='eth0', recv_format='r {value}', sent_format='s {value}'), [
-					{'divider_highlight_group': 'background:divider', 'contents': 'r 1 KiB/s', 'highlight_groups': ['network_load_recv', 'network_load']},
-					{'divider_highlight_group': 'background:divider', 'contents': 's 2 KiB/s', 'highlight_groups': ['network_load_sent', 'network_load']},
+					{'divider_highlight_group': 'network_load:divider', 'contents': 'r 1 KiB/s', 'highlight_groups': ['network_load_recv', 'network_load']},
+					{'divider_highlight_group': 'network_load:divider', 'contents': 's 2 KiB/s', 'highlight_groups': ['network_load_sent', 'network_load']},
 				])
 				self.assertEqual(self.module.network_load(pl=pl, recv_format='r {value}', sent_format='s {value}', suffix='bps', interface='eth0'), [
-					{'divider_highlight_group': 'background:divider', 'contents': 'r 1 Kibps', 'highlight_groups': ['network_load_recv', 'network_load']},
-					{'divider_highlight_group': 'background:divider', 'contents': 's 2 Kibps', 'highlight_groups': ['network_load_sent', 'network_load']},
+					{'divider_highlight_group': 'network_load:divider', 'contents': 'r 1 Kibps', 'highlight_groups': ['network_load_recv', 'network_load']},
+					{'divider_highlight_group': 'network_load:divider', 'contents': 's 2 Kibps', 'highlight_groups': ['network_load_sent', 'network_load']},
 				])
 				self.assertEqual(self.module.network_load(pl=pl, recv_format='r {value}', sent_format='s {value}', si_prefix=True, interface='eth0'), [
-					{'divider_highlight_group': 'background:divider', 'contents': 'r 1 kB/s', 'highlight_groups': ['network_load_recv', 'network_load']},
-					{'divider_highlight_group': 'background:divider', 'contents': 's 2 kB/s', 'highlight_groups': ['network_load_sent', 'network_load']},
+					{'divider_highlight_group': 'network_load:divider', 'contents': 'r 1 kB/s', 'highlight_groups': ['network_load_recv', 'network_load']},
+					{'divider_highlight_group': 'network_load:divider', 'contents': 's 2 kB/s', 'highlight_groups': ['network_load_sent', 'network_load']},
 				])
 				self.assertEqual(self.module.network_load(pl=pl, recv_format='r {value}', sent_format='s {value}', recv_max=0, interface='eth0'), [
-					{'divider_highlight_group': 'background:divider', 'contents': 'r 1 KiB/s', 'highlight_groups': ['network_load_recv_gradient', 'network_load_gradient', 'network_load_recv', 'network_load'], 'gradient_level': 100},
-					{'divider_highlight_group': 'background:divider', 'contents': 's 2 KiB/s', 'highlight_groups': ['network_load_sent', 'network_load']},
+					{'divider_highlight_group': 'network_load:divider', 'contents': 'r 1 KiB/s', 'highlight_groups': ['network_load_recv_gradient', 'network_load_gradient', 'network_load_recv', 'network_load'], 'gradient_level': 100},
+					{'divider_highlight_group': 'network_load:divider', 'contents': 's 2 KiB/s', 'highlight_groups': ['network_load_sent', 'network_load']},
 				])
 
 				class ApproxEqual(object):
@@ -455,8 +454,8 @@ class TestNet(TestCommon):
 						return abs(i - 50.0) < 1
 
 				self.assertEqual(self.module.network_load(pl=pl, recv_format='r {value}', sent_format='s {value}', sent_max=4800, interface='eth0'), [
-					{'divider_highlight_group': 'background:divider', 'contents': 'r 1 KiB/s', 'highlight_groups': ['network_load_recv', 'network_load']},
-					{'divider_highlight_group': 'background:divider', 'contents': 's 2 KiB/s', 'highlight_groups': ['network_load_sent_gradient', 'network_load_gradient', 'network_load_sent', 'network_load'], 'gradient_level': ApproxEqual()},
+					{'divider_highlight_group': 'network_load:divider', 'contents': 'r 1 KiB/s', 'highlight_groups': ['network_load_recv', 'network_load']},
+					{'divider_highlight_group': 'network_load:divider', 'contents': 's 2 KiB/s', 'highlight_groups': ['network_load_sent_gradient', 'network_load_gradient', 'network_load_sent', 'network_load'], 'gradient_level': ApproxEqual()},
 				])
 			finally:
 				self.module.network_load.shutdown()

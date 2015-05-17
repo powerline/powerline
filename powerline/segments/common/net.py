@@ -247,7 +247,7 @@ class NetworkLoadSegment(KwThreadedSegment):
 				hl_groups[:0] = (group + '_gradient' for group in hl_groups)
 			r.append({
 				'contents': format.format(value=humanize_bytes(value, suffix, si_prefix)),
-				'divider_highlight_group': 'background:divider',
+				'divider_highlight_group': 'network_load:divider',
 				'highlight_groups': hl_groups,
 			})
 			if is_gradient:
@@ -287,7 +287,7 @@ falls back to reading
 	Maximum number of sent bytes per second. Is only used to compute gradient
 	level.
 
-Divider highlight group used: ``background:divider``.
+Divider highlight group used: ``network_load:divider``.
 
 Highlight groups used: ``network_load_sent_gradient`` (gradient) or ``network_load_recv_gradient`` (gradient) or ``network_load_gradient`` (gradient), ``network_load_sent`` or ``network_load_recv`` or ``network_load``.
 ''')
