@@ -748,6 +748,8 @@ def tab(pl, segment_info, end=False):
 
 	:param bool end:
 		In place of starting region for the current tab end it.
+
+	No highlight groups are used (literal segment).
 	'''
 	try:
 		return [{

@@ -172,6 +172,15 @@ Detailed description of used dictionary keys:
     <config-themes-seg-after>`, :ref:`before <config-themes-seg-before>`) will 
     be ignored.
 
+    .. note::
+       If target is inclusion of the segment in powerline upstream all segment 
+       functions that output *only* subsegments with ``literal_contents`` key
+       must contain the following string in documentation::
+
+           No highlight groups are used (literal segment).
+
+       String must be present on the separate line.
+
 .. _dev-segments-draw_inner_divider:
 
 ``draw_hard_divider``, ``draw_soft_divider``, ``draw_inner_divider``

@@ -381,7 +381,10 @@ def check_segment_function(function_name, data, context, echoerr):
 		hl_groups = []
 		divider_hl_group = None
 
+		hadproblem = False
+
 		if func.__doc__:
+			NO_H_G_USED_STR = 'No highlight groups are used (literal segment).'
 			H_G_USED_STR = 'Highlight groups used: '
 			LHGUS = len(H_G_USED_STR)
 			D_H_G_USED_STR = 'Divider highlight group used: '
@@ -391,6 +394,20 @@ def check_segment_function(function_name, data, context, echoerr):
 			for i, line in enumerate(func.__doc__.split('\n')):
 				if H_G_USED_STR in line:
 					idx = line.index(H_G_USED_STR) + LHGUS
+					if hl_groups is None:
+						idx -= LHGUS
+						mark = Mark(mark_name, i + 1, idx + 1, func.__doc__, pointer + idx)
+						echoerr(
+							context='Error while checking theme (key {key})'.format(key=context.key),
+							context_mark=function_name.mark,
+							problem=(
+								'found highlight group definition in addition to sentense stating that '
+								'no highlight groups are used'
+							),
+							problem_mark=mark,
+						)
+						hadproblem = True
+						continue
 					hl_groups.append((
 						line[idx:],
 						(mark_name, i + 1, idx + 1, func.__doc__),
@@ -400,9 +417,23 @@ def check_segment_function(function_name, data, context, echoerr):
 					idx = line.index(D_H_G_USED_STR) + LDHGUS + 2
 					mark = Mark(mark_name, i + 1, idx + 1, func.__doc__, pointer + idx)
 					divider_hl_group = MarkedUnicode(line[idx:-3], mark)
+				elif NO_H_G_USED_STR in line:
+					idx = line.index(NO_H_G_USED_STR)
+					if hl_groups:
+						mark = Mark(mark_name, i + 1, idx + 1, func.__doc__, pointer + idx)
+						echoerr(
+							context='Error while checking theme (key {key})'.format(key=context.key),
+							context_mark=function_name.mark,
+							problem=(
+								'found sentense stating that no highlight groups are used '
+								'in addition to highlight group definition'
+							),
+							problem_mark=mark,
+						)
+						hadproblem = True
+						continue
+					hl_groups = None
 				pointer += len(line) + len('\n')
-
-		hadproblem = False
 
 		if divider_hl_group:
 			r = hl_exists(divider_hl_group, data, context, echoerr, allow_gradients=True)
@@ -466,7 +497,7 @@ def check_segment_function(function_name, data, context, echoerr):
 								h[0], list_sep.join(r))
 						)
 					hadproblem = True
-		else:
+		elif hl_groups is not None:
 			r = hl_exists(function_name, data, context, echoerr, allow_gradients=True)
 			if r:
 				echoerr(
