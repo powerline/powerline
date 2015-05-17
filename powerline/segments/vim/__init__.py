@@ -740,3 +740,19 @@ def csv_col_current(pl, segment_info, display_name='auto', name_format=' ({colum
 		'contents': name_format.format(column_name=column_name),
 		'highlight_groups': ['csv:column_name', 'csv'],
 	}] if column_name else [])
+
+
+@requires_segment_info
+def tab(pl, segment_info, end=False):
+	'''Mark start of the clickable region for tabpage
+
+	:param bool end:
+		In place of starting region for the current tab end it.
+	'''
+	try:
+		return [{
+			'contents': None,
+			'literal_contents': (0, '%{tabnr}T'.format(tabnr=('' if end else segment_info['tabnr']))),
+		}]
+	except KeyError:
+		return None

@@ -153,9 +153,24 @@ All keys in segments returned by the function override those obtained from
 
 Detailed description of used dictionary keys:
 
+.. _dev-segments-contents:
+
 ``contents``
     Text displayed by segment. Should be a ``unicode`` (Python2) or ``str`` 
     (Python3) instance.
+
+``literal_contents``
+    Text that needs to be output literally (i.e. without passing through 
+    :py:meth:`powerline.renderer.strwidth` to determine length, through
+    :py:meth:`powerline.renderer.escape` to escape special characters and 
+    through :py:meth:`powerline.renderer.hl` to highlight it). Should be a tuple
+    ``(contents_length, contents)`` where ``contents_length`` is an integer and 
+    ``contents`` is a ``unicode`` (Python2) or ``str`` (Python3) instance.
+
+    If this key is present and its second value is true then other contents keys 
+    (:ref:`contents <dev-segments-contents>`, :ref:`after
+    <config-themes-seg-after>`, :ref:`before <config-themes-seg-before>`) will 
+    be ignored.
 
 .. _dev-segments-draw_inner_divider:
 

@@ -8,6 +8,9 @@
 				"exclude_function": "single_tab",
 				"segments": [
 					{
+						"function": "tab"
+					},
+					{
 						"function": "tabnr",
 						"after": " ",
 						"priority": 5
@@ -28,6 +31,12 @@
 						"priority": 5
 					}
 				]
+			},
+			{
+				"function": "tab",
+				"args": {
+					"end": true
+				}
 			},
 			{
 				"type": "segment_list",
