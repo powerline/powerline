@@ -9,7 +9,6 @@ from threading import Lock, Timer
 from argparse import ArgumentParser
 
 from powerline import Powerline
-from powerline.lib.monotonic import monotonic
 from powerline.lib.encoding import get_unicode_writer
 
 
@@ -29,12 +28,12 @@ if __name__ == '__main__':
 	args = parser.parse_args()
 	powerline = BarPowerline()
 	lock = Lock()
-	modes = ["default"]
+	modes = ['default']
 	write = get_unicode_writer(encoding='utf-8')
 
 	def render(reschedule=False):
 		if reschedule:
-			Timer(0.5, render, kwargs={"reschedule": True}).start()
+			Timer(0.5, render, kwargs={'reschedule': True}).start()
 
 		global lock
 		with lock:

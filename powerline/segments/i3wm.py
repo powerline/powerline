@@ -1,10 +1,7 @@
 # vim:fileencoding=utf-8:noet
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
-from threading import Thread
-
 from powerline.theme import requires_segment_info
-from powerline.segments import Segment, with_docstring
 
 
 conn = None
@@ -30,27 +27,28 @@ def workspaces(pl, only_show=None, strip=0):
 	'''Return list of used workspaces
 
 	:param list only_show:
-		Specifies which workspaces to show.
-		Valid entries are "visible", "urgent" and "focused".
-		If omitted or ``null`` all workspaces are shown.
+		Specifies which workspaces to show. Valid entries are ``"visible"``, 
+		``"urgent"`` and ``"focused"``. If omitted or ``null`` all workspaces 
+		are shown.
 
 	:param int strip:
-		Specifies how many characters from the front of each workspace name should
-		be stripped (e.g. to remove workspace numbers). Defaults to zero.
+		Specifies how many characters from the front of each workspace name 
+		should be stripped (e.g. to remove workspace numbers). Defaults to zero.
 
-	Highlight groups used: ``workspace``, ``w_visible``, ``w_focused``, ``w_urgent``
+	Highlight groups used: ``workspace`` or ``w_visible``, ``workspace`` or ``w_focused``, ``workspace`` or ``w_urgent``.
 	'''
 	global conn
-	if not conn: conn = i3ipc.Connection()
+	if not conn:
+		conn = i3ipc.Connection()
 
 	return [{
-		'contents': w['name'][min(len(w['name']),strip):],
+		'contents': w['name'][min(len(w['name']), strip):],
 		'highlight_groups': calcgrp(w)
-	} for w in conn.get_workspaces() if not only_show or any(w[typ] for typ in only_show)]
+	} for w in conn.get_workspaces() if not only_show or any((w[typ] for typ in only_show))]
 
 
 @requires_segment_info
-def mode(pl, segment_info, names={"default": None}):
+def mode(pl, segment_info, names={'default': None}):
 	'''Returns current i3 mode
 
 	:param dict names:
