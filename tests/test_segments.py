@@ -7,7 +7,7 @@ import os
 from functools import partial
 from collections import namedtuple
 
-from powerline.segments import shell, tmux, pdb
+from powerline.segments import shell, tmux, pdb, i3wm
 from powerline.lib.vcs import get_fallback_create_watcher
 from powerline.lib.unicode import out_u
 
@@ -814,6 +814,50 @@ class TestWthr(TestCommon):
 				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '19°C', 'gradient_level': 70.0}
 			])
 			self.module.weather.shutdown()
+
+
+class TestI3WM(TestCase):
+	def test_workspaces(self):
+		pl = Pl()
+		with replace_attr(i3wm, 'conn', Args(get_workspaces=lambda: iter([
+			{'name': '1: w1', 'focused': False, 'urgent': False, 'visible': False},
+			{'name': '2: w2', 'focused': False, 'urgent': False, 'visible': True},
+			{'name': '3: w3', 'focused': False, 'urgent': True, 'visible': True},
+			{'name': '4: w4', 'focused': True, 'urgent': True, 'visible': True},
+		]))):
+			self.assertEqual(i3wm.workspaces(pl=pl), [
+				{'contents': '1: w1', 'highlight_groups': ['workspace']},
+				{'contents': '2: w2', 'highlight_groups': ['w_visible', 'workspace']},
+				{'contents': '3: w3', 'highlight_groups': ['w_urgent', 'w_visible', 'workspace']},
+				{'contents': '4: w4', 'highlight_groups': ['w_focused', 'w_urgent', 'w_visible', 'workspace']},
+			])
+			self.assertEqual(i3wm.workspaces(pl=pl, only_show=None), [
+				{'contents': '1: w1', 'highlight_groups': ['workspace']},
+				{'contents': '2: w2', 'highlight_groups': ['w_visible', 'workspace']},
+				{'contents': '3: w3', 'highlight_groups': ['w_urgent', 'w_visible', 'workspace']},
+				{'contents': '4: w4', 'highlight_groups': ['w_focused', 'w_urgent', 'w_visible', 'workspace']},
+			])
+			self.assertEqual(i3wm.workspaces(pl=pl, only_show=['focused', 'urgent']), [
+				{'contents': '3: w3', 'highlight_groups': ['w_urgent', 'w_visible', 'workspace']},
+				{'contents': '4: w4', 'highlight_groups': ['w_focused', 'w_urgent', 'w_visible', 'workspace']},
+			])
+			self.assertEqual(i3wm.workspaces(pl=pl, only_show=['visible']), [
+				{'contents': '2: w2', 'highlight_groups': ['w_visible', 'workspace']},
+				{'contents': '3: w3', 'highlight_groups': ['w_urgent', 'w_visible', 'workspace']},
+				{'contents': '4: w4', 'highlight_groups': ['w_focused', 'w_urgent', 'w_visible', 'workspace']},
+			])
+			self.assertEqual(i3wm.workspaces(pl=pl, only_show=['visible'], strip=3), [
+				{'contents': 'w2', 'highlight_groups': ['w_visible', 'workspace']},
+				{'contents': 'w3', 'highlight_groups': ['w_urgent', 'w_visible', 'workspace']},
+				{'contents': 'w4', 'highlight_groups': ['w_focused', 'w_urgent', 'w_visible', 'workspace']},
+			])
+
+	def test_mode(self):
+		pl = Pl()
+		self.assertEqual(i3wm.mode(pl=pl, segment_info={'mode': 'default'}), None)
+		self.assertEqual(i3wm.mode(pl=pl, segment_info={'mode': 'test'}), 'test')
+		self.assertEqual(i3wm.mode(pl=pl, segment_info={'mode': 'default'}, names={'default': 'test'}), 'test')
+		self.assertEqual(i3wm.mode(pl=pl, segment_info={'mode': 'test'}, names={'default': 'test', 'test': 't'}), 't')
 
 
 class TestMail(TestCommon):

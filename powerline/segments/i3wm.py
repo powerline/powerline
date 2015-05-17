@@ -5,10 +5,6 @@ from powerline.theme import requires_segment_info
 
 
 conn = None
-try:
-    import i3ipc
-except ImportError:
-    import i3 as conn
 
 
 def calcgrp(w):
@@ -39,7 +35,12 @@ def workspaces(pl, only_show=None, strip=0):
 	'''
 	global conn
 	if not conn:
-		conn = i3ipc.Connection()
+		try:
+			import i3ipc
+		except ImportError:
+			import i3 as conn
+		else:
+			conn = i3ipc.Connection()
 
 	return [{
 		'contents': w['name'][min(len(w['name']), strip):],
