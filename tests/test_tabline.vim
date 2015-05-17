@@ -16,7 +16,7 @@ catch
 	cquit
 endtry
 
-if result isnot# '%#Pl_247_10395294_236_3158064_NONE# 1 ./abc  2 ./def %#Pl_236_3158064_240_5789784_NONE# %#Pl_250_12369084_240_5789784_NONE#3 ./%#Pl_231_16777215_240_5789784_bold#ghi %#Pl_240_5789784_236_3158064_NONE# %#Pl_231_16777215_236_3158064_NONE#                                         %#Pl_252_13684944_236_3158064_NONE# %#Pl_235_2500134_252_13684944_bold# Tabs '
+if result isnot# '%1T%#Pl_247_10395294_236_3158064_NONE# 1 ./abc  %2T2 ./def %#Pl_236_3158064_240_5789784_NONE# %3T%#Pl_250_12369084_240_5789784_NONE#3 ./%#Pl_231_16777215_240_5789784_bold#ghi %#Pl_240_5789784_236_3158064_NONE# %T%#Pl_231_16777215_236_3158064_NONE#                                         %#Pl_252_13684944_236_3158064_NONE# %#Pl_235_2500134_252_13684944_bold# Tabs '
 	call writefile(['Unexpected tabline', result], 'message.fail')
 	cquit
 endif
@@ -30,7 +30,7 @@ catch
 	cquit
 endtry
 
-if result isnot# '%#Pl_247_10395294_236_3158064_NONE# 1 ./abc  2 ./def %#Pl_236_3158064_240_5789784_NONE# %#Pl_250_12369084_240_5789784_NONE#3 ./%#Pl_231_16777215_240_5789784_bold#ghi %#Pl_240_5789784_236_3158064_NONE# %#Pl_231_16777215_236_3158064_NONE#                                         %#Pl_252_13684944_236_3158064_NONE# %#Pl_235_2500134_252_13684944_bold# Bufs '
+if result isnot# '%T%#Pl_247_10395294_236_3158064_NONE# 1 ./abc  2 ./def %#Pl_236_3158064_240_5789784_NONE# %#Pl_250_12369084_240_5789784_NONE#3 ./%#Pl_231_16777215_240_5789784_bold#ghi %#Pl_240_5789784_236_3158064_NONE# %#Pl_231_16777215_236_3158064_NONE#                                         %#Pl_252_13684944_236_3158064_NONE# %#Pl_235_2500134_252_13684944_bold# Bufs '
 	call writefile(['Unexpected tabline (2)', result], 'message.fail')
 	cquit
 endif
@@ -42,7 +42,7 @@ catch
 	call writefile(['Exception while evaluating &tabline (3)', v:exception], 'message.fail')
 endtry
 
-if result isnot# '%#Pl_247_10395294_236_3158064_NONE# 1 ./abc  2 ./def %#Pl_236_3158064_240_5789784_NONE# %#Pl_250_12369084_240_5789784_NONE#3 ./%#Pl_231_16777215_240_5789784_bold#ghi %#Pl_240_5789784_236_3158064_NONE# %#Pl_231_16777215_236_3158064_NONE#                                         %#Pl_252_13684944_236_3158064_NONE# %#Pl_235_2500134_252_13684944_bold# Bufs '
+if result isnot# '%T%#Pl_247_10395294_236_3158064_NONE# 1 ./abc  2 ./def %#Pl_236_3158064_240_5789784_NONE# %#Pl_250_12369084_240_5789784_NONE#3 ./%#Pl_231_16777215_240_5789784_bold#ghi %#Pl_240_5789784_236_3158064_NONE# %#Pl_231_16777215_236_3158064_NONE#                                         %#Pl_252_13684944_236_3158064_NONE# %#Pl_235_2500134_252_13684944_bold# Bufs '
 	call writefile(['Unexpected tabline (3)', result], 'message.fail')
 	cquit
 endif
