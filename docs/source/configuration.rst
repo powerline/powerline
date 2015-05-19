@@ -15,15 +15,15 @@ written in Python.
 Powerline provides default configurations in the following locations:
 
 :ref:`Main configuration <config-main>`
-    :file:`powerline/config.json`
+    :file:`powerline/config_files/config.json`
 :ref:`Colorschemes <config-colorschemes>`
-    :file:`powerline/colorschemes/{name}.json`, 
-    :file:`powerline/colorscheme/{extension}/__main__.json`, 
-    :file:`powerline/colorschemes/{extension}/{name}.json`
+    :file:`powerline/config_files/colorschemes/{name}.json`, 
+    :file:`powerline/config_files/colorschemes/{extension}/__main__.json`, 
+    :file:`powerline/config_files/colorschemes/{extension}/{name}.json`
 :ref:`Themes <config-themes>`
-    :file:`powerline/themes/{top_theme}.json`, 
-    :file:`powerline/themes/{extension}/__main__.json`, 
-    :file:`powerline/themes/{extension}/default.json`
+    :file:`powerline/config_files/themes/{top_theme}.json`, 
+    :file:`powerline/config_files/themes/{extension}/__main__.json`, 
+    :file:`powerline/config_files/themes/{extension}/default.json`
 
 The default configuration files are stored in the main package. User 
 configuration files are stored in :file:`$XDG_CONFIG_HOME/powerline` for 
