@@ -194,7 +194,7 @@ Color definitions
 
 .. _config-colors-colors:
 
-``colors``
+``colors``p
     Color definitions, consisting of a dict where the key is the name of the 
     color, and the value is one of the following:
 
@@ -502,7 +502,7 @@ ascii                       Theme without any unicode characters at all
         rendered. A lower number means that the segment has a higher priority.
 
         Segments are removed according to their priority, with low priority 
-        segments being removed first.
+        segments (i.e., with a greater priority number) being removed first.
 
     .. _config-themes-seg-draw_divider:
 
