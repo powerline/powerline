@@ -194,7 +194,7 @@ Color definitions
 
 .. _config-colors-colors:
 
-``colors``p
+``colors``
     Color definitions, consisting of a dict where the key is the name of the 
     color, and the value is one of the following:
 
