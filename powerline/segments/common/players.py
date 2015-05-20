@@ -208,8 +208,8 @@ class MpdPlayerSegment(PlayerSegment):
 mpd = with_docstring(MpdPlayerSegment(),
 ('''Return Music Player Daemon information
 
-Requires ``mpd`` Python module (e.g., |python-mpd2|_ or |python-mpd|_ Python package) or alternatively the
-``mpc`` command to be acessible from $PATH.
+Requires ``mpd`` Python module (e.g., |python-mpd2|_ or |python-mpd|_ Python
+package) or alternatively the ``mpc`` command to be acessible from $PATH.
 
 .. |python-mpd| replace:: ``python-mpd``
 .. _python-mpd: https://pypi.python.org/pypi/python-mpd
