@@ -11,6 +11,7 @@ mkdir tests/vterm/path
 ln -s "$(which "${PYTHON}")" tests/vterm/path/python
 ln -s "$(which bash)" tests/vterm/path
 ln -s "$(which env)" tests/vterm/path
+ln -s "$(which cut)" tests/vterm/path
 ln -s "$PWD/scripts/powerline-render" tests/vterm/path
 ln -s "$PWD/scripts/powerline-config" tests/vterm/path
 
