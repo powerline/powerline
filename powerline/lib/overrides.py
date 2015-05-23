@@ -25,7 +25,7 @@ def parse_value(s):
 	'''
 	if not s:
 		return REMOVE_THIS_KEY
-	elif s[0] in '"{[0193456789-' or s in ('null', 'true', 'false'):
+	elif s[0] in '"{[0123456789-' or s in ('null', 'true', 'false'):
 		return json.loads(s)
 	else:
 		return s
