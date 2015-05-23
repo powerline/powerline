@@ -91,6 +91,11 @@ def get_functions(lib):
 			('cols', ctypes.c_int)
 		)),
 		vterm_obtain_screen=(VTermScreen_p, (('vt', VTerm_p),)),
+		vterm_set_size=(None, (
+			('vt', VTerm_p),
+			('rows', ctypes.c_int),
+			('cols', ctypes.c_int)
+		)),
 		vterm_screen_reset=(None, (
 			('screen', VTermScreen_p),
 			('hard', ctypes.c_int)
@@ -170,6 +175,9 @@ class VTerm(object):
 		if isinstance(data, unicode):
 			data = data.encode('utf-8')
 		return self.functions.vterm_input_write(self.vt, data, len(data))
+
+	def resize(self, rows, cols):
+		self.functions.vterm_set_size(self.vt, rows, cols)
 
 	def __del__(self):
 		try:

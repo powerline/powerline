@@ -54,6 +54,7 @@ def test_expected_result(p, expected_result, cols, rows, print_logs):
 		for key, text in result
 	))
 	print(shesc_result)
+	print(result)
 	print('Expected:')
 	shesc_expected_result = ''.join((
 		'{0}{1}\x1b[m'.format(cell_properties_key_to_shell_escape(key), text)
@@ -93,6 +94,17 @@ def test_expected_result(p, expected_result, cols, rows, print_logs):
 					sys.stdout.write(line)
 			os.unlink(f)
 	return False
+
+
+def get_expected_result(tmux_version, expected_result_old, expected_result_1_7=None, expected_result_new=None, expected_result_2_0=None):
+	if tmux_version >= (2, 0) and expected_result_2_0:
+		return expected_result_2_0
+	elif tmux_version >= (1, 8) and expected_result_new:
+		return expected_result_new
+	elif tmux_version >= (1, 7) and expected_result_1_7:
+		return expected_result_1_7
+	else:
+		return expected_result_old
 
 
 def main(attempts=3):
@@ -165,8 +177,8 @@ def main(attempts=3):
 				'POWERLINE_CONFIG_PATHS': os.path.abspath('powerline/config_files'),
 				'POWERLINE_COMMAND': 'powerline-render',
 				'POWERLINE_THEME_OVERRIDES': (
-					'default.segments.right=[{"type":"string","name":"s1","highlight_groups":["cwd"]}];'
-					'default.segments.left=[{"type":"string","name":"s2","highlight_groups":["background"]}];'
+					'default.segments.right=[{"type":"string","name":"s1","highlight_groups":["cwd"],"priority":50}];'
+					'default.segments.left=[{"type":"string","name":"s2","highlight_groups":["background"],"priority":20}];'
 					'default.segment_data.s1.contents=S1 string here;'
 					'default.segment_data.s2.contents=S2 string here;'
 				),
@@ -175,8 +187,47 @@ def main(attempts=3):
 			},
 		)
 		p.start()
-		sleep(2)
-		expected_result_2_0 = (
+		sleep(5)
+		tmux_version = get_tmux_version(get_fallback_logger())
+		expected_result = get_expected_result(tmux_version, expected_result_old=(
+			(((0, 0, 0), (243, 243, 243), 1, 0, 0), ' 0 '),
+			(((243, 243, 243), (11, 11, 11), 0, 0, 0), ' '),
+			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' S2 string here  '),
+			(((133, 133, 133), (11, 11, 11), 0, 0, 0), ' 0 '),
+			(((88, 88, 88), (11, 11, 11), 0, 0, 0), '| '),
+			(((188, 188, 188), (11, 11, 11), 0, 0, 0), 'bash  '),
+			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' '),
+			(((133, 133, 133), (11, 11, 11), 0, 0, 0), ' 1 '),
+			(((88, 88, 88), (11, 11, 11), 0, 0, 0), '| '),
+			(((188, 188, 188), (11, 11, 11), 0, 0, 0), 'bash  '),
+			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' '),
+			(((11, 11, 11), (0, 102, 153), 0, 0, 0), ' '),
+			(((102, 204, 255), (0, 102, 153), 0, 0, 0), '2 | '),
+			(((255, 255, 255), (0, 102, 153), 1, 0, 0), 'bash '),
+			(((0, 102, 153), (11, 11, 11), 0, 0, 0), ' '),
+			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' ' * 127),
+			(((88, 88, 88), (11, 11, 11), 0, 0, 0), ' '),
+			(((199, 199, 199), (88, 88, 88), 0, 0, 0), ' S1 string here '),
+		), expected_result_new=(
+			(((0, 0, 0), (243, 243, 243), 1, 0, 0), ' 0 '),
+			(((243, 243, 243), (11, 11, 11), 0, 0, 0), ' '),
+			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' S2 string here  '),
+			(((133, 133, 133), (11, 11, 11), 0, 0, 0), ' 0 '),
+			(((88, 88, 88), (11, 11, 11), 0, 0, 0), '| '),
+			(((188, 188, 188), (11, 11, 11), 0, 0, 0), 'bash  '),
+			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' '),
+			(((133, 133, 133), (11, 11, 11), 0, 0, 0), ' 1 '),
+			(((88, 88, 88), (11, 11, 11), 0, 0, 0), '| '),
+			(((0, 102, 153), (11, 11, 11), 0, 0, 0), 'bash  '),
+			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' '),
+			(((11, 11, 11), (0, 102, 153), 0, 0, 0), ' '),
+			(((102, 204, 255), (0, 102, 153), 0, 0, 0), '2 | '),
+			(((255, 255, 255), (0, 102, 153), 1, 0, 0), 'bash '),
+			(((0, 102, 153), (11, 11, 11), 0, 0, 0), ' '),
+			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' ' * 127),
+			(((88, 88, 88), (11, 11, 11), 0, 0, 0), ' '),
+			(((199, 199, 199), (88, 88, 88), 0, 0, 0), ' S1 string here '),
+		), expected_result_2_0=(
 			(((0, 0, 0), (243, 243, 243), 1, 0, 0), ' 0 '),
 			(((243, 243, 243), (11, 11, 11), 0, 0, 0), ' '),
 			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' S2 string here '),
@@ -195,62 +246,69 @@ def main(attempts=3):
 			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' ' * 128),
 			(((88, 88, 88), (11, 11, 11), 0, 0, 0), ' '),
 			(((199, 199, 199), (88, 88, 88), 0, 0, 0), ' S1 string here '),
-		)
-		expected_result_new = (
+		))
+		ret = None
+		if not test_expected_result(p, expected_result, cols, rows, not attempts):
+			if attempts:
+				pass
+				# Will rerun main later.
+			else:
+				ret = False
+		elif ret is not False:
+			ret = True
+		cols = 40
+		p.resize(rows, cols)
+		sleep(5)
+		expected_result = get_expected_result(tmux_version, (
+			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' ' * cols),
+		), expected_result_1_7=(
 			(((0, 0, 0), (243, 243, 243), 1, 0, 0), ' 0 '),
 			(((243, 243, 243), (11, 11, 11), 0, 0, 0), ' '),
-			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' S2 string here  '),
-			(((133, 133, 133), (11, 11, 11), 0, 0, 0), ' 0 '),
-			(((88, 88, 88), (11, 11, 11), 0, 0, 0), '| '),
-			(((188, 188, 188), (11, 11, 11), 0, 0, 0), 'bash  '),
+			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' <'),
+			(((188, 188, 188), (11, 11, 11), 0, 0, 0), 'sh  '),
 			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' '),
-			(((133, 133, 133), (11, 11, 11), 0, 0, 0), ' 1 '),
-			(((88, 88, 88), (11, 11, 11), 0, 0, 0), '| '),
+			(((11, 11, 11), (0, 102, 153), 0, 0, 0), ' '),
+			(((102, 204, 255), (0, 102, 153), 0, 0, 0), '2 | '),
+			(((255, 255, 255), (0, 102, 153), 1, 0, 0), 'bash '),
+			(((0, 102, 153), (11, 11, 11), 0, 0, 0), ' '),
+			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' '),
+			(((88, 88, 88), (11, 11, 11), 0, 0, 0), ' '),
+			(((199, 199, 199), (88, 88, 88), 0, 0, 0), ' S1 string here ')
+		), expected_result_new=(
+			(((0, 0, 0), (243, 243, 243), 1, 0, 0), ' 0 '),
+			(((243, 243, 243), (11, 11, 11), 0, 0, 0), ' '),
+			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' <'),
+			(((0, 102, 153), (11, 11, 11), 0, 0, 0), 'sh  '),
+			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' '),
+			(((11, 11, 11), (0, 102, 153), 0, 0, 0), ' '),
+			(((102, 204, 255), (0, 102, 153), 0, 0, 0), '2 | '),
+			(((255, 255, 255), (0, 102, 153), 1, 0, 0), 'bash '),
+			(((0, 102, 153), (11, 11, 11), 0, 0, 0), ' '),
+			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' '),
+			(((88, 88, 88), (11, 11, 11), 0, 0, 0), ' '),
+			(((199, 199, 199), (88, 88, 88), 0, 0, 0), ' S1 string here ')
+		), expected_result_2_0=(
+			(((0, 0, 0), (243, 243, 243), 1, 0, 0), ' 0 '),
+			(((243, 243, 243), (11, 11, 11), 0, 0, 0), ' '),
+			(((255, 255, 255), (11, 11, 11), 0, 0, 0), '<'),
 			(((0, 102, 153), (11, 11, 11), 0, 0, 0), 'bash  '),
 			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' '),
 			(((11, 11, 11), (0, 102, 153), 0, 0, 0), ' '),
 			(((102, 204, 255), (0, 102, 153), 0, 0, 0), '2 | '),
 			(((255, 255, 255), (0, 102, 153), 1, 0, 0), 'bash '),
 			(((0, 102, 153), (11, 11, 11), 0, 0, 0), ' '),
-			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' ' * 127),
 			(((88, 88, 88), (11, 11, 11), 0, 0, 0), ' '),
-			(((199, 199, 199), (88, 88, 88), 0, 0, 0), ' S1 string here '),
-		)
-		expected_result_old = (
-			(((0, 0, 0), (243, 243, 243), 1, 0, 0), ' 0 '),
-			(((243, 243, 243), (11, 11, 11), 0, 0, 0), ' '),
-			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' S2 string here  '),
-			(((133, 133, 133), (11, 11, 11), 0, 0, 0), ' 0 '),
-			(((88, 88, 88), (11, 11, 11), 0, 0, 0), '| '),
-			(((188, 188, 188), (11, 11, 11), 0, 0, 0), 'bash  '),
-			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' '),
-			(((133, 133, 133), (11, 11, 11), 0, 0, 0), ' 1 '),
-			(((88, 88, 88), (11, 11, 11), 0, 0, 0), '| '),
-			(((188, 188, 188), (11, 11, 11), 0, 0, 0), 'bash  '),
-			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' '),
-			(((11, 11, 11), (0, 102, 153), 0, 0, 0), ' '),
-			(((102, 204, 255), (0, 102, 153), 0, 0, 0), '2 | '),
-			(((255, 255, 255), (0, 102, 153), 1, 0, 0), 'bash '),
-			(((0, 102, 153), (11, 11, 11), 0, 0, 0), ' '),
-			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' ' * 127),
-			(((88, 88, 88), (11, 11, 11), 0, 0, 0), ' '),
-			(((199, 199, 199), (88, 88, 88), 0, 0, 0), ' S1 string here '),
-		)
-		tmux_version = get_tmux_version(get_fallback_logger())
-		if tmux_version >= (2, 0):
-			expected_result = expected_result_2_0
-		elif tmux_version >= (1, 8):
-			expected_result = expected_result_new
-		else:
-			expected_result = expected_result_old
+			(((199, 199, 199), (88, 88, 88), 0, 0, 0), ' S1 string here ')
+		))
 		if not test_expected_result(p, expected_result, cols, rows, not attempts):
 			if attempts:
 				pass
-				# Will rerun main later.
 			else:
-				return False
-		else:
-			return True
+				ret = False
+		elif ret is not False:
+			ret = True
+		if ret is not None:
+			return ret
 	finally:
 		check_call([tmux_exe, '-S', socket_path, 'kill-server'], env={
 			'PATH': vterm_path,

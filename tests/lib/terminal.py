@@ -28,6 +28,7 @@ class ExpectProcess(threading.Thread):
 		child = pexpect.spawn(self.cmd, self.args, cwd=self.cwd, env=self.env)
 		sleep(0.5)
 		child.setwinsize(self.rows, self.cols)
+		sleep(0.5)
 		self.child = child
 		status = None
 		while status is None:
@@ -43,6 +44,13 @@ class ExpectProcess(threading.Thread):
 				with self.lock:
 					self.vterm.push(s)
 					self.buffer.append(s)
+
+	def resize(self, rows, cols):
+		with self.child_lock:
+			self.rows = rows
+			self.cols = cols
+			self.child.setwinsize(rows, cols)
+			self.vterm.resize(rows, cols)
 
 	def __getitem__(self, position):
 		with self.lock:
