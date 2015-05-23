@@ -31,6 +31,13 @@ class TmuxRenderer(Renderer):
 	character_translations = Renderer.character_translations.copy()
 	character_translations[ord('#')] = '##[]'
 
+	def render(self, width=None, segment_info={}, **kwargs):
+		if width and segment_info:
+			width -= segment_info.get('width_adjust', 0)
+			if width < 10:
+				width = 10
+		return super(TmuxRenderer, self).render(width=width, segment_info=segment_info, **kwargs)
+
 	def hlstyle(self, fg=None, bg=None, attrs=None):
 		'''Highlight a segment.'''
 		# We don’t need to explicitly reset attributes, so skip those calls
