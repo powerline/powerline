@@ -127,6 +127,8 @@ def process_segment_lister(pl, segment_info, parsed_segments, side, mode, colors
 				colorscheme,
 			)
 		new_pslen = len(parsed_segments)
+		while parsed_segments[new_pslen - 1]['literal_contents'][1]:
+			new_pslen -= 1
 		if new_pslen > old_pslen + 1 and draw_inner_divider is not None:
 			for i in range(old_pslen, new_pslen - 1) if side == 'left' else range(old_pslen + 1, new_pslen):
 				parsed_segments[i]['draw_soft_divider'] = draw_inner_divider
@@ -134,6 +136,8 @@ def process_segment_lister(pl, segment_info, parsed_segments, side, mode, colors
 
 
 def set_segment_highlighting(pl, colorscheme, segment, mode):
+	if segment['literal_contents'][1]:
+		return True
 	try:
 		highlight_group_prefix = segment['highlight_group_prefix']
 	except KeyError:
@@ -228,6 +232,7 @@ get_fallback_segment = {
 	'before': None,
 	'after': None,
 	'contents': '',
+	'literal_contents': (0, ''),
 	'priority': None,
 	'draw_soft_divider': True,
 	'draw_hard_divider': True,
@@ -244,6 +249,7 @@ get_fallback_segment = {
 	'_len': None,
 	'_contents_len': None,
 }.copy
+
 
 def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, get_module_attr, top_theme):
 	data = {
@@ -373,6 +379,7 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, ge
 					)
 				),
 				'contents': None,
+				'literal_contents': None,
 				'priority': None,
 				'draw_soft_divider': None,
 				'draw_hard_divider': None,
@@ -421,6 +428,7 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, ge
 			'after': get_key(False, segment, module, function_name, name, 'after', ''),
 			'contents_func': contents_func,
 			'contents': contents,
+			'literal_contents': (0, ''),
 			'priority': segment.get('priority', None),
 			'draw_hard_divider': segment.get('draw_hard_divider', True),
 			'draw_soft_divider': segment.get('draw_soft_divider', True),

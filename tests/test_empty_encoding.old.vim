@@ -1,5 +1,5 @@
 #!/usr/bin/vim -S
-if has('multibyte')
+if has('multi_byte')
 	if empty(&encoding)
 		call writefile(['&encoding option value is empty, even though Vim has +multibyte'], 'message.fail')
 		cquit

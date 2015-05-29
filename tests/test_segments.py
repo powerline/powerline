@@ -1234,6 +1234,18 @@ class TestVim(TestCase):
 		self.assertEqual(self.vim.tabnr(pl=pl, segment_info=segment_info, show_current=True), '1')
 		self.assertEqual(self.vim.tabnr(pl=pl, segment_info=segment_info, show_current=False), None)
 
+	def test_tab(self):
+		pl = Pl()
+		segment_info = vim_module._get_segment_info()
+		self.assertEqual(self.vim.tab(pl=pl, segment_info=segment_info), [{
+			'contents': None,
+			'literal_contents': (0, '%1T'),
+		}])
+		self.assertEqual(self.vim.tab(pl=pl, segment_info=segment_info, end=True), [{
+			'contents': None,
+			'literal_contents': (0, '%T'),
+		}])
+
 	def test_bufnr(self):
 		pl = Pl()
 		segment_info = vim_module._get_segment_info()
