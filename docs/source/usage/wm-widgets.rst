@@ -11,7 +11,8 @@ Awesome widget
    background and updates the statusline with ``awesome-client``.
 
 Add the following to :file:`rc.lua`, where ``{repository_root}`` is the absolute 
-path to Powerline installation directory:
+path to Powerline installation directory (see :ref:`repository root 
+<repository-root>`):
 
 .. code-block:: lua
 

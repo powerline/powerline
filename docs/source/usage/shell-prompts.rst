@@ -16,7 +16,8 @@ Bash prompt
 ===========
 
 Add the following line to the :file:`bashrc`, where ``{repository_root}`` is the 
-absolute path to the Powerline installation directory:
+absolute path to the Powerline installation directory (see :ref:`repository root 
+<repository-root>`):
 
 .. code-block:: bash
 
@@ -48,7 +49,8 @@ Zsh prompt
 ==========
 
 Add the following line to the :file:`zshrc`, where ``{repository_root}`` is the 
-absolute path to the Powerline installation directory:
+absolute path to the Powerline installation directory (see :ref:`repository root 
+<repository-root>`):
 
 .. code-block:: bash
 
@@ -58,7 +60,8 @@ Fish prompt
 ===========
 
 Add the following line to :file:`config.fish`, where ``{repository_root}`` is 
-the absolute path to the Powerline installation directory:
+the absolute path to the Powerline installation directory (see :ref:`repository 
+root <repository-root>`):
 
 .. code-block:: bash
 
@@ -77,9 +80,10 @@ many \*nix distributions. To use it add
 
    . {repository_root}/powerline/bindings/rc/powerline.rc
 
-to :file:`rcrc` file (usually :file:`~/.rcrc`) and make sure ``rc`` is started 
-as a login shell (with ``-l`` argument): otherwise this configuration file is 
-not read.
+(``{repository_root}`` is the absolute path to the Powerline installation 
+directory, see :ref:`repository root <repository-root>`) to :file:`rcrc` file 
+(usually :file:`~/.rcrc`) and make sure ``rc`` is started as a login shell (with 
+``-l`` argument): otherwise this configuration file is not read.
 
 .. warning::
    Original Plan9 shell and its \*nix port are not supported because they are 
@@ -96,6 +100,9 @@ After launching busybox run the following command:
 .. code-block:: bash
 
    . {repository_root}/powerline/bindings/shell/powerline.sh
+
+where ``{repository_root}`` is the absolute path to the Powerline installation 
+directory (see :ref:`repository root <repository-root>`).
 
 Mksh users may put this line into ``~/.mkshrc`` file. Dash users may use the 
 following in ``~/.profile``:
