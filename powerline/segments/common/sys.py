@@ -131,10 +131,12 @@ if os.path.exists('/proc/uptime'):
 elif 'psutil' in globals():
 	from time import time
 
-	def _get_uptime():
-		# psutil.BOOT_TIME is not subject to clock adjustments, but time() is.
-		# Thus it is a fallback to /proc/uptime reading and not the reverse.
-		return int(time() - psutil.BOOT_TIME)
+	if hasattr(psutil, 'boot_time'):
+		def _get_uptime():
+			return int(time() - psutil.boot_time())
+	else:
+		def _get_uptime():
+			return int(time() - psutil.BOOT_TIME)
 else:
 	def _get_uptime():
 		raise NotImplementedError
