@@ -1,26 +1,38 @@
 # vim:fileencoding=utf-8:noet
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
+import os
 from datetime import datetime
 
 
-def date(pl, format='%Y-%m-%d', istime=False):
+def date(pl, format='%Y-%m-%d', istime=False, timezone=None):
 	'''Return the current date.
 
 	:param str format:
 		strftime-style date format string
 	:param bool istime:
 		If true then segment uses ``time`` highlight group.
+	:param str timezone:
+		A Timezone string. A list of timezones can usually be
+		obtained by listing the contents of
+		``/usr/share/zoneinfo/``. For example: ``Europe/Lisbon``.
 
 	Divider highlight group used: ``time:divider``.
 
 	Highlight groups used: ``time`` or ``date``.
 	'''
-	return [{
-		'contents': datetime.now().strftime(format),
-		'highlight_groups': (['time'] if istime else []) + ['date'],
-		'divider_highlight_group': 'time:divider' if istime else None,
-	}]
+	if timezone is not None:
+		old_tz = os.environ.get('TZ', None)
+		os.environ['TZ'] = timezone
+	try:
+		return [{
+			'contents': datetime.now().strftime(format),
+			'highlight_groups': (['time'] if istime else []) + ['date'],
+			'divider_highlight_group': 'time:divider' if istime else None,
+		}]
+	finally:
+		if timezone is not None and old_tz is not None:
+			os.environ['TZ'] = old_tz
 
 
 UNICODE_TEXT_TRANSLATION = {
@@ -33,7 +45,7 @@ def fuzzy_time(pl, unicode_text=False):
 	'''Display the current time as fuzzy time, e.g. "quarter past six".
 
 	:param bool unicode_text:
-		If true then hyphenminuses (regular ASCII ``-``) and single quotes are 
+		If true then hyphenminuses (regular ASCII ``-``) and single quotes are
 		replaced with unicode dashes and apostrophes.
 	'''
 	hour_str = ['twelve', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven']
