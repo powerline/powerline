@@ -35,10 +35,10 @@ class BarRenderer(Renderer):
 
 		return text + contents + '%{F-B--u}'
 
-	def render(self):
+	def render(self, *args, **kwargs):
 		return '%{{l}}{0}%{{r}}{1}'.format(
-			super(BarRenderer, self).render(side='left'),
-			super(BarRenderer, self).render(side='right'),
+			super(BarRenderer, self).render(side='left', *args, **kwargs),
+			super(BarRenderer, self).render(side='right', *args, **kwargs),
 		)
 
 

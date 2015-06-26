@@ -6,8 +6,9 @@ import os
 
 from functools import partial
 from collections import namedtuple
+from time import sleep
 
-from powerline.segments import shell, tmux, pdb
+from powerline.segments import shell, tmux, pdb, i3wm
 from powerline.lib.vcs import get_fallback_create_watcher
 from powerline.lib.unicode import out_u
 
@@ -397,8 +398,6 @@ class TestNet(TestCommon):
 			self.assertEqual(self.module.internal_ip(pl=pl, ipv=6), None)
 
 	def test_network_load(self):
-		from time import sleep
-
 		def gb(interface):
 			return None
 
@@ -430,24 +429,24 @@ class TestNet(TestCommon):
 				while not self.module.network_load.interfaces.get('eth0', {}).get('prev', (None, None))[1]:
 					sleep(0.1)
 				self.assertEqual(self.module.network_load(pl=pl, interface='eth0'), [
-					{'divider_highlight_group': 'background:divider', 'contents': 'DL  1 KiB/s', 'highlight_groups': ['network_load_recv', 'network_load']},
-					{'divider_highlight_group': 'background:divider', 'contents': 'UL  2 KiB/s', 'highlight_groups': ['network_load_sent', 'network_load']},
+					{'divider_highlight_group': 'network_load:divider', 'contents': 'DL  1 KiB/s', 'highlight_groups': ['network_load_recv', 'network_load']},
+					{'divider_highlight_group': 'network_load:divider', 'contents': 'UL  2 KiB/s', 'highlight_groups': ['network_load_sent', 'network_load']},
 				])
 				self.assertEqual(self.module.network_load(pl=pl, interface='eth0', recv_format='r {value}', sent_format='s {value}'), [
-					{'divider_highlight_group': 'background:divider', 'contents': 'r 1 KiB/s', 'highlight_groups': ['network_load_recv', 'network_load']},
-					{'divider_highlight_group': 'background:divider', 'contents': 's 2 KiB/s', 'highlight_groups': ['network_load_sent', 'network_load']},
+					{'divider_highlight_group': 'network_load:divider', 'contents': 'r 1 KiB/s', 'highlight_groups': ['network_load_recv', 'network_load']},
+					{'divider_highlight_group': 'network_load:divider', 'contents': 's 2 KiB/s', 'highlight_groups': ['network_load_sent', 'network_load']},
 				])
 				self.assertEqual(self.module.network_load(pl=pl, recv_format='r {value}', sent_format='s {value}', suffix='bps', interface='eth0'), [
-					{'divider_highlight_group': 'background:divider', 'contents': 'r 1 Kibps', 'highlight_groups': ['network_load_recv', 'network_load']},
-					{'divider_highlight_group': 'background:divider', 'contents': 's 2 Kibps', 'highlight_groups': ['network_load_sent', 'network_load']},
+					{'divider_highlight_group': 'network_load:divider', 'contents': 'r 1 Kibps', 'highlight_groups': ['network_load_recv', 'network_load']},
+					{'divider_highlight_group': 'network_load:divider', 'contents': 's 2 Kibps', 'highlight_groups': ['network_load_sent', 'network_load']},
 				])
 				self.assertEqual(self.module.network_load(pl=pl, recv_format='r {value}', sent_format='s {value}', si_prefix=True, interface='eth0'), [
-					{'divider_highlight_group': 'background:divider', 'contents': 'r 1 kB/s', 'highlight_groups': ['network_load_recv', 'network_load']},
-					{'divider_highlight_group': 'background:divider', 'contents': 's 2 kB/s', 'highlight_groups': ['network_load_sent', 'network_load']},
+					{'divider_highlight_group': 'network_load:divider', 'contents': 'r 1 kB/s', 'highlight_groups': ['network_load_recv', 'network_load']},
+					{'divider_highlight_group': 'network_load:divider', 'contents': 's 2 kB/s', 'highlight_groups': ['network_load_sent', 'network_load']},
 				])
 				self.assertEqual(self.module.network_load(pl=pl, recv_format='r {value}', sent_format='s {value}', recv_max=0, interface='eth0'), [
-					{'divider_highlight_group': 'background:divider', 'contents': 'r 1 KiB/s', 'highlight_groups': ['network_load_recv_gradient', 'network_load_gradient', 'network_load_recv', 'network_load'], 'gradient_level': 100},
-					{'divider_highlight_group': 'background:divider', 'contents': 's 2 KiB/s', 'highlight_groups': ['network_load_sent', 'network_load']},
+					{'divider_highlight_group': 'network_load:divider', 'contents': 'r 1 KiB/s', 'highlight_groups': ['network_load_recv_gradient', 'network_load_gradient', 'network_load_recv', 'network_load'], 'gradient_level': 100},
+					{'divider_highlight_group': 'network_load:divider', 'contents': 's 2 KiB/s', 'highlight_groups': ['network_load_sent', 'network_load']},
 				])
 
 				class ApproxEqual(object):
@@ -455,8 +454,8 @@ class TestNet(TestCommon):
 						return abs(i - 50.0) < 1
 
 				self.assertEqual(self.module.network_load(pl=pl, recv_format='r {value}', sent_format='s {value}', sent_max=4800, interface='eth0'), [
-					{'divider_highlight_group': 'background:divider', 'contents': 'r 1 KiB/s', 'highlight_groups': ['network_load_recv', 'network_load']},
-					{'divider_highlight_group': 'background:divider', 'contents': 's 2 KiB/s', 'highlight_groups': ['network_load_sent_gradient', 'network_load_gradient', 'network_load_sent', 'network_load'], 'gradient_level': ApproxEqual()},
+					{'divider_highlight_group': 'network_load:divider', 'contents': 'r 1 KiB/s', 'highlight_groups': ['network_load_recv', 'network_load']},
+					{'divider_highlight_group': 'network_load:divider', 'contents': 's 2 KiB/s', 'highlight_groups': ['network_load_sent_gradient', 'network_load_gradient', 'network_load_sent', 'network_load'], 'gradient_level': ApproxEqual()},
 				])
 			finally:
 				self.module.network_load.shutdown()
@@ -814,6 +813,50 @@ class TestWthr(TestCommon):
 				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '19°C', 'gradient_level': 70.0}
 			])
 			self.module.weather.shutdown()
+
+
+class TestI3WM(TestCase):
+	def test_workspaces(self):
+		pl = Pl()
+		with replace_attr(i3wm, 'conn', Args(get_workspaces=lambda: iter([
+			{'name': '1: w1', 'focused': False, 'urgent': False, 'visible': False},
+			{'name': '2: w2', 'focused': False, 'urgent': False, 'visible': True},
+			{'name': '3: w3', 'focused': False, 'urgent': True, 'visible': True},
+			{'name': '4: w4', 'focused': True, 'urgent': True, 'visible': True},
+		]))):
+			self.assertEqual(i3wm.workspaces(pl=pl), [
+				{'contents': '1: w1', 'highlight_groups': ['workspace']},
+				{'contents': '2: w2', 'highlight_groups': ['w_visible', 'workspace']},
+				{'contents': '3: w3', 'highlight_groups': ['w_urgent', 'w_visible', 'workspace']},
+				{'contents': '4: w4', 'highlight_groups': ['w_focused', 'w_urgent', 'w_visible', 'workspace']},
+			])
+			self.assertEqual(i3wm.workspaces(pl=pl, only_show=None), [
+				{'contents': '1: w1', 'highlight_groups': ['workspace']},
+				{'contents': '2: w2', 'highlight_groups': ['w_visible', 'workspace']},
+				{'contents': '3: w3', 'highlight_groups': ['w_urgent', 'w_visible', 'workspace']},
+				{'contents': '4: w4', 'highlight_groups': ['w_focused', 'w_urgent', 'w_visible', 'workspace']},
+			])
+			self.assertEqual(i3wm.workspaces(pl=pl, only_show=['focused', 'urgent']), [
+				{'contents': '3: w3', 'highlight_groups': ['w_urgent', 'w_visible', 'workspace']},
+				{'contents': '4: w4', 'highlight_groups': ['w_focused', 'w_urgent', 'w_visible', 'workspace']},
+			])
+			self.assertEqual(i3wm.workspaces(pl=pl, only_show=['visible']), [
+				{'contents': '2: w2', 'highlight_groups': ['w_visible', 'workspace']},
+				{'contents': '3: w3', 'highlight_groups': ['w_urgent', 'w_visible', 'workspace']},
+				{'contents': '4: w4', 'highlight_groups': ['w_focused', 'w_urgent', 'w_visible', 'workspace']},
+			])
+			self.assertEqual(i3wm.workspaces(pl=pl, only_show=['visible'], strip=3), [
+				{'contents': 'w2', 'highlight_groups': ['w_visible', 'workspace']},
+				{'contents': 'w3', 'highlight_groups': ['w_urgent', 'w_visible', 'workspace']},
+				{'contents': 'w4', 'highlight_groups': ['w_focused', 'w_urgent', 'w_visible', 'workspace']},
+			])
+
+	def test_mode(self):
+		pl = Pl()
+		self.assertEqual(i3wm.mode(pl=pl, segment_info={'mode': 'default'}), None)
+		self.assertEqual(i3wm.mode(pl=pl, segment_info={'mode': 'test'}), 'test')
+		self.assertEqual(i3wm.mode(pl=pl, segment_info={'mode': 'default'}, names={'default': 'test'}), 'test')
+		self.assertEqual(i3wm.mode(pl=pl, segment_info={'mode': 'test'}, names={'default': 'test', 'test': 't'}), 't')
 
 
 class TestMail(TestCommon):
@@ -1190,6 +1233,18 @@ class TestVim(TestCase):
 		segment_info = vim_module._get_segment_info()
 		self.assertEqual(self.vim.tabnr(pl=pl, segment_info=segment_info, show_current=True), '1')
 		self.assertEqual(self.vim.tabnr(pl=pl, segment_info=segment_info, show_current=False), None)
+
+	def test_tab(self):
+		pl = Pl()
+		segment_info = vim_module._get_segment_info()
+		self.assertEqual(self.vim.tab(pl=pl, segment_info=segment_info), [{
+			'contents': None,
+			'literal_contents': (0, '%1T'),
+		}])
+		self.assertEqual(self.vim.tab(pl=pl, segment_info=segment_info, end=True), [{
+			'contents': None,
+			'literal_contents': (0, '%T'),
+		}])
 
 	def test_bufnr(self):
 		pl = Pl()

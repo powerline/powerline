@@ -198,10 +198,8 @@ args_spec = Spec(
 	segment_info=Spec().error('Segment info dictionary must be set by powerline').optional(),
 ).unknown_spec(Spec(), Spec()).optional().copy
 segment_module_spec = Spec().type(unicode).func(check_segment_module).optional().copy
-sub_segments_spec = Spec()
 exinclude_spec = Spec().re(function_name_re).func(check_exinclude_function).copy
-segment_spec = Spec(
-	type=Spec().oneof(type_keys).optional(),
+segment_spec_base = Spec(
 	name=Spec().re('^[a-zA-Z_]\w*$').optional(),
 	function=Spec().re(function_name_re).func(check_segment_function).optional(),
 	exclude_modes=Spec().list(vim_mode_spec()).optional(),
@@ -230,10 +228,14 @@ segment_spec = Spec(
 		':divider$',
 		(lambda value: 'it is recommended that divider highlight group names end with ":divider"')
 	).optional(),
-	segments=sub_segments_spec,
-).func(check_full_segment_data)
-sub_segments_spec.optional().list(segment_spec)
-del sub_segments_spec
+).func(check_full_segment_data).copy
+subsegment_spec = segment_spec_base().update(
+	type=Spec().oneof(set((key for key in type_keys if key != 'segment_list'))).optional(),
+)
+segment_spec = segment_spec_base().update(
+	type=Spec().oneof(type_keys).optional(),
+	segments=Spec().optional().list(subsegment_spec),
+)
 segments_spec = Spec().optional().list(segment_spec).copy
 segdict_spec = Spec(
 	left=segments_spec().context_message('Error while loading segments from left side (key {key})'),

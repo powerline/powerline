@@ -25,7 +25,7 @@ If the repository was just cloned the following line needs to be added to the
    set rtp+={repository_root}/powerline/bindings/vim
 
 where ``{repository_root}`` is the absolute path to the Powerline installation 
-directory.
+directory (see :ref:`repository root <repository-root>`).
 
 If pathogen is used and Powerline functionality is not needed outside of Vim 
 then it is possible to simply add Powerline as a bundle and point the path above 
@@ -82,7 +82,8 @@ Tmux statusline
 ===============
 
 Add the following lines to :file:`.tmux.conf`, where ``{repository_root}`` is 
-the absolute path to the Powerline installation directory::
+the absolute path to the Powerline installation directory (see :ref:`repository 
+root <repository-root>`)::
 
    source "{repository_root}/powerline/bindings/tmux/powerline.conf"
 
