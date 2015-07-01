@@ -12,7 +12,7 @@ from powerline.lib.shell import run_cmd
 # segment is imported into powerline.segments.common module.
 
 
-def _get_battery(pl):
+def _fetch_battery_info(pl):
 	try:
 		import dbus
 	except ImportError:
@@ -55,23 +55,31 @@ def _get_battery(pl):
 						dbus.Interface(dev, dbus_interface=devinterface).Get(
 							devtype_name,
 							'Percentage'
-						)
+						),
+						dbus.Interface(dev, dbus_interface=devinterface).Get(
+							devtype_name,
+							'State'
+						) == 1
 					)
 				pl.debug('Not using DBUS+UPower as no batteries were found')
 
 	if os.path.isdir('/sys/class/power_supply'):
 		linux_bat_fmt = '/sys/class/power_supply/{0}/capacity'
+		linux_ac_fmt = '/sys/class/power_supply/{0}/online'
 		for linux_bat in os.listdir('/sys/class/power_supply'):
 			cap_path = linux_bat_fmt.format(linux_bat)
+			online_path = linux_ac_fmt.format(linux_bat)
 			if linux_bat.startswith('BAT') and os.path.exists(cap_path):
 				pl.debug('Using /sys/class/power_supply with battery {0}', linux_bat)
 
-				def _get_capacity(pl):
+				def _get_battery_status(pl):
 					with open(cap_path, 'r') as f:
-						return int(float(f.readline().split()[0]))
-
-				return _get_capacity
-		pl.debug('Not using /sys/class/power_supply as no batteries were found')
+						_capacity = int(float(f.readline().split()[0]))
+					with open(online_path, 'r') as f:
+						_ac_powered = f.readline() == 1
+					return _capacity, _ac_powered
+				return _get_battery_status
+			pl.debug('Not using /sys/class/power_supply as no batteries were found')
 	else:
 		pl.debug('Not using /sys/class/power_supply: no directory')
 
@@ -86,12 +94,12 @@ def _get_battery(pl):
 
 		BATTERY_PERCENT_RE = re.compile(r'(\d+)%')
 
-		def _get_capacity(pl):
+		def _get_battery_status(pl):
 			battery_summary = run_cmd(pl, ['pmset', '-g', 'batt'])
 			battery_percent = BATTERY_PERCENT_RE.search(battery_summary).group(1)
-			return int(battery_percent)
-
-		return _get_capacity
+			ac_charging = 'AC' in battery_summary
+			return int(battery_percent), ac_charging
+		return _get_battery_status
 	else:
 		pl.debug('Not using pmset: executable not found')
 
@@ -110,11 +118,11 @@ def _get_battery(pl):
 				for battery in wmi.InstancesOf('Win32_Battery'):
 					pl.debug('Using win32com.client with Win32_Battery')
 
-					def _get_capacity(pl):
+					def _get_battery_status(pl):
 						# http://msdn.microsoft.com/en-us/library/aa394074(v=vs.85).aspx
-						return battery.EstimatedChargeRemaining
+						return battery.EstimatedChargeRemaining, battery.BatteryStatus == 6
 
-					return _get_capacity
+					return _get_battery_status
 				pl.debug('Not using win32com.client as no batteries were found')
 		from ctypes import Structure, c_byte, c_ulong, byref
 		if sys.platform == 'cygwin':
@@ -136,41 +144,41 @@ def _get_battery(pl):
 				('BatteryFullLifeTime', c_ulong)
 			]
 
-		def _get_capacity(pl):
+		def _get_battery_status(pl):
 			powerclass = PowerClass()
 			result = library_loader.kernel32.GetSystemPowerStatus(byref(powerclass))
 			# http://msdn.microsoft.com/en-us/library/windows/desktop/aa372693(v=vs.85).aspx
 			if result:
 				return None
-			return powerclass.BatteryLifePercent
+			return powerclass.BatteryLifePercent, powerclass.ACLineStatus == 1
 
-		if _get_capacity() is None:
+		if _get_battery_status() is None:
 			pl.debug('Not using GetSystemPowerStatus because it failed')
 		else:
 			pl.debug('Using GetSystemPowerStatus')
 
-		return _get_capacity
+		return _get_battery_status
 
 	raise NotImplementedError
 
 
-def _get_capacity(pl):
-	global _get_capacity
+def _get_battery_status(pl):
+	global _get_battery_status
 
-	def _failing_get_capacity(pl):
+	def _failing_get_status(pl):
 		raise NotImplementedError
 
 	try:
-		_get_capacity = _get_battery(pl)
+		_get_battery_status = _fetch_battery_info(pl)
 	except NotImplementedError:
-		_get_capacity = _failing_get_capacity
+		_get_battery_status = _failing_get_status
 	except Exception as e:
-		pl.exception('Exception while obtaining battery capacity getter: {0}', str(e))
-		_get_capacity = _failing_get_capacity
-	return _get_capacity(pl)
+		pl.exception('Exception while obtaining battery status: {0}', str(e))
+		_get_battery_status = _failing_get_status
+	return _get_battery_status(pl)
 
 
-def battery(pl, format='{capacity:3.0%}', steps=5, gamify=False, full_heart='O', empty_heart='O'):
+def battery(pl, format='{ac_state} {capacity:3.0%}', steps=5, gamify=False, full_heart='O', empty_heart='O', online='C', offline=' '):
 	'''Return battery charge status.
 
 	:param str format:
@@ -189,21 +197,32 @@ def battery(pl, format='{capacity:3.0%}', steps=5, gamify=False, full_heart='O',
 		another gradient level and highlighting group, so it is OK for it to be 
 		the same as full_heart as long as necessary highlighting groups are 
 		defined.
+	:param str online:
+		If computer is connected to a power supply this symbol is prepended to the segment.
+	:param str offline:
+		If computer is NOT connected to a power supply this symbol is prepended to the segment.
 
 	``battery_gradient`` and ``battery`` groups are used in any case, first is 
 	preferred.
 
-	Highlight groups used: ``battery_full`` or ``battery_gradient`` (gradient) or ``battery``, ``battery_empty`` or ``battery_gradient`` (gradient) or ``battery``.
+	Highlight groups used: ``battery_full`` or ``battery_gradient`` (gradient) or ``battery``, ``battery_empty`` or ``battery_gradient`` (gradient) or ``battery``, ``battery_online`` or ``battery_ac_state`` or ``battery_gradient`` (gradient) or ``battery``, ``battery_offline`` or ``battery_ac_state`` or ``battery_gradient`` (gradient) or ``battery``.
 	'''
 	try:
-		capacity = _get_capacity(pl)
+		capacity, ac_powered = _get_battery_status(pl)
 	except NotImplementedError:
-		pl.info('Unable to get battery capacity.')
+		pl.info('Unable to get battery status.')
 		return None
+
 	ret = []
 	if gamify:
 		denom = int(steps)
 		numer = int(denom * capacity / 100)
+		ret.append({
+			'contents': online if ac_powered else offline,
+			'draw_inner_divider': False,
+			'highlight_groups': ['battery_online' if ac_powered else 'battery_offline', 'battery_ac_state', 'battery_gradient', 'battery'],
+			'gradient_level': 0,
+		})
 		ret.append({
 			'contents': full_heart * numer,
 			'draw_inner_divider': False,
@@ -220,7 +239,7 @@ def battery(pl, format='{capacity:3.0%}', steps=5, gamify=False, full_heart='O',
 		})
 	else:
 		ret.append({
-			'contents': format.format(capacity=(capacity / 100.0)),
+			'contents': format.format(ac_state=(online if ac_powered else offline), capacity=(capacity / 100.0)),
 			'highlight_groups': ['battery_gradient', 'battery'],
 			# Gradients are “least alert – most alert” by default, capacity has 
 			# the opposite semantics.

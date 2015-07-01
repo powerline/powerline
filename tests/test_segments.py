@@ -881,12 +881,12 @@ class TestBat(TestCommon):
 	def test_battery(self):
 		pl = Pl()
 
-		def _get_capacity(pl):
-			return 86
+		def _get_battery_status(pl):
+			return 86, False
 
-		with replace_attr(self.module, '_get_capacity', _get_capacity):
+		with replace_attr(self.module, '_get_battery_status', _get_battery_status):
 			self.assertEqual(self.module.battery(pl=pl), [{
-				'contents': '86%',
+				'contents': '  86%',
 				'highlight_groups': ['battery_gradient', 'battery'],
 				'gradient_level': 14,
 			}])
@@ -896,11 +896,17 @@ class TestBat(TestCommon):
 				'gradient_level': 14,
 			}])
 			self.assertEqual(self.module.battery(pl=pl, steps=7), [{
-				'contents': '86%',
+				'contents': '  86%',
 				'highlight_groups': ['battery_gradient', 'battery'],
 				'gradient_level': 14,
 			}])
 			self.assertEqual(self.module.battery(pl=pl, gamify=True), [
+				{
+					'contents': ' ',
+					'draw_inner_divider': False,
+					'highlight_groups': ['battery_offline', 'battery_ac_state', 'battery_gradient', 'battery'],
+					'gradient_level': 0
+				},
 				{
 					'contents': 'OOOO',
 					'draw_inner_divider': False,
@@ -916,6 +922,12 @@ class TestBat(TestCommon):
 			])
 			self.assertEqual(self.module.battery(pl=pl, gamify=True, full_heart='+', empty_heart='-', steps='10'), [
 				{
+					'contents': ' ',
+					'draw_inner_divider': False,
+					'highlight_groups': ['battery_offline', 'battery_ac_state', 'battery_gradient', 'battery'],
+					'gradient_level': 0
+				},
+				{
 					'contents': '++++++++',
 					'draw_inner_divider': False,
 					'highlight_groups': ['battery_full', 'battery_gradient', 'battery'],
@@ -928,6 +940,34 @@ class TestBat(TestCommon):
 					'gradient_level': 100
 				}
 			])
+
+	def test_battery_with_ac_online(self):
+		pl = Pl()
+
+		def _get_battery_status(pl):
+			return 86, True
+
+		with replace_attr(self.module, '_get_battery_status', _get_battery_status):
+			self.assertEqual(self.module.battery(pl=pl, online='C', offline=' '), [
+				{
+					'contents': 'C 86%',
+					'highlight_groups': ['battery_gradient', 'battery'],
+					'gradient_level': 14,
+				}])
+
+	def test_battery_with_ac_offline(self):
+		pl = Pl()
+
+		def _get_battery_status(pl):
+			return 86, False
+
+		with replace_attr(self.module, '_get_battery_status', _get_battery_status):
+			self.assertEqual(self.module.battery(pl=pl, online='C', offline=' '), [
+				{
+					'contents': '  86%',
+					'highlight_groups': ['battery_gradient', 'battery'],
+					'gradient_level': 14,
+				}])
 
 
 class TestVim(TestCase):
