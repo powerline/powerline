@@ -8,7 +8,7 @@ addons:
         packages:
             - libssl1.0.0
             - zsh
-            # - tcsh
+            - tcsh
             # - mksh
             # - busybox
             # - rc

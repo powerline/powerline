@@ -13,7 +13,6 @@ if test "$TRAVIS" = true ; then
 	export PATH="$PWD/tests/bot-ci/deps/rc:$PATH"
 	export PATH="$PWD/tests/bot-ci/deps/mksh:$PATH"
 	export PATH="$PWD/tests/bot-ci/deps/busybox:$PATH"
-	export PATH="$PWD/tests/bot-ci/deps/tcsh:$PATH"
 	export PATH="$PWD/tests/bot-ci/deps/socat:$PATH"
 
 	if test "$PYTHON_IMPLEMENTATION" = "CPython" ; then
