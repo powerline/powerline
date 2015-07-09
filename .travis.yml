@@ -9,10 +9,10 @@ addons:
             - libssl1.0.0
             - zsh
             - tcsh
-            # - mksh
-            # - busybox
+            - mksh
+            - busybox
             # - rc
-            # - socat
+            - socat
             - bc
 language: python
 install: tests/install.sh
