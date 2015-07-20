@@ -244,8 +244,8 @@ highlighting groups are usually cleared, including those defined by powerline.
 To workaround this issue powerline hooks ``Colorscheme`` event, but when you 
 source vimrc with ``BufWritePost`` (or any other) event, but without ``nested`` 
 this event is not launched. See also `autocmd-nested 
-<http://vimpluginloader.sourceforge.net/doc/autocmd.txt.html#autocmd-nested>`_ 
-Vim documentation.
+<http://vimcommunity.bitbucket.org/doc/autocmd.txt.html#autocmd-nested>`_ Vim 
+documentation.
 
 Powerline loses color after saving any file
 -------------------------------------------
