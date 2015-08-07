@@ -51,10 +51,12 @@ def _fetch_battery_info(pl):
 						pl.debug('Not using DBUS+UPower with {0}: not a power supply', devpath)
 						continue
 					pl.debug('Using DBUS+UPower with {0}', devpath)
-					return lambda pl: float(
-						dbus.Interface(dev, dbus_interface=devinterface).Get(
-							devtype_name,
-							'Percentage'
+					return lambda pl: (
+						float(
+							dbus.Interface(dev, dbus_interface=devinterface).Get(
+								devtype_name,
+								'Percentage'
+							),
 						),
 						dbus.Interface(dev, dbus_interface=devinterface).Get(
 							devtype_name,
