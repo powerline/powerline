@@ -148,11 +148,13 @@ username = False
 _geteuid = getattr(os, 'geteuid', lambda: 1)
 
 
-def user(pl, hide_user=None):
+def user(pl, hide_user=None, hide_domain=False):
 	'''Return the current user.
 
 	:param str hide_user:
 		Omit showing segment for users with names equal to this string.
+	:param bool hide_domain:
+		Drop domain component if it exists in a username (delimited by '@').
 
 	Highlights the user with the ``superuser`` if the effective user ID is 0.
 
@@ -166,6 +168,11 @@ def user(pl, hide_user=None):
 		return None
 	if username == hide_user:
 		return None
+	if hide_domain == True:
+		try:
+			username = username[:username.index('@')]
+		except ValueError:
+			pass
 	euid = _geteuid()
 	return [{
 		'contents': username,
