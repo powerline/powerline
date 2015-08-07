@@ -496,15 +496,15 @@ class TestEnv(TestCommon):
 				pass
 
 			def username(self):
-				return 'def'
+				return 'def@DOMAIN.COM'
 
 			if hasattr(self.module, 'psutil') and not callable(self.module.psutil.Process.username):
 				username = property(username)
 
 		struct_passwd = namedtuple('struct_passwd', ('pw_name',))
 		new_psutil = new_module('psutil', Process=Process)
-		new_pwd = new_module('pwd', getpwuid=lambda uid: struct_passwd(pw_name='def'))
-		new_getpass = new_module('getpass', getuser=lambda: 'def')
+		new_pwd = new_module('pwd', getpwuid=lambda uid: struct_passwd(pw_name='def@DOMAIN.COM'))
+		new_getpass = new_module('getpass', getuser=lambda: 'def@DOMAIN.COM')
 		pl = Pl()
 		with replace_attr(self.module, 'pwd', new_pwd):
 			with replace_attr(self.module, 'getpass', new_getpass):
@@ -512,12 +512,18 @@ class TestEnv(TestCommon):
 					with replace_attr(self.module, 'psutil', new_psutil):
 						with replace_attr(self.module, '_geteuid', lambda: 5):
 							self.assertEqual(self.module.user(pl=pl), [
-								{'contents': 'def', 'highlight_groups': ['user']}
+								{'contents': 'def@DOMAIN.COM', 'highlight_groups': ['user']}
 							])
 							self.assertEqual(self.module.user(pl=pl, hide_user='abc'), [
+								{'contents': 'def@DOMAIN.COM', 'highlight_groups': ['user']}
+							])
+							self.assertEqual(self.module.user(pl=pl, hide_domain=False), [
+								{'contents': 'def@DOMAIN.COM', 'highlight_groups': ['user']}
+							])
+							self.assertEqual(self.module.user(pl=pl, hide_user='def@DOMAIN.COM'), None)
+							self.assertEqual(self.module.user(pl=pl, hide_domain=True), [
 								{'contents': 'def', 'highlight_groups': ['user']}
 							])
-							self.assertEqual(self.module.user(pl=pl, hide_user='def'), None)
 						with replace_attr(self.module, '_geteuid', lambda: 0):
 							self.assertEqual(self.module.user(pl=pl), [
 								{'contents': 'def', 'highlight_groups': ['superuser', 'user']}
