@@ -8,10 +8,6 @@ import re
 from powerline.lib.shell import run_cmd
 
 
-# XXX Warning: module name must not be equal to the segment name as long as this 
-# segment is imported into powerline.segments.common module.
-
-
 def _fetch_battery_info(pl):
 	try:
 		import dbus
