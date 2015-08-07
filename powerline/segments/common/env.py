@@ -2,6 +2,7 @@
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 import os
+import re
 
 from powerline.lib.unicode import out_u
 from powerline.theme import requires_segment_info
@@ -148,11 +149,13 @@ username = False
 _geteuid = getattr(os, 'geteuid', lambda: 1)
 
 
-def user(pl, hide_user=None):
+def user(pl, hide_user=None, hide_domain=False):
 	'''Return the current user.
 
 	:param str hide_user:
 		Omit showing segment for users with names equal to this string.
+	:param bool hide_domain:
+		Drop domain component if itexists in a username (delimited by '@').
 
 	Highlights the user with the ``superuser`` if the effective user ID is 0.
 
@@ -166,6 +169,11 @@ def user(pl, hide_user=None):
 		return None
 	if username == hide_user:
 		return None
+	if hide_domain == True:
+		searchfor = None
+		searchfor = re.search('@', username)
+		if searchfor:
+			username, _ = username.split('@')
 	euid = _geteuid()
 	return [{
 		'contents': username,
