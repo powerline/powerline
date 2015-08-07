@@ -184,14 +184,19 @@ def battery(pl, format='{ac_state} {capacity:3.0%}', steps=5, gamify=False, full
 	'''Return battery charge status.
 
 	:param str format:
-		Percent format in case gamify is False.
+		Percent format in case gamify is False. Format arguments: ``ac_state`` 
+		which is equal to either ``online`` or ``offline`` string arguments and 
+		``capacity`` which is equal to current battery capacity in interval [0, 
+		100].
 	:param int steps:
 		Number of discrete steps to show between 0% and 100% capacity if gamify
 		is True.
 	:param bool gamify:
 		Measure in hearts (♥) instead of percentages. For full hearts 
 		``battery_full`` highlighting group is preferred, for empty hearts there 
-		is ``battery_empty``.
+		is ``battery_empty``. ``battery_online`` or ``battery_offline`` group 
+		will be used for leading segment containing ``online`` or ``offline`` 
+		argument contents.
 	:param str full_heart:
 		Heart displayed for “full” part of battery.
 	:param str empty_heart:
@@ -200,9 +205,9 @@ def battery(pl, format='{ac_state} {capacity:3.0%}', steps=5, gamify=False, full
 		the same as full_heart as long as necessary highlighting groups are 
 		defined.
 	:param str online:
-		If computer is connected to a power supply this symbol is prepended to the segment.
+		Symbol used if computer is connected to a power supply.
 	:param str offline:
-		If computer is NOT connected to a power supply this symbol is prepended to the segment.
+		Symbol used if computer is not connected to a power supply.
 
 	``battery_gradient`` and ``battery`` groups are used in any case, first is 
 	preferred.
