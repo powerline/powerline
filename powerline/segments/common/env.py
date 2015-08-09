@@ -169,7 +169,8 @@ def user(pl, hide_user=None, hide_domain=False):
 	if username == hide_user:
 		return None
 	if hide_domain == True:
-		username = username[0:username.find('@')]
+		if '@' in username:
+			username = username[0:username.find('@')]
 	euid = _geteuid()
 	return [{
 		'contents': username,
