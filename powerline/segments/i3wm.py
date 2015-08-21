@@ -19,13 +19,16 @@ def calcgrp(w):
 	return group
 
 
-def workspaces(pl, only_show=None, strip=0):
+def workspaces(pl, only_show=None, output=None, strip=0):
 	'''Return list of used workspaces
 
 	:param list only_show:
 		Specifies which workspaces to show. Valid entries are ``"visible"``, 
 		``"urgent"`` and ``"focused"``. If omitted or ``null`` all workspaces 
 		are shown.
+
+	:param str output:
+		If specified, only workspaces on this output are shown.
 
 	:param int strip:
 		Specifies how many characters from the front of each workspace name 
@@ -45,7 +48,10 @@ def workspaces(pl, only_show=None, strip=0):
 	return [{
 		'contents': w['name'][min(len(w['name']), strip):],
 		'highlight_groups': calcgrp(w)
-	} for w in conn.get_workspaces() if not only_show or any((w[typ] for typ in only_show))]
+	} for w in conn.get_workspaces()
+		if (not only_show or any(w[typ] for typ in only_show))
+		and (not output or w['output'] == output)
+	]
 
 
 @requires_segment_info
