@@ -11,10 +11,6 @@ FAILED=0
 if test "$TRAVIS" = true ; then
 	export PATH="$HOME/opt/fish/bin:${PATH}"
 	export PATH="$PWD/tests/bot-ci/deps/rc:$PATH"
-	export PATH="$PWD/tests/bot-ci/deps/mksh:$PATH"
-	export PATH="$PWD/tests/bot-ci/deps/busybox:$PATH"
-	export PATH="$PWD/tests/bot-ci/deps/tcsh:$PATH"
-	export PATH="$PWD/tests/bot-ci/deps/socat:$PATH"
 
 	if test "$PYTHON_IMPLEMENTATION" = "CPython" ; then
 		export PATH="$HOME/opt/zsh-${PYTHON_MM}${USE_UCS2_PYTHON:+-ucs2}/bin:${PATH}"
