@@ -18,7 +18,7 @@ from powerline import get_fallback_logger
 from tests.lib.terminal import ExpectProcess
 
 
-VTERM_TEST_DIR = os.path.abspath('tests/vterm')
+VTERM_TEST_DIR = os.path.abspath('tests/vterm_tmux')
 
 
 def cell_properties_key_to_shell_escape(cell_properties_key):

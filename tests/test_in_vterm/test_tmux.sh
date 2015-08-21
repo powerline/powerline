@@ -4,18 +4,18 @@ set +x
 
 FAILED=0
 
-rm -rf tests/vterm
-mkdir tests/vterm
-mkdir tests/vterm/path
+rm -rf tests/vterm_tmux
+mkdir tests/vterm_tmux
+mkdir tests/vterm_tmux/path
 
-ln -s "$(which "${PYTHON}")" tests/vterm/path/python
-ln -s "$(which bash)" tests/vterm/path
-ln -s "$(which env)" tests/vterm/path
-ln -s "$(which cut)" tests/vterm/path
-ln -s "$PWD/scripts/powerline-render" tests/vterm/path
-ln -s "$PWD/scripts/powerline-config" tests/vterm/path
+ln -s "$(which "${PYTHON}")" tests/vterm_tmux/path/python
+ln -s "$(which bash)" tests/vterm_tmux/path
+ln -s "$(which env)" tests/vterm_tmux/path
+ln -s "$(which cut)" tests/vterm_tmux/path
+ln -s "$PWD/scripts/powerline-render" tests/vterm_tmux/path
+ln -s "$PWD/scripts/powerline-config" tests/vterm_tmux/path
 
-cp -r tests/terminfo tests/vterm
+cp -r tests/terminfo tests/vterm_tmux
 
 FAIL_SUMMARY=""
 
@@ -28,7 +28,7 @@ test_tmux() {
 	if ! which "${POWERLINE_TMUX_EXE}" ; then
 		return 0
 	fi
-	ln -sf "$(which "${POWERLINE_TMUX_EXE}")" tests/vterm/path
+	ln -sf "$(which "${POWERLINE_TMUX_EXE}")" tests/vterm_tmux/path
 	f=tests/test_in_vterm/test_tmux.py
 	if ! "${PYTHON}" $f ; then
 		echo "Failed vterm test $f"
@@ -49,7 +49,7 @@ fi
 
 if test $FAILED -eq 0 ; then
 	echo "$FAIL_SUMMARY"
-	rm -rf tests/vterm
+	rm -rf tests/vterm_tmux
 fi
 
 exit $FAILED
