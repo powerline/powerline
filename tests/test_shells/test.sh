@@ -1,10 +1,8 @@
 #!/bin/sh
-. tests/bot-ci/scripts/common/main.sh
-set +x
+. tests/common.sh
 
-: ${PYTHON:=python}
-FAIL_SUMMARY=""
-FAILED=0
+enter_suite shells
+
 if test "x$1" = "x--fast" ; then
 	FAST=1
 	shift
@@ -285,9 +283,7 @@ check_test_client() {
 	esac
 	expected_mime_type="${expected_mime_type%/*}"
 	if test "$expected_mime_type" != "$actual_mime_type" ; then
-		echo "Expected $executable to have MIME type $expected_mime_type, but got $actual_mime_type"
-		FAILED=1
-		FAIL_SUMMARY="${FAIL_SUMMARY}${NL}M ${executable}"
+		fail "MIME-$executable" "M" "Expected $executable to have MIME type $expected_mime_type, but got $actual_mime_type"
 	fi
 }
 
@@ -382,8 +378,7 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 				fi
 				echo ">>> $(readlink "tests/shell/path/$SH")"
 				if ! run_test $TEST_TYPE $TEST_CLIENT $TEST_COMMAND ; then
-					FAILED=1
-					FAIL_SUMMARY="${FAIL_SUMMARY}${NL}T ${TEST_TYPE} ${TEST_CLIENT} ${TEST_COMMAND}"
+					fail "$SH-$TEST_TYPE-$TEST_CLIENT:test" F "Failed checking $TEST_COMMAND"
 				fi
 			done
 		done
@@ -395,8 +390,7 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 				echo "Daemon log:"
 				echo '============================================================'
 				cat tests/shell/daemon_log
-				FAILED=1
-				FAIL_SUMMARY="${FAIL_SUMMARY}${NL}L ${TEST_TYPE} ${TEST_CLIENT} ${TEST_COMMAND}"
+				fail "$SH-$TEST_TYPE-$TEST_CLIENT:log" E "Non-empty daemon log for ${TEST_COMMAND}"
 			fi
 		fi
 	done
@@ -406,9 +400,7 @@ if $PYTHON scripts/powerline-daemon -s$ADDRESS > tests/shell/daemon_log_2 2>&1 ;
 	sleep 1
 	$PYTHON scripts/powerline-daemon -s$ADDRESS -k
 else
-	echo "Daemon exited with status $?"
-	FAILED=1
-	FAIL_SUMMARY="${FAIL_SUMMARY}${NL}D"
+	fail "daemon:run" F "Daemon exited with status $?"
 fi
 
 if ! test -z "$(cat tests/shell/daemon_log_2)" ; then
@@ -416,8 +408,7 @@ if ! test -z "$(cat tests/shell/daemon_log_2)" ; then
 	echo "Daemon log (2nd):"
 	echo '============================================================'
 	cat tests/shell/daemon_log_2
-	FAILED=1
-	FAIL_SUMMARY="${FAIL_SUMMARY}${NL}L"
+	fail "daemon:log" E "Daemon run with non-empty log"
 fi
 
 if ( test "x${ONLY_SHELL}" = "x" || test "x${ONLY_SHELL}" = "xzsh" ) \
@@ -425,8 +416,7 @@ if ( test "x${ONLY_SHELL}" = "x" || test "x${ONLY_SHELL}" = "xzsh" ) \
 	&& zsh tests/test_shells/zsh_test_script.zsh 2>/dev/null; then
 	echo "> zpython"
 	if ! run_test zpython zpython zsh -f -i ; then
-		FAILED=1
-		FAIL_SUMMARY="${FAIL_SUMMARY}${NL}T zpython zsh -f -i"
+		fail "zsh-zpython:test" F "Failed checking zsh -f -i"
 	fi
 fi
 
@@ -435,8 +425,7 @@ if  test "x${ONLY_SHELL}" = "x" || test "x${ONLY_SHELL}" = "xpdb" ; then
 		if test "x${ONLY_TEST_TYPE}" = "x" || test "x${ONLY_TEST_TYPE}" = "xsubclass" ; then
 			echo "> pdb subclass"
 			if ! run_test subclass python $PDB_PYTHON "$PWD/tests/test_shells/pdb-main.py" ; then
-				FAILED=1
-				FAIL_SUMMARY="${FAIL_SUMMARY}${NL}T pdb $PDB_PYTHON $PWD/tests/test_shells/pdb-main.py"
+				fail "pdb-subclass:test" F "Failed checking $PDB_PYTHON $PWD/tests/test_shells/pdb-main.py"
 			fi
 		fi
 		if test "x${ONLY_TEST_TYPE}" = "x" || test "x${ONLY_TEST_TYPE}" = "xmodule" ; then
@@ -446,8 +435,7 @@ if  test "x${ONLY_SHELL}" = "x" || test "x${ONLY_SHELL}" = "xpdb" ; then
 				MODULE="powerline.bindings.pdb.__main__"
 			fi
 			if ! run_test module python $PDB_PYTHON -m$MODULE "$PWD/tests/test_shells/pdb-script.py" ; then
-				FAILED=1
-				FAIL_SUMMARY="${FAIL_SUMMARY}${NL}T pdb $PDB_PYTHON -m$MODULE $PWD/tests/test_shells/pdb-script"
+				fail "pdb-module:test" F "Failed checking $PDB_PYTHON -m$MODULE $PWD/tests/test_shells/pdb-script"
 			fi
 		fi
 	fi
@@ -460,8 +448,7 @@ if test "x${ONLY_SHELL}" = "x" || test "x${ONLY_SHELL}" = "xipython" ; then
 		export POWERLINE_THEME_OVERRIDES='in.segments.left=[]'
 		echo "> ipython"
 		if ! run_test ipython ipython ${IPYTHON_PYTHON} -mIPython ; then
-			FAILED=1
-			FAIL_SUMMARY="${FAIL_SUMMARY}${NL}T ipython"
+			fail "ipython:test" F "Failed checking ${IPYTHON_PYTHON} -mIPython"
 		fi
 		unset POWERLINE_THEME_OVERRIDES
 		unset POWERLINE_CONFIG_OVERRIDES
@@ -470,7 +457,6 @@ fi
 
 if test $FAILED -eq 0 ; then
 	rm -r tests/shell
-else
-	echo "${FAIL_SUMMARY}"
 fi
-exit $FAILED
+
+exit_suite

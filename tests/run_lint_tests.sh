@@ -1,7 +1,10 @@
 #!/bin/sh
-FAILED=0
+. tests/common.sh
+
+enter_suite lint
+
 if ! ${PYTHON} scripts/powerline-lint -p powerline/config_files ; then
-	echo "Failed powerline-lint"
-	FAILED=1
+	fail "test" F "Running powerline-lint failed"
 fi
-exit $FAILED
+
+exit_suite
