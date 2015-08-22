@@ -5,6 +5,7 @@ import threading
 
 from time import sleep
 from collections import namedtuple
+from itertools import groupby
 
 import pexpect
 
@@ -23,7 +24,7 @@ class ExpectProcess(threading.Thread):
 		self.cwd = cwd
 		self.env = env
 		self.buffer = []
-		self.child_lock = threading.Lock()
+		self.child_lock = threading.RLock()
 
 	def run(self):
 		child = pexpect.spawn(self.cmd, self.args, cwd=self.cwd, env=self.env)
@@ -42,8 +43,9 @@ class ExpectProcess(threading.Thread):
 			except pexpect.EOF:
 				break
 			else:
-				with self.lock:
+				with self.child_lock:
 					self.vterm.push(s)
+				with self.lock:
 					self.buffer.append(s)
 
 	def resize(self, rows, cols):
@@ -54,8 +56,25 @@ class ExpectProcess(threading.Thread):
 			self.vterm.resize(rows, cols)
 
 	def __getitem__(self, position):
-		with self.lock:
-			return self.vterm.vtscreen[position]
+		row, col = position
+		with self.child_lock:
+			if col is Ellipsis and row is Ellipsis:
+				return [
+					self[row, col]
+					for row in range(self.rows)  # NOQA
+				]
+			elif col is Ellipsis:
+				return [
+					self[row, col]
+					for col in range(self.cols)  # NOQA
+				]
+			elif row is Ellipsis:
+				return [
+					self[row, col]
+					for row in range(self.rows)  # NOQA
+				]
+			else:
+				return self.vterm.vtscreen[row, col]
 
 	def read(self):
 		with self.lock:
@@ -66,6 +85,13 @@ class ExpectProcess(threading.Thread):
 	def send(self, data):
 		with self.child_lock:
 			self.child.send(data)
+
+	def row(self, row):
+		with self.child_lock:
+			return tuple((
+				(cpk, ''.join((i.text for i in cell_group)))
+				for cpk, cell_group in groupby(self[row, Ellipsis], lambda i: i.cell_properties_key)
+			))
 
 
 def cpk_to_shesc(cpk):
