@@ -819,10 +819,10 @@ class TestI3WM(TestCase):
 	def test_workspaces(self):
 		pl = Pl()
 		with replace_attr(i3wm, 'conn', Args(get_workspaces=lambda: iter([
-			{'name': '1: w1', 'focused': False, 'urgent': False, 'visible': False},
-			{'name': '2: w2', 'focused': False, 'urgent': False, 'visible': True},
-			{'name': '3: w3', 'focused': False, 'urgent': True, 'visible': True},
-			{'name': '4: w4', 'focused': True, 'urgent': True, 'visible': True},
+			{'name': '1: w1', 'output': 'LVDS1', 'focused': False, 'urgent': False, 'visible': False},
+			{'name': '2: w2', 'output': 'LVDS1', 'focused': False, 'urgent': False, 'visible': True},
+			{'name': '3: w3', 'output': 'HDMI1', 'focused': False, 'urgent': True, 'visible': True},
+			{'name': '4: w4', 'output': 'DVI01', 'focused': True, 'urgent': True, 'visible': True},
 		]))):
 			self.assertEqual(i3wm.workspaces(pl=pl), [
 				{'contents': '1: w1', 'highlight_groups': ['workspace']},
@@ -849,6 +849,15 @@ class TestI3WM(TestCase):
 				{'contents': 'w2', 'highlight_groups': ['w_visible', 'workspace']},
 				{'contents': 'w3', 'highlight_groups': ['w_urgent', 'w_visible', 'workspace']},
 				{'contents': 'w4', 'highlight_groups': ['w_focused', 'w_urgent', 'w_visible', 'workspace']},
+			])
+			self.assertEqual(i3wm.workspaces(pl=pl, only_show=['focused', 'urgent'], output='DVI01'), [
+				{'contents': '4: w4', 'highlight_groups': ['w_focused', 'w_urgent', 'w_visible', 'workspace']},
+			])
+			self.assertEqual(i3wm.workspaces(pl=pl, only_show=['visible'], output='HDMI1'), [
+				{'contents': '3: w3', 'highlight_groups': ['w_urgent', 'w_visible', 'workspace']},
+			])
+			self.assertEqual(i3wm.workspaces(pl=pl, only_show=['visible'], strip=3, output='LVDS1'), [
+				{'contents': 'w2', 'highlight_groups': ['w_visible', 'workspace']},
 			])
 
 	def test_mode(self):
