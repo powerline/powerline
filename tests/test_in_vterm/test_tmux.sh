@@ -1,8 +1,7 @@
 #!/bin/sh
-. tests/bot-ci/scripts/common/main.sh
-set +x
+. tests/common.sh
 
-FAILED=0
+enter_suite tmux
 
 rm -rf tests/vterm_tmux
 mkdir tests/vterm_tmux
@@ -17,8 +16,6 @@ ln -s "$PWD/scripts/powerline-config" tests/vterm_tmux/path
 
 cp -r tests/terminfo tests/vterm_tmux
 
-FAIL_SUMMARY=""
-
 test_tmux() {
 	if test "$PYTHON_IMPLEMENTATION" = PyPy; then
 		# FIXME PyPy3 segfaults for some reason, PyPy does it as well, but 
@@ -31,9 +28,8 @@ test_tmux() {
 	ln -sf "$(which "${POWERLINE_TMUX_EXE}")" tests/vterm_tmux/path
 	f=tests/test_in_vterm/test_tmux.py
 	if ! "${PYTHON}" $f ; then
-		echo "Failed vterm test $f"
-		FAILED=1
-		FAIL_SUMMARY="$FAIL_SUMMARY${NL}F $POWERLINE_TMUX_EXE $f"
+		local test_name="$("$POWERLINE_TMUX_EXE" -V 2>&1 | cut -d' ' -f2)"
+		fail "$test_name" F "Failed vterm test $f"
 	fi
 }
 
@@ -48,8 +44,9 @@ else
 fi
 
 if test $FAILED -eq 0 ; then
-	echo "$FAIL_SUMMARY"
 	rm -rf tests/vterm_tmux
+else
+	echo "$FAIL_SUMMARY"
 fi
 
-exit $FAILED
+exit_suite

@@ -1,5 +1,8 @@
 #!/bin/sh
-FAILED=0
+. tests/common.sh
+
+enter_suite daemon
+
 export ADDRESS="powerline-ipc-test-$$"
 echo "Powerline address: $ADDRESS"
 if $PYTHON scripts/powerline-daemon -s$ADDRESS ; then
@@ -8,16 +11,14 @@ if $PYTHON scripts/powerline-daemon -s$ADDRESS ; then
 		$PYTHON client/powerline.py --socket $ADDRESS -p/dev/null shell left | \
 		grep 'file not found'
 	) ; then
-		echo "-p/dev/null argument ignored or not treated properly"
-		FAILED=1
+		fail "devnull" F "-p/dev/null argument ignored or not treated properly"
 	fi
 	if ( \
 		$PYTHON client/powerline.py --socket $ADDRESS \
 			-p$PWD/powerline/config_files shell left | \
 		grep 'file not found'
 	) ; then
-		echo "-p/dev/null argument remembered while it should not"
-		FAILED=1
+		fail "nodevnull" F "-p/dev/null argument remembered while it should not"
 	fi
 	if ! ( \
 		cd tests && \
@@ -25,17 +26,15 @@ if $PYTHON scripts/powerline-daemon -s$ADDRESS ; then
 			-p$PWD/../powerline/config_files shell left | \
 		grep 'tests'
 	) ; then
-		echo "Output lacks string “tests”"
-		FAILED=1
+		fail "segment" F "Output lacks string “tests”"
 	fi
 else
-	echo "Daemon exited with status $?"
-	FAILED=1
+	fail "exitcode" E "Daemon exited with status $?"
 fi
 if $PYTHON scripts/powerline-daemon -s$ADDRESS -k ; then
 	:
 else
-	echo "powerline-daemon -k failed with exit code $?"
-	FAILED=1
+	fail "-k" F "powerline-daemon -k failed with exit code $?"
 fi
-exit $FAILED
+
+exit_suite

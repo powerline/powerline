@@ -1,6 +1,7 @@
 #!/bin/sh
-. tests/bot-ci/scripts/common/main.sh
-FAILED=0
+. tests/common.sh
+
+enter_suite vim
 
 if test -z "$VIM" ; then
 	if test -n "$USE_UCS2_PYTHON" ; then
@@ -42,28 +43,29 @@ export POWERLINE_THEME_OVERRIDES='default.segments.left=[]'
 test_script() {
 	local vim="$1"
 	local script="$2"
+	local test_name_prefix="$3"
 	echo "Running script $script with $vim"
 	if ! test -e "$vim" ; then
 		return 0
 	fi
 	if ! "$vim" -u NONE -S $script || test -f message.fail ; then
-		echo "Failed script $script run with $VIM" >&2
+		local test_name="$test_name_prefix-${script##*/}"
+		fail "${test_name%.vim}" F "Failed script $script run with $VIM"
 		cat message.fail >&2
 		rm message.fail
-		FAILED=1
 	fi
 }
 
 for script in tests/test_*.vim ; do
 	if test "${script%.old.vim}" = "${script}" ; then
-		test_script "$NEW_VIM" "$script"
+		test_script "$NEW_VIM" "$script" new
 	fi
 done
 
 if test -e "$OLD_VIM" ; then
 	for script in tests/test_*.old.vim ; do
-		test_script "$OLD_VIM" "$script"
+		test_script "$OLD_VIM" "$script" old
 	done
 fi
 
-exit $FAILED
+exit_suite
