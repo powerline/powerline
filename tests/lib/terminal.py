@@ -4,6 +4,7 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 import threading
 
 from time import sleep
+from collections import namedtuple
 
 import pexpect
 
@@ -65,3 +66,43 @@ class ExpectProcess(threading.Thread):
 	def send(self, data):
 		with self.child_lock:
 			self.child.send(data)
+
+
+def cpk_to_shesc(cpk):
+	'''Convert one cell_properties_key item to shell escape sequence
+
+	:param tests.lib.vterm.VTermScreenCell.cell_properties_key cpk:
+		Item to convert.
+
+	:return:
+		String, shell escape sequence usable in terminals that are able to parse 
+		true color escape sequences::
+
+			\e[38;2;R;G;B;48;2;R;G;B{other attributes}m
+	'''
+	fg, bg, bold, underline, italic = cpk
+	return('\x1b[38;2;{0};48;2;{1}{bold}{underline}{italic}m'.format(
+		';'.join((str(i) for i in fg)),
+		';'.join((str(i) for i in bg)),
+		bold=(';1' if bold else ''),
+		underline=(';4' if underline else ''),
+		italic=(';3' if italic else ''),
+	))
+
+
+ColorKey = namedtuple('ColorKey', (
+	'fg', 'bg', 'bold', 'underline', 'italic'
+))
+ColoredText = namedtuple('ColoredText', (
+	'cell_properties_key', 'text'
+))
+
+
+def coltext_to_shesc(coltext):
+	return ''.join((
+		(lambda ctext: ('{0}{1}\x1b[m'.format(
+			cpk_to_shesc(ctext.cell_properties_key),
+			ctext.text
+		)))(i if hasattr(i, 'cell_properties_key') else ColoredText(ColorKey(*i[0]), i[1]))
+		for i in coltext
+	))
