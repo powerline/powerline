@@ -150,7 +150,10 @@ try:
 		return if_io.bytes_recv, if_io.bytes_sent
 
 	def _get_interfaces():
-		io_counters = psutil.network_io_counters(pernic=True)
+		try:
+			io_counters = psutil.net_io_counters(pernic=True)
+		except AttributeError:
+			io_counters = psutil.network_io_counters(pernic=True)
 		for interface, data in io_counters.items():
 			if data:
 				yield interface, data.bytes_recv, data.bytes_sent
