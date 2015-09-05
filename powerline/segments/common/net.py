@@ -118,6 +118,7 @@ else:
 		try:
 			return addrs[family][0]['addr']
 		except (KeyError, IndexError):
+			pl.info("No IPv{0} address found for interface {1}", ipv, interface)
 			return None
 
 
