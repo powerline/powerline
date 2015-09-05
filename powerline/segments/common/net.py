@@ -101,16 +101,24 @@ else:
 			return 0
 
 	def internal_ip(pl, interface='auto', ipv=4):
+		family = netifaces.AF_INET6 if ipv == 6 else netifaces.AF_INET
 		if interface == 'auto':
 			try:
 				interface = next(iter(sorted(netifaces.interfaces(), key=_interface_key, reverse=True)))
 			except StopIteration:
 				pl.info('No network interfaces found')
 				return None
+		elif interface == 'default_gateway':
+			try:
+				interface = netifaces.gateways()['default'][family][1]
+			except KeyError:
+				pl.info('No default gateway found for IPv{0}', ipv)
+				return None
 		addrs = netifaces.ifaddresses(interface)
 		try:
-			return addrs[netifaces.AF_INET6 if ipv == 6 else netifaces.AF_INET][0]['addr']
+			return addrs[family][0]['addr']
 		except (KeyError, IndexError):
+			pl.info("No IPv{0} address found for interface {1}", ipv, interface)
 			return None
 
 
@@ -130,6 +138,11 @@ Requires ``netifaces`` module to work properly.
 	#. ``teredo`` followed by number or the end of string.
 	#. Any other interface that is not ``lo*``.
 	#. ``lo`` followed by number or the end of string.
+
+	Use ``default_gateway`` to detect the interface based on the machine's
+	`default gateway <https://en.wikipedia.org/wiki/Default_gateway>`_ (i.e.,
+	the router to which it is connected).
+
 :param int ipv:
 	4 or 6 for ipv4 and ipv6 respectively, depending on which IP address you 
 	need exactly.

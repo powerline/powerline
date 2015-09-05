@@ -397,6 +397,29 @@ class TestNet(TestCommon):
 			interfaces[:] = ()
 			self.assertEqual(self.module.internal_ip(pl=pl, ipv=6), None)
 
+		gateways = {
+			'default': {
+				netifaces.AF_INET: ('192.168.100.1', 'enp2s0'),
+				netifaces.AF_INET6: ('feff::5446:5eff:fe5a:0001', 'enp2s0')
+			}
+		}
+
+		with replace_module_module(
+			self.module, 'netifaces',
+			interfaces=(lambda: interfaces),
+			ifaddresses=(lambda interface: addr[interface]),
+			gateways=(lambda: gateways),
+			AF_INET=netifaces.AF_INET,
+			AF_INET6=netifaces.AF_INET6,
+		):
+			# default gateway has specified address family
+			self.assertEqual(self.module.internal_ip(pl=pl, interface='default_gateway', ipv=4), '192.168.100.200')
+			self.assertEqual(self.module.internal_ip(pl=pl, interface='default_gateway', ipv=6), 'feff::5446:5eff:fe5a:7777%enp2s0')
+			# default gateway doesn't have specified address family
+			gateways['default'] = {}
+			self.assertEqual(self.module.internal_ip(pl=pl, interface='default_gateway', ipv=4), None)
+			self.assertEqual(self.module.internal_ip(pl=pl, interface='default_gateway', ipv=6), None)
+
 	def test_network_load(self):
 		def gb(interface):
 			return None
