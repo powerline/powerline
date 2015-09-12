@@ -13,7 +13,7 @@ if test -z "$FAILED" ; then
 	FAIL_SUMMARY=""
 
 	TMP_ROOT="$ROOT/tests/tmp"
-	export FAILURES_FILE="$ROOT/tests/failures"
+	export FAILURES_FILE="$ROOT/tests/status"
 fi
 
 ANSI_CLEAR="\033[0K"
@@ -56,13 +56,20 @@ fail() {
 	local test_name="$1" ; shift
 	local fail_char="$allow_failure$1" ; shift
 	local message="$1" ; shift
+	local verb="${1:-Failed}" ; shift
 	local full_msg="$fail_char $POWERLINE_CURRENT_SUITE|$test_name :: $message"
 	FAIL_SUMMARY="${FAIL_SUMMARY}${NL}${full_msg}"
-	echo "Failed: $full_msg"
+	echo "$verb: $full_msg"
 	echo "$full_msg" >> "$FAILURES_FILE"
 	if test -z "$allow_failure" ; then
 		FAILED=1
 	fi
+}
+
+skip() {
+	local test_name="$1" ; shift
+	local message="$1" ; shift
+	fail --allow-failure "$test_name" S "$message" "Skipped"
 }
 
 make_test_root() {

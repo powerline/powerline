@@ -10,7 +10,7 @@ build
 
 message.fail
 
-client/powerline
+/client/powerline
 
 /tests/tmp
-/tests/failures
+/tests/status
