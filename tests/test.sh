@@ -40,10 +40,10 @@ for script in tests/run_*_tests.sh ; do
 	fi
 done
 
-if test -e tests/failures ; then
-	echo "Some tests failed. Summary:"
-	cat tests/failures
-	rm tests/failures
+if test -e tests/status ; then
+	echo "Fails and skips summary:"
+	cat tests/status
+	rm tests/status
 fi
 
 exit_suite
