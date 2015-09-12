@@ -28,6 +28,14 @@ fail() {
 	local full_msg="$fail_char $POWERLINE_CURRENT_SUITE|$test_name :: $message"
 	FAIL_SUMMARY="${FAIL_SUMMARY}${NL}${full_msg}"
 	echo "Failed: $full_msg"
-	echo "$full_msg" >> tests/failures
+	echo "$full_msg" >> tests/status
 	FAILED=1
+}
+
+skip() {
+	local test_name="$1"
+	local message="$2"
+	local full_msg="S $POWERLINE_CURRENT_SUITE|$test_name :: $message"
+	echo "Skipped: $full_msg"
+	echo "$full_msg" >> tests/status
 }
