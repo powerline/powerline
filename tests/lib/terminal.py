@@ -95,11 +95,12 @@ class ExpectProcess(threading.Thread):
 		buf = BytesIO(self.read())
 		if regex.search(buf.getvalue()):
 			return
-		time = monotonic()
-		while monotonic() - time < timeout:
+		start_time = monotonic()
+		while monotonic() - start_time < timeout:
 			buf.write(self.read())
 			if regex.search(buf.getvalue()):
 				return
+			sleep(0.1)
 		raise ValueError('Timed out')
 
 	def send(self, data):
