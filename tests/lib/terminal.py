@@ -62,20 +62,20 @@ class ExpectProcess(threading.Thread):
 		row, col = position
 		with self.child_lock:
 			if col is Ellipsis and row is Ellipsis:
-				return [
+				return (
 					self[row, col]
 					for row in range(self.rows)  # NOQA
-				]
+				)
 			elif col is Ellipsis:
-				return [
+				return (
 					self[row, col]
 					for col in range(self.cols)  # NOQA
-				]
+				)
 			elif row is Ellipsis:
-				return [
+				return (
 					self[row, col]
 					for row in range(self.rows)  # NOQA
-				]
+				)
 			else:
 				return self.vterm.vtscreen[row, col]
 
@@ -111,7 +111,8 @@ class ExpectProcess(threading.Thread):
 
 	def close(self):
 		with self.child_lock:
-			self.child.close(force=True)
+			if hasattr(self, 'child'):
+				self.child.close(force=True)
 
 
 def cpk_to_shesc(cpk):
