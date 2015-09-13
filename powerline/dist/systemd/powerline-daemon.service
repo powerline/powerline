@@ -1,0 +1,10 @@
+[Unit]
+Description=powerline-daemon - Daemon that improves powerline performance
+Documentation=man:powerline-daemon(1)
+Documentation=https://powerline.readthedocs.org/en/latest/
+
+[Service]
+ExecStart=/usr/bin/powerline-daemon --foreground
+
+[Install]
+WantedBy=default.target
