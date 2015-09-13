@@ -6,8 +6,11 @@ import threading
 from time import sleep
 from collections import namedtuple
 from itertools import groupby
+from io import BytesIO
 
 import pexpect
+
+from powerline.lib.monotonic import monotonic
 
 from tests.lib.vterm import VTerm
 
@@ -82,9 +85,22 @@ class ExpectProcess(threading.Thread):
 			del self.buffer[:]
 			return ret
 
+	def waitfor(self, regex, timeout=1):
+		buf = BytesIO(self.read())
+		if regex.search(buf.getvalue()):
+			return
+		time = monotonic()
+		while monotonic() - time < timeout:
+			buf.write(self.read())
+			if regex.search(buf.getvalue()):
+				return
+		raise ValueError('Timed out')
+
 	def send(self, data):
 		with self.child_lock:
 			self.child.send(data)
+
+	write = send
 
 	def row(self, row):
 		with self.child_lock:
@@ -92,6 +108,10 @@ class ExpectProcess(threading.Thread):
 				(cpk, ''.join((i.text for i in cell_group)))
 				for cpk, cell_group in groupby(self[row, Ellipsis], lambda i: i.cell_properties_key)
 			))
+
+	def close(self):
+		with self.child_lock:
+			self.child.close(force=True)
 
 
 def cpk_to_shesc(cpk):
