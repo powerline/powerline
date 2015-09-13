@@ -2,6 +2,7 @@
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 import threading
+import logging
 
 from time import sleep
 from collections import namedtuple
@@ -13,6 +14,9 @@ import pexpect
 from powerline.lib.monotonic import monotonic
 
 from tests.lib.vterm import VTerm
+
+
+logger = logging.getLogger('terminal')
 
 
 class ExpectProcess(threading.Thread):
@@ -112,13 +116,15 @@ class ExpectProcess(threading.Thread):
 	def waitfor(self, regex, timeout=1):
 		buf = BytesIO(self.read())
 		if regex.search(buf.getvalue()):
-			return
+			return buf.getvalue()
 		start_time = monotonic()
 		while monotonic() - start_time < timeout:
+			sleep(0.1)
 			buf.write(self.read())
 			if regex.search(buf.getvalue()):
-				return
-			sleep(0.1)
+				return buf.getvalue()
+		with self.lock:
+			self.buffer.append(buf.getvalue())
 		raise ValueError('Timed out')
 
 	def send(self, data):
@@ -133,7 +139,10 @@ class ExpectProcess(threading.Thread):
 	def close(self):
 		with self.child_lock:
 			if hasattr(self, 'child'):
-				self.child.close(force=True)
+				try:
+					self.child.close(force=True)
+				except pexpect.ExceptionPexpect as e:
+					logging.exception('Exception %r', e)
 
 
 def cpk_to_shesc(cpk):
