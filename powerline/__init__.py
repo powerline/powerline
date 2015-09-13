@@ -411,13 +411,18 @@ class Powerline(object):
 		self.run_loader_update = False
 
 		self.renderer_options = {}
-
-		self.prev_common_config = None
-		self.prev_ext_config = None
 		self.pl = None
 		self.setup_args = ()
 		self.setup_kwargs = {}
 		self.imported_modules = set()
+
+		self.init_prev_configs()
+
+	def init_prev_configs(self):
+		'''Initialize previous config values to None.
+		'''
+		self.prev_common_config = None
+		self.prev_ext_config = None
 
 	get_encoding = staticmethod(get_preferred_output_encoding)
 	'''Get encoding used by the current application
@@ -433,7 +438,17 @@ class Powerline(object):
 		'''
 		return create_logger(self.common_config, self.default_log_stream)
 
-	def create_renderer(self, load_main=False, load_colors=False, load_colorscheme=False, load_theme=False):
+	def recreate_renderer(self):
+		'''Recreate renderer, ignoring previous configuration
+		'''
+		self.init_prev_configs()
+		return self.create_renderer(load_main=True, load_colors=True, load_colorscheme=True, load_theme=True)
+
+	def create_renderer(self,
+	                    load_main=False,
+	                    load_colors=False,
+	                    load_colorscheme=False,
+	                    load_theme=False):
 		'''(Re)create renderer object. Can be used after Powerline object was 
 		successfully initialized. If any of the below parameters except 
 		``load_main`` is True renderer object will be recreated.
