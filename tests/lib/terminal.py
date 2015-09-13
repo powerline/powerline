@@ -16,7 +16,7 @@ from tests.lib.vterm import VTerm
 
 
 class ExpectProcess(threading.Thread):
-	def __init__(self, lib, rows, cols, cmd, args, cwd=None, env=None):
+	def __init__(self, lib, rows, cols, cmd, args, cwd=None, env=None, init_input=''):
 		super(ExpectProcess, self).__init__()
 		self.vterm = VTerm(lib, rows, cols)
 		self.lock = threading.Lock()
@@ -28,30 +28,48 @@ class ExpectProcess(threading.Thread):
 		self.env = env
 		self.buffer = []
 		self.child_lock = threading.RLock()
+		self.init_input = init_input
+
+	def read_child(self, timeout=0):
+		status = None
+		try:
+			with self.child_lock:
+				s = self.child.read_nonblocking(size=1024, timeout=timeout)
+				status = self.child.status
+		except pexpect.TIMEOUT:
+			return True, status, b''
+		except pexpect.EOF:
+			return False, status, b''
+		except ValueError:  # I/O operation on closed file
+			return False, status, b''
+		else:
+			return True, status, s
 
 	def run(self):
-		child = pexpect.spawn(self.cmd, self.args, cwd=self.cwd, env=self.env)
-		sleep(0.5)
-		child.setwinsize(self.rows, self.cols)
-		sleep(0.5)
-		self.child = child
+		with self.child_lock:
+			child = pexpect.spawn(self.cmd, self.args, cwd=self.cwd, env=self.env)
+			sleep(0.5)
+			child.setwinsize(self.rows, self.cols)
+			sleep(0.5)
+			self.child = child
 		status = None
-		while status is None:
-			try:
-				with self.child_lock:
-					s = child.read_nonblocking(size=1024, timeout=0)
-					status = child.status
-			except pexpect.TIMEOUT:
-				pass
-			except pexpect.EOF:
-				break
-			except ValueError:  # I/O operation on closed file
-				break
-			else:
-				with self.child_lock:
-					self.vterm.push(s)
+		if self.init_input:
+			self.write(self.init_input)
+			s = True
+			while s:
+				cont, status, s = self.read_child(0.1)
+				if not cont:
+					break
 				with self.lock:
 					self.buffer.append(s)
+		while status is None:
+			cont, status, s = self.read_child()
+			if not cont:
+				break
+			with self.child_lock:
+				self.vterm.push(s)
+			with self.lock:
+				self.buffer.append(s)
 
 	def start(self, *args, **kwargs):
 		super(ExpectProcess, self).start(*args, **kwargs)
