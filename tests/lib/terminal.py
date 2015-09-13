@@ -53,6 +53,10 @@ class ExpectProcess(threading.Thread):
 				with self.lock:
 					self.buffer.append(s)
 
+	def start(self, *args, **kwargs):
+		super(ExpectProcess, self).start(*args, **kwargs)
+		sleep(1)
+
 	def resize(self, rows, cols):
 		with self.child_lock:
 			self.rows = rows
