@@ -110,11 +110,7 @@ class ExpectProcess(threading.Thread):
 	write = send
 
 	def row(self, row):
-		with self.child_lock:
-			return tuple((
-				(cpk, ''.join((i.text for i in cell_group)))
-				for cpk, cell_group in groupby(self[row, Ellipsis], lambda i: i.cell_properties_key)
-			))
+		return coltext_join(self[row, Ellipsis])
 
 	def close(self):
 		with self.child_lock:
@@ -150,6 +146,23 @@ ColorKey = namedtuple('ColorKey', (
 ColoredText = namedtuple('ColoredText', (
 	'cell_properties_key', 'text'
 ))
+
+
+def coltext_join(coltext):
+	ret = tuple((
+		(cpk, ''.join((i.text or ' ' for i in cell_group)))
+		for cpk, cell_group in groupby(coltext, lambda i: i.cell_properties_key)
+	))
+	if ret == ((
+		(
+			(240, 240, 240),
+			(0, 0, 0),
+			0, 0, 0
+		),
+		' ' * len(ret[0][1])
+	),):
+		return ()
+	return ret
 
 
 def coltext_to_shesc(coltext):
