@@ -45,6 +45,8 @@ class ExpectProcess(threading.Thread):
 				pass
 			except pexpect.EOF:
 				break
+			except ValueError:  # I/O operation on closed file
+				break
 			else:
 				with self.child_lock:
 					self.vterm.push(s)
