@@ -19,11 +19,14 @@ from tests.lib.vterm import VTerm
 logger = logging.getLogger('terminal')
 
 
+CursorPos = namedtuple('CursorPos', ('row', 'col'))
+
+
 class ExpectProcess(threading.Thread):
-	def __init__(self, lib, rows, cols, cmd, args, cwd=None, env=None, init_input=''):
+	def __init__(self, lib, rows, cols, cmd, args, cwd=None, env=None,
+	             init_input='', init_input_wait_timeout=0.1):
 		super(ExpectProcess, self).__init__()
 		self.vterm = VTerm(lib, rows, cols)
-		self.lock = threading.Lock()
 		self.rows = rows
 		self.cols = cols
 		self.cmd = cmd
@@ -31,8 +34,12 @@ class ExpectProcess(threading.Thread):
 		self.cwd = cwd
 		self.env = env
 		self.buffer = []
+		self.lock = threading.Lock()
 		self.child_lock = threading.RLock()
+		self.vterm_lock = threading.RLock()
 		self.init_input = init_input
+		self.init_input_wait_timeout = init_input_wait_timeout
+		self.init_event = threading.Event()
 
 	def read_child(self, timeout=0):
 		status = None
@@ -50,45 +57,62 @@ class ExpectProcess(threading.Thread):
 			return True, status, s
 
 	def run(self):
-		with self.child_lock:
-			child = pexpect.spawn(self.cmd, self.args, cwd=self.cwd, env=self.env)
-			sleep(0.5)
-			child.setwinsize(self.rows, self.cols)
-			sleep(0.5)
-			self.child = child
 		status = None
-		if self.init_input:
-			self.write(self.init_input)
-			s = True
-			while s:
-				cont, status, s = self.read_child(0.1)
+		try:
+			with self.child_lock:
+				self.child = pexpect.spawn(self.cmd, self.args, cwd=self.cwd, env=self.env)
+			s = False
+			while not s:
+				cont, status, s = self.read_child(0.5)
 				if not cont:
 					break
-				with self.lock:
-					self.buffer.append(s)
+				if s:
+					with self.lock:
+						self.buffer.append(s)
+					break
+
+			with self.child_lock:
+				self.child.setwinsize(self.rows, self.cols)
+				sleep(0.5)
+
+			if self.init_input:
+				self.write(self.init_input)
+				s = True
+				wait_timeout = self.init_input_wait_timeout
+				while s:
+					cont, status, s = self.read_child(wait_timeout)
+					if not cont:
+						break
+					if s:
+						with self.lock:
+							self.buffer.append(s)
+		finally:
+			self.init_event.set()
 		while status is None:
 			cont, status, s = self.read_child()
 			if not cont:
 				break
-			with self.child_lock:
-				self.vterm.push(s)
-			with self.lock:
-				self.buffer.append(s)
+			if s:
+				with self.vterm_lock:
+					self.vterm.push(s)
+				with self.lock:
+					self.buffer.append(s)
 
 	def start(self, *args, **kwargs):
 		super(ExpectProcess, self).start(*args, **kwargs)
-		sleep(1)
+		self.init_event.wait()
 
 	def resize(self, rows, cols):
+		self.rows = rows
+		self.cols = cols
 		with self.child_lock:
-			self.rows = rows
-			self.cols = cols
 			self.child.setwinsize(rows, cols)
+		with self.vterm_lock:
 			self.vterm.resize(rows, cols)
 
 	def __getitem__(self, position):
 		row, col = position
-		with self.child_lock:
+		with self.vterm_lock:
 			if col is Ellipsis and row is Ellipsis:
 				return (
 					self[row, col]
@@ -119,12 +143,20 @@ class ExpectProcess(threading.Thread):
 			return buf.getvalue()
 		start_time = monotonic()
 		while monotonic() - start_time < timeout:
-			sleep(0.1)
+			sleep(0.005)
 			buf.write(self.read())
 			if regex.search(buf.getvalue()):
 				return buf.getvalue()
 		with self.lock:
 			self.buffer.append(buf.getvalue())
+		raise ValueError('Timed out')
+
+	def waitforcursor(self, check_pos, timeout=1):
+		start_time = monotonic()
+		while monotonic() - start_time < timeout:
+			sleep(0.005)
+			if check_pos(self.cursor):
+				return
 		raise ValueError('Timed out')
 
 	def send(self, data):
@@ -143,6 +175,12 @@ class ExpectProcess(threading.Thread):
 					self.child.close(force=True)
 				except pexpect.ExceptionPexpect as e:
 					logging.exception('Exception %r', e)
+
+	@property
+	def cursor(self):
+		with self.vterm_lock:
+			cursor = self.vterm.cursor
+		return CursorPos(cursor.row, cursor.col)
 
 
 def cpk_to_shesc(cpk):
