@@ -16,15 +16,46 @@ _ref_pat = re.compile(br'ref:\s*refs/heads/(.+)')
 
 
 def branch_name_from_config_file(directory, config_file):
+	status = ''
+	b = None
+	if os.path.exists('%s/rebase-apply' % directory):
+		if os.path.exists('%s/rebase-apply/rebasing' % directory):
+			status = ' (REBASE)'
+			with open('%s/rebase-apply/head-name' % directory, 'r') as f:
+				b = f.read()
+		elif os.path.exists('%s/rebase-apply/applying' % directory):
+			status = ' (AM)'
+		else:
+			status = ' (REBASE|AM)'
+	elif os.path.exists('%s/rebase-merge' % directory):
+		with open('%s/rebase-merge/head-name' % directory, 'r') as f:
+			b = f.read()
+		if os.path.exists('%s/rebase-merge/interactive' % directory):
+			status = ' (REBASE-i)'
+		else:
+			status = ' (REBASE-m)'
+	elif os.path.exists('%s/MERGE_HEAD' % directory):
+		status = ' (MERGING)'
+	elif os.path.exists('%s/CHERRY_PICK_HEAD' % directory):
+		status = ' (CHERRY-PICKING)'
+	elif os.path.exists('%s/REVERT_HEAD' % directory):
+		status = ' (REVERT_HEAD)'
+	elif os.path.exists('%s/BISECT_LOG' % directory):
+		status = ' (BISECTING)'
+
+	if b:
+		b = b.strip().replace('refs/heads/', '')
+		return b + status
+
 	try:
 		with open(config_file, 'rb') as f:
 			raw = f.read()
 	except EnvironmentError:
-		return os.path.basename(directory)
+		return os.path.basename(directory) + status
 	m = _ref_pat.match(raw)
 	if m is not None:
-		return m.group(1).decode(get_preferred_file_contents_encoding(), 'replace')
-	return raw[:7]
+		return m.group(1).decode(get_preferred_file_contents_encoding(), 'replace') + status
+	return raw[:7] + status
 
 
 def git_directory(directory):
