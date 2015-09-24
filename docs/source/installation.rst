@@ -29,7 +29,7 @@ Generic requirements
 * ``bzr`` python package (note: *not* standalone executable). Required to work 
   with bazaar repositories.
 * ``pyuv`` python package. Required for :ref:`libuv-based watcher 
-  <config-common-watcher>` to work.
+  <config-common-watcher>` to work. (This also requires python-dev package be installed beforehand.)
 * ``i3-py``, `available on github <https://github.com/ziberna/i3-py>`_. Required 
   for i3wm bindings and segments.
 
