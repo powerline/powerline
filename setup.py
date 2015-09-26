@@ -34,7 +34,7 @@ def compile_client():
 		# A normal split would do a split on each space which might be incorrect. The
 		# shlex will not split if a space occurs in an arguments value.
 		subprocess.check_call(compiler + shlex.split(cflags) + ['client/powerline.c', '-o', 'scripts/powerline'])
-		shutil.copyfile('scripts/powerline', 'client/powerline')
+		shutil.copy('scripts/powerline', 'client/powerline')
 
 try:
 	compile_client()
@@ -49,11 +49,11 @@ except Exception as e:
 		from powerline.lib.shell import which
 	if which('socat') and which('sed') and which('sh'):
 		print('Using powerline.sh script instead of C version (requires socat, sed and sh)')
-		shutil.copyfile('client/powerline.sh', 'scripts/powerline')
+		shutil.copy('client/powerline.sh', 'scripts/powerline')
 		can_use_scripts = True
 	else:
 		print('Using powerline.py script instead of C version')
-		shutil.copyfile('client/powerline.py', 'scripts/powerline')
+		shutil.copy('client/powerline.py', 'scripts/powerline')
 		can_use_scripts = True
 else:
 	can_use_scripts = False
