@@ -7,6 +7,7 @@ import sys
 import subprocess
 import logging
 import shlex
+import shutil
 
 from traceback import print_exc
 from setuptools import setup, find_packages
@@ -33,6 +34,7 @@ def compile_client():
 		# A normal split would do a split on each space which might be incorrect. The
 		# shlex will not split if a space occurs in an arguments value.
 		subprocess.check_call(compiler + shlex.split(cflags) + ['client/powerline.c', '-o', 'scripts/powerline'])
+		shutil.copyfile('scripts/powerline', 'client/powerline')
 
 try:
 	compile_client()
@@ -40,7 +42,6 @@ except Exception as e:
 	print('Compiling C version of powerline-client failed')
 	logging.exception(e)
 	# FIXME Catch more specific exceptions
-	import shutil
 	if hasattr(shutil, 'which'):
 		which = shutil.which
 	else:
