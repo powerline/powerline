@@ -58,11 +58,17 @@ else:
 	can_use_scripts = False
 
 
+def get_subprocess_output(cmd):
+	p = subprocess.Popen(cmd, shell=False, stdout=subprocess.PIPE)
+	stdout, _ = p.communicate()
+	return stdout.decode('ascii').strip()
+
+
 def get_version():
 	base_version = '2.2'
 	base_version += '.dev9999'
 	try:
-		return base_version + '+git.' + str(subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip())
+		return base_version + '+git.' + str(get_subprocess_output(['git', 'rev-parse', 'HEAD']))
 	except Exception:
 		print_exc()
 		return base_version
