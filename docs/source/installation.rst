@@ -113,8 +113,7 @@ install a patched font.
 Patched fonts
 -------------
 
-This method is the fallback method and works for every terminal, with the 
-exception of :ref:`rxvt-unicode <tips-and-tricks-urxvt>`.
+This method is the fallback method and works for every terminal.
 
 Download the font from `powerline-fonts`_. If preferred font can’t be found in 
 the `powerline-fonts`_ repo, then patching the preferred font is needed instead.
