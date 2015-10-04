@@ -17,7 +17,7 @@ def date(pl, format='%Y-%m-%d', istime=False):
 	Highlight groups used: ``time`` or ``date``.
 	'''
 	return [{
-		'contents': datetime.now().strftime(format),
+		'contents': datetime.now().strftime(format.encode('utf-8')).decode('utf-8'),
 		'highlight_groups': (['time'] if istime else []) + ['date'],
 		'divider_highlight_group': 'time:divider' if istime else None,
 	}]
@@ -33,7 +33,7 @@ def fuzzy_time(pl, unicode_text=False):
 	'''Display the current time as fuzzy time, e.g. "quarter past six".
 
 	:param bool unicode_text:
-		If true then hyphenminuses (regular ASCII ``-``) and single quotes are 
+		If true then hyphenminuses (regular ASCII ``-``) and single quotes are
 		replaced with unicode dashes and apostrophes.
 	'''
 	hour_str = ['twelve', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven']
