@@ -7,6 +7,7 @@ import os
 from functools import partial
 from collections import namedtuple
 from time import sleep
+from platform import python_implementation
 
 from powerline.segments import shell, tmux, pdb, i3wm
 from powerline.lib.vcs import get_fallback_create_watcher
@@ -709,7 +710,12 @@ class TestTime(TestCommon):
 		with replace_attr(self.module, 'datetime', Args(now=lambda: Args(strftime=lambda fmt: fmt))):
 			self.assertEqual(self.module.date(pl=pl), [{'contents': '%Y-%m-%d', 'highlight_groups': ['date'], 'divider_highlight_group': None}])
 			self.assertEqual(self.module.date(pl=pl, format='%H:%M', istime=True), [{'contents': '%H:%M', 'highlight_groups': ['time', 'date'], 'divider_highlight_group': 'time:divider'}])
-		self.assertEqual(self.module.date(pl=pl, format='\u231a', istime=True), [{'contents': '\u231a', 'highlight_groups': ['time', 'date'], 'divider_highlight_group': 'time:divider'}])
+		unicode_date = self.module.date(pl=pl, format='\u231a', istime=True)
+		expected_unicode_date = [{'contents': '\u231a', 'highlight_groups': ['time', 'date'], 'divider_highlight_group': 'time:divider'}]
+		if python_implementation() == 'PyPy' and sys.version_info >= (3,):
+			if unicode_date != expected_unicode_date:
+				raise SkipTest('Dates do not match, see https://bitbucket.org/pypy/pypy/issues/2161/pypy3-strftime-does-not-accept-unicode')
+		self.assertEqual(unicode_date, expected_unicode_date)
 
 	def test_fuzzy_time(self):
 		time = Args(hour=0, minute=45)
