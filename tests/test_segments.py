@@ -709,7 +709,7 @@ class TestTime(TestCommon):
 		with replace_attr(self.module, 'datetime', Args(now=lambda: Args(strftime=lambda fmt: fmt))):
 			self.assertEqual(self.module.date(pl=pl), [{'contents': '%Y-%m-%d', 'highlight_groups': ['date'], 'divider_highlight_group': None}])
 			self.assertEqual(self.module.date(pl=pl, format='%H:%M', istime=True), [{'contents': '%H:%M', 'highlight_groups': ['time', 'date'], 'divider_highlight_group': 'time:divider'}])
-		self.module.date(pl=pl, format='\u231a')
+		self.assertEqual(self.module.date(pl=pl, format='\u231a', istime=True), [{'contents': '\u231a', 'highlight_groups': ['time', 'date'], 'divider_highlight_group': 'time:divider'}])
 
 	def test_fuzzy_time(self):
 		time = Args(hour=0, minute=45)

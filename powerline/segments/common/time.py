@@ -19,7 +19,7 @@ def date(pl, format='%Y-%m-%d', istime=False):
 	try:
 		contents = datetime.now().strftime(format)
 	except UnicodeEncodeError:
-		contents = datetime.now().strftime(format.encode('utf-8'))
+		contents = datetime.now().strftime(format.encode('utf-8')).decode('utf-8')
 
 	return [{
 		'contents': contents,
