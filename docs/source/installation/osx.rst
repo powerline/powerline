@@ -22,7 +22,7 @@ Python package
       to be installed. ``coreutils`` may be installed using ``brew install 
       coreutils``.
 
-2. Install Powerline using one of the following commans:
+2. Install Powerline using one of the following commands:
 
    .. code-block:: sh
 
