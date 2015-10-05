@@ -5,6 +5,10 @@ enter_suite vim
 
 if test -z "$VIM" ; then
 	if test -n "$USE_UCS2_PYTHON" ; then
+		if test "$UCS2_PYTHON_VARIANT" = "2.6" ; then
+			skip "vim" "Vim + Python-2.6-ucs2 currently fails"
+			exit_suite
+		fi
 		NEW_VIM="$ROOT/tests/bot-ci/deps/vim/master-$UCS2_PYTHON_VARIANT-ucs2-double/vim"
 		OLD_VIM="$ROOT/tests/bot-ci/deps/vim/v7.0.112-$UCS2_PYTHON_VARIANT-ucs2/vim"
 		opt_dir="$HOME/opt/cpython-ucs2-$UCS2_PYTHON_VARIANT"
