@@ -19,9 +19,20 @@ def environment(pl, segment_info, variable=None):
 
 
 @requires_segment_info
-def virtualenv(pl, segment_info):
-	'''Return the name of the current Python virtualenv.'''
-	return os.path.basename(segment_info['environ'].get('VIRTUAL_ENV', '')) or None
+def virtualenv(pl, segment_info, ignore_venv=False, ignore_conda=False):
+	'''Return the name of the current Python or conda virtualenv.
+
+	:param bool ignore_venv:
+		Whether to ignore virtual environments. Default is False.
+	:param bool ignore_conda:
+		Whether to ignore conda environments. Default is False.
+	'''
+	return (
+		(not ignore_venv and
+		 os.path.basename(segment_info['environ'].get('VIRTUAL_ENV', ''))) or
+		(not ignore_conda and
+		 segment_info['environ'].get('CONDA_DEFAULT_ENV', '')) or
+		None)
 
 
 @requires_segment_info
