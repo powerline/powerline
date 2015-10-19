@@ -34,10 +34,5 @@ matrix:
           env: >-
             USE_UCS2_PYTHON=1
             UCS2_PYTHON_VARIANT="2.7"
-    allow_failures:
-        - python: "2.6"
-          env: >-
-            USE_UCS2_PYTHON=1
-            UCS2_PYTHON_VARIANT="2.6"
 
 # vim: et
