@@ -467,7 +467,8 @@ Shell
 
         ``client_id``
             Identifier unique to one shell instance. Is used to record instance 
-            state by powerline daemon.
+            state by powerline daemon. In tmux this is the same as :ref:`pane_id 
+            <dev-seginfo-shell-renarg-pane_id>`.
 
             It is not guaranteed that existing client ID will not be retaken 
             when old shell with this ID quit: usually process PID is used as 
@@ -480,6 +481,14 @@ Shell
         ``local_theme``
             Local theme that will be used by shell. One should not rely on the 
             existence of this key.
+
+        .. _dev-seginfo-shell-renarg-pane_id:
+
+        ``pane_id``
+            Identifier unique to each tmux pane. Is always an integer, optional. 
+            Obtained by using ``tmux display -p '#D'``, then all leading spaces 
+            and per cent signs are stripped and the result is converted into an 
+            integer.
 
         Other keys, if any, are specific to segments.
 
