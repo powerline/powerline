@@ -10,7 +10,7 @@ from itertools import chain
 from powerline.lib.overrides import parsedotval, parse_override_var
 from powerline.lib.dict import mergeargs
 from powerline.lib.encoding import get_preferred_arguments_encoding
-from powerline.lib.unicode import u
+from powerline.lib.unicode import u, unicode
 
 
 if sys.version_info < (3,):
@@ -49,6 +49,14 @@ def finish_args(environ, args):
 	))
 	if args.renderer_arg:
 		args.renderer_arg = mergeargs((parsedotval(v) for v in args.renderer_arg), remove=True)
+		if 'pane_id' in args.renderer_arg:
+			if isinstance(args.renderer_arg['pane_id'], (bytes, unicode)):
+				try:
+					args.renderer_arg['pane_id'] = int(args.renderer_arg['pane_id'].lstrip(' %'))
+				except ValueError:
+					pass
+			if 'client_id' not in args.renderer_arg:
+				args.renderer_arg['client_id'] = args.renderer_arg['pane_id']
 	args.config_path = (
 		[path for path in environ.get('POWERLINE_CONFIG_PATHS', '').split(':') if path]
 		+ (args.config_path or [])
