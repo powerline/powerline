@@ -50,7 +50,9 @@
 		"powerline.segments.common.bat.battery": {
 			"args": {
 				"full_heart": "💙",
-				"empty_heart": "💛"
+				"empty_heart": "💛",
+				"online": "⚡️",
+				"offline": " "
 			}
 		},
 		"powerline.segments.common.sys.uptime": {

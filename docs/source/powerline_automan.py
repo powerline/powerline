@@ -7,6 +7,8 @@ import codecs
 
 from collections import namedtuple
 
+from functools import reduce
+
 from docutils.parsers.rst import Directive
 from docutils.parsers.rst.directives import unchanged_required
 from docutils import nodes

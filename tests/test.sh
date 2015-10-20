@@ -1,20 +1,16 @@
 #!/bin/bash
-. tests/bot-ci/scripts/common/main.sh
+. tests/common.sh
+
+enter_suite root
 
 : ${USER:=`id -un`}
 : ${HOME:=`getent passwd $USER | cut -d: -f6`}
 
 export USER HOME
 
-FAILED=0
-
 if test "$TRAVIS" = true ; then
 	export PATH="$HOME/opt/fish/bin:${PATH}"
 	export PATH="$PWD/tests/bot-ci/deps/rc:$PATH"
-	export PATH="$PWD/tests/bot-ci/deps/mksh:$PATH"
-	export PATH="$PWD/tests/bot-ci/deps/busybox:$PATH"
-	export PATH="$PWD/tests/bot-ci/deps/tcsh:$PATH"
-	export PATH="$PWD/tests/bot-ci/deps/socat:$PATH"
 
 	if test "$PYTHON_IMPLEMENTATION" = "CPython" ; then
 		export PATH="$HOME/opt/zsh-${PYTHON_MM}${USE_UCS2_PYTHON:+-ucs2}/bin:${PATH}"
@@ -38,9 +34,16 @@ fi
 export PYTHON="${PYTHON:=python}"
 export PYTHONPATH="${PYTHONPATH}${PYTHONPATH:+:}`realpath .`"
 for script in tests/run_*_tests.sh ; do
+	test_name="${script##*/run_}"
 	if ! sh $script ; then
-		echo "Failed $script"
-		FAILED=1
+		fail "${test_name%_tests.sh}" F "Failed $script"
 	fi
 done
-exit $FAILED
+
+if test -e tests/failures ; then
+	echo "Some tests failed. Summary:"
+	cat tests/failures
+	rm tests/failures
+fi
+
+exit_suite

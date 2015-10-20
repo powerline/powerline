@@ -147,38 +147,42 @@ def create_ebuilds(version_string, overlay, user, **kwargs):
 		live_ebuild = None
 		for ebuild in os.listdir(pdir):
 			if ebuild.endswith('.ebuild') and '9999' in ebuild:
+				live_ebuild_base = ebuild
 				live_ebuild = os.path.join(pdir, ebuild)
 				break
 		assert(live_ebuild)
 		vcur = os.path.join(pdir, '{0}-{1}.ebuild'.format(pn, version_string))
-		with open(live_ebuild) as LEF:
-			with open(vcur, 'w') as F:
-				dropnext = False
-				for line in LEF:
-					if line.startswith('EGIT'):
-						# Drop all EGIT_… and the next empty line
-						dropnext = True
-						next_re = re.compile('^$')
-						continue
-					if dropnext:
-						assert(next_re.match(line))
-						dropnext = False
-						continue
-					if line.startswith('# Note the lack of an assignment to ${S}'):
-						next_re = re.compile('^#')
-						dropnext = True
-						line = 'S="${WORKDIR}/${MY_P}"\n'
-					if line.startswith('inherit'):
-						line = line.replace(' git-r3', '')
-						line += '\n'
-						line += 'MY_PN="powerline-status"\n'
-						line += 'MY_P="${MY_PN}-${PV}"'
-						line += '\n'
-					elif line.startswith('HOMEPAGE'):
-						line += 'SRC_URI="mirror://pypi/p/${MY_PN}/${MY_P}.tar.gz"\n'
-					elif line.startswith('KEYWORDS'):
-						line = 'KEYWORDS="~amd64 ~ppc ~x86 ~x86-fbsd"\n'
-					F.write(line)
+		if pn == 'powerline-vim':
+			with open(live_ebuild) as LEF:
+				with open(vcur, 'w') as F:
+					dropnext = False
+					for line in LEF:
+						if line.startswith('EGIT'):
+							# Drop all EGIT_… and the next empty line
+							dropnext = True
+							next_re = re.compile('^$')
+							continue
+						if dropnext:
+							assert(next_re.match(line))
+							dropnext = False
+							continue
+						if line.startswith('# Note the lack of an assignment to ${S}'):
+							next_re = re.compile('^#')
+							dropnext = True
+							line = 'S="${WORKDIR}/${MY_P}"\n'
+						if line.startswith('inherit'):
+							line = line.replace(' git-r3', '')
+							line += '\n'
+							line += 'MY_PN="powerline-status"\n'
+							line += 'MY_P="${MY_PN}-${PV}"'
+							line += '\n'
+						elif line.startswith('HOMEPAGE'):
+							line += 'SRC_URI="mirror://pypi/p/${MY_PN}/${MY_P}.tar.gz"\n'
+						elif line.startswith('KEYWORDS'):
+							line = 'KEYWORDS="~amd64 ~ppc ~x86 ~x86-fbsd"\n'
+						F.write(line)
+		else:
+			os.symlink(live_ebuild_base, vcur)
 		new_files.append(vcur)
 		check_call(['ebuild', vcur, 'manifest'])
 		new_files.append(os.path.join(pdir, 'Manifest'))

@@ -167,14 +167,16 @@ Requires cmus-remote command be acessible from $PATH.
 
 
 class MpdPlayerSegment(PlayerSegment):
-	def get_player_status(self, pl, host='localhost', port=6600):
+	def get_player_status(self, pl, host='localhost', password=None, port=6600):
 		try:
 			import mpd
 		except ImportError:
+			if password:
+				host = password + '@' + host
 			now_playing = run_cmd(pl, [
 				'mpc', 'current',
 				'-f', '%album%\n%artist%\n%title%\n%time%',
-				'-h', str(host),
+				'-h', host,
 				'-p', str(port)
 			], strip=False)
 			if not now_playing:
@@ -189,6 +191,8 @@ class MpdPlayerSegment(PlayerSegment):
 		else:
 			client = mpd.MPDClient()
 			client.connect(host, port)
+			if password:
+				client.password(password)
 			now_playing = client.currentsong()
 			if not now_playing:
 				return
@@ -220,6 +224,8 @@ package) or alternatively the ``mpc`` command to be acessible from $PATH.
 {0}
 :param str host:
 	Host on which mpd runs.
+:param str password:
+	Password used for connecting to daemon.
 :param int port:
 	Port which should be connected to.
 ''').format(_common_args.format('mpd')))

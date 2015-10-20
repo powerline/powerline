@@ -30,6 +30,7 @@ user = os.environ['USER']
 
 REFS_RE = re.compile(r'^\[\d+ refs\]\n')
 IPYPY_DEANSI_RE = re.compile(r'\033(?:\[(?:\?\d+[lh]|[^a-zA-Z]+[a-ln-zA-Z])|[=>])')
+ZSH_HL_RE = re.compile(r'\033\[\?\d+[hl]')
 
 start_str = 'cd tests/shell/3rd'
 if shell == 'pdb':
@@ -55,7 +56,10 @@ with codecs.open(fname, 'r', encoding='utf-8') as R:
 			line = line.replace(user, 'USER')
 			if pid is not None:
 				line = line.replace(pid, 'PID')
-			if shell == 'fish':
+			if shell == 'zsh':
+				line = line.replace('\033[0m\033[23m\033[24m\033[J', '')
+				line = ZSH_HL_RE.subn('', line)[0]
+			elif shell == 'fish':
 				res = ''
 				try:
 					while line.index('\033[0;'):

@@ -29,7 +29,11 @@ checkout_cached_dir git://github.com/powerline/deps tests/bot-ci/deps
 mkdir -p "$HOME/opt"
 
 if test -n "$USE_UCS2_PYTHON" ; then
-	pip install virtualenvwrapper
+	if test "$UCS2_PYTHON_VARIANT" = "2.6" ; then
+		pip install 'virtualenvwrapper==4.6.0'
+	else
+		pip install virtualenvwrapper
+	fi
 	set +e
 	. virtualenvwrapper.sh
 	set -e

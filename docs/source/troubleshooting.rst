@@ -189,6 +189,25 @@ If your locale encoding is not unicode (any encoding that starts with “utf” 
 should set up your system to use unicode locale or forget about powerline fancy 
 characters.
 
+Urxvt unicode3 and frills
+-------------------------
+
+Make sure that, whatever urxvt package you're installing, both the `unicode3`
+and `frills` features are enabled at compile time. Run
+``urxvt --help 2>&1 | grep options:`` to get a list of enabled options.
+This should contain at least `frills`, `unicode3` and optionally `iso14755`
+if you want to input Unicode characters as well.
+
+Compiler flags example:
+
+    --enable-frills \
+    --enable-unicode3
+
+As long as your terminal emulator is compiled without unicode rendering,
+no amount of configuration will make it display unicode characters.
+They're being considered 'unnecessary features', but they add negligible
+overhead to the size of the installed package (~100KB).
+
 Vim issues
 ==========
 
@@ -244,8 +263,8 @@ highlighting groups are usually cleared, including those defined by powerline.
 To workaround this issue powerline hooks ``Colorscheme`` event, but when you 
 source vimrc with ``BufWritePost`` (or any other) event, but without ``nested`` 
 this event is not launched. See also `autocmd-nested 
-<http://vimpluginloader.sourceforge.net/doc/autocmd.txt.html#autocmd-nested>`_ 
-Vim documentation.
+<http://vimcommunity.bitbucket.org/doc/autocmd.txt.html#autocmd-nested>`_ Vim 
+documentation.
 
 Powerline loses color after saving any file
 -------------------------------------------
