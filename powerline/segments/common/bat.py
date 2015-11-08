@@ -62,19 +62,25 @@ def _fetch_battery_info(pl):
 				pl.debug('Not using DBUS+UPower as no batteries were found')
 
 	if os.path.isdir('/sys/class/power_supply'):
-		linux_bat_fmt = '/sys/class/power_supply/{0}/capacity'
+		online_path_verified = None
+		linux_supplier_fmt = '/sys/class/power_supply/{0}/capacity'
 		linux_ac_fmt = '/sys/class/power_supply/{0}/online'
-		for linux_bat in os.listdir('/sys/class/power_supply'):
-			cap_path = linux_bat_fmt.format(linux_bat)
-			online_path = linux_ac_fmt.format(linux_bat)
-			if linux_bat.startswith('BAT') and os.path.exists(cap_path):
-				pl.debug('Using /sys/class/power_supply with battery {0}', linux_bat)
+		for linux_supplier in os.listdir('/sys/class/power_supply'):
+			cap_path = linux_supplier_fmt.format(linux_supplier)
+			online_path = linux_ac_fmt.format(linux_supplier)
+			if linux_supplier.startswith('AC') and os.path.exists(online_path):
+				pl.debug('Using /sys/class/power_supply with AC {0}', online_path)
+				online_path_verified = online_path
+			elif linux_supplier.startswith('BAT') and os.path.exists(cap_path):
+				pl.debug('Using /sys/class/power_supply with battery {0}', linux_supplier)
 
 				def _get_battery_status(pl):
+					_ac_powered = None
 					with open(cap_path, 'r') as f:
 						_capacity = int(float(f.readline().split()[0]))
-					with open(online_path, 'r') as f:
-						_ac_powered = f.readline() == 1
+					if online_path_verified:
+						with open(online_path_verified, 'r') as f:
+							_ac_powered = int(f.readline()) == 1
 					return _capacity, _ac_powered
 				return _get_battery_status
 			pl.debug('Not using /sys/class/power_supply as no batteries were found')
