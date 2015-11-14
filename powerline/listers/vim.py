@@ -89,22 +89,13 @@ def bufferlister(pl, segment_info, show_unlisted=False, **kwargs):
 		return dct
 
 	return (
-		(
-			buf_segment_info,
-			add_multiplier(buf_segment_info['buffer'], {'highlight_group_prefix': prefix})
-		)
-		for buf_segment_info, prefix in (
-			(
-				buffer_updated_segment_info(
-					segment_info,
-					buffer
-				),
-				('buf' if buffer is cur_buffer else 'buf_nc')
-			)
-			for buffer in vim.buffers
-		) if (
-			buf_segment_info['buffer'] is cur_buffer
-			or show_unlisted
-			or int(vim_getbufoption(buf_segment_info, 'buflisted'))
+		(lambda buffer, prefix: (
+			buffer_updated_segment_info(segment_info, buffer),
+			add_multiplier(buffer, {'highlight_group_prefix': prefix}
+		))(buffer, 'buf' if buffer is cur_buffer else 'buf_nc')
+		for buffer in vim.buffers if (
+		    buffer is cur_buffer
+		    or show_unlisted
+		    or int(vim.eval('buflisted(%s)' % buffer.number)) > 0
 		)
 	)
