@@ -2,7 +2,7 @@
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 from powerline.theme import requires_segment_info
-from powerline.bindings.vim import (current_tabpage, list_tabpages, vim_getbufoption)
+from powerline.bindings.vim import (current_tabpage, list_tabpages)
 
 try:
 	import vim
@@ -49,7 +49,10 @@ def tablister(pl, segment_info, **kwargs):
 	return (
 		(lambda tabpage, prefix: (
 			tabpage_updated_segment_info(segment_info, tabpage),
-			add_multiplier(tabpage, {'highlight_group_prefix': prefix})
+			add_multiplier(tabpage, {
+				'highlight_group_prefix': prefix,
+				'divider_highlight_group': 'tab:divider'
+			})
 		))(tabpage, 'tab' if tabpage == cur_tabpage else 'tab_nc')
 		for tabpage in list_tabpages()
 	)
@@ -75,7 +78,8 @@ def bufferlister(pl, segment_info, show_unlisted=False, **kwargs):
 	and ``bufnr`` keys set to buffer-specific ones, ``window``, ``winnr`` and 
 	``window_id`` keys set to None.
 
-	Adds either ``buf:`` or ``buf_nc:`` prefix to all segment highlight groups.
+	Adds one of ``buf:``, ``buf_nc:``, ``buf_mod:``, or ``buf_nc_mod`` 
+	prefix to all segment highlight groups.
 
 	:param bool show_unlisted:
 		True if unlisted buffers should be shown as well. Current buffer is 
@@ -89,10 +93,17 @@ def bufferlister(pl, segment_info, show_unlisted=False, **kwargs):
 		return dct
 
 	return (
-		(lambda buffer, prefix: (
+		(lambda buffer, current, modified: (
 			buffer_updated_segment_info(segment_info, buffer),
-			add_multiplier(buffer, {'highlight_group_prefix': prefix}
-		))(buffer, 'buf' if buffer is cur_buffer else 'buf_nc')
+			add_multiplier(buffer, {
+				'highlight_group_prefix': '%s%s' % (current, modified),
+				'divider_highlight_group': 'tab:divider'
+			})
+		))(
+			buffer,
+			'buf' if buffer is cur_buffer else 'buf_nc',
+			'_mod' if int(vim.eval('getbufvar(%s, \'&mod\')' % buffer.number)) > 0 else ''
+		)
 		for buffer in vim.buffers if (
 		    buffer is cur_buffer
 		    or show_unlisted
