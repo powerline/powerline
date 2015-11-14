@@ -102,7 +102,7 @@ def bufferlister(pl, segment_info, show_unlisted=False, **kwargs):
 		))(
 			buffer,
 			'buf' if buffer is cur_buffer else 'buf_nc',
-			'_mod' if int(vim.eval('getbufvar(%s, \'&mod\')' % buffer.number)) > 0 else ''
+			'_mod' if int(vim.eval('getbufvar(%s, \'&modified\')' % buffer.number)) > 0 else ''
 		)
 		for buffer in vim.buffers if (
 		    buffer is cur_buffer
