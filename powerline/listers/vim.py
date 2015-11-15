@@ -96,17 +96,28 @@ def bufferlister(pl, segment_info, show_unlisted=False, **kwargs):
 		(lambda buffer, current, modified: (
 			buffer_updated_segment_info(segment_info, buffer),
 			add_multiplier(buffer, {
-				'highlight_group_prefix': '%s%s' % (current, modified),
+				'highlight_group_prefix': '{0}{1}'.format(current, modified),
 				'divider_highlight_group': 'tab:divider'
 			})
 		))(
 			buffer,
 			'buf' if buffer is cur_buffer else 'buf_nc',
-			'_mod' if int(vim.eval('getbufvar(%s, \'&modified\')' % buffer.number)) > 0 else ''
+			'_mod' if int(vim.eval('getbufvar({0}, \'&modified\')'.format(buffer.number))) > 0 else ''
 		)
 		for buffer in vim.buffers if (
 		    buffer is cur_buffer
 		    or show_unlisted
+		    # We can't use vim_getbufoption(segment_info, 'buflisted')
+		    # here for performance reasons. Querying the buffer options
+		    # through the vim python module's option attribute caused
+		    # vim to think it needed to update the tabline for every
+		    # keystroke after any event that changed the buffer's
+		    # options.
+		    #
+		    # Using the vim module's eval method to directly use the
+		    # buflisted(nr) vim method instead does not cause vim to
+		    # update the tabline after every keystroke, but rather after
+		    # events that would change that status. Fixes #1281
 		    or int(vim.eval('buflisted(%s)' % buffer.number)) > 0
 		)
 	)
