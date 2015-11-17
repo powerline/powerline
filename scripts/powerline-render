@@ -1,0 +1,30 @@
+#!/usr/bin/env python
+# vim:fileencoding=utf-8:noet
+
+from __future__ import (unicode_literals, division, absolute_import, print_function)
+
+import sys
+import os
+
+try:
+	from powerline.shell import ShellPowerline
+except ImportError:
+	sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(os.path.realpath(__file__)))))
+	from powerline.shell import ShellPowerline
+
+from powerline.commands.main import get_argparser, finish_args, write_output
+from powerline.lib.encoding import get_unicode_writer
+
+
+if sys.version_info < (3,):
+	write = sys.stdout.write
+else:
+	write = sys.stdout.buffer.write
+
+
+if __name__ == '__main__':
+	args = get_argparser().parse_args()
+	finish_args(os.environ, args)
+	powerline = ShellPowerline(args, run_once=True)
+	segment_info = {'args': args, 'environ': os.environ}
+	write_output(args, powerline, segment_info, get_unicode_writer())

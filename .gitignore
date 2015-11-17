@@ -1,0 +1,13 @@
+tags
+
+*.py[co]
+__pycache__
+
+*.egg
+*.egg-info
+dist
+build
+
+message.fail
+
+client/powerline

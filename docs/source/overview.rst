@@ -1,0 +1,67 @@
+********
+Overview
+********
+
+**Powerline is a statusline plugin for vim, and provides statuslines and
+prompts for several other applications, including zsh, bash, tmux, IPython,
+Awesome, i3 and Qtile.**
+
+Features
+--------
+
+* **Extensible and feature rich, written in Python.** Powerline was
+  completely rewritten in Python to get rid of as much vimscript as
+  possible. This has allowed much better extensibility, leaner and better
+  config files, and a structured, object-oriented codebase with no mandatory
+  third-party dependencies other than a Python interpreter.
+* **Stable and testable code base.** Using Python has allowed unit testing
+  of all the project code. The code is tested to work in Python 2.6+ and
+  Python 3.
+* **Support for prompts and statuslines in many applications.** Originally
+  created exclusively for vim statuslines, the project has evolved to
+  provide statuslines in tmux and several WMs, and prompts for shells like
+  bash/zsh and other applications. It’s simple to write renderers for any
+  other applications that Powerline doesn’t yet support.
+* **Configuration and colorschemes written in JSON.** JSON is
+  a standardized, simple and easy to use file format that allows for easy
+  user configuration across all of Powerline’s supported applications.
+* **Fast and lightweight, with daemon support for even better performance.**
+  Although the code base spans a couple of thousand lines of code with no
+  goal of “less than X lines of code”, the main focus is on good performance
+  and as little code as possible while still providing a rich set of
+  features. The new daemon also ensures that only one Python instance is
+  launched for prompts and statuslines, which provides excellent
+  performance.
+
+*But I hate Python / I don’t need shell prompts / this is just too much
+hassle for me / what happened to the original vim-powerline project / …*
+
+You should check out some of the Powerline derivatives. The most lightweight
+and feature-rich alternative is currently Bailey Ling’s `vim-airline
+<https://github.com/bling/vim-airline>`_ project.
+
+Screenshots
+-----------
+
+Vim statusline
+^^^^^^^^^^^^^^
+
+**Mode-dependent highlighting**
+
+* .. image:: _static/img/pl-mode-normal.png
+     :alt: Normal mode
+* .. image:: _static/img/pl-mode-insert.png
+     :alt: Insert mode
+* .. image:: _static/img/pl-mode-visual.png
+     :alt: Visual mode
+* .. image:: _static/img/pl-mode-replace.png
+     :alt: Replace mode
+
+**Automatic truncation of segments in small windows**
+
+* .. image:: _static/img/pl-truncate1.png
+     :alt: Truncation illustration
+* .. image:: _static/img/pl-truncate2.png
+     :alt: Truncation illustration
+* .. image:: _static/img/pl-truncate3.png
+     :alt: Truncation illustration

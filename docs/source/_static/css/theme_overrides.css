@@ -1,0 +1,6 @@
+.wy-table-responsive > table > tbody > tr > td {
+	white-space: unset;
+}
+.wy-table-responsive > table > tbody > tr > td:first-child {
+	vertical-align: top;
+}

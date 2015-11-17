@@ -1,0 +1,13 @@
+#!/usr/bin/env python
+# vim:fileencoding=utf-8:noet
+from __future__ import (unicode_literals, division, absolute_import, print_function)
+
+import sys
+
+from powerline.lint import check
+from powerline.commands.lint import get_argparser
+
+
+if __name__ == '__main__':
+	args = get_argparser().parse_args()
+	sys.exit(check(args.config_path, args.debug))

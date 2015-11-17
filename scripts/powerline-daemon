@@ -1,0 +1,428 @@
+#!/usr/bin/env python
+# vim:fileencoding=utf-8:noet
+from __future__ import (unicode_literals, division, absolute_import, print_function)
+
+import socket
+import os
+import errno
+import sys
+
+from argparse import ArgumentParser
+from select import select
+from signal import signal, SIGTERM
+from time import sleep
+from functools import partial
+from io import BytesIO
+
+from powerline.shell import ShellPowerline
+from powerline.commands.main import finish_args, write_output
+from powerline.lib.monotonic import monotonic
+from powerline.lib.encoding import get_preferred_output_encoding, get_preferred_arguments_encoding, get_unicode_writer
+
+from powerline.commands.main import get_argparser as get_main_argparser
+from powerline.commands.daemon import get_argparser as get_daemon_argparser
+
+
+is_daemon = False
+use_filesystem = not sys.platform.lower().startswith('linux')
+
+address = None
+pidfile = None
+
+
+class NonInteractiveArgParser(ArgumentParser):
+	def print_usage(self, file=None):
+		raise Exception(self.format_usage())
+
+	def print_help(self, file=None):
+		raise Exception(self.format_help())
+
+	def exit(self, status=0, message=None):
+		pass
+
+	def error(self, message):
+		raise Exception(self.format_usage())
+
+
+parser = get_main_argparser(NonInteractiveArgParser)
+
+EOF = b'EOF\0\0'
+
+powerlines = {}
+logger = None
+config_loader = None
+home = os.path.expanduser('~')
+
+
+class PowerlineDaemon(ShellPowerline):
+	def get_log_handler(self):
+		if not is_daemon:
+			import logging
+			return logging.StreamHandler()
+		return super(PowerlineDaemon, self).get_log_handler()
+
+
+def render(args, environ, cwd):
+	global logger
+	global config_loader
+	cwd = cwd or environ.get('PWD', '/')
+	segment_info = {
+		'getcwd': lambda: cwd,
+		'home': environ.get('HOME', home),
+		'environ': environ,
+		'args': args,
+	}
+	key = (
+		args.ext[0],
+		args.renderer_module,
+		tuple(args.config_override) if args.config_override else None,
+		tuple(args.theme_override) if args.theme_override else None,
+		tuple(args.config_path) if args.config_path else None,
+		environ.get('POWERLINE_THEME_OVERRIDES', ''),
+		environ.get('POWERLINE_CONFIG_OVERRIDES', ''),
+		environ.get('POWERLINE_CONFIG_PATHS', ''),
+	)
+	finish_args(environ, args)
+	powerline = None
+	try:
+		powerline = powerlines[key]
+	except KeyError:
+		try:
+			powerline = powerlines[key] = PowerlineDaemon(
+				args,
+				logger=logger,
+				config_loader=config_loader,
+				run_once=False,
+			)
+			if logger is None:
+				logger = powerline.logger
+			if config_loader is None:
+				config_loader = powerline.config_loader
+		except SystemExit:
+			# Somebody thought raising system exit was a good idea,
+			return ''
+		except Exception as e:
+			if powerline:
+				powerline.pl.exception('Failed to render {0}: {1}', str(key), str(e))
+			else:
+				return 'Failed to render {0}: {1}'.format(str(key), str(e))
+	s = BytesIO()
+	write_output(args, powerline, segment_info, get_unicode_writer(stream=s))
+	s.seek(0)
+	return s.read()
+
+
+def eintr_retry_call(func, *args, **kwargs):
+	while True:
+		try:
+			return func(*args, **kwargs)
+		except EnvironmentError as e:
+			if getattr(e, 'errno', None) == errno.EINTR:
+				continue
+			raise
+
+
+def do_read(conn, timeout=2.0):
+	''' Read data from the client. If the client fails to send data within
+	timeout seconds, abort. '''
+	read = []
+	end_time = monotonic() + timeout
+	while not read or not read[-1].endswith(b'\0\0'):
+		r, w, e = select((conn,), (), (conn,), timeout)
+		if e:
+			return
+		if monotonic() > end_time:
+			return
+		if not r:
+			continue
+		x = eintr_retry_call(conn.recv, 4096)
+		if x:
+			read.append(x)
+		else:
+			break
+	return b''.join(read)
+
+
+def do_write(conn, result):
+	try:
+		eintr_retry_call(conn.sendall, result)
+	except Exception:
+		pass
+
+
+def safe_bytes(o, encoding=get_preferred_output_encoding()):
+	'''Return bytes instance without ever throwing an exception.'''
+	try:
+		try:
+			# We are assuming that o is a unicode object
+			return o.encode(encoding, 'replace')
+		except Exception:
+			# Object may have defined __bytes__ (python 3) or __str__ method 
+			# (python 2)
+			# This also catches problem with non_ascii_bytes.encode('utf-8') 
+			# that first tries to decode to UTF-8 using ascii codec (and fails 
+			# in this case) and then encode to given encoding: errors= argument 
+			# is not used in the first stage.
+			return bytes(o)
+	except Exception as e:
+		return safe_bytes(str(e), encoding)
+
+
+def parse_args(req, encoding=get_preferred_arguments_encoding()):
+	args = [x.decode(encoding) for x in req.split(b'\0') if x]
+	numargs = int(args[0], 16)
+	shell_args = parser.parse_args(args[1:numargs + 1])
+	cwd = args[numargs + 1]
+	environ = dict(((k, v) for k, v in (x.partition('=')[0::2] for x in args[numargs + 2:])))
+	return shell_args, environ, cwd
+
+
+def do_render(req):
+	try:
+		return safe_bytes(render(*parse_args(req)))
+	except Exception as e:
+		return safe_bytes(str(e))
+
+
+def do_one(sock, read_sockets, write_sockets, result_map):
+	r, w, e = select(
+		tuple(read_sockets) + (sock,),
+		tuple(write_sockets),
+		tuple(read_sockets) + tuple(write_sockets) + (sock,),
+		60.0
+	)
+
+	if sock in e:
+		# We cannot accept any more connections, so we exit
+		raise SystemExit(1)
+
+	for s in e:
+		# Discard all broken connections to clients
+		s.close()
+		read_sockets.discard(s)
+		write_sockets.discard(s)
+
+	for s in r:
+		if s == sock:
+			# A client wants to connect
+			conn, _ = eintr_retry_call(sock.accept)
+			read_sockets.add(conn)
+		else:
+			# A client has sent some data
+			read_sockets.discard(s)
+			req = do_read(s)
+			if req == EOF:
+				raise SystemExit(0)
+			elif req:
+				ans = do_render(req)
+				result_map[s] = ans
+				write_sockets.add(s)
+			else:
+				s.close()
+
+	for s in w:
+		# A client is ready to receive the result
+		write_sockets.discard(s)
+		result = result_map.pop(s)
+		try:
+			do_write(s, result)
+		finally:
+			s.close()
+
+
+def main_loop(sock):
+	sock.listen(1)
+	sock.setblocking(0)
+
+	read_sockets, write_sockets = set(), set()
+	result_map = {}
+	try:
+		while True:
+			do_one(sock, read_sockets, write_sockets, result_map)
+	except KeyboardInterrupt:
+		raise SystemExit(0)
+	return 0
+
+
+def daemonize(stdin=os.devnull, stdout=os.devnull, stderr=os.devnull):
+	try:
+		pid = os.fork()
+		if pid > 0:
+			# exit first parent
+			sys.exit(0)
+	except OSError as e:
+		sys.stderr.write("fork #1 failed: %d (%s)\n" % (e.errno, e.strerror))
+		sys.exit(1)
+
+	# decouple from parent environment
+	os.chdir("/")
+	os.setsid()
+	os.umask(0)
+
+	# do second fork
+	try:
+		pid = os.fork()
+		if pid > 0:
+			# exit from second parent
+			sys.exit(0)
+	except OSError as e:
+		sys.stderr.write("fork #2 failed: %d (%s)\n" % (e.errno, e.strerror))
+		sys.exit(1)
+
+	# Redirect standard file descriptors.
+	si = open(stdin, 'rb')
+	so = open(stdout, 'a+b')
+	se = open(stderr, 'a+b', 0)
+	os.dup2(si.fileno(), sys.stdin.fileno())
+	os.dup2(so.fileno(), sys.stdout.fileno())
+	os.dup2(se.fileno(), sys.stderr.fileno())
+	global is_daemon
+	is_daemon = True
+
+
+def check_existing():
+	if use_filesystem:
+		# We cannot bind if the socket file already exists so remove it, we
+		# already have a lock on pidfile, so this should be safe.
+		try:
+			os.unlink(address)
+		except EnvironmentError:
+			pass
+
+	sock = socket.socket(family=socket.AF_UNIX)
+	try:
+		sock.bind(address)
+	except socket.error as e:
+		if getattr(e, 'errno', None) == errno.EADDRINUSE:
+			return None
+		raise
+	return sock
+
+
+def kill_daemon():
+	sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+	try:
+		try:
+			eintr_retry_call(sock.connect, address)
+		except socket.error:
+			return False
+		else:
+			eintr_retry_call(sock.sendall, EOF)
+	finally:
+		sock.close()
+	return True
+
+
+def cleanup_lockfile(fd, *args):
+	try:
+		# Remove the directory entry for the lock file
+		os.unlink(pidfile)
+		# Close the file descriptor
+		os.close(fd)
+	except EnvironmentError:
+		pass
+	if args:
+		# Called in signal handler
+		raise SystemExit(1)
+
+
+def lockpidfile():
+	import fcntl
+	import atexit
+	import stat
+	fd = os.open(
+		pidfile,
+		os.O_WRONLY | os.O_CREAT,
+		stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH
+	)
+	try:
+		fcntl.lockf(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+	except EnvironmentError:
+		os.close(fd)
+		return None
+	os.lseek(fd, 0, os.SEEK_SET)
+	os.ftruncate(fd, 0)
+	os.write(fd, ('%d' % os.getpid()).encode('ascii'))
+	os.fsync(fd)
+	cleanup = partial(cleanup_lockfile, fd)
+	signal(SIGTERM, cleanup)
+	atexit.register(cleanup)
+	return fd
+
+
+def main():
+	global address
+	global pidfile
+	parser = get_daemon_argparser()
+	args = parser.parse_args()
+
+	if args.socket:
+		address = args.socket
+		if not use_filesystem:
+			address = '\0' + address
+	else:
+		if use_filesystem:
+			address = '/tmp/powerline-ipc-%d'
+		else:
+			# Use the abstract namespace for sockets rather than the filesystem
+			# (Available only in linux)
+			address = '\0powerline-ipc-%d'
+
+		address = address % os.getuid()
+
+	if use_filesystem:
+		pidfile = address + '.pid'
+
+	if args.kill:
+		if args.foreground or args.replace:
+			parser.error('--kill and --foreground/--replace cannot be used together')
+		if kill_daemon():
+			if not args.quiet:
+				print ('Kill command sent to daemon, if it does not die in a couple of seconds use kill to kill it')
+			raise SystemExit(0)
+		else:
+			if not args.quiet:
+				print ('No running daemon found')
+			raise SystemExit(1)
+
+	if args.replace:
+		while kill_daemon():
+			if not args.quiet:
+				print ('Kill command sent to daemon, waiting for daemon to exit, press Ctrl-C to terminate wait and exit')
+			sleep(2)
+
+	if use_filesystem and not args.foreground:
+		# We must daemonize before creating the locked pidfile, unfortunately,
+		# this means further print statements are discarded
+		daemonize()
+
+	if use_filesystem:
+		# Create a locked pid file containing the daemon’s PID
+		if lockpidfile() is None:
+			if not args.quiet:
+				sys.stderr.write(
+					'The daemon is already running. Use %s -k to kill it.\n' % (
+						os.path.basename(sys.argv[0])))
+			raise SystemExit(1)
+
+	# Bind to address or bail if we cannot bind
+	sock = check_existing()
+	if sock is None:
+		if not args.quiet:
+			sys.stderr.write(
+				'The daemon is already running. Use %s -k to kill it.\n' % (
+					os.path.basename(sys.argv[0])))
+		raise SystemExit(1)
+
+	if args.foreground:
+		return main_loop(sock)
+
+	if not use_filesystem:
+		# We daemonize on linux
+		daemonize()
+
+	main_loop(sock)
+
+
+if __name__ == '__main__':
+	main()

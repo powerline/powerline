@@ -1,0 +1,7 @@
+print ('cd ' + 'tests/shell/3rd')  # Start of the test marker
+bool 42
+bool 44
+class Test(object):
+pass
+
+exit

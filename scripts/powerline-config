@@ -1,0 +1,22 @@
+#!/usr/bin/env python
+# vim:fileencoding=utf-8:noet
+from __future__ import (unicode_literals, division, absolute_import, print_function)
+
+try:
+	from powerline.commands.config import get_argparser
+except ImportError:
+	import sys
+	import os
+	sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(os.path.realpath(__file__)))))
+	from powerline.commands.config import get_argparser
+
+import powerline.bindings.config as config
+
+
+if __name__ == '__main__':
+	parser = get_argparser()
+	args = parser.parse_args()
+
+	pl = config.create_powerline_logger(args)
+
+	args.function(pl, args)

@@ -1,0 +1,84 @@
+fn _powerline_sigwinch {
+	_POWERLINE_COLUMNS = `{
+		stty size | cut -d' ' -f2
+	}
+	_powerline_tmux_setenv COLUMNS $_POWERLINE_COLUMNS
+}
+fn _powerline_update_pwd {
+	_POWERLINE_NEW_PWD = `{pwd}
+	if (test $^_POWERLINE_NEW_PWD '=' $^_POWERLINE_SAVED_PWD) {
+		_POWERLINE_SAVED_PWD = $_POWERLINE_NEW_PWD
+		_powerline_tmux_setenv PWD $_POWERLINE_SAVED_PWD
+	}
+}
+fn _powerline_continuation_prompt {
+	_powerline_prompt --renderer-arg 'local_theme=continuation' $*
+}
+fn _powerline_prompt {
+	$POWERLINE_COMMAND $POWERLINE_COMMAND_ARGS shell aboveleft -r.readline --last-pipe-status $^_POWERLINE_STATUS --last-exit-code $_POWERLINE_STATUS($#_POWERLINE_STATUS) --jobnum $_POWERLINE_JOBNUM --renderer-arg 'client_id='$pid $*
+}
+fn _powerline_set_prompt {
+	_POWERLINE_STATUS = ( $status )
+	_POWERLINE_JOBNUM = $#apids
+	prompt = (``() {
+		_powerline_prompt
+	} ``() {
+		_powerline_continuation_prompt
+	})
+	_powerline_update_pwd
+}
+
+fn _powerline_common_setup {
+	fn sigwinch {
+		_powerline_sigwinch
+	}
+	_powerline_sigwinch
+	_POWERLINE_SAVED_PWD = ''
+}
+
+fn _powerline_tmux_setenv {
+}
+
+if (test -z $POWERLINE_CONFIG_COMMAND) {
+	if (which powerline-config >/dev/null) {
+		POWERLINE_CONFIG_COMMAND = powerline-config
+	} else {
+		echo powerline-config executable not found, unable to proceed >[2=1]
+	}
+}
+if (test x$POWERLINE_CONFIG_COMMAND '!=' x) {
+	if ($POWERLINE_CONFIG_COMMAND shell --shell rcsh uses prompt) {
+		if (test x$POWERLINE_COMMAND_ARGS '!=' x) {
+			# Perform splitting
+			POWERLINE_COMMAND_ARGS=( `{echo $POWERLINE_COMMAND_ARGS} )
+		}
+		fn prompt {
+			_powerline_set_prompt
+		}
+		if (test -z $POWERLINE_SHELL_CONTINUATION$POWERLINE_RCSH_CONTINUATION) {
+			_POWERLINE_STATUS = 0
+			_POWERLINE_JOBNUM = 0
+			_POWERLINE_CONTINUATION = `{
+				_powerline_continuation_prompt
+			}
+			fn _powerline_continuation_prompt {
+				echo -n $_POWERLINE_CONTINUATION
+			}
+		}
+		_powerline_common_setup
+	}
+	if (test x$TMUX '!=' x) {
+		if ($POWERLINE_CONFIG_COMMAND shell --shell rcsh uses tmux) {
+			_POWERLINE_TMUX=$TMUX
+			fn _powerline_tmux_setenv {
+				if (test x$2 '!=' x) {
+					TMUX=$_POWERLINE_TMUX tmux setenv -g TMUX_$1^_`{
+						TMUX=$_POWERLINE_TMUX tmux display -p '#D' | tr -d %
+					} $2
+				}
+			}
+			_powerline_common_setup
+		}
+	}
+}
+# vim: ft=rcshell

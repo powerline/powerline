@@ -1,0 +1,6 @@
+recursive-include powerline *.json *.vim
+recursive-include powerline/bindings *.*
+recursive-exclude powerline/bindings *.pyc *.pyo
+recursive-include client *.*
+recursive-include docs/source *.rst *.py
+include docs/Makefile
