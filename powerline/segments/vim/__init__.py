@@ -11,7 +11,7 @@ from collections import defaultdict
 try:
 	import vim
 except ImportError:
-	vim = {}
+	vim = object()
 
 from powerline.bindings.vim import (vim_get_func, getbufvar, vim_getbufoption,
                                     buffer_name, vim_getwinvar,

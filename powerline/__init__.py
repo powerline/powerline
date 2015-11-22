@@ -9,7 +9,7 @@ from threading import Lock, Event
 
 from powerline.colorscheme import Colorscheme
 from powerline.lib.config import ConfigLoader
-from powerline.lib.unicode import safe_unicode, FailedUnicode
+from powerline.lib.unicode import unicode, safe_unicode, FailedUnicode
 from powerline.config import DEFAULT_SYSTEM_CONFIG_DIR
 from powerline.lib.dict import mergedicts
 from powerline.lib.encoding import get_preferred_output_encoding
@@ -121,7 +121,7 @@ def get_fallback_logger(stream=None):
 	handler.setLevel(level)
 	handler.setFormatter(formatter)
 
-	logger = logging.getLogger('powerline')
+	logger = logging.Logger('powerline')
 	logger.setLevel(level)
 	logger.addHandler(handler)
 	_fallback_logger = PowerlineLogger(None, logger, '_fallback_')
@@ -200,40 +200,102 @@ def load_config(cfg_path, find_config_files, config_loader, loader_callback=None
 	return ret
 
 
-def _get_log_handler(common_config, stream=None):
-	'''Get log handler.
+def _set_log_handlers(common_config, logger, get_module_attr, stream=None):
+	'''Set log handlers
 
 	:param dict common_config:
 		Configuration dictionary used to create handler.
-
-	:return: logging.Handler subclass.
+	:param logging.Logger logger:
+		Logger to which handlers will be attached.
+	:param func get_module_attr:
+		:py:func:`gen_module_attr_getter` output.
+	:param file stream:
+		Stream to use by default for :py:class:`logging.StreamHandler` in place 
+		of :py:attr:`sys.stderr`. May be ``None``.
 	'''
-	log_file = common_config['log_file']
-	if log_file:
-		log_file = os.path.expanduser(log_file)
-		log_dir = os.path.dirname(log_file)
-		if not os.path.isdir(log_dir):
-			os.mkdir(log_dir)
-		return logging.FileHandler(log_file)
-	else:
-		return logging.StreamHandler(stream)
+	log_targets = common_config['log_file']
+	num_handlers = 0
+	for log_target in log_targets:
+		if log_target is None:
+			log_target = ['logging.StreamHandler', []]
+		elif isinstance(log_target, unicode):
+			log_target = os.path.expanduser(log_target)
+			log_dir = os.path.dirname(log_target)
+			if log_dir and not os.path.isdir(log_dir):
+				os.mkdir(log_dir)
+			log_target = ['logging.FileHandler', [[log_target]]]
+		module, handler_class_name = log_target[0].rpartition('.')[::2]
+		module = module or 'logging.handlers'
+		try:
+			handler_class_args = log_target[1][0]
+		except IndexError:
+			if module == 'logging' and handler_class_name == 'StreamHandler':
+				handler_class_args = [stream]
+			else:
+				handler_class_args = ()
+		try:
+			handler_class_kwargs = log_target[1][1]
+		except IndexError:
+			handler_class_kwargs = {}
+		module = str(module)
+		handler_class_name = str(handler_class_name)
+		handler_class = get_module_attr(module, handler_class_name)
+		if not handler_class:
+			continue
+		handler = handler_class(*handler_class_args, **handler_class_kwargs)
+		try:
+			handler_level_name = log_target[2]
+		except IndexError:
+			handler_level_name = common_config['log_level']
+		try:
+			handler_format = log_target[3]
+		except IndexError:
+			handler_format = common_config['log_format']
+		handler.setLevel(getattr(logging, handler_level_name))
+		handler.setFormatter(logging.Formatter(handler_format))
+		logger.addHandler(handler)
+		num_handlers += 1
+	if num_handlers == 0 and log_targets:
+		raise ValueError('Failed to set up any handlers')
 
 
-def create_logger(common_config, stream=None):
+def create_logger(common_config, use_daemon_threads=True, ext='__unknown__',
+                  import_paths=None, imported_modules=None, stream=None):
 	'''Create logger according to provided configuration
+
+	:param dict common_config:
+		Common configuration, from :py:func:`finish_common_config`.
+	:param bool use_daemon_threads:
+		Whether daemon threads should be used. Argument to 
+		:py:class:`PowerlineLogger` constructor.
+	:param str ext:
+		Used extension. Argument to :py:class:`PowerlineLogger` constructor.
+	:param set imported_modules:
+		Set where imported modules are saved. Argument to 
+		:py:func:`gen_module_attr_getter`. May be ``None``, in this case new 
+		empty set is used.
+	:param file stream:
+		Stream to use by default for :py:class:`logging.StreamHandler` in place 
+		of :py:attr:`sys.stderr`. May be ``None``.
+
+	:return: Three objects:
+
+		#. :py:class:`logging.Logger` instance.
+		#. :py:class:`PowerlineLogger` instance.
+		#. Function, output of :py:func:`gen_module_attr_getter`.
 	'''
-	log_format = common_config['log_format']
-	formatter = logging.Formatter(log_format)
-
+	logger = logging.Logger('powerline')
 	level = getattr(logging, common_config['log_level'])
-	handler = _get_log_handler(common_config, stream)
-	handler.setLevel(level)
-	handler.setFormatter(formatter)
-
-	logger = logging.getLogger('powerline')
 	logger.setLevel(level)
-	logger.addHandler(handler)
-	return logger
+
+	pl = PowerlineLogger(use_daemon_threads, logger, ext)
+	get_module_attr = gen_module_attr_getter(
+		pl, common_config['paths'],
+		set() if imported_modules is None else imported_modules)
+
+	_set_log_handlers(common_config, logger, get_module_attr, stream)
+
+	return logger, pl, get_module_attr
 
 
 def finish_common_config(encoding, common_config):
@@ -264,7 +326,10 @@ def finish_common_config(encoding, common_config):
 	common_config.setdefault('additional_escapes', None)
 	common_config.setdefault('reload_config', True)
 	common_config.setdefault('interval', None)
-	common_config.setdefault('log_file', None)
+	common_config.setdefault('log_file', [None])
+
+	if not isinstance(common_config['log_file'], list):
+		common_config['log_file'] = [common_config['log_file']]
 
 	common_config['paths'] = [
 		os.path.expanduser(path) for path in common_config['paths']
@@ -324,6 +389,26 @@ def gen_module_attr_getter(pl, import_paths, imported_modules):
 	return get_module_attr
 
 
+LOG_KEYS = set(('log_format', 'log_level', 'log_file', 'paths'))
+'''List of keys related to logging
+'''
+
+
+def _get_log_keys(common_config):
+	'''Return a common configuration copy with only log-related config left
+
+	:param dict common_config:
+		Common configuration.
+
+	:return:
+		:py:class:`dict` instance which has only keys from 
+		:py:attr:`powerline.LOG_KEYS` left.
+	'''
+	return dict((
+		(k, v) for k, v in common_config.items() if k in LOG_KEYS
+	))
+
+
 class Powerline(object):
 	'''Main powerline class, entrance point for all powerline uses. Sets 
 	powerline up and loads the configuration.
@@ -380,6 +465,7 @@ class Powerline(object):
 		self.ext = ext
 		self.run_once = run_once
 		self.logger = logger
+		self.had_logger = bool(self.logger)
 		self.use_daemon_threads = use_daemon_threads
 
 		if not renderer_module:
@@ -430,8 +516,20 @@ class Powerline(object):
 
 		This function is used to create logger unless it was already specified 
 		at initialization.
+
+		:return: Three objects:
+
+			#. :py:class:`logging.Logger` instance.
+			#. :py:class:`PowerlineLogger` instance.
+			#. Function, output of :py:func:`gen_module_attr_getter`.
 		'''
-		return create_logger(self.common_config, self.default_log_stream)
+		return create_logger(
+			common_config=self.common_config,
+			use_daemon_threads=self.use_daemon_threads,
+			ext=self.ext,
+			imported_modules=self.imported_modules,
+			stream=self.default_log_stream,
+		)
 
 	def create_renderer(self, load_main=False, load_colors=False, load_colorscheme=False, load_theme=False):
 		'''(Re)create renderer object. Can be used after Powerline object was 
@@ -465,21 +563,23 @@ class Powerline(object):
 					or not self.prev_common_config
 					or self.prev_common_config['default_top_theme'] != self.common_config['default_top_theme'])
 
+				log_keys_differ = (not self.prev_common_config or (
+					_get_log_keys(self.prev_common_config) != _get_log_keys(self.common_config)
+				))
+
 				self.prev_common_config = self.common_config
 
-				self.import_paths = self.common_config['paths']
-
-				if not self.logger:
-					self.logger = self.create_logger()
-
-				if not self.pl:
-					self.pl = PowerlineLogger(self.use_daemon_threads, self.logger, self.ext)
+				if log_keys_differ:
+					if self.had_logger:
+						self.pl = PowerlineLogger(self.use_daemon_threads, self.logger, self.ext)
+						self.get_module_attr = gen_module_attr_getter(
+							self.pl, self.common_config['paths'], self.imported_modules)
+					else:
+						self.logger, self.pl, self.get_module_attr = self.create_logger()
 					self.config_loader.pl = self.pl
 
 				if not self.run_once:
 					self.config_loader.set_watcher(self.common_config['watcher'])
-
-				self.get_module_attr = gen_module_attr_getter(self.pl, self.import_paths, self.imported_modules)
 
 				mergedicts(self.renderer_options, dict(
 					pl=self.pl,
