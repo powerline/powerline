@@ -531,7 +531,8 @@ class Spec(object):
 		if max_len == min_len:
 			self.len('eq', len(specs))
 		else:
-			self.len('ge', min_len)
+			if min_len > 0:
+				self.len('ge', min_len)
 			self.len('le', max_len)
 
 		start = len(self.specs)

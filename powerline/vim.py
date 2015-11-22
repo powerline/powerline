@@ -7,10 +7,13 @@ import logging
 
 from itertools import count
 
-import vim
+try:
+	import vim
+except ImportError:
+	vim = object()
 
 from powerline.bindings.vim import vim_get_func, vim_getvar, get_vim_encoding, python_to_vim
-from powerline import Powerline, FailedUnicode
+from powerline import Powerline, FailedUnicode, finish_common_config
 from powerline.lib.dict import mergedicts
 from powerline.lib.unicode import u
 
@@ -32,19 +35,21 @@ def _override_from(config, override_varname, key=None):
 class VimVarHandler(logging.Handler, object):
 	'''Vim-specific handler which emits messages to Vim global variables
 
-	Used variable: ``g:powerline_log_messages``.
+	:param str varname:
+		Variable where
 	'''
-	def __init__(self, *args, **kwargs):
-		super(VimVarHandler, self).__init__(*args, **kwargs)
-		vim.command('unlet! g:powerline_log_messages')
-		vim.command('let g:powerline_log_messages = []')
+	def __init__(self, varname):
+		super(VimVarHandler, self).__init__()
+		utf_varname = u(varname)
+		self.vim_varname = utf_varname.encode('ascii')
+		vim.command('unlet! g:' + utf_varname)
+		vim.command('let g:' + utf_varname + ' = []')
 
-	@staticmethod
-	def emit(record):
+	def emit(self, record):
 		message = u(record.message)
 		if record.exc_text:
 			message += '\n' + u(record.exc_text)
-		vim.eval(b'add(g:powerline_log_messages, ' + python_to_vim(message) + b')')
+		vim.eval(b'add(g:' + self.vim_varname + b', ' + python_to_vim(message) + b')')
 
 
 class VimPowerline(Powerline):
@@ -53,6 +58,12 @@ class VimPowerline(Powerline):
 		self.last_window_id = 1
 		self.pyeval = pyeval
 		self.construct_window_statusline = self.create_window_statusline_constructor()
+		if all((hasattr(vim.current.window, attr) for attr in ('options', 'vars', 'number'))):
+			self.win_idx = self.new_win_idx
+		else:
+			self.win_idx = self.old_win_idx
+			self._vim_getwinvar = vim_get_func('getwinvar', 'bytes')
+			self._vim_setwinvar = vim_get_func('setwinvar')
 
 	if sys.version_info < (3,):
 		def create_window_statusline_constructor(self):
@@ -79,18 +90,6 @@ class VimPowerline(Powerline):
 	)
 
 	default_log_stream = sys.stdout
-
-	def create_logger(self):
-		logger = super(VimPowerline, self).create_logger()
-		try:
-			if int(vim_getvar('powerline_use_var_handler')):
-				formatter = logging.Formatter(self.common_config['log_format'])
-				handler = VimVarHandler(getattr(logging, self.common_config['log_level']))
-				handler.setFormatter(formatter)
-				logger.addHandler(handler)
-		except KeyError:
-			pass
-		return logger
 
 	def add_local_theme(self, key, config):
 		'''Add local themes at runtime (during vim session).
@@ -137,7 +136,16 @@ class VimPowerline(Powerline):
 	get_encoding = staticmethod(get_vim_encoding)
 
 	def load_main_config(self):
-		return _override_from(super(VimPowerline, self).load_main_config(), 'powerline_config_overrides')
+		main_config = _override_from(super(VimPowerline, self).load_main_config(), 'powerline_config_overrides')
+		try:
+			use_var_handler = bool(int(vim_getvar('powerline_use_var_handler')))
+		except KeyError:
+			use_var_handler = False
+		if use_var_handler:
+			main_config.setdefault('common', {})
+			main_config['common'] = finish_common_config(self.get_encoding(), main_config['common'])
+			main_config['common']['log_file'].append(['powerline.vim.VimVarHandler', [['powerline_log_messages']]])
+		return main_config
 
 	def load_theme_config(self, name):
 		return _override_from(
@@ -252,44 +260,40 @@ class VimPowerline(Powerline):
 			# do anything.
 			pass
 
-	if all((hasattr(vim.current.window, attr) for attr in ('options', 'vars', 'number'))):
-		def win_idx(self, window_id):
-			r = None
-			for window in vim.windows:
-				try:
-					curwindow_id = window.vars['powerline_window_id']
-					if r is not None and curwindow_id == window_id:
-						raise KeyError
-				except KeyError:
-					curwindow_id = self.last_window_id
-					self.last_window_id += 1
-					window.vars['powerline_window_id'] = curwindow_id
-				statusline = self.construct_window_statusline(curwindow_id)
-				if window.options['statusline'] != statusline:
-					window.options['statusline'] = statusline
-				if curwindow_id == window_id if window_id else window is vim.current.window:
-					r = (window, curwindow_id, window.number)
-			return r
-	else:
-		_vim_getwinvar = staticmethod(vim_get_func('getwinvar', 'bytes'))
-		_vim_setwinvar = staticmethod(vim_get_func('setwinvar'))
+	def new_win_idx(self, window_id):
+		r = None
+		for window in vim.windows:
+			try:
+				curwindow_id = window.vars['powerline_window_id']
+				if r is not None and curwindow_id == window_id:
+					raise KeyError
+			except KeyError:
+				curwindow_id = self.last_window_id
+				self.last_window_id += 1
+				window.vars['powerline_window_id'] = curwindow_id
+			statusline = self.construct_window_statusline(curwindow_id)
+			if window.options['statusline'] != statusline:
+				window.options['statusline'] = statusline
+			if curwindow_id == window_id if window_id else window is vim.current.window:
+				r = (window, curwindow_id, window.number)
+		return r
 
-		def win_idx(self, window_id):
-			r = None
-			for winnr, window in zip(count(1), vim.windows):
-				curwindow_id = self._vim_getwinvar(winnr, 'powerline_window_id')
-				if curwindow_id and not (r is not None and curwindow_id == window_id):
-					curwindow_id = int(curwindow_id)
-				else:
-					curwindow_id = self.last_window_id
-					self.last_window_id += 1
-					self._vim_setwinvar(winnr, 'powerline_window_id', curwindow_id)
-				statusline = self.construct_window_statusline(curwindow_id)
-				if self._vim_getwinvar(winnr, '&statusline') != statusline:
-					self._vim_setwinvar(winnr, '&statusline', statusline)
-				if curwindow_id == window_id if window_id else window is vim.current.window:
-					r = (window, curwindow_id, winnr)
-			return r
+	def old_win_idx(self, window_id):
+		r = None
+		for winnr, window in zip(count(1), vim.windows):
+			curwindow_id = self._vim_getwinvar(winnr, 'powerline_window_id')
+			if curwindow_id and not (r is not None and curwindow_id == window_id):
+				curwindow_id = int(curwindow_id)
+			else:
+				curwindow_id = self.last_window_id
+				self.last_window_id += 1
+				self._vim_setwinvar(winnr, 'powerline_window_id', curwindow_id)
+			statusline = self.construct_window_statusline(curwindow_id)
+			if self._vim_getwinvar(winnr, '&statusline') != statusline:
+				self._vim_setwinvar(winnr, '&statusline', statusline)
+			if curwindow_id == window_id if window_id else window is vim.current.window:
+				r = (window, curwindow_id, winnr)
+		return r
 
 	def statusline(self, window_id):
 		window, window_id, winnr = self.win_idx(window_id) or (None, None, None)

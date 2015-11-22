@@ -22,7 +22,7 @@ from powerline.lint.checks import (check_matcher_func, check_ext, check_config, 
                                    check_segment_function, check_args, get_one_segment_function,
                                    check_highlight_groups, check_highlight_group, check_full_segment_data,
                                    get_all_possible_functions, check_segment_data_key, register_common_name,
-                                   highlight_group_spec)
+                                   highlight_group_spec, check_log_file_level, check_logging_handler)
 from powerline.lint.spec import Spec
 from powerline.lint.context import Context
 
@@ -56,6 +56,11 @@ ext_spec = Spec(
 	top_theme=top_theme_spec().optional(),
 ).copy
 gen_components_spec = (lambda *components: Spec().list(Spec().type(unicode).oneof(set(components))))
+log_level_spec = Spec().re('^[A-Z]+$').func(
+	(lambda value, *args: (True, True, not hasattr(logging, value))),
+	(lambda value: 'unknown debugging level {0}'.format(value))
+).copy
+log_format_spec = Spec().type(unicode).copy
 main_spec = (Spec(
 	common=Spec(
 		default_top_theme=top_theme_spec().optional(),
@@ -67,21 +72,32 @@ main_spec = (Spec(
 			(lambda value, *args: (True, True, not os.path.exists(os.path.expanduser(value.value)))),
 			(lambda value: 'path does not exist: {0}'.format(value))
 		).optional(),
-		log_file=Spec().type(unicode).func(
-			(
-				lambda value, *args: (
-					True,
-					True,
-					not os.path.isdir(os.path.dirname(os.path.expanduser(value)))
-				)
+		log_file=Spec().either(
+			Spec().type(unicode).func(
+				(
+					lambda value, *args: (
+						True,
+						True,
+						not os.path.isdir(os.path.dirname(os.path.expanduser(value)))
+					)
+				),
+				(lambda value: 'directory does not exist: {0}'.format(os.path.dirname(value)))
 			),
-			(lambda value: 'directory does not exist: {0}'.format(os.path.dirname(value)))
+			Spec().list(Spec().either(
+				Spec().type(unicode, type(None)),
+				Spec().tuple(
+					Spec().re(function_name_re).func(check_logging_handler),
+					Spec().tuple(
+						Spec().type(list).optional(),
+						Spec().type(dict).optional(),
+					),
+					log_level_spec().func(check_log_file_level).optional(),
+					log_format_spec().optional(),
+				),
+			))
 		).optional(),
-		log_level=Spec().re('^[A-Z]+$').func(
-			(lambda value, *args: (True, True, not hasattr(logging, value))),
-			(lambda value: 'unknown debugging level {0}'.format(value))
-		).optional(),
-		log_format=Spec().type(unicode).optional(),
+		log_level=log_level_spec().optional(),
+		log_format=log_format_spec().optional(),
 		interval=Spec().either(Spec().cmp('gt', 0.0), Spec().type(type(None))).optional(),
 		reload_config=Spec().type(bool).optional(),
 		watcher=Spec().type(unicode).oneof(set(('auto', 'inotify', 'stat'))).optional(),

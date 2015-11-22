@@ -12,6 +12,8 @@ Vim overrides
 
 Vim configuration can be overridden using the following options:
 
+.. _local-configuration-overrides-vim-config:
+
 ``g:powerline_config_overrides``
     Dictionary, recursively merged with contents of 
     :file:`powerline/config.json`.
@@ -36,6 +38,17 @@ Vim configuration can be overridden using the following options:
     save log in ``g:powerline_log_messages`` variable in addition to whatever 
     was configured in :ref:`log_* options <config-common-log>`. Level is always 
     :ref:`log_level <config-common-log_level>`, same for format.
+
+    .. warning::
+        This variable is deprecated. Use :ref:`log_file option 
+        <config-common-log>` in conjunction with 
+        :py:class:`powerline.vim.VimVarHandler` class and :ref:`Vim config 
+        overrides variable <local-configuration-overrides-vim-config>`. Using 
+        this is also the only variant to make saving into the environment 
+        variable the *only* place where log is saved or save into different 
+        variable.
+
+    .. autoclass:: powerline.vim.VimVarHandler
 
 .. _local-configuration-overrides-script:
 

@@ -7,7 +7,7 @@ from powerline.bindings.vim import (current_tabpage, list_tabpages, vim_getbufop
 try:
 	import vim
 except ImportError:
-	vim = {}
+	vim = object()
 
 
 def tabpage_updated_segment_info(segment_info, tabpage):
