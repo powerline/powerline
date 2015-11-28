@@ -189,7 +189,11 @@ class MpdPlayerSegment(PlayerSegment):
 				'total': now_playing[3],
 			}
 		else:
-			client = mpd.MPDClient()
+			try:
+				client = mpd.MPDClient(use_unicode=True)
+			except TypeError:
+				# python-mpd 1.x does not support use_unicode
+				client = mpd.MPDClient()
 			client.connect(host, port)
 			if password:
 				client.password(password)
