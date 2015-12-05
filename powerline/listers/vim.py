@@ -1,18 +1,14 @@
 # vim:fileencoding=utf-8:noet
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
+from powerline.theme import requires_segment_info
 from powerline.editors import with_input, with_list
-
-try:
-	import vim
-except ImportError:
-	vim = object()
 
 
 def tabpage_updated_segment_info(segment_info, tab_input):
 	segment_info = segment_info.copy()
 	tabnr = tab_input['tab_number']
-	tabpage = vim.tabpages[tabnr - 1]
+	tabpage = segment_info['vim'].tabpages[tabnr - 1]
 	window = tabpage.window
 	buffer = window.buffer
 	segment_info.update(
@@ -31,6 +27,7 @@ def tabpage_updated_segment_info(segment_info, tab_input):
 
 @with_list(('list_tabs', ('tab_number',)))
 @with_input('current_tab_number')
+@requires_segment_info
 def tablister(pl, segment_info, **kwargs):
 	'''List all tab pages in segment_info format
 
@@ -69,7 +66,7 @@ def buffer_updated_segment_info(segment_info, buffer_input):
 		window=None,
 		winnr=None,
 		window_id=None,
-		buffer=vim.buffers[buffer_input['buffer_number']],
+		buffer=segment_info['vim'].buffers[buffer_input['buffer_number']],
 		bufnr=buffer_input['buffer_number'],
 	)
 	return segment_info
@@ -77,6 +74,7 @@ def buffer_updated_segment_info(segment_info, buffer_input):
 
 @with_list(('list_buffers', ('modified_indicator', 'listed_indicator', 'buffer_number')))
 @with_input('current_buffer_number')
+@requires_segment_info
 def bufferlister(pl, segment_info, show_unlisted=False, **kwargs):
 	'''List all buffers in segment_info format
 

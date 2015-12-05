@@ -8,11 +8,6 @@ import sys
 
 from collections import defaultdict
 
-try:
-	import vim
-except ImportError:
-	vim = object()
-
 from powerline.bindings.vim import register_buffer_cache
 from powerline.theme import requires_segment_info, requires_filesystem_watcher
 from powerline.lib import add_divider_highlight_group
@@ -643,10 +638,10 @@ else:
 		return fin(csv.reader(l, dialect))
 
 
-def process_csv_buffer(pl, buffer, line, col, display_name):
+def process_csv_buffer(pl, buffer, vim, line, col, display_name):
 	global csv_cache
 	if csv_cache is None:
-		csv_cache = register_buffer_cache(defaultdict(lambda: (None, None, None)))
+		csv_cache = register_buffer_cache(vim, defaultdict(lambda: (None, None, None)))
 	try:
 		cur_first_line = buffer[0]
 	except UnicodeDecodeError:
@@ -697,6 +692,7 @@ def process_csv_buffer(pl, buffer, line, col, display_name):
 
 @requires_buffer_access
 @with_input('file_type')
+@requires_segment_info
 def csv_col_current(pl, segment_info, display_name='auto', name_format=' ({column_name:.15})'):
 	'''Display CSV column number and column name
 
@@ -716,7 +712,8 @@ def csv_col_current(pl, segment_info, display_name='auto', name_format=' ({colum
 	if segment_info['input']['file_type'] != 'csv':
 		return None
 	line, col = segment_info['window'].cursor
-	column_number, column_name = process_csv_buffer(pl, segment_info['buffer'], line, col, display_name)
+	column_number, column_name = process_csv_buffer(
+		pl, segment_info['buffer'], segment_info['vim'], line, col, display_name)
 	if not column_number:
 		return None
 	return [{

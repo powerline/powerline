@@ -13,7 +13,7 @@ from powerline.theme import Theme
 from powerline.editors import (EditorList, EditorDict, EditorMap,
                                EditorTabList, EditorBufferList, EditorWindowList)
 from powerline.editors.vim import VimFuncsDict, VimGlobalVar, VimVimEditor, VimPyEditor
-from powerline.bindings.vim import python_to_vim
+from powerline.bindings.vim import get_python_to_vim, register_powerline_vim_strtrans_error
 
 
 def segments_to_reqs_iter(seglist):
@@ -82,12 +82,13 @@ class VimVarHandler(logging.Handler, object):
 		vim.command('unlet! g:' + utf_varname)
 		vim.command('let g:' + utf_varname + ' = []')
 		self.vim = vim
+		self.python_to_vim = get_python_to_vim(vim)
 
 	def emit(self, record):
 		message = u(record.message)
 		if record.exc_text:
 			message += '\n' + u(record.exc_text)
-		self.vim.eval(b'add(g:' + self.vim_varname + b', ' + python_to_vim(message) + b')')
+		self.vim.eval(b'add(g:' + self.vim_varname + b', ' + self.python_to_vim(message) + b')')
 
 
 class VimPowerline(Powerline):
@@ -336,6 +337,8 @@ class VimPowerline(Powerline):
 			pyeval = 'pyeval' if sys.version_info < (3,) else 'py3eval'
 		if not pycmd:
 			pycmd = get_default_pycmd()
+
+		register_powerline_vim_strtrans_error(self.vim)
 
 		self.renderer_options['is_old_vim'] = self.is_old_vim
 		self.pycmd = pycmd

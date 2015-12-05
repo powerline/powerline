@@ -1,17 +1,16 @@
 # vim:fileencoding=utf-8:noet
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
-try:
-	import vim
-except ImportError:
-	vim = object()
-
+from powerline.theme import requires_segment_info
 from powerline.segments.vim import window_cached
 from powerline.bindings.vim import vim_global_exists
 
 
 @window_cached
-def syntastic(pl, err_format='ERR:  {first_line} ({num}) ', warn_format='WARN:  {first_line} ({num}) '):
+@requires_segment_info
+def syntastic(pl, segment_info,
+              err_format='ERR:  {first_line} ({num}) ',
+              warn_format='WARN:  {first_line} ({num}) '):
 	'''Show whether syntastic has found any errors or warnings
 
 	:param str err_format:
@@ -22,7 +21,8 @@ def syntastic(pl, err_format='ERR:  {first_line} ({num}) ', warn_format='WARN
 
 	Highlight groups used: ``syntastic:warning`` or ``warning``, ``syntastic:error`` or ``error``.
 	'''
-	if not vim_global_exists('SyntasticLoclist'):
+	vim = segment_info['vim']
+	if not vim_global_exists(vim, 'SyntasticLoclist'):
 		return None
 	has_errors = int(vim.eval('g:SyntasticLoclist.current().hasErrorsOrWarningsToDisplay()'))
 	if not has_errors:

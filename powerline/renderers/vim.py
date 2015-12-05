@@ -3,7 +3,7 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 
 import sys
 
-from powerline.bindings.vim import vim_getoption, environ, current_tabpage, get_vim_encoding
+from powerline.bindings.vim import vim_getoption, VimEnviron, current_tabpage, get_vim_encoding
 from powerline.renderer import Renderer
 from powerline.colorscheme import ATTR_BOLD, ATTR_ITALIC, ATTR_UNDERLINE
 from powerline.lib.unicode import unichr, register_strwidth_error
@@ -22,9 +22,6 @@ class VimRenderer(Renderer):
 
 	character_translations = Renderer.character_translations.copy()
 	character_translations[ord('%')] = '%%'
-
-	segment_info = Renderer.segment_info.copy()
-	segment_info.update(environ=environ)
 
 	def __init__(self, vim=None, is_old_vim=False, const_reqs=[], vim_funcs=None, **kwargs):
 		self.vim = vim
@@ -56,12 +53,14 @@ class VimRenderer(Renderer):
 		self.hl_groups = {}
 		self.prev_highlight = None
 		self.strwidth_error_name = register_strwidth_error(self.strwidth)
-		self.encoding = get_vim_encoding()
+		self.encoding = get_vim_encoding(self.vim)
 		self.uses_vim_python = True
 		if not is_old_vim:
 			self.theme_selector = VimPyEditor.compile_themes_getter(self.local_themes, vim_funcs, vim)
 		self.vim_funcs = vim_funcs
 		self.themelambda = None
+		self.segment_info = self.segment_info.copy()
+		self.segment_info.update(vim=self.vim, environ=VimEnviron(self.vim))
 
 	def shutdown(self):
 		self.theme.shutdown()
@@ -90,7 +89,7 @@ class VimRenderer(Renderer):
 				themenr = self.themelambda(self.pl, segment_info)
 
 		buffer = window.buffer if window else None
-		tabpage = current_tabpage()
+		tabpage = current_tabpage(self.vim)
 
 		segment_info.update(
 			window=window,
@@ -103,7 +102,7 @@ class VimRenderer(Renderer):
 		segment_info['tabnr'] = tabpage.number
 		segment_info['bufnr'] = buffer.number if buffer else None
 		if is_tabline:
-			winwidth = int(vim_getoption('columns'))
+			winwidth = int(vim_getoption(self.vim, 'columns'))
 		else:
 			winwidth = segment_info['window'].width
 
