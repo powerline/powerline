@@ -1,8 +1,7 @@
 # vim:fileencoding=utf-8:noet
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
-from powerline.bindings.vim import (current_tabpage, list_tabpages)
-from powerline.editors import with_list
+from powerline.editors import with_input, with_list
 
 try:
 	import vim
@@ -10,8 +9,10 @@ except ImportError:
 	vim = object()
 
 
-def tabpage_updated_segment_info(segment_info, tabpage):
+def tabpage_updated_segment_info(segment_info, tab_input):
 	segment_info = segment_info.copy()
+	tabnr = tab_input['tab_number']
+	tabpage = vim.tabpages[tabnr - 1]
 	window = tabpage.window
 	buffer = window.buffer
 	segment_info.update(
@@ -24,11 +25,12 @@ def tabpage_updated_segment_info(segment_info, tabpage):
 		bufnr=buffer.number,
 		input=segment_info['input'].copy(),
 	)
-	segment_info['input'].update(segment_info['list_tabs_inputs'][tabpage.number - 1])
+	segment_info['input'].update(tab_input)
 	return segment_info
 
 
-@with_list('list_tabs')
+@with_list(('list_tabs', ('tab_number',)))
+@with_input('current_tab_number')
 def tablister(pl, segment_info, **kwargs):
 	'''List all tab pages in segment_info format
 
@@ -41,38 +43,40 @@ def tablister(pl, segment_info, **kwargs):
 	Works best with vim-7.4 or later: earlier versions miss tabpage object and 
 	thus window objects are not available as well.
 	'''
-	cur_tabpage = current_tabpage()
-	cur_tabnr = cur_tabpage.number
+	cur_tabnr = segment_info['input']['current_tab_number']
 
-	def add_multiplier(tabpage, dct):
-		dct['priority_multiplier'] = 1 + (0.001 * abs(tabpage.number - cur_tabnr))
+	def add_multiplier(tab_input, dct):
+		dct['priority_multiplier'] = 1 + (0.001 * abs(tab_input['tab_number'] - cur_tabnr))
 		return dct
 
 	return (
-		(lambda tabpage, prefix: (
-			tabpage_updated_segment_info(segment_info, tabpage),
-			add_multiplier(tabpage, {
+		(lambda tab_input, prefix: (
+			tabpage_updated_segment_info(segment_info, tab_input),
+			add_multiplier(tab_input, {
 				'highlight_group_prefix': prefix,
 				'divider_highlight_group': 'tab:divider'
 			})
-		))(tabpage, 'tab' if tabpage == cur_tabpage else 'tab_nc')
-		for tabpage in list_tabpages()
+		))(tab_input, 'tab' if tab_input['tab_number'] == cur_tabnr else 'tab_nc')
+		for tab_input in segment_info['inputs']['list_tabs_inputs']
 	)
 
 
-def buffer_updated_segment_info(segment_info, buffer):
+def buffer_updated_segment_info(segment_info, buffer_input):
 	segment_info = segment_info.copy()
+	segment_info['input'] = segment_info['input'].copy()
+	segment_info['input'].update(buffer_input)
 	segment_info.update(
 		window=None,
 		winnr=None,
 		window_id=None,
-		buffer=buffer,
-		bufnr=buffer.number,
+		buffer=vim.buffers[buffer_input['buffer_number']],
+		bufnr=buffer_input['buffer_number'],
 	)
 	return segment_info
 
 
-@with_list('list_buffers')
+@with_list(('list_buffers', ('modified_indicator', 'listed_indicator', 'buffer_number')))
+@with_input('current_buffer_number')
 def bufferlister(pl, segment_info, show_unlisted=False, **kwargs):
 	'''List all buffers in segment_info format
 
@@ -87,39 +91,32 @@ def bufferlister(pl, segment_info, show_unlisted=False, **kwargs):
 		True if unlisted buffers should be shown as well. Current buffer is 
 		always shown.
 	'''
-	cur_buffer = vim.current.buffer
-	cur_bufnr = cur_buffer.number
+	cur_buffer = segment_info['input']['current_buffer_number']
+	cur_buffer_idx = -1
+	for cur_buffer_idx, i in enumerate(segment_info['input']['list_buffers_inputs']):
+		if i['buffer_number'] == cur_buffer:
+			break
 
-	def add_multiplier(buffer, dct):
-		dct['priority_multiplier'] = 1 + (0.001 * abs(buffer.number - cur_bufnr))
+	def add_multiplier(idx, dct):
+		dct['priority_multiplier'] = 1 + (0.001 * abs(idx - cur_buffer_idx))
 		return dct
 
 	return (
-		(lambda buffer, current, modified: (
-			buffer_updated_segment_info(segment_info, buffer),
-			add_multiplier(buffer, {
+		(lambda i, idx, current, modified: (
+			buffer_updated_segment_info(segment_info, i),
+			add_multiplier(idx, {
 				'highlight_group_prefix': '{0}{1}'.format(current, modified),
 				'divider_highlight_group': 'tab:divider'
 			})
 		))(
-			buffer,
-			'buf' if buffer is cur_buffer else 'buf_nc',
-			'_mod' if int(vim.eval('getbufvar({0}, \'&modified\')'.format(buffer.number))) > 0 else ''
+			i,
+			idx,
+			'buf' if idx == cur_buffer_idx else 'buf_nc',
+			'_mod' if i['modified_indicator'] else ''
 		)
-		for buffer in vim.buffers if (
-		    buffer is cur_buffer
-		    or show_unlisted
-		    # We can't use vim_getbufoption(segment_info, 'buflisted')
-		    # here for performance reasons. Querying the buffer options
-		    # through the vim python module's option attribute caused
-		    # vim to think it needed to update the tabline for every
-		    # keystroke after any event that changed the buffer's
-		    # options.
-		    #
-		    # Using the vim module's eval method to directly use the
-		    # buflisted(nr) vim method instead does not cause vim to
-		    # update the tabline after every keystroke, but rather after
-		    # events that would change that status. Fixes #1281
-		    or int(vim.eval('buflisted(%s)' % buffer.number)) > 0
+		for idx, i in enumerate(segment_info['input']['list_buffers_inputs']) if (
+			idx == cur_buffer_idx
+			or show_unlisted
+			or i['listed_indicator']
 		)
 	)

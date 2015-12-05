@@ -4,11 +4,13 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 import sys
 import logging
 
-from powerline import Powerline
+from itertools import chain
+
+from powerline import Powerline, finish_common_config
 from powerline.lib.dict import mergedicts
 from powerline.lib.unicode import u
 from powerline.theme import Theme
-from powerline.editors import (EditorList, EditorMap,
+from powerline.editors import (EditorList, EditorDict, EditorMap,
                                EditorTabList, EditorBufferList, EditorWindowList)
 from powerline.editors.vim import VimFuncsDict, VimGlobalVar, VimVimEditor, VimPyEditor
 from powerline.bindings.vim import python_to_vim
@@ -21,18 +23,34 @@ def segments_to_reqs_iter(seglist):
 				yield segment[key]
 			except KeyError:
 				pass
-		if segment['type'] == 'segments_list' and 'ext_editor_list' in segment:
-			lname = segment['ext_editor_list']
+		if segment['type'] == 'segment_list' and 'ext_editor_list' in segment:
+			lname, lreqs = segment['ext_editor_list']
 			yield [lname]
 			lobj = {
 				'list_tabs': EditorTabList,
 				'list_buffers': EditorBufferList,
 				'list_windows': EditorWindowList,
 			}[lname]()
+			iterparam = {
+				'list_tabs': 'tab',
+				'list_buffers': 'buffer',
+				'list_windows': 'window',
+			}[lname]
+			reqs_dict = VimVimEditor.reqss_to_reqs_dict(chain(
+				segments_to_reqs_iter(segment['segments']),
+				[lreqs],
+			))
+			# FIXME Save types information and perform conversion
+			reqs_dict = dict((
+				(k, v[0][0])
+				for k, v in reqs_dict.items()
+			))
+			inputs = EditorDict(**reqs_dict)
 			yield [
 				(
 					lname + '_inputs',
-					EditorMap(FIXME, lobj, FIXME),
+					(EditorMap(inputs, lobj, iterparam),),
+					'reqslist',
 				)
 			]
 
@@ -53,7 +71,9 @@ class VimVarHandler(logging.Handler, object):
 	'''Vim-specific handler which emits messages to Vim global variables
 
 	:param str varname:
-		Variable where
+		Variable where log will be stored.
+	:param module vim:
+		Vim module.
 	'''
 	def __init__(self, vim, varname):
 		super(VimVarHandler, self).__init__()
@@ -213,6 +233,7 @@ class VimPowerline(Powerline):
 			**self.renderer_options['theme_kwargs']
 		)
 		return {
+			'is_tabline': is_tabline,
 			'config': config,
 			'theme': theme,
 			'reqs_dict': theme_to_reqs_dict(

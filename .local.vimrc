@@ -9,3 +9,5 @@ let b:syntastic_checkers = ['flake8']
 unlet! g:python_space_error_highlight
 let g:pymode_syntax_indent_errors = 0
 let g:pymode_syntax_space_errors = 0
+
+let g:gutentags_exclude = ['build']

@@ -484,6 +484,12 @@ class EditorMap(EditorObj):
 	.. code-block:: python
 
 		[iterparam for iterparam in lst if condition]
+
+	if ``iterparam`` is a string. It may also be a list, in which case first 
+	parameter is expected to be a string for the same purposes as in the above 
+	expression and others are tuples containing a name of the parameter and 
+	:py:class:`EditorObj` instances containing expressions used to determine 
+	parameter value. Note that expressions will be recomputed each time used.
 	'''
 	def __init__(self, expr, lst, iterparam='vval'):
 		self.expr = toedobj(expr)
@@ -519,6 +525,26 @@ class EditorTabList(EditorObj):
 
 class EditorWindowList(EditorObj):
 	'''Class describing expression which returns a list of windows
+	'''
+	pass
+
+
+class EditorWindowBuffer(EditorObj):
+	'''Class describing expression which returns current window’s buffer
+	'''
+	pass
+
+
+class EditorTabWindowBuffer(EditorObj):
+	'''Class describing expression which returns tab’s window’s buffer
+
+	Uses current window for the current tab.
+	'''
+	pass
+
+
+class EditorTabWindow(EditorObj):
+	'''Class describing expression which returns current tab’s window
 	'''
 	pass
 

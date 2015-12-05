@@ -126,7 +126,8 @@ class VimRenderer(Renderer):
 				input = theme['input_getter'](buffer, window, tabpage)
 			except KeyError:
 				theme['input_getter'] = VimPyEditor.compile_reqs_dict(
-					theme['reqs_dict'], self.vim_funcs, self.vim)
+					theme['reqs_dict'], self.vim_funcs, self.vim,
+					tabscope=theme.get('is_tabline'))
 				input = theme['input_getter'](buffer, window, tabpage)
 
 		if is_tabline or winnr == input['current_window_number']:

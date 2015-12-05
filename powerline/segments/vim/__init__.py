@@ -588,26 +588,26 @@ def tabnr(pl, segment_info, show_current=True):
 		return str(tabnr)
 
 
-@with_input('current_buffer_number')
+@with_input('current_buffer_number', 'buffer_number')
 def bufnr(pl, segment_info, show_current=True):
 	'''Show buffer number
 
 	:param bool show_current:
 		If False do not show current window number.
 	'''
-	bufnr = segment_info['bufnr']
+	bufnr = segment_info['input']['buffer_number']
 	if show_current or bufnr != segment_info['input']['current_buffer_number']:
 		return str(bufnr)
 
 
-@with_input('current_window_number')
+@with_input('current_window_number', 'window_number')
 def winnr(pl, segment_info, show_current=True):
 	'''Show window number
 
 	:param bool show_current:
 		If False do not show current window number.
 	'''
-	winnr = segment_info['winnr']
+	winnr = segment_info['input']['window_number']
 	if show_current or winnr != segment_info['input']['current_window_number']:
 		return str(winnr)
 

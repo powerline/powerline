@@ -357,6 +357,32 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, ge
 
 		incext, excext, display_condition = gen_display_condition(segment)
 
+		extensions = None
+
+		if segment_type in ('function', 'segment_list'):
+			extensions = getattr(_contents_func, 'powerline_extensions', None)
+
+		if segment_type == 'function':
+			startup_func = get_attr_func(_contents_func, 'startup', args)
+			shutdown_func = getattr(_contents_func, 'shutdown', None)
+			expand_func = get_attr_func(_contents_func, 'expand', args, True)
+			truncate_func = get_attr_func(_contents_func, 'truncate', args, True)
+
+			if hasattr(_contents_func, 'powerline_requires_filesystem_watcher'):
+				create_watcher = lambda: create_file_watcher(pl, common_config['watcher'])
+				args[str('create_watcher')] = create_watcher
+
+			if hasattr(_contents_func, 'powerline_requires_segment_info'):
+				contents_func = lambda pl, segment_info: _contents_func(pl=pl, segment_info=segment_info, **args)
+			else:
+				contents_func = lambda pl, segment_info: _contents_func(pl=pl, **args)
+		else:
+			startup_func = None
+			shutdown_func = None
+			contents_func = None
+			expand_func = None
+			truncate_func = None
+
 		if segment_type == 'segment_list':
 			# Handle startup and shutdown of _contents_func?
 			subsegments = [
@@ -366,7 +392,7 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, ge
 					for subsegment in segment['segments']
 				) if subsegment
 			]
-			return {
+			ret = {
 				'name': name or function_name,
 				'type': segment_type,
 				'highlight_groups': None,
@@ -401,59 +427,34 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, ge
 				'_len': None,
 				'_contents_len': None,
 			}
-
-		extensions = None
-
-		if segment_type == 'function':
-			startup_func = get_attr_func(_contents_func, 'startup', args)
-			shutdown_func = getattr(_contents_func, 'shutdown', None)
-			expand_func = get_attr_func(_contents_func, 'expand', args, True)
-			truncate_func = get_attr_func(_contents_func, 'truncate', args, True)
-
-			extensions = getattr(_contents_func, 'powerline_extensions', None)
-
-			if hasattr(_contents_func, 'powerline_requires_filesystem_watcher'):
-				create_watcher = lambda: create_file_watcher(pl, common_config['watcher'])
-				args[str('create_watcher')] = create_watcher
-
-			if hasattr(_contents_func, 'powerline_requires_segment_info'):
-				contents_func = lambda pl, segment_info: _contents_func(pl=pl, segment_info=segment_info, **args)
-			else:
-				contents_func = lambda pl, segment_info: _contents_func(pl=pl, **args)
 		else:
-			startup_func = None
-			shutdown_func = None
-			contents_func = None
-			expand_func = None
-			truncate_func = None
-
-		ret = {
-			'name': name or function_name,
-			'type': segment_type,
-			'highlight_groups': highlight_groups,
-			'divider_highlight_group': None,
-			'before': get_key(False, segment, module, function_name, name, 'before', ''),
-			'after': get_key(False, segment, module, function_name, name, 'after', ''),
-			'contents_func': contents_func,
-			'contents': contents,
-			'literal_contents': (0, ''),
-			'priority': segment.get('priority', None),
-			'draw_hard_divider': segment.get('draw_hard_divider', True),
-			'draw_soft_divider': segment.get('draw_soft_divider', True),
-			'draw_inner_divider': segment.get('draw_inner_divider', False),
-			'side': side,
-			'display_condition': display_condition,
-			'width': segment.get('width'),
-			'align': segment.get('align', 'l'),
-			'expand': expand_func,
-			'truncate': truncate_func,
-			'startup': startup_func,
-			'shutdown': shutdown_func,
-			'_rendered_raw': '',
-			'_rendered_hl': '',
-			'_len': None,
-			'_contents_len': None,
-		}
+			ret = {
+				'name': name or function_name,
+				'type': segment_type,
+				'highlight_groups': highlight_groups,
+				'divider_highlight_group': None,
+				'before': get_key(False, segment, module, function_name, name, 'before', ''),
+				'after': get_key(False, segment, module, function_name, name, 'after', ''),
+				'contents_func': contents_func,
+				'contents': contents,
+				'literal_contents': (0, ''),
+				'priority': segment.get('priority', None),
+				'draw_hard_divider': segment.get('draw_hard_divider', True),
+				'draw_soft_divider': segment.get('draw_soft_divider', True),
+				'draw_inner_divider': segment.get('draw_inner_divider', False),
+				'side': side,
+				'display_condition': display_condition,
+				'width': segment.get('width'),
+				'align': segment.get('align', 'l'),
+				'expand': expand_func,
+				'truncate': truncate_func,
+				'startup': startup_func,
+				'shutdown': shutdown_func,
+				'_rendered_raw': '',
+				'_rendered_hl': '',
+				'_len': None,
+				'_contents_len': None,
+			}
 		if extensions:
 			for ext_key, ext_val in extensions.items():
 				ret['ext_' + ext_key] = ext_val

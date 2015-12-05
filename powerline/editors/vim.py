@@ -14,10 +14,11 @@ from powerline.editors import (Editor,
                                EditorWinPos, EditorAny, EditorUnaryOp, EditorNot, EditorBufferList,
                                EditorFilter, EditorCached, EditorDict, EditorOverrides, EditorEncoding,
                                EditorBufferNameBase, EditorMap, EditorWindowList, EditorTabList,
+                               EditorWindowBuffer, EditorTabWindowBuffer, EditorTabWindow,
                                toedobj)
 
 
-def finish_kwargs(kwargs, vval=None, cache=None, buffer_cache=None, paramfunc=(lambda s: s)):
+def finish_kwargs(kwargs, vval=None, cache=None, buffer_cache=None, paramfunc=(lambda s: s), toed=None):
 	'''Create a copy of kwargs with necessary parameters filled
 
 	If ``kwargs`` dictionary contains key ``finished`` with true value then it 
@@ -43,6 +44,9 @@ def finish_kwargs(kwargs, vval=None, cache=None, buffer_cache=None, paramfunc=(l
 	:param func paramfunc:
 		Function that converts parameters ``buffer``, ``window`` and ``tabpage`` 
 		to the used strings.
+	:param func toed:
+		Function used to convert :py:class:`powerline.editors.EditorObj` 
+		instances to strings suitable for ``kwargs['parameters']`` dictionary.
 
 	:return: A modified copy of ``kwargs`` dictionary.
 	'''
@@ -50,17 +54,23 @@ def finish_kwargs(kwargs, vval=None, cache=None, buffer_cache=None, paramfunc=(l
 		return kwargs
 	kwargs = kwargs.copy()
 	kwargs.setdefault('tabscope', False)
+	kwargs['finished'] = True
 	try:
 		kwargs['parameters'] = kwargs['parameters'].copy()
 	except KeyError:
 		kwargs['parameters'] = {}
-	kwargs['parameters'].setdefault('buffer', paramfunc('buffer'))
-	kwargs['parameters'].setdefault('window', paramfunc('window'))
-	kwargs['parameters'].setdefault('tabpage', paramfunc('tabpage'))
 	kwargs['parameters'].setdefault('vval', vval or 'i')
 	kwargs['parameters'].setdefault('cache', cache or 'cache')
 	kwargs['parameters'].setdefault('buffer_cache', buffer_cache or 'buffer_cache')
-	kwargs['finished'] = True
+	kwargs['parameters'].setdefault('tabpage', paramfunc('tabpage'))
+	if kwargs['tabscope'] and 'window' not in kwargs['parameters']:
+		kwargs['parameters']['window'] = toed(EditorTabWindow(), **kwargs)
+	else:
+		kwargs['parameters'].setdefault('window', paramfunc('window'))
+	if kwargs['tabscope'] and 'buffer' not in kwargs['parameters']:
+		kwargs['parameters']['buffer'] = toed(EditorTabWindowBuffer(), **kwargs)
+	else:
+		kwargs['parameters'].setdefault('buffer', paramfunc('buffer'))
 	return kwargs
 
 
@@ -108,6 +118,18 @@ class VimCurrentWindowNumber(EditorObj):
 	pass
 
 
+class VimTabNumber(EditorObj):
+	pass
+
+
+class VimBufferNumber(EditorObj):
+	pass
+
+
+class VimWindowNumber(EditorObj):
+	pass
+
+
 class VimOptionalFunc(EditorObj):
 	def __init__(self, name, args=(), cond=None, default=EditorNone()):
 		self.name = name
@@ -131,6 +153,20 @@ def updated(d, *args, **kwargs):
 	d = d.copy()
 	d.update(*args, **kwargs)
 	return d
+
+
+def iterparam_updated(parameters, obj, toed):
+	parameters = parameters.copy()
+	if isinstance(obj.iterparam, list):
+		for iterparam in obj.iterparam:
+			if isinstance(iterparam, tuple):
+				name, expr = iterparam
+				parameters[name] = toed(expr)
+			else:
+				parameters[iterparam] = parameters['vval']
+	else:
+		parameters[obj.iterparam] = parameters['vval']
+	return parameters
 
 
 ED_TO_VIM = {
@@ -303,14 +339,12 @@ ED_TO_VIM = {
 						'v:val'))),
 			**kw
 		))(self, **updated(
-			kw, parameters=updated(
-				kw['parameters'], ((self.iterparam, kw['parameters']['vval']),)))),
+			kw, parameters=iterparam_updated(kw['parameters'], self, toed))),
 		'tovimpy': lambda self, toed, **kw: (lambda self, **kw: 'any(({0} for vval in {1}))'.format(
 			toed(self.condition, **kw),
 			toed(self.list, **kw)))(
 				self, **updated(
-					kw, parameters=updated(
-						kw['parameters'], ((self.iterparam, kw['parameters']['vval']),)))
+					kw, parameters=iterparam_updated(kw['parameters'], self, toed))
 			),
 	},
 	EditorFilter: {
@@ -322,14 +356,12 @@ ED_TO_VIM = {
 			),
 			**kw
 		))(self, **updated(
-			kw, parameters=updated(
-				kw['parameters'], ((self.iterparam, kw['parameters']['vval']),)))),
+			kw, parameters=iterparam_updated(kw['parameters'], self, toed))),
 		'tovimpy': lambda self, toed, **kw: (lambda self, **kw: '[vval for vval in {1} if {0}]'.format(
 			toed(self.condition, **kw),
 			toed(self.list, **kw)))(
 				self, **updated(
-					kw, parameters=updated(
-						kw['parameters'], ((self.iterparam, kw['parameters']['vval']),)))
+					kw, parameters=iterparam_updated(kw['parameters'], self, toed))
 			),
 	},
 	EditorMap: {
@@ -342,13 +374,12 @@ ED_TO_VIM = {
 			**kw
 		))(self, **updated(
 			kw, parameters=updated(
-				kw['parameters'], ((self.iterparam, kw['parameters']['vval']),)))),
+				kw, parameters=iterparam_updated(kw['parameters'], self, toed)))),
 		'tovimpy': lambda self, toed, **kw: (lambda self, **kw: '[{0} for vval in {1}]'.format(
 			toed(self.expr, **kw),
 			toed(self.list, **kw)))(
 				self, **updated(
-					kw, parameters=updated(
-						kw['parameters'], ((self.iterparam, kw['parameters']['vval']),)))
+					kw, parameters=iterparam_updated(kw['parameters'], self, toed))
 			),
 	},
 	VimVVar: {
@@ -449,6 +480,18 @@ ED_TO_VIM = {
 			**kw
 		),
 	},
+	VimBufferNumber: {
+		'tovim': lambda self, toed, **kw: kw['parameters']['buffer'],
+		'tovimpy': lambda self, toed, **kw: '{buffer}.number'.format(**kw['parameters']),
+	},
+	VimWindowNumber: {
+		'tovim': lambda self, toed, **kw: kw['parameters']['window'],
+		'tovimpy': lambda self, toed, **kw: '{window}.number'.format(**kw['parameters']),
+	},
+	VimTabNumber: {
+		'tovim': lambda self, toed, **kw: kw['parameters']['tabpage'],
+		'tovimpy': lambda self, toed, **kw: '{tabpage}.number'.format(**kw['parameters']),
+	},
 	VimStlWinList: {
 		'tovim': lambda self, toed, **kw: toed(
 			EditorFunc(
@@ -500,6 +543,18 @@ ED_TO_VIM = {
 		'tovim': lambda self, toed, **kw: toed(EditorFunc('tabpagenr', '$'), **kw),
 		'tovimpy': lambda self, toed, **kw: 'len(vim.tabpages)',
 	},
+	EditorTabWindow: {
+		'tovim': lambda self, toed, **kw: 'tabpagewinnr({tabpage})'.format(**kw['parameters']),
+		'tovimpy': lambda self, toed, **kw: '{tabpage}.window'.format(**kw['parameters']),
+	},
+	EditorTabWindowBuffer: {
+		'tovim': lambda self, toed, **kw: 'tabpagebuflist({tabpage})[{window}-1]'.format(**kw['parameters']),
+		'tovimpy': lambda self, toed, **kw: '{window}.buffer'.format(**kw['parameters']),
+	},
+	EditorWindowBuffer: {
+		'tovim': lambda self, toed, **kw: 'winbufnr({window})'.format(**kw['parameters']),
+		'tovimpy': lambda self, toed, **kw: '{window}.buffer'.format(**kw['parameters']),
+	},
 }
 
 
@@ -517,6 +572,13 @@ class VimEditor(Editor):
 	)
 	del _pos_to_pos_and_col
 	modified_indicator = (VimBufferOption('modified'),)
+	# We can't use vim_getbufoption(segment_info, 'buflisted')
+	# here for performance reasons. Querying the buffer options
+	# through the vim python module's option attribute caused
+	# vim to think it needed to update the tabline for every
+	# keystroke after any event that changed the buffer's
+	# options.
+	listed_indicator = (EditorFunc('buflisted', EditorParameter('buffer')),)
 	tab_modified_indicator = (EditorAny(VimBufferOption('modified'), EditorBufferList(), 'buffer'),)
 	paste_indicator = (VimGlobalOption('paste'), EditorNone())
 	buffer_name = (EditorBufferName(),)
@@ -543,6 +605,9 @@ class VimEditor(Editor):
 	current_tab_number = (VimCurrentTabNumber(),)
 	current_buffer_number = (VimCurrentBufferNumber(),)
 	current_window_number = (VimCurrentWindowNumber(),)
+	tab_number = (VimTabNumber(),)
+	buffer_number = (VimBufferNumber(),)
+	window_number = (VimWindowNumber(),)
 	tab_amount = (VimTabAmount(),)
 	textwidth = (VimBufferOption('textwidth'),)
 	stl_winlist = (VimStlWinList(),)
@@ -600,6 +665,7 @@ class VimVimEditor(VimEditor):
 				vval=cls.toed(VimVVar('val'), **finkwargs),
 				cache=cls.toed(VimGlobalVar('_powerline_cache'), **finkwargs),
 				buffer_cache=cls.toed(VimGlobalVar('_powerline_buffer_cache'), **finkwargs),
+				toed=cls.toed,
 			)
 		return super(VimVimEditor, cls).toed(obj, **kwargs)
 
@@ -703,7 +769,7 @@ class VimPyEditor(VimEditor):
 
 		:return: Python code (string) obtained from given AST.
 		'''
-		kwargs = finish_kwargs(kwargs)
+		kwargs = finish_kwargs(kwargs, vval='vval', toed=cls.toed)
 		return super(VimPyEditor, cls).toed(obj, **kwargs)
 
 	@classmethod
@@ -846,13 +912,13 @@ if __name__ == '__main__':
 	for attr in dir(VimEditor):
 		aval = getattr(VimEditor, attr)
 		if isinstance(aval, tuple) and aval:
-			sys.stdout.write('{0:<23} vi: '.format(attr))
+			sys.stdout.write('{0:<23} v: '.format(attr))
 			sys.stdout.flush()
 			print(VimVimEditor.toed(aval[0], tabscope=True, parameters={}))
-			sys.stdout.write('{0:<23} py: '.format(''))
+			sys.stdout.write('{0:<23} p: '.format(''))
 			print(VimPyEditor.toed(aval[0], tabscope=True, parameters={}))
 			if len(aval) > 1:
-				sys.stdout.write('{0:<23} vi: '.format(''))
+				sys.stdout.write('{0:<23} v: '.format(''))
 				print(VimVimEditor.toed(aval[-1], tabscope=True, parameters={}))
-				sys.stdout.write('{0:<23} py: '.format(''))
+				sys.stdout.write('{0:<23} p: '.format(''))
 				print(VimPyEditor.toed(aval[-1], tabscope=True, parameters={}))
