@@ -74,6 +74,7 @@ else:
 	_interface_starts = {
 		'eth':      10,  # Regular ethernet adapters         : eth1
 		'enp':      10,  # Regular ethernet adapters, Gentoo : enp2s0
+		'en':       10,  # OS X                              : en0 
 		'ath':       9,  # Atheros WiFi adapters             : ath0
 		'wlan':      9,  # Other WiFi adapters               : wlan1
 		'wlp':       9,  # Other WiFi adapters, Gentoo       : wlp5s0
