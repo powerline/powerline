@@ -1,39 +1,43 @@
 {
-	"segments": {
-		"left": [
-			{
-				"type": "string",
-				"contents": "ControlP",
-				"highlight_groups": ["ctrlp:label"]
-			},
-			{
-				"function": "powerline.segments.vim.plugin.ctrlp.mode_prev",
-				"draw_soft_divider": false,
-				"draw_hard_divider": false
-			},
-			{
-				"function": "powerline.segments.vim.plugin.ctrlp.mode",
-				"draw_soft_divider": false,
-				"draw_hard_divider": false
-			},
-			{
-				"function": "powerline.segments.vim.plugin.ctrlp.mode_next"
-			},
-			{
-				"function": "powerline.segments.vim.plugin.ctrlp.marked"
-			},
-			{
-							"function": "powerline.segments.vim.plugin.ctrlp.prog"
-			},
-			{
-				"type": "string",
-				"highlight_groups": ["ctrlp:background"],
-				"draw_soft_divider": false,
-				"draw_hard_divider": false,
-				"width": "auto"
-			}
-		],
-		"right": [
-		]
-	}
+    "segments": {
+        "left": [
+            {
+                "type": "string",
+                "contents": "ControlP",
+                "highlight_groups": ["ctrlp:label"]
+            },
+            {
+                "function": "powerline.segments.vim.plugin.ctrlp.mode_prev",
+                "draw_soft_divider": false,
+                "draw_hard_divider": false
+            },
+            {
+                "function": "powerline.segments.vim.plugin.ctrlp.mode",
+                "draw_soft_divider": false,
+                "draw_hard_divider": false
+            },
+            {
+                "function": "powerline.segments.vim.plugin.ctrlp.mode_next",
+                "draw_soft_divider": false,
+                "draw_hard_divider": false
+            },
+            {
+                "function": "powerline.segments.vim.plugin.ctrlp.marked",
+                "draw_soft_divider": false,
+                "draw_hard_divider": false
+            },
+            {
+                "function": "powerline.segments.vim.plugin.ctrlp.prog"
+            },
+            {
+                "type": "string",
+                "highlight_groups": ["ctrlp:background"],
+                "draw_soft_divider": false,
+                "draw_hard_divider": false,
+                "width": "auto"
+            }
+        ],
+        "right": [
+        ]
+    }
 }

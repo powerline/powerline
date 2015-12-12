@@ -47,11 +47,11 @@
 		"commandt:finder":     "file_name",
 		"commandt:path":       "file_directory",
 
-		"ctrlp:label":      "file_name",
-		"ctrlp:background": "background",
-		"ctrlp:status": "background",
-		"ctrlp:status_other":     "file_name",
+		"ctrlp:label":        "file_name",
+		"ctrlp:background":   "background",
+		"ctrlp:status":       "background",
+		"ctrlp:status_other": "file_name",
 		"ctrlp:marked":       "file_name",
-		"ctrlp:prog":       "file_name"
+		"ctrlp:prog":         "file_name"
 	}
 }
