@@ -23,15 +23,24 @@
 		"csv:column_number": "line_current",
 		"csv:column_name":   "line_current_symbol",
 
+		"tab:background":     "background",
+		"tab:divider":        "background:divider",
+
 		"tab_nc:modified_indicator": "modified_indicator",
 		"tab_nc:file_directory":     "information:unimportant",
 		"tab_nc:file_name":          "tab_nc:file_directory",
 		"tab_nc:tabnr":              "tab_nc:file_directory",
 
 		"buf_nc:file_directory":     "tab_nc:file_directory",
-		"buf_nc:file_name":          "tab_nc:file_name",
-		"buf_nc:bufnr":              "tab_nc:tabnr",
+		"buf_nc:file_name":          "buf_nc:file_directory",
+		"buf_nc:bufnr":              "buf_nc:file_directory",
 		"buf_nc:modified_indicator": "tab_nc:modified_indicator",
+
+		"buf_nc_mod:file_directory":     "tab_nc:file_directory",
+		"buf_nc_mod:file_name":          "buf_nc_mod:file_directory",
+		"buf_nc_mod:bufnr":              "buf_nc_mod:file_directory",
+		"buf_nc_mod:modified_indicator": "tab_nc:modified_indicator",
+
 
 		"commandt:label":      "file_name",
 		"commandt:background": "background",

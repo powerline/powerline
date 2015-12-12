@@ -94,13 +94,37 @@ Common configuration is a subdictionary that is a value of ``common`` key in
 .. _config-common-log:
 
 ``log_file``
-    Defines path which will hold powerline logs. If not present, logging will be 
-    done to stderr.
+    Defines how logs will be handled. There are three variants here:
+
+    #. Absent. In this case logging will be done to stderr: equivalent to 
+       ``[["logging.StreamHandler", []]]`` or ``[null]``.
+    #. Plain string. In this case logging will be done to the given file: 
+       ``"/file/name"`` is equivalent to ``[["logging.FileHandler", 
+       [["/file/name"]]]]`` or ``["/file/name"]``. Leading ``~/`` is expanded in 
+       the file name, so using ``"~/.log/foo"`` is permitted. If directory 
+       pointed by the option is absent, it will be created, but not its parent.
+    #. List of handler definitions. Handler definition may either be ``null``, 
+       a string or a list with two or three elements:
+
+       #. Logging class name and module. If module name is absent, it is 
+          equivalent to ``logging.handlers``.
+       #. Class constructor arguments in a form ``[[args[, kwargs]]]``: accepted 
+          variants are ``[]`` (no arguments), ``[args]`` (e.g. 
+          ``[["/file/name"]]``: only positional arguments) or ``[args, kwargs]`` 
+          (e.g. ``[[], {"host": "localhost", "port": 6666}]``: positional and 
+          keyword arguments, but no positional arguments in the example).
+       #. Optional logging level. Overrides :ref:`log_level key 
+          <config-common-log_level>` and has the same format.
+       #. Optional format string. Partially overrides :ref:`log_format key 
+          <config-common-log_format>` and has the same format. “Partially” here 
+          means that it may only specify more critical level.
 
 .. _config-common-log_level:
 
 ``log_level``
     String, determines logging level. Defaults to ``WARNING``.
+
+.. _config-common-log_format:
 
 ``log_format``
     String, determines format of the log messages. Defaults to 
