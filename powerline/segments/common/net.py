@@ -30,7 +30,10 @@ def hostname(pl, segment_info, only_if_ssh=False, exclude_domain=False):
 
 
 def _external_ip(query_url='http://ipv4.icanhazip.com/'):
-	return urllib_read(query_url).strip()
+	try:
+		return urllib_read(query_url).strip()
+	except:
+		return ""
 
 
 class ExternalIpSegment(ThreadedSegment):
@@ -50,7 +53,8 @@ class ExternalIpSegment(ThreadedSegment):
 
 
 external_ip = with_docstring(ExternalIpSegment(),
-'''Return external IP address.
+'''Return external IP address. If an exception occurs during IP address
+retrieval, return empty string.
 
 :param str query_url:
 	URI to query for IP address, should return only the IP address as a text string
