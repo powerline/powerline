@@ -50,24 +50,27 @@ Add the following to :file:`~/.config/qtile/config.py`:
        ),
    ]
 
-.. _bar-usage:
+.. _lemonbar-usage:
 
-bar-aint-recursive
-==================
+lemonbar (formerly bar-aint-recursive)
+======================================
 
-To run the bar simply pipe the output of the binding script into ``bar`` and 
-specify appropriate options, for example like this::
+To run the bar simply start the binding script:
 
-    python /path/to/powerline/bindings/bar/powerline-bar.py | bar
+    python /path/to/powerline/bindings/lemonbar/powerline-lemonbar.py
 
-to run with i3, simply ``exec`` this in i3 config file::
+You can specify options to be passed to ``lemonbar`` after ``--``, like so:
 
-    exec python /path/to/powerline/bindings/bar/powerline-bar.py --i3 | bar
+    python /path/to/powerline/bindings/lemonbar/powerline-lemonbar.py --height 16 -- -f "Source Code Pro for Powerline-9"
+
+to run with i3, simply ``exec`` this in the i3 config file and set the ``--i3`` switch:
+
+    exec python /path/to/powerline/bindings/lemonbar/powerline-lemonbar.py --i3
 
 Running the binding in i3-mode will require `i3ipc <https://github.com/acrisci/i3ipc-python>`_
 (or the outdated `i3-py <https://github.com/ziberna/i3-py>`_).
 
-See the `bar documentation <https://github.com/LemonBoy/bar>`_ for more 
+See the `lemonbar documentation <https://github.com/LemonBoy/bar>`_ for more 
 information and options.
 
 I3 bar

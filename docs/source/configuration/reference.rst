@@ -187,6 +187,10 @@ Common configuration is a subdictionary that is a value of ``ext`` key in
     ``out`` and ``rewrite`` prompts (refer to IPython documentation for more 
     details) while ``in`` prompt is the default.
 
+    For wm (:ref:`lemonbar <lemonbar-usage>` only) it is a dictionary 
+    ``{output : theme_name}`` that maps the ``xrandr`` output names to the 
+    local themes to use on that output.
+
 ``components``
     Determines which extension components should be enabled. This key is highly 
     extension-specific, here is the table of extensions and corresponding 

@@ -29,8 +29,9 @@ def workspaces(pl, segment_info, only_show=None, output=None, strip=0):
 		are shown.
 
 	:param str output:
-		If specified, only workspaces on this output are shown. If unspecified, 
-		may be set by the lemonbar renderer and bindings.
+		May be set to the name of an X output. If specified, only workspaces 
+		on that output are shown. Overrides automatic output detection by 
+		the lemonbar renderer and bindings.
 
 	:param int strip:
 		Specifies how many characters from the front of each workspace name 
@@ -47,7 +48,7 @@ def workspaces(pl, segment_info, only_show=None, output=None, strip=0):
 		else:
 			conn = i3ipc.Connection()
 
-	output = output or ('output' in segment_info and segment_info['output'])
+	output = output or segment_info.get('output')
 
 	return [{
 		'contents': w['name'][min(len(w['name']), strip):],
