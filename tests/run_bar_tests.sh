@@ -187,6 +187,13 @@ else
 	exit_suite --continue
 fi
 
+if ! powerline-lint \
+	-p "$ROOT/powerline/config_files" \
+	-p "$TEST_STATIC_ROOT/powerline"
+then
+	fail "lint" F "Checking test config failed"
+fi
+
 if test $FAILED -eq 0 ; then
 	rm -r "$TEST_ROOT"
 fi
