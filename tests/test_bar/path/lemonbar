@@ -1,0 +1,11 @@
+#!/bin/sh
+
+RES_DIR="$TEST_ROOT/results"
+mkdir -p "$RES_DIR"
+RES_FILE="$RES_DIR/$$"
+while test -e "$RES_FILE.log" ; do
+	RES_FILE="$RES_FILE.${RANDOM:-`date +%N | sed s/^0*//`}"
+done
+
+echo $(basename $0) "$@" > "$RES_FILE.args"
+cat > "$RES_FILE.log"

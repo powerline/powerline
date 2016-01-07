@@ -1,0 +1,10 @@
+{
+	"segment_data": {
+		"time": {
+			"display": false
+		},
+		"powerline.segments.common.time.date": {
+			"display": false
+		}
+	}
+}
