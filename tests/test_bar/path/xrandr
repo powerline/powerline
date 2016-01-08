@@ -1,0 +1,31 @@
+#!/bin/sh
+
+cat << EOF
+Screen 0: minimum 8 x 8, current 1920 x 1200, maximum 16384 x 16384
+DVI-I-0 disconnected (normal left inverted right x axis y axis)
+VGA-0 connected 1920x1200+1+0 (normal left inverted right x axis y axis) 520mm x 330mm
+   1920x1200     59.95*+
+   1920x1080     60.00  
+   1680x1050     59.95  
+   1600x1200     60.00  
+   1440x900      59.89  
+   1280x1024     75.02    60.02  
+   1280x800      59.81  
+   1152x864      75.00  
+   1024x768      75.03    60.00  
+   800x600       75.00    60.32  
+   640x480       75.00    59.94  
+DVI-I-1 connected 1920x1200+0+0 (normal left inverted right x axis y axis) 520mm x 330mm
+   1920x1200     59.95*+
+   1920x1080     60.00  
+   1680x1050     59.95  
+   1600x1200     60.00  
+   1440x900      59.89  
+   1280x1024     75.02    60.02  
+   1280x800      59.81  
+   1152x864      75.00  
+   1024x768      75.03    60.00  
+   800x600       75.00    60.32  
+   640x480       75.00    59.94  
+HDMI-0 disconnected (normal left inverted right x axis y axis)
+EOF

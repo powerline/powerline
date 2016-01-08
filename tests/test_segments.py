@@ -891,39 +891,48 @@ class TestI3WM(TestCase):
 			{'name': '3: w3', 'output': 'HDMI1', 'focused': False, 'urgent': True, 'visible': True},
 			{'name': '4: w4', 'output': 'DVI01', 'focused': True, 'urgent': True, 'visible': True},
 		]))):
-			self.assertEqual(i3wm.workspaces(pl=pl), [
+			segment_info = {}
+
+			self.assertEqual(i3wm.workspaces(pl=pl, segment_info=segment_info), [
 				{'contents': '1: w1', 'highlight_groups': ['workspace']},
 				{'contents': '2: w2', 'highlight_groups': ['w_visible', 'workspace']},
 				{'contents': '3: w3', 'highlight_groups': ['w_urgent', 'w_visible', 'workspace']},
 				{'contents': '4: w4', 'highlight_groups': ['w_focused', 'w_urgent', 'w_visible', 'workspace']},
 			])
-			self.assertEqual(i3wm.workspaces(pl=pl, only_show=None), [
+			self.assertEqual(i3wm.workspaces(pl=pl, segment_info=segment_info, only_show=None), [
 				{'contents': '1: w1', 'highlight_groups': ['workspace']},
 				{'contents': '2: w2', 'highlight_groups': ['w_visible', 'workspace']},
 				{'contents': '3: w3', 'highlight_groups': ['w_urgent', 'w_visible', 'workspace']},
 				{'contents': '4: w4', 'highlight_groups': ['w_focused', 'w_urgent', 'w_visible', 'workspace']},
 			])
-			self.assertEqual(i3wm.workspaces(pl=pl, only_show=['focused', 'urgent']), [
+			self.assertEqual(i3wm.workspaces(pl=pl, segment_info=segment_info, only_show=['focused', 'urgent']), [
 				{'contents': '3: w3', 'highlight_groups': ['w_urgent', 'w_visible', 'workspace']},
 				{'contents': '4: w4', 'highlight_groups': ['w_focused', 'w_urgent', 'w_visible', 'workspace']},
 			])
-			self.assertEqual(i3wm.workspaces(pl=pl, only_show=['visible']), [
+			self.assertEqual(i3wm.workspaces(pl=pl, segment_info=segment_info, only_show=['visible']), [
 				{'contents': '2: w2', 'highlight_groups': ['w_visible', 'workspace']},
 				{'contents': '3: w3', 'highlight_groups': ['w_urgent', 'w_visible', 'workspace']},
 				{'contents': '4: w4', 'highlight_groups': ['w_focused', 'w_urgent', 'w_visible', 'workspace']},
 			])
-			self.assertEqual(i3wm.workspaces(pl=pl, only_show=['visible'], strip=3), [
+			self.assertEqual(i3wm.workspaces(pl=pl, segment_info=segment_info, only_show=['visible'], strip=3), [
 				{'contents': 'w2', 'highlight_groups': ['w_visible', 'workspace']},
 				{'contents': 'w3', 'highlight_groups': ['w_urgent', 'w_visible', 'workspace']},
 				{'contents': 'w4', 'highlight_groups': ['w_focused', 'w_urgent', 'w_visible', 'workspace']},
 			])
-			self.assertEqual(i3wm.workspaces(pl=pl, only_show=['focused', 'urgent'], output='DVI01'), [
+			self.assertEqual(i3wm.workspaces(pl=pl, segment_info=segment_info, only_show=['focused', 'urgent'], output='DVI01'), [
 				{'contents': '4: w4', 'highlight_groups': ['w_focused', 'w_urgent', 'w_visible', 'workspace']},
 			])
-			self.assertEqual(i3wm.workspaces(pl=pl, only_show=['visible'], output='HDMI1'), [
+			self.assertEqual(i3wm.workspaces(pl=pl, segment_info=segment_info, only_show=['visible'], output='HDMI1'), [
 				{'contents': '3: w3', 'highlight_groups': ['w_urgent', 'w_visible', 'workspace']},
 			])
-			self.assertEqual(i3wm.workspaces(pl=pl, only_show=['visible'], strip=3, output='LVDS1'), [
+			self.assertEqual(i3wm.workspaces(pl=pl, segment_info=segment_info, only_show=['visible'], strip=3, output='LVDS1'), [
+				{'contents': 'w2', 'highlight_groups': ['w_visible', 'workspace']},
+			])
+			segment_info['output'] = 'LVDS1'
+			self.assertEqual(i3wm.workspaces(pl=pl, segment_info=segment_info, only_show=['visible'], output='HDMI1'), [
+				{'contents': '3: w3', 'highlight_groups': ['w_urgent', 'w_visible', 'workspace']},
+			])
+			self.assertEqual(i3wm.workspaces(pl=pl, segment_info=segment_info, only_show=['visible'], strip=3), [
 				{'contents': 'w2', 'highlight_groups': ['w_visible', 'workspace']},
 			])
 

@@ -1,0 +1,18 @@
+{
+	"segments": {
+		"left": [
+			{
+				"type": "string",
+				"highlight_groups": ["time"],
+				"contents": "default-left"
+			}
+		],
+		"right": [
+			{
+				"type": "string",
+				"highlight_groups": ["time"],
+				"contents": "default-right"
+			}
+		]
+	}
+}

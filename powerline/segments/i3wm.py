@@ -19,7 +19,8 @@ def calcgrp(w):
 	return group
 
 
-def workspaces(pl, only_show=None, output=None, strip=0):
+@requires_segment_info
+def workspaces(pl, segment_info, only_show=None, output=None, strip=0):
 	'''Return list of used workspaces
 
 	:param list only_show:
@@ -28,7 +29,9 @@ def workspaces(pl, only_show=None, output=None, strip=0):
 		are shown.
 
 	:param str output:
-		If specified, only workspaces on this output are shown.
+		May be set to the name of an X output. If specified, only workspaces 
+		on that output are shown. Overrides automatic output detection by 
+		the lemonbar renderer and bindings.
 
 	:param int strip:
 		Specifies how many characters from the front of each workspace name 
@@ -44,6 +47,8 @@ def workspaces(pl, only_show=None, output=None, strip=0):
 			import i3 as conn
 		else:
 			conn = i3ipc.Connection()
+
+	output = output or segment_info.get('output')
 
 	return [{
 		'contents': w['name'][min(len(w['name']), strip):],

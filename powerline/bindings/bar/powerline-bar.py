@@ -2,31 +2,27 @@
 # vim:fileencoding=utf-8:noet
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
+import os
 import sys
 import time
 
 from threading import Lock, Timer
 from argparse import ArgumentParser
 
-from powerline import Powerline
+from powerline.lemonbar import LemonbarPowerline
 from powerline.lib.encoding import get_unicode_writer
 
 
-class BarPowerline(Powerline):
-	get_encoding = staticmethod(lambda: 'utf-8')
-
-	def init(self):
-		super(BarPowerline, self).init(ext='wm', renderer_module='bar')
-
-
 if __name__ == '__main__':
-	parser = ArgumentParser(description='Powerline BAR bindings.')
+	parser = ArgumentParser(description='Powerline lemonbar bindings.')
 	parser.add_argument(
 		'--i3', action='store_true',
 		help='Subscribe for i3 events.'
 	)
 	args = parser.parse_args()
-	powerline = BarPowerline()
+	powerline = LemonbarPowerline()
+	powerline.update_renderer()
+	powerline.pl.warn("The 'bar' bindings are deprecated, please switch to 'lemonbar'")
 	lock = Lock()
 	modes = ['default']
 	write = get_unicode_writer(encoding='utf-8')
@@ -60,4 +56,4 @@ if __name__ == '__main__':
 			conn.main()
 
 	while True:
-		time.sleep(1e10)
+		time.sleep(1e8)
