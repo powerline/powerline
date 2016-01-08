@@ -7,39 +7,14 @@ import re
 import subprocess
 
 from threading import Lock, Timer
-from argparse import ArgumentParser, REMAINDER
 
 from powerline.lemonbar import LemonbarPowerline
 from powerline.lib.shell import run_cmd
+from powerline.commands.lemonbar import get_argparser
 
 
 if __name__ == '__main__':
-	parser = ArgumentParser(
-		description='Powerline BAR bindings.',
-		usage='%(prog)s [-h] [--i3] [--height HEIGHT] [--interval INTERVAL] [--bar-command CMD] -- args'
-	)
-	parser.add_argument(
-		'--i3', action='store_true',
-		help='Subscribe for i3 events.'
-	)
-	parser.add_argument(
-		'--height', default='',
-		help='Bar height.'
-	)
-	parser.add_argument(
-		'--interval', '-i',
-		type=float, default=0.5,
-		help='Refresh interval.'
-	)
-	parser.add_argument(
-		'--bar-command', '-c',
-		default='lemonbar',
-		help='Name of the lemonbar executable to use.'
-	)
-	parser.add_argument(
-		'args', nargs=REMAINDER,
-		help='Extra arguments for lemonbar.'
-	)
+	parser = get_argparser()
 	args = parser.parse_args()
 
 	powerline = LemonbarPowerline()

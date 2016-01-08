@@ -73,6 +73,12 @@ Running the binding in i3-mode will require `i3ipc <https://github.com/acrisci/i
 See the `lemonbar documentation <https://github.com/LemonBoy/bar>`_ for more 
 information and options.
 
+All ``powerline-lemonbar.py`` arguments:
+
+.. automan:: powerline.commands.lemonbar
+   :prog: powerline-lemonbar.py
+   :minimal: true
+
 I3 bar
 ======
 

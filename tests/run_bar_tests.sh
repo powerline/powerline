@@ -117,7 +117,7 @@ if ! test -e "$LEMONBAR_SCRIPT" ; then
 	:
 else
 	enter_suite "lemonbar"
-	for args in "" "-i0.5" "--interval=0.5" "-- test args" "-c bar-aint-recursive" "--height=10"; do
+	for args in "" "-i0.5" "--interval=0.5" "-- test args" "--bar-command bar-aint-recursive" "--height=10"; do
 		rm -rf "$TEST_ROOT/results"
 		run python "$LEMONBAR_SCRIPT" $args > "$TEST_ROOT/lemonbar.log" 2>&1 &
 		SPID=$!
@@ -158,8 +158,8 @@ else
 			height="${height%% *}"
 		fi
 		command="lemonbar"
-		if test "x${args#-c}" != "x$args" ; then
-			command="${args#-c}"
+		if test "x${args#--bar-command}" != "x$args" ; then
+			command="${args#--bar-command}"
 			command="${command# }"
 			command="${command#=}"
 			command="${command%% *}"
