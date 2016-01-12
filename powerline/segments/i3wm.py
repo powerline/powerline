@@ -51,12 +51,51 @@ def workspaces(pl, segment_info, only_show=None, output=None, strip=0):
 	output = output or segment_info.get('output')
 
 	return [{
-		'contents': w['name'][min(len(w['name']), strip):],
+		'contents': w['name'][strip:],
 		'highlight_groups': calcgrp(w)
 	} for w in conn.get_workspaces()
 		if (not only_show or any(w[typ] for typ in only_show))
 		and (not output or w['output'] == output)
 	]
+
+
+@requires_segment_info
+def workspace(pl, segment_info, workspace=None, strip=0):
+	'''Return the specified workspace name
+
+	:param str workspace:
+		Specifies which workspace to show. If unspecified, may be set by the 
+		``list_workspaces`` lister.
+
+	:param int strip:
+		Specifies how many characters from the front of each workspace name 
+		should be stripped (e.g. to remove workspace numbers). Defaults to zero.
+
+	Highlight groups used: ``workspace`` or ``w_visible``, ``workspace`` or ``w_focused``, ``workspace`` or ``w_urgent``.
+	'''
+	workspace = workspace or segment_info.get('workspace')['name']
+	if segment_info.get('workspace') and segment_info.get('workspace')['name'] == workspace:
+		w = segment_info.get('workspace')
+	else:
+		global conn
+		if not conn:
+			try:
+				import i3ipc
+			except ImportError:
+				import i3 as conn
+			else:
+				conn = i3ipc.Connection()
+		try:
+			w = next((
+				w for w in get_i3_connection().get_workspaces()
+				if w['name'] == workspace
+			))
+		except StopIteration:
+			return None
+	return [{
+		'contents': w['name'][min(len(w['name']), strip):],
+		'highlight_groups': calcgrp(w)
+	}]
 
 
 @requires_segment_info
