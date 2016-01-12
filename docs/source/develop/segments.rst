@@ -517,6 +517,16 @@ Pdb
     Equal to the length of :py:attr:`pdb.Pdb.stack` at the first invocation of 
     the prompt decremented by one.
 
+i3wm
+----
+
+``mode``
+    Currently active i3 mode (as a string).
+
+``output``
+    ``xrandr`` output name currently drawing to. Currently only available
+    in lemonbar bindings.
+
 Segment class
 =============
 
