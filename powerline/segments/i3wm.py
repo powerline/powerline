@@ -54,8 +54,8 @@ def workspaces(pl, segment_info, only_show=None, output=None, strip=0):
 		'contents': w['name'][strip:],
 		'highlight_groups': calcgrp(w)
 	} for w in conn.get_workspaces()
-		if (not only_show or any(w[typ] for typ in only_show))
-		and (not output or w['output'] == output)
+		if ((not only_show or any(w[typ] for typ in only_show))
+			and (not output or w['output'] == output))
 	]
 
 
