@@ -885,7 +885,7 @@ class TestWthr(TestCommon):
 class TestI3WM(TestCase):
 	def test_workspaces(self):
 		pl = Pl()
-		with replace_attr(i3wm, 'conn', Args(get_workspaces=lambda: iter([
+		with replace_attr(i3wm, 'conn', Args(get_i3_workspaces=lambda: iter([
 			{'name': '1: w1', 'output': 'LVDS1', 'focused': False, 'urgent': False, 'visible': False},
 			{'name': '2: w2', 'output': 'LVDS1', 'focused': False, 'urgent': False, 'visible': True},
 			{'name': '3: w3', 'output': 'HDMI1', 'focused': False, 'urgent': True, 'visible': True},
