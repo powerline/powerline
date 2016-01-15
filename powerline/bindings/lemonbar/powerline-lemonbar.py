@@ -10,7 +10,7 @@ from threading import Lock, Timer
 
 from powerline.lemonbar import LemonbarPowerline
 from powerline.commands.lemonbar import get_argparser
-from powerline.listers.i3wm import get_connected_xrandr_outputs
+from powerline.bindings.wm import get_connected_xrandr_outputs
 
 
 if __name__ == '__main__':
