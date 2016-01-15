@@ -883,14 +883,26 @@ class TestWthr(TestCommon):
 
 
 class TestI3WM(TestCase):
-	def test_workspaces(self):
-		pl = Pl()
-		with replace_attr(i3wm, 'conn', Args(get_i3_workspaces=lambda: iter([
+	@staticmethod
+	def get_workspaces():
+		return iter([
 			{'name': '1: w1', 'output': 'LVDS1', 'focused': False, 'urgent': False, 'visible': False},
 			{'name': '2: w2', 'output': 'LVDS1', 'focused': False, 'urgent': False, 'visible': True},
 			{'name': '3: w3', 'output': 'HDMI1', 'focused': False, 'urgent': True, 'visible': True},
 			{'name': '4: w4', 'output': 'DVI01', 'focused': True, 'urgent': True, 'visible': True},
-		]))):
+		])
+
+	@staticmethod
+	def get_outputs(pl):
+		return iter([
+			{'name': 'LVDS1'},
+			{'name': 'HDMI1'},
+			{'name': 'DVI01'},
+		])
+
+	def test_workspaces(self):
+		pl = Pl()
+		with replace_attr(i3wm, 'get_i3_connection', lambda: Args(get_workspaces=self.get_workspaces)):
 			segment_info = {}
 
 			self.assertEqual(i3wm.workspaces(pl=pl, segment_info=segment_info), [
@@ -934,6 +946,29 @@ class TestI3WM(TestCase):
 			])
 			self.assertEqual(i3wm.workspaces(pl=pl, segment_info=segment_info, only_show=['visible'], strip=3), [
 				{'contents': 'w2', 'highlight_groups': ['w_visible', 'workspace']},
+			])
+
+	def test_workspace(self):
+		pl = Pl()
+		with replace_attr(i3wm, 'get_i3_connection', lambda: Args(get_workspaces=self.get_workspaces)):
+			segment_info = {}
+
+			self.assertEqual(i3wm.workspace(pl=pl, segment_info=segment_info, workspace='1: w1'), [
+				{'contents': '1: w1', 'highlight_groups': ['workspace']},
+			])
+			self.assertEqual(i3wm.workspace(pl=pl, segment_info=segment_info, workspace='3: w3', strip=True), [
+				{'contents': 'w3', 'highlight_groups': ['w_urgent', 'w_visible', 'workspace']},
+			])
+			self.assertEqual(i3wm.workspace(pl=pl, segment_info=segment_info, workspace='9: w9'), None)
+			self.assertEqual(i3wm.workspace(pl=pl, segment_info=segment_info), [
+				{'contents': '4: w4', 'highlight_groups': ['w_focused', 'w_urgent', 'w_visible', 'workspace']},
+			])
+			segment_info['workspace'] = next(self.get_workspaces())
+			self.assertEqual(i3wm.workspace(pl=pl, segment_info=segment_info, workspace='4: w4'), [
+				{'contents': '4: w4', 'highlight_groups': ['w_focused', 'w_urgent', 'w_visible', 'workspace']},
+			])
+			self.assertEqual(i3wm.workspace(pl=pl, segment_info=segment_info, strip=True), [
+				{'contents': 'w1', 'highlight_groups': ['workspace']},
 			])
 
 	def test_mode(self):
