@@ -1,8 +1,13 @@
 # vim:fileencoding=utf-8:noet
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
+import re
+
 from powerline.theme import requires_segment_info
 from powerline.bindings.wm import get_i3_connection
+
+
+WORKSPACE_REGEX = re.compile(r'^[0-9]+: ?')
 
 
 def calcgrp(w):
@@ -15,6 +20,12 @@ def calcgrp(w):
 		group.append('w_visible')
 	group.append('workspace')
 	return group
+
+
+def format_name(name, strip=False):
+	if strip:
+		return WORKSPACE_REGEX.sub('', name, count=1)
+	return name
 
 
 @requires_segment_info
@@ -49,7 +60,7 @@ def workspaces(pl, segment_info, only_show=None, output=None, strip=0):
 
 
 @requires_segment_info
-def workspace(pl, segment_info, workspace=None, strip=0):
+def workspace(pl, segment_info, workspace=None, strip=False):
 	'''Return the specified workspace name
 
 	:param str workspace:
@@ -57,9 +68,9 @@ def workspace(pl, segment_info, workspace=None, strip=0):
 		``list_workspaces`` lister if used, otherwise falls back to 
 		currently focused workspace.
 
-	:param int strip:
-		Specifies how many characters from the front of each workspace name 
-		should be stripped (e.g. to remove workspace numbers). Defaults to zero.
+	:param bool strip:
+		Specifies whether workspace numbers (in the ``1: name`` format) should 
+		be stripped from workspace names before being displayed. Defaults to false.
 
 	Highlight groups used: ``workspace`` or ``w_visible``, ``workspace`` or ``w_focused``, ``workspace`` or ``w_urgent``.
 	'''
@@ -83,7 +94,7 @@ def workspace(pl, segment_info, workspace=None, strip=0):
 			return None
 
 	return [{
-		'contents': w['name'][min(len(w['name']), strip):],
+		'contents': format_name(w['name'], strip=strip),
 		'highlight_groups': calcgrp(w)
 	}]
 
