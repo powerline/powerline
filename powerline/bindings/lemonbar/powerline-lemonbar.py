@@ -9,8 +9,8 @@ import subprocess
 from threading import Lock, Timer
 
 from powerline.lemonbar import LemonbarPowerline
-from powerline.lib.shell import run_cmd
 from powerline.commands.lemonbar import get_argparser
+from powerline.bindings.wm import get_connected_xrandr_outputs
 
 
 if __name__ == '__main__':
@@ -20,13 +20,8 @@ if __name__ == '__main__':
 	powerline = LemonbarPowerline()
 	powerline.update_renderer()
 	bars = []
-	active_screens = [match.groupdict() for match in re.finditer(
-		'^(?P<name>[0-9A-Za-z-]+) connected (?P<width>\d+)x(?P<height>\d+)\+(?P<x>\d+)\+(?P<y>\d+)',
-		run_cmd(powerline.pl, ['xrandr', '-q']),
-		re.MULTILINE
-	)]
 
-	for screen in active_screens:
+	for screen in get_connected_xrandr_outputs(powerline.pl):
 		command = [args.bar_command, '-g', '{0}x{1}+{2}'.format(screen['width'], args.height, screen['x'])] + args.args[1:]
 		process = subprocess.Popen(command, stdin=subprocess.PIPE)
 		bars.append((screen['name'], process, int(screen['width']) / 5))
