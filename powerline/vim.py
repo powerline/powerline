@@ -193,8 +193,8 @@ class VimPowerline(Powerline):
 			# guaranteed that .add_local_theme will be called once again, so 
 			# this function arguments will be saved here for calling from 
 			# .do_setup().
-			self.setup_kwargs.setdefault('_local_themes', []).append((key, config))
 			self.create_old_vim_funcs()
+			self.setup_kwargs.setdefault('_local_themes', []).append((key, config))
 			return True
 
 	def get_encoding(self):
@@ -400,6 +400,8 @@ class VimPowerline(Powerline):
 		# Hack for local themes support after reloading.
 		for args in _local_themes:
 			self.add_local_theme(*args)
+
+		self.create_old_vim_funcs()
 
 	def reset_highlight(self):
 		try:

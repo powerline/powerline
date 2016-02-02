@@ -516,7 +516,7 @@ ED_TO_VIM = {
 		),
 	},
 	VimGlobalVar: {
-		'tovim': lambda self, toed, **kw: 'g:' + self.name,
+		'tovim': lambda self, toed, **kw: 'get(g:, "' + self.name + '", "")',
 		'tovimpy': lambda self, toed, **kw: 'vim.vars.get({0!r}, "")'.format(self.name),
 	},
 	EditorOverrides: {
@@ -640,8 +640,8 @@ class VimEditor(Editor):
 class VimVimEditor(VimEditor):
 	converters = VimEditor.converters.copy()
 	converters.update(
-		bool=lambda b: bool(int(b)),
-		int=lambda n: int(n),
+		bool=lambda b: b and bool(int(b)),
+		int=lambda n: int(n) if n else 0,
 	)
 
 	edconverters = dict((
@@ -710,7 +710,7 @@ class VimVimEditor(VimEditor):
 			conv_code.append(',')
 		code[-1] = '}'
 		conv_code[-1] = '}'
-		return ''.join(code), eval('\n'.join(code), gvars)
+		return ''.join(code), eval('\n'.join(conv_code), gvars)
 
 	@classmethod
 	def compile_themes_getter(cls, local_themes, **kwargs):
