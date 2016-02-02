@@ -16,6 +16,7 @@ from powerline.editors import (Editor,
                                EditorBufferNameBase, EditorMap, EditorWindowList, EditorTabList,
                                EditorWindowBuffer, EditorTabWindowBuffer, EditorTabWindow,
                                toedobj)
+from powerline.lib.dict import updated
 
 
 def finish_kwargs(kwargs, vval=None, cache=None, buffer_cache=None, paramfunc=(lambda s: s), toed=None):
@@ -147,12 +148,6 @@ class VimStlWinList(EditorObj):
 
 class VimTabAmount(EditorObj):
 	pass
-
-
-def updated(d, *args, **kwargs):
-	d = d.copy()
-	d.update(*args, **kwargs)
-	return d
 
 
 def iterparam_updated(parameters, obj, toed):
