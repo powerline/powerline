@@ -54,7 +54,7 @@ def tablister(pl, segment_info, **kwargs):
 				'divider_highlight_group': 'tab:divider'
 			})
 		))(tab_input, 'tab' if tab_input['tab_number'] == cur_tabnr else 'tab_nc')
-		for tab_input in segment_info['inputs']['list_tabs_inputs']
+		for tab_input in segment_info['input']['list_tabs_inputs']
 	)
 
 

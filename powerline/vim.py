@@ -32,7 +32,7 @@ def segments_to_reqs_iter(seglist):
 				'list_windows': EditorWindowList,
 			}[lname]()
 			iterparam = {
-				'list_tabs': 'tab',
+				'list_tabs': 'tabpage',
 				'list_buffers': 'buffer',
 				'list_windows': 'window',
 			}[lname]
