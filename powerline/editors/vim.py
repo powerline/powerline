@@ -578,7 +578,7 @@ class VimEditor(Editor):
 	# vim to think it needed to update the tabline for every
 	# keystroke after any event that changed the buffer's
 	# options.
-	listed_indicator = (EditorFunc('buflisted', EditorParameter('buffer')),)
+	listed_indicator = (EditorFunc('buflisted', VimBufferNumber()),)
 	tab_modified_indicator = (EditorAny(VimBufferOption('modified'), EditorBufferList(), 'buffer'),)
 	paste_indicator = (VimGlobalOption('paste'), EditorNone())
 	buffer_name = (EditorBufferName(),)
