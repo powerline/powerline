@@ -78,3 +78,11 @@ def mergedicts_copy(d1, d2):
 		else:
 			ret[k] = d2[k]
 	return ret
+
+
+def updated(d, *args, **kwargs):
+    '''Copy dictionary and update it with provided arguments
+    '''
+    d = d.copy()
+    d.update(*args, **kwargs)
+    return d

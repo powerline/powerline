@@ -517,6 +517,22 @@ Pdb
     Equal to the length of :py:attr:`pdb.Pdb.stack` at the first invocation of 
     the prompt decremented by one.
 
+i3wm
+----
+
+``mode``
+    Currently active i3 mode (as a string).
+
+``output``
+    ``xrandr`` output name currently drawing to. Currently only available
+    in lemonbar bindings.
+
+``workspace``
+    dictionary containing the workspace name under the key ``"name"`` and 
+    boolean values for the ``"visible"``, ``"urgent"`` and ``"focused"`` 
+    keys, indicating the state of the workspace. Currently only provided by 
+    the :py:func:`powerline.listers.i3wm.workspace_lister` lister.
+
 Segment class
 =============
 
