@@ -305,7 +305,7 @@ Segment dictionary contains the following keys:
   ``side``
     Segment side: ``right`` or ``left``.
 
-  ``display_condition```
+  ``display_condition``
     Contains function that takes three position parameters: 
     :py:class:`powerline.PowerlineLogger` instance, :ref:`segment_info 
     <dev-segments-info>` dictionary and current mode and returns either ``True`` 
