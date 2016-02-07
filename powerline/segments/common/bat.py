@@ -9,6 +9,17 @@ from powerline.lib.shell import run_cmd
 
 
 def _fetch_battery_info(pl):
+	def _flatten_battery_metadata(pl, batteries):
+		'''Flatten metadata from multiple batteries into a format that looks
+		like one battery in the end.'''
+		numerator = sum(map(lambda x: float(x[0]) * x[1], batteries))
+		energy_full_sum = sum(map(lambda x: x[1], batteries))
+		# We detect whether the computer is currently AC powered by checking
+		# if there are batteries which are not in the 'Charging' state.
+		ac_powered = any(map(lambda x: x[2], batteries))
+		energy_percentage = (numerator) / energy_full_sum
+		return lambda pl: (energy_percentage, ac_powered)
+
 	try:
 		import dbus
 	except ImportError:
@@ -30,6 +41,7 @@ def _fetch_battery_info(pl):
 			else:
 				devinterface = 'org.freedesktop.DBus.Properties'
 				devtype_name = interface + '.Device'
+				batteries = []
 				for devpath in up.EnumerateDevices(dbus_interface=interface):
 					dev = bus.get_object(interface, devpath)
 					devget = lambda what: dev.Get(
@@ -47,40 +59,49 @@ def _fetch_battery_info(pl):
 						pl.debug('Not using DBUS+UPower with {0}: not a power supply', devpath)
 						continue
 					pl.debug('Using DBUS+UPower with {0}', devpath)
-					return lambda pl: (
-						float(
-							dbus.Interface(dev, dbus_interface=devinterface).Get(
-								devtype_name,
-								'Percentage'
-							),
+					batteries.append((
+						dbus.Interface(dev, dbus_interface=devinterface).Get(
+							devtype_name,
+							'Percentage'
+						),
+						dbus.Interface(dev, dbus_interface=devinterface).Get(
+							devtype_name,
+							'EnergyFull'
 						),
 						dbus.Interface(dev, dbus_interface=devinterface).Get(
 							devtype_name,
 							'State'
 						) == 1
-					)
+					))
+				if len(batteries) != 0:
+					return _flatten_battery_metadata(pl, batteries)
 				pl.debug('Not using DBUS+UPower as no batteries were found')
 
 	if os.path.isdir('/sys/class/power_supply'):
 		linux_capacity_fmt = '/sys/class/power_supply/{0}/capacity'
+		linux_energy_full_fmt = '/sys/class/power_supply/{0}/energy_full'
 		linux_status_fmt = '/sys/class/power_supply/{0}/status'
+		batteries = []
 		for linux_supplier in os.listdir('/sys/class/power_supply'):
 			cap_path = linux_capacity_fmt.format(linux_supplier)
+			energy_full_path = linux_energy_full_fmt.format(linux_supplier)
 			status_path = linux_status_fmt.format(linux_supplier)
 			if not os.path.exists(cap_path):
 				continue
 			pl.debug('Using /sys/class/power_supply with battery {0}', linux_supplier)
-			def _get_battery_status(pl):
-				with open(cap_path, 'r') as f:
-					_capacity = int(float(f.readline().split()[0]))
-				try:
-					with open(status_path, 'r') as f:
-						_ac_powered = (f.readline().strip() != 'Discharging')
-				except IOError:
-					_ac_powered = None
-				return _capacity, _ac_powered
-			return _get_battery_status
-			pl.debug('Not using /sys/class/power_supply as no batteries were found')
+			with open(cap_path, 'r') as f:
+				_capacity = int(float(f.readline().split()[0]))
+			with open(energy_full_path, 'r') as f:
+				_energy_full = int(float(f.readline().split()[0]))
+			try:
+				with open(status_path, 'r') as f:
+					_ac_powered = (f.readline().strip() == 'Charging')
+			except IOError:
+				_ac_powered = None
+			batteries.append((_capacity, _energy_full, _ac_powered))
+		if len(batteries) != 0:
+			return _flatten_battery_metadata(pl, batteries)
+		pl.debug('Not using /sys/class/power_supply as no batteries were found')
 	else:
 		pl.debug('Not using /sys/class/power_supply: no directory')
 
@@ -183,32 +204,32 @@ def battery(pl, format='{ac_state} {capacity:3.0%}', steps=5, gamify=False, full
 	'''Return battery charge status.
 
 	:param str format:
-		Percent format in case gamify is False. Format arguments: ``ac_state`` 
-		which is equal to either ``online`` or ``offline`` string arguments and 
-		``capacity`` which is equal to current battery capacity in interval [0, 
+		Percent format in case gamify is False. Format arguments: ``ac_state``
+		which is equal to either ``online`` or ``offline`` string arguments and
+		``capacity`` which is equal to current battery capacity in interval [0,
 		100].
 	:param int steps:
 		Number of discrete steps to show between 0% and 100% capacity if gamify
 		is True.
 	:param bool gamify:
-		Measure in hearts (♥) instead of percentages. For full hearts 
-		``battery_full`` highlighting group is preferred, for empty hearts there 
-		is ``battery_empty``. ``battery_online`` or ``battery_offline`` group 
-		will be used for leading segment containing ``online`` or ``offline`` 
+		Measure in hearts (♥) instead of percentages. For full hearts
+		``battery_full`` highlighting group is preferred, for empty hearts there
+		is ``battery_empty``. ``battery_online`` or ``battery_offline`` group
+		will be used for leading segment containing ``online`` or ``offline``
 		argument contents.
 	:param str full_heart:
 		Heart displayed for “full” part of battery.
 	:param str empty_heart:
 		Heart displayed for “used” part of battery. It is also displayed using
-		another gradient level and highlighting group, so it is OK for it to be 
-		the same as full_heart as long as necessary highlighting groups are 
+		another gradient level and highlighting group, so it is OK for it to be
+		the same as full_heart as long as necessary highlighting groups are
 		defined.
 	:param str online:
 		Symbol used if computer is connected to a power supply.
 	:param str offline:
 		Symbol used if computer is not connected to a power supply.
 
-	``battery_gradient`` and ``battery`` groups are used in any case, first is 
+	``battery_gradient`` and ``battery`` groups are used in any case, first is
 	preferred.
 
 	Highlight groups used: ``battery_full`` or ``battery_gradient`` (gradient) or ``battery``, ``battery_empty`` or ``battery_gradient`` (gradient) or ``battery``, ``battery_online`` or ``battery_ac_state`` or ``battery_gradient`` (gradient) or ``battery``, ``battery_offline`` or ``battery_ac_state`` or ``battery_gradient`` (gradient) or ``battery``.
@@ -247,7 +268,7 @@ def battery(pl, format='{ac_state} {capacity:3.0%}', steps=5, gamify=False, full
 		ret.append({
 			'contents': format.format(ac_state=(online if ac_powered else offline), capacity=(capacity / 100.0)),
 			'highlight_groups': ['battery_gradient', 'battery'],
-			# Gradients are “least alert – most alert” by default, capacity has 
+			# Gradients are “least alert – most alert” by default, capacity has
 			# the opposite semantics.
 			'gradient_level': 100 - capacity,
 		})
