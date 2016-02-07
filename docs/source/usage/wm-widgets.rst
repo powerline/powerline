@@ -7,11 +7,11 @@ Awesome widget
 
 .. note:: Powerline currently only supports awesome 3.5.
 
-.. note:: The Powerline widget will spawn a shell script that runs in the 
+.. note:: The Powerline widget will spawn a shell script that runs in the
    background and updates the statusline with ``awesome-client``.
 
-Add the following to :file:`rc.lua`, where ``{repository_root}`` is the absolute 
-path to Powerline installation directory (see :ref:`repository root 
+Add the following to :file:`rc.lua`, where ``{repository_root}`` is the absolute
+path to Powerline installation directory (see :ref:`repository root
 <repository-root>`):
 
 .. code-block:: lua
@@ -70,7 +70,7 @@ to run with i3, simply ``exec`` this in the i3 config file and set the ``--i3`` 
 Running the binding in i3-mode will require `i3ipc <https://github.com/acrisci/i3ipc-python>`_
 (or the outdated `i3-py <https://github.com/ziberna/i3-py>`_).
 
-See the `lemonbar documentation <https://github.com/LemonBoy/bar>`_ for more 
+See the `lemonbar documentation <https://github.com/LemonBoy/bar>`_ for more
 information and options.
 
 All ``powerline-lemonbar.py`` arguments:
@@ -83,9 +83,9 @@ I3 bar
 ======
 
 .. note::
-   As the patch to include background-colors in i3bar is likely not to be 
-   merged, it is recommended to instead run ``bar`` (see above). The source for 
-   i3bgbar is however still available `here 
+   As the patch to include background-colors in i3bar is likely not to be
+   merged, it is recommended to instead run ``bar`` (see above). The source for
+   i3bgbar is however still available `here
    <https://github.com/S0lll0s/i3bgbar>`_.
 
 Add the following to :file:`~/.i3/config`::
@@ -97,5 +97,5 @@ Add the following to :file:`~/.i3/config`::
         font pango:PowerlineFont 12
     }
 
-where ``i3bgbar`` may be replaced with the path to the custom i3bar binary and 
+where ``i3bgbar`` may be replaced with the path to the custom i3bar binary and
 ``PowerlineFont`` is any system font with powerline support.
