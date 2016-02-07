@@ -57,7 +57,7 @@ def _fetch_battery_info(pl):
 						dbus.Interface(dev, dbus_interface=devinterface).Get(
 							devtype_name,
 							'State'
-						) == 1
+						) != 2
 					)
 				pl.debug('Not using DBUS+UPower as no batteries were found')
 
