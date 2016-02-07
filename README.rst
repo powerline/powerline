@@ -5,8 +5,8 @@ Powerline
 :Source: https://github.com/powerline/powerline
 :Version: beta
 
-**Powerline is a statusline plugin for vim, and provides statuslines and 
-prompts for several other applications, including zsh, bash, tmux, IPython, 
+**Powerline is a statusline plugin for vim, and provides statuslines and
+prompts for several other applications, including zsh, bash, tmux, IPython,
 Awesome, i3 and Qtile.**
 
 * `Support forum`_ (powerline-support@googlegroups.com)
@@ -23,43 +23,43 @@ Awesome, i3 and Qtile.**
 Features
 --------
 
-* **Extensible and feature rich, written in Python.** Powerline was 
-  completely rewritten in Python to get rid of as much vimscript as 
-  possible. This has allowed much better extensibility, leaner and better 
+* **Extensible and feature rich, written in Python.** Powerline was
+  completely rewritten in Python to get rid of as much vimscript as
+  possible. This has allowed much better extensibility, leaner and better
   config files, and a structured, object-oriented codebase with no mandatory
   third-party dependencies other than a Python interpreter.
-* **Stable and testable code base.** Using Python has allowed unit testing 
-  of all the project code. The code is tested to work in Python 2.6+ and 
+* **Stable and testable code base.** Using Python has allowed unit testing
+  of all the project code. The code is tested to work in Python 2.6+ and
   Python 3.
-* **Support for prompts and statuslines in many applications.** Originally 
-  created exclusively for vim statuslines, the project has evolved to 
-  provide statuslines in tmux and several WMs, and prompts for shells like 
-  bash/zsh and other applications. It’s simple to write renderers for any 
+* **Support for prompts and statuslines in many applications.** Originally
+  created exclusively for vim statuslines, the project has evolved to
+  provide statuslines in tmux and several WMs, and prompts for shells like
+  bash/zsh and other applications. It’s simple to write renderers for any
   other applications that Powerline doesn’t yet support.
-* **Configuration and colorschemes written in JSON.** JSON is 
-  a standardized, simple and easy to use file format that allows for easy 
+* **Configuration and colorschemes written in JSON.** JSON is
+  a standardized, simple and easy to use file format that allows for easy
   user configuration across all of Powerline’s supported applications.
 * **Fast and lightweight, with daemon support for even better performance.**
-  Although the code base spans a couple of thousand lines of code with no 
-  goal of “less than X lines of code”, the main focus is on good performance 
-  and as little code as possible while still providing a rich set of 
-  features. The new daemon also ensures that only one Python instance is 
-  launched for prompts and statuslines, which provides excellent 
+  Although the code base spans a couple of thousand lines of code with no
+  goal of “less than X lines of code”, the main focus is on good performance
+  and as little code as possible while still providing a rich set of
+  features. The new daemon also ensures that only one Python instance is
+  launched for prompts and statuslines, which provides excellent
   performance.
 
-*But I hate Python / I don’t need shell prompts / this is just too much 
+*But I hate Python / I don’t need shell prompts / this is just too much
 hassle for me / what happened to the original vim-powerline project / …*
 
 You should check out some of the Powerline derivatives. The most lightweight
-and feature-rich alternative is currently Bailey Ling’s `vim-airline 
+and feature-rich alternative is currently Bailey Ling’s `vim-airline
 <https://github.com/bling/vim-airline>`_ project.
 
 ------
 
-* Consult the `documentation 
-  <https://powerline.readthedocs.org/en/latest/>`_ for more information and 
+* Consult the `documentation
+  <https://powerline.readthedocs.org/en/latest/>`_ for more information and
   installation instructions.
-* Check out `powerline-fonts <https://github.com/powerline/fonts>`_ for 
+* Check out `powerline-fonts <https://github.com/powerline/fonts>`_ for
   pre-patched versions of popular, open source coding fonts.
 
 Screenshots
