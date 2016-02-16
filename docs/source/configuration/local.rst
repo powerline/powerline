@@ -50,6 +50,14 @@ Vim configuration can be overridden using the following options:
 
     .. autoclass:: powerline.vim.VimVarHandler
 
+``g:powerline_old_vim``
+    Variable used to tell Powerline to use code intended for old (earlier then 
+    vim-7.4) Vim versions.
+
+    .. warning::
+        This variable exists for testing purposes and can be removed or renamed 
+        without bumping major version.
+
 .. _local-configuration-overrides-script:
 
 Powerline script overrides

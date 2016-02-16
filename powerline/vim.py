@@ -101,7 +101,7 @@ class VimPowerline(Powerline):
 	def init(self, pyeval='pyeval', **kwargs):
 		import vim
 		self.vim = vim
-		self.is_old_vim = bool(int(self.vim.eval('v:version < 704')))
+		self.is_old_vim = bool(int(self.vim.eval('v:version < 704 || exists("g:powerline_old_vim")')))
 		self.vim_funcs = VimFuncsDict(vim)
 
 		if self.is_old_vim:
@@ -130,11 +130,11 @@ class VimPowerline(Powerline):
 
 	if sys.version_info < (3,):
 		def create_window_statusline_constructor(self):
-			window_statusline = b'%!' + str(self.pyeval) + b'(\'powerline.statusline({0})\')'
+			window_statusline = b'%!' + str(self.pyeval) + b'(\'powerline.statusline(window_id={0})\')'
 			return window_statusline.format
 	else:
 		def create_window_statusline_constructor(self):
-			startstr = b'%!' + self.pyeval.encode('ascii') + b'(\'powerline.statusline('
+			startstr = b'%!' + self.pyeval.encode('ascii') + b'(\'powerline.statusline(window_id='
 			endstr = b')\')'
 			return lambda idx: (
 				startstr + str(idx).encode('ascii') + endstr
