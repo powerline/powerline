@@ -26,7 +26,7 @@ def syntastic(pl, segment_info,
 		return None
 	has_errors = int(vim.eval('g:SyntasticLoclist.current().hasErrorsOrWarningsToDisplay()'))
 	if not has_errors:
-		return
+		return None
 	errors = vim.eval('g:SyntasticLoclist.current().errors()')
 	warnings = vim.eval('g:SyntasticLoclist.current().warnings()')
 	segments = []
