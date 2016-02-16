@@ -145,6 +145,15 @@ class EditorObj(object):
 	def __div__(self, other):
 		return EditorBinaryOp('/', self, toedobj(other))
 
+	def __and__(self, other):
+		return EditorBinaryOp('&', self, toedobj(other))
+
+	def __or__(self, other):
+		return EditorBinaryOp('|', self, toedobj(other))
+
+	def __xor__(self, other):
+		return EditorBinaryOp('^', self, toedobj(other))
+
 	def __radd__(self, other):
 		return EditorBinaryOp('+', toedobj(other), self)
 
@@ -153,6 +162,15 @@ class EditorObj(object):
 
 	def __rdiv__(self, other):
 		return EditorBinaryOp('/', toedobj(other), self)
+
+	def __rand__(self, other):
+		return EditorBinaryOp('&', toedobj(other), self)
+
+	def __ror__(self, other):
+		return EditorBinaryOp('|', toedobj(other), self)
+
+	def __rxor__(self, other):
+		return EditorBinaryOp('^', toedobj(other), self)
 
 	def __getitem__(self, index):
 		return EditorIndex(self, index)

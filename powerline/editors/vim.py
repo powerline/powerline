@@ -171,6 +171,53 @@ def iterparam_updated(parameters, obj, toed):
 	return parameters
 
 
+def raising(exc):
+	raise exc
+
+
+VIM_VIM_OP_DEFAULT = (lambda self, toed, **kw:
+	self.op.join((toed(child, **kw) for child in self.children)))
+VIM_VIM_OPS = defaultdict(lambda: VIM_VIM_OP_DEFAULT, {
+	'=~#': (lambda self, toed, **kw: r"({0}) =~# '\v'.({1})".format(
+		toed(self.children[0], **kw),
+		toed(self.children[1], **kw),
+	)),
+	'==': (lambda self, toed, **kw:
+		'==#'.join((toed(child, **kw) for child in self.children))),
+	'+l': (lambda self, toed, **kw:
+		'+'.join((toed(child, **kw) for child in self.children))),
+	'|': (lambda self, toed, **kw:
+		'||'.join((toed(child, **kw) for child in self.children))),
+	'&': (lambda self, toed, **kw:
+		'&&'.join((toed(child, **kw) for child in self.children))),
+	'^': (lambda self, toed, **kw:
+		raising(NotImplementedError('Logical xor is not implemented'))),
+})
+
+
+VIM_PY_OP_DEFAULT = VIM_VIM_OP_DEFAULT
+VIM_PY_OPS = defaultdict(lambda: VIM_PY_OP_DEFAULT, {
+	'=~#': (lambda self, toed, **kw: 'bool(re.search({1}, {0}))'.format(
+		toed(self.children[0], **kw),
+		toed(self.children[1], **kw),
+	)),
+	'.': (lambda self, toed, **kw:
+		'"".join((str(i) for i in ({0},)))'.format(
+			','.join(toed(child, **kw) for child in self.children)
+		)
+	),
+	'+l': (lambda self, toed, **kw: (
+		'list(chain(' + ','.join((toed(child, **kw) for child in self.children)) + '))'
+	)),
+	'|': (lambda self, toed, **kw:
+		' or '.join((toed(child, **kw) for child in self.children))),
+	'&': (lambda self, toed, **kw:
+		' and '.join((toed(child, **kw) for child in self.children))),
+	'^': (lambda self, toed, **kw:
+		raising(NotImplementedError('Logical xor is not implemented'))),
+})
+
+
 ED_TO_VIM = {
 	EditorObj: {
 		'tovim': lambda self, toed, **kw: str(self),
@@ -191,32 +238,8 @@ ED_TO_VIM = {
 		'tovimpy': lambda self, toed, **kw: 'None',
 	},
 	EditorBinaryOp: {
-		'tovim': lambda self, toed, **kw: (
-			'({0}) =~# \'\\v\'.({1})'.format(
-				toed(self.children[0], **kw),
-				toed(self.children[1], **kw),
-			)
-			if self.op == '=~#' and len(self.children) == 2 else
-			'==#'.join((toed(child, **kw) for child in self.children))
-			if self.op == '==' else
-			'+'.join((toed(child, **kw) for child in self.children))
-			if self.op == '+l' else
-			self.op.join((toed(child, **kw) for child in self.children))
-		),
-		'tovimpy': lambda self, toed, **kw: (
-			'bool(re.search({1}, {0}))'.format(
-				toed(self.children[0], **kw),
-				toed(self.children[1], **kw),
-			)
-			if self.op == '=~#' and len(self.children) == 2 else
-			'"".join((str(i) for i in ({0},)))'.format(
-				','.join(toed(child, **kw) for child in self.children)
-			)
-			if self.op == '.' else
-			'list(chain(' + ','.join((toed(child, **kw) for child in self.children)) + '))'
-			if self.op == '+l' else
-			self.op.join((toed(child, **kw) for child in self.children))
-		),
+		'tovim': lambda self, toed, **kw: VIM_VIM_OPS[self.op](self, toed, **kw),
+		'tovimpy': lambda self, toed, **kw: VIM_PY_OPS[self.op](self, toed, **kw),
 	},
 	EditorTernaryOp: {
 		'tovim': lambda self, toed, **kw: '({condition})? ({if_true}): ({if_false})'.format(
