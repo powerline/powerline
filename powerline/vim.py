@@ -282,10 +282,20 @@ class VimPowerline(Powerline):
 		self.finishers = [func for expr, func in inputdefs]
 		themeexpr, themelambda = VimVimEditor.compile_themes_getter(self.renderer.local_themes)
 		self.renderer.themelambda = themelambda
-		self.vim.command(('''
+		command = lambda s: self.vim.command(s.format(
+			pycmd=self.pycmd,
+			themeexpr=themeexpr,
+			inputs=VimVimEditor.toed(
+				EditorList(*[expr for expr, func in inputdefs])
+			),
+			tablineinputnr=self.tablineinputnr,
+		))
+		command('''
 			if !exists("g:_powerline_next_window_id")
 				let g:_powerline_next_window_id = 1
 			endif
+		''')
+		command('''
 			function! _PowerlineWindowNr(winid)
 				let ret = 0
 				for window in range(1, winnr('$'))
@@ -294,8 +304,8 @@ class VimPowerline(Powerline):
 						call setwinvar(window, '_powerline_window_id', g:_powerline_next_window_id)
 						call setwinvar(window, 'statusline', '%!_PowerlineStatusline('.g:_powerline_next_window_id.')')
 						let g:_powerline_next_window_id += 1
-					elif getwinvar(window, '&statusline') isnot# '%!_PowerlineStatusline('.g:_powerline_next_window_id.')'
-						call setwinvar(window, '&statusline', '%!_PowerlineStatusline('.g:_powerline_next_window_id.')')
+					elseif getwinvar(window, '&statusline') isnot# '%!_PowerlineStatusline('.winid.')'
+						call setwinvar(window, '&statusline', '%!_PowerlineStatusline('.winid.')')
 					endif
 					if winid == a:winid || (a:winid == 0 && window == winnr())
 						let ret = window
@@ -303,33 +313,42 @@ class VimPowerline(Powerline):
 				endfor
 				return ret
 			endfunction
+		''')
+		command('''
 			function! _PowerlineNewStatusline()
 				return _PowerlineStatusline(0)
 			endfunction
+		''')
+		command('''
 			let g:_powerline_inputs = {inputs}
+		''')
+		command('''
 			function! _PowerlineStatusline(winid)
 				let window = _PowerlineWindowNr(a:winid)
 				let buffer = winbufnr(window)
 				let tabpage = tabpagenr()
 				let themenr = {themeexpr}
 				let input = eval(g:_powerline_inputs[themenr])
-				{pycmd} powerline.statusline(input=powerline.finishers[int(vim.eval("themenr"))](powerline.vim.eval("input")), winnr=int(vim.eval("window")), themenr=int(vim.eval("themenr")))
+				{pycmd} powerline.viml_return_str(powerline.statusline(input=powerline.finishers[int(vim.eval("themenr"))](powerline.vim.eval("input")), winnr=int(vim.eval("window")), themenr=int(vim.eval("themenr"))))
 			endfunction
+		''')
+		command('''
 			function! _PowerlineTabline()
 				let window = winnr()
 				let buffer = winbufnr(window)
 				let tabpage = tabpagenr()
 				let input = eval(g:_powerline_inputs[{tablineinputnr}])
-				{pycmd} powerline.tabline(powerline.finishers[{tablineinputnr}](input=powerline.vim.eval("input")))
+				{pycmd} powerline.viml_return_str(powerline.tabline(powerline.finishers[{tablineinputnr}](input=powerline.vim.eval("input"))))
 			endfunction
-		''').format(
-			pycmd=self.pycmd,
-			themeexpr=themeexpr,
-			inputs=VimVimEditor.toed(
-				EditorList(*[expr for expr, func in inputdefs])
-			),
-			tablineinputnr=self.tablineinputnr,
-		))
+		''')
+
+	def viml_return_str(self, s):
+		'''Use VimL command ``:return`` to return a string
+
+		:param bytes s:
+			String to return.
+		'''
+		self.vim.command(b'return "' + s.replace(b'\\', b'\\\\').replace(b'"', b'\\"') + b'"')
 
 	def do_setup(self, pyeval=None, pycmd=None, can_replace_pyeval=True, _local_themes=()):
 		import __main__
@@ -434,16 +453,9 @@ class VimPowerline(Powerline):
 				retwinnr = i + 1
 		return retwindow, retwinnr
 
-	def find_window(self, window_id):
-		assert window_id is not None
-		for i, curwindow in enumerate(self.vim.windows):
-			if curwindow.vars.get('_powerline_window_id') == window_id:
-				return curwindow, i + 1
-		return None, None
-
-	def statusline(self, window_id=None, input=None, themenr=None):
+	def statusline(self, winnr=None, window_id=None, input=None, themenr=None):
 		if self.is_old_vim:
-			window, winnr = self.find_window(window_id)
+			window = self.vim.windows[winnr - 1]
 		else:
 			window, winnr = self.set_stls(window_id)
 		return self.render(input=input, themenr=themenr, window_id=window_id, window=window, winnr=winnr)

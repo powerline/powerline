@@ -3,7 +3,7 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 
 from powerline.theme import requires_segment_info
 from powerline.editors import (EditorTernaryOp, EditorCached, EditorFunc,
-                               EditorNone, EditorBinaryOp, EditorWinPos,
+                               EditorBinaryOp, EditorWinPos,
                                EditorStr, editor_input_addon)
 from powerline.editors.vim import VimBufferVar
 from powerline.segments import Segment, with_docstring
@@ -22,13 +22,13 @@ class CurrentTag(Segment):
 					EditorFunc('exists', ':Tagbar'),
 					EditorCached(
 						'tagbar_tag_{0}'.format(flags),
-						EditorBinaryOp('.', VimBufferVar('changedtick'), EditorStr('-'), EditorWinPos()[0]),
+						EditorBinaryOp('.', VimBufferVar('changedtick'), '-', EditorWinPos()[0]),
 						EditorFunc('tagbar#currenttag', '%s', '', flags),
 						cache_type='buffer',
 					),
-					EditorNone()
+					'',
 				),
-				EditorNone()
+				EditorStr(''),
 			),
 			'str',
 		))

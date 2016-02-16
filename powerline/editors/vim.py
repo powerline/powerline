@@ -16,7 +16,6 @@ from powerline.editors import (Editor,
                                EditorBufferNameBase, EditorMap, EditorWindowList, EditorTabList,
                                EditorWindowBuffer, EditorTabWindowBuffer, EditorTabWindow,
                                toedobj)
-from powerline.lib.dict import updated
 
 
 def finish_kwargs(kwargs, vval=None, cache=None, buffer_cache=None, paramfunc=(lambda s: s), toed=None):
@@ -49,7 +48,9 @@ def finish_kwargs(kwargs, vval=None, cache=None, buffer_cache=None, paramfunc=(l
 		Function used to convert :py:class:`powerline.editors.EditorObj` 
 		instances to strings suitable for ``kwargs['parameters']`` dictionary.
 
-	:return: A modified copy of ``kwargs`` dictionary.
+	:return:
+		A modified copy of ``kwargs`` dictionary or ``kwargs`` dictionary 
+		itself if it was already finished.
 	'''
 	if kwargs.get('finished'):
 		return kwargs
@@ -148,6 +149,12 @@ class VimStlWinList(EditorObj):
 
 class VimTabAmount(EditorObj):
 	pass
+
+
+def updated(d, *args, **kwargs):
+	d = d.copy()
+	d.update(*args, **kwargs)
+	return d
 
 
 def iterparam_updated(parameters, obj, toed):
@@ -267,8 +274,11 @@ ED_TO_VIM = {
 	},
 	EditorBufferName: {
 		'tovim': lambda self, toed, **kw: toed(
-			EditorFunc('fnamemodify', EditorFunc('bufname', EditorParameter('buffer')), ':p'),
-			**kw),
+			EditorTernaryOp(
+				EditorFunc('empty', EditorFunc('bufname', EditorParameter('buffer'))),
+				b'',
+				EditorFunc('fnamemodify', EditorFunc('bufname', EditorParameter('buffer')), ':p'),
+			), **kw),
 		'tovimpy': lambda self, toed, **kw: '{buffer}.name'.format(
 			buffer=kw['parameters']['buffer']),
 	},
@@ -368,8 +378,7 @@ ED_TO_VIM = {
 			),
 			**kw
 		))(self, **updated(
-			kw, parameters=updated(
-				kw, parameters=iterparam_updated(kw['parameters'], self, toed)))),
+			kw, parameters=iterparam_updated(kw['parameters'], self, toed))),
 		'tovimpy': lambda self, toed, **kw: (lambda self, **kw: '[{0} for vval in {1}]'.format(
 			toed(self.expr, **kw),
 			toed(self.list, **kw)))(
@@ -622,13 +631,12 @@ class VimEditor(Editor):
 		current_buffer_number='int',
 		current_window_number='int',
 		textwidth='int',
-		stl_winlist='intintstrlistlist',
+		stl_winlist='intintbyteslistlist',
 	)
 
 	converters = Editor.converters.copy()
 	converters.update(
-		intintstrlistlist=lambda l: [[[int(a), int(b), VimEditor.converters['str'](c)] for a, b, c in i]
-		                             for i in l],
+		intintbyteslistlist=lambda l: [[int(a), int(b), c] for a, b, c in l],
 	)
 
 
@@ -646,12 +654,17 @@ class VimVimEditor(VimEditor):
 	))
 
 	@classmethod
-	def toed(cls, obj, **kwargs):
-		'''Convert given :py:class:`powerline.editors.EditorObj` to VimL
+	def finish_kwargs(cls, kwargs):
+		'''Finish kwargs by creating a copy of it and adding necessary data
 
-		See :py:func:`finish_kwargs` for a list of ``kwargs`` parameters.
+		If kwargs does not require finishing it is returned without copying.
 
-		:return: VimL string obtained from given AST.
+		:param dict kwargs:
+			Keyword arguments to finish.
+
+		:return:
+			New dictionary with values from kwargs and some new or kwargs 
+			itself.
 		'''
 		if not kwargs.get('finished'):
 			finkwargs = updated(kwargs, finished=True)
@@ -662,7 +675,17 @@ class VimVimEditor(VimEditor):
 				buffer_cache=cls.toed(VimGlobalVar('_powerline_buffer_cache'), **finkwargs),
 				toed=cls.toed,
 			)
-		return super(VimVimEditor, cls).toed(obj, **kwargs)
+		return kwargs
+
+	@classmethod
+	def toed(cls, obj, **kwargs):
+		'''Convert given :py:class:`powerline.editors.EditorObj` to VimL
+
+		See :py:func:`finish_kwargs` for a list of ``kwargs`` parameters.
+
+		:return: VimL string obtained from given AST.
+		'''
+		return super(VimVimEditor, cls).toed(obj, **cls.finish_kwargs(kwargs))
 
 	@classmethod
 	def compile_reqs_dict(cls, reqs_dict, **kwargs):
@@ -684,6 +707,7 @@ class VimVimEditor(VimEditor):
 			#. Python function which takes the resulting object and converts it to 
 			   proper types.
 		'''
+		kwargs = cls.finish_kwargs(kwargs)
 		code = ['{']
 		conv_code = ['lambda d: {']
 		gvars = {}
@@ -732,6 +756,7 @@ class VimVimEditor(VimEditor):
 			#. Python lambda object which returns the same thing. Is to be used 
 			   in case VimL expression evaluated to zero.
 		'''
+		kwargs = cls.finish_kwargs(kwargs)
 		code = []
 		pycode = ['lambda pl, matcher_info: (']
 		for i, m in enumerate(local_themes):
