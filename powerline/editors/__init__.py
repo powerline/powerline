@@ -298,7 +298,7 @@ class EditorBinaryOp(EditorObj):
 	def __init__(self, op, *children):
 		self.op = op
 		'''Binary operator description'''
-		self.children = children
+		self.children = [toedobj(child) for child in children]
 		'''List of subjects to the binary operation
 
 		.. note::
@@ -318,11 +318,11 @@ class EditorTernaryOp(EditorObj):
 	'''Class representing ternary operator expression
 	'''
 	def __init__(self, condition, if_true, if_false):
-		self.condition = condition
+		self.condition = toedobj(condition)
 		'''Condition expression'''
-		self.if_true = if_true
+		self.if_true = toedobj(if_true)
 		'''Result if condition expression is true'''
-		self.if_false = if_false
+		self.if_false = toedobj(if_false)
 		'''Result if condition expression is false'''
 
 	def __repr__(self):
