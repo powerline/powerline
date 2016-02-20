@@ -72,7 +72,7 @@ def _fetch_battery_info(pl):
 								devtype_name,
 								'State'
 							) != 2
-						return (energy * 100.0/ energy_full), state
+						return (energy * 100.0 / energy_full), state
 					return _flatten_battery
 				pl.debug('Not using DBUS+UPower as no batteries were found')
 
