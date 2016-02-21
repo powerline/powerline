@@ -22,6 +22,7 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 from itertools import chain
 from collections import namedtuple
 
+from powerline.lib.dict import updated
 from powerline.lib.unicode import unicode
 from powerline.theme import requires_segment_info
 
@@ -436,7 +437,27 @@ class EditorWinPos(EditorObj):
 	pass
 
 
-class EditorAny(EditorObj):
+class EditorIter(EditorObj):
+	'''Parent class for classes that describes iterating functions
+
+	E.g. :py:func:`any` or :py:func:`filter`.
+	'''
+	iterparam = None
+	'''Name of the parameter that is being iterated on
+
+	May either be a :py:class:`powerline.lib.unicode.unicode` instance or a list 
+	containing either tuples ``(iterparam, expr)`` or just a single string. 
+	Values that are single strings are identical to values which are lists with 
+	this string. ``expr`` is a :py:class:`EditorObj` instance which describes 
+	expression used to obtain value for ``iterparam``. Note that it must be run 
+	fast because it will be placed everywhere where parameter is needed.
+
+	String values are like tuple values ``(string, kw['parameters']['vval'])`` 
+	where ``kw`` is a kwargs dictionary passed to :py:meth:`Editor.toed`.
+	'''
+
+
+class EditorAny(EditorIter):
 	'''Class that describes :py:func:`any` function run on a list
 
 	EditorAny(condition, lst, iterparam) is like:
@@ -451,10 +472,6 @@ class EditorAny(EditorObj):
 		self.list = toedobj(lst)
 		'''Expression that returns a list being checked'''
 		self.iterparam = iterparam
-		'''Name of the parameter that is being iterated on
-
-		E.g. ``buffer``, ``window``.
-		'''
 
 	def __repr__(self):
 		return '<{name}: any({param} for {param} in {list} if {condition})>'.format(
@@ -465,7 +482,7 @@ class EditorAny(EditorObj):
 		)
 
 
-class EditorFilter(EditorObj):
+class EditorFilter(EditorIter):
 	'''Class that describes :py:func:`filter` function run on a list
 
 	EditorFilter(condition, lst, iterparam) is like:
@@ -480,10 +497,6 @@ class EditorFilter(EditorObj):
 		self.list = toedobj(lst)
 		'''Expression that returns a list being filtered'''
 		self.iterparam = iterparam
-		'''Name of the parameter that is being iterated on
-
-		E.g. ``buffer``, ``window``.
-		'''
 
 	def __repr__(self):
 		return '<{name}: ({param} for {param} in {list} if {condition})>'.format(
@@ -494,7 +507,7 @@ class EditorFilter(EditorObj):
 		)
 
 
-class EditorMap(EditorObj):
+class EditorMap(EditorIter):
 	'''Class that describes :py:func:`map` function run on a list
 
 	EditorMap(expr, lst, iterparam) is like:
@@ -515,10 +528,6 @@ class EditorMap(EditorObj):
 		self.list = toedobj(lst)
 		'''Expression that returns a list being used'''
 		self.iterparam = iterparam
-		'''Name of the parameter that is being iterated on
-
-		E.g. ``buffer``, ``window``.
-		'''
 
 	def __repr__(self):
 		return '<{name}: ({expr} for {param} in {list})>'.format(
@@ -617,6 +626,46 @@ Range = namedtuple('Range', ('start', 'end'))
 VisualPosition = namedtuple('VisualPosition', ('line', 'col', 'virtcol', 'virtoff'))
 WindowPosition = namedtuple('WindowPosition', ('line', 'col'))
 WindowLines = namedtuple('WindowLines', ('first', 'last'))
+
+
+def param_updated(kw, *args, **kwargs):
+	'''Return a copy of kw with a copy of kw['parameters'] updated with kwargs
+
+	:param dict kw:
+		Dictionary to update.
+
+	:return:
+		Copy of kw with copy of ``kw['parameters']`` updated using ``args`` and 
+		``kwargs``.
+	'''
+	return updated(kw, parameters=updated(kw['parameters'], *args, **kwargs))
+
+
+def iterparam_updated(kw, obj, toed):
+	'''Copy and update kw['parameters'] for iterating over
+
+	:param dict kw:
+		Dictionary to update.
+	:param poweline.editors.EditorIter obj:
+		What to update with. Uses 
+		:py:attr:`powerline.editors.EditorIter.iterparam` to decide which 
+		parameters to update.
+
+	:return:
+		Copy of ``kw`` with copy of ``kw['parameters']`` updated according to 
+		the description.
+	'''
+	update = {}
+	if isinstance(obj.iterparam, list):
+		for iterparam in obj.iterparam:
+			if isinstance(iterparam, tuple):
+				name, expr = iterparam
+				update[name] = toed(expr)
+			else:
+				update[iterparam] = kw['parameters']['vval']
+	else:
+		update[obj.iterparam] = kw['parameters']['vval']
+	return param_updated(kw, update)
 
 
 class Editor(object):

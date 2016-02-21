@@ -7,7 +7,8 @@ import os
 from collections import defaultdict
 from itertools import chain
 
-from powerline.editors import (Editor,
+from powerline.lib.dict import updated
+from powerline.editors import (Editor, param_updated, iterparam_updated,
                                EditorObj, EditorBinaryOp, EditorTernaryOp, EditorEmpty,
                                EditorIndex, EditorFunc, EditorStr, EditorList, EditorNone,
                                EditorNamedThing, EditorBufferName, EditorLastBufLine, EditorParameter,
@@ -149,26 +150,6 @@ class VimStlWinList(EditorObj):
 
 class VimTabAmount(EditorObj):
 	pass
-
-
-def updated(d, *args, **kwargs):
-	d = d.copy()
-	d.update(*args, **kwargs)
-	return d
-
-
-def iterparam_updated(parameters, obj, toed):
-	parameters = parameters.copy()
-	if isinstance(obj.iterparam, list):
-		for iterparam in obj.iterparam:
-			if isinstance(iterparam, tuple):
-				name, expr = iterparam
-				parameters[name] = toed(expr)
-			else:
-				parameters[iterparam] = parameters['vval']
-	else:
-		parameters[obj.iterparam] = parameters['vval']
-	return parameters
 
 
 def raising(exc):
@@ -366,13 +347,11 @@ ED_TO_VIM = {
 							toed(self.condition, **kw)),
 						'v:val'))),
 			**kw
-		))(self, **updated(
-			kw, parameters=iterparam_updated(kw['parameters'], self, toed))),
+		))(self, **iterparam_updated(kw, self, toed)),
 		'tovimpy': lambda self, toed, **kw: (lambda self, **kw: 'any(({0} for vval in {1}))'.format(
 			toed(self.condition, **kw),
 			toed(self.list, **kw)))(
-				self, **updated(
-					kw, parameters=iterparam_updated(kw['parameters'], self, toed))
+				self, **iterparam_updated(kw, self, toed)
 			),
 	},
 	EditorFilter: {
@@ -383,13 +362,11 @@ ED_TO_VIM = {
 				toed(self.condition, **kw)
 			),
 			**kw
-		))(self, **updated(
-			kw, parameters=iterparam_updated(kw['parameters'], self, toed))),
+		))(self, **iterparam_updated(kw, self, toed)),
 		'tovimpy': lambda self, toed, **kw: (lambda self, **kw: '[vval for vval in {1} if {0}]'.format(
 			toed(self.condition, **kw),
 			toed(self.list, **kw)))(
-				self, **updated(
-					kw, parameters=iterparam_updated(kw['parameters'], self, toed))
+				self, **iterparam_updated(kw, self, toed)
 			),
 	},
 	EditorMap: {
@@ -400,13 +377,11 @@ ED_TO_VIM = {
 				toed(self.expr, **kw)
 			),
 			**kw
-		))(self, **updated(
-			kw, parameters=iterparam_updated(kw['parameters'], self, toed))),
+		))(self, **iterparam_updated(kw, self, toed)),
 		'tovimpy': lambda self, toed, **kw: (lambda self, **kw: '[{0} for vval in {1}]'.format(
 			toed(self.expr, **kw),
 			toed(self.list, **kw)))(
-				self, **updated(
-					kw, parameters=iterparam_updated(kw['parameters'], self, toed))
+				self, **iterparam_updated(kw, self, toed)
 			),
 	},
 	VimVVar: {
@@ -530,7 +505,7 @@ ED_TO_VIM = {
 						VimWinVar('_powerline_window_id'),
 						VimWinOption('statusline'),
 					),
-					**updated(kw, {'parameters': updated(kw['parameters'], window=toed(VimVVar('val'), **kw))})
+					**param_updated(kw, window=toed(VimVVar('val'), **kw))
 				)
 			),
 			**kw
