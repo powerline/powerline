@@ -538,19 +538,33 @@ class EditorMap(EditorIter):
 		)
 
 
-class EditorBufferList(EditorObj):
+class EditorIterable(EditorObj):
+	'''Class describing expression which returns a list of something
+
+	Used for buffer, tabpage and window lists.
+	'''
+	pass
+
+
+class EditorTabAmount(EditorObj):
+	'''Class describing expression which returns a number of tabpages
+	'''
+	pass
+
+
+class EditorBufferList(EditorIterable):
 	'''Class describing expression which returns a list of buffers
 	'''
 	pass
 
 
-class EditorTabList(EditorObj):
+class EditorTabList(EditorIterable):
 	'''Class describing expression which returns a list of tabpages
 	'''
 	pass
 
 
-class EditorWindowList(EditorObj):
+class EditorWindowList(EditorIterable):
 	'''Class describing expression which returns a list of windows
 	'''
 	pass
@@ -651,21 +665,39 @@ def iterparam_updated(kw, obj, toed):
 		:py:attr:`powerline.editors.EditorIter.iterparam` to decide which 
 		parameters to update.
 
+		In addition to parameters which were listed updating ``window`` 
+		parameter triggers updating ``buffer`` and updating ``tabpage`` updates 
+		``window`` and ``buffer`` parameters. In these cases ``window`` is set 
+		to converted by ``toed`` :py:class:`EditorTabWindow` instance and 
+		``buffer`` is set to converted :py:class:`EditorTabWindowBuffer` 
+		instance.
+	:param func toed:
+		Bound method :py:meth:`Editor.toed` or something similar.
+
 	:return:
 		Copy of ``kw`` with copy of ``kw['parameters']`` updated according to 
 		the description.
 	'''
-	update = {}
-	if isinstance(obj.iterparam, list):
-		for iterparam in obj.iterparam:
-			if isinstance(iterparam, tuple):
-				name, expr = iterparam
-				update[name] = toed(expr)
-			else:
-				update[iterparam] = kw['parameters']['vval']
-	else:
-		update[obj.iterparam] = kw['parameters']['vval']
-	return param_updated(kw, update)
+	kw = kw.copy()
+	params = kw['parameters'] = kw['parameters'].copy()
+	iterparam = obj.iterparam
+	if not isinstance(iterparam, list):
+		iterparam = [iterparam]
+	for val in iterparam:
+		if isinstance(val, tuple):
+			name, expr = val
+			params[name] = toed(expr, **kw)
+		else:
+			name = val
+			params[name] = params['vval']
+		if name == 'tabpage':
+			name = 'window'
+			kw['tabscope'] = True
+			params[name] = toed(EditorTabWindow(), **kw)
+		if name == 'window':
+			name = 'buffer'
+			params[name] = toed(EditorTabWindowBuffer(), **kw)
+	return kw
 
 
 class Editor(object):

@@ -8,14 +8,19 @@ from collections import defaultdict
 from itertools import chain
 
 from powerline.lib.dict import updated
-from powerline.editors import (Editor, param_updated, iterparam_updated,
-                               EditorObj, EditorBinaryOp, EditorTernaryOp, EditorEmpty,
-                               EditorIndex, EditorFunc, EditorStr, EditorList, EditorNone,
-                               EditorNamedThing, EditorBufferName, EditorLastBufLine, EditorParameter,
-                               EditorWinPos, EditorAny, EditorUnaryOp, EditorNot, EditorBufferList,
-                               EditorFilter, EditorCached, EditorDict, EditorOverrides, EditorEncoding,
-                               EditorBufferNameBase, EditorMap, EditorWindowList, EditorTabList,
-                               EditorWindowBuffer, EditorTabWindowBuffer, EditorTabWindow,
+from powerline.editors import (Editor, param_updated,
+                               EditorObj, EditorBinaryOp, EditorTernaryOp,
+                               EditorEmpty, EditorIndex, EditorFunc, EditorStr,
+                               EditorList, EditorNone, EditorNamedThing,
+                               EditorBufferName, EditorLastBufLine,
+                               EditorParameter, EditorWinPos, EditorAny,
+                               EditorUnaryOp, EditorNot, EditorBufferList,
+                               EditorFilter, EditorCached, EditorDict,
+                               EditorOverrides, EditorEncoding,
+                               EditorBufferNameBase, EditorMap,
+                               EditorWindowList, EditorTabList,
+                               EditorWindowBuffer, EditorTabWindowBuffer,
+                               EditorTabWindow, EditorTabAmount,
                                toedobj)
 
 
@@ -145,10 +150,6 @@ class VimOptionalFunc(EditorObj):
 
 
 class VimStlWinList(EditorObj):
-	pass
-
-
-class VimTabAmount(EditorObj):
 	pass
 
 
@@ -541,7 +542,7 @@ ED_TO_VIM = {
 	EditorEncoding: {
 		'toed': lambda self, toed, **kw: toed(VimGlobalOption('encoding'), **kw),
 	},
-	VimTabAmount: {
+	EditorTabAmount: {
 		'tovim': lambda self, toed, **kw: toed(EditorFunc('tabpagenr', '$'), **kw),
 		'tovimpy': lambda self, toed, **kw: 'len(vim.tabpages)',
 	},
@@ -610,7 +611,7 @@ class VimEditor(Editor):
 	tab_number = (VimTabNumber(),)
 	buffer_number = (VimBufferNumber(),)
 	window_number = (VimWindowNumber(),)
-	tab_amount = (VimTabAmount(),)
+	tab_amount = (EditorTabAmount(),)
 	textwidth = (VimBufferOption('textwidth'),)
 	stl_winlist = (VimStlWinList(),)
 	editor_overrides = (EditorOverrides(),)
@@ -629,6 +630,7 @@ class VimEditor(Editor):
 		current_buffer_number='int',
 		current_window_number='int',
 		textwidth='int',
+		tab_amount='int',
 		stl_winlist='intintbyteslistlist',
 	)
 
@@ -707,7 +709,7 @@ class VimVimEditor(VimEditor):
 		'''
 		kwargs = cls.finish_kwargs(kwargs)
 		code = ['{']
-		conv_code = ['lambda d: {']
+		conv_code = ['lambda input: {']
 		gvars = {}
 		for k, v in reqs_dict.items():
 			code += [
@@ -721,9 +723,9 @@ class VimVimEditor(VimEditor):
 			]
 			if v[1] in cls.converters:
 				gvars['conv_' + v[1]] = cls.converters[v[1]]
-				conv_code.append('conv_{0}(d[{1!r}])'.format(v[1], k))
+				conv_code.append('conv_{0}(input[{1!r}])'.format(v[1], k))
 			else:
-				conv_code.append('d[{0!r}]'.format(k))
+				conv_code.append('input[{0!r}]'.format(k))
 			conv_code.append(',')
 		code[-1] = '}'
 		conv_code[-1] = '}'

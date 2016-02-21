@@ -16,6 +16,24 @@ from powerline.editors.vim import VimFuncsDict, VimGlobalVar, VimVimEditor, VimP
 from powerline.bindings.vim import get_python_to_vim, register_powerline_vim_strtrans_error
 
 
+LIST_OBJECTS = {
+	'list_tabs': EditorTabList,
+	'list_buffers': EditorBufferList,
+	'list_windows': EditorWindowList,
+}
+'''Dictionary mapping lister names to 
+:py:class:`powerline.editors.EditorIterable` subclasses
+'''
+LIST_PARAMETER_NAMES = {
+	'list_tabs': 'tabpage',
+	'list_buffers': 'buffer',
+	'list_windows': 'window',
+}
+'''Dictionary mapping lister names to 
+:py:attr:`powerline.editors.EditorIter.iterparam` values
+'''
+
+
 def segments_to_reqs_iter(seglist):
 	for segment in seglist:
 		for key in ['ext_editor_input', 'inc_ext_editor_input', 'exc_ext_editor_input']:
@@ -26,16 +44,8 @@ def segments_to_reqs_iter(seglist):
 		if segment['type'] == 'segment_list' and 'ext_editor_list' in segment:
 			lname, lreqs = segment['ext_editor_list']
 			yield [lname]
-			lobj = {
-				'list_tabs': EditorTabList,
-				'list_buffers': EditorBufferList,
-				'list_windows': EditorWindowList,
-			}[lname]()
-			iterparam = {
-				'list_tabs': 'tabpage',
-				'list_buffers': 'buffer',
-				'list_windows': 'window',
-			}[lname]
+			lobj = LIST_OBJECTS[lname]()
+			iterparam = LIST_PARAMETER_NAMES[lname]
 			reqs_dict = VimVimEditor.reqss_to_reqs_dict(chain(
 				segments_to_reqs_iter(segment['segments']),
 				[lreqs],
