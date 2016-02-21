@@ -77,8 +77,8 @@ def _fetch_battery_info(pl):
 				pl.debug('Not using DBUS+UPower as no batteries were found')
 
 	if os.path.isdir('/sys/class/power_supply'):
-		linux_energy_full_fmt = '/sys/class/power_supply/{0}/enery_full'
-		linux_energy_fmt = '/sys/class/power_supply/{0}/enery'
+		linux_energy_full_fmt = '/sys/class/power_supply/{0}/energy_full'
+		linux_energy_fmt = '/sys/class/power_supply/{0}/energy_now'
 		linux_status_fmt = '/sys/class/power_supply/{0}/status'
 		devices = []
 		for linux_supplier in os.listdir('/sys/class/power_supply'):
