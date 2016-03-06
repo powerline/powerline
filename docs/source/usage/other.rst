@@ -89,8 +89,8 @@ root <repository-root>`)::
 
 .. note::
     The availability of the ``powerline-config`` command is required for 
-    powerline support. DLlocation of this script may be specified via 
-    ``$POWERLINE_CONFIG_COMMAND`` environment variable.
+    powerline support. The location of this script may be specified via 
+    the ``$POWERLINE_CONFIG_COMMAND`` environment variable.
 
 .. note::
     It is advised to run ``powerline-daemon`` before adding the above line to 
