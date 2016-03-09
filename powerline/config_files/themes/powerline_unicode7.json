@@ -143,6 +143,15 @@
 			"args": {
 				"text": "🖫⃥"
 			}
+		},
+
+		"powerline.segments.i3wm.scratchpad": {
+			"args": {
+				"icons": {
+					"fresh": "●",
+					"changed": "○"
+				}
+			}
 		}
 	}
 }

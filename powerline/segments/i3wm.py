@@ -10,7 +10,7 @@ from powerline.bindings.wm import get_i3_connection
 WORKSPACE_REGEX = re.compile(r'^[0-9]+: ?')
 
 
-def calcgrp(w):
+def workspace_groups(w):
 	group = []
 	if w['focused']:
 		group.append('w_focused')
@@ -53,7 +53,7 @@ def workspaces(pl, segment_info, only_show=None, output=None, strip=0):
 	return [
 		{
 			'contents': w['name'][strip:],
-			'highlight_groups': calcgrp(w)
+			'highlight_groups': workspace_groups(w)
 		}
 		for w in get_i3_connection().get_workspaces()
 		if ((not only_show or any(w[typ] for typ in only_show))
@@ -97,7 +97,7 @@ def workspace(pl, segment_info, workspace=None, strip=False):
 
 	return [{
 		'contents': format_name(w['name'], strip=strip),
-		'highlight_groups': calcgrp(w)
+		'highlight_groups': workspace_groups(w)
 	}]
 
 
@@ -115,3 +115,41 @@ def mode(pl, segment_info, names={'default': None}):
 	if mode in names:
 		return names[mode]
 	return mode
+
+
+def scratchpad_groups(w):
+	group = []
+	if w.urgent:
+		group.append('scratchpad:urgent')
+	if w.nodes[0].focused:
+		group.append('scratchpad:focused')
+	if w.workspace().name != '__i3_scratch':
+		group.append('scratchpad:visible')
+	group.append('scratchpad')
+	return group
+
+
+SCRATCHPAD_ICONS = {
+	'fresh': 'O',
+	'changed': 'X',
+}
+
+
+def scratchpad(pl, icons=SCRATCHPAD_ICONS):
+	'''Returns the windows currently on the scratchpad
+
+	:param dict icons:
+		Specifies the strings to show for the different scratchpad window states. Must 
+		contain the keys ``fresh`` and ``changed``.
+
+	Highlight groups used: ``scratchpad`` or ``scratchpad:visible``, ``scratchpad`` or ``scratchpad:focused``, ``scratchpad`` or ``scratchpad:urgent``.
+	'''
+
+	return [
+		{
+			'contents': icons.get(w.scratchpad_state, icons['changed']),
+			'highlight_groups': scratchpad_groups(w)
+		}
+		for w in get_i3_connection().get_tree().descendents()
+		if w.scratchpad_state != 'none'
+	]

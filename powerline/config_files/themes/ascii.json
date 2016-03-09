@@ -131,6 +131,15 @@
 			"args": {
 				"text": "+"
 			}
+		},
+
+		"powerline.segments.i3wm.scratchpad": {
+			"args": {
+				"icons": {
+					"fresh": "O",
+					"changed": "X"
+				}
+			}
 		}
 	}
 }
