@@ -7,7 +7,7 @@ import os
 from subprocess import Popen, PIPE
 from functools import partial
 
-from powerline.lib.encoding import get_preferred_input_encoding
+from powerline.lib.encoding import get_preferred_input_encoding, get_preferred_output_encoding
 
 
 if sys.platform.startswith('win32'):
@@ -36,7 +36,8 @@ def run_cmd(pl, cmd, stdin=None, strip=True):
 		pl.exception('Could not execute command ({0}): {1}', e, cmd)
 		return None
 	else:
-		stdout, err = p.communicate(stdin)
+		stdout, err = p.communicate(
+			stdin if stdin is None else stdin.encode(get_preferred_output_encoding()))
 		stdout = stdout.decode(get_preferred_input_encoding())
 	return stdout.strip() if strip else stdout
 
