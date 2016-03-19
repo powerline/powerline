@@ -17,6 +17,7 @@ from powerline.lib.vcs import guess, get_fallback_create_watcher
 from powerline.lib.threaded import ThreadedSegment, KwThreadedSegment
 from powerline.lib.monotonic import monotonic
 from powerline.lib.vcs.git import git_directory
+from powerline.lib.shell import run_cmd
 
 import powerline.lib.unicode as plu
 
@@ -46,6 +47,24 @@ BZR_REPO = 'bzr_repo'
 
 def thread_number():
 	return len(threading.enumerate())
+
+
+class TestShell(TestCase):
+	def test_run_cmd(self):
+		pl = Pl()
+		self.assertEqual(run_cmd(pl, ['xxx_nonexistent_command_xxx']), None)
+		self.assertEqual(len(pl.exceptions), 1)
+		pl = Pl()
+		self.assertEqual(run_cmd(pl, ['echo', '  test  ']), 'test')
+		self.assertFalse(pl)
+		self.assertEqual(run_cmd(pl, ['echo', '  test  '], strip=True), 'test')
+		self.assertFalse(pl)
+		self.assertEqual(run_cmd(pl, ['echo', '  test  '], strip=False), '  test  \n')
+		self.assertFalse(pl)
+		self.assertEqual(run_cmd(pl, ['cat'], stdin='test'), 'test')
+		self.assertFalse(pl)
+		self.assertEqual(run_cmd(pl, ['sh', '-c', 'cat >&2'], stdin='test'), '')
+		self.assertFalse(pl)
 
 
 class TestThreaded(TestCase):
