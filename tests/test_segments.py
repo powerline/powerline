@@ -892,14 +892,6 @@ class TestI3WM(TestCase):
 			{'name': '4: w4', 'output': 'DVI01', 'focused': True, 'urgent': True, 'visible': True},
 		])
 
-	@staticmethod
-	def get_outputs(pl):
-		return iter([
-			{'name': 'LVDS1'},
-			{'name': 'HDMI1'},
-			{'name': 'DVI01'},
-		])
-
 	def test_workspaces(self):
 		pl = Pl()
 		with replace_attr(i3wm, 'get_i3_connection', lambda: Args(get_workspaces=self.get_workspaces)):
@@ -977,6 +969,45 @@ class TestI3WM(TestCase):
 		self.assertEqual(i3wm.mode(pl=pl, segment_info={'mode': 'test'}), 'test')
 		self.assertEqual(i3wm.mode(pl=pl, segment_info={'mode': 'default'}, names={'default': 'test'}), 'test')
 		self.assertEqual(i3wm.mode(pl=pl, segment_info={'mode': 'test'}, names={'default': 'test', 'test': 't'}), 't')
+
+	def test_scratchpad(self):
+		class Conn(object):
+			def get_tree(self):
+				return self
+			
+			def descendents(self):
+				nodes_unfocused = [Args(focused = False)]
+				nodes_focused = [Args(focused = True)]
+
+				workspace_scratch = lambda: Args(name='__i3_scratch')
+				workspace_noscratch = lambda: Args(name='2: www')
+				return [
+					Args(scratchpad_state='fresh', urgent=False, workspace=workspace_scratch, nodes=nodes_unfocused),
+					Args(scratchpad_state='changed', urgent=True, workspace=workspace_noscratch, nodes=nodes_focused),
+					Args(scratchpad_state='fresh', urgent=False, workspace=workspace_scratch, nodes=nodes_unfocused),
+					Args(scratchpad_state=None, urgent=False, workspace=workspace_noscratch, nodes=nodes_unfocused),
+					Args(scratchpad_state='fresh', urgent=False, workspace=workspace_scratch, nodes=nodes_focused),
+					Args(scratchpad_state=None, urgent=True, workspace=workspace_noscratch, nodes=nodes_unfocused),
+				]
+
+		pl = Pl()
+		with replace_attr(i3wm, 'get_i3_connection', lambda: Conn()):
+			self.assertEqual(i3wm.scratchpad(pl=pl), [
+				{'contents': 'O', 'highlight_groups': ['scratchpad']},
+				{'contents': 'X', 'highlight_groups': ['scratchpad:urgent', 'scratchpad:focused', 'scratchpad:visible', 'scratchpad']},
+				{'contents': 'O', 'highlight_groups': ['scratchpad']},
+				{'contents': 'X', 'highlight_groups': ['scratchpad:visible', 'scratchpad']},
+				{'contents': 'O', 'highlight_groups': ['scratchpad:focused', 'scratchpad']},
+				{'contents': 'X', 'highlight_groups': ['scratchpad:urgent', 'scratchpad:visible', 'scratchpad']},
+			])
+			self.assertEqual(i3wm.scratchpad(pl=pl, icons={'changed': '-', 'fresh': 'o'}), [
+				{'contents': 'o', 'highlight_groups': ['scratchpad']},
+				{'contents': '-', 'highlight_groups': ['scratchpad:urgent', 'scratchpad:focused', 'scratchpad:visible', 'scratchpad']},
+				{'contents': 'o', 'highlight_groups': ['scratchpad']},
+				{'contents': '-', 'highlight_groups': ['scratchpad:visible', 'scratchpad']},
+				{'contents': 'o', 'highlight_groups': ['scratchpad:focused', 'scratchpad']},
+				{'contents': '-', 'highlight_groups': ['scratchpad:urgent', 'scratchpad:visible', 'scratchpad']},
+			])
 
 
 class TestMail(TestCommon):
