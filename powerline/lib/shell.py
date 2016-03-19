@@ -43,7 +43,7 @@ def run_cmd(pl, cmd, stdin=None, strip=True):
 
 def asrun(pl, ascript):
 	'''Run the given AppleScript and return the standard output and error.'''
-	return run_cmd(pl, ['osascript', '-'], ascript)
+	return run_cmd(pl, ['osascript', '-'], ascript.encode('utf-8'))
 
 
 def readlines(cmd, cwd):
