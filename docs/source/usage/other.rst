@@ -114,11 +114,12 @@ For IPython<0.11 add the following lines to :file:`.ipython/ipy_user_conf.py`:
     # create skeleton ipy_user_conf.py file):
     powerline_setup()
 
-For IPython>=0.11 add the following line to :file:`ipython_config.py` file in 
-the used profile:
+For IPython>=0.11 add the following line to
+:file:`~/.ipython/profile_default/ipython_config.py` file in the used profile:
 
 .. code-block:: Python
 
+    c = get_config()
     c.InteractiveShellApp.extensions = [
         'powerline.bindings.ipython.post_0_11'
     ]
