@@ -7,7 +7,7 @@ from powerline.bindings.vim import vim_getbufoption, buffer_name
 
 
 def help(matcher_info):
-	return str(vim_getbufoption(matcher_info, 'buftype')) == 'help'
+	return vim_getbufoption(matcher_info, 'buftype') == 'help'
 
 
 def cmdwin(matcher_info):
@@ -16,4 +16,4 @@ def cmdwin(matcher_info):
 
 
 def quickfix(matcher_info):
-	return str(vim_getbufoption(matcher_info, 'buftype')) == 'quickfix'
+	return vim_getbufoption(matcher_info, 'buftype') == 'quickfix'
