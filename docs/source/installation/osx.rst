@@ -11,11 +11,9 @@ Python package
 
        sudo port select python python27-apple
 
-   . Homebrew may be used here::
+   Homebrew may be used here::
 
        brew install python
-
-   .
 
    .. note::
       In case :file:`powerline.sh` as a client ``socat`` and ``coreutils`` need 
@@ -24,28 +22,28 @@ Python package
 
 2. Install Powerline using one of the following commands:
 
+    This will get the current release version:
+
    .. code-block:: sh
 
        pip install --user powerline-status
 
-   will get current release version and
+   This will get the latest development version:
 
    .. code-block:: sh
 
        pip install --user git+git://github.com/powerline/powerline
 
-   will get latest development version.
-
    .. warning::
-      When using ``brew install`` to install Python one must not supply
+      When using ``brew install`` to install Python, one must not supply
       ``--user`` flag to ``pip``.
 
    .. note::
-      Due to the naming conflict with an unrelated project powerline is named 
+      Due to the naming conflict with an unrelated project, powerline is named 
       ``powerline-status`` in PyPI.
 
    .. note::
-      Powerline developers should be aware that``pip install --editable`` does 
+      Powerline developers should be aware that ``pip install --editable`` does 
       not currently fully work. Installation performed this way are missing 
       ``powerline`` executable that needs to be symlinked. It will be located in 
       ``scripts/powerline``.
@@ -61,9 +59,9 @@ but MacVim users need to install it using the following command::
 Fonts installation
 ==================
 
-Install downloaded patched font by double-clicking the font file in Finder, then 
-clicking :guilabel:`Install this font` in the preview window.
+Download the patched font from Github, install it by double-clicking the font file in Finder and then 
+click :guilabel:`Install this font` in the preview window.
 
 After installing the patched font MacVim or terminal emulator (whatever 
 application powerline should work with) need to be configured to use the patched 
-font. The correct font usually ends with *for Powerline*.
+font. The correct font usually ends with *'for Powerline'*.
