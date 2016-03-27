@@ -208,7 +208,7 @@ class MpdPlayerSegment(PlayerSegment):
 				'album': now_playing.get('album'),
 				'artist': now_playing.get('artist'),
 				'title': now_playing.get('title'),
-				'elapsed': _convert_seconds(now_playing.get('elapsed', 0)),
+				'elapsed': _convert_seconds(status.get('elapsed', 0)),
 				'total': _convert_seconds(now_playing.get('time', 0)),
 			}
 
