@@ -231,7 +231,7 @@ def do_one(sock, read_sockets, write_sockets, result_map):
 
 
 def main_loop(sock):
-	sock.listen(1)
+	sock.listen(128)
 	sock.setblocking(0)
 
 	read_sockets, write_sockets = set(), set()
