@@ -30,8 +30,9 @@ Generic requirements
   with bazaar repositories.
 * ``pyuv`` python package. Required for :ref:`libuv-based watcher 
   <config-common-watcher>` to work.
-* ``i3-py``, `available on github <https://github.com/ziberna/i3-py>`_. Required 
-  for i3wm bindings and segments.
+* ``i3-ipc`` python package. Required for i3wm bindings and segments.
+* ``xrandr`` program. Required for the multi-monitor lemonbar binding and the 
+  :py:func:`powerline.listers.i3wm.output_lister`.
 
 .. note::
     Until mercurial and bazaar support Python-3 or PyPy powerline will not 
