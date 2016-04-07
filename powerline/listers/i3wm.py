@@ -28,7 +28,7 @@ def workspace_lister(pl, segment_info, only_show=None, output=None):
 
 	Sets the segment info values of ``workspace`` and ``output`` to the name of 
 	the i3 workspace and the ``xrandr`` output respectively and the keys
-	``"visible"``, ``"urgent"`` and ``"focused`` to a boolean indicating these
+	``"visible"``, ``"urgent"`` and ``"focused"`` to a boolean indicating these
 	states.
 
 	:param list only_show:
