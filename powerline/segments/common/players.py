@@ -189,7 +189,11 @@ class MpdPlayerSegment(PlayerSegment):
 				'total': now_playing[3],
 			}
 		else:
-			client = mpd.MPDClient()
+			try:
+				client = mpd.MPDClient(use_unicode=True)
+			except TypeError:
+				# python-mpd 1.x does not support use_unicode
+				client = mpd.MPDClient()
 			client.connect(host, port)
 			if password:
 				client.password(password)
@@ -204,7 +208,7 @@ class MpdPlayerSegment(PlayerSegment):
 				'album': now_playing.get('album'),
 				'artist': now_playing.get('artist'),
 				'title': now_playing.get('title'),
-				'elapsed': _convert_seconds(now_playing.get('elapsed', 0)),
+				'elapsed': _convert_seconds(status.get('elapsed', 0)),
 				'total': _convert_seconds(now_playing.get('time', 0)),
 			}
 

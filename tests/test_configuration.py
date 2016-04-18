@@ -825,28 +825,28 @@ class TestVim(TestCase):
 		sys.path.pop(0)
 
 
-class TestBar(TestRender):
-	def test_bar(self):
+class TestLemonbar(TestRender):
+	def test_lemonbar(self):
 		import powerline as powerline_module
 		with swap_attributes(config, powerline_module):
-			with get_powerline_raw(config, powerline_module.Powerline, replace_gcp=True, ext='wm', renderer_module='bar') as powerline:
+			with get_powerline_raw(config, powerline_module.Powerline, replace_gcp=True, ext='wm', renderer_module='lemonbar') as powerline:
 				self.assertRenderEqual(
 					powerline,
 					'%{l}%{F#ffc00000}%{B#ff008000}%{+u} A%{F-B--u}%{F#ff008000}%{B#ffc00000}>>%{F-B--u}%{F#ff008000}%{B#ffc00000}B%{F-B--u}%{F#ffc00000}>>%{F-B--u}%{r}%{F#ffc00000}<<%{F-B--u}%{F#ff804000}%{B#ffc00000}%{+u}C%{F-B--u}%{F#ff0000c0}%{B#ffc00000}<<%{F-B--u}%{F#ff008000}%{B#ff0000c0}D %{F-B--u}'
 				)
 
 	@with_new_config
-	def test_bar_escape(self, config):
+	def test_lemonbar_escape(self, config):
 		import powerline as powerline_module
 		config['themes/wm/default']['segments']['left'] = (
 			highlighted_string('%{asd}', 'hl1'),
 			highlighted_string('10% %', 'hl2'),
 		)
 		with swap_attributes(config, powerline_module):
-			with get_powerline_raw(config, powerline_module.Powerline, replace_gcp=True, ext='wm', renderer_module='bar') as powerline:
+			with get_powerline_raw(config, powerline_module.Powerline, replace_gcp=True, ext='wm', renderer_module='lemonbar') as powerline:
 				self.assertRenderEqual(
 					powerline,
-					'%{l}%{F#ffc00000}%{B#ff008000}%{+u} %%{asd}%{F-B--u}%{F#ff008000}%{B#ffc00000}>>%{F-B--u}%{F#ff008000}%{B#ffc00000}10%% %%%{F-B--u}%{F#ffc00000}>>%{F-B--u}%{r}%{F#ffc00000}<<%{F-B--u}%{F#ff804000}%{B#ffc00000}%{+u}C%{F-B--u}%{F#ff0000c0}%{B#ffc00000}<<%{F-B--u}%{F#ff008000}%{B#ff0000c0}D %{F-B--u}'
+					'%{l}%{F#ffc00000}%{B#ff008000}%{+u} %%{}{asd}%{F-B--u}%{F#ff008000}%{B#ffc00000}>>%{F-B--u}%{F#ff008000}%{B#ffc00000}10%%{} %%{}%{F-B--u}%{F#ffc00000}>>%{F-B--u}%{r}%{F#ffc00000}<<%{F-B--u}%{F#ff804000}%{B#ffc00000}%{+u}C%{F-B--u}%{F#ff0000c0}%{B#ffc00000}<<%{F-B--u}%{F#ff008000}%{B#ff0000c0}D %{F-B--u}'
 				)
 
 

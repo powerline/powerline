@@ -6,6 +6,7 @@ import re
 import codecs
 
 from collections import namedtuple
+from argparse import REMAINDER
 
 from functools import reduce
 
@@ -61,9 +62,9 @@ def parse_argument(*args, **kwargs):
 	is_option = args[0].startswith('-')
 	is_long_option = args[0].startswith('--')
 	is_short_option = is_option and not is_long_option
-	action = kwargs.get('action', 'store_true')
-	multi = kwargs.get('action') in ('append',)
-	nargs = kwargs.get('nargs') or (1 if kwargs.get('metavar') or action in ('append',) else 0)
+	action = kwargs.get('action', 'store')
+	multi = kwargs.get('action') in ('append',) or kwargs.get('nargs') is REMAINDER
+	nargs = kwargs.get('nargs', (1 if action in ('append', 'store') else 0))
 	return Argument(
 		names=args,
 		help=u(kwargs.get('help', '')),
@@ -165,9 +166,20 @@ def format_usage_arguments(arguments, base_length=None):
 					# `--` is automatically transformed into &#8211; (EN DASH) 
 					# when parsing into HTML. We do not need this.
 					line[-1] += [nodes.Text(char) for char in name]
+				elif argument.nargs is REMAINDER:
+					line.append(nodes.Text('['))
+					line.append(nodes.strong())
+					line[-1] += [nodes.Text(char) for char in '--']
+					line.append(nodes.Text('] '))
 				if argument.nargs:
-					assert(argument.nargs in (1, '?'))
-					with SurroundWith(line, argument.nargs == '?' and argument.is_option):
+					assert(argument.nargs in (1, '?', REMAINDER))
+					with SurroundWith(
+						line, (
+							True
+							if argument.nargs is REMAINDER
+							else (argument.nargs == '?' and argument.is_option)
+						)
+					):
 						if argument.is_long_option:
 							line.append(nodes.Text('='))
 						line.append(nodes.emphasis(text=argument.metavar))
@@ -337,15 +349,21 @@ class AutoManParser(object):
 class AutoMan(Directive):
 	required_arguments = 1
 	optional_arguments = 0
-	option_spec = dict(prog=unchanged_required)
+	option_spec = dict(prog=unchanged_required, minimal=bool)
 	has_content = False
 
 	def run(self):
+		minimal = self.options.get('minimal')
 		module = self.arguments[0]
 		template_args = {}
 		template_args.update(get_authors())
 		get_argparser = __import__(str(module), fromlist=[str('get_argparser')]).get_argparser
 		parser = get_argparser(AutoManParser)
+		if minimal:
+			container = nodes.container()
+			container += parser.automan_usage(self.options['prog'])
+			container += parser.automan_description()
+			return [container]
 		synopsis_section = nodes.section(
 			'',
 			nodes.title(text='Synopsis'),

@@ -3,9 +3,12 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 
 import os
 
-from powerline.bindings.vim import buffer_name
+from powerline.bindings.vim import vim_getbufoption, buffer_name
 
 
 def commandt(matcher_info):
 	name = buffer_name(matcher_info)
-	return name and os.path.basename(name) == b'GoToFile'
+	return (
+		vim_getbufoption(matcher_info, 'filetype') == 'command-t'
+		or (name and os.path.basename(name) == b'GoToFile')
+	)

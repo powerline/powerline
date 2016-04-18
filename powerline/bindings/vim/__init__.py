@@ -273,7 +273,7 @@ def _vim_to_python(value):
 
 if hasattr(vim, 'options'):
 	def vim_getbufoption(info, option):
-		return info['buffer'].options[str(option)]
+		return _vim_to_python(info['buffer'].options[str(option)])
 
 	def vim_getoption(option):
 		return vim.options[str(option)]

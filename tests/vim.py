@@ -265,6 +265,14 @@ def eval(expr):
 		import os
 		assert os.path.basename(current.buffer.name).startswith('NERD_tree_')
 		return '/usr/include'
+	elif expr.startswith('getbufvar('):
+		import re
+		match = re.match(r'^getbufvar\((\d+), ["\'](.+)["\']\)$', expr)
+		if not match:
+			raise NotImplementedError(expr)
+		bufnr = int(match.group(1))
+		varname = match.group(2)
+		return _emul_getbufvar(bufnr, varname)
 	elif expr == 'tabpagenr()':
 		return current.tabpage.number
 	elif expr == 'tabpagenr("$")':

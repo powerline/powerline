@@ -43,9 +43,15 @@ def get_preferred_output_encoding():
 		Falls back to ASCII, so that output is most likely to be displayed 
 		correctly.
 	'''
+	if hasattr(locale, 'LC_MESSAGES'):
+		return (
+			locale.getlocale(locale.LC_MESSAGES)[1]
+			or locale.getdefaultlocale()[1]
+			or 'ascii'
+		)
+
 	return (
-		locale.getlocale(locale.LC_MESSAGES)[1]
-		or locale.getdefaultlocale()[1]
+		locale.getdefaultlocale()[1]
 		or 'ascii'
 	)
 
@@ -57,9 +63,15 @@ def get_preferred_input_encoding():
 		Falls back to latin1 so that function is less likely to throw as decoded 
 		output is primary searched for ASCII values.
 	'''
+	if hasattr(locale, 'LC_MESSAGES'):
+		return (
+			locale.getlocale(locale.LC_MESSAGES)[1]
+			or locale.getdefaultlocale()[1]
+			or 'latin1'
+		)
+
 	return (
-		locale.getlocale(locale.LC_MESSAGES)[1]
-		or locale.getdefaultlocale()[1]
+		locale.getdefaultlocale()[1]
 		or 'latin1'
 	)
 

@@ -11,11 +11,9 @@ Python package
 
        sudo port select python python27-apple
 
-   . Homebrew may be used here::
+   Homebrew may be used here::
 
        brew install python
-
-   .
 
    .. note::
       In case :file:`powerline.sh` as a client ``socat`` and ``coreutils`` need 
@@ -45,7 +43,7 @@ Python package
       ``powerline-status`` in PyPI.
 
    .. note::
-      Powerline developers should be aware that``pip install --editable`` does 
+      Powerline developers should be aware that ``pip install --editable`` does 
       not currently fully work. Installation performed this way are missing 
       ``powerline`` executable that needs to be symlinked. It will be located in 
       ``scripts/powerline``.
@@ -56,13 +54,13 @@ Vim installation
 Any terminal vim version with Python 3.2+ or Python 2.6+ support should work, 
 but MacVim users need to install it using the following command::
 
-    brew install macvim --env-std --override-system-vim
+    brew install macvim --env-std --with-override-system-vim
 
 Fonts installation
 ==================
 
-Install downloaded patched font by double-clicking the font file in Finder, then 
-clicking :guilabel:`Install this font` in the preview window.
+To install patched font double-click the font file in Finder, then click 
+:guilabel:`Install this font` in the preview window.
 
 After installing the patched font MacVim or terminal emulator (whatever 
 application powerline should work with) need to be configured to use the patched 

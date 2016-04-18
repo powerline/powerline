@@ -89,8 +89,8 @@ root <repository-root>`)::
 
 .. note::
     The availability of the ``powerline-config`` command is required for 
-    powerline support. DLlocation of this script may be specified via 
-    ``$POWERLINE_CONFIG_COMMAND`` environment variable.
+    powerline support. The location of this script may be specified via 
+    the ``$POWERLINE_CONFIG_COMMAND`` environment variable.
 
 .. note::
     It is advised to run ``powerline-daemon`` before adding the above line to 
@@ -114,11 +114,12 @@ For IPython<0.11 add the following lines to :file:`.ipython/ipy_user_conf.py`:
     # create skeleton ipy_user_conf.py file):
     powerline_setup()
 
-For IPython>=0.11 add the following line to :file:`ipython_config.py` file in 
-the used profile:
+For IPython>=0.11 add the following line to
+:file:`~/.ipython/profile_default/ipython_config.py` file in the used profile:
 
 .. code-block:: Python
 
+    c = get_config()
     c.InteractiveShellApp.extensions = [
         'powerline.bindings.ipython.post_0_11'
     ]

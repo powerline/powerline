@@ -9,7 +9,7 @@ import shlex
 
 from powerline.config import POWERLINE_ROOT, TMUX_CONFIG_DIRECTORY
 from powerline.lib.config import ConfigLoader
-from powerline import generate_config_finder, load_config, create_logger, PowerlineLogger, finish_common_config
+from powerline import generate_config_finder, load_config, create_logger, finish_common_config
 from powerline.shell import ShellPowerline
 from powerline.lib.shell import which
 from powerline.bindings.tmux import (TmuxVersionInfo, run_tmux_command, set_tmux_environment, get_tmux_version,
@@ -221,8 +221,8 @@ def get_main_config(args):
 def create_powerline_logger(args):
 	config = get_main_config(args)
 	common_config = finish_common_config(get_preferred_output_encoding(), config['common'])
-	logger = create_logger(common_config)
-	return PowerlineLogger(use_daemon_threads=True, logger=logger, ext='config')
+	logger, pl, get_module_attr = create_logger(common_config)
+	return pl
 
 
 def check_command(cmd):

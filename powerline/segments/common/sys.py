@@ -13,7 +13,8 @@ from powerline.segments import with_docstring
 cpu_count = None
 
 
-def system_load(pl, format='{avg:.1f}', threshold_good=1, threshold_bad=2, track_cpu_count=False):
+def system_load(pl, format='{avg:.1f}', threshold_good=1, threshold_bad=2,
+                track_cpu_count=False, short=False):
 	'''Return system load average.
 
 	Highlights using ``system_load_good``, ``system_load_bad`` and
@@ -35,6 +36,8 @@ def system_load(pl, format='{avg:.1f}', threshold_good=1, threshold_bad=2, track
 	:param bool track_cpu_count:
 		if True powerline will continuously poll the system to detect changes
 		in the number of CPUs.
+	:param bool short:
+		if True only the sys load over last 1 minute will be displayed.
 
 	Divider highlight group used: ``background:divider``.
 
@@ -61,6 +64,10 @@ def system_load(pl, format='{avg:.1f}', threshold_good=1, threshold_bad=2, track
 			'divider_highlight_group': 'background:divider',
 			'gradient_level': gradient_level,
 		})
+
+		if short:
+		    return ret
+
 	ret[0]['contents'] += ' '
 	ret[1]['contents'] += ' '
 	return ret

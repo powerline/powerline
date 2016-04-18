@@ -18,7 +18,9 @@ exit_suite() {
 		echo "${FAIL_SUMMARY}"
 	fi
 	export POWERLINE_CURRENT_SUITE="${POWERLINE_CURRENT_SUITE%/*}"
-	exit $FAILED
+	if test "x$1" != "x--continue" ; then
+		exit $FAILED
+	fi
 }
 
 fail() {
