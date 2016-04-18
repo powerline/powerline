@@ -8,7 +8,7 @@ from collections import defaultdict
 from itertools import chain
 
 from powerline.lib.dict import updated
-from powerline.editors import (Editor, param_updated,
+from powerline.editors import (Editor, param_updated, iterparam_updated,
                                EditorObj, EditorBinaryOp, EditorTernaryOp,
                                EditorEmpty, EditorIndex, EditorFunc, EditorStr,
                                EditorList, EditorNone, EditorNamedThing,
