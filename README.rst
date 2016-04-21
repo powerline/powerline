@@ -52,7 +52,7 @@ hassle for me / what happened to the original vim-powerline project / …*
 
 You should check out some of the Powerline derivatives. The most lightweight
 and feature-rich alternative is currently Bailey Ling’s `vim-airline 
-<https://github.com/bling/vim-airline>`_ project.
+<https://github.com/vim-airline/vim-airline>`_ project.
 
 ------
 
@@ -92,4 +92,4 @@ Vim statusline
 
 The font in the screenshots is `Pragmata Pro`_ by Fabrizio Schiavi.
 
-.. _`Pragmata Pro`: http://www.fsd.it/fonts/pragmatapro.htm
+.. _`Pragmata Pro`: http://www.fsd.it/shop/fonts/pragmatapro
