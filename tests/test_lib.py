@@ -566,6 +566,32 @@ class TestVCS(TestCase):
 			self.do_branch_rename_test(repo, lambda b: re.match(r'^[a-f0-9]+$', b))
 		finally:
 			call(['git', 'checkout', '-q', 'master'], cwd=GIT_REPO)
+		# Test stashing
+		self.assertEqual(repo.stash(), 0)
+
+		def stash_save():
+			with open(os.path.join(GIT_REPO, 'file'), 'w') as f:
+				f.write('abc')
+			return call(['git', 'stash', '-u'], cwd=GIT_REPO, stdout=PIPE)
+
+		def stash_drop():
+			return call(['git', 'stash', 'drop'], cwd=GIT_REPO, stdout=PIPE)
+
+		def stash_list():
+			return call(['git', 'stash', 'list'], cwd=GIT_REPO, stdout=PIPE)
+
+		try:
+			stash_save()
+			self.assertEqual(repo.stash(), 1)
+			stash_save()
+			self.assertEqual(repo.stash(), 2)
+			stash_drop()
+			self.assertEqual(repo.stash(), 1)
+			stash_drop()
+			self.assertEqual(repo.stash(), 0)
+		finally:
+			while stash_list():
+			    stash_drop()
 
 	def test_git_sym(self):
 		create_watcher = get_fallback_create_watcher()
