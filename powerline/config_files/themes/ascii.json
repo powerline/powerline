@@ -15,6 +15,9 @@
 		"branch": {
 			"before": "BR "
 		},
+		"stash": {
+			"before": "ST "
+		},
 		"cwd": {
 			"args": {
 				"ellipsis": "..."

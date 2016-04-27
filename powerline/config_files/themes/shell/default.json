@@ -31,6 +31,10 @@
 				"priority": 10
 			},
 			{
+				"function": "powerline.segments.common.vcs.stash",
+				"priority": 50
+			},
+			{
 				"function": "powerline.segments.common.vcs.branch",
 				"priority": 40
 			}

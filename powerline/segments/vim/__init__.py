@@ -22,7 +22,7 @@ from powerline.lib import add_divider_highlight_group
 from powerline.lib.vcs import guess
 from powerline.lib.humanize_bytes import humanize_bytes
 from powerline.lib import wraps_saveargs as wraps
-from powerline.segments.common.vcs import BranchSegment
+from powerline.segments.common.vcs import BranchSegment, StashSegment
 from powerline.segments import with_docstring
 from powerline.lib.unicode import string, unicode
 
@@ -507,6 +507,25 @@ branch = with_docstring(VimBranchSegment(),
 Highlight groups used: ``branch_clean``, ``branch_dirty``, ``branch``.
 
 Divider highlight group used: ``branch:divider``.
+''')
+
+
+@requires_filesystem_watcher
+@requires_segment_info
+class VimStashSegment(StashSegment):
+	divider_highlight_group = 'stash:divider'
+
+	@staticmethod
+	def get_directory(segment_info):
+		if vim_getbufoption(segment_info, 'buftype'):
+			return None
+		return buffer_name(segment_info)
+
+
+stash = with_docstring(VimStashSegment(),
+'''Return the number of stashes in the current working branch.
+
+Highlight groups used: ``stash``.
 ''')
 
 

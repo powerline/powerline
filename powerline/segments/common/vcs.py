@@ -56,3 +56,34 @@ branch = with_docstring(BranchSegment(),
 
 Highlight groups used: ``branch_clean``, ``branch_dirty``, ``branch``.
 ''')
+
+
+@requires_filesystem_watcher
+@requires_segment_info
+class StashSegment(Segment):
+	divider_highlight_group = None
+
+	@staticmethod
+	def get_directory(segment_info):
+		return segment_info['getcwd']()
+
+	def __call__(self, pl, segment_info, create_watcher):
+		name = self.get_directory(segment_info)
+		if name:
+			repo = guess(path=name, create_watcher=create_watcher)
+			if repo is not None:
+				stash = getattr(repo, 'stash', None)
+				if stash:
+					stashes = stash()
+					if stashes:
+						return [{
+							'contents': str(stashes),
+							'highlight_groups': ['stash'],
+							'divider_highlight_group': self.divider_highlight_group
+						}]
+
+stash = with_docstring(StashSegment(),
+'''Return the number of current VCS stash entries, if any.
+
+Highlight groups used: ``stash``.
+''')

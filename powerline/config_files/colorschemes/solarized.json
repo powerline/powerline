@@ -15,6 +15,7 @@
 		"branch":                  { "fg": "solarized:base1", "bg": "solarized:base02", "attrs": [] },
 		"branch_dirty":            { "fg": "solarized:yellow", "bg": "solarized:base02", "attrs": [] },
 		"branch_clean":            { "fg": "solarized:base1", "bg": "solarized:base02", "attrs": [] },
+		"stash":                   "branch_dirty",
 		"email_alert_gradient":    { "fg": "solarized:base3", "bg": "yellow_orange_red", "attrs": [] },
 		"email_alert":             "warning:regular",
 		"cwd":                     "information:additional",

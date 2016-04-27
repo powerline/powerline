@@ -102,6 +102,13 @@ try:
 		def ignore_event(path, name):
 			return False
 
+		def stash(self):
+			try:
+				stashref = git.Repository(git_directory(self.directory)).lookup_reference('refs/stash')
+			except KeyError:
+				return 0
+			return sum(1 for _ in stashref.log())
+
 		def do_status(self, directory, path):
 			if path:
 				try:
@@ -170,6 +177,9 @@ except ImportError:
 
 		def _gitcmd(self, directory, *args):
 			return readlines(('git',) + args, directory)
+
+		def stash(self):
+			return sum(1 for _ in self._gitcmd(self.directory, 'stash', 'list'))
 
 		def do_status(self, directory, path):
 			if path:

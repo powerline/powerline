@@ -738,6 +738,29 @@ class TestVcs(TestCommon):
 					'divider_highlight_group': None
 				}])
 
+	def test_stash(self):
+		pl = Pl()
+		create_watcher = get_fallback_create_watcher()
+		stash = partial(self.module.stash, pl=pl, create_watcher=create_watcher, segment_info={'getcwd': os.getcwd})
+
+		def forge_stash(n):
+		    return replace_attr(self.module, 'guess', get_dummy_guess(stash=lambda: n, directory='/tmp/tests'))
+
+		with forge_stash(0):
+			self.assertEqual(stash(), None)
+		with forge_stash(1):
+			self.assertEqual(stash(), [{
+				'highlight_groups': ['stash'],
+				'contents': '1',
+				'divider_highlight_group': None
+			}])
+		with forge_stash(2):
+			self.assertEqual(stash(), [{
+				'highlight_groups': ['stash'],
+				'contents': '2',
+				'divider_highlight_group': None
+			}])
+
 
 class TestTime(TestCommon):
 	module_name = 'time'
@@ -1389,6 +1412,30 @@ class TestVim(TestCase):
 					self.assertEqual(branch(segment_info=segment_info, status_colors=True, ignore_statuses=['U']), [
 						{'divider_highlight_group': 'branch:divider', 'highlight_groups': ['branch_clean', 'branch'], 'contents': 'foo'}
 					])
+
+	def test_stash(self):
+		pl = Pl()
+		create_watcher = get_fallback_create_watcher()
+		with vim_module._with('buffer', '/foo') as segment_info:
+			stash = partial(self.vim.stash, pl=pl, create_watcher=create_watcher, segment_info=segment_info)
+
+			def forge_stash(n):
+				return replace_attr(self.vcs, 'guess', get_dummy_guess(stash=lambda: n))
+
+			with forge_stash(0):
+				self.assertEqual(stash(), None)
+			with forge_stash(1):
+				self.assertEqual(stash(), [{
+					'divider_highlight_group': 'stash:divider',
+					'highlight_groups': ['stash'],
+					'contents': '1'
+				}])
+			with forge_stash(2):
+				self.assertEqual(stash(), [{
+					'divider_highlight_group': 'stash:divider',
+					'highlight_groups': ['stash'],
+					'contents': '2'
+				}])
 
 	def test_file_vcs_status(self):
 		pl = Pl()

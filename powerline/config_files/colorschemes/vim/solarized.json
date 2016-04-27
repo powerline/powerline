@@ -12,6 +12,7 @@
 		"readonly_indicator":       { "fg": "solarized:red", "bg": "solarized:base01", "attrs": [] },
 		"branch_dirty":             { "fg": "solarized:yellow", "bg": "solarized:base01", "attrs": [] },
 		"branch:divider":           { "fg": "solarized:base1", "bg": "solarized:base01", "attrs": [] },
+		"stash:divider":            "branch:divider",
 		"file_name":                { "fg": "solarized:base3", "bg": "solarized:base01", "attrs": ["bold"] },
 		"window_title":             { "fg": "solarized:base3", "bg": "solarized:base01", "attrs": [] },
 		"file_name_no_file":        { "fg": "solarized:base3", "bg": "solarized:base01", "attrs": ["bold"] },
