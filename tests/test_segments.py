@@ -738,6 +738,29 @@ class TestVcs(TestCommon):
 					'divider_highlight_group': None
 				}])
 
+	def test_stash(self):
+		pl = Pl()
+		create_watcher = get_fallback_create_watcher()
+		stash = partial(self.module.stash, pl=pl, create_watcher=create_watcher, segment_info={'getcwd': os.getcwd})
+
+		def forge_stash(n):
+		    return replace_attr(self.module, 'guess', get_dummy_guess(stash=lambda: n, directory='/tmp/tests'))
+
+		with forge_stash(0):
+			self.assertEqual(stash(), None)
+		with forge_stash(1):
+			self.assertEqual(stash(), [{
+				'highlight_groups': ['stash'],
+				'contents': '1',
+				'divider_highlight_group': None
+			}])
+		with forge_stash(2):
+			self.assertEqual(stash(), [{
+				'highlight_groups': ['stash'],
+				'contents': '2',
+				'divider_highlight_group': None
+			}])
+
 
 class TestTime(TestCommon):
 	module_name = 'time'
