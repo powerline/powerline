@@ -116,9 +116,8 @@ class WeatherSegment(KwThreadedSegment):
 		except KeyError:
 			if location_query is None:
 				location_data = json.loads(urllib_read('http://freegeoip.net/json/'))
-				location = ','.join((
+				location = ', '.join((
 					location_data['city'],
-					location_data['region_name'],
 					location_data['country_code']
 				))
 				self.info('Location returned by freegeoip is {0}', location)
@@ -126,8 +125,8 @@ class WeatherSegment(KwThreadedSegment):
 				location = location_query
 			query_data = {
 				'q':
-				'use "https://raw.githubusercontent.com/yql/yql-tables/master/weather/weather.bylocation.xml" as we;'
-				'select * from we where location="{0}" and unit="c"'.format(location).encode('utf-8'),
+				'select item.condition.code, item.condition.temp from weather.forecast '
+				'where u = "c" and woeid in (select woeid from geo.places where text = "{0}" limit 1) limit 1;'.format(self.location).encode('utf-8'),
 				'format': 'json',
 			}
 			self.location_urls[location_query] = url = (
@@ -143,7 +142,7 @@ class WeatherSegment(KwThreadedSegment):
 
 		response = json.loads(raw_response)
 		try:
-			condition = response['query']['results']['weather']['rss']['channel']['item']['condition']
+			condition = response['query']['results']['channel']['item']['condition']
 			condition_code = int(condition['code'])
 			temp = float(condition['temp'])
 		except (KeyError, ValueError):
