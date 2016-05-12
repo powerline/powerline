@@ -8,7 +8,7 @@ from powerline.lib.threaded import KwThreadedSegment
 from powerline.segments import with_docstring
 
 
-# XXX Warning: module name must not be equal to the segment name as long as this 
+# XXX Warning: module name must not be equal to the segment name as long as this
 # segment is imported into powerline.segments.common module.
 
 
@@ -115,19 +115,20 @@ class WeatherSegment(KwThreadedSegment):
 			return self.location_urls[location_query]
 		except KeyError:
 			if location_query is None:
-				location_data = json.loads(urllib_read('http://freegeoip.net/json/'))
+				location_data = json.loads(urllib_read('http://geoip.nekudo.com/api/'))
 				location = ','.join((
 					location_data['city'],
-					location_data['region_name'],
-					location_data['country_code']
+					location_data['country']['name'],
+					location_data['country']['code']
 				))
-				self.info('Location returned by freegeoip is {0}', location)
+				self.info('Location returned by nekudo is {0}', location)
 			else:
 				location = location_query
 			query_data = {
 				'q':
 				'use "https://raw.githubusercontent.com/yql/yql-tables/master/weather/weather.bylocation.xml" as we;'
-				'select * from we where location="{0}" and unit="c"'.format(location).encode('utf-8'),
+				'select * from weather.forecast where woeid in'
+				' (select woeid from geo.places(1) where text="{0}") and u="c"'.format(location).encode('utf-8'),
 				'format': 'json',
 			}
 			self.location_urls[location_query] = url = (
@@ -143,7 +144,7 @@ class WeatherSegment(KwThreadedSegment):
 
 		response = json.loads(raw_response)
 		try:
-			condition = response['query']['results']['weather']['rss']['channel']['item']['condition']
+			condition = response['query']['results']['channel']['item']['condition']
 			condition_code = int(condition['code'])
 			temp = float(condition['temp'])
 		except (KeyError, ValueError):
@@ -203,7 +204,7 @@ class WeatherSegment(KwThreadedSegment):
 weather = with_docstring(WeatherSegment(),
 '''Return weather from Yahoo! Weather.
 
-Uses GeoIP lookup from http://freegeoip.net/ to automatically determine
+Uses GeoIP lookup from http://geoip.nekudo.com to automatically determine
 your current location. This should be changed if you’re in a VPN or if your
 IP address is registered at another location.
 
