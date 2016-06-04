@@ -126,7 +126,6 @@ class WeatherSegment(KwThreadedSegment):
 				location = location_query
 			query_data = {
 				'q':
-				'use "https://raw.githubusercontent.com/yql/yql-tables/master/weather/weather.bylocation.xml" as we;'
 				'select * from weather.forecast where woeid in'
 				' (select woeid from geo.places(1) where text="{0}") and u="c"'.format(location).encode('utf-8'),
 				'format': 'json',
