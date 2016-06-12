@@ -11,3 +11,6 @@ build
 message.fail
 
 client/powerline
+
+tests/vterm_shell
+tests/vterm_tmux

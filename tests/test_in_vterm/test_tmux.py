@@ -7,7 +7,6 @@ import sys
 
 from time import sleep
 from subprocess import check_call
-from itertools import groupby
 from difflib import ndiff
 from glob import glob1
 
@@ -15,68 +14,34 @@ from powerline.lib.unicode import u
 from powerline.bindings.tmux import get_tmux_version
 from powerline import get_fallback_logger
 
-from tests.lib.terminal import ExpectProcess
+from tests.lib.terminal import ExpectProcess, coltext_to_shesc
 
 
 VTERM_TEST_DIR = os.path.abspath('tests/vterm_tmux')
 
 
-def cell_properties_key_to_shell_escape(cell_properties_key):
-	fg, bg, bold, underline, italic = cell_properties_key
-	return('\x1b[38;2;{0};48;2;{1}{bold}{underline}{italic}m'.format(
-		';'.join((str(i) for i in fg)),
-		';'.join((str(i) for i in bg)),
-		bold=(';1' if bold else ''),
-		underline=(';4' if underline else ''),
-		italic=(';3' if italic else ''),
-	))
-
-
 def test_expected_result(p, expected_result, cols, rows, print_logs):
-	last_line = []
-	for col in range(cols):
-		last_line.append(p[rows - 1, col])
 	attempts = 3
 	result = None
 	while attempts:
-		result = tuple((
-			(key, ''.join((i.text for i in subline)))
-			for key, subline in groupby(last_line, lambda i: i.cell_properties_key)
-		))
+		result = p.row(rows - 1)
 		if result == expected_result:
 			return True
 		attempts -= 1
 		print('Actual result does not match expected. Attempts left: {0}.'.format(attempts))
 		sleep(2)
+	shesc_result = coltext_to_shesc(result)
 	print('Result:')
-	shesc_result = ''.join((
-		'{0}{1}\x1b[m'.format(cell_properties_key_to_shell_escape(key), text)
-		for key, text in result
-	))
 	print(shesc_result)
 	print(result)
 	print('Expected:')
-	shesc_expected_result = ''.join((
-		'{0}{1}\x1b[m'.format(cell_properties_key_to_shell_escape(key), text)
-		for key, text in expected_result
-	))
+	shesc_expected_result = coltext_to_shesc(expected_result)
 	print(shesc_expected_result)
 	p.send(b'powerline-config tmux setup\n')
 	sleep(5)
 	print('Screen:')
-	screen = []
-	for i in range(rows):
-		screen.append([])
-		for j in range(cols):
-			screen[-1].append(p[i, j])
 	print('\n'.join(
-		''.join((
-			'{0}{1}\x1b[m'.format(
-				cell_properties_key_to_shell_escape(i.cell_properties_key),
-				i.text
-			) for i in line
-		))
-		for line in screen
+		coltext_to_shesc(line) for line in p[Ellipsis, Ellipsis]
 	))
 	a = shesc_result.replace('\x1b', '\\e') + '\n'
 	b = shesc_expected_result.replace('\x1b', '\\e') + '\n'

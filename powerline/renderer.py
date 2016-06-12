@@ -248,9 +248,9 @@ class Renderer(object):
 
 		theme = self.get_theme(kwargs.get('matcher_info', None))
 		for line in range(theme.get_line_number() - 1, 0, -1):
-			yield self.render(side=None, line=line, **kwargs)
+			yield self.render(side=None, line=line, theme=theme, **kwargs)
 
-	def render(self, mode=None, width=None, side=None, line=0, output_raw=False, output_width=False, segment_info=None, matcher_info=None):
+	def render(self, mode=None, width=None, side=None, line=0, output_raw=False, output_width=False, segment_info=None, matcher_info=None, theme=None):
 		'''Render all segments.
 
 		When a width is provided, low-priority segments are dropped one at 
@@ -285,8 +285,9 @@ class Renderer(object):
 		:param matcher_info:
 			Matcher information. Is processed in :py:meth:`get_segment_info` 
 			method.
+		:param powerline.theme.Theme theme:
+			Used theme or None.
 		'''
-		theme = self.get_theme(matcher_info)
 		return self.do_render(
 			mode=mode,
 			width=width,
@@ -295,7 +296,7 @@ class Renderer(object):
 			output_raw=output_raw,
 			output_width=output_width,
 			segment_info=self.get_segment_info(segment_info, mode),
-			theme=theme,
+			theme=theme or self.get_theme(matcher_info),
 		)
 
 	def compute_divider_widths(self, theme):
@@ -399,7 +400,6 @@ class Renderer(object):
 	def _render_length(self, theme, segments, divider_widths):
 		'''Update segments lengths and return them
 		'''
-		segments_len = len(segments)
 		ret = 0
 		divider_spaces = theme.get_spaces()
 		prev_segment = theme.EMPTY_SEGMENT
@@ -464,7 +464,6 @@ class Renderer(object):
 		highlighting strings added), and only renders the highlighted
 		statusline if render_highlighted is True.
 		'''
-		segments_len = len(segments)
 		divider_spaces = theme.get_spaces()
 		prev_segment = theme.EMPTY_SEGMENT
 		try:

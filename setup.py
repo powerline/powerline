@@ -7,6 +7,7 @@ import sys
 import subprocess
 import logging
 import shlex
+import shutil
 
 from traceback import print_exc
 from setuptools import setup, find_packages
@@ -33,6 +34,7 @@ def compile_client():
 		# A normal split would do a split on each space which might be incorrect. The
 		# shlex will not split if a space occurs in an arguments value.
 		subprocess.check_call(compiler + shlex.split(cflags) + ['client/powerline.c', '-o', 'scripts/powerline'])
+		shutil.copy('scripts/powerline', 'client/powerline')
 
 try:
 	compile_client()
@@ -40,7 +42,6 @@ except Exception as e:
 	print('Compiling C version of powerline-client failed')
 	logging.exception(e)
 	# FIXME Catch more specific exceptions
-	import shutil
 	if hasattr(shutil, 'which'):
 		which = shutil.which
 	else:
@@ -48,21 +49,27 @@ except Exception as e:
 		from powerline.lib.shell import which
 	if which('socat') and which('sed') and which('sh'):
 		print('Using powerline.sh script instead of C version (requires socat, sed and sh)')
-		shutil.copyfile('client/powerline.sh', 'scripts/powerline')
+		shutil.copy('client/powerline.sh', 'scripts/powerline')
 		can_use_scripts = True
 	else:
 		print('Using powerline.py script instead of C version')
-		shutil.copyfile('client/powerline.py', 'scripts/powerline')
+		shutil.copy('client/powerline.py', 'scripts/powerline')
 		can_use_scripts = True
 else:
 	can_use_scripts = False
+
+
+def get_subprocess_output(cmd):
+	p = subprocess.Popen(cmd, shell=False, stdout=subprocess.PIPE)
+	stdout, _ = p.communicate()
+	return stdout.decode('ascii').strip()
 
 
 def get_version():
 	base_version = '2.4'
 	base_version += '.dev9999'
 	try:
-		return base_version + '+git.' + str(subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip())
+		return base_version + '+git.' + str(get_subprocess_output(['git', 'rev-parse', 'HEAD']))
 	except Exception:
 		print_exc()
 		return base_version

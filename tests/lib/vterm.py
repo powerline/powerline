@@ -44,6 +44,15 @@ class VTermPos_s(ctypes.Structure):
 	)
 
 
+class VTermRect_s(ctypes.Structure):
+	_fields_ = (
+		('start_row', ctypes.c_int),
+		('end_row', ctypes.c_int),
+		('start_col', ctypes.c_int),
+		('end_col', ctypes.c_int),
+	)
+
+
 class VTermColor_s(ctypes.Structure):
 	_fields_ = (
 		('red', ctypes.c_uint8),
@@ -66,6 +75,10 @@ class VTermScreenCellAttrs_s(ctypes.Structure):
 	)
 
 
+VTermAttr_e = ctypes.c_int
+VTermProp_e = ctypes.c_int
+
+
 VTERM_MAX_CHARS_PER_CELL = 6
 
 
@@ -81,6 +94,7 @@ class VTermScreenCell_s(ctypes.Structure):
 
 VTerm_p = ctypes.c_void_p
 VTermScreen_p = ctypes.c_void_p
+VTermState_p = ctypes.c_void_p
 
 
 def get_functions(lib):
@@ -91,6 +105,7 @@ def get_functions(lib):
 			('cols', ctypes.c_int)
 		)),
 		vterm_obtain_screen=(VTermScreen_p, (('vt', VTerm_p),)),
+		vterm_obtain_state=(VTermState_p, (('vt', VTerm_p),)),
 		vterm_set_size=(None, (
 			('vt', VTerm_p),
 			('rows', ctypes.c_int),
@@ -110,7 +125,12 @@ def get_functions(lib):
 			('pos', VTermPos_s),
 			('cell', ctypes.POINTER(VTermScreenCell_s))
 		)),
+		vterm_state_get_cursorpos=(None, (
+			('state', VTermState_p),
+			('cursorpos', ctypes.POINTER(VTermPos_s)),
+		)),
 		vterm_free=(None, (('vt', VTerm_p),)),
+		vterm_set_utf8=(None, (('vt', VTerm_p), ('is_utf8', ctypes.c_int))),
 	)
 
 
@@ -168,8 +188,12 @@ class VTerm(object):
 	def __init__(self, lib, rows, cols):
 		self.functions = get_functions(lib)
 		self.vt = self.functions.vterm_new(rows, cols)
+		self.functions.vterm_set_utf8(self.vt, 1)
+		self.vtstate = self.functions.vterm_obtain_state(self.vt)
 		self.vtscreen = VTermScreen(self.functions, self.functions.vterm_obtain_screen(self.vt))
 		self.vtscreen.reset(True)
+		self._cursor = VTermPos_s(0, 0)
+		self._cursor_p = ctypes.byref(self._cursor)
 
 	def push(self, data):
 		if isinstance(data, unicode):
@@ -184,3 +208,8 @@ class VTerm(object):
 			self.functions.vterm_free(self.vt)
 		except AttributeError:
 			pass
+
+	@property
+	def cursor(self):
+		self.functions.vterm_state_get_cursorpos(self.vtstate, self._cursor_p)
+		return self._cursor

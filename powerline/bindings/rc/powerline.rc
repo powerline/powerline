@@ -21,7 +21,7 @@ fn _powerline_set_prompt {
 	_POWERLINE_STATUS = ( $status )
 	_POWERLINE_JOBNUM = $#apids
 	prompt = (``() {
-		_powerline_prompt
+		_powerline_prompt --width $_POWERLINE_COLUMNS
 	} ``() {
 		_powerline_continuation_prompt
 	})

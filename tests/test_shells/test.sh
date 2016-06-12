@@ -191,8 +191,8 @@ ln -s "$(which uname)" tests/shell/path
 ln -s "$(which test)" tests/shell/path
 ln -s "$(which pwd)" tests/shell/path
 ln -s "$(which hostname)" tests/shell/path
-ln -s ../../test_shells/bgscript.sh tests/shell/path
-ln -s ../../test_shells/waitpid.sh tests/shell/path
+ln -s ../../test_in_vterm/bgscript.sh tests/shell/path
+ln -s ../../test_in_vterm/waitpid.sh tests/shell/path
 if which socat ; then
 	ln -s "$(which socat)" tests/shell/path
 fi
@@ -424,8 +424,8 @@ if  test "x${ONLY_SHELL}" = "x" || test "x${ONLY_SHELL}" = "xpdb" ; then
 	if test "$PYTHON_IMPLEMENTATION" != "PyPy" ; then
 		if test "x${ONLY_TEST_TYPE}" = "x" || test "x${ONLY_TEST_TYPE}" = "xsubclass" ; then
 			echo "> pdb subclass"
-			if ! run_test subclass python $PDB_PYTHON "$PWD/tests/test_shells/pdb-main.py" ; then
-				fail "pdb-subclass:test" F "Failed checking $PDB_PYTHON $PWD/tests/test_shells/pdb-main.py"
+			if ! run_test subclass python $PDB_PYTHON "$PWD/tests/test_in_vterm/pdb-main.py" ; then
+				fail "pdb-subclass:test" F "Failed checking $PDB_PYTHON $PWD/tests/test_in_vterm/pdb-main.py"
 			fi
 		fi
 		if test "x${ONLY_TEST_TYPE}" = "x" || test "x${ONLY_TEST_TYPE}" = "xmodule" ; then
@@ -434,8 +434,8 @@ if  test "x${ONLY_SHELL}" = "x" || test "x${ONLY_SHELL}" = "xpdb" ; then
 			if test "$PYTHON_MM" = "2.6" ; then
 				MODULE="powerline.bindings.pdb.__main__"
 			fi
-			if ! run_test module python $PDB_PYTHON -m$MODULE "$PWD/tests/test_shells/pdb-script.py" ; then
-				fail "pdb-module:test" F "Failed checking $PDB_PYTHON -m$MODULE $PWD/tests/test_shells/pdb-script"
+			if ! run_test module python $PDB_PYTHON -m$MODULE "$PWD/tests/test_in_vterm/pdb-script.py" ; then
+				fail "pdb-module:test" F "Failed checking $PDB_PYTHON -m$MODULE $PWD/tests/test_in_vterm/pdb-script.py"
 			fi
 		fi
 	fi
