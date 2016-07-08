@@ -6,6 +6,15 @@ from powerline.lib.dict import mergedicts
 from powerline.lib.unicode import string
 
 
+class IPythonInfo(object):
+	def __init__(self, shell):
+		self._shell = shell
+
+	@property
+	def prompt_count(self):
+		return self._shell.execution_count
+
+
 # HACK: ipython tries to only leave us with plain ASCII
 class RewriteResult(object):
 	def __init__(self, prompt):
