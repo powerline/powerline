@@ -12,10 +12,10 @@ except ImportError:
 
 from pygments.token import Token
 from prompt_toolkit.styles import DynamicStyle, Attrs
-from IPython.terminal.prompts import Prompts
 
 from powerline.renderers.ipython import IPythonRenderer
 from powerline.ipython import IPythonInfo
+from powerline.colorscheme import ATTR_BOLD, ATTR_ITALIC, ATTR_UNDERLINE
 
 
 PowerlinePromptToken = Token.Generic.Prompt.Powerline
@@ -30,37 +30,11 @@ class PowerlineStyleDict(defaultdict):
 		return defaultdict.__new__(cls)
 
 	def __init__(self, missing_func):
-		super(IPythonPygmentsStyle, self).__init__()
+		super(PowerlineStyleDict, self).__init__()
 		self.missing_func = missing_func
 
 	def __missing__(self, key):
 		return self.missing_func(key)
-
-
-class PowerlinePrompts(Prompts):
-	'''Class that returns powerline prompts
-	'''
-	def __init__(self, old_prompts, powerline):
-		self.old_prompts = old_prompts
-		self.shell = old_prompts.shell
-		self.powerline = powerline
-		self.last_output_count = None
-		self.last_output = {}
-
-	for prompt in ('in', 'continuation', 'rewrite', 'out'):
-		exec((
-			'def {0}_prompt_tokens(self, *args, **kwargs):\n'
-			'	if self.last_output_count != self.shell.execution_count:\n'
-			'		self.last_output.clear()\n'
-			'		self.last_output_count = self.shell.execution_count\n'
-			'	if "{0}" not in self.last_output:\n'
-			'		self.last_output["{0}"] = self.powerline.render('
-			'			side="left",'
-			'			matcher_info="{1}",'
-			'			segment_info=IPythonInfo(self.shell),'
-			'		) + [(Token.Generic.Prompt, " ")]\n'
-			'	return self.last_output["{0}"]'
-		).format(prompt, 'in2' if prompt == 'continuation' else prompt))
 
 
 class PowerlinePromptStyle(DynamicStyle):
@@ -107,6 +81,10 @@ class PowerlinePromptStyle(DynamicStyle):
 
 class IPythonPygmentsRenderer(IPythonRenderer):
 	reduce_initial = []
+
+	def get_segment_info(self, segment_info, mode):
+		return super(IPythonPygmentsRenderer, self).get_segment_info(
+			IPythonInfo(segment_info), mode)
 
 	@staticmethod
 	def hl_join(segments):
