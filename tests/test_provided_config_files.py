@@ -154,11 +154,11 @@ class TestConfig(TestCase):
 
 		segment_info = Args(prompt_count=1)
 
-		with IpyPowerline(logger=get_logger()) as powerline:
+		with IpyPowerline(logger=get_logger(), renderer_module='.pre_5') as powerline:
 			for prompt_type in ['in', 'in2']:
 				powerline.render(is_prompt=True, matcher_info=prompt_type, segment_info=segment_info)
 				powerline.render(is_prompt=True, matcher_info=prompt_type, segment_info=segment_info)
-		with IpyPowerline(logger=get_logger()) as powerline:
+		with IpyPowerline(logger=get_logger(), renderer_module='.pre_5') as powerline:
 			for prompt_type in ['out', 'rewrite']:
 				powerline.render(is_prompt=False, matcher_info=prompt_type, segment_info=segment_info)
 				powerline.render(is_prompt=False, matcher_info=prompt_type, segment_info=segment_info)
