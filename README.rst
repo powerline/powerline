@@ -12,7 +12,7 @@ Awesome, i3 and Qtile.**
 * `Support forum`_ (powerline-support@googlegroups.com)
 * `Development discussion`_ (powerline-dev@googlegroups.com)
 
-.. image:: https://api.travis-ci.org/powerline/powerline.png?branch=develop
+.. image:: https://api.travis-ci.org/powerline/powerline.svg?branch=develop
    :target: `travis-build-status`_
    :alt: Build status
 
