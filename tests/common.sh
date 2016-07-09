@@ -24,12 +24,19 @@ exit_suite() {
 }
 
 fail() {
+	local allow_failure=
+	if test "x$1" = "x--allow-failure" ; then
+		shift
+		allow_failure=A
+	fi
 	local test_name="$1"
-	local fail_char="$2"
+	local fail_char="$allow_failure$2"
 	local message="$3"
 	local full_msg="$fail_char $POWERLINE_CURRENT_SUITE|$test_name :: $message"
 	FAIL_SUMMARY="${FAIL_SUMMARY}${NL}${full_msg}"
 	echo "Failed: $full_msg"
 	echo "$full_msg" >> tests/failures
-	FAILED=1
+	if test "x$allow_failure" = "x" ; then
+		FAILED=1
+	fi
 }
