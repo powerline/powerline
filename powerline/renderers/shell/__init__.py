@@ -13,41 +13,30 @@ def int_to_rgb(num):
 	return r, g, b
 
 
-class ShellRenderer(Renderer):
-	'''Powerline shell segment renderer.'''
-	escape_hl_start = ''
-	escape_hl_end = ''
-	term_truecolor = False
-	term_escape_style = 'auto'
-	tmux_escape = False
-	screen_escape = False
-
-	character_translations = Renderer.character_translations.copy()
+class PromptRenderer(Renderer):
+	'''Powerline generic prompt segment renderer'''
 
 	def __init__(self, old_widths=None, **kwargs):
-		super(ShellRenderer, self).__init__(**kwargs)
+		super(PromptRenderer, self).__init__(**kwargs)
 		self.old_widths = old_widths if old_widths is not None else {}
 
-	def render(self, segment_info, **kwargs):
-		local_theme = segment_info.get('local_theme')
-		return super(ShellRenderer, self).render(
-			matcher_info=local_theme,
-			segment_info=segment_info,
-			**kwargs
-		)
+	def get_client_id(self, segment_info):
+		'''Get client ID given segment info
+
+		This is used by daemon to correctly cache widths for different clients 
+		using a single renderer instance.
+
+		:param dict segment_info:
+			:ref:`Segment info dictionary <dev-segments-info>`. Out of it only 
+			``client_id`` key is used. It is OK for this dictionary to not 
+			contain this key.
+
+		:return: Any hashable value or ``None``.
+		'''
+		return segment_info.get('client_id') if isinstance(segment_info, dict) else None
 
 	def do_render(self, output_width, segment_info, side, theme, width=None, **kwargs):
-		if self.term_escape_style == 'auto':
-			if segment_info['environ'].get('TERM') == 'fbterm':
-				self.used_term_escape_style = 'fbterm'
-			else:
-				self.used_term_escape_style = 'xterm'
-		else:
-			self.used_term_escape_style = self.term_escape_style
-		if isinstance(segment_info, dict):
-			client_id = segment_info.get('client_id')
-		else:
-			client_id = None
+		client_id = self.get_client_id(segment_info)
 		if client_id is not None:
 			local_key = (client_id, side, None if theme is self.theme else id(theme))
 			key = (client_id, side, None)
@@ -70,7 +59,7 @@ class ShellRenderer(Renderer):
 						width -= self.old_widths[(client_id, 'left', local_key[-1])]
 					except KeyError:
 						pass
-		res = super(ShellRenderer, self).do_render(
+		res = super(PromptRenderer, self).do_render(
 			output_width=True,
 			width=width,
 			theme=theme,
@@ -85,6 +74,36 @@ class ShellRenderer(Renderer):
 			return ret[0]
 		else:
 			return ret
+
+
+class ShellRenderer(PromptRenderer):
+	'''Powerline shell segment renderer.'''
+	escape_hl_start = ''
+	escape_hl_end = ''
+	term_truecolor = False
+	term_escape_style = 'auto'
+	tmux_escape = False
+	screen_escape = False
+
+	character_translations = Renderer.character_translations.copy()
+
+	def render(self, segment_info, **kwargs):
+		local_theme = segment_info.get('local_theme')
+		return super(ShellRenderer, self).render(
+			matcher_info=local_theme,
+			segment_info=segment_info,
+			**kwargs
+		)
+
+	def do_render(self, segment_info, **kwargs):
+		if self.term_escape_style == 'auto':
+			if segment_info['environ'].get('TERM') == 'fbterm':
+				self.used_term_escape_style = 'fbterm'
+			else:
+				self.used_term_escape_style = 'xterm'
+		else:
+			self.used_term_escape_style = self.term_escape_style
+		return super(ShellRenderer, self).do_render(segment_info=segment_info, **kwargs)
 
 	def hlstyle(self, fg=None, bg=None, attrs=None):
 		'''Highlight a segment.
