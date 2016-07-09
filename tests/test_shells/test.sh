@@ -88,6 +88,10 @@ do_run_test() {
 				|| test "$PYTHON_IMPLEMENTATION" = "PyPy" \
 			) \
 		) \
+		|| ( \
+			test "x${SH}" = "xipython" \
+			&& test "$("${PYTHON}" -mIPython --version | head -n1 | cut -d. -f1)" -ge 5 \
+		) \
 	) ; then
 		wait_for_echo_arg="--wait-for-echo"
 	fi
