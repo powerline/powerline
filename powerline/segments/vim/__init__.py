@@ -578,7 +578,7 @@ def trailing_whitespace(pl, segment_info):
 	else:
 		buf = segment_info['buffer']
 		bws = b' \t'
-		sws = str(bws)
+		sws = str(' \t')  # Ignore unicode_literals and use native str.
 		for i in range(len(buf)):
 			try:
 				line = buf[i]
