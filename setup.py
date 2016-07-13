@@ -59,7 +59,7 @@ else:
 
 
 def get_version():
-	base_version = '2.4'
+	base_version = '2.5'
 	base_version += '.dev9999'
 	try:
 		return base_version + '+git.' + str(subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip())
