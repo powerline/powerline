@@ -124,6 +124,22 @@ For IPython>=0.11 add the following line to
         'powerline.bindings.ipython.post_0_11'
     ]
 
+For IPython>=5.0 you may use the above set up, but it is deprecated. It is 
+suggested to use
+
+.. code-block:: Python
+
+    from powerline.bindings.ipython.since_5 import PowerlinePrompts
+    c = get_config()
+    c.TerminalInteractiveShell.simple_prompt = False
+    c.TerminalInteractiveShell.prompts_class = PowerlinePrompts
+
+.. note::
+    Setting ``simple_prompt`` to False after IPython-5.0 is required regardless 
+    of whether you use ``c.InteractiveShellApp.extensions`` setting or 
+    ``c.TerminalInteractiveShell.prompts_class``. But you probably already have 
+    this line because IPython is not very useful without it.
+
 IPython=0.11* is not supported and does not work. IPython<0.10 was not 
 tested (not installable by pip).
 
