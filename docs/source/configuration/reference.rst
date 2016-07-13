@@ -191,6 +191,8 @@ Common configuration is a subdictionary that is a value of ``ext`` key in
     ``{output : theme_name}`` that maps the ``xrandr`` output names to the 
     local themes to use on that output.
 
+.. _config-ext-components:
+
 ``components``
     Determines which extension components should be enabled. This key is highly 
     extension-specific, here is the table of extensions and corresponding 

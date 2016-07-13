@@ -29,7 +29,7 @@ Pdb listers
    :members:
 
 i3wm listers
-----------
+------------
 
 .. automodule:: powerline.listers.i3wm
    :members:
