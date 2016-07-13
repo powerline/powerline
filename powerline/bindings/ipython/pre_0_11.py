@@ -99,7 +99,7 @@ class ConfigurableIPythonPowerline(IPythonPowerline):
 		self.config_overrides = config_overrides
 		self.theme_overrides = theme_overrides
 		self.config_paths = config_paths
-		super(ConfigurableIPythonPowerline, self).init()
+		super(ConfigurableIPythonPowerline, self).init(renderer_module='.pre_5')
 
 	def ipython_magic(self, ip, parameter_s=''):
 		if parameter_s == 'reload':

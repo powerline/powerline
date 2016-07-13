@@ -43,6 +43,8 @@
 		"branch_dirty":              { "fg": "brightyellow", "bg": "gray2", "attrs": [] },
 		"branch_clean":              { "fg": "gray9", "bg": "gray2", "attrs": [] },
 		"branch:divider":            { "fg": "gray7", "bg": "gray2", "attrs": [] },
+		"stash":                     "branch_dirty",
+		"stash:divider":             "branch:divider",
 		"cwd":                       "information:additional",
 		"cwd:current_folder":        "information:regular",
 		"cwd:divider":               { "fg": "gray7", "bg": "gray4", "attrs": [] },

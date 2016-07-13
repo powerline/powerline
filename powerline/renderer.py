@@ -4,6 +4,7 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 import sys
 import os
 import re
+import operator
 
 from itertools import chain
 
@@ -310,6 +311,19 @@ class Renderer(object):
 			},
 		}
 
+	hl_join = staticmethod(''.join)
+	'''Join a list of rendered segments into a resulting string
+
+	This method exists to deal with non-string render outputs, so `segments` 
+	may actually be not an iterable with strings.
+
+	:param list segments:
+		Iterable containing rendered segments. By “rendered segments” 
+		:py:meth:`Renderer.hl` output is meant.
+
+	:return: Results of joining these segments.
+	'''
+
 	def do_render(self, mode, width, side, line, output_raw, output_width, segment_info, theme):
 		'''Like Renderer.render(), but accept theme in place of matcher_info
 		'''
@@ -323,7 +337,7 @@ class Renderer(object):
 			# No width specified, so we don’t need to crop or pad anything
 			if output_width:
 				current_width = self._render_length(theme, segments, self.compute_divider_widths(theme))
-			return construct_returned_value(''.join([
+			return construct_returned_value(self.hl_join([
 				segment['_rendered_hl']
 				for segment in self._render_segments(theme, segments)
 			]) + self.hlstyle(), segments, current_width, output_raw, output_width)
@@ -378,7 +392,10 @@ class Renderer(object):
 		elif output_width:
 			current_width = self._render_length(theme, segments, divider_widths)
 
-		rendered_highlighted = ''.join([segment['_rendered_hl'] for segment in self._render_segments(theme, segments)])
+		rendered_highlighted = self.hl_join([
+			segment['_rendered_hl']
+			for segment in self._render_segments(theme, segments)
+		])
 		if rendered_highlighted:
 			rendered_highlighted += self.hlstyle()
 
