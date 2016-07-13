@@ -100,6 +100,29 @@ root <repository-root>`)::
 
     to :file:`.tmux.conf`.
 
+.. warning::
+    Segments which depend on current working directory (e.g. 
+    :py:func:`powerline.segments.common.vcs.branch`) require also setting up 
+    :ref:`shell bindings <usage-shell>`. It is not required to use powerline 
+    shell prompt, :ref:`components setting <config-ext-components>` allows to 
+    set up only powerline bindings for tmux without altering your prompt. 
+    Without setting up shell bindings powerline will use current working 
+    directory of *tmux server* which is probably not what you need.
+
+    Segments which depend on environment like 
+    :py:func:`powerline.segments.common.env.virtualenv` will not work at all 
+    (i.e. they will use environment of the tmux server), tracking environment 
+    changes is going to slow down shell a lot.
+
+    In any case it is suggested to avoid both kinds of segments in tmux 
+    :ref:`themes <config-themes>` because even support for tracking current 
+    directory is very limited:
+
+    #. It works only in shell. Should you e.g. run Vim and run ``:cd`` there you 
+       will get current working directory from shell.
+    #. It works only in local shell and requires configuring it.
+    #. Some shells are not supported at all.
+
 IPython prompt
 ==============
 
