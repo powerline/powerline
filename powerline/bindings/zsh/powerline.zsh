@@ -74,7 +74,9 @@ _powerline_init_modes_support() {
 	}
 
 	function -g _powerline_zle_keymap_select() {
+		local last_status=$?
 		_powerline_set_true_keymap_name $KEYMAP
+		$(exit last_status)
 		zle reset-prompt
 		test -z "$_POWERLINE_SAVE_WIDGET" || zle $_POWERLINE_SAVE_WIDGET
 	}
