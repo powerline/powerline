@@ -104,8 +104,13 @@ _powerline_set_command() {
 	fi
 }
 
+_powerline_tmux_pane() {
+	echo "${TMUX_PANE:-`TMUX="$_POWERLINE_TMUX" tmux display -p "#D"`}" | \
+		tr -d ' %'
+}
+
 _powerline_tmux_setenv() {
-	TMUX="$_POWERLINE_TMUX" tmux setenv -g TMUX_"$1"_`tmux display -p "#D" | tr -d %` "$2"
+	TMUX="$_POWERLINE_TMUX" tmux setenv -g TMUX_"$1"_`_powerline_tmux_pane` "$2"
 	TMUX="$_POWERLINE_TMUX" tmux refresh -S
 }
 
