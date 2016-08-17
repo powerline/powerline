@@ -21,7 +21,17 @@ else
 	endif
 endif
 if ( { $POWERLINE_CONFIG_COMMAND shell --shell=tcsh uses tmux } ) then
-	alias _powerline_tmux_set_pwd 'if ( $?TMUX && { tmux refresh -S >&/dev/null } ) tmux setenv -g TMUX_PWD_`tmux display -p "#D" | tr -d %` $PWD:q ; if ( $?TMUX ) tmux refresh -S >&/dev/null'
+	if ( $?TMUX_PANE ) then
+		if ( "$TMUX_PANE" == "" ) then
+			set _POWERLINE_TMUX_PANE="`tmux display -p '#D'`"
+		else
+			set _POWERLINE_TMUX_PANE="$TMUX_PANE"
+		endif
+	else
+		set _POWERLINE_TMUX_PANE="`tmux display -p '#D'`"
+	endif
+	set _POWERLINE_TMUX_PANE="`echo $_POWERLINE_TMUX_PANE:q | tr -d '% '`"
+	alias _powerline_tmux_set_pwd 'if ( $?TMUX && { tmux refresh -S >&/dev/null } ) tmux setenv -g TMUX_PWD_$_POWERLINE_TMUX_PANE $PWD:q ; if ( $?TMUX ) tmux refresh -S >&/dev/null'
 	alias cwdcmd "`alias cwdcmd` ; _powerline_tmux_set_pwd"
 endif
 if ( { $POWERLINE_CONFIG_COMMAND shell --shell=tcsh uses prompt } ) then
