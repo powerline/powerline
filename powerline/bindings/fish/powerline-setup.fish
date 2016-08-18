@@ -82,9 +82,17 @@ function powerline-setup
 	if env $POWERLINE_CONFIG_COMMAND shell --shell=fish uses tmux
 		if test -n "$TMUX"
 			if tmux refresh -S ^/dev/null
+				set -g _POWERLINE_TMUX "$TMUX"
+				function _powerline_tmux_pane
+					if test -z "$TMUX_PANE"
+						env TMUX="$_POWERLINE_TMUX" tmux display -p "#D" | tr -d ' %'
+					else
+						echo "$TMUX_PANE" | tr -d ' %'
+					end
+				end
 				function _powerline_tmux_setenv
-					tmux setenv -g TMUX_$argv[1]_(tmux display -p "#D" | tr -d "%") "$argv[2]"
-					tmux refresh -S
+					env TMUX="$_POWERLINE_TMUX" tmux setenv -g TMUX_$argv[1]_(_powerline_tmux_pane) "$argv[2]"
+					env TMUX="$_POWERLINE_TMUX" tmux refresh -S
 				end
 				function --on-variable PWD _powerline_tmux_set_pwd
 					_powerline_tmux_setenv PWD "$PWD"

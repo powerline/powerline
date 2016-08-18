@@ -20,6 +20,11 @@ _powerline_append_precmd_function() {
 
 integer _POWERLINE_JOBNUM
 
+_powerline_tmux_pane() {
+	local -x TMUX="$_POWERLINE_TMUX"
+	echo "${TMUX_PANE:-`tmux display -p "#D"`}" | tr -d ' %'
+}
+
 _powerline_init_tmux_support() {
 	emulate -L zsh
 	if test -n "$TMUX" && tmux refresh -S &>/dev/null ; then
@@ -29,7 +34,7 @@ _powerline_init_tmux_support() {
 		function -g _powerline_tmux_setenv() {
 			emulate -L zsh
 			local -x TMUX="$_POWERLINE_TMUX"
-			tmux setenv -g TMUX_"$1"_$(tmux display -p "#D" | tr -d %) "$2"
+			tmux setenv -g TMUX_"$1"_$(_powerline_tmux_pane) "$2"
 			tmux refresh -S
 		}
 
