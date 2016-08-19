@@ -311,7 +311,7 @@ if test -z "${ONLY_SHELL}" || test "x${ONLY_SHELL%sh}" != "x${ONLY_SHELL}" || te
 		if test $TEST_TYPE = daemon ; then
 			sh -c '
 				echo $$ > tests/shell/daemon_pid
-				$PYTHON ./scripts/powerline-daemon -s$ADDRESS -f >tests/shell/daemon_log 2>&1
+				exec $PYTHON ./scripts/powerline-daemon -s$ADDRESS -f >tests/shell/daemon_log 2>&1
 			' &
 		fi
 		echo "> Testing $TEST_TYPE"

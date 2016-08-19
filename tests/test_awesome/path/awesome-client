@@ -1,0 +1,3 @@
+#!/bin/sh
+echo "$@" >> "$TEST_ROOT/results/args"
+cat >> "$TEST_ROOT/results/requests"

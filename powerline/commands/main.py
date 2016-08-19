@@ -11,6 +11,7 @@ from powerline.lib.overrides import parsedotval, parse_override_var
 from powerline.lib.dict import mergeargs
 from powerline.lib.encoding import get_preferred_arguments_encoding
 from powerline.lib.unicode import u, unicode
+from powerline.bindings.wm import wm_threads
 
 
 if sys.version_info < (3,):
@@ -23,7 +24,7 @@ else:
 		return s
 
 
-def finish_args(environ, args):
+def finish_args(parser, environ, args, is_daemon=False):
 	'''Do some final transformations
 
 	Transforms ``*_override`` arguments into dictionaries, adding overrides from 
@@ -61,7 +62,13 @@ def finish_args(environ, args):
 		[path for path in environ.get('POWERLINE_CONFIG_PATHS', '').split(':') if path]
 		+ (args.config_path or [])
 	)
-	args.side = args.side[0]
+	if args.ext[0].startswith('wm.'):
+		if not is_daemon:
+			parser.error('WM bindings must be used with daemon only')
+		elif args.ext[0][3:] not in wm_threads:
+			parser.error('WM binding not found')
+	elif not args.side:
+		parser.error('expected one argument')
 	return args
 
 
@@ -77,15 +84,16 @@ def get_argparser(ArgumentParser=argparse.ArgumentParser):
 	parser.add_argument(
 		'ext', nargs=1,
 		help='Extension: application for which powerline command is launched '
-		     '(usually `shell\' or `tmux\').'
+		     '(usually `shell\' or `tmux\'). Also supports `wm.\' extensions: '
+		     + ', '.join(('`wm.' + key + '\'' for key in wm_threads.keys())) + '.'
 	)
 	parser.add_argument(
-		'side', nargs=1, choices=('left', 'right', 'above', 'aboveleft'),
+		'side', nargs='?', choices=('left', 'right', 'above', 'aboveleft'),
 		help='Side: `left\' and `right\' represent left and right side '
 		     'respectively, `above\' emits lines that are supposed to be printed '
 		     'just above the prompt and `aboveleft\' is like concatenating '
 		     '`above\' with `left\' with the exception that only one Python '
-		     'instance is used in this case.'
+		     'instance is used in this case. May be omitted for `wm.*\' extensions.'
 	)
 	parser.add_argument(
 		'-r', '--renderer-module', metavar='MODULE', type=str,

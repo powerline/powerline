@@ -5,6 +5,10 @@ import re
 
 from powerline.theme import requires_segment_info
 from powerline.lib.shell import run_cmd
+from powerline.bindings.wm.awesome import AwesomeThread
+
+
+DEFAULT_UPDATE_INTERVAL = 0.5
 
 
 conn = None
@@ -36,3 +40,8 @@ def get_connected_xrandr_outputs(pl):
 	return (match.groupdict() for match in XRANDR_OUTPUT_RE.finditer(
 	    run_cmd(pl, ['xrandr', '-q'])
 	))
+
+
+wm_threads = {
+	'awesome': AwesomeThread,
+}

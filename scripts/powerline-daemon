@@ -13,11 +13,14 @@ from signal import signal, SIGTERM
 from time import sleep
 from functools import partial
 from io import BytesIO
+from threading import Event
+from itertools import chain
 
 from powerline.shell import ShellPowerline
 from powerline.commands.main import finish_args, write_output
 from powerline.lib.monotonic import monotonic
 from powerline.lib.encoding import get_preferred_output_encoding, get_preferred_arguments_encoding, get_unicode_writer
+from powerline.bindings.wm import wm_threads
 
 from powerline.commands.main import get_argparser as get_main_argparser
 from powerline.commands.daemon import get_argparser as get_daemon_argparser
@@ -28,6 +31,7 @@ use_filesystem = not sys.platform.lower().startswith('linux')
 
 address = None
 pidfile = None
+ts_shutdown_event = Event()
 
 
 class NonInteractiveArgParser(ArgumentParser):
@@ -52,6 +56,7 @@ powerlines = {}
 logger = None
 config_loader = None
 home = os.path.expanduser('~')
+started_wm_threads = {}
 
 
 class PowerlineDaemon(ShellPowerline):
@@ -62,10 +67,21 @@ class PowerlineDaemon(ShellPowerline):
 		return super(PowerlineDaemon, self).get_log_handler()
 
 
+def start_wm(args, environ, cwd):
+	wm_name = args.ext[0][3:]
+	if wm_name in started_wm_threads:
+		return b''
+	shutdown_event = Event()
+	thread = wm_threads[wm_name](shutdown_event=shutdown_event)
+	thread.start()
+	started_wm_threads[wm_name] = (thread, shutdown_event)
+	return b''
+
+
 def render(args, environ, cwd):
 	global logger
 	global config_loader
-	cwd = cwd or environ.get('PWD', '/')
+
 	segment_info = {
 		'getcwd': lambda: cwd,
 		'home': environ.get('HOME', home),
@@ -82,7 +98,7 @@ def render(args, environ, cwd):
 		environ.get('POWERLINE_CONFIG_OVERRIDES', ''),
 		environ.get('POWERLINE_CONFIG_PATHS', ''),
 	)
-	finish_args(environ, args)
+
 	powerline = None
 	try:
 		powerline = powerlines[key]
@@ -93,6 +109,7 @@ def render(args, environ, cwd):
 				logger=logger,
 				config_loader=config_loader,
 				run_once=False,
+				shutdown_event=ts_shutdown_event,
 			)
 			if logger is None:
 				logger = powerline.logger
@@ -174,12 +191,18 @@ def parse_args(req, encoding=get_preferred_arguments_encoding()):
 	shell_args = parser.parse_args(args[1:numargs + 1])
 	cwd = args[numargs + 1]
 	environ = dict(((k, v) for k, v in (x.partition('=')[0::2] for x in args[numargs + 2:])))
+	cwd = cwd or environ.get('PWD', '/')
 	return shell_args, environ, cwd
 
 
-def do_render(req):
+def get_answer(req):
 	try:
-		return safe_bytes(render(*parse_args(req)))
+		args, environ, cwd = parse_args(req)
+		finish_args(parser, environ, args, is_daemon=True)
+		if args.ext[0].startswith('wm.'):
+			return safe_bytes(start_wm(args, environ, cwd))
+		else:
+			return safe_bytes(render(args, environ, cwd))
 	except Exception as e:
 		return safe_bytes(str(e))
 
@@ -214,7 +237,7 @@ def do_one(sock, read_sockets, write_sockets, result_map):
 			if req == EOF:
 				raise SystemExit(0)
 			elif req:
-				ans = do_render(req)
+				ans = get_answer(req)
 				result_map[s] = ans
 				write_sockets.add(s)
 			else:
@@ -230,6 +253,39 @@ def do_one(sock, read_sockets, write_sockets, result_map):
 			s.close()
 
 
+def shutdown(sock, read_sockets, write_sockets):
+	'''Perform operations necessary for nicely shutting down daemon
+
+	Specifically it
+
+	#. Closes all sockets.
+	#. Notifies segments based on 
+	  :py:class:`powerline.lib.threaded.ThreadedSegment` and WM-specific 
+	  threads that daemon is shutting down.
+	#. Waits for threads to finish, but no more then 2 seconds total.
+	#. Waits so that total execution time of this function is 2 seconds in order 
+	   to allow ThreadedSegments to finish.
+	'''
+	total_wait_time = 2
+	shutdown_start_time = monotonic()
+
+	for s in chain((sock,), read_sockets, write_sockets):
+		s.close()
+
+	# Notify ThreadedSegments
+	ts_shutdown_event.set()
+	for thread, shutdown_event in started_wm_threads.values():
+		shutdown_event.set()
+
+	for thread, shutdown_event in started_wm_threads.values():
+		wait_time = total_wait_time - (monotonic() - shutdown_start_time)
+		if wait_time > 0:
+			thread.join(wait_time)
+
+	wait_time = total_wait_time - (monotonic() - shutdown_start_time)
+	sleep(wait_time)
+
+
 def main_loop(sock):
 	sock.listen(128)
 	sock.setblocking(0)
@@ -237,10 +293,14 @@ def main_loop(sock):
 	read_sockets, write_sockets = set(), set()
 	result_map = {}
 	try:
-		while True:
-			do_one(sock, read_sockets, write_sockets, result_map)
-	except KeyboardInterrupt:
-		raise SystemExit(0)
+		try:
+			while True:
+				do_one(sock, read_sockets, write_sockets, result_map)
+		except KeyboardInterrupt:
+			raise SystemExit(0)
+	except SystemExit as e:
+		shutdown(sock, read_sockets, write_sockets)
+		raise e
 	return 0
 
 

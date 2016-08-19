@@ -23,8 +23,9 @@ else:
 
 
 if __name__ == '__main__':
-	args = get_argparser().parse_args()
-	finish_args(os.environ, args)
+	parser = get_argparser()
+	args = parser.parse_args()
+	finish_args(parser, os.environ, args)
 	powerline = ShellPowerline(args, run_once=True)
 	segment_info = {'args': args, 'environ': os.environ}
 	write_output(args, powerline, segment_info, get_unicode_writer())

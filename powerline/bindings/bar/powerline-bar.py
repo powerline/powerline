@@ -11,6 +11,7 @@ from argparse import ArgumentParser
 
 from powerline.lemonbar import LemonbarPowerline
 from powerline.lib.encoding import get_unicode_writer
+from powerline.bindings.wm import DEFAULT_UPDATE_INTERVAL
 
 
 if __name__ == '__main__':
@@ -29,7 +30,7 @@ if __name__ == '__main__':
 
 	def render(reschedule=False):
 		if reschedule:
-			Timer(0.5, render, kwargs={'reschedule': True}).start()
+			Timer(DEFAULT_UPDATE_INTERVAL, render, kwargs={'reschedule': True}).start()
 
 		global lock
 		with lock:
