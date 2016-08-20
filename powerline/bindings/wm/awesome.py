@@ -22,14 +22,20 @@ def read_to_log(pl, client):
 		pl.error('Client exited with {0}', client.returncode, prefix='awesome')
 
 
-def run(shutdown_event=None, interval=None):
-	powerline = Powerline('wm', renderer_module='pango_markup')
+def run(thread_shutdown_event=None, pl_shutdown_event=None, pl_config_loader=None,
+        interval=None):
+	powerline = Powerline(
+		'wm',
+		renderer_module='pango_markup',
+		shutdown_event=pl_shutdown_event,
+		config_loader=pl_config_loader,
+	)
 	powerline.update_renderer()
 
-	if not shutdown_event:
-		shutdown_event = powerline.shutdown_event
+	if not thread_shutdown_event:
+		thread_shutdown_event = powerline.shutdown_event
 
-	while not shutdown_event.is_set():
+	while not thread_shutdown_event.is_set():
 		# powerline.update_interval may change over time
 		used_interval = interval or powerline.update_interval
 		start_time = monotonic()
@@ -39,15 +45,15 @@ def run(shutdown_event=None, interval=None):
 		client.stdin.write(request.encode('utf-8'))
 		client.stdin.close()
 		read_to_log(powerline.pl, client)
-		shutdown_event.wait(max(used_interval - (monotonic() - start_time), 0.1))
+		thread_shutdown_event.wait(max(used_interval - (monotonic() - start_time), 0.1))
 
 
 class AwesomeThread(Thread):
 	__slots__ = ('powerline_shutdown_event',)
 
-	def __init__(self, shutdown_event):
+	def __init__(self, **kwargs):
 		super(AwesomeThread, self).__init__()
-		self.powerline_shutdown_event = shutdown_event
+		self.powerline_run_kwargs = kwargs
 
 	def run(self):
-		run(shutdown_event=self.powerline_shutdown_event)
+		run(**self.powerline_run_kwargs)

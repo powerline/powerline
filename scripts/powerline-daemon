@@ -71,10 +71,14 @@ def start_wm(args, environ, cwd):
 	wm_name = args.ext[0][3:]
 	if wm_name in started_wm_threads:
 		return b''
-	shutdown_event = Event()
-	thread = wm_threads[wm_name](shutdown_event=shutdown_event)
+	thread_shutdown_event = Event()
+	thread = wm_threads[wm_name](
+		thread_shutdown_event=thread_shutdown_event,
+		pl_shutdown_event=ts_shutdown_event,
+		pl_config_loader=config_loader,
+	)
 	thread.start()
-	started_wm_threads[wm_name] = (thread, shutdown_event)
+	started_wm_threads[wm_name] = (thread, thread_shutdown_event)
 	return b''
 
 
