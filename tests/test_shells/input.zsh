@@ -2,6 +2,7 @@ unset HOME
 unsetopt promptsp notransientrprompt
 setopt interactivecomments
 setopt autonamedirs
+setopt warncreateglobal
 function set_theme_option() {
 	export POWERLINE_THEME_OVERRIDES="${POWERLINE_THEME_OVERRIDES};$1=$2"
 	powerline-reload-config

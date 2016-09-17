@@ -1,4 +1,4 @@
-_POWERLINE_SOURCED="$0:A"
+local _POWERLINE_SOURCED="$0:A"
 
 _powerline_columns_fallback() {
 	if which stty &>/dev/null ; then
@@ -18,7 +18,7 @@ _powerline_append_precmd_function() {
 	fi
 }
 
-integer _POWERLINE_JOBNUM
+integer -g _POWERLINE_JOBNUM=0
 
 _powerline_tmux_pane() {
 	local -x TMUX="$_POWERLINE_TMUX"
@@ -58,11 +58,11 @@ _powerline_init_modes_support() {
 
 	test -z "$ZSH_VERSION" && return 0
 
-	typeset -ga VS
-	VS=( ${(s:.:)ZSH_VERSION} )
+	local -a vs
+	vs=( ${(s:.:)ZSH_VERSION} )
 
 	# Mode support requires >=zsh-4.3.11
-	if (( VS[1] < 4 || (VS[1] == 4 && (VS[2] < 3 || (VS[2] == 3 && VS[3] < 11))) )) ; then
+	if (( vs[1] < 4 || (vs[1] == 4 && (vs[2] < 3 || (vs[2] == 3 && vs[3] < 11))) )) ; then
 		return 0
 	fi
 
@@ -71,7 +71,7 @@ _powerline_init_modes_support() {
 	}
 
 	function -g _powerline_set_true_keymap_name() {
-		_POWERLINE_MODE="${1}"
+		typeset -g _POWERLINE_MODE="${1}"
 		local plm_bk="$(bindkey -lL ${_POWERLINE_MODE})"
 		if [[ $plm_bk = 'bindkey -A'* ]] ; then
 			_powerline_set_true_keymap_name ${(Q)${${(z)plm_bk}[3]}}
@@ -94,7 +94,7 @@ _powerline_init_modes_support() {
 	_powerline_set_main_keymap_name
 
 	if [[ "$_POWERLINE_MODE" != vi* ]] ; then
-		_POWERLINE_DEFAULT_MODE="$_POWERLINE_MODE"
+		typeset -g _POWERLINE_DEFAULT_MODE="$_POWERLINE_MODE"
 	fi
 
 	_powerline_append_precmd_function _powerline_set_main_keymap_name
@@ -111,7 +111,7 @@ _powerline_set_jobnum() {
 	# ([ is in first column). You see: any line counting thingie will return 
 	# wrong number of jobs. You need to filter the lines first. Or not use 
 	# jobs built-in at all.
-	_POWERLINE_JOBNUM=${(%):-%j}
+	integer -g _POWERLINE_JOBNUM=${(%):-%j}
 }
 
 _powerline_update_counter() {
@@ -123,7 +123,7 @@ _powerline_setup_prompt() {
 
 	_powerline_append_precmd_function _powerline_set_jobnum
 
-	VIRTUAL_ENV_DISABLE_PROMPT=1
+	typeset -g VIRTUAL_ENV_DISABLE_PROMPT=1
 
 	if test -z "${POWERLINE_NO_ZSH_ZPYTHON}" && { zmodload libzpython || zmodload zsh/zpython } &>/dev/null ; then
 		_powerline_append_precmd_function _powerline_update_counter
@@ -142,7 +142,7 @@ _powerline_setup_prompt() {
 		}
 	else
 		if test -z "${POWERLINE_COMMAND}" ; then
-			POWERLINE_COMMAND="$($POWERLINE_CONFIG_COMMAND shell command)"
+			typeset -g POWERLINE_COMMAND="$($POWERLINE_CONFIG_COMMAND shell command)"
 		fi
 
 		local add_args='-r .zsh'
@@ -159,11 +159,11 @@ _powerline_setup_prompt() {
 		local add_args_2=$add_args$new_args_2
 		add_args+=' --width=$(( ${COLUMNS:-$(_powerline_columns_fallback)} - ${ZLE_RPROMPT_INDENT:-1} ))'
 		local add_args_r2=$add_args$new_args_2
-		PS1='$("$POWERLINE_COMMAND" $=POWERLINE_COMMAND_ARGS shell aboveleft '$add_args')'
-		RPS1='$("$POWERLINE_COMMAND" $=POWERLINE_COMMAND_ARGS shell right '$add_args')'
-		PS2='$("$POWERLINE_COMMAND" $=POWERLINE_COMMAND_ARGS shell left '$add_args_2')'
-		RPS2='$("$POWERLINE_COMMAND" $=POWERLINE_COMMAND_ARGS shell right '$add_args_r2')'
-		PS3='$("$POWERLINE_COMMAND" $=POWERLINE_COMMAND_ARGS shell left '$add_args_3')'
+		typeset -g PS1='$("$POWERLINE_COMMAND" $=POWERLINE_COMMAND_ARGS shell aboveleft '$add_args')'
+		typeset -g RPS1='$("$POWERLINE_COMMAND" $=POWERLINE_COMMAND_ARGS shell right '$add_args')'
+		typeset -g PS2='$("$POWERLINE_COMMAND" $=POWERLINE_COMMAND_ARGS shell left '$add_args_2')'
+		typeset -g RPS2='$("$POWERLINE_COMMAND" $=POWERLINE_COMMAND_ARGS shell right '$add_args_r2')'
+		typeset -g PS3='$("$POWERLINE_COMMAND" $=POWERLINE_COMMAND_ARGS shell left '$add_args_3')'
 	fi
 }
 
@@ -187,15 +187,15 @@ _powerline_add_widget() {
 		eval "function $save_widget() { emulate -L zsh; $widget \$@ }"
 		eval "${old_widget_command/$widget/$save_widget}"
 		zle -N $widget $function
-		_POWERLINE_SAVE_WIDGET="$save_widget"
+		typeset -g _POWERLINE_SAVE_WIDGET="$save_widget"
 	fi
 }
 
 if test -z "${POWERLINE_CONFIG_COMMAND}" ; then
 	if which powerline-config >/dev/null ; then
-		POWERLINE_CONFIG_COMMAND=powerline-config
+		typeset -g POWERLINE_CONFIG_COMMAND=powerline-config
 	else
-		POWERLINE_CONFIG_COMMAND="$_POWERLINE_SOURCED:h:h:h:h/scripts/powerline-config"
+		typeset -g POWERLINE_CONFIG_COMMAND="${_POWERLINE_SOURCED:h:h:h:h}/scripts/powerline-config"
 	fi
 fi
 
