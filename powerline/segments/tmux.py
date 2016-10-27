@@ -20,3 +20,14 @@ def attached_clients(pl, minimum=1):
 	attached_count = len(attached_clients_output.rstrip().split('\n'))
 
 	return None if attached_count < minimum else str(attached_count)
+
+def synchronized_panes(pl):
+	'''Return "SYNC" if the panes of the current window are synchronized
+	'''
+
+	synced_output = get_tmux_output(pl, 'display-message', '-p', '#{pane_synchronized}')
+	if not synced_output:
+		return None
+	synced = synced_output.rstrip().split('\n')[0]
+
+	return None if synced == "0" else str("SYNC")
