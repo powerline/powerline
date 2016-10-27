@@ -49,6 +49,7 @@
 		"cwd:current_folder":        "information:regular",
 		"cwd:divider":               { "fg": "gray7", "bg": "gray4", "attrs": [] },
 		"virtualenv":                { "fg": "white", "bg": "darkcyan", "attrs": [] },
+		"synchronized_panes":        { "fg": "white", "bg": "red", "attrs": [] },
 		"attached_clients":          { "fg": "gray8", "bg": "gray0", "attrs": [] }
 	}
 }
