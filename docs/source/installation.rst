@@ -95,7 +95,7 @@ Fonts installation
 
 Powerline uses several special glyphs to get the arrow effect and some custom 
 symbols for developers. This requires having either a symbol font or a patched 
-font installed in the system. Used application (e.g. terminal emulator) must 
+font installed in the system. The used application (e.g. terminal emulator) must 
 also either be configured to use patched fonts (in some cases even support it 
 because custom glyphs live in private use area which some applications reserve 
 for themselves) or support fontconfig for powerline to work properly with 
