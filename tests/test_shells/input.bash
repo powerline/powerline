@@ -1,5 +1,12 @@
+I=1
 set_theme_option() {
+	eval saved_theme_overrides_$I'=${POWERLINE_THEME_OVERRIDES}'
 	export POWERLINE_THEME_OVERRIDES="${POWERLINE_THEME_OVERRIDES};$1=$2"
+	(( I++ ))
+}
+pop_theme_option() {
+	(( I-- ))
+	eval export POWERLINE_THEME_OVERRIDES'=${saved_theme_overrides_'$I'}'
 }
 set_theme() {
 	export POWERLINE_CONFIG_OVERRIDES="ext.shell.theme=$1"
@@ -57,11 +64,15 @@ cd ../'`echo`'
 cd ../'«Unicode!»'
 set_theme_option default_leftonly.segments.above "$ABOVE_LEFT"
 export DISPLAYED_ENV_VAR=foo
+set_theme_option default_leftonly.segments.left "[]"
+false
+pop_theme_option
 unset DISPLAYED_ENV_VAR
+pop_theme_option
 set_theme_option default_leftonly.segments.above "$ABOVE_FULL"
 export DISPLAYED_ENV_VAR=foo
 unset DISPLAYED_ENV_VAR
-set_theme_option default_leftonly.segments.above
+pop_theme_option
 set_theme_option default_leftonly.dividers.left.hard \$ABC
 false
 true is the last line
