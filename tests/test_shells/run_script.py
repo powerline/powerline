@@ -64,6 +64,7 @@ def main():
 		'POWERLINE_COMMAND_ARGS': os.environ.get('POWERLINE_COMMAND_ARGS', ''),
 		'POWERLINE_COMMAND': os.environ.get('POWERLINE_COMMAND', ''),
 		'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
+		'TERMINFO': os.path.abspath(os.path.join('tests', 'terminfo')),
 	}
 
 	os.environ['PATH'] = environ['PATH']
