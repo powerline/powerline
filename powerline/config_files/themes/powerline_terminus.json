@@ -15,11 +15,11 @@
 			"before": " "
 		},
 		"stash": {
-			"before": "⌆ "
+			"before": "ST "
 		},
 		"cwd": {
 			"args": {
-				"ellipsis": "⋯"
+				"ellipsis": "…"
 			}
 		},
 
@@ -38,13 +38,13 @@
 		},
 
 		"time": {
-			"before": "⌚ "
+			"before": ""
 		},
 
 		"powerline.segments.common.net.network_load": {
 			"args": {
-				"recv_format": "⬇ {value:>8}",
-				"sent_format": "⬆ {value:>8}"
+				"recv_format": "⇓ {value:>8}",
+				"sent_format": "⇑ {value:>8}"
 			}
 		},
 		"powerline.segments.common.net.hostname": {
@@ -59,29 +59,29 @@
 			}
 		},
 		"powerline.segments.common.sys.uptime": {
-			"before": "⇑  "
+			"before": "↑  "
 		},
 		"powerline.segments.common.mail.email_imap_alert": {
-			"before": "✉ "
+			"before": "MAIL "
 		},
 		"powerline.segments.common.env.virtualenv": {
-			"before": "ⓔ  "
+			"before": "(e) "
 		},
 		"powerline.segments.common.wthr.weather": {
 			"args": {
 				"icons": {
-					"day":           "〇",
-					"blustery":      "⚑",
-					"rainy":         "☔",
-					"cloudy":        "☁",
-					"snowy":         "❅",
-					"stormy":        "☈",
-					"foggy":         "≡",
-					"sunny":         "☼",
-					"night":         "☾",
-					"windy":         "☴",
-					"not_available": "�",
-					"unknown":       "⚠"
+					"day":           "DAY",
+					"blustery":      "WIND",
+					"rainy":         "RAIN",
+					"cloudy":        "CLOUDS",
+					"snowy":         "SNOW",
+					"stormy":        "STORM",
+					"foggy":         "FOG",
+					"sunny":         "SUN",
+					"night":         "NIGHT",
+					"windy":         "WINDY",
+					"not_available": "NA",
+					"unknown":       "UKN"
 				}
 			}
 		},

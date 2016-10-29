@@ -310,7 +310,7 @@ def finish_common_config(encoding, common_config):
 	'''
 	encoding = encoding.lower()
 	if encoding.startswith('utf') or encoding.startswith('ucs'):
-		default_top_theme = 'powerline'
+		default_top_theme = 'powerline_terminus'
 	else:
 		default_top_theme = 'ascii'
 
