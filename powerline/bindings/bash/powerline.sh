@@ -67,7 +67,8 @@ _powerline_prompt() {
 _powerline_set_prompt() {
 	local last_exit_code=$?
 	local jobnum="$(jobs -p|wc -l)"
-	PS1="$(_powerline_prompt aboveleft $last_exit_code $jobnum)"
+	PS1="$(_powerline_prompt aboveleft $last_exit_code $jobnum ; echo -n EOL)"
+	PS1="${PS1%EOL}"
 	if test -n "$POWERLINE_SHELL_CONTINUATION$POWERLINE_BASH_CONTINUATION" ; then
 		PS2="$(_powerline_local_prompt left -r.bash $last_exit_code $jobnum continuation)"
 	fi
