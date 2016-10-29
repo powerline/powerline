@@ -14,6 +14,7 @@ _powerline_columns_fallback() {
 
 _powerline_append_precmd_function() {
 	if test -z "${precmd_functions[(re)$1]}" ; then
+		typeset -ag precmd_functions
 		precmd_functions+=( $1 )
 	fi
 }

@@ -87,7 +87,7 @@ def main():
 	)
 	child.expect(re.compile(b'.*'))
 	sleep(0.5)
-	child.setwinsize(1, 300)
+	child.setwinsize(3, 300)
 
 	with open(os.path.join('tests', 'test_shells', 'input.{0}'.format(shell)), 'rb') as F:
 		if not args.wait_for_echo:

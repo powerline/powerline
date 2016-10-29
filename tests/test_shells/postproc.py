@@ -30,23 +30,29 @@ user = os.environ['USER']
 
 REFS_RE = re.compile(r'^\[\d+ refs\]\n')
 IPYPY_DEANSI_RE = re.compile(r'\033(?:\[(?:\?\d+[lh]|[^a-zA-Z]+[a-ln-zA-Z])|[=>])')
-ZSH_HL_RE = re.compile(r'\033\[\?\d+[hl]')
+ZSH_CTRLM_RE = re.compile(r'\033\[\?\d+[hl](.)\015(?=\1)')
+ZSH_DEANSI_RE = re.compile(r'\033\[(?:\?\d+[hl]|\d+[DC]|K)|(.)\010(?=\1)|\033\[0m\033\[23m\033\[24m\033\[J')
 
 start_str = 'cd tests/shell/3rd'
 if shell == 'pdb':
 	start_str = 'class Foo(object):'
 
+SPLIT_SHELLS = set(('fish', 'zsh'))
+
 with codecs.open(fname, 'r', encoding='utf-8') as R:
 	with codecs.open(new_fname, 'w', encoding='utf-8') as W:
 		found_cd = False
 		i = -1
-		for line in (R if shell != 'fish' else R.read().split('\n')):
+		for line in (R if shell not in SPLIT_SHELLS else R.read().split('\n')):
 			i += 1
 			if not found_cd:
 				found_cd = (start_str in line)
 				continue
 			if 'true is the last line' in line:
 				break
+			if shell == 'zsh':
+				line = ZSH_CTRLM_RE.subn('', line)[0]
+				line += '\n'
 			line = line.translate({
 				ord('\r'): None
 			})
@@ -57,8 +63,7 @@ with codecs.open(fname, 'r', encoding='utf-8') as R:
 			if pid is not None:
 				line = line.replace(pid, 'PID')
 			if shell == 'zsh':
-				line = line.replace('\033[0m\033[23m\033[24m\033[J', '')
-				line = ZSH_HL_RE.subn('', line)[0]
+				line = ZSH_DEANSI_RE.subn('', line)[0]
 			elif shell == 'fish':
 				res = ''
 				try:
