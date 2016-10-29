@@ -12,7 +12,7 @@ from powerline.lib.dict import mergedicts_copy as mdc
 from powerline import Powerline
 
 from tests import TestCase
-from tests.lib.config_mock import select_renderer
+from tests.lib.config_mock import select_renderer, UT
 
 
 CONFIG_DIR = 'tests/config'
@@ -88,7 +88,7 @@ main_tree = lambda: {
 	'1/colors': colors_config(),
 	'1/colorschemes/default': colorscheme_config(),
 	'1/themes/test/default': theme_config(),
-	'1/themes/powerline': top_theme_config(),
+	'1/themes/' + UT: top_theme_config(),
 	'1/themes/other1': mdc(top_theme_config(), {
 		'dividers': {
 			'left': {
@@ -193,10 +193,10 @@ class TestMerging(TestCase):
 
 	def test_top_theme_merging(self):
 		with WithConfigTree(mdc(main_tree(), {
-			'2/themes/powerline': {
+			'2/themes/' + UT: {
 				'spaces': 1,
 			},
-			'3/themes/powerline': {
+			'3/themes/' + UT: {
 				'dividers': {
 					'left': {
 						'hard': '>>',

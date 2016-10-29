@@ -10,9 +10,13 @@ from functools import wraps
 
 from powerline.renderer import Renderer
 from powerline.lib.config import ConfigLoader
-from powerline import Powerline
+from powerline import Powerline, get_default_theme
 
 from tests.lib import Args, replace_attr
+
+
+UT = get_default_theme(is_unicode=True)
+AT = get_default_theme(is_unicode=False)
 
 
 class TestHelpers(object):
