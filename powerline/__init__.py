@@ -298,6 +298,18 @@ def create_logger(common_config, use_daemon_threads=True, ext='__unknown__',
 	return logger, pl, get_module_attr
 
 
+def get_default_theme(is_unicode=True):
+	'''Get default theme used by powerline
+
+	:param bool is_unicode:
+		If true, return theme for unicode environments, otherwise return theme 
+		that is supposed to be ASCII-only.
+
+	:return: theme name.
+	'''
+	return 'powerline_terminus' if is_unicode else 'ascii'
+
+
 def finish_common_config(encoding, common_config):
 	'''Add default values to common config and expand ~ in paths
 
@@ -309,10 +321,8 @@ def finish_common_config(encoding, common_config):
 		paths.
 	'''
 	encoding = encoding.lower()
-	if encoding.startswith('utf') or encoding.startswith('ucs'):
-		default_top_theme = 'powerline_terminus'
-	else:
-		default_top_theme = 'ascii'
+	default_top_theme = get_default_theme(
+		encoding.startswith('utf') or encoding.startswith('ucs'))
 
 	common_config = common_config.copy()
 	common_config.setdefault('default_top_theme', default_top_theme)
