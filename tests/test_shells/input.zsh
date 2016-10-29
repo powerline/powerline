@@ -3,8 +3,20 @@ unsetopt promptsp notransientrprompt
 setopt interactivecomments
 setopt autonamedirs
 setopt warncreateglobal
+typeset -A TEST_THEME_OVERRIDES
+typeset -gx POWERLINE_THEME_OVERRIDES
 function set_theme_option() {
-	export POWERLINE_THEME_OVERRIDES="${POWERLINE_THEME_OVERRIDES};$1=$2"
+	if (( $# > 1 )) ; then
+		TEST_THEME_OVERRIDES[$1]=$2
+	else
+		unset 'TEST_THEME_OVERRIDES['$1']'
+	fi
+	local k
+	POWERLINE_THEME_OVERRIDES=
+	for k in ${(k)TEST_THEME_OVERRIDES} ; do
+		POWERLINE_THEME_OVERRIDES+=";${k}=${TEST_THEME_OVERRIDES[$k]}"
+	done
+	export POWERLINE_THEME_OVERRIDES
 	powerline-reload-config
 }
 function set_theme() {
@@ -78,6 +90,9 @@ cd .
 cd .
 set_theme_option default.segments.above "$ABOVE_LEFT"
 export DISPLAYED_ENV_VAR=foo
+set_theme_option default.segments.left "[]"
+false
+set_theme_option default.segments.left
 unset DISPLAYED_ENV_VAR
 set_theme_option default.segments.above "$ABOVE_FULL"
 export DISPLAYED_ENV_VAR=foo
