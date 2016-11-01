@@ -22,8 +22,8 @@ Generic requirements
   faster than python version of the client, but still slower than C version.
 * ``psutil`` python package. Required for some segments like cpu_percent. Some 
   segments have linux-only fallbacks for ``psutil`` functionality.
-* ``mercurial`` python package (note: *not* standalone executable). Required to 
-  work with mercurial repositories.
+* ``hglib`` python package *and* mercurial executable. Required to work with
+  mercurial repositories.
 * ``pygit2`` python package or ``git`` executable. Required to work with ``git`` 
   repositories.
 * ``bzr`` python package (note: *not* standalone executable). Required to work 
@@ -35,8 +35,8 @@ Generic requirements
   :py:func:`powerline.listers.i3wm.output_lister`.
 
 .. note::
-    Until mercurial and bazaar support Python-3 or PyPy powerline will not 
-    support repository information when running in these interpreters.
+    Until bazaar supports Python-3 or PyPy powerline will not support
+    repository information when running in these interpreters.
 
 .. _repository-root:
 

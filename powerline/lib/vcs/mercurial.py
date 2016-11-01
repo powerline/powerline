@@ -3,7 +3,7 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 
 import os
 
-from mercurial import hg, ui, match
+import hglib
 
 from powerline.lib.vcs import get_branch_name, get_file_status
 from powerline.lib.path import join
@@ -20,21 +20,23 @@ def branch_name_from_config_file(directory, config_file):
 
 
 class Repository(object):
-	__slots__ = ('directory', 'ui', 'create_watcher')
+	__slots__ = ('directory', 'create_watcher')
 
-	statuses = 'MARDUI'
-	repo_statuses = (1, 1, 1, 1, 2)
+	# hg status -> (powerline file status, repo status flag)
+	statuses = {
+		b'M': ('M', 1),	 b'A': ('A', 1), b'R': ('R', 1), b'!': ('D', 1),
+		b'?': ('U', 2), b'I': ('I', 0)
+	}
 	repo_statuses_str = (None, 'D ', ' U', 'DU')
 
 	def __init__(self, directory, create_watcher):
 		self.directory = os.path.abspath(directory)
-		self.ui = ui.ui()
 		self.create_watcher = create_watcher
 
 	def _repo(self, directory):
 		# Cannot create this object once and use always: when repository updates
 		# functions emit invalid results
-		return hg.repository(self.ui, directory)
+		return hglib.open(directory)
 
 	def status(self, path=None):
 		'''Return status of repository or file.
@@ -63,17 +65,17 @@ class Repository(object):
 	def do_status(self, directory, path):
 		repo = self._repo(directory)
 		if path:
-			m = match.match(None, None, [path], exact=True)
-			statuses = repo.status(match=m, unknown=True, ignored=True)
-			for status, paths in zip(self.statuses, statuses):
+			path = os.path.join(directory, path)
+			statuses = repo.status(include=path, all=True)
+			for status, paths in statuses:
 				if paths:
-					return status
+					return self.statuses[status][0]
 			return None
 		else:
 			resulting_status = 0
-			for status, paths in zip(self.repo_statuses, repo.status(unknown=True)):
+			for status, paths in repo.status(all=True):
 				if paths:
-					resulting_status |= status
+					resulting_status |= self.statuses[status][1]
 			return self.repo_statuses_str[resulting_status]
 
 	def branch(self):
