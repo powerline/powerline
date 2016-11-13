@@ -136,13 +136,20 @@ class WeatherSegment(KwThreadedSegment):
 			return url
 
 	def compute_state(self, location_query):
-		url = self.get_request_url(location_query)
-		raw_response = urllib_read(url)
-		if not raw_response:
-			self.error('Failed to get response')
-			return None
+		for i in range(5):
+			try:
+				url = self.get_request_url(location_query)
+				raw_response = urllib_read(url)
+				if not raw_response:
+					self.error('Failed to get response')
+					return None
 
-		response = json.loads(raw_response)
+				response = json.loads(raw_response)
+				if response['query']['results'] is not None:
+					break
+			except (KeyError, ValueError):
+				self.exception('Yahoo returned malformed or unexpected response: {0}', repr(raw_response))
+				return None
 		try:
 			condition = response['query']['results']['channel']['item']['condition']
 			condition_code = int(condition['code'])
