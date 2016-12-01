@@ -77,25 +77,31 @@ def _fetch_battery_info(pl):
 				pl.debug('Not using DBUS+UPower as no batteries were found')
 
 	if os.path.isdir('/sys/class/power_supply'):
-		linux_energy_full_fmt = '/sys/class/power_supply/{0}/energy_full'
-		linux_energy_fmt = '/sys/class/power_supply/{0}/energy_now'
+		# ENERGY_* attributes represents capacity in µWh only.
+		# CHARGE_* attributes represents capacity in µAh only.
+		linux_capacity_units = ('energy', 'charge')
+		linux_energy_full_fmt = '/sys/class/power_supply/{0}/{1}_full'
+		linux_energy_fmt = '/sys/class/power_supply/{0}/{1}_now'
 		linux_status_fmt = '/sys/class/power_supply/{0}/status'
 		devices = []
 		for linux_supplier in os.listdir('/sys/class/power_supply'):
-			energy_path = linux_energy_fmt.format(linux_supplier)
-			if not os.path.exists(energy_path):
-				continue
-			pl.debug('Using /sys/class/power_supply with battery {0}', linux_supplier)
-			devices.append(linux_supplier)
+			for unit in linux_capacity_units:
+				energy_path = linux_energy_fmt.format(linux_supplier, unit)
+				if not os.path.exists(energy_path):
+					continue
+				pl.debug('Using /sys/class/power_supply with battery {0} and unit {1}',
+					linux_supplier, unit)
+				devices.append((linux_supplier, unit))
+				break  # energy or charge, not both
 		if devices:
 			def _get_battery_status(pl):
 				energy = 0.0
 				energy_full = 0.0
 				state = True
-				for device in devices:
-					with open(linux_energy_full_fmt.format(device), 'r') as f:
+				for device, unit in devices:
+					with open(linux_energy_full_fmt.format(device, unit), 'r') as f:
 						energy_full += int(float(f.readline().split()[0]))
-					with open(linux_energy_fmt.format(device), 'r') as f:
+					with open(linux_energy_fmt.format(device, unit), 'r') as f:
 						energy += int(float(f.readline().split()[0]))
 					try:
 						with open(linux_status_fmt.format(device), 'r') as f:
