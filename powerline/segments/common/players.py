@@ -42,6 +42,7 @@ class PlayerSegment(Segment):
 			'title': None,
 			'elapsed': None,
 			'total': None,
+			'file': None,
 		}
 		func_stats = self.get_player_status(**kwargs)
 		if not func_stats:
