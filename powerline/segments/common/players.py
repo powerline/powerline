@@ -175,7 +175,7 @@ class MpdPlayerSegment(PlayerSegment):
 				host = password + '@' + host
 			now_playing = run_cmd(pl, [
 				'mpc', 'current',
-				'-f', '%album%\n%artist%\n%title%\n%time%',
+				'-f', '%album%\n%artist%\n%title%\n%time%\n%file%',
 				'-h', host,
 				'-p', str(port)
 			], strip=False)
@@ -187,6 +187,7 @@ class MpdPlayerSegment(PlayerSegment):
 				'artist': now_playing[1],
 				'title': now_playing[2],
 				'total': now_playing[3],
+				'file': now_playing[4],
 			}
 		else:
 			try:
@@ -210,6 +211,7 @@ class MpdPlayerSegment(PlayerSegment):
 				'title': now_playing.get('title'),
 				'elapsed': _convert_seconds(status.get('elapsed', 0)),
 				'total': _convert_seconds(now_playing.get('time', 0)),
+				'file': now_playing.get('file'),
 			}
 
 
