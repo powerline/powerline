@@ -101,6 +101,10 @@ Highlight groups used: ``player_fallback`` or ``player``, ``player_play`` or ``p
 	+------------+-------------------------------------------------------------+
 	|total       |Composition length in format M:SS.                           |
 	+------------+-------------------------------------------------------------+
+	|file        |Mpd only option. Show file name of the song currently being  |
+	|            |played with path. Path shown is relative to the default      |
+	|            |mpd music directory.                                         |
+	+------------+-------------------------------------------------------------+
 :param dict state_symbols:
 	Symbols used for displaying state. Must contain all of the following keys:
 
