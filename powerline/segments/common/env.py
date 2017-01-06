@@ -44,7 +44,7 @@ class CwdSegment(Segment):
 
 	def omitted_args(self, name, method):
 		if method is self.get_shortened_path:
-			return (0, 1, 2)
+			return ()
 		else:
 			return super(CwdSegment, self).omitted_args(name, method)
 
