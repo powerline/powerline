@@ -12,7 +12,7 @@ function powerline-setup
 
 	function _powerline_columns
 		# Hack: `test "" -eq 0` is true, as well as `test 0 -eq 0`
-		# Note: at fish startup `$COLUMNS` is equal to zero, meaning that it may 
+		# Note: at fish startup `$COLUMNS` is equal to zero, meaning that it may
 		# not be used.
 		if test "$COLUMNS" -eq 0
 			_powerline_columns_fallback
@@ -33,18 +33,18 @@ function powerline-setup
 		if test -z "$POWERLINE_COMMAND"
 			set -g POWERLINE_COMMAND (env $POWERLINE_CONFIG_COMMAND shell command)
 		end
-		function --on-variable fish_key_bindings _powerline_set_default_mode
+		function _powerline_set_default_mode --on-variable fish_key_bindings
 			if test x$fish_key_bindings != xfish_vi_key_bindings
 				set -g _POWERLINE_DEFAULT_MODE default
 			else
 				set -g -e _POWERLINE_DEFAULT_MODE
 			end
 		end
-		function --on-variable POWERLINE_COMMAND _powerline_update
+		function _powerline_update --on-variable POWERLINE_COMMAND
 			set -l addargs "--last-exit-code=\$status"
 			set -l addargs "$addargs --last-pipe-status=\$status"
 			set -l addargs "$addargs --jobnum=(jobs -p | wc -l)"
-			# One random value has an 1/32767 = 0.0031% probability of having 
+			# One random value has an 1/32767 = 0.0031% probability of having
 			# the same value in two shells
 			set -l addargs "$addargs --renderer-arg=client_id="(random)
 			set -l addargs "$addargs --width=\$_POWERLINE_COLUMNS"
@@ -70,7 +70,7 @@ function powerline-setup
 				env \$POWERLINE_COMMAND $POWERLINE_COMMAND_ARGS shell right $addargs
 				$rpromptpast
 			end
-			function --on-signal WINCH _powerline_set_columns
+			function _powerline_set_columns --on-signal WINCH
 				set -g _POWERLINE_COLUMNS $columnsexpr
 			end
 			"
@@ -94,10 +94,10 @@ function powerline-setup
 					env TMUX="$_POWERLINE_TMUX" tmux setenv -g TMUX_$argv[1]_(_powerline_tmux_pane) "$argv[2]"
 					env TMUX="$_POWERLINE_TMUX" tmux refresh -S
 				end
-				function --on-variable PWD _powerline_tmux_set_pwd
+				function _powerline_tmux_set_pwd --on-variable PWD
 					_powerline_tmux_setenv PWD "$PWD"
 				end
-				function --on-signal WINCH _powerline_tmux_set_columns
+				function _powerline_tmux_set_columns --on-signal WINCH
 					_powerline_tmux_setenv COLUMNS (_powerline_columns)
 				end
 				_powerline_tmux_set_columns
