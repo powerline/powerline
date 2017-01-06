@@ -41,15 +41,15 @@ function powerline-setup
 			end
 		end
 		function --on-variable POWERLINE_COMMAND _powerline_update
-			set -l addargs "--last-exit-code=\$status"
-			set -l addargs "$addargs --last-pipe-status=\$status"
+			set -l addargs "--last_exit_code=\$status"
+			set -l addargs "$addargs --last_pipe_status=\$status"
 			set -l addargs "$addargs --jobnum=(jobs -p | wc -l)"
 			# One random value has an 1/32767 = 0.0031% probability of having 
 			# the same value in two shells
-			set -l addargs "$addargs --renderer-arg=client_id="(random)
+			set -l addargs "$addargs --renderer_arg=client_id="(random)
 			set -l addargs "$addargs --width=\$_POWERLINE_COLUMNS"
-			set -l addargs "$addargs --renderer-arg=mode=\$fish_bind_mode"
-			set -l addargs "$addargs --renderer-arg=default_mode=\$_POWERLINE_DEFAULT_MODE"
+			set -l addargs "$addargs --renderer_arg=mode=\$fish_bind_mode"
+			set -l addargs "$addargs --renderer_arg=default_mode=\$_POWERLINE_DEFAULT_MODE"
 			set -l promptside
 			set -l rpromptpast
 			set -l columnsexpr
@@ -64,10 +64,10 @@ function powerline-setup
 			end
 			eval "
 			function fish_prompt
-				env \$POWERLINE_COMMAND $POWERLINE_COMMAND_ARGS shell $promptside $addargs
+				env \$POWERLINE_COMMAND $POWERLINE_COMMAND_ARGS $addargs shell $promptside
 			end
 			function fish_right_prompt
-				env \$POWERLINE_COMMAND $POWERLINE_COMMAND_ARGS shell right $addargs
+				env \$POWERLINE_COMMAND $POWERLINE_COMMAND_ARGS $addargs shell right
 				$rpromptpast
 			end
 			function --on-signal WINCH _powerline_set_columns
