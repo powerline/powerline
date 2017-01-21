@@ -17,6 +17,9 @@ If installed using pip just add
 
 (replace ``python`` with ``python3`` if appropriate) to the :file:`vimrc`.
 
+.. note::
+    Status line will not appear by default when there is only a single window displayed. `:h laststatus` for more information.
+
 If the repository was just cloned the following line needs to be added to the 
 :file:`vimrc`:
 
@@ -28,8 +31,7 @@ where ``{repository_root}`` is the absolute path to the Powerline installation
 directory (see :ref:`repository root <repository-root>`).
 
 If pathogen is used and Powerline functionality is not needed outside of Vim 
-then it is possible to simply add Powerline as a bundle and point the path above 
-to the Powerline bundle directory, e.g. 
+then it is possible to simply add Powerline as a bundle and point the path above to the Powerline bundle directory, e.g. 
 :file:`~/.vim/bundle/powerline/powerline/bindings/vim`.
 
 Vundle and NeoBundle users may instead use
