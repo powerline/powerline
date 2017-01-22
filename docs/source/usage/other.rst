@@ -19,7 +19,7 @@ If installed using pip just add
 
 .. note::
    Status line will not appear by default when there is only a single window
-   displayed. `:h 'laststatus'` for more information.
+   displayed. Run ``:h 'laststatus'`` in vim for more information.
 
 If the repository was just cloned the following line needs to be added to the 
 :file:`vimrc`:
