@@ -33,7 +33,7 @@ else:
 	use_bzr = True
 
 try:
-	__import__('mercurial')
+	__import__('hglib')
 except ImportError:
 	use_mercurial = False
 else:

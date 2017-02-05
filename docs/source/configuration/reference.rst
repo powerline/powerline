@@ -144,8 +144,8 @@ Common configuration is a subdictionary that is a value of ``common`` key in
 
 ``default_top_theme``
     String, determines which top-level theme will be used as the default. 
-    Defaults to ``powerline`` in unicode locales and ``ascii`` in non-unicode 
-    locales. See `Themes`_ section for more details.
+    Defaults to ``powerline_terminus`` in unicode locales and ``ascii`` in 
+    non-unicode locales. See `Themes`_ section for more details.
 
 Extension-specific configuration
 --------------------------------
@@ -190,6 +190,8 @@ Common configuration is a subdictionary that is a value of ``ext`` key in
     For wm (:ref:`lemonbar <lemonbar-usage>` only) it is a dictionary 
     ``{output : theme_name}`` that maps the ``xrandr`` output names to the 
     local themes to use on that output.
+
+.. _config-ext-components:
 
 ``components``
     Determines which extension components should be enabled. This key is highly 
@@ -329,6 +331,7 @@ powerline_unicode7          Theme with powerline dividers and unicode-7 symbols
 unicode                     Theme without any symbols from private use area
 unicode_terminus            Theme containing only symbols from terminus PCF font
 unicode_terminus_condensed  Like above, but occupies as less space as possible
+powerline_terminus          Like unicode_terminus, but with powerline symbols
 ascii                       Theme without any unicode characters at all
 ==========================  ====================================================
 

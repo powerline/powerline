@@ -12,14 +12,14 @@
 	"spaces": 1,
 	"segment_data": {
 		"branch": {
-			"before": "🔀 "
+			"before": " "
 		},
 		"stash": {
-			"before": "📝"
+			"before": "ST "
 		},
 		"cwd": {
 			"args": {
-				"ellipsis": "⋯"
+				"ellipsis": "…"
 			}
 		},
 
@@ -30,72 +30,58 @@
 			"args": {
 				"state_symbols": {
 					"fallback": "♫",
-					"play":     "⏵",
-					"pause":    "⏸",
-					"stop":     "⏹"
+					"play":     "▶",
+					"pause":    "▮▮",
+					"stop":     "■"
 				}
 			}
 		},
 
 		"time": {
-			"before": "🕐 "
+			"before": ""
 		},
 
 		"powerline.segments.common.net.network_load": {
 			"args": {
-				"recv_format": "⬇ {value:>8}",
-				"sent_format": "⬆ {value:>8}"
+				"recv_format": "⇓ {value:>8}",
+				"sent_format": "⇑ {value:>8}"
 			}
 		},
 		"powerline.segments.common.net.hostname": {
-			"before": "🏠 "
+			"before": " "
 		},
 		"powerline.segments.common.bat.battery": {
 			"args": {
-				"full_heart": "💙",
-				"empty_heart": "💛",
-				"online": "⚡️",
+				"full_heart": "♥",
+				"empty_heart": "♥",
+				"online": "⚡︎",
 				"offline": " "
 			}
 		},
 		"powerline.segments.common.sys.uptime": {
-			"before": "⇑ "
+			"before": "↑  "
 		},
 		"powerline.segments.common.mail.email_imap_alert": {
-			"before": "✉ "
+			"before": "MAIL "
 		},
 		"powerline.segments.common.env.virtualenv": {
-			"before": "🐍 "
+			"before": "(e) "
 		},
 		"powerline.segments.common.wthr.weather": {
 			"args": {
 				"icons": {
-					"tornado":                 "🌪",
-					"hurricane":               "🌀",
-					"showers":                 "☔",
-					"scattered_showers":       "☔",
-					"thunderstorms":           "🌩",
-					"isolated_thunderstorms":  "🌩",
-					"scattered_thunderstorms": "🌩",
-					"dust":                    "🌫",
-					"fog":                     "🌫",
-					"cold":                    "❄",
-					"partly_cloudy_day":       "🌤",
-					"mostly_cloudy_day":       "🌥",
-					"sun":                     "🌣",
-					"hot":                     "♨",
-					"day":                     "☀",
-					"blustery":                "⚑",
-					"rainy":                   "☂",
-					"cloudy":                  "☁",
-					"snowy":                   "☃",
-					"stormy":                  "☈",
-					"foggy":                   "🌁",
-					"sunny":                   "🌣",
-					"night":                   "☾",
-					"windy":                   "☴",
-					"not_available":           "�",
-					"unknown":                 "⚠"
+					"day":           "DAY",
+					"blustery":      "WIND",
+					"rainy":         "RAIN",
+					"cloudy":        "CLOUDS",
+					"snowy":         "SNOW",
+					"stormy":        "STORM",
+					"foggy":         "FOG",
+					"sunny":         "SUN",
+					"night":         "NIGHT",
+					"windy":         "WINDY",
+					"not_available": "NA",
+					"unknown":       "UKN"
 				}
 			}
 		},
@@ -139,12 +125,12 @@
 		},
 		"powerline.segments.vim.readonly_indicator": {
 			"args": {
-				"text": "🔏"
+				"text": ""
 			}
 		},
 		"powerline.segments.vim.modified_indicator": {
 			"args": {
-				"text": "🖫⃥"
+				"text": "+"
 			}
 		},
 

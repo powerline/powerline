@@ -158,17 +158,16 @@ class ThreadedSegment(Segment, MultiRunnedThread):
 	def additional_args(self):
 		return (('interval', self.interval),)
 
+	_omitted_args = {
+		'render': (0,),
+		'set_state': ('shutdown_event',),
+	}
+
 	def omitted_args(self, name, method):
+		ret = self._omitted_args.get(name, ())
 		if isinstance(getattr(self, name, None), MethodType):
-			omitted_indexes = (0,)
-		else:
-			omitted_indexes = ()
-		if name.startswith('render'):
-			if omitted_indexes:
-				omitted_indexes += (1,)
-			else:
-				omitted_indexes = (0,)
-		return omitted_indexes
+			ret = tuple((i + 1 if isinstance(i, int) else i for i in ret))
+		return ret
 
 
 class KwThreadedSegment(ThreadedSegment):
@@ -255,3 +254,9 @@ class KwThreadedSegment(ThreadedSegment):
 	@staticmethod
 	def render_one(update_state, **kwargs):
 		return update_state
+
+	_omitted_args = {
+		'render': ('update_value', 'key', 'after_update'),
+		'set_state': ('shutdown_event',),
+		'render_one': (0,),
+	}

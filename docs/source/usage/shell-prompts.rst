@@ -1,3 +1,5 @@
+.. _usage-shell:
+
 *************
 Shell prompts
 *************

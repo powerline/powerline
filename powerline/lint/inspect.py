@@ -39,7 +39,9 @@ def getconfigargspec(obj):
 		for i, arg in enumerate(reversed(argspec.args)):
 			if (
 				largs - (i + 1) in omitted_args
+				or arg in omitted_args
 				or arg == 'pl'
+				or arg == 'self'
 				or (arg == 'create_watcher' and requires_filesystem_watcher)
 				or (arg == 'segment_info' and requires_segment_info)
 			):

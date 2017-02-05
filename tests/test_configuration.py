@@ -10,7 +10,7 @@ from copy import deepcopy
 import tests.vim as vim_module
 
 from tests import TestCase
-from tests.lib.config_mock import get_powerline, get_powerline_raw, swap_attributes
+from tests.lib.config_mock import get_powerline, get_powerline_raw, swap_attributes, UT
 from tests.lib import Args, replace_item
 
 
@@ -114,7 +114,7 @@ config = {
 			],
 		},
 	},
-	'themes/powerline': {
+	'themes/' + UT: {
 		'dividers': {
 			'left': {
 				'hard': '>>',
@@ -362,9 +362,9 @@ class TestThemeHierarchy(TestRender):
 
 	@add_args
 	def test_no_powerline(self, p, config):
-		config['themes/test/__main__']['dividers'] = config['themes/powerline']['dividers']
+		config['themes/test/__main__']['dividers'] = config['themes/' + UT]['dividers']
 		config['themes/test/__main__']['spaces'] = 1
-		del config['themes/powerline']
+		del config['themes/' + UT]
 		self.assertRenderEqual(p, '{121} s {24}>>{344}g {34}>{34}<{344} f {--}')
 		self.assertEqual(p.logger._pop_msgs(), [])
 
@@ -380,19 +380,19 @@ class TestThemeHierarchy(TestRender):
 
 	@add_args
 	def test_only_default(self, p, config):
-		config['themes/test/default']['dividers'] = config['themes/powerline']['dividers']
+		config['themes/test/default']['dividers'] = config['themes/' + UT]['dividers']
 		config['themes/test/default']['spaces'] = 1
 		del config['themes/test/__main__']
-		del config['themes/powerline']
+		del config['themes/' + UT]
 		self.assertRenderEqual(p, '{121} s {24}>>{344}g {34}>{34}<{344} f {--}')
 
 	@add_args
 	def test_only_main(self, p, config):
 		del config['themes/test/default']
-		del config['themes/powerline']
+		del config['themes/' + UT]
 		self.assertRenderEqual(p, 'themes/test/default')
 		self.assertEqual(p.logger._pop_msgs(), [
-			'exception:test:powerline:Failed to load theme: themes/powerline',
+			'exception:test:powerline:Failed to load theme: themes/' + UT,
 			'exception:test:powerline:Failed to load theme: themes/test/default',
 			'exception:test:powerline:Failed to create renderer: themes/test/default',
 			'exception:test:powerline:Failed to render: themes/test/default',
@@ -413,11 +413,11 @@ class TestThemeHierarchy(TestRender):
 	@add_args
 	def test_nothing(self, p, config):
 		del config['themes/test/default']
-		del config['themes/powerline']
+		del config['themes/' + UT]
 		del config['themes/test/__main__']
 		self.assertRenderEqual(p, 'themes/test/default')
 		self.assertEqual(p.logger._pop_msgs(), [
-			'exception:test:powerline:Failed to load theme: themes/powerline',
+			'exception:test:powerline:Failed to load theme: themes/' + UT,
 			'exception:test:powerline:Failed to load theme: themes/test/__main__',
 			'exception:test:powerline:Failed to load theme: themes/test/default',
 			'exception:test:powerline:Failed to create renderer: themes/test/default',
@@ -570,7 +570,7 @@ class TestSegmentAttributes(TestRender):
 		def m1(divider=',', **kwargs):
 			return divider.join(kwargs.keys()) + divider
 		m1.powerline_segment_datas = {
-			'powerline': {
+			UT: {
 				'args': {
 					'divider': ';'
 				}
@@ -640,7 +640,7 @@ class TestSegmentData(TestRender):
 		def m2(**kwargs):
 			return 'S'
 		sys.modules['bar'] = Args(m1=m1, m2=m2)
-		config['themes/powerline']['segment_data'] = {
+		config['themes/' + UT]['segment_data'] = {
 			'm1': {
 				'before': '1'
 			},
