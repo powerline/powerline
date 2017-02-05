@@ -23,7 +23,8 @@ class ConfigurableIPythonPowerline(IPythonPowerline):
 	def do_setup(self, ip, prompts, shutdown_hook):
 		prompts.powerline = self
 
-		saved_msfn = ip._make_style_from_name
+		msfn_missing = ()
+		saved_msfn = getattr(ip, '_make_style_from_name', msfn_missing)
 
 		if hasattr(saved_msfn, 'powerline_original'):
 			saved_msfn = saved_msfn.powerline_original
@@ -43,7 +44,8 @@ class ConfigurableIPythonPowerline(IPythonPowerline):
 			_saved_msfn = saved_msfn
 			saved_msfn = lambda: _saved_msfn(ip)
 
-		ip._make_style_from_name = _make_style_from_name
+		if saved_msfn is not msfn_missing:
+			ip._make_style_from_name = _make_style_from_name
 
 		magics = PowerlineMagics(ip, self)
 		ip.register_magics(magics)
