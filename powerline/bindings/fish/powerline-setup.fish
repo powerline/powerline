@@ -62,7 +62,7 @@ function powerline-setup
 				set rpromptpast
 				set columnsexpr '(_powerline_columns)'
 			end
-			eval "
+			echo "
 			function fish_prompt
 				env \$POWERLINE_COMMAND $POWERLINE_COMMAND_ARGS shell $promptside $addargs
 			end
@@ -73,7 +73,7 @@ function powerline-setup
 			function _powerline_set_columns --on-signal WINCH
 				set -g _POWERLINE_COLUMNS $columnsexpr
 			end
-			"
+			" | source
 			_powerline_set_columns
 		end
 		_powerline_set_default_mode
