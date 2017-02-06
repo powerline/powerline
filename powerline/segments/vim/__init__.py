@@ -87,18 +87,27 @@ def window_cached(func):
 def mode(pl, segment_info, override=None):
 	'''Return the current vim mode.
 
+	If mode (returned by ``mode()`` VimL function, see ``:h mode()`` in Vim) 
+	consists of multiple characters and necessary mode is not known to powerline 
+	then it will fall back to mode with last character(s) ignored.
+
 	:param dict override:
 		dict for overriding default mode strings, e.g. ``{ 'n': 'NORM' }``
 	'''
 	mode = segment_info['mode']
 	if mode == 'nc':
 		return None
-	if not override:
-		return vim_modes[mode]
-	try:
-		return override[mode]
-	except KeyError:
-		return vim_modes[mode]
+	while mode:
+		try:
+			if not override:
+				return vim_modes[mode]
+			try:
+				return override[mode]
+			except KeyError:
+				return vim_modes[mode]
+		except KeyError:
+			mode = mode[:-1]
+	return 'BUG'
 
 
 @window_cached
