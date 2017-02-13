@@ -550,6 +550,28 @@ class TestDisplayCondition(TestRender):
 			self.assertRenderEqual(p, '{56} s1{6-}>>{--}', mode='m1')
 
 
+class TestOuterPadding(TestRender):
+	@add_args
+	def test_outer_padding_left(self, p, config):
+		config['themes/' + UT]['outer_padding'] = 5
+		self.assertRenderEqual(p, '{121}     s{24}>>{344}g{4-}>>{--}', side='left')
+
+	@add_args
+	def test_outer_padding_right(self, p, config):
+		config['themes/' + UT]['outer_padding'] = 5
+		self.assertRenderEqual(p, '{4-}<<{344}f     {--}', side='right')
+
+	@add_args
+	def test_outer_padding_ten(self, p, config):
+		config['themes/' + UT]['outer_padding'] = 10
+		self.assertRenderEqual(p, '{121}          s  {24}>>{344}g{34}>{34}|{344} f          {--}', width=30)
+
+	@add_args
+	def test_outer_padding_zero(self, p, config):
+		config['themes/' + UT]['outer_padding'] = 0
+		self.assertRenderEqual(p, '{121}s            {24}>>{344}g{34}>{34}|{344}           f{--}', width=30)
+
+
 class TestSegmentAttributes(TestRender):
 	@add_args
 	def test_no_attributes(self, p, config):

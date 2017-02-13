@@ -361,6 +361,10 @@ ascii                       Theme without any unicode characters at all
        is set in the local themes it will be ignored. This option may also be 
        ignored in some bindings.
 
+``outer_padding``
+    Defines number of spaces at the end of output (on the right side) or at 
+    the start of output (on the left side). Defaults to ``1``.
+
 
 ``dividers``
     Defines the dividers used in all Powerline extensions.
