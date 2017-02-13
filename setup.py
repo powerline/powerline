@@ -70,11 +70,11 @@ def get_version():
 
 setup(
 	name='powerline-status',
-	version='2.5.2',
+	version=get_version(),
 	description='The ultimate statusline/prompt utility.',
 	long_description=README,
 	classifiers=[
-		'Development Status :: 5 - Production/Stable',
+		'Development Status :: 4 - Beta',
 		'Environment :: Console',
 		'Environment :: Plugins',
 		'Intended Audience :: End Users/Desktop',
