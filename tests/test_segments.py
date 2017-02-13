@@ -1159,6 +1159,8 @@ class TestVim(TestCase):
 		self.assertEqual(self.vim.mode(pl=pl, segment_info=segment_info, override={'n': 'NORM'}), 'NORM')
 		with vim_module._with('mode', 'i') as segment_info:
 			self.assertEqual(self.vim.mode(pl=pl, segment_info=segment_info), 'INSERT')
+		with vim_module._with('mode', 'i\0') as segment_info:
+			self.assertEqual(self.vim.mode(pl=pl, segment_info=segment_info), 'INSERT')
 		with vim_module._with('mode', chr(ord('V') - 0x40)) as segment_info:
 			self.assertEqual(self.vim.mode(pl=pl, segment_info=segment_info), 'V-BLCK')
 			self.assertEqual(self.vim.mode(pl=pl, segment_info=segment_info, override={'^V': 'VBLK'}), 'VBLK')
