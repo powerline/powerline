@@ -74,6 +74,20 @@
 				"col_current":              { "fg": "solarized:base00", "bg": "solarized:base03", "attrs": [] }
 			}
 		},
+		"ic": {
+			"groups": {
+				"background":             { "fg": "solarized:base03", "bg": "solarized:base2", "attrs": [] },
+				"background:divider":     { "fg": "solarized:base02", "bg": "solarized:base2", "attrs": [] },
+				"mode":                   { "fg": "solarized:base3", "bg": "solarized:blue", "attrs": ["bold"] }
+			}
+		},
+		"ix": {
+			"groups": {
+				"background":             { "fg": "solarized:base03", "bg": "solarized:base2", "attrs": [] },
+				"background:divider":     { "fg": "solarized:base02", "bg": "solarized:base2", "attrs": [] },
+				"mode":                   { "fg": "solarized:base3", "bg": "solarized:blue", "attrs": ["bold"] }
+			}
+		},
 		"v": {
 			"groups": {
 				"mode": { "fg": "solarized:base3", "bg": "solarized:orange", "attrs": ["bold"] }
@@ -90,6 +104,16 @@
 			}
 		},
 		"R": {
+			"groups": {
+				"mode": { "fg": "solarized:base3", "bg": "solarized:red", "attrs": ["bold"] }
+			}
+		},
+		"Rc": {
+			"groups": {
+				"mode": { "fg": "solarized:base3", "bg": "solarized:red", "attrs": ["bold"] }
+			}
+		},
+		"Rx": {
 			"groups": {
 				"mode": { "fg": "solarized:base3", "bg": "solarized:red", "attrs": ["bold"] }
 			}

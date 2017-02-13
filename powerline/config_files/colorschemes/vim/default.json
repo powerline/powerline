@@ -76,6 +76,50 @@
 				"branch:divider":     { "fg": "darkcyan", "bg": "darkblue", "attrs": [] }
 			}
 		},
+		"ic": {
+			"colors": {
+				"gray0": "darkestblue",
+				"gray1": "darkestblue",
+				"gray2": "darkestblue",
+				"gray3": "darkblue",
+				"gray4": "darkblue",
+				"gray5": "darkestcyan",
+				"gray6": "darkestcyan",
+				"gray7": "darkestcyan",
+				"gray8": "mediumcyan",
+				"gray9": "mediumcyan",
+				"gray10": "mediumcyan",
+				"green_yellow_red": "gray5",
+				"dark_green_gray": "light_green_gray"
+			},
+			"groups": {
+				"mode":               { "fg": "darkestcyan", "bg": "white", "attrs": ["bold"] },
+				"background:divider": { "fg": "darkcyan", "bg": "darkestblue", "attrs": [] },
+				"branch:divider":     { "fg": "darkcyan", "bg": "darkblue", "attrs": [] }
+			}
+		},
+		"ix": {
+			"colors": {
+				"gray0": "darkestblue",
+				"gray1": "darkestblue",
+				"gray2": "darkestblue",
+				"gray3": "darkblue",
+				"gray4": "darkblue",
+				"gray5": "darkestcyan",
+				"gray6": "darkestcyan",
+				"gray7": "darkestcyan",
+				"gray8": "mediumcyan",
+				"gray9": "mediumcyan",
+				"gray10": "mediumcyan",
+				"green_yellow_red": "gray5",
+				"dark_green_gray": "light_green_gray"
+			},
+			"groups": {
+				"mode":               { "fg": "darkestcyan", "bg": "white", "attrs": ["bold"] },
+				"background:divider": { "fg": "darkcyan", "bg": "darkestblue", "attrs": [] },
+				"branch:divider":     { "fg": "darkcyan", "bg": "darkblue", "attrs": [] }
+			}
+		},
 		"v": {
 			"groups": {
 				"mode": { "fg": "darkorange", "bg": "brightestorange", "attrs": ["bold"] }
@@ -92,6 +136,16 @@
 			}
 		},
 		"R": {
+			"groups": {
+				"mode": { "fg": "white", "bg": "brightred", "attrs": ["bold"] }
+			}
+		},
+		"Rc": {
+			"groups": {
+				"mode": { "fg": "white", "bg": "brightred", "attrs": ["bold"] }
+			}
+		},
+		"Rx": {
 			"groups": {
 				"mode": { "fg": "white", "bg": "brightred", "attrs": ["bold"] }
 			}
