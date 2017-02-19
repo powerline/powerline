@@ -69,6 +69,7 @@ class Theme(object):
 			self.cursor_space_multiplier = None
 		self.cursor_columns = theme_config.get('cursor_columns')
 		self.spaces = theme_config['spaces']
+		self.outer_padding = int(theme_config.get('outer_padding', 1))
 		self.segments = []
 		self.EMPTY_SEGMENT = {
 			'contents': None,
