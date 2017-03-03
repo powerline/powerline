@@ -34,7 +34,7 @@ def _convert_seconds(seconds):
 
 
 class PlayerSegment(Segment):
-	def __call__(self, format='{state_symbol} {artist} - {title} ({total})', state_symbols=STATE_SYMBOLS, **kwargs):
+	def __call__(self, format='{state_symbol}|{artist} - {title}|({elapsed}/{total})', state_symbols=STATE_SYMBOLS, **kwargs):
 		stats = {
 			'state': 'fallback',
 			'album': None,
