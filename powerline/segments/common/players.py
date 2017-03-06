@@ -486,7 +486,7 @@ class ITunesPlayerSegment(PlayerSegment):
 			tell application "System Events"
 				set process_list to (name of every process)
 			end tell
-		
+
 			if process_list contains "iTunes" then
 				tell application "iTunes"
 					if player state is playing then
