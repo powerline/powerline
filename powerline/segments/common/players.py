@@ -483,23 +483,23 @@ class ITunesPlayerSegment(PlayerSegment):
 	def get_player_status(self, pl):
 		status_delimiter = '-~`/='
 		ascript = '''
-		tell application "System Events"
-		set process_list to (name of every process)
-		end tell
+			tell application "System Events"
+				set process_list to (name of every process)
+			end tell
 		
-		if process_list contains "iTunes" then
-		tell application "iTunes"
-		if player state is playing then
-		set t_title to name of current track
-		set t_artist to artist of current track
-		set t_album to album of current track
-		set t_duration to duration of current track
-		set t_elapsed to player position
-		set t_state to player state
-		return t_title & "{0}" & t_artist & "{0}" & t_album & "{0}" & t_elapsed & "{0}" & t_duration & "{0}" & t_state
-		end if
-		end tell
-		end if
+			if process_list contains "iTunes" then
+				tell application "iTunes"
+					if player state is playing then
+						set t_title to name of current track
+						set t_artist to artist of current track
+						set t_album to album of current track
+						set t_duration to duration of current track
+						set t_elapsed to player position
+						set t_state to player state
+						return t_title & "{0}" & t_artist & "{0}" & t_album & "{0}" & t_elapsed & "{0}" & t_duration & "{0}" & t_state
+					end if
+				end tell
+			end if
 		'''.format(status_delimiter)
 		now_playing = asrun(pl, ascript)
 		if not now_playing:
