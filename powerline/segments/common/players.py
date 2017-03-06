@@ -486,7 +486,7 @@ class ITunesPlayerSegment(PlayerSegment):
 		tell application "System Events"
 		set process_list to (name of every process)
 		end tell
-                
+		
 		if process_list contains "iTunes" then
 		tell application "iTunes"
 		if player state is playing then
@@ -508,12 +508,9 @@ class ITunesPlayerSegment(PlayerSegment):
 		if len(now_playing) != 6:
 			return
 		title, artist, album = now_playing[0], now_playing[1], now_playing[2]
-		title = title[0:15] + "…" if len(title) > 15 else title
-		artist = artist[0:10] + "…" if len(artist) > 10 else artist
-		album = album[0:10] + "…" if len(album) > 10 else album
 		state = _convert_state(now_playing[5])
 		total = _convert_seconds(now_playing[4])
-		elapsed = _convert_seconds(float(now_playing[3]))
+		elapsed = _convert_seconds(now_playing[3])
 		return {
 			'title': title,
 			'artist': artist,
@@ -523,7 +520,7 @@ class ITunesPlayerSegment(PlayerSegment):
 			'state': state
 		}
 
-        
+
 itunes = with_docstring(ITunesPlayerSegment(),
 ('''Return iTunes now playing information
 
