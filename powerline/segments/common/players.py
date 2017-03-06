@@ -503,7 +503,7 @@ class ITunesPlayerSegment(PlayerSegment):
 		'''.format(status_delimiter)
 		now_playing = asrun(pl, ascript)
 		if not now_playing:
-		return
+			return
 		now_playing = now_playing.split(status_delimiter)
 		if len(now_playing) != 6:
 			return
