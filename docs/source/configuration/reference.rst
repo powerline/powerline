@@ -395,7 +395,7 @@ ascii                       Theme without any unicode characters at all
     :ref:`display <config-themes-seg-display>`.
 
     Key :ref:`args <config-themes-seg-args>` (only for function and 
-    segments_list segments) is handled specially: unlike other values it is 
+    segment_list segments) is handled specially: unlike other values it is 
     merged with all other values, except that a single ``{module}.{function}`` 
     key if found prevents merging all ``{function}`` values.
 
@@ -432,7 +432,7 @@ ascii                       Theme without any unicode characters at all
 
     ``type``
         The segment type. Can be one of ``function`` (default), ``string`` or 
-        ``segments_list``:
+        ``segment_list``:
 
         ``function``
             The segment contents is the return value of the function defined in 
@@ -447,7 +447,7 @@ ascii                       Theme without any unicode characters at all
             highlighting group is defined in the :ref:`highlight_groups option 
             <config-themes-seg-highlight_groups>`.
 
-        ``segments_list``
+        ``segment_list``
             Sub-list of segments. This list only allows :ref:`function 
             <config-themes-seg-function>`, :ref:`segments 
             <config-themes-seg-segments>` and :ref:`args 
@@ -462,7 +462,7 @@ ascii                       Theme without any unicode characters at all
         Segment name. If present allows referring to this segment in 
         :ref:`segment_data <config-themes-segment_data>` dictionary by this 
         name. If not ``string`` segments may not be referred there at all and 
-        ``function`` and ``segments_list`` segments may be referred there using 
+        ``function`` and ``segment_list`` segments may be referred there using 
         either ``{module}.{function_name}`` or ``{function_name}``, whichever 
         will be found first. Function name is taken from :ref:`function key 
         <config-themes-seg-function>`.
