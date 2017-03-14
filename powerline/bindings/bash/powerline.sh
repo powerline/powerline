@@ -67,6 +67,12 @@ _powerline_prompt() {
 _powerline_set_prompt() {
 	local last_exit_code=$?
 	local jobnum="$(jobs -p|wc -l)"
+	local RPS="$(_powerline_prompt right $last_exit_code $jobnum)"
+	local clean=$(printf "$RPS" | sed -e 's#\\\[##g' -e 's#\\\]##g')
+	local cleaner=$(printf "$RPS" | sed -e 's#\\\[[^]]*\]##g')
+	local printlen
+	printf "%s%n" "$clean" >/dev/null printlen
+	printf "%*s\r" $(( ${COLUMNS:-$(_powerline_columns_fallback)} + $printlen - ${#cleaner} )) "$clean"
 	PS1="$(_powerline_prompt aboveleft $last_exit_code $jobnum)"
 	if test -n "$POWERLINE_SHELL_CONTINUATION$POWERLINE_BASH_CONTINUATION" ; then
 		PS2="$(_powerline_local_prompt left -r.bash $last_exit_code $jobnum continuation)"
