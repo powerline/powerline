@@ -30,7 +30,7 @@ Generic requirements
   with bazaar repositories.
 * ``pyuv`` python package. Required for :ref:`libuv-based watcher 
   <config-common-watcher>` to work.
-* ``i3-ipc`` python package. Required for i3wm bindings and segments.
+* ``i3ipc`` python package. Required for i3wm bindings and segments.
 * ``xrandr`` program. Required for the multi-monitor lemonbar binding and the 
   :py:func:`powerline.listers.i3wm.output_lister`.
 
