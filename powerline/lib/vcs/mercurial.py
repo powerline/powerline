@@ -24,8 +24,8 @@ class Repository(object):
 
 	# hg status -> (powerline file status, repo status flag)
 	statuses = {
-		b'M': ('M', 1),	 b'A': ('A', 1), b'R': ('R', 1), b'!': ('D', 1),
-		b'?': ('U', 2), b'I': ('I', 0)
+		b'M': ('M', 1), b'A': ('A', 1), b'R': ('R', 1), b'!': ('D', 1),
+		b'?': ('U', 2), b'I': ('I', 0), b'C': ('', 0),
 	}
 	repo_statuses_str = (None, 'D ', ' U', 'DU')
 
