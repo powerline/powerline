@@ -160,20 +160,20 @@ def raising(exc):
 VIM_VIM_OP_DEFAULT = (lambda self, toed, **kw:
 	self.op.join((toed(child, **kw) for child in self.children)))
 VIM_VIM_OPS = defaultdict(lambda: VIM_VIM_OP_DEFAULT, {
-	'=~#': (lambda self, toed, **kw: r"({0}) =~# '\v'.({1})".format(
+	'=~#': (lambda self, toed, **kw: r"(({0}) =~# '\v'.({1}))".format(
 		toed(self.children[0], **kw),
 		toed(self.children[1], **kw),
 	)),
 	'==': (lambda self, toed, **kw:
-		'==#'.join((toed(child, **kw) for child in self.children))),
+		'(' + ('==#'.join((toed(child, **kw) for child in self.children))) + ')'),
 	'+l': (lambda self, toed, **kw:
-		'+'.join((toed(child, **kw) for child in self.children))),
+		'(' + '+'.join((toed(child, **kw) for child in self.children)) + ')'),
 	'|': (lambda self, toed, **kw:
-		'||'.join((toed(child, **kw) for child in self.children))),
+		'(' + '||'.join((toed(child, **kw) for child in self.children)) + ')'),
 	'&': (lambda self, toed, **kw:
-		'&&'.join((toed(child, **kw) for child in self.children))),
+		'(' + '&&'.join((toed(child, **kw) for child in self.children)) + ')'),
 	'^': (lambda self, toed, **kw:
-		raising(NotImplementedError('Logical xor is not implemented'))),
+		'xor(' + ','.join((toed(child, **kw) for child in self.children)) + ')'),
 })
 
 
@@ -241,7 +241,7 @@ ED_TO_VIM = {
 	EditorIndex: {
 		'toed': lambda self, toed, **kw: (
 			toed(self.obj, **kw) + (
-				'[' + ' : '.join((toed(i, **kw) for i in self.index)) + ']'
+				'[' + ' : '.join((toed(i, **kw) for i in self.index)) + ' + 1]'
 			)
 		),
 	},
@@ -565,15 +565,13 @@ class VimEditor(Editor):
 	'''Definition of the Vim editor
 	'''
 	mode = (EditorFunc('mode', 1), EditorStr('nc'))
-	_pos_to_pos_and_col = lambda pos: pos[1:].joined(EditorList(EditorFunc('virtcol', pos[1:])))
 	visual_range = (
 		EditorList(
-			_pos_to_pos_and_col(EditorFunc('getpos', 'v')),
-			_pos_to_pos_and_col(EditorFunc('getpos', '.'))
+			EditorFunc('getpos', 'v'),
+			EditorFunc('getpos', '.')
 		),
 		EditorNone()
 	)
-	del _pos_to_pos_and_col
 	modified_indicator = (VimBufferOption('modified'),)
 	# We can't use vim_getbufoption(segment_info, 'buflisted')
 	# here for performance reasons. Querying the buffer options

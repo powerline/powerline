@@ -117,6 +117,11 @@ class EditorObj(object):
 		'''
 		return EditorBinaryOp('==', self, toedobj(other))
 
+	def startswith(self, start):
+		'''Describe startswith
+		'''
+		return EditorBinaryOp('==', self[:len(start)], start)
+
 	def matches(self, other):
 		'''Describe regexp match operator
 
