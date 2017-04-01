@@ -4,77 +4,13 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 import sys
 import logging
 
-from itertools import chain
-
 from powerline import Powerline, finish_common_config
 from powerline.lib.dict import mergedicts
 from powerline.lib.unicode import u
 from powerline.theme import Theme
-from powerline.editors import (EditorList, EditorDict, EditorMap,
-                               EditorTabList, EditorBufferList, EditorWindowList)
+from powerline.editors import EditorList
 from powerline.editors.vim import VimFuncsDict, VimGlobalVar, VimVimEditor, VimPyEditor
 from powerline.bindings.vim import get_python_to_vim, register_powerline_vim_strtrans_error
-
-
-LIST_OBJECTS = {
-	'list_tabs': EditorTabList,
-	'list_buffers': EditorBufferList,
-	'list_windows': EditorWindowList,
-}
-'''Dictionary mapping lister names to 
-:py:class:`powerline.editors.EditorIterable` subclasses
-'''
-LIST_PARAMETER_NAMES = {
-	'list_tabs': 'tabpage',
-	'list_buffers': 'buffer',
-	'list_windows': 'window',
-}
-'''Dictionary mapping lister names to 
-:py:attr:`powerline.editors.EditorIter.iterparam` values
-'''
-
-
-def segments_to_reqs_iter(seglist):
-	for segment in seglist:
-		for key in ['ext_editor_input', 'inc_ext_editor_input', 'exc_ext_editor_input']:
-			try:
-				yield segment[key]
-			except KeyError:
-				pass
-		if segment['type'] == 'segment_list' and 'ext_editor_list' in segment:
-			lname, lreqs = segment['ext_editor_list']
-			yield [lname]
-			lobj = LIST_OBJECTS[lname]()
-			iterparam = LIST_PARAMETER_NAMES[lname]
-			reqs_dict = VimVimEditor.reqss_to_reqs_dict(chain(
-				segments_to_reqs_iter(segment['segments']),
-				[lreqs],
-			))
-			# FIXME Save types information and perform conversion
-			reqs_dict = dict((
-				(k, v[0][0])
-				for k, v in reqs_dict.items()
-			))
-			inputs = EditorDict(**reqs_dict)
-			yield [
-				(
-					lname + '_inputs',
-					(EditorMap(inputs, lobj, iterparam),),
-					'reqslist',
-				)
-			]
-
-
-def theme_to_reqs_iter(theme, const_reqs):
-	for line in theme.segments:
-		for seglist in line.values():
-			for reqs in segments_to_reqs_iter(seglist):
-				yield reqs
-	yield const_reqs
-
-
-def theme_to_reqs_dict(theme, const_reqs):
-	return VimVimEditor.reqss_to_reqs_dict(theme_to_reqs_iter(theme, const_reqs))
 
 
 class VimVarHandler(logging.Handler, object):
@@ -102,10 +38,10 @@ class VimVarHandler(logging.Handler, object):
 
 
 class VimPowerline(Powerline):
-	prereqs = [
+	prereqs = (
 		'editor_overrides', 'editor_encoding',
-		('use_var_handler', (VimGlobalVar('powerline_use_var_handler'),), 'bool')
-	]
+		('use_var_handler', (VimGlobalVar('powerline_use_var_handler'),), 'bool'),
+	)
 	'''Data which is required first'''
 
 	def init(self, pyeval='pyeval', **kwargs):
@@ -118,12 +54,14 @@ class VimPowerline(Powerline):
 		self.vim_funcs = VimFuncsDict(vim)
 
 		if self.is_old_vim:
+			self.vim_cls = VimVimEditor
 			prereqs_vim_expr, prereqs_finfunc = (
-				VimVimEditor.compile_reqs_dict(VimVimEditor.reqss_to_reqs_dict([self.prereqs])))
+				self.vim_cls.compile_reqs_dict(self.vim_cls.reqs_to_reqs_dict(self.prereqs)))
 			self.prereqs_input = prereqs_finfunc(self.vim.eval(prereqs_vim_expr))
 		else:
-			reqs_dict = VimVimEditor.reqss_to_reqs_dict([self.prereqs])
-			self.prereqs_input = VimPyEditor.compile_reqs_dict(reqs_dict, self.vim_funcs, self.vim)(
+			self.vim_cls = VimPyEditor
+			reqs_dict = self.vim_cls.reqs_to_reqs_dict(self.prereqs)
+			self.prereqs_input = self.vim_cls.compile_reqs_dict(reqs_dict, self.vim_funcs, self.vim)(
 				self.vim.current.buffer, self.vim.current.window, self.vim.current.tabpage)
 
 		self.encoding = self.prereqs_input['editor_encoding'] or 'ascii'
@@ -133,12 +71,8 @@ class VimPowerline(Powerline):
 		self.pyeval = pyeval
 		self.construct_window_statusline = self.create_window_statusline_constructor()
 		self.renderer_options['vim'] = vim
-		self.const_reqs = ['mode', 'current_window_number']
-		'''Data which is always required from Vim'''
-		if self.is_old_vim:
-			self.const_reqs.append('stl_winlist')
 		self.const_tabline_reqs = ['mode']
-		self.renderer_options['const_reqs'] = self.const_reqs
+		self.renderer_options['vim_cls'] = self.vim_cls
 		self.renderer_options['vim_funcs'] = self.vim_funcs
 
 	if sys.version_info < (3,):
@@ -250,9 +184,9 @@ class VimPowerline(Powerline):
 			'is_tabline': is_tabline,
 			'config': config,
 			'theme': theme,
-			'reqs_dict': theme_to_reqs_dict(
+			'reqs_dict': self.vim_cls.theme_to_reqs_dict(
 				theme,
-				self.const_tabline_reqs if is_tabline else self.const_reqs
+				self.const_tabline_reqs if is_tabline else None
 			),
 		}
 
@@ -288,17 +222,17 @@ class VimPowerline(Powerline):
 	def create_old_vim_funcs(self):
 		if not self.is_old_vim:
 			return
-		inputdefs = [VimVimEditor.compile_reqs_dict(self.renderer.theme_reqs_dict)] + [
-			VimVimEditor.compile_reqs_dict(theme['reqs_dict'], tabscope=(matcher is None))
+		inputdefs = [self.vim_cls.compile_reqs_dict(self.renderer.theme_reqs_dict)] + [
+			self.vim_cls.compile_reqs_dict(theme['reqs_dict'], tabscope=(matcher is None))
 			for matcher, theme in self.renderer.local_themes
 		]
 		self.finishers = [func for expr, func in inputdefs]
-		themeexpr, themelambda = VimVimEditor.compile_themes_getter(self.renderer.local_themes)
+		themeexpr, themelambda = self.vim_cls.compile_themes_getter(self.renderer.local_themes)
 		self.renderer.themelambda = themelambda
 		command = lambda s: self.vim.command(s.format(
 			pycmd=self.pycmd,
 			themeexpr=themeexpr,
-			inputs=VimVimEditor.toed(
+			inputs=self.vim_cls.toed(
 				EditorList(*[expr for expr, func in inputdefs])
 			),
 			tablineinputnr=self.tablineinputnr,

@@ -7,8 +7,6 @@ from powerline.bindings.vim import vim_getoption, VimEnviron, current_tabpage, g
 from powerline.renderer import Renderer
 from powerline.colorscheme import ATTR_BOLD, ATTR_ITALIC, ATTR_UNDERLINE
 from powerline.lib.unicode import unichr, register_strwidth_error
-from powerline.editors.vim import VimPyEditor
-from powerline.vim import theme_to_reqs_dict
 
 
 mode_translations = {
@@ -23,7 +21,7 @@ class VimRenderer(Renderer):
 	character_translations = Renderer.character_translations.copy()
 	character_translations[ord('%')] = '%%'
 
-	def __init__(self, vim=None, is_old_vim=False, const_reqs=[], vim_funcs=None, **kwargs):
+	def __init__(self, vim=None, is_old_vim=False, vim_funcs=None, vim_cls=None, **kwargs):
 		self.vim = vim
 		self.is_old_vim = is_old_vim
 		if hasattr(self.vim, 'strwidth'):
@@ -45,7 +43,8 @@ class VimRenderer(Renderer):
 			else:
 				pass
 		super(VimRenderer, self).__init__(**kwargs)
-		self.theme_reqs_dict = theme_to_reqs_dict(self.theme, const_reqs)
+		self.vim_cls = vim_cls
+		self.theme_reqs_dict = self.vim_cls.theme_to_reqs_dict(self.theme)
 		self.theme_dict = {
 			'theme': self.theme,
 			'reqs_dict': self.theme_reqs_dict,
@@ -56,7 +55,8 @@ class VimRenderer(Renderer):
 		self.encoding = get_vim_encoding(self.vim)
 		self.uses_vim_python = True
 		if not is_old_vim:
-			self.theme_selector = VimPyEditor.compile_themes_getter(self.local_themes, vim_funcs, vim)
+			self.theme_selector = self.vim_cls.compile_themes_getter(
+				self.local_themes, vim_funcs, vim)
 		self.vim_funcs = vim_funcs
 		self.themelambda = None
 		self.segment_info = self.segment_info.copy()
@@ -124,7 +124,7 @@ class VimRenderer(Renderer):
 			try:
 				input = theme['input_getter'](buffer, window, tabpage)
 			except KeyError:
-				theme['input_getter'] = VimPyEditor.compile_reqs_dict(
+				theme['input_getter'] = self.vim_cls.compile_reqs_dict(
 					theme['reqs_dict'], self.vim_funcs, self.vim,
 					tabscope=theme.get('is_tabline'))
 				input = theme['input_getter'](buffer, window, tabpage)

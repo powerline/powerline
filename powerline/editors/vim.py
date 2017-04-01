@@ -651,6 +651,8 @@ class VimEditor(Editor):
 		intintbyteslistlist=lambda l: [[int(a), int(b), c] for a, b, c in l],
 	)
 
+	const_reqs = ('mode', 'current_window_number')
+
 
 class VimVimEditor(VimEditor):
 	converters = VimEditor.converters.copy()
@@ -664,6 +666,8 @@ class VimVimEditor(VimEditor):
 		for k, v in ED_TO_VIM.items()
 		if 'tovim' in v or 'toed' in v
 	))
+
+	const_reqs = VimEditor.const_reqs + ('stl_winlist',)
 
 	@classmethod
 	def finish_kwargs(cls, kwargs):
@@ -705,7 +709,7 @@ class VimVimEditor(VimEditor):
 
 		:param list reqs_dict:
 			List of requirements. See 
-			:py:func:`powerline.editors.reqss_to_reqs_dict` for more details.
+			:py:func:`powerline.editors.reqs_to_reqs_dict` for more details.
 		:param dict kwargs:
 			Whatever keyword arguments need to be passed to 
 			:py:meth:`powerline.editors.Editor.toed`.
@@ -808,7 +812,7 @@ class VimPyEditor(VimEditor):
 
 		:param list reqs_dict:
 			List of requirements. See 
-			:py:func:`powerline.editors.reqss_to_reqs_dict` for more details.
+			:py:func:`powerline.editors.reqs_to_reqs_dict` for more details.
 		:param VimFuncsDict vim_funcs:
 			:py:class:`VimFuncsDict` instance. Needed to provide ``vim_funcs`` 
 			global value to the generated lambda.

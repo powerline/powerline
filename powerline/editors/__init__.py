@@ -419,7 +419,7 @@ class EditorParameter(EditorNamedThing):
 class EditorReqss(EditorObj):
 	'''Class describing expression which returns requirements dictionary
 
-	See :py:meth:`Editor.reqss_to_reqs_dict` and 
+	See :py:meth:`Editor.reqs_to_reqs_dict` and 
 	:py:meth:`Editor.compile_reqs_dict`.
 	'''
 	pass
@@ -935,36 +935,30 @@ class Editor(object):
 		raise NotImplementedError('No converter found for class {0!r} of object {1!r}'.format(type(obj), obj))
 
 	@classmethod
-	def reqss_to_reqs_dict(cls, reqss):
-		'''Convert list of list of requirements to requirements dictionary
+	def reqs_to_reqs_dict(cls, reqs):
+		'''Convert list of requirements to requirements dictionary
 
 		Requirements list is described in :py:func:`with_input`. Requirements 
 		dictionary looks like ``{{requirement_name}: {requirement_desc}}``. 
 		``{requirement_desc}`` is described in relevant :py:class:`Editor` 
 		subclass.
 
-		:param list reqss:
-			List of lists of requirements.
+		:param list reqs:
+			List of requirements.
 
 		:return: Dictionary.
 		'''
 		reqs_dict = {}
 
-		for reqs in reqss:
-			for req in reqs:
-				if isinstance(req, tuple):
-					reqname, reqdef, reqtype = req
-				else:
-					reqname = req
-					reqdef = getattr(cls, reqname)
-					reqtype = cls.types.get(reqname, None)
-				try:
-					existing_reqdef, existing_reqtype = reqs_dict[reqname]
-				except KeyError:
-					reqs_dict[reqname] = (reqdef, reqtype)
-				else:
-					assert(existing_reqdef == reqdef)
-					assert(existing_reqtype == reqtype)
+		for req in reqs:
+			reqname, reqdef, reqtype = cls.normalize_req(req)
+			try:
+				existing_reqdef, existing_reqtype = reqs_dict[reqname]
+			except KeyError:
+				reqs_dict[reqname] = (reqdef, reqtype)
+			else:
+				assert(existing_reqdef == reqdef)
+				assert(existing_reqtype == reqtype)
 
 		return reqs_dict
 
@@ -973,7 +967,7 @@ class Editor(object):
 		'''Compile reqs dict to something which will eventually return a dict
 
 		``reqs_dict`` is a dictionary returned by 
-		:py:meth:`Editor.reqss_to_reqs_dict`. Result of the compilation must 
+		:py:meth:`Editor.reqs_to_reqs_dict`. Result of the compilation must 
 		somehow (defined by editor-specific bindings) return :ref:`input 
 		dictionary <dev-segment_info-vim-input>`.
 		'''
@@ -996,3 +990,127 @@ class Editor(object):
 			Whatever keyword arguments need to be passed to :py:func:`tovimpy`.
 		'''
 		pass
+
+	const_reqs = ()
+	'''Requirements which are always needed
+
+	These requirements will be requested always, regardless of what was 
+	requested by segments.
+	'''
+
+	list_objects = {
+		'list_tabs': EditorTabList,
+		'list_buffers': EditorBufferList,
+		'list_windows': EditorWindowList,
+	}
+	'''Dictionary mapping lister names to 
+	:py:class:`powerline.editors.EditorIterable` subclasses
+	'''
+
+	list_parameter_names = {
+		'list_tabs': 'tabpage',
+		'list_buffers': 'buffer',
+		'list_windows': 'window',
+	}
+	'''Dictionary mapping lister names to 
+	:py:attr:`powerline.editors.EditorIter.iterparam` values
+	'''
+
+	@classmethod
+	def segments_to_reqs(cls, seglist):
+		'''Transform a list of segments into a list of requirements
+
+		Takes into account requirements requested by segment itself and also by 
+		:ref:`include and exclude functions 
+		<config-themes-seg-exclude_function>`.
+
+		:param list seglist:
+			List of segments. Handles lister segments speciall.
+
+		:yield: ()
+		'''
+		for segment in seglist:
+			for key in ['ext_editor_input', 'inc_ext_editor_input',
+			            'exc_ext_editor_input']:
+				try:
+					reqs = segment[key]
+				except KeyError:
+					pass
+				else:
+					for req in reqs:
+						yield req
+			if segment['type'] == 'segment_list' and 'ext_editor_list' in segment:
+				lname, lreqs = segment['ext_editor_list']
+				yield lname
+				lobj = cls.list_objects[lname]()
+				iterparam = cls.list_parameter_names[lname]
+				reqs_dict = cls.reqs_to_reqs_dict(chain(
+					cls.segments_to_reqs(segment['segments']),
+					lreqs,
+				))
+				# FIXME Save types information and perform conversion
+				reqs_dict = dict((
+					(k, v[0][0])
+					for k, v in reqs_dict.items()
+				))
+				inputs = EditorDict(**reqs_dict)
+				yield (
+					lname + '_inputs',
+					(EditorMap(inputs, lobj, iterparam),),
+					'reqslist',
+				)
+
+	@classmethod
+	def normalize_req(cls, req):
+		'''Transform req which is a name into (name, def, type)
+
+		:param unicode|tuple req:
+			Requirement to transform.
+
+		:return: (name, def, type).
+		'''
+		if isinstance(req, tuple):
+			return req
+		else:
+			return (
+				req,
+				getattr(cls, req),
+				cls.types.get(req, None)
+			)
+
+	@classmethod
+	def theme_to_reqs(cls, theme, const_reqs_override=None):
+		'''Transform theme into an iterable of requirements
+
+		:param powerline.theme.Theme theme:
+			Transformed theme.
+		:param tuple const_reqs_override:
+			Override for :py:attr:`const_reqs`.
+
+		:yield: All requirements, in a form (name, def, type).
+		'''
+		for line in theme.segments:
+			for seglist in line.values():
+				for req in cls.segments_to_reqs(seglist):
+					yield cls.normalize_req(req)
+		const_reqs = (
+			const_reqs_override
+			if const_reqs_override is not None
+			else cls.const_reqs)
+		for const_req in const_reqs:
+			yield cls.normalize_req(const_req)
+
+	@classmethod
+	def theme_to_reqs_dict(cls, theme, const_reqs_override=None):
+		'''Transform theme into a requirements dictionary
+
+		See :py:meth:`reqs_to_reqs_dict`.
+
+		:param powerline.theme.Theme theme:
+			Transformed theme.
+		:param tuple const_reqs_override:
+			Override for :py:attr:`const_reqs`.
+
+		:return: Requirements dictionary.
+		'''
+		return cls.reqs_to_reqs_dict(cls.theme_to_reqs(theme))
