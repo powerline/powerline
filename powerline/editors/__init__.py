@@ -971,7 +971,7 @@ class Editor(object):
 		somehow (defined by editor-specific bindings) return :ref:`input 
 		dictionary <dev-segment_info-vim-input>`.
 		'''
-		pass
+		raise NotImplementedError
 
 	@classmethod
 	def compile_themes_getter(cls, local_themes, **kwargs):
@@ -989,7 +989,7 @@ class Editor(object):
 		:param dict kwargs:
 			Whatever keyword arguments need to be passed to :py:func:`tovimpy`.
 		'''
-		pass
+		raise NotImplementedError
 
 	const_reqs = ()
 	'''Requirements which are always needed
