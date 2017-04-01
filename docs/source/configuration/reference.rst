@@ -215,6 +215,13 @@ Common configuration is a subdictionary that is a value of ``ext`` key in
 
     All components are enabled by default.
 
+.. _config-ext-update_interval:
+
+``update_interval``
+    Determines how often WM status bars need to be updated, in seconds. Only 
+    valid for WM extensions which use ``powerline-daemon``. Defaults to 
+    2 seconds.
+
 .. _config-colors:
 
 Color definitions

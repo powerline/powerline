@@ -127,7 +127,7 @@ class TestParser(TestCase):
 				}),
 			]:
 				args = parser.parse_args(argv)
-				finish_args({}, args)
+				finish_args(parser, {}, args)
 				for key, val in expargs.items():
 					self.assertEqual(getattr(args, key), val)
 				for key, val in args.__dict__.items():
