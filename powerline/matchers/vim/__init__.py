@@ -6,5 +6,13 @@ from powerline.editors.vim import VimBufferOption
 
 
 help = VimBufferOption('buftype').equals('help')
+'''Match help buffer
+'''
+
 quickfix = VimBufferOption('buftype').equals('quickfix')
+'''Match quickfix buffer
+'''
+
 cmdwin = EditorBufferNameBase().equals('[Command Line]')
+'''Match command buffer (i.e. what shows after ``q:``)
+'''

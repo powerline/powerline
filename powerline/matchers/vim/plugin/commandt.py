@@ -5,3 +5,5 @@ from powerline.editors.vim import VimBufferOption
 
 
 commandt = VimBufferOption('filetype').equals('command-t')
+'''Match command-t buffer
+'''

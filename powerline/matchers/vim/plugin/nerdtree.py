@@ -5,3 +5,5 @@ from powerline.editors import EditorBufferNameBase
 
 
 nerdtree = EditorBufferNameBase().matches('NERD_tree_\\d+$')
+'''Match nerdtree buffer
+'''
