@@ -70,6 +70,14 @@ powerline:
     theme-specific values go directly to :ref:`top-level themes 
     <config-themes>`.
 
+.. _dev-segments-extensions:
+
+``powerline_extensions``
+    This attribute must be a dictionary containing arbitrary data. Currently 
+    only used by :ref:`editor bindings <dev-editors>`, populated via 
+    :py:func:`powerline.editors.with_input` (adds ``editor_input`` key) and 
+    :py:func:`powerline.editors.with_list` (adds ``editor_list`` key).
+
 .. _dev-segments-startup:
 
 ``startup``
@@ -332,6 +340,15 @@ Segment dictionary contains the following keys:
   ``shutdown``
     :ref:`Shutdown function <dev-segments-shutdown>`. Accepts no argument.
 
+   ``ext_…``, ``inc_ext_…``, ``exc_ext_…``
+    Contents of :ref:`powerline_extensions dictionary 
+    <dev-segments-extensions>`: ``segment.powerline_extensions['foo']`` 
+    generates ``ext_foo`` key. ``inc_ext_…`` and ``exc_ext_…`` are taken from 
+    :ref:`include and exclude <config-themes-seg-exclude_function>` functions 
+    respectively.
+
+    May be absent.
+
 Segments layout
 ===============
 
@@ -428,12 +445,23 @@ Vim ``segment_info`` argument is a dictionary with the following keys:
     Value of ``&encoding`` from the time when powerline was initialized. It 
     should be used to convert return values.
 
+All notes and keys from :ref:`editors section <dev-segment_info-editors>` also 
+apply.
+
+.. _dev-segment_info-editors:
+
+Editors
+-------
+
+Developing editor segments is better described in :ref:`the relevant file 
+<dev-editors-segments>`, here is a brief list of what is present there:
+
 .. _dev-segment_info-vim-input:
 
 ``input``
     Dictionary where keys are identifiers of some pieces of data obtained from 
-    the editor and values are these pieces. More details in :ref:`Editors 
-    support <dev-editors>` document.
+    the editor and values are these pieces. More details in :ref:`Editor 
+    bindings <dev-editors>` document.
 
 .. note::
    Segment generally should not assume that it is run for the current window, 

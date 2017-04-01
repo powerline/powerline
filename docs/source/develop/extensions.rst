@@ -1,3 +1,5 @@
+.. _dev-extensions:
+
 ********************************
 Creating new powerline extension
 ********************************

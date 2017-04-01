@@ -781,7 +781,7 @@ class VimVimEditor(VimEditor):
 				code += [cls.toed(matcher, **kwargs) + '?' + str(i + 1) + ':']
 			elif matcher is not None:
 				pycode += [
-					'{i} if local_themes[{i}][0](pl, matcher_info) else'.format(i=i)
+					'{i} if local_themes[{i}][0](pl=pl, matcher_info=matcher_info) else'.format(i=i)
 				]
 		pycode += ['0)']
 		code += ['0']
