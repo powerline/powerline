@@ -111,7 +111,10 @@ class VimPowerline(Powerline):
 	def init(self, pyeval='pyeval', **kwargs):
 		import vim
 		self.vim = vim
-		self.is_old_vim = bool(int(self.vim.eval('v:version < 704 || exists("g:powerline_old_vim")')))
+		self.is_old_vim = bool(int(self.vim.eval(
+			'v:version < 704 '
+			'|| exists("g:powerline_old_vim") '
+			'|| has("nvim")')))
 		self.vim_funcs = VimFuncsDict(vim)
 
 		if self.is_old_vim:
@@ -360,8 +363,7 @@ class VimPowerline(Powerline):
 		'''
 		self.vim.command(b'return "' + s.replace(b'\\', b'\\\\').replace(b'"', b'\\"') + b'"')
 
-	def do_setup(self, pyeval=None, pycmd=None, can_replace_pyeval=True, _local_themes=()):
-		import __main__
+	def do_setup(self, pyeval=None, pycmd=None, can_replace_pyeval=True, _local_themes=(), gvars=None):
 		if not pyeval:
 			pyeval = 'pyeval' if sys.version_info < (3,) else 'py3eval'
 		if not pycmd:
@@ -387,7 +389,11 @@ class VimPowerline(Powerline):
 		self.pyeval = pyeval
 		self.construct_window_statusline = self.create_window_statusline_constructor()
 
-		__main__.powerline = self
+		if gvars is None:
+			import __main__
+			__main__.powerline = self
+		else:
+			gvars['powerline'] = self
 
 		try:
 			if (

@@ -181,6 +181,9 @@ class EditorObj(object):
 	def __getitem__(self, index):
 		return EditorIndex(self, index)
 
+	def __call__(self, *args):
+		return EditorFunc(self, *args)
+
 	def __eq__(self, other):
 		return (self is other or (type(self) is type(other) and self.__dict__ == other.__dict__))
 
@@ -194,7 +197,9 @@ class EditorObj(object):
 class EditorNumber(int, EditorObj):
 	'''Class representing integer literal
 	'''
-	pass
+	def __repr__(self):
+		return '{0}({1})'.format(
+			self.__class__.__name__, super(EditorNumber, self).__repr__())
 
 
 class EditorStr(unicode, EditorObj):
@@ -202,7 +207,9 @@ class EditorStr(unicode, EditorObj):
 
 	.. note: Not a binary string.
 	'''
-	pass
+	def __repr__(self):
+		return '{0}({1})'.format(
+			self.__class__.__name__, super(EditorStr, self).__repr__())
 
 
 class EditorList(EditorObj):

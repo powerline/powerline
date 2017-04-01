@@ -8,6 +8,7 @@ from collections import defaultdict
 from itertools import chain
 
 from powerline.lib.dict import updated
+from powerline.lib.unicode import unicode
 from powerline.editors import (Editor, param_updated, iterparam_updated,
                                EditorObj, EditorBinaryOp, EditorTernaryOp,
                                EditorEmpty, EditorIndex, EditorFunc, EditorStr,
@@ -20,7 +21,7 @@ from powerline.editors import (Editor, param_updated, iterparam_updated,
                                EditorBufferNameBase, EditorMap,
                                EditorWindowList, EditorTabList,
                                EditorWindowBuffer, EditorTabWindowBuffer,
-                               EditorTabWindow, EditorTabAmount,
+                               EditorTabWindow, EditorTabAmount, EditorNumber,
                                toedobj)
 
 
@@ -209,6 +210,11 @@ ED_TO_VIM = {
 		'tovim': lambda self, toed, **kw: (
 			"'" + self.replace("'", "''") + "'"
 		),
+		'tovimpy': lambda self, toed, **kw: unicode.__repr__(self),
+	},
+	EditorNumber: {
+		'tovim': lambda self, toed, **kw: int.__repr__(self),
+		'tovimpy': lambda self, toed, **kw: int.__repr__(self),
 	},
 	EditorList: {
 		'toed': lambda self, toed, **kw: (
@@ -229,7 +235,7 @@ ED_TO_VIM = {
 			if_true=toed(self.if_true, **kw),
 			if_false=toed(self.if_false, **kw),
 		),
-		'tovimpy': lambda self, toed, **kw: '({if_true}) if ({condition}) else ({if_false})'.format(
+		'tovimpy': lambda self, toed, **kw: '(({if_true}) if ({condition}) else ({if_false}))'.format(
 			condition=toed(self.condition, **kw),
 			if_true=toed(self.if_true, **kw),
 			if_false=toed(self.if_false, **kw),
@@ -241,17 +247,25 @@ ED_TO_VIM = {
 	EditorIndex: {
 		'toed': lambda self, toed, **kw: (
 			toed(self.obj, **kw) + (
-				'[' + ' : '.join((toed(i, **kw) for i in self.index)) + ' + 1]'
+				'[' + ' : '.join((toed(idx if i == 0 else toedobj(idx - 1), **kw)
+				                  for i, idx in enumerate(self.index))) + ']'
 			)
 		),
 	},
 	EditorFunc: {
 		'tovim': lambda self, toed, **kw: (
-			self.name + '(' + ', '.join((toed(arg, **kw) for arg in self.args)) + ')'
+			(
+				'(' + toed(self.name, **kw) + ')'
+				if isinstance(self.name, EditorObj) else
+				self.name
+			) + '(' + ', '.join((toed(arg, **kw) for arg in self.args)) + ')'
 		),
 		'tovimpy': lambda self, toed, **kw: (
-			'vim_funcs[' + repr(self.name) + ']'
-			+ '(' + ', '.join((toed(arg, **kw) for arg in self.args)) + ')'
+			(
+				'(' + toed(self.name, **kw) + ')'
+				if isinstance(self.name, EditorObj) else
+				'vim_funcs[' + repr(self.name) + ']'
+			) + '(' + ', '.join((toed(arg, **kw) for arg in self.args)) + ')'
 		),
 	},
 	VimGlobalOption: {
@@ -759,14 +773,12 @@ class VimVimEditor(VimEditor):
 		pycode = ['lambda pl, matcher_info: (']
 		for i, m in enumerate(local_themes):
 			matcher = m[0]
-			if callable(matcher):
+			if isinstance(matcher, EditorObj):
+				code += [cls.toed(matcher, **kwargs) + '?' + str(i + 1) + ':']
+			elif matcher is not None:
 				pycode += [
 					'{i} if local_themes[{i}][0](pl, matcher_info) else'.format(i=i)
 				]
-			elif matcher is None:
-				pass
-			else:
-				code += [cls.toed(matcher, **kwargs) + '?' + str(i + 1) + ':']
 		pycode += ['0)']
 		code += ['0']
 		return ''.join(code), eval('\n'.join(pycode), {'local_themes': local_themes})
@@ -831,6 +843,8 @@ class VimPyEditor(VimEditor):
 				','
 			]
 		code[-1] = '}'
+		# for i, v in enumerate(code):
+		# 	print(i + 1, v)
 		ret = eval('\n'.join(code), gvars)
 		ret.source = code
 		return ret
@@ -873,15 +887,15 @@ class VimPyEditor(VimEditor):
 		code = ['lambda pl, matcher_info, theme, buffer, window, tabpage: (']
 		for i, m in enumerate(local_themes):
 			matcher, theme = m
-			if callable(matcher):
+			if isinstance(matcher, EditorObj):
 				code += [
 					'local_themes[{0}][1]'.format(i),
-					'if local_themes[i][0](pl=pl, matcher_info=matcher_info) else',
+					'if ' + cls.toed(matcher, **kwargs) + ' else',
 				]
 			elif matcher is not None:
 				code += [
 					'local_themes[{0}][1]'.format(i),
-					'if ' + cls.toed(matcher, **kwargs) + ' else',
+					'if local_themes[{0}][0](pl=pl, matcher_info=matcher_info) else'.format(i),
 				]
 		code += ['theme', ')']
 		return eval('\n'.join(code), updated(init_globals, {
