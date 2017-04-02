@@ -4,6 +4,7 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 import threading
 
 from time import sleep
+from itertools import groupby
 
 import pexpect
 
@@ -65,3 +66,33 @@ class ExpectProcess(threading.Thread):
 	def send(self, data):
 		with self.child_lock:
 			self.child.send(data)
+
+	def get_highlighted_text(self, text, attrs, default_props=()):
+		ret = []
+		new_attrs = attrs.copy()
+		for cell_properties, segment_text in text:
+			segment_text = segment_text.translate({'{': '{{', '}': '}}'})
+			if cell_properties not in new_attrs:
+				new_attrs[cell_properties] = len(new_attrs) + 1
+			props_name = new_attrs[cell_properties]
+			if props_name in default_props:
+				ret.append(segment_text)
+			else:
+				ret.append('{' + str(props_name) + ':' + segment_text + '}')
+		return ''.join(ret), new_attrs
+
+	def get_row(self, row, attrs, default_props=()):
+		with self.lock:
+			return self.get_highlighted_text((
+				(key, ''.join((cell.text for cell in subline)))
+				for key, subline in groupby((
+					self.vterm.vtscreen[row, col] for col in range(self.cols)
+				), lambda cell: cell.cell_properties_key)
+			), attrs, default_props)
+
+	def get_screen(self, attrs, default_props=()):
+		lines = []
+		for row in range(self.rows):
+			line, attrs = self.get_row(row, attrs, default_props)
+			lines.append(line)
+		return '\n'.join(lines), attrs

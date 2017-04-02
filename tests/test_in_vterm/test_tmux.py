@@ -7,7 +7,6 @@ import sys
 
 from time import sleep
 from subprocess import check_call
-from itertools import groupby
 from difflib import ndiff
 from glob import glob1
 
@@ -19,6 +18,10 @@ from tests.lib.terminal import ExpectProcess
 
 
 VTERM_TEST_DIR = os.path.abspath('tests/vterm_tmux')
+
+
+def convert_expected_result(p, expected_result):
+	return p.get_highlighted_text(expected_result, {})
 
 
 def cell_properties_key_to_shell_escape(cell_properties_key):
@@ -33,57 +36,32 @@ def cell_properties_key_to_shell_escape(cell_properties_key):
 
 
 def test_expected_result(p, expected_result, cols, rows, print_logs):
-	last_line = []
-	for col in range(cols):
-		last_line.append(p[rows - 1, col])
+	expected_text, attrs = convert_expected_result(p, expected_result)
 	attempts = 3
 	result = None
 	while attempts:
-		result = tuple((
-			(key, ''.join((i.text for i in subline)))
-			for key, subline in groupby(last_line, lambda i: i.cell_properties_key)
-		))
-		if result == expected_result:
+		actual_text, all_attrs = p.get_row(rows - 1, attrs)
+		if actual_text == expected_text:
 			return True
 		attempts -= 1
 		print('Actual result does not match expected. Attempts left: {0}.'.format(attempts))
 		sleep(2)
 	print('Result:')
-	shesc_result = ''.join((
-		'{0}{1}\x1b[m'.format(cell_properties_key_to_shell_escape(key), text)
-		for key, text in result
-	))
-	print(shesc_result)
-	print(result)
+	print(actual_text)
 	print('Expected:')
-	shesc_expected_result = ''.join((
-		'{0}{1}\x1b[m'.format(cell_properties_key_to_shell_escape(key), text)
-		for key, text in expected_result
-	))
-	print(shesc_expected_result)
+	print(expected_text)
+	print('Attributes:')
+	print(all_attrs)
 	p.send(b'powerline-config tmux setup\n')
 	sleep(5)
 	print('Screen:')
-	screen = []
-	for i in range(rows):
-		screen.append([])
-		for j in range(cols):
-			screen[-1].append(p[i, j])
-	print('\n'.join(
-		''.join((
-			'{0}{1}\x1b[m'.format(
-				cell_properties_key_to_shell_escape(i.cell_properties_key),
-				i.text
-			) for i in line
-		))
-		for line in screen
-	))
-	a = shesc_result.replace('\x1b', '\\e') + '\n'
-	b = shesc_expected_result.replace('\x1b', '\\e') + '\n'
+	screen, screen_attrs = p.get_screen(attrs)
+	print(screen)
+	print(screen_attrs)
 	print('_' * 80)
 	print('Diff:')
 	print('=' * 80)
-	print(''.join((u(line) for line in ndiff([a], [b]))))
+	print(''.join((u(line) for line in ndiff([actual_text], [expected_text]))))
 	if print_logs:
 		for f in glob1(VTERM_TEST_DIR, '*.log'):
 			print('_' * 80)
@@ -310,10 +288,11 @@ def main(attempts=3):
 		if ret is not None:
 			return ret
 	finally:
-		check_call([tmux_exe, '-S', socket_path, 'kill-server'], env={
-			'PATH': vterm_path,
-			'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
-		}, cwd=VTERM_TEST_DIR)
+		pass
+		#  check_call([tmux_exe, '-S', socket_path, 'kill-server'], env={
+			#  'PATH': vterm_path,
+			#  'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
+		#  }, cwd=VTERM_TEST_DIR)
 	return main(attempts=(attempts - 1))
 
 
