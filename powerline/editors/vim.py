@@ -669,7 +669,8 @@ class VimEditor(Editor):
 		],
 	)
 
-	const_reqs = Editor.const_reqs + ('mode', 'current_window_number')
+	const_reqs = Editor.const_reqs + (
+		'mode', 'current_window_number', 'current_tab_number')
 
 	@staticmethod
 	def req_to_edobj(req):

@@ -57,6 +57,7 @@ class VimRenderer(Renderer):
 		if not is_old_vim:
 			self.theme_selector = self.vim_cls.compile_themes_getter(
 				self.local_themes, vim_funcs, vim)
+		self.is_old_vim = is_old_vim
 		self.vim_funcs = vim_funcs
 		self.themelambda = None
 		self.segment_info = self.segment_info.copy()
@@ -89,7 +90,7 @@ class VimRenderer(Renderer):
 				themenr = self.themelambda(self.pl, segment_info)
 
 		buffer = window.buffer if window else None
-		tabpage = current_tabpage(self.vim)
+		tabpage = current_tabpage(self.vim, self.is_old_vim, input)
 
 		segment_info.update(
 			window=window,

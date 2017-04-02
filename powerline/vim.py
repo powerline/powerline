@@ -10,7 +10,8 @@ from powerline.lib.unicode import u
 from powerline.theme import Theme
 from powerline.editors import EditorList
 from powerline.editors.vim import VimFuncsDict, VimGlobalVar, VimVimEditor, VimPyEditor
-from powerline.bindings.vim import get_python_to_vim, register_powerline_vim_strtrans_error
+from powerline.bindings.vim import (get_python_to_vim, register_powerline_vim_strtrans_error,
+                                    LazyWindow)
 
 
 class VimVarHandler(logging.Handler, object):
@@ -37,27 +38,6 @@ class VimVarHandler(logging.Handler, object):
 		self.vim.eval(b'add(g:' + self.vim_varname + b', ' + self.python_to_vim(message) + b')')
 
 
-class WindowProxy(object):
-	'''Class which may serve as a drop-in replacement of vim.Window object
-
-	Does not create vim.Window object up until required.
-
-	:param module vim:
-		Vim module.
-	:param int winnr:
-		Window number.
-	'''
-	def __init__(self, vim, winnr):
-		self.number = winnr
-		self.__window = None
-		self.__vim = vim
-
-	def __getattr__(self, attr):
-		if self.__window is None:
-			self.__window = self.__vim.windows[self.number - 1]
-		return getattr(self.__window, attr)
-
-
 class VimPowerline(Powerline):
 	prereqs = (
 		'editor_overrides', 'editor_encoding',
@@ -69,7 +49,7 @@ class VimPowerline(Powerline):
 		import vim
 		self.vim = vim
 		self.is_old_vim = bool(int(self.vim.eval(
-			'v:version < 704 '
+			'v:version < 800 '
 			'|| exists("g:powerline_old_vim") '
 			'|| has("nvim")')))
 		self.vim_funcs = VimFuncsDict(vim)
@@ -88,7 +68,6 @@ class VimPowerline(Powerline):
 		self.encoding = self.prereqs_input['editor_encoding'] or 'ascii'
 
 		super(VimPowerline, self).init('vim', **kwargs)
-		self.last_window_id = 1
 		self.pyeval = pyeval
 		self.construct_window_statusline = self.create_window_statusline_constructor()
 		self.renderer_options['vim'] = vim
@@ -405,28 +384,24 @@ class VimPowerline(Powerline):
 			pass
 
 	def set_stls(self, window_id):
-		assert window_id is not None
+		assert(not self.is_old_vim)
+		assert(window_id is not None)
 		retwindow = None
 		retwinnr = None
-		for i, window in enumerate(self.vim.windows):
-			curwindow_id = window.vars.get('_powerline_window_id', None)
-			if not curwindow_id:
-				curwindow_id = self.last_window_id
-				self.last_window_id += 1
-				window.vars['_powerline_window_id'] = curwindow_id
-				window.options['statusline'] = self.construct_window_statusline(curwindow_id)
-			else:
-				needed_stl = self.construct_window_statusline(curwindow_id)
-				if needed_stl != window.options['statusline']:
-					window.options['statusline'] = needed_stl
+		win_getid = self.vim.Function('win_getid')
+		for window in self.vim.windows:
+			curwindow_id = win_getid(window.number)
+			needed_stl = self.construct_window_statusline(curwindow_id)
+			if needed_stl != window.options['statusline']:
+				window.options['statusline'] = needed_stl
 			if window_id == curwindow_id:
 				retwindow = window
-				retwinnr = i + 1
+				retwinnr = window.number
 		return retwindow, retwinnr
 
 	def statusline(self, winnr=None, window_id=None, input=None, themenr=None):
 		if self.is_old_vim:
-			window = WindowProxy(self.vim, winnr)
+			window = LazyWindow(self.vim, winnr)
 		else:
 			window, winnr = self.set_stls(window_id)
 		return self.render(input=input, themenr=themenr, window_id=window_id, window=window, winnr=winnr)
@@ -439,17 +414,14 @@ class VimPowerline(Powerline):
 		window_id = None
 		winnr = None
 		window = None
-		for i, window in enumerate(self.vim.windows):
-			curwindow_id = window.vars.get('_powerline_window_id', None)
-			if not curwindow_id:
-				curwindow_id = self.last_window_id
-				self.last_window_id += 1
-				window.vars['_powerline_window_id'] = curwindow_id
-				window.options['statusline'] = self.construct_window_statusline(curwindow_id)
+		win_getid = self.vim.Function('win_getid')
+		for window in self.vim.windows:
+			curwindow_id = win_getid(window.number)
+			window.options['statusline'] = self.construct_window_statusline(curwindow_id)
 			if window is self.vim.current.window:
 				window_id = curwindow_id
-				window = self.vim.current.window
-				winnr = i + 1
+				window = window
+				winnr = window.number
 		return self.render(input, window_id=window_id, window=window, winnr=winnr)
 
 	def setup_components(self, components):

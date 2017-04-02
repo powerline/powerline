@@ -149,11 +149,81 @@ class Tabpage(FalseObject):
 			int(self.vim.eval('tabpagewinnr({0})'.format(self.number))))
 
 
-def current_tabpage(vim):
-	if hasattr(vim, 'tabpages'):
-		return vim.current.tabpage
-	else:
-		return Tabpage(vim, int(vim.eval('tabpagenr()')))
+class LazyCurrentTabpage(object):
+	'''Class which may serve as a drop-in replacement of vim.Tabpage object
+
+	Does not create vim.Tabpage object up until required.
+
+	:param module vim:
+		Vim module.
+	:param bool is_old_vim:
+		True if using old vim (without vim.current.tabpage).
+	:param dict input:
+		Input.
+	'''
+	def __init__(self, vim, is_old_vim, input):
+		self.__vim = vim
+		self.__tabpage = None
+		self.__is_old_vim = is_old_vim
+		assert(input is None or isinstance(input, dict))
+		number = input and input.get('current_tab_number')
+		self.__number = number
+		if number is not None:
+			self.number = number
+
+	def __getattr__(self, attr):
+		if self.__tabpage is None:
+			if self.__is_old_vim:
+				if self.__number is None:
+					self.__number = self.__vim.eval('tabpagenr()')
+				return Tabpage(self.__vim, self.__number)
+			else:
+				self.__tabpage = self.__vim.current.tabpage
+		return getattr(self.__tabpage, attr)
+
+
+class LazyWindowBuffer(object):
+	'''Class which may serve as a drop-in replacement of vim.Buffer object
+
+	Does not create vim.Buffer object up until required.
+
+	:param LazyWindow window:
+		Window this buffer is shown in.
+	'''
+	def __init__(self, window):
+		self.__window = window
+		self.__buffer = None
+
+	def __getattr__(self, attr):
+		if self.__buffer is None:
+			self.__buffer = self.__window.buffer
+		return getattr(self.__buffer, attr)
+
+
+class LazyWindow(object):
+	'''Class which may serve as a drop-in replacement of vim.Window object
+
+	Does not create vim.Window object up until required.
+
+	:param module vim:
+		Vim module.
+	:param int winnr:
+		Window number.
+	'''
+	def __init__(self, vim, winnr):
+		self.number = winnr
+		self.__window = None
+		self.__vim = vim
+		self.buffer = LazyWindowBuffer(self)
+
+	def __getattr__(self, attr):
+		if self.__window is None:
+			self.__window = self.__vim.windows[self.number - 1]
+		return getattr(self.__window, attr)
+
+
+def current_tabpage(vim, is_old_vim, input):
+	return LazyCurrentTabpage(vim, is_old_vim, input)
 
 
 class VimEnviron(object):
