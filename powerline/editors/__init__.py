@@ -939,9 +939,12 @@ class Editor(object):
 		'''Convert list of requirements to requirements dictionary
 
 		Requirements list is described in :py:func:`with_input`. Requirements 
-		dictionary looks like ``{{requirement_name}: {requirement_desc}}``. 
-		``{requirement_desc}`` is described in relevant :py:class:`Editor` 
-		subclass.
+		dictionary looks like ``{{requirement_name}: ({requirement_desc}, 
+		{requirement_type})}``. ``{requirement_desc}`` is described in relevant 
+		:py:class:`Editor` subclass, ``{requirement_type}`` is either a string 
+		or a dictionary which maps requirement subkeys to actual types (used for 
+		listers). In case of string type, these strings may appear in 
+		:py:attr:`converters` attribute.
 
 		:param list reqs:
 			List of requirements.
@@ -1017,6 +1020,19 @@ class Editor(object):
 	'''
 
 	@classmethod
+	def req_to_edobj(cls, req):
+		'''Convert requirement to :py:class:`EditorObj`
+
+		Used by :py:meth:`segments_to_reqs` to convert lister requirements 
+		(values of req_dict).
+
+		:param req: Requirement to convert.
+
+		:return: Converted requirement.
+		'''
+		return req
+
+	@classmethod
 	def segments_to_reqs(cls, seglist):
 		'''Transform a list of segments into a list of requirements
 
@@ -1048,16 +1064,19 @@ class Editor(object):
 					cls.segments_to_reqs(segment['segments']),
 					lreqs,
 				))
-				# FIXME Save types information and perform conversion
-				reqs_dict = dict((
-					(k, v[0][0])
+				reqs_types_dict = dict((
+					(k, v[1])
 					for k, v in reqs_dict.items()
 				))
-				inputs = EditorDict(**reqs_dict)
+				reqs_vals_dict = dict((
+					(k, cls.req_to_edobj(v[0]))
+					for k, v in reqs_dict.items()
+				))
+				inputs = EditorDict(**reqs_vals_dict)
 				yield (
 					lname + '_inputs',
 					(EditorMap(inputs, lobj, iterparam),),
-					'reqslist',
+					reqs_types_dict,
 				)
 
 	@classmethod

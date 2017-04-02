@@ -653,6 +653,19 @@ class VimEditor(Editor):
 
 	const_reqs = ('mode', 'current_window_number')
 
+	@staticmethod
+	def req_to_edobj(req):
+		'''Convert requirement to :py:class:`EditorObj`
+
+		Used by :py:meth:`segments_to_reqs` to convert lister requirements 
+		(values of req_dict).
+
+		:param tuple req: Requirement to convert.
+
+		:return: Converted requirement.
+		'''
+		return req[0]
+
 
 class VimVimEditor(VimEditor):
 	converters = VimEditor.converters.copy()
@@ -704,6 +717,34 @@ class VimVimEditor(VimEditor):
 		return super(VimVimEditor, cls).toed(obj, **cls.finish_kwargs(kwargs))
 
 	@classmethod
+	def compile_req_type(cls, req_type, req_var, gvars, conv_code):
+		'''Convert requirement type to the Python code which does the conversion
+
+		:param req_type:
+			Requirement type, string or dictionary.
+		:param req_var:
+			Variable which may be used to access the requirement value.
+		:param dict gvars:
+			Global variables. Modified to add converters there.
+		:param list conv_code:
+			Converted code. Modified to add code ther.
+		'''
+		if isinstance(req_type, dict):
+			conv_code.append('    {')
+			for subk, subv in req_type.items():
+				conv_code.append(repr(subk) + ':')
+				cls.compile_req_type(subv, '{0}[{1!r}]'.format(req_var, subk),
+				                     gvars, conv_code)
+				conv_code.append(',')
+			conv_code[-1] += '}'
+		else:
+			if req_type in cls.converters:
+				gvars['conv_' + req_type] = cls.converters[req_type]
+				conv_code.append('    conv_{0}({1})'.format(req_type, req_var))
+			else:
+				conv_code.append('    ' + req_var)
+
+	@classmethod
 	def compile_reqs_dict(cls, reqs_dict, **kwargs):
 		'''Convert a dictionary with requirements to a VimL expression
 
@@ -728,23 +769,20 @@ class VimVimEditor(VimEditor):
 		conv_code = ['lambda input: {']
 		gvars = {}
 		for k, v in reqs_dict.items():
-			code += [
-				cls.toed(EditorStr(k), **kwargs)
-				+ ':'
-				+ cls.toed(v[0][0], **kwargs),
-				','
-			]
-			conv_code += [
-				repr(k) + ':'
-			]
-			if v[1] in cls.converters:
-				gvars['conv_' + v[1]] = cls.converters[v[1]]
-				conv_code.append('conv_{0}(input[{1!r}])'.format(v[1], k))
-			else:
-				conv_code.append('input[{0!r}]'.format(k))
-			conv_code.append(',')
-		code[-1] = '}'
-		conv_code[-1] = '}'
+			code.append(
+				'  '
+				+ cls.toed(EditorStr(k), **kwargs)
+				+ ': '
+				+ cls.toed(v[0][0], **kwargs)
+				+ ','
+			)
+			conv_code.append('  ' + repr(k) + ':')
+			cls.compile_req_type(v[1], 'input[{0!r}]'.format(k), gvars, conv_code)
+			conv_code[-1] += ','
+		code[-1] += '}'
+		conv_code[-1] += '}'
+		# for i, v in enumerate(conv_code):
+		# 	print(i + 1, v)
 		return ''.join(code), eval('\n'.join(conv_code), gvars)
 
 	@classmethod
@@ -807,6 +845,34 @@ class VimPyEditor(VimEditor):
 		return super(VimPyEditor, cls).toed(obj, **kwargs)
 
 	@classmethod
+	def compile_req_type(cls, req_type, pyexpr, gvars):
+		'''Convert requirement type to the Python code which does the conversion
+
+		:param req_type:
+			Requirement type, string or dictionary.
+		:param str pyexpr:
+			Converted code. Modified to add code ther.
+		:param dict gvars:
+			Global variables. Modified to add converters there.
+
+		:return:
+			Modified pyexpr.
+		'''
+		if isinstance(req_type, dict):
+			subexpr = ['{']
+			subpyexpr = 'input'
+			for subk, subv in req_type.items():
+				subexpr.append('{0!r}: {1},'.format(
+					subk, cls.compile_req_type(subv, subpyexpr, gvars)))
+			subexpr.append('}')
+			pyexpr = '(lambda input: {0})({1})'.format(' '.join(subexpr), pyexpr)
+		else:
+			if req_type in cls.converters:
+				pyexpr = 'conv_' + req_type + '(' + pyexpr + ')'
+				gvars['conv_' + req_type] = cls.converters[req_type]
+		return pyexpr
+
+	@classmethod
 	def compile_reqs_dict(cls, reqs_dict, vim_funcs, vim, **kwargs):
 		'''Convert a dictionary with requirements to a Python lambda object
 
@@ -837,16 +903,14 @@ class VimPyEditor(VimEditor):
 		})
 		for k, v in reqs_dict.items():
 			pyexpr = cls.toed(v[0][0], **kwargs)
-			if v[1] in cls.converters:
-				pyexpr = 'conv_' + v[1] + '(' + pyexpr + ')'
-				gvars['conv_' + v[1]] = cls.converters[v[1]]
-			code += [
+			pyexpr = cls.compile_req_type(v[1], pyexpr, gvars)
+			code.append(
 				repr(k)
 				+ ':'
-				+ pyexpr,
-				','
-			]
-		code[-1] = '}'
+				+ pyexpr
+				+ ','
+			)
+		code[-1] += '}'
 		# for i, v in enumerate(code):
 		# 	print(i + 1, v)
 		ret = eval('\n'.join(code), gvars)
