@@ -783,7 +783,10 @@ class VimVimEditor(VimEditor):
 		conv_code[-1] += '}'
 		# for i, v in enumerate(conv_code):
 		# 	print(i + 1, v)
-		return ''.join(code), eval('\n'.join(conv_code), gvars)
+		conv_code_s = '\n'.join(conv_code)
+		converter = eval(conv_code_s, gvars)
+		converter.source = conv_code_s
+		return ''.join(code), converter
 
 	@classmethod
 	def compile_themes_getter(cls, local_themes, **kwargs):
@@ -823,7 +826,10 @@ class VimVimEditor(VimEditor):
 				]
 		pycode += ['0)']
 		code += ['0']
-		return ''.join(code), eval('\n'.join(pycode), {'local_themes': local_themes})
+		pycode_s = '\n'.join(pycode)
+		themes_getter = eval(pycode_s, {'local_themes': local_themes})
+		themes_getter.source = pycode_s
+		return ''.join(code), themes_getter
 
 
 class VimPyEditor(VimEditor):
@@ -913,8 +919,9 @@ class VimPyEditor(VimEditor):
 		code[-1] += '}'
 		# for i, v in enumerate(code):
 		# 	print(i + 1, v)
-		ret = eval('\n'.join(code), gvars)
-		ret.source = code
+		code_s = '\n'.join(code)
+		ret = eval(code_s, gvars)
+		ret.source = code_s
 		return ret
 
 	@classmethod
@@ -966,11 +973,14 @@ class VimPyEditor(VimEditor):
 					'if local_themes[{0}][0](pl=pl, matcher_info=matcher_info) else'.format(i),
 				]
 		code += ['theme', ')']
-		return eval('\n'.join(code), updated(init_globals, {
+		code_s = '\n'.join(code)
+		ret = eval(code_s, updated(init_globals, {
 			'vim': vim,
 			'vim_funcs': vim_funcs,
 			'local_themes': local_themes[:],
 		}))
+		ret.source = code_s
+		return ret
 
 
 init_globals = {
