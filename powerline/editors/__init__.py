@@ -648,6 +648,15 @@ class EditorEncoding(EditorObj):
 	pass
 
 
+class EditorAvailableWidth(EditorObj):
+	'''Class describing expression which returns available width
+
+	Should be used by renderers to determine how much space they may consume 
+	in statusline.
+	'''
+	pass
+
+
 Range = namedtuple('Range', ('start', 'end'))
 VisualPosition = namedtuple('VisualPosition', ('line', 'col', 'virtcol', 'virtoff'))
 WindowPosition = namedtuple('WindowPosition', ('line', 'col'))
@@ -815,6 +824,12 @@ class Editor(object):
 	Expected to have no parameters.
 	'''
 
+	available_width = ()
+	'''Definition of how to get available width
+
+	Expected to have no parameters.
+	'''
+
 	list_buffers = ()
 	'''Definition of how to list buffers
 
@@ -852,6 +867,7 @@ class Editor(object):
 		'trailing_whitespace': 'int',
 		'editor_overrides': 'overridesdict',
 		'editor_encoding': 'ascii',
+		'available_width': 'int',
 	}
 	'''Types for editor properties
 
@@ -994,7 +1010,7 @@ class Editor(object):
 		'''
 		raise NotImplementedError
 
-	const_reqs = ()
+	const_reqs = ('available_width',)
 	'''Requirements which are always needed
 
 	These requirements will be requested always, regardless of what was 

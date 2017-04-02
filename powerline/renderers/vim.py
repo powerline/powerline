@@ -3,7 +3,7 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 
 import sys
 
-from powerline.bindings.vim import vim_getoption, VimEnviron, current_tabpage, get_vim_encoding
+from powerline.bindings.vim import VimEnviron, current_tabpage, get_vim_encoding
 from powerline.renderer import Renderer
 from powerline.colorscheme import ATTR_BOLD, ATTR_ITALIC, ATTR_UNDERLINE
 from powerline.lib.unicode import unichr, register_strwidth_error
@@ -101,10 +101,6 @@ class VimRenderer(Renderer):
 		)
 		segment_info['tabnr'] = tabpage.number
 		segment_info['bufnr'] = buffer.number if buffer else None
-		if is_tabline:
-			winwidth = int(vim_getoption(self.vim, 'columns'))
-		else:
-			winwidth = segment_info['window'].width
 
 		if themenr is None:
 			theme = self.theme_selector(
@@ -136,6 +132,7 @@ class VimRenderer(Renderer):
 			mode = 'nc'
 
 		segment_info.update(input=input, mode=mode)
+		winwidth = segment_info['input']['available_width']
 
 		statusline = super(VimRenderer, self).render(
 			mode=mode,

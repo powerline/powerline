@@ -22,6 +22,7 @@ from powerline.editors import (Editor, param_updated, iterparam_updated,
                                EditorWindowList, EditorTabList,
                                EditorWindowBuffer, EditorTabWindowBuffer,
                                EditorTabWindow, EditorTabAmount, EditorNumber,
+                               EditorAvailableWidth,
                                toedobj)
 
 
@@ -409,8 +410,6 @@ ED_TO_VIM = {
 	},
 	EditorBufferList: {
 		'tovim': lambda self, toed, **kw: toed(
-			EditorFunc('tabpagebuflist', EditorParameter('tabpage'))
-			if kw['tabscope'] else
 			EditorFunc('filter', EditorFunc('range', 1, EditorFunc('bufnr', '$')), 'bufexists(v:val)'),
 			**kw
 		),
@@ -572,6 +571,19 @@ ED_TO_VIM = {
 		'tovim': lambda self, toed, **kw: 'winbufnr({window})'.format(**kw['parameters']),
 		'tovimpy': lambda self, toed, **kw: '{window}.buffer'.format(**kw['parameters']),
 	},
+	EditorAvailableWidth: {
+		'tovim': lambda self, toed, **kw: toed(
+			VimGlobalOption('columns')
+			if kw['tabscope'] else
+			EditorFunc('winwidth', EditorParameter('window')),
+			**kw
+		),
+		'tovimpy': lambda self, toed, **kw: (
+			toed(VimGlobalOption('columns'), **kw)
+			if kw['tabscope'] else
+			'{window}.width'.format(**kw['parameters'])
+		),
+	},
 }
 
 
@@ -628,6 +640,7 @@ class VimEditor(Editor):
 	stl_winlist = (VimStlWinList(),)
 	editor_overrides = (EditorOverrides(),)
 	editor_encoding = (EditorEncoding(),)
+	available_width = (EditorAvailableWidth(),)
 	list_buffers = (EditorBufferList(),)
 	list_tabs = (EditorTabList(),)
 	list_windows = (EditorWindowList(),)
@@ -639,8 +652,11 @@ class VimEditor(Editor):
 		window_title='str',
 		readonly_indicator='bool',
 		current_tab_number='int',
+		tab_number='int',
 		current_buffer_number='int',
+		buffer_number='int',
 		current_window_number='int',
+		window_number='int',
 		textwidth='int',
 		tab_amount='int',
 		stl_winlist='intintbyteslistlist',
@@ -648,10 +664,12 @@ class VimEditor(Editor):
 
 	converters = Editor.converters.copy()
 	converters.update(
-		intintbyteslistlist=lambda l: [[int(a), int(b), c] for a, b, c in l],
+		intintbyteslistlist=lambda l: [
+			(int(a), None if b == '' else int(b), c) for a, b, c in l
+		],
 	)
 
-	const_reqs = ('mode', 'current_window_number')
+	const_reqs = Editor.const_reqs + ('mode', 'current_window_number')
 
 	@staticmethod
 	def req_to_edobj(req):
@@ -670,7 +688,7 @@ class VimEditor(Editor):
 class VimVimEditor(VimEditor):
 	converters = VimEditor.converters.copy()
 	converters.update(
-		bool=lambda b: b and bool(int(b)),
+		bool=lambda b: bool(b and bool(int(b))),
 		int=lambda n: int(n) if n else 0,
 	)
 
@@ -717,7 +735,7 @@ class VimVimEditor(VimEditor):
 		return super(VimVimEditor, cls).toed(obj, **cls.finish_kwargs(kwargs))
 
 	@classmethod
-	def compile_req_type(cls, req_type, req_var, gvars, conv_code):
+	def compile_req_type(cls, req_type, req_var, gvars, conv_code, indent='  '):
 		'''Convert requirement type to the Python code which does the conversion
 
 		:param req_type:
@@ -728,21 +746,24 @@ class VimVimEditor(VimEditor):
 			Global variables. Modified to add converters there.
 		:param list conv_code:
 			Converted code. Modified to add code ther.
+		:param str indent:
+			Code indent.
 		'''
 		if isinstance(req_type, dict):
-			conv_code.append('    {')
+			conv_code.append(indent + '  (lambda input_i: [{')
 			for subk, subv in req_type.items():
-				conv_code.append(repr(subk) + ':')
-				cls.compile_req_type(subv, '{0}[{1!r}]'.format(req_var, subk),
-				                     gvars, conv_code)
-				conv_code.append(',')
-			conv_code[-1] += '}'
+				conv_code.append(indent + '    ' + repr(subk) + ':')
+				cls.compile_req_type(
+					subv, 'i[{0!r}]'.format(subk), gvars, conv_code,
+					indent + '    ')
+				conv_code[-1] += ','
+			conv_code.append('    } for i in input_i])(' + req_var + ')')
 		else:
 			if req_type in cls.converters:
 				gvars['conv_' + req_type] = cls.converters[req_type]
-				conv_code.append('    conv_{0}({1})'.format(req_type, req_var))
+				conv_code.append(indent + '  conv_{0}({1})'.format(req_type, req_var))
 			else:
-				conv_code.append('    ' + req_var)
+				conv_code.append(indent + '  ' + req_var)
 
 	@classmethod
 	def compile_reqs_dict(cls, reqs_dict, **kwargs):
@@ -866,12 +887,12 @@ class VimPyEditor(VimEditor):
 		'''
 		if isinstance(req_type, dict):
 			subexpr = ['{']
-			subpyexpr = 'input'
 			for subk, subv in req_type.items():
 				subexpr.append('{0!r}: {1},'.format(
-					subk, cls.compile_req_type(subv, subpyexpr, gvars)))
+					subk, cls.compile_req_type(subv, 'i[{0!r}]'.format(subk), gvars)))
 			subexpr.append('}')
-			pyexpr = '(lambda input: {0})({1})'.format(' '.join(subexpr), pyexpr)
+			pyexpr = '(lambda input_o: [(lambda input_i: {0})(i) for i in input_o])({1})'.format(
+				' '.join(subexpr), pyexpr)
 		else:
 			if req_type in cls.converters:
 				pyexpr = 'conv_' + req_type + '(' + pyexpr + ')'

@@ -313,7 +313,7 @@ class VimPowerline(Powerline):
 
 		try:
 			self.tablineinputnr = next((
-				i
+				i + 1
 				for i, v in enumerate(self.renderer.local_themes)
 				if v[0] is None
 			))
@@ -411,7 +411,7 @@ class VimPowerline(Powerline):
 		return self.render(input=input, themenr=themenr, window_id=window_id, window=window, winnr=winnr)
 
 	def tabline(self, input=None):
-		return self.render(input=input, themenr=self.tablineinputnr + 1, is_tabline=True)
+		return self.render(input=input, themenr=self.tablineinputnr, is_tabline=True)
 
 	def new_window(self, input=None):
 		window_id = None
