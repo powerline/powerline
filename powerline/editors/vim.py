@@ -699,7 +699,7 @@ class VimVimEditor(VimEditor):
 	))
 
 	const_reqs = VimEditor.const_reqs + (
-		'stl_winlist', 'current_tab_number')
+		'stl_winlist', 'current_tab_number', 'buffer_number')
 
 	@classmethod
 	def finish_kwargs(cls, kwargs):

@@ -274,6 +274,9 @@ class VimPowerline(Powerline):
 		command('''
 			function! _PowerlineStatusline(winid)
 				let [window, winid] = _PowerlineWindowNr(a:winid)
+				if window == 0
+					return _PowerlineNewStatusline()
+				endif
 				let buffer = winbufnr(window)
 				let tabpage = tabpagenr()
 				let themenr = {themeexpr}

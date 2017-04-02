@@ -101,7 +101,10 @@ class VimRenderer(Renderer):
 			encoding=self.encoding,
 		)
 		segment_info['tabnr'] = tabpage.number
-		segment_info['bufnr'] = buffer.number if buffer else None
+		if input and 'buffer_number' in input:
+			segment_info['bufnr'] = input['buffer_number']
+		else:
+			segment_info['bufnr'] = buffer and buffer.number
 
 		if themenr is None:
 			theme = self.theme_selector(
