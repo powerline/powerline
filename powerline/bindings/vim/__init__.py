@@ -196,7 +196,7 @@ class LazyWindowBuffer(object):
 
 	def __getattr__(self, attr):
 		if self.__buffer is None:
-			self.__buffer = self.__window.buffer
+			self.__buffer = self.__window.powerline_window.buffer
 		return getattr(self.__buffer, attr)
 
 
@@ -212,14 +212,14 @@ class LazyWindow(object):
 	'''
 	def __init__(self, vim, winnr):
 		self.number = winnr
-		self.__window = None
 		self.__vim = vim
 		self.buffer = LazyWindowBuffer(self)
 
 	def __getattr__(self, attr):
-		if self.__window is None:
-			self.__window = self.__vim.windows[self.number - 1]
-		return getattr(self.__window, attr)
+		if attr == 'powerline_window':
+			self.powerline_window = self.__vim.windows[self.number - 1]
+			return self.powerline_window
+		return getattr(self.powerline_window, attr)
 
 
 def current_tabpage(vim, is_old_vim, input):

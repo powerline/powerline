@@ -245,6 +245,7 @@ class VimPowerline(Powerline):
 		command('''
 			function! _PowerlineWindowNr(winid)
 				let ret = 0
+				let ret_winid = a:winid
 				for window in range(1, winnr('$'))
 					let winid = getwinvar(window, '_powerline_window_id')
 					if empty(winid)
@@ -256,9 +257,10 @@ class VimPowerline(Powerline):
 					endif
 					if winid == a:winid || (a:winid == 0 && window == winnr())
 						let ret = window
+						let ret_winid = getwinvar(window, '_powerline_window_id')
 					endif
 				endfor
-				return ret
+				return [ret, ret_winid]
 			endfunction
 		''')
 		command('''
@@ -271,12 +273,12 @@ class VimPowerline(Powerline):
 		''')
 		command('''
 			function! _PowerlineStatusline(winid)
-				let window = _PowerlineWindowNr(a:winid)
+				let [window, winid] = _PowerlineWindowNr(a:winid)
 				let buffer = winbufnr(window)
 				let tabpage = tabpagenr()
 				let themenr = {themeexpr}
 				let input = eval(g:_powerline_inputs[themenr])
-				{pycmd} powerline.viml_return_str(powerline.statusline(input=powerline.finishers[int(vim.eval("themenr"))](powerline.vim.eval("input")), winnr=int(vim.eval("window")), themenr=int(vim.eval("themenr"))))
+				{pycmd} powerline.viml_return_str(powerline.statusline(input=powerline.finishers[int(vim.eval("themenr"))](powerline.vim.eval("input")), winnr=int(vim.eval("window")), themenr=int(vim.eval("themenr")), window_id=int(powerline.vim.eval("winid"))))
 			endfunction
 		''')
 		command('''
@@ -404,6 +406,8 @@ class VimPowerline(Powerline):
 			window = LazyWindow(self.vim, winnr)
 		else:
 			window, winnr = self.set_stls(window_id)
+		if not winnr:
+			return ''
 		return self.render(input=input, themenr=themenr, window_id=window_id, window=window, winnr=winnr)
 
 	def tabline(self, input=None):

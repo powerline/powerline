@@ -669,8 +669,7 @@ class VimEditor(Editor):
 		],
 	)
 
-	const_reqs = Editor.const_reqs + (
-		'mode', 'current_window_number', 'current_tab_number')
+	const_reqs = Editor.const_reqs + ('mode', 'current_window_number')
 
 	@staticmethod
 	def req_to_edobj(req):
@@ -699,7 +698,8 @@ class VimVimEditor(VimEditor):
 		if 'tovim' in v or 'toed' in v
 	))
 
-	const_reqs = VimEditor.const_reqs + ('stl_winlist',)
+	const_reqs = VimEditor.const_reqs + (
+		'stl_winlist', 'current_tab_number')
 
 	@classmethod
 	def finish_kwargs(cls, kwargs):
