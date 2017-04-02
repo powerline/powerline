@@ -37,6 +37,27 @@ class VimVarHandler(logging.Handler, object):
 		self.vim.eval(b'add(g:' + self.vim_varname + b', ' + self.python_to_vim(message) + b')')
 
 
+class WindowProxy(object):
+	'''Class which may serve as a drop-in replacement of vim.Window object
+
+	Does not create vim.Window object up until required.
+
+	:param module vim:
+		Vim module.
+	:param int winnr:
+		Window number.
+	'''
+	def __init__(self, vim, winnr):
+		self.number = winnr
+		self.__window = None
+		self.__vim = vim
+
+	def __getattr__(self, attr):
+		if self.__window is None:
+			self.__window = self.__vim.windows[self.number - 1]
+		return getattr(self.__window, attr)
+
+
 class VimPowerline(Powerline):
 	prereqs = (
 		'editor_overrides', 'editor_encoding',
@@ -348,9 +369,9 @@ class VimPowerline(Powerline):
 				# Without GUI everything works, in other cases startup screen is 
 				# not shown.
 				if self.is_old_vim:
-					self.new_window()
-				else:
 					self.vim.eval('_PowerlineNewStatusline()')
+				else:
+					self.new_window()
 		except UnicodeDecodeError:
 			# vim.current.buffer.name may raise UnicodeDecodeError when using 
 			# Python-3*. Fortunately, this means that current buffer is not 
@@ -405,7 +426,7 @@ class VimPowerline(Powerline):
 
 	def statusline(self, winnr=None, window_id=None, input=None, themenr=None):
 		if self.is_old_vim:
-			window = self.vim.windows[winnr - 1]
+			window = WindowProxy(self.vim, winnr)
 		else:
 			window, winnr = self.set_stls(window_id)
 		return self.render(input=input, themenr=themenr, window_id=window_id, window=window, winnr=winnr)
@@ -414,6 +435,7 @@ class VimPowerline(Powerline):
 		return self.render(input=input, themenr=self.tablineinputnr, is_tabline=True)
 
 	def new_window(self, input=None):
+		assert(not self.is_old_vim)
 		window_id = None
 		winnr = None
 		window = None
