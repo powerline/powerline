@@ -54,7 +54,7 @@ def last_pipe_status(pl, segment_info):
 
 
 @requires_segment_info
-def mode(pl, segment_info, override={'vicmd': 'COMMND', 'viins': 'INSERT'}, default=None):
+def mode(pl, segment_info, override={'vicmd': 'NORMAL', 'viins': 'INSERT'}, default=None):
 	'''Return the current mode.
 
 	:param dict override:
