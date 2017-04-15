@@ -29,7 +29,8 @@ def pick_gradient_value(grad_list, gradient_level):
 
 	Note: gradient level is not checked for being inside [0, 100] interval.
 	'''
-	return grad_list[int(round(gradient_level * (len(grad_list) - 1) / 100))]
+	index = min(int(round(gradient_level * (len(grad_list) - 1) / 100)), len(grad_list) - 1)
+	return grad_list[index]
 
 
 class Colorscheme(object):
