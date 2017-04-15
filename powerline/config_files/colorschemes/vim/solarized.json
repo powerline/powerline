@@ -102,6 +102,11 @@
 				"mode": { "fg": "solarized:base3", "bg": "solarized:orange", "attrs": ["bold"] }
 			}
 		},
+		"^V": {
+			"groups": {
+				"mode": { "fg": "oldlace", "bg": "orange", "attr": ["bold"] }
+			}
+		},
 		"R": {
 			"groups": {
 				"mode": { "fg": "solarized:base3", "bg": "solarized:red", "attrs": ["bold"] }
