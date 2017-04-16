@@ -1,0 +1,58 @@
+.TH "POWERLINE" "1" "October 2014" "Powerline" "Powerline manual"
+.SH "NAME"
+powerline, powerline-render \- Powerline prompt and statusline script
+.SH "SYNOPSIS"
+\fIpowerline\fR [\-h] [\-r MODULE] [\-w WIDTH] [\-\-last_exit_code INT]
+          [\-\-last_pipe_status LIST] [\-\-jobnum INT]
+          [\-c KEY.KEY=VALUE] [\-t THEME.KEY.KEY=VALUE]
+          [\-R KEY=VAL] [\-p PATH] [\-\-socket ADDRESS]
+          ext [{left,right,above,aboveleft}]
+.SH "DESCRIPTION"
+.PP
+Powerline is a statusline plugin for vim, and provides statuslines and prompts for several other applications, including zsh, bash, tmux, IPython, Awesome and Qtile.
+.SH "OPTIONS"
+.SS "positional arguments:"
+.TP
+ext
+Extension: application for which powerline command is launched (usually `shell' or `tmux')
+.TP
+{left,right,above,aboveleft}
+Side: `left' and `right' represent left and right side respectively, `above' emits lines that are supposed to be printed just above the prompt and `aboveleft' is like concatenating `above' with `left' with the exception that only one Python instance is used in this case.
+.SS "optional arguments:"
+.TP
+\fB\-h\fR, \fB\-\-help\fR
+show this help message and exit
+.TP
+\fB\-r\fR MODULE, \fB\-\-renderer_module\fR MODULE
+Renderer module. Usually something like `.bash' or `.zsh', is supposed to be set only in shell\-specific bindings file.
+.TP
+\fB\-w\fR WIDTH, \fB\-\-width\fR WIDTH
+Maximum prompt with. Triggers truncation of some segments
+.TP
+\fB\-\-last_exit_code\fR INT
+Last exit code
+.TP
+\fB\-\-last_pipe_status\fR LIST
+Like above, but is supposed to contain space\-separated array of statuses, representing exit statuses of commands in one pipe.
+.TP
+\fB\-\-jobnum\fR INT
+Number of jobs.
+.TP
+\fB\-c\fR KEY.KEY=VALUE, \fB\-\-config\fR KEY.KEY=VALUE
+Configuration overrides for `config.json'. Is translated to a dictionary and merged with the dictionary obtained from actual JSON configuration: KEY.KEY=VALUE is translated to `{"KEY": {"KEY": VALUE}}' and then merged recursively. VALUE may be any JSON value, values that are not `null', `true', `false', start with digit, `{', `[' are treated like strings. If VALUE is omitted then corresponding key is removed.
+.TP
+\fB\-t\fR THEME.KEY.KEY=VALUE, \fB\-\-theme_option\fR THEME.KEY.KEY=VALUE
+Like above, but theme\-specific. THEME should point to an existing and used theme to have any effect, but it is fine to use any theme here.
+.TP
+\fB\-R\fR KEY=VAL, \fB\-\-renderer_arg\fR KEY=VAL
+Like above, but provides argument for renderer. Is supposed to be used only by shell bindings to provide various data like last_exit_code or last_pipe_status (they are not using \fB\-\-renderer_arg\fR for historical resons: renderer_arg was added later).
+.TP
+\fB\-p\fR PATH, \fB\-\-config_path\fR PATH
+Path to configuration directory. If it is present then configuration files will only be seeked in the provided path. May be provided multiple times to search in a list of directories.
+.TP
+\fB\-\-socket\fR ADDRESS
+Socket address to use in daemon clients. Is always UNIX domain socket on linux and file socket on Mac OS X. Not used here, present only for compatibility with other powerline clients. This argument must always be the first one and be in a form `\-\-socket ADDRESS': no `=' or short form allowed (in other powerline clients, not here).
+.SH "SEE ALSO"
+\fBpowerline-daemon\fR(1), \fBpowerline-config\fR(1), \fBpowerline-lint\fR(1)
+.SH "AUTHORS"
+Kim Silkebækken, Nikolay Pavlov, Kovid Goyal and contributors. The glyphs in the font patcher are created by Fabrizio Schiavi.
