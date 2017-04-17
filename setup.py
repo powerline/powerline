@@ -68,6 +68,60 @@ def get_version():
 		return base_version
 
 
+if not can_use_scripts:
+	# Depending on the Python version using scripts argument to setup() to 
+	# install an ELF binary may result in either corrupted binary (“line 
+	# endings” found gets corrupt) or a UnicodeError (Python tries to read 
+	# binary file as a text file and, of course, fails). Thus to install 
+	# powerline binary data argument to setup is used. But while on linux using 
+	# just bin here is fine on OS X sometimes this may result in invalid path.
+	#
+	# This hack is used to determine where regural scripts are installed when 
+	# running install_scripts command (it is being implicitly run from install 
+	# command), and use this directory for powerline binary file.
+	#
+	# All exceptions are silenced so that installing will work somewhere even if 
+	# distutils API changes.
+	try:
+		from distutils.command import install_data as install_data_module
+
+		install_scripts_dir = 'bin'
+
+		origin_install_data = install_data_module.install_data
+
+		class install_data(origin_install_data):
+			def finalize_options(self, *args, **kwargs):
+				global install_scripts_dir
+				try:
+					cmd_obj = self.distribution.get_command_obj('install_scripts')
+					cmd_obj.ensure_finalized()
+					install_scripts_dir = cmd_obj.install_dir
+				except Exception:
+					print_exc()
+				return origin_install_data.finalize_options(self, *args, **kwargs)
+
+		install_data_module.install_data = install_data
+
+		class PowerlineScriptTuple(object):
+			def __len__(self):
+				return 2
+
+			def __getitem__(self, i):
+				global install_scripts_dir
+				if i == 0:
+					print(('Hack used to determine powerline installation '
+					       'directory detected directory as {0}').format(install_scripts_dir))
+					print('You need to verify this directory is in $PATH.')
+					return install_scripts_dir
+				else:
+					return self.scripts
+
+			def __init__(self, scripts):
+				self.scripts = scripts
+	except Exception:
+		print_exc()
+
+
 setup(
 	name='powerline-status',
 	version=get_version(),
@@ -119,7 +173,7 @@ setup(
 		'scripts/powerline-render',
 		'scripts/powerline-config',
 	] + (['scripts/powerline'] if can_use_scripts else []),
-	data_files=(None if can_use_scripts else (('bin', ['scripts/powerline']),)),
+	data_files=(None if can_use_scripts else (PowerlineScriptTuple(['scripts/powerline']),)),
 	keywords='',
 	packages=find_packages(exclude=('tests', 'tests.*')),
 	include_package_data=True,
