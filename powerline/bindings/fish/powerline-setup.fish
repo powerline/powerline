@@ -12,7 +12,7 @@ function powerline-setup
 
 	function _powerline_columns
 		# Hack: `test "" -eq 0` is true, as well as `test 0 -eq 0`
-		# Note: at fish startup `$COLUMNS` is equal to zero, meaning that it may 
+		# Note: at fish startup `$COLUMNS` is equal to zero, meaning that it may
 		# not be used.
 		if test "$COLUMNS" -eq 0
 			_powerline_columns_fallback
@@ -44,7 +44,7 @@ function powerline-setup
 			set -l addargs "--last-exit-code=\$status"
 			set -l addargs "$addargs --last-pipe-status=\$status"
 			set -l addargs "$addargs --jobnum=(jobs -p | wc -l)"
-			# One random value has an 1/32767 = 0.0031% probability of having 
+			# One random value has an 1/32767 = 0.0031% probability of having
 			# the same value in two shells
 			set -l addargs "$addargs --renderer-arg=client_id="(random)
 			set -l addargs "$addargs --width=\$_POWERLINE_COLUMNS"
