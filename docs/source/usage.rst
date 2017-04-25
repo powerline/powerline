@@ -56,7 +56,7 @@ if terminal emulator supports it.
    Name                  OS      Patched font support  Fontconfig support    24-bit color support 
    ===================== ======= ===================== ===================== =====================
    Gvim                  Linux   |i_yes|               |i_no|                |i_yes|
-   iTerm2                OS X    |i_yes|               |i_no|                |i_no|
+   iTerm2                OS X    |i_yes|               |i_no|                |i_partial| [#]_
    Konsole               Linux   |i_yes|               |i_yes|               |i_yes|
    lxterminal            Linux   |i_yes|               |i_yes|               |i_no|
    MacVim                OS X    |i_yes|               |i_no|                |i_yes|
@@ -72,6 +72,7 @@ if terminal emulator supports it.
 .. |i_no| image:: _static/img/icons/cross.png
 .. |i_partial| image:: _static/img/icons/error.png
 
+.. [#] iTerm2 Nightly builds now support 24bit color.
 .. [#] Must be compiled with ``--enable-unicode3`` for the patched font to work.
 .. [#] Since version 0.5.
 .. [#] Including XFCE terminal and GNOME terminal.
