@@ -160,6 +160,13 @@ def main(attempts=3):
 		'PYTHONPATH': os.environ.get('PYTHONPATH', ''),
 	}
 
+	conf_path = os.path.abspath('powerline/bindings/tmux/powerline.conf')
+	conf_line = 'source "' + (
+		conf_path.replace('\\', '\\\\').replace('"', '\\"')) + '"\n'
+	conf_file = os.path.realpath(os.path.join(VTERM_TEST_DIR, 'tmux.conf'))
+	with open(conf_file, 'w') as cf_fd:
+		cf_fd.write(conf_line)
+
 	try:
 		p = ExpectProcess(
 			lib=lib,
@@ -175,7 +182,7 @@ def main(attempts=3):
 				# Request verbose logging just in case
 				'-v',
 				# Specify configuration file
-				'-f', os.path.abspath('powerline/bindings/tmux/powerline.conf'),
+				'-f', conf_file,
 				# Run bash three times
 				'new-session', 'bash --norc --noprofile -i', ';',
 				'new-window', 'bash --norc --noprofile -i', ';',
