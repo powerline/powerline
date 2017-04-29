@@ -1,5 +1,4 @@
 #!/bin/sh
-exit 0
 . tests/common.sh
 
 enter_suite tmux

@@ -4,6 +4,7 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 
 import os
 import sys
+import json
 
 from time import sleep
 from subprocess import check_call
@@ -36,7 +37,7 @@ def cell_properties_key_to_shell_escape(cell_properties_key):
 
 
 def test_expected_result(p, expected_result, cols, rows, print_logs):
-	expected_text, attrs = convert_expected_result(p, expected_result)
+	expected_text, attrs = expected_result
 	attempts = 3
 	result = None
 	while attempts:
@@ -74,7 +75,11 @@ def test_expected_result(p, expected_result, cols, rows, print_logs):
 	return False
 
 
-def get_expected_result(tmux_version, expected_result_old, expected_result_1_7=None, expected_result_new=None, expected_result_2_0=None):
+def get_expected_result(tmux_version,
+                        expected_result_old,
+                        expected_result_1_7=None,
+                        expected_result_new=None,
+                        expected_result_2_0=None):
 	if tmux_version >= (2, 0) and expected_result_2_0:
 		return expected_result_2_0
 	elif tmux_version >= (1, 8) and expected_result_new:
@@ -98,6 +103,63 @@ def main(attempts=3):
 	else:
 		lib = os.environ.get('POWERLINE_LIBVTERM', 'libvterm.so')
 
+	env = {
+		# Reasoning:
+		# 1. vt* TERMs (used to be vt100 here) make tmux-1.9 use
+		#    different and identical colors for inactive windows. This 
+		#    is not like tmux-1.6: foreground color is different from 
+		#    separator color and equal to (0, 102, 153) for some reason 
+		#    (separator has correct color). tmux-1.8 is fine, so are 
+		#    older versions (though tmux-1.6 and tmux-1.7 do not have 
+		#    highlighting for previously active window) and my system 
+		#    tmux-1.9a.
+		# 2. screen, xterm and some other non-256color terminals both
+		#    have the same issue and make libvterm emit complains like 
+		#    `Unhandled CSI SGR 3231`.
+		# 3. screen-256color, xterm-256color and other -256color
+		#    terminals make libvterm emit complains about unhandled 
+		#    escapes to stderr.
+		# 4. `st-256color` does not have any of the above problems, but
+		#    it may be not present on the target system because it is 
+		#    installed with x11-terms/st and not with sys-libs/ncurses.
+		#
+		# For the given reasons decision was made: to fix tmux-1.9 tests 
+		# and not make libvterm emit any data to stderr st-256color 
+		# $TERM should be used, up until libvterm has its own terminfo 
+		# database entry (if it ever will). To make sure that relevant 
+		# terminfo entry is present on the target system it should be 
+		# distributed with powerline test package. To make distribution 
+		# not require modifying anything outside of powerline test 
+		# directory TERMINFO variable is set.
+		'TERMINFO': os.path.join(VTERM_TEST_DIR, 'terminfo'),
+		'TERM': 'st-256color',
+		'PATH': vterm_path,
+		'SHELL': os.path.join(VTERM_TEST_DIR, 'path', 'bash'),
+		'POWERLINE_CONFIG_PATHS': os.path.abspath('powerline/config_files'),
+		'POWERLINE_COMMAND': 'powerline-render',
+		'POWERLINE_THEME_OVERRIDES': ';'.join((
+			key + '=' + json.dumps(val)
+			for key, val in (
+				('default.segments.right', [{
+					'type': 'string',
+					'name': 's1',
+					'highlight_groups': ['cwd'],
+					'priority':50,
+				}]),
+				('default.segments.left', [{
+					'type': 'string',
+					'name': 's2',
+					'highlight_groups': ['background'],
+					'priority':20,
+				}]),
+				('default.segment_data.s1.contents', 'S1 string here'),
+				('default.segment_data.s2.contents', 'S2 string here'),
+			)
+		)),
+		'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
+		'PYTHONPATH': os.environ.get('PYTHONPATH', ''),
+	}
+
 	try:
 		p = ExpectProcess(
 			lib=lib,
@@ -120,111 +182,70 @@ def main(attempts=3):
 				'new-window', 'bash --norc --noprofile -i', ';',
 			],
 			cwd=VTERM_TEST_DIR,
-			env={
-				# Reasoning:
-				# 1. vt* TERMs (used to be vt100 here) make tmux-1.9 use
-				#    different and identical colors for inactive windows. This 
-				#    is not like tmux-1.6: foreground color is different from 
-				#    separator color and equal to (0, 102, 153) for some reason 
-				#    (separator has correct color). tmux-1.8 is fine, so are 
-				#    older versions (though tmux-1.6 and tmux-1.7 do not have 
-				#    highlighting for previously active window) and my system 
-				#    tmux-1.9a.
-				# 2. screen, xterm and some other non-256color terminals both
-				#    have the same issue and make libvterm emit complains like 
-				#    `Unhandled CSI SGR 3231`.
-				# 3. screen-256color, xterm-256color and other -256color
-				#    terminals make libvterm emit complains about unhandled 
-				#    escapes to stderr.
-				# 4. `st-256color` does not have any of the above problems, but
-				#    it may be not present on the target system because it is 
-				#    installed with x11-terms/st and not with sys-libs/ncurses.
-				#
-				# For the given reasons decision was made: to fix tmux-1.9 tests 
-				# and not make libvterm emit any data to stderr st-256color 
-				# $TERM should be used, up until libvterm has its own terminfo 
-				# database entry (if it ever will). To make sure that relevant 
-				# terminfo entry is present on the target system it should be 
-				# distributed with powerline test package. To make distribution 
-				# not require modifying anything outside of powerline test 
-				# directory TERMINFO variable is set.
-				'TERMINFO': os.path.join(VTERM_TEST_DIR, 'terminfo'),
-				'TERM': 'st-256color',
-				'PATH': vterm_path,
-				'SHELL': os.path.join(VTERM_TEST_DIR, 'path', 'bash'),
-				'POWERLINE_CONFIG_PATHS': os.path.abspath('powerline/config_files'),
-				'POWERLINE_COMMAND': 'powerline-render',
-				'POWERLINE_THEME_OVERRIDES': (
-					'default.segments.right=[{"type":"string","name":"s1","highlight_groups":["cwd"],"priority":50}];'
-					'default.segments.left=[{"type":"string","name":"s2","highlight_groups":["background"],"priority":20}];'
-					'default.segment_data.s1.contents=S1 string here;'
-					'default.segment_data.s2.contents=S2 string here;'
-				),
-				'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
-				'PYTHONPATH': os.environ.get('PYTHONPATH', ''),
-			},
+			env=env,
 		)
 		p.start()
 		sleep(5)
 		tmux_version = get_tmux_version(get_fallback_logger())
-		expected_result = get_expected_result(tmux_version, expected_result_old=(
-			(((0, 0, 0), (243, 243, 243), 1, 0, 0), ' 0 '),
-			(((243, 243, 243), (11, 11, 11), 0, 0, 0), ' '),
-			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' S2 string here  '),
-			(((133, 133, 133), (11, 11, 11), 0, 0, 0), ' 0  '),
-			(((88, 88, 88), (11, 11, 11), 0, 0, 0), '| '),
-			(((188, 188, 188), (11, 11, 11), 0, 0, 0), 'bash  '),
-			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' '),
-			(((133, 133, 133), (11, 11, 11), 0, 0, 0), ' 1- '),
-			(((88, 88, 88), (11, 11, 11), 0, 0, 0), '| '),
-			(((188, 188, 188), (11, 11, 11), 0, 0, 0), 'bash  '),
-			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' '),
-			(((11, 11, 11), (0, 102, 153), 0, 0, 0), ' '),
-			(((102, 204, 255), (0, 102, 153), 0, 0, 0), '2* | '),
-			(((255, 255, 255), (0, 102, 153), 1, 0, 0), 'bash '),
-			(((0, 102, 153), (11, 11, 11), 0, 0, 0), ' '),
-			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' ' * 124),
-			(((88, 88, 88), (11, 11, 11), 0, 0, 0), ' '),
-			(((199, 199, 199), (88, 88, 88), 0, 0, 0), ' S1 string here '),
-		), expected_result_new=(
-			(((0, 0, 0), (243, 243, 243), 1, 0, 0), ' 0 '),
-			(((243, 243, 243), (11, 11, 11), 0, 0, 0), ' '),
-			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' S2 string here  '),
-			(((133, 133, 133), (11, 11, 11), 0, 0, 0), ' 0  '),
-			(((88, 88, 88), (11, 11, 11), 0, 0, 0), '| '),
-			(((188, 188, 188), (11, 11, 11), 0, 0, 0), 'bash  '),
-			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' '),
-			(((133, 133, 133), (11, 11, 11), 0, 0, 0), ' 1- '),
-			(((88, 88, 88), (11, 11, 11), 0, 0, 0), '| '),
-			(((0, 102, 153), (11, 11, 11), 0, 0, 0), 'bash  '),
-			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' '),
-			(((11, 11, 11), (0, 102, 153), 0, 0, 0), ' '),
-			(((102, 204, 255), (0, 102, 153), 0, 0, 0), '2* | '),
-			(((255, 255, 255), (0, 102, 153), 1, 0, 0), 'bash '),
-			(((0, 102, 153), (11, 11, 11), 0, 0, 0), ' '),
-			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' ' * 124),
-			(((88, 88, 88), (11, 11, 11), 0, 0, 0), ' '),
-			(((199, 199, 199), (88, 88, 88), 0, 0, 0), ' S1 string here '),
-		), expected_result_2_0=(
-			(((0, 0, 0), (243, 243, 243), 1, 0, 0), ' 0 '),
-			(((243, 243, 243), (11, 11, 11), 0, 0, 0), ' '),
-			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' S2 string here '),
-			(((133, 133, 133), (11, 11, 11), 0, 0, 0), ' 0  '),
-			(((88, 88, 88), (11, 11, 11), 0, 0, 0), '| '),
-			(((188, 188, 188), (11, 11, 11), 0, 0, 0), 'bash  '),
-			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' '),
-			(((133, 133, 133), (11, 11, 11), 0, 0, 0), ' 1- '),
-			(((88, 88, 88), (11, 11, 11), 0, 0, 0), '| '),
-			(((0, 102, 153), (11, 11, 11), 0, 0, 0), 'bash  '),
-			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' '),
-			(((11, 11, 11), (0, 102, 153), 0, 0, 0), ' '),
-			(((102, 204, 255), (0, 102, 153), 0, 0, 0), '2* | '),
-			(((255, 255, 255), (0, 102, 153), 1, 0, 0), 'bash '),
-			(((0, 102, 153), (11, 11, 11), 0, 0, 0), ' '),
-			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' ' * 125),
-			(((88, 88, 88), (11, 11, 11), 0, 0, 0), ' '),
-			(((199, 199, 199), (88, 88, 88), 0, 0, 0), ' S1 string here '),
-		))
+		expected_result = get_expected_result(
+			tmux_version,
+			expected_result_old=(
+				'{1: 0 }{2: }{3: S2 string here  }{4: 0  }'
+				'{5:| }{6:bash  }{3: }{4: 1- }'
+				'{5:| }{6:bash  }{3: }{7: }'
+				'{8:2* | }{9:bash }{10: }'
+				'{3:' + (' ' * 124) + '}'
+				'{5: }{11: S1 string here }', {
+					((0, 0, 0), (243, 243, 243), 1, 0, 0): 1,
+					((243, 243, 243), (11, 11, 11), 0, 0, 0): 2,
+					((255, 255, 255), (11, 11, 11), 0, 0, 0): 3,
+					((133, 133, 133), (11, 11, 11), 0, 0, 0): 4,
+					((88, 88, 88), (11, 11, 11), 0, 0, 0): 5,
+					((188, 188, 188), (11, 11, 11), 0, 0, 0): 6,
+					((11, 11, 11), (0, 102, 153), 0, 0, 0): 7,
+					((102, 204, 255), (0, 102, 153), 0, 0, 0): 8,
+					((255, 255, 255), (0, 102, 153), 1, 0, 0): 9,
+					((0, 102, 153), (11, 11, 11), 0, 0, 0): 10,
+					((199, 199, 199), (88, 88, 88), 0, 0, 0): 11,
+				}),
+			expected_result_new=(
+				'{1: 0 }{2: }{3: S2 string here  }{4: 0  }'
+				'{5:| }{6:bash  }{3: }{4: 1- }'
+				'{5:| }{7:bash  }{3: }{8: }'
+				'{9:2* | }{10:bash }{7: }'
+				'{3:' + (' ' * 124) + '}'
+				'{5: }{11: S1 string here }', {
+					((0, 0, 0), (243, 243, 243), 1, 0, 0): 1,
+					((243, 243, 243), (11, 11, 11), 0, 0, 0): 2,
+					((255, 255, 255), (11, 11, 11), 0, 0, 0): 3,
+					((133, 133, 133), (11, 11, 11), 0, 0, 0): 4,
+					((88, 88, 88), (11, 11, 11), 0, 0, 0): 5,
+					((188, 188, 188), (11, 11, 11), 0, 0, 0): 6,
+					((0, 102, 153), (11, 11, 11), 0, 0, 0): 7,
+					((11, 11, 11), (0, 102, 153), 0, 0, 0): 8,
+					((102, 204, 255), (0, 102, 153), 0, 0, 0): 9,
+					((255, 255, 255), (0, 102, 153), 1, 0, 0): 10,
+					((199, 199, 199), (88, 88, 88), 0, 0, 0): 11,
+				}),
+			expected_result_2_0=(
+				'{1: 0 }{2: }{3: S2 string here }{4: 0  }'
+				'{5:| }{6:bash  }{3: }{4: 1- }'
+				'{5:| }{7:bash  }{3: }{8: }'
+				'{9:2* | }{10:bash }{7: }'
+				'{3:' + (' ' * 125) + '}{5: }{11: S1 string here }', {
+					((0, 0, 0), (243, 243, 243), 1, 0, 0): 1,
+					((243, 243, 243), (11, 11, 11), 0, 0, 0): 2,
+					((255, 255, 255), (11, 11, 11), 0, 0, 0): 3,
+					((133, 133, 133), (11, 11, 11), 0, 0, 0): 4,
+					((88, 88, 88), (11, 11, 11), 0, 0, 0): 5,
+					((188, 188, 188), (11, 11, 11), 0, 0, 0): 6,
+					((0, 102, 153), (11, 11, 11), 0, 0, 0): 7,
+					((11, 11, 11), (0, 102, 153), 0, 0, 0): 8,
+					((102, 204, 255), (0, 102, 153), 0, 0, 0): 9,
+					((255, 255, 255), (0, 102, 153), 1, 0, 0): 10,
+					((199, 199, 199), (88, 88, 88), 0, 0, 0): 11,
+				}),
+		)
 		ret = None
 		if not test_expected_result(p, expected_result, cols, rows, not attempts):
 			if attempts:
@@ -237,47 +258,58 @@ def main(attempts=3):
 		cols = 40
 		p.resize(rows, cols)
 		sleep(5)
-		expected_result = get_expected_result(tmux_version, (
-			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' ' * cols),
-		), expected_result_1_7=(
-			(((0, 0, 0), (243, 243, 243), 1, 0, 0), ' 0 '),
-			(((243, 243, 243), (11, 11, 11), 0, 0, 0), ' '),
-			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' <'),
-			(((188, 188, 188), (11, 11, 11), 0, 0, 0), 'h  '),
-			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' '),
-			(((11, 11, 11), (0, 102, 153), 0, 0, 0), ' '),
-			(((102, 204, 255), (0, 102, 153), 0, 0, 0), '2* | '),
-			(((255, 255, 255), (0, 102, 153), 1, 0, 0), 'bash '),
-			(((0, 102, 153), (11, 11, 11), 0, 0, 0), ' '),
-			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' '),
-			(((88, 88, 88), (11, 11, 11), 0, 0, 0), ' '),
-			(((199, 199, 199), (88, 88, 88), 0, 0, 0), ' S1 string here ')
-		), expected_result_new=(
-			(((0, 0, 0), (243, 243, 243), 1, 0, 0), ' 0 '),
-			(((243, 243, 243), (11, 11, 11), 0, 0, 0), ' '),
-			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' <'),
-			(((0, 102, 153), (11, 11, 11), 0, 0, 0), 'h  '),
-			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' '),
-			(((11, 11, 11), (0, 102, 153), 0, 0, 0), ' '),
-			(((102, 204, 255), (0, 102, 153), 0, 0, 0), '2* | '),
-			(((255, 255, 255), (0, 102, 153), 1, 0, 0), 'bash '),
-			(((0, 102, 153), (11, 11, 11), 0, 0, 0), ' '),
-			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' '),
-			(((88, 88, 88), (11, 11, 11), 0, 0, 0), ' '),
-			(((199, 199, 199), (88, 88, 88), 0, 0, 0), ' S1 string here ')
-		), expected_result_2_0=(
-			(((0, 0, 0), (243, 243, 243), 1, 0, 0), ' 0 '),
-			(((243, 243, 243), (11, 11, 11), 0, 0, 0), ' '),
-			(((255, 255, 255), (11, 11, 11), 0, 0, 0), '<'),
-			(((0, 102, 153), (11, 11, 11), 0, 0, 0), 'ash  '),
-			(((255, 255, 255), (11, 11, 11), 0, 0, 0), ' '),
-			(((11, 11, 11), (0, 102, 153), 0, 0, 0), ' '),
-			(((102, 204, 255), (0, 102, 153), 0, 0, 0), '2* | '),
-			(((255, 255, 255), (0, 102, 153), 1, 0, 0), 'bash '),
-			(((0, 102, 153), (11, 11, 11), 0, 0, 0), ' '),
-			(((88, 88, 88), (11, 11, 11), 0, 0, 0), ' '),
-			(((199, 199, 199), (88, 88, 88), 0, 0, 0), ' S1 string here ')
-		))
+		expected_result = get_expected_result(
+			tmux_version,
+			expected_result_old=('{1:' + (' ' * cols) + '}', {
+				((255, 255, 255), (11, 11, 11), 0, 0, 0): 1,
+			}),
+			expected_result_1_7=(
+				'{1: 0 }'
+				'{2: }{3: <}{4:h  }{3: }{5: }'
+				'{6:2* | }{7:bash }{8: }{3: }{9: }'
+				'{10: S1 string here }', {
+					((0, 0, 0), (243, 243, 243), 1, 0, 0): 1,
+					((243, 243, 243), (11, 11, 11), 0, 0, 0): 2,
+					((255, 255, 255), (11, 11, 11), 0, 0, 0): 3,
+					((188, 188, 188), (11, 11, 11), 0, 0, 0): 4,
+					((11, 11, 11), (0, 102, 153), 0, 0, 0): 5,
+					((102, 204, 255), (0, 102, 153), 0, 0, 0): 6,
+					((255, 255, 255), (0, 102, 153), 1, 0, 0): 7,
+					((0, 102, 153), (11, 11, 11), 0, 0, 0): 8,
+					((88, 88, 88), (11, 11, 11), 0, 0, 0): 9,
+					((199, 199, 199), (88, 88, 88), 0, 0, 0): 10,
+				}),
+			expected_result_new=(
+				'{1: 0 }'
+				'{2: }{3: <}{4:h  }{3: }{5: }'
+				'{6:2* | }{7:bash }{4: }{3: }{8: }'
+				'{9: S1 string here }', {
+					((0, 0, 0), (243, 243, 243), 1, 0, 0): 1,
+					((243, 243, 243), (11, 11, 11), 0, 0, 0): 2,
+					((255, 255, 255), (11, 11, 11), 0, 0, 0): 3,
+					((0, 102, 153), (11, 11, 11), 0, 0, 0): 4,
+					((11, 11, 11), (0, 102, 153), 0, 0, 0): 5,
+					((102, 204, 255), (0, 102, 153), 0, 0, 0): 6,
+					((255, 255, 255), (0, 102, 153), 1, 0, 0): 7,
+					((88, 88, 88), (11, 11, 11), 0, 0, 0): 8,
+					((199, 199, 199), (88, 88, 88), 0, 0, 0): 9,
+				}),
+			expected_result_2_0=(
+				'{1: 0 }'
+				'{2: }{3:<}{4:ash  }{3: }{5: }'
+				'{6:2* | }{7:bash }{4: }{8: }'
+				'{9: S1 string here }', {
+					((0, 0, 0), (243, 243, 243), 1, 0, 0): 1,
+					((243, 243, 243), (11, 11, 11), 0, 0, 0): 2,
+					((255, 255, 255), (11, 11, 11), 0, 0, 0): 3,
+					((0, 102, 153), (11, 11, 11), 0, 0, 0): 4,
+					((11, 11, 11), (0, 102, 153), 0, 0, 0): 5,
+					((102, 204, 255), (0, 102, 153), 0, 0, 0): 6,
+					((255, 255, 255), (0, 102, 153), 1, 0, 0): 7,
+					((88, 88, 88), (11, 11, 11), 0, 0, 0): 8,
+					((199, 199, 199), (88, 88, 88), 0, 0, 0): 9,
+				}),
+		)
 		if not test_expected_result(p, expected_result, cols, rows, not attempts):
 			if attempts:
 				pass
@@ -288,11 +320,8 @@ def main(attempts=3):
 		if ret is not None:
 			return ret
 	finally:
-		pass
-		#  check_call([tmux_exe, '-S', socket_path, 'kill-server'], env={
-			#  'PATH': vterm_path,
-			#  'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
-		#  }, cwd=VTERM_TEST_DIR)
+		check_call([tmux_exe, '-S', socket_path, 'kill-server'], env=env,
+		           cwd=VTERM_TEST_DIR)
 	return main(attempts=(attempts - 1))
 
 
