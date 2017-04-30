@@ -171,6 +171,8 @@ def main(attempts=3):
 
 	tmux_version = get_tmux_version(get_fallback_logger())
 
+	dim = MutableDimensions(rows=50, cols=200)
+
 	base_attrs = {
 		((0, 0, 0), (243, 243, 243), 1, 0, 0): 'lead',
 		((243, 243, 243), (11, 11, 11), 0, 0, 0): 'leadsep',
@@ -274,6 +276,11 @@ def main(attempts=3):
 		prepare_test_1,
 		prepare_test_2,
 	)
+
+	socket_path = os.path.abspath('tmux-socket-{0}'.format(attempts))
+	if os.path.exists(socket_path):
+		os.unlink(socket_path)
+
 	args = [
 		# Specify full path to tmux socket (testing tmux instance must not 
 		# interfere with user one)
@@ -289,11 +296,6 @@ def main(attempts=3):
 		'new-window', 'bash --norc --noprofile -i', ';',
 		'new-window', 'bash --norc --noprofile -i', ';',
 	]
-
-	socket_path = os.path.abspath('tmux-socket-{0}'.format(attempts))
-	if os.path.exists(socket_path):
-		os.unlink(socket_path)
-	dim = MutableDimensions(rows=50, cols=200)
 
 	try:
 		p = ExpectProcess(
