@@ -219,8 +219,15 @@ def get_env(vterm_path, test_dir, *args, **kwargs):
 	return env
 
 
-def do_terminal_tests(tests, cmd, lib, dim, args, env, cwd=None, fin_cb=None,
+def do_terminal_tests(tests, cmd, dim, args, env, cwd=None, fin_cb=None,
                       last_attempt_cb=None, attempts=3):
+	lib = os.environ.get('POWERLINE_LIBVTERM')
+	if not lib:
+		if os.path.exists('tests/bot-ci/deps/libvterm/libvterm.so'):
+			lib = 'tests/bot-ci/deps/libvterm/libvterm.so'
+		else:
+			lib = 'libvterm.so'
+
 	while attempts:
 		try:
 			p = ExpectProcess(

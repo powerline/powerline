@@ -69,11 +69,6 @@ def main(attempts=3):
 
 	tmux_exe = os.path.join(vterm_path, 'tmux')
 
-	if os.path.exists('tests/bot-ci/deps/libvterm/libvterm.so'):
-		lib = 'tests/bot-ci/deps/libvterm/libvterm.so'
-	else:
-		lib = os.environ.get('POWERLINE_LIBVTERM', 'libvterm.so')
-
 	socket_path = os.path.abspath('tmux-socket-{0}'.format(attempts))
 	if os.path.exists(socket_path):
 		os.unlink(socket_path)
@@ -237,7 +232,6 @@ def main(attempts=3):
 	return do_terminal_tests(
 		tests=tests,
 		cmd=tmux_exe,
-		lib=lib,
 		dim=dim,
 		args=args,
 		env=env,
