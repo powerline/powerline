@@ -233,7 +233,7 @@ def main(attempts=3):
 		),
 		get_expected_result(
 			tmux_version,
-			expected_result_old=('{bg:' + (' ' * dim.cols) + '}', base_attrs),
+			expected_result_old=('{bg:' + (' ' * 40) + '}', base_attrs),
 			expected_result_1_7=(
 				'{lead: 0 }'
 				'{leadsep: }{bg: <}{4:h  }{bg: }{5: }'
