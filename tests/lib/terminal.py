@@ -141,13 +141,12 @@ class ExpectProcess(threading.Thread):
 		return '\n'.join(lines), attrs
 
 
-def test_expected_result(p, expected_result, last_attempt,
-                         last_attempt_cb=None):
-	expected_text, attrs = expected_result
+def test_expected_result(p, test, last_attempt, last_attempt_cb=None):
+	expected_text, attrs = test['expected_result']
 	attempts = 3
 	result = None
 	while attempts:
-		actual_text, all_attrs = p.get_row(p.dim.rows - 1, attrs)
+		actual_text, all_attrs = p.get_row(test['row'], attrs)
 		if actual_text == expected_text:
 			return True
 		attempts -= 1
@@ -236,11 +235,16 @@ def do_terminal_tests(tests, cmd, lib, dim, args, env, cwd=None, fin_cb=None,
 
 			ret = True
 
-			for test_prep, expected_result in tests:
-				test_prep(p)
+			for test in tests:
+				try:
+					test_prep = test['prep_cb']
+				except KeyError:
+					pass
+				else:
+					test_prep(p)
 				ret = (
 					ret
-					and test_expected_result(p, expected_result, attempts == 0,
+					and test_expected_result(p, test, attempts == 0,
 					                         last_attempt_cb)
 				)
 
