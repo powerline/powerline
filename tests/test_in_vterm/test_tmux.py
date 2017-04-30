@@ -22,6 +22,14 @@ from tests.lib.terminal import ExpectProcess
 
 VTERM_TEST_DIR = os.path.abspath('tests/vterm_tmux')
 
+class RetValues:
+	# Poor man enum
+	do_restart = ()  # Falsy
+	not_run = ()  # Falsy
+	failed = ()  # Falsy
+	successfull = (1,)  # Truthy
+	partial_success = (1,)  # Truthy
+
 
 def convert_expected_result(p, expected_result):
 	return p.get_highlighted_text(expected_result, {})
@@ -55,8 +63,6 @@ def test_expected_result(p, expected_result, cols, rows, print_logs):
 	print(expected_text)
 	print('Attributes:')
 	print(all_attrs)
-	p.send(b'powerline-config tmux setup\n')
-	sleep(5)
 	print('Screen:')
 	screen, screen_attrs = p.get_screen(attrs)
 	print(screen)
@@ -252,15 +258,14 @@ def main(attempts=3):
 					((255, 255, 255), (0, 102, 153), 1, 0, 0): 10,
 				})),
 		)
-		ret = None
+		ret = RetValues.not_run
 		if not test_expected_result(p, expected_result, cols, rows, not attempts):
 			if attempts:
-				pass
-				# Will rerun main later.
+				ret = RetValues.do_restart
 			else:
-				ret = False
-		elif ret is not False:
-			ret = True
+				ret = RetValues.failed
+		elif ret is RetValues.not_run:
+			ret = RetValues.partial_success
 		cols = 40
 		p.resize(rows, cols)
 		sleep(5)
@@ -301,13 +306,13 @@ def main(attempts=3):
 		)
 		if not test_expected_result(p, expected_result, cols, rows, not attempts):
 			if attempts:
-				pass
+				ret = RetValues.do_restart
 			else:
-				ret = False
-		elif ret is not False:
-			ret = True
-		if ret is not None:
-			return ret
+				ret = RetValues.failed
+		elif ret is RetValues.partial_success:
+			ret = RetValues.successfull
+		if ret is RetValues.successfull or ret is RetValues.failed:
+			return bool(ret)
 	finally:
 		try:
 			check_call([tmux_exe, '-S', socket_path, 'kill-server'], env={
