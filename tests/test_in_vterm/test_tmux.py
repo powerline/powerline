@@ -80,12 +80,12 @@ def test_expected_result(p, expected_result, cols, rows, print_logs):
 def get_expected_result(tmux_version,
                         expected_result_old,
                         expected_result_1_7=None,
-                        expected_result_new=None,
+                        expected_result_1_8=None,
                         expected_result_2_0=None):
 	if tmux_version >= (2, 0) and expected_result_2_0:
 		return expected_result_2_0
-	elif tmux_version >= (1, 8) and expected_result_new:
-		return expected_result_new
+	elif tmux_version >= (1, 8) and expected_result_1_8:
+		return expected_result_1_8
 	elif tmux_version >= (1, 7) and expected_result_1_7:
 		return expected_result_1_7
 	else:
@@ -223,7 +223,7 @@ def main(attempts=3):
 					((255, 255, 255), (0, 102, 153), 1, 0, 0): 9,
 					((0, 102, 153), (11, 11, 11), 0, 0, 0): 10,
 				})),
-			expected_result_new=(
+			expected_result_1_8=(
 				'{lead: 0 }{leadsep: }{bg: S2 string here  }'
 				'{4: 0  }{cwdhsep:| }{6:bash  }'
 				'{bg: }{4: 1- }{cwdhsep:| }{7:bash  }'
@@ -278,7 +278,7 @@ def main(attempts=3):
 					((255, 255, 255), (0, 102, 153), 1, 0, 0): 7,
 					((0, 102, 153), (11, 11, 11), 0, 0, 0): 8,
 				})),
-			expected_result_new=(
+			expected_result_1_8=(
 				'{lead: 0 }'
 				'{leadsep: }{bg: <}{4:h  }{bg: }{5: }'
 				'{6:2* | }{7:bash }{4: }{bg: }{cwdhsep: }'
