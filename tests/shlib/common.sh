@@ -30,14 +30,14 @@ exit_suite() {
 		echo "${FAIL_SUMMARY}"
 	fi
 	export POWERLINE_CURRENT_SUITE="${POWERLINE_CURRENT_SUITE%/*}"
-	if test "x$1" != "x--continue" ; then
+	if test "$1" != "--continue" ; then
 		exit $FAILED
 	fi
 }
 
 fail() {
 	local allow_failure=
-	if test "x$1" = "x--allow-failure" ; then
+	if test "$1" = "--allow-failure" ; then
 		shift
 		allow_failure=A
 	fi
@@ -48,7 +48,7 @@ fail() {
 	FAIL_SUMMARY="${FAIL_SUMMARY}${NL}${full_msg}"
 	echo "Failed: $full_msg"
 	echo "$full_msg" >> "$FAILURES_FILE"
-	if test "x$allow_failure" = "x" ; then
+	if test -z "$allow_failure" ; then
 		FAILED=1
 	fi
 }

@@ -49,7 +49,7 @@ check_log() {
 	if test "$warns" = "warns" ; then
 		local warning="$(head -n1 "$log_file" | sed 's/.*://')"
 		local expwarning="The 'bar' bindings are deprecated, please switch to 'lemonbar'"
-		if test "x$warning" != "x$expwarning" ; then
+		if test "$warning" != "$expwarning" ; then
 			echo "Got: $warning"
 			echo "Exp: $expwarning"
 			fail "warn" F "Expected warning"
@@ -66,7 +66,7 @@ check_log() {
 		return 1
 	fi
 	local expline="%{l}%{F#ffd0d0d0}%{B#ff303030} $text-left %{F-B--u}%{F#ff303030} %{F-B--u}%{r}%{F#ff303030} %{F-B--u}%{F#ffd0d0d0}%{B#ff303030} $text-right %{F-B--u}"
-	if test "x$expline" != "x$line" ; then
+	if test "$expline" != "$line" ; then
 		echo "Line:     '$line'"
 		echo "Expected: '$expline'"
 		fail "log:line" F "Unexpected line"
@@ -149,14 +149,14 @@ else
 		if test "$fnum" -ne 2 ; then
 			fail "fnum" F "Expected two output files"
 		fi
-		if test "x${args#--height}" != "x$args" ; then
+		if test "${args#--height}" != "$args" ; then
 			height="${args#--height}"
 			height="${height# }"
 			height="${height#=}"
 			height="${height%% *}"
 		fi
 		command="lemonbar"
-		if test "x${args#--bar-command}" != "x$args" ; then
+		if test "${args#--bar-command}" != "$args" ; then
 			command="${args#--bar-command}"
 			command="${command# }"
 			command="${command#=}"
@@ -166,11 +166,11 @@ else
 		rm "$TEST_ROOT/args.log"
 		script_args="${args#*-- }"
 		script_args="${script_args# }"
-		if test "x${script_args}" '=' "x$args" ; then
+		if test "${script_args}" = "$args" ; then
 			script_args=
 		fi
 		expected_args="$command -g 1920x$height+0${script_args:+ }$script_args${NL}$command -g 1920x$height+1${script_args:+ }$script_args"
-		if test "x$expected_args" != "x$received_args" ; then
+		if test "$expected_args" != "$received_args" ; then
 			echo "args:${NL}<$received_args>"
 			echo "expected:${NL}<$expected_args>"
 			fail "args" F "Expected different args"

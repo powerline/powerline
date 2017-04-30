@@ -30,7 +30,7 @@ for pexe in powerline powerline.sh powerline.py ; do
 	else
 		continue
 	fi
-	if test "x$pexe" != 'xpowerline.sh' || test -e "$TEST_PATH/socat" ; then
+	if test "$pexe" != 'powerline.sh' || test -e "$TEST_PATH/socat" ; then
 		POWERLINE_COMMAND="$pexe"
 		break
 	fi
@@ -74,7 +74,7 @@ check_log() {
 		return 1
 	fi
 	local expline="powerline_widget:set_markup('<span foreground=\"#303030\"> </span><span foreground=\"#d0d0d0\" background=\"#303030\" font_weight=\"bold\"> default-right </span>')"
-	if test "x$expline" != "x$line" ; then
+	if test "$expline" != "$line" ; then
 		echo "Line:     '$line'"
 		echo "Expected: '$expline'"
 		fail "log:line" F "Unexpected line"
@@ -119,7 +119,7 @@ else
 		sleep 5
 		killscript "$(cat "$TEST_ROOT/$args-pid")"
 		rm "$TEST_ROOT/$args-pid"
-		if test "x$(cat "$DEPRECATED_LOG")" != "x" ; then
+		if test -n "$(cat "$DEPRECATED_LOG")" ; then
 			display_log "$DEPRECATED_LOG"
 			fail "output" E "Nonempty $DEPRECATED_SCRIPT output"
 		fi
@@ -153,7 +153,7 @@ run "$POWERLINE_COMMAND" --socket $ADDRESS wm.awesome > "$TEST_ROOT/output.log.3
 run "$POWERLINE_COMMAND" --socket $ADDRESS wm.awesome > "$TEST_ROOT/output.log.4" 2>&1
 run "$POWERLINE_COMMAND" --socket $ADDRESS wm.awesome > "$TEST_ROOT/output.log.5" 2>&1
 for log_file in "$TEST_ROOT"/output.log.* ; do
-	if test "x$(cat "$log_file")" != "x" ; then
+	if test -n "$(cat "$log_file")" ; then
 		display_log "$log_file"
 		fail "output" E "Nonempty $POWERLINE_COMMAND output at run ${log_file#*.}"
 	fi
@@ -161,13 +161,13 @@ for log_file in "$TEST_ROOT"/output.log.* ; do
 done
 sleep 5
 run python "$POWERLINE_DAEMON" --socket $ADDRESS --quiet --kill > "$TEST_ROOT/kill.log" 2>&1
-if test "x$(cat "$TEST_ROOT/kill.log")" != "x" ; then
+if test -n "$(cat "$TEST_ROOT/kill.log")" ; then
 	display_log "$TEST_ROOT/kill.log"
 	fail "daemonlog" E "Nonempty kill log"
 fi
 rm "$TEST_ROOT/kill.log"
 wait $DPID
-if test "x$(cat "$TEST_ROOT/daemon.log")" != "x" ; then
+if test -n "$(cat "$TEST_ROOT/daemon.log")" ; then
 	display_log "$TEST_ROOT/daemon.log"
 	fail "daemonlog" E "Nonempty daemon log"
 fi

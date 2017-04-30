@@ -12,7 +12,7 @@ ONLY_TEST_CLIENT="$3"
 
 export PYTHON
 
-if test "x$ONLY_SHELL" = "x--help" ; then
+if test "$ONLY_SHELL" = "--help" ; then
 cat << EOF
 Usage:
 	$0 [[[ONLY_SHELL | ""] (ONLY_TEST_TYPE | "")] (ONLY_TEST_CLIENT | "")]
@@ -53,7 +53,7 @@ print_full_output() {
 	cat "$TEST_ROOT/${SH}.${TEST_TYPE}.${TEST_CLIENT}.full.log"
 	echo
 	echo '____________________________________________________________'
-	if test "x$POWERLINE_TEST_NO_CAT_V" != "x1" ; then
+	if test "$POWERLINE_TEST_NO_CAT_V" != "1" ; then
 		echo "Full output (cat -v):"
 		echo '============================================================'
 		cat -v "$TEST_ROOT/${SH}.${TEST_TYPE}.${TEST_CLIENT}.full.log"
@@ -71,9 +71,9 @@ do_run_test() {
 
 	local wait_for_echo_arg=
 	if ( \
-		test "x${SH}" = "xdash" \
+		test "${SH}" = "dash" \
 		|| ( \
-			test "x${SH}" = "xpdb" \
+			test "${SH}" = "pdb" \
 			&& ( \
 				( \
 					test "$PYTHON_VERSION_MAJOR" -eq 3 \
@@ -84,7 +84,7 @@ do_run_test() {
 			) \
 		) \
 		|| ( \
-			test "x${SH}" = "xipython" \
+			test "${SH}" = "ipython" \
 			&& test "$("${PYTHON}" -mIPython --version | head -n1 | cut -d. -f1)" -ge 5 \
 		) \
 	) ; then
@@ -95,7 +95,7 @@ do_run_test() {
 		"$@"
 	if ! check_screen_log ${TEST_TYPE} ${TEST_CLIENT} ${SH} ; then
 		echo '____________________________________________________________'
-		if test "x$POWERLINE_TEST_NO_CAT_V" != "x1" ; then
+		if test "$POWERLINE_TEST_NO_CAT_V" != "1" ; then
 			# Repeat the diff to make it better viewable in travis output
 			echo "Diff (cat -v):"
 			echo '============================================================'
@@ -388,7 +388,7 @@ if ( \
 					fi
 				fi
 				SH="${TEST_COMMAND%% *}"
-				if test "$ONLY_SHELL" != "" && test "x$ONLY_SHELL" != "x$SH" ; then
+				if test -n "$ONLY_SHELL" && test "$ONLY_SHELL" != "$SH" ; then
 					continue
 				fi
 				if ! test -x "$TEST_ROOT/path/$SH" ; then
@@ -396,13 +396,7 @@ if ( \
 				fi
 				echo ">>> $(readlink "$TEST_ROOT/path/$SH")"
 				if ! run_test $TEST_TYPE $TEST_CLIENT $TEST_COMMAND ; then
-					ALLOW_FAILURE_ARG=
-					# dash tests are not stable, see #931
-					# also do not allow fish tests to spoil the build
-					if test x$FAST$SH = x1dash || test x$FAST$SH = x1fish ; then
-						ALLOW_FAILURE_ARG="--allow-failure"
-					fi
-					fail $ALLOW_FAILURE_ARG "$SH-$TEST_TYPE-$TEST_CLIENT:test" F \
+					fail "$SH-$TEST_TYPE-$TEST_CLIENT:test" F \
 						"Failed checking $TEST_COMMAND"
 				fi
 			done
