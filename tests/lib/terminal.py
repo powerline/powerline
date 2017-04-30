@@ -12,11 +12,9 @@ import pexpect
 from tests.lib.vterm import VTerm, Dimensions
 
 
-class MutableDimensions(Dimensions):
-	def __new__(cls, rows, cols):
-		return Dimensions.__new__(cls, rows, cols)
-
+class MutableDimensions(object):
 	def __init__(self, rows, cols):
+		super(MutableDimensions, self).__init__()
 		self._list = [rows, cols]
 
 	def __getitem__(self, idx):
@@ -51,7 +49,7 @@ class ExpectProcess(threading.Thread):
 		super(ExpectProcess, self).__init__()
 		self.vterm = VTerm(lib, dim)
 		self.lock = threading.Lock()
-		self.dim = Dimensions(dim[0], dim[1])
+		self.dim = Dimensions(*dim)
 		self.cmd = cmd
 		self.args = args
 		self.cwd = cwd
@@ -89,7 +87,7 @@ class ExpectProcess(threading.Thread):
 
 	def resize(self, dim):
 		with self.child_lock:
-			self.dim = Dimensions(dim[0], dim[1])
+			self.dim = Dimensions(*dim)
 			self.child.setwinsize(self.dim.rows, self.dim.cols)
 			self.vterm.resize(self.dim)
 
