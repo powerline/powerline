@@ -17,7 +17,7 @@ from powerline.lib.dict import updated
 from powerline.bindings.tmux import get_tmux_version
 from powerline import get_fallback_logger
 
-from tests.lib.terminal import ExpectProcess
+from tests.lib.terminal import ExpectProcess, MutableDimensions
 
 
 VTERM_TEST_DIR = os.path.abspath('tests/vterm_tmux')
@@ -46,12 +46,12 @@ def cell_properties_key_to_shell_escape(cell_properties_key):
 	))
 
 
-def test_expected_result(p, expected_result, cols, rows, print_logs):
+def test_expected_result(p, expected_result, dim, print_logs):
 	expected_text, attrs = expected_result
 	attempts = 3
 	result = None
 	while attempts:
-		actual_text, all_attrs = p.get_row(rows - 1, attrs)
+		actual_text, all_attrs = p.get_row(dim.rows - 1, attrs)
 		if actual_text == expected_text:
 			return True
 		attempts -= 1
@@ -103,8 +103,7 @@ def main(attempts=3):
 	socket_path = os.path.abspath('tmux-socket-{0}'.format(attempts))
 	if os.path.exists(socket_path):
 		os.unlink(socket_path)
-	rows = 50
-	cols = 200
+	dim = MutableDimensions(rows=50, cols=200)
 
 	tmux_exe = os.path.join(vterm_path, 'tmux')
 
@@ -177,6 +176,8 @@ def main(attempts=3):
 	with open(conf_file, 'w') as cf_fd:
 		cf_fd.write(conf_line)
 
+	tmux_version = get_tmux_version(get_fallback_logger())
+
 	base_attrs = {
 		((0, 0, 0), (243, 243, 243), 1, 0, 0): 'lead',
 		((243, 243, 243), (11, 11, 11), 0, 0, 0): 'leadsep',
@@ -185,35 +186,8 @@ def main(attempts=3):
 		((88, 88, 88), (11, 11, 11), 0, 0, 0): 'cwdhsep',
 		((0, 0, 0), (0, 224, 0), 0, 0, 0): 'defstl',
 	}
-
-	try:
-		p = ExpectProcess(
-			lib=lib,
-			rows=rows,
-			cols=cols,
-			cmd=tmux_exe,
-			args=[
-				# Specify full path to tmux socket (testing tmux instance must 
-				# not interfere with user one)
-				'-S', socket_path,
-				# Force 256-color mode
-				'-2',
-				# Request verbose logging just in case
-				'-v',
-				# Specify configuration file
-				'-f', conf_file,
-				# Run bash three times
-				'new-session', 'bash --norc --noprofile -i', ';',
-				'new-window', 'bash --norc --noprofile -i', ';',
-				'new-window', 'bash --norc --noprofile -i', ';',
-			],
-			cwd=VTERM_TEST_DIR,
-			env=env,
-		)
-		p.start()
-		sleep(5)
-		tmux_version = get_tmux_version(get_fallback_logger())
-		expected_result = get_expected_result(
+	expected_results = (
+		get_expected_result(
 			tmux_version,
 			expected_result_old=(
 				'{lead: 0 }{leadsep: }{bg: S2 string here  }'
@@ -257,21 +231,10 @@ def main(attempts=3):
 					((102, 204, 255), (0, 102, 153), 0, 0, 0): 9,
 					((255, 255, 255), (0, 102, 153), 1, 0, 0): 10,
 				})),
-		)
-		ret = RetValues.not_run
-		if not test_expected_result(p, expected_result, cols, rows, not attempts):
-			if attempts:
-				ret = RetValues.do_restart
-			else:
-				ret = RetValues.failed
-		elif ret is RetValues.not_run:
-			ret = RetValues.partial_success
-		cols = 40
-		p.resize(rows, cols)
-		sleep(5)
-		expected_result = get_expected_result(
+		),
+		get_expected_result(
 			tmux_version,
-			expected_result_old=('{bg:' + (' ' * cols) + '}', base_attrs),
+			expected_result_old=('{bg:' + (' ' * dim.cols) + '}', base_attrs),
 			expected_result_1_7=(
 				'{lead: 0 }'
 				'{leadsep: }{bg: <}{4:h  }{bg: }{5: }'
@@ -303,8 +266,46 @@ def main(attempts=3):
 					((102, 204, 255), (0, 102, 153), 0, 0, 0): 6,
 					((255, 255, 255), (0, 102, 153), 1, 0, 0): 7,
 				})),
+		),
+	)
+
+	try:
+		p = ExpectProcess(
+			lib=lib,
+			dim=dim,
+			cmd=tmux_exe,
+			args=[
+				# Specify full path to tmux socket (testing tmux instance must 
+				# not interfere with user one)
+				'-S', socket_path,
+				# Force 256-color mode
+				'-2',
+				# Request verbose logging just in case
+				'-v',
+				# Specify configuration file
+				'-f', conf_file,
+				# Run bash three times
+				'new-session', 'bash --norc --noprofile -i', ';',
+				'new-window', 'bash --norc --noprofile -i', ';',
+				'new-window', 'bash --norc --noprofile -i', ';',
+			],
+			cwd=VTERM_TEST_DIR,
+			env=env,
 		)
-		if not test_expected_result(p, expected_result, cols, rows, not attempts):
+		p.start()
+		sleep(5)
+		ret = RetValues.not_run
+		if not test_expected_result(p, expected_results[0], dim, not attempts):
+			if attempts:
+				ret = RetValues.do_restart
+			else:
+				ret = RetValues.failed
+		elif ret is RetValues.not_run:
+			ret = RetValues.partial_success
+		dim.cols = 40
+		p.resize(dim)
+		sleep(5)
+		if not test_expected_result(p, expected_results[1], dim, not attempts):
 			if attempts:
 				ret = RetValues.do_restart
 			else:

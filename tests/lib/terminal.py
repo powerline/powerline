@@ -9,16 +9,39 @@ from signal import SIGKILL
 
 import pexpect
 
-from tests.lib.vterm import VTerm
+from tests.lib.vterm import VTerm, Dimensions
+
+
+class MutableDimensions(Dimensions):
+	def __new__(cls, rows, cols):
+		return Dimensions.__new__(cls, rows, cols)
+
+	def __init__(self, rows, cols):
+		Dimensions.__init__(self, rows, cols)
+		self._list = [rows, cols]
+
+	def __getitem__(self, idx):
+		return self._list[idx]
+
+	def __setitem__(self, idx, val):
+		self._list[idx] = val
+
+	rows = property(
+		fget = lambda self: self._list[0],
+		fset = lambda self, val: self._list.__setitem__(0, val),
+	)
+	cols = property(
+		fget = lambda self: self._list[1],
+		fset = lambda self, val: self._list.__setitem__(1, val),
+	)
 
 
 class ExpectProcess(threading.Thread):
-	def __init__(self, lib, rows, cols, cmd, args, cwd=None, env=None):
+	def __init__(self, lib, dim, cmd, args, cwd=None, env=None):
 		super(ExpectProcess, self).__init__()
-		self.vterm = VTerm(lib, rows, cols)
+		self.vterm = VTerm(lib, dim)
 		self.lock = threading.Lock()
-		self.rows = rows
-		self.cols = cols
+		self.dim = dim
 		self.cmd = cmd
 		self.args = args
 		self.cwd = cwd
@@ -30,7 +53,7 @@ class ExpectProcess(threading.Thread):
 	def run(self):
 		child = pexpect.spawn(self.cmd, self.args, cwd=self.cwd, env=self.env)
 		sleep(0.5)
-		child.setwinsize(self.rows, self.cols)
+		child.setwinsize(self.dim.rows, self.dim.cols)
 		sleep(0.5)
 		self.child = child
 		status = None
@@ -54,12 +77,11 @@ class ExpectProcess(threading.Thread):
 	def kill(self):
 		self.shutdown_event.set()
 
-	def resize(self, rows, cols):
+	def resize(self, dim):
 		with self.child_lock:
-			self.rows = rows
-			self.cols = cols
-			self.child.setwinsize(rows, cols)
-			self.vterm.resize(rows, cols)
+			self.dim = dim
+			self.child.setwinsize(dim.rows, dim.cols)
+			self.vterm.resize(dim)
 
 	def __getitem__(self, position):
 		with self.lock:
@@ -94,13 +116,14 @@ class ExpectProcess(threading.Thread):
 			return self.get_highlighted_text((
 				(key, ''.join((cell.text for cell in subline)))
 				for key, subline in groupby((
-					self.vterm.vtscreen[row, col] for col in range(self.cols)
+					self.vterm.vtscreen[row, col]
+					for col in range(self.dim.cols)
 				), lambda cell: cell.cell_properties_key)
 			), attrs, default_props)
 
 	def get_screen(self, attrs, default_props=()):
 		lines = []
-		for row in range(self.rows):
+		for row in range(self.dim.rows):
 			line, attrs = self.get_row(row, attrs, default_props)
 			lines.append(line)
 		return '\n'.join(lines), attrs
