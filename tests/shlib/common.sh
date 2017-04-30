@@ -2,6 +2,10 @@
 set +x
 
 : ${PYTHON:=python}
+: ${USER:=`id -un`}
+: ${HOME:=`getent passwd $USER | cut -d: -f6`}
+
+export USER HOME
 
 if test -z "$FAILED" ; then
 	FAILED=0
@@ -69,3 +73,9 @@ rm_tmp_dir() {
 		rm -r "$TMP_ROOT"
 	fi
 }
+
+if ! which realpath ; then
+	realpath() {
+		$PYTHON -c 'import os, sys; print(os.path.realpath(sys.argv[1]))' "$1"
+	}
+fi

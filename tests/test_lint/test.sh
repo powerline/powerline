@@ -3,7 +3,7 @@
 
 enter_suite lint
 
-if ! ${PYTHON} scripts/powerline-lint -p powerline/config_files ; then
+if ! "$PYTHON" "$ROOT/scripts/powerline-lint" -p "$ROOT/powerline/config_files" ; then
 	fail "test" F "Running powerline-lint failed"
 fi
 

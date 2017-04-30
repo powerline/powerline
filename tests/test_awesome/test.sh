@@ -3,12 +3,10 @@
 
 enter_suite awesome
 
-TEST_ROOT="$ROOT/tests/awesome"
+TEST_ROOT="$(make_tmp_dir awesome)"
 TEST_PATH="$TEST_ROOT/path"
 TEST_STATIC_ROOT="$ROOT/tests/test_awesome"
 
-test -d "$TEST_ROOT" && rm -r "$TEST_ROOT"
-mkdir "$TEST_ROOT"
 cp -r "$TEST_STATIC_ROOT/path" "$TEST_ROOT"
 cp -r "$TEST_STATIC_ROOT/powerline" "$TEST_ROOT"
 
@@ -184,10 +182,6 @@ if ! powerline-lint \
 	-p "$TEST_STATIC_ROOT/powerline"
 then
 	fail "lint" F "Checking test config failed"
-fi
-
-if test $FAILED -eq 0 ; then
-	rm -r "$TEST_ROOT"
 fi
 
 exit_suite

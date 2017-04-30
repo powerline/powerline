@@ -3,17 +3,12 @@
 
 enter_suite shells
 
-if test "x$1" = "x--fast" ; then
+if test $# -eq 0 ; then
 	FAST=1
-	shift
 fi
 ONLY_SHELL="$1"
 ONLY_TEST_TYPE="$2"
 ONLY_TEST_CLIENT="$3"
-
-if ! test -z "$ONLY_SHELL$ONLY_TEST_TYPE$ONLY_TEST_CLIENT" ; then
-	FAST=
-fi
 
 export PYTHON
 

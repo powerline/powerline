@@ -3,11 +3,6 @@
 
 enter_suite root
 
-: ${USER:=`id -un`}
-: ${HOME:=`getent passwd $USER | cut -d: -f6`}
-
-export USER HOME
-
 if test "$TRAVIS" = true ; then
 	export PATH="$HOME/opt/fish/bin:${PATH}"
 	export PATH="$PWD/tests/bot-ci/deps/rc:$PATH"
@@ -25,15 +20,9 @@ if test "$TRAVIS" = true ; then
 	fi
 fi
 
-if ! which realpath ; then
-	realpath() {
-		$PYTHON -c 'import os, sys; print(os.path.realpath(sys.argv[1]))' "$1"
-	}
-fi
-
 export PYTHON="${PYTHON:=python}"
 export PYTHONPATH="${PYTHONPATH}${PYTHONPATH:+:}`realpath .`"
-for script in tests/run_*_tests.sh ; do
+for script in "$ROOT"/tests/test_*/test.sh ; do
 	test_name="${script##*/run_}"
 	if ! sh $script ; then
 		fail "${test_name%_tests.sh}" F "Failed $script"
