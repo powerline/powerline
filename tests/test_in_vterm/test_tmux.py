@@ -8,34 +8,18 @@ import json
 
 from time import sleep
 from subprocess import check_call
-from difflib import ndiff
 from glob import glob1
 from traceback import print_exc
 
-from powerline.lib.unicode import u
 from powerline.lib.dict import updated
 from powerline.bindings.tmux import get_tmux_version
 from powerline import get_fallback_logger
 
-from tests.lib.terminal import ExpectProcess, MutableDimensions
+from tests.lib.terminal import (ExpectProcess, MutableDimensions,
+                                do_terminal_tests, get_env)
 
 
 VTERM_TEST_DIR = os.path.abspath('tests/vterm_tmux')
-
-
-def convert_expected_result(p, expected_result):
-	return p.get_highlighted_text(expected_result, {})
-
-
-def cell_properties_key_to_shell_escape(cell_properties_key):
-	fg, bg, bold, underline, italic = cell_properties_key
-	return('\x1b[38;2;{0};48;2;{1}{bold}{underline}{italic}m'.format(
-		';'.join((str(i) for i in fg)),
-		';'.join((str(i) for i in bg)),
-		bold=(';1' if bold else ''),
-		underline=(';4' if underline else ''),
-		italic=(';3' if italic else ''),
-	))
 
 
 def tmux_logs_iter(test_dir):
@@ -54,36 +38,6 @@ def print_tmux_logs():
 		os.unlink(f)
 
 
-def test_expected_result(p, expected_result, last_attempt, last_attempt_cb):
-	expected_text, attrs = expected_result
-	attempts = 3
-	result = None
-	while attempts:
-		actual_text, all_attrs = p.get_row(p.dim.rows - 1, attrs)
-		if actual_text == expected_text:
-			return True
-		attempts -= 1
-		print('Actual result does not match expected. Attempts left: {0}.'.format(attempts))
-		sleep(2)
-	print('Result:')
-	print(actual_text)
-	print('Expected:')
-	print(expected_text)
-	print('Attributes:')
-	print(all_attrs)
-	print('Screen:')
-	screen, screen_attrs = p.get_screen(attrs)
-	print(screen)
-	print(screen_attrs)
-	print('_' * 80)
-	print('Diff:')
-	print('=' * 80)
-	print(''.join((u(line) for line in ndiff([actual_text], [expected_text]))))
-	if last_attempt:
-		last_attempt_cb()
-	return False
-
-
 def get_expected_result(tmux_version,
                         expected_result_old,
                         expected_result_1_7=None,
@@ -99,6 +53,17 @@ def get_expected_result(tmux_version,
 		return expected_result_old
 
 
+def tmux_fin_cb(p, cmd, env):
+	try:
+		check_call([
+			cmd, '-S', env['POWERLINE_TMUX_SOCKET_PATH'], 'kill-server'
+		], env=env, cwd=VTERM_TEST_DIR)
+	except Exception:
+		print_exc()
+	for f in tmux_logs_iter(VTERM_TEST_DIR):
+		os.unlink(f)
+
+
 def main(attempts=3):
 	vterm_path = os.path.join(VTERM_TEST_DIR, 'path')
 
@@ -109,40 +74,11 @@ def main(attempts=3):
 	else:
 		lib = os.environ.get('POWERLINE_LIBVTERM', 'libvterm.so')
 
-	env = {
-		# Reasoning:
-		# 1. vt* TERMs (used to be vt100 here) make tmux-1.9 use
-		#    different and identical colors for inactive windows. This 
-		#    is not like tmux-1.6: foreground color is different from 
-		#    separator color and equal to (0, 102, 153) for some reason 
-		#    (separator has correct color). tmux-1.8 is fine, so are 
-		#    older versions (though tmux-1.6 and tmux-1.7 do not have 
-		#    highlighting for previously active window) and my system 
-		#    tmux-1.9a.
-		# 2. screen, xterm and some other non-256color terminals both
-		#    have the same issue and make libvterm emit complains like 
-		#    `Unhandled CSI SGR 3231`.
-		# 3. screen-256color, xterm-256color and other -256color
-		#    terminals make libvterm emit complains about unhandled 
-		#    escapes to stderr.
-		# 4. `st-256color` does not have any of the above problems, but
-		#    it may be not present on the target system because it is 
-		#    installed with x11-terms/st and not with sys-libs/ncurses.
-		#
-		# For the given reasons decision was made: to fix tmux-1.9 tests 
-		# and not make libvterm emit any data to stderr st-256color 
-		# $TERM should be used, up until libvterm has its own terminfo 
-		# database entry (if it ever will). To make sure that relevant 
-		# terminfo entry is present on the target system it should be 
-		# distributed with powerline test package. To make distribution 
-		# not require modifying anything outside of powerline test 
-		# directory TERMINFO variable is set.
-		'TERMINFO': os.path.join(VTERM_TEST_DIR, 'terminfo'),
-		'TERM': 'st-256color',
-		'PATH': vterm_path,
-		'SHELL': os.path.join(VTERM_TEST_DIR, 'path', 'bash'),
-		'POWERLINE_CONFIG_PATHS': os.path.abspath('powerline/config_files'),
-		'POWERLINE_COMMAND': 'powerline-render',
+	socket_path = os.path.abspath('tmux-socket-{0}'.format(attempts))
+	if os.path.exists(socket_path):
+		os.unlink(socket_path)
+
+	env = get_env(vterm_path, VTERM_TEST_DIR, {
 		'POWERLINE_THEME_OVERRIDES': ';'.join((
 			key + '=' + json.dumps(val)
 			for key, val in (
@@ -162,9 +98,8 @@ def main(attempts=3):
 				('default.segment_data.s2.contents', 'S2 string here'),
 			)
 		)),
-		'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
-		'PYTHONPATH': os.environ.get('PYTHONPATH', ''),
-	}
+		'POWERLINE_TMUX_SOCKET_PATH': socket_path,
+	})
 
 	conf_path = os.path.abspath('powerline/bindings/tmux/powerline.conf')
 	conf_line = 'source "' + (
@@ -268,10 +203,10 @@ def main(attempts=3):
 		),
 	)
 
-	def prepare_test_1():
+	def prepare_test_1(p):
 		sleep(5)
 
-	def prepare_test_2():
+	def prepare_test_2(p):
 		dim.cols = 40
 		p.resize(dim)
 		sleep(5)
@@ -280,10 +215,6 @@ def main(attempts=3):
 		prepare_test_1,
 		prepare_test_2,
 	)
-
-	socket_path = os.path.abspath('tmux-socket-{0}'.format(attempts))
-	if os.path.exists(socket_path):
-		os.unlink(socket_path)
 
 	args = [
 		# Specify full path to tmux socket (testing tmux instance must not 
@@ -301,41 +232,17 @@ def main(attempts=3):
 		'new-window', 'bash --norc --noprofile -i', ';',
 	]
 
-	try:
-		p = ExpectProcess(
-			lib=lib,
-			dim=dim,
-			cmd=tmux_exe,
-			args=args,
-			cwd=VTERM_TEST_DIR,
-			env=env,
-		)
-		p.start()
-
-		ret = True
-
-		for test_prep, expected_result in zip(test_preps, expected_results):
-			test_prep()
-			ret = (
-				ret
-				and test_expected_result(p, expected_result, attempts == 0,
-				                         print_tmux_logs)
-			)
-
-		if ret or attempts == 0:
-			return ret
-	finally:
-		try:
-			check_call([tmux_exe, '-S', socket_path, 'kill-server'], env=env,
-			           cwd=VTERM_TEST_DIR)
-		except Exception:
-			print_exc()
-		p.kill()
-		p.join(10)
-		for f in tmux_logs_iter(VTERM_TEST_DIR):
-			os.unlink(f)
-		assert(not p.isAlive())
-	return main(attempts=(attempts - 1))
+	return do_terminal_tests(
+		tests=zip(test_preps, expected_results),
+		cmd=tmux_exe,
+		lib=lib,
+		dim=dim,
+		args=args,
+		env=env,
+		cwd=VTERM_TEST_DIR,
+		fin_cb=tmux_fin_cb,
+		last_attempt_cb=print_tmux_logs,
+	)
 
 
 if __name__ == '__main__':

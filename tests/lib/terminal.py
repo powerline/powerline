@@ -2,12 +2,16 @@
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 import threading
+import os
 
 from time import sleep
 from itertools import groupby
 from signal import SIGKILL
+from difflib import ndiff
 
 import pexpect
+
+from powerline.lib.unicode import u
 
 from tests.lib.vterm import VTerm, Dimensions
 
@@ -135,3 +139,120 @@ class ExpectProcess(threading.Thread):
 			line, attrs = self.get_row(row, attrs, default_props)
 			lines.append(line)
 		return '\n'.join(lines), attrs
+
+
+def test_expected_result(p, expected_result, last_attempt,
+                         last_attempt_cb=None):
+	expected_text, attrs = expected_result
+	attempts = 3
+	result = None
+	while attempts:
+		actual_text, all_attrs = p.get_row(p.dim.rows - 1, attrs)
+		if actual_text == expected_text:
+			return True
+		attempts -= 1
+		print('Actual result does not match expected. Attempts left: {0}.'.format(attempts))
+		sleep(2)
+	print('Result:')
+	print(actual_text)
+	print('Expected:')
+	print(expected_text)
+	print('Attributes:')
+	print(all_attrs)
+	print('Screen:')
+	screen, screen_attrs = p.get_screen(attrs)
+	print(screen)
+	print(screen_attrs)
+	print('_' * 80)
+	print('Diff:')
+	print('=' * 80)
+	print(''.join((
+		u(line) for line in ndiff([actual_text + '\n'], [expected_text + '\n']))
+	))
+	if last_attempt and last_attempt_cb:
+		last_attempt_cb()
+	return False
+
+
+ENV_BASE = {
+	# Reasoning:
+	# 1. vt* TERMs (used to be vt100 here) make tmux-1.9 use different and
+	#    identical colors for inactive windows. This is not like tmux-1.6: 
+	#    foreground color is different from separator color and equal to (0, 
+	#    102, 153) for some reason (separator has correct color). tmux-1.8 is 
+	#    fine, so are older versions (though tmux-1.6 and tmux-1.7 do not have 
+	#    highlighting for previously active window) and my system tmux-1.9a.
+	# 2. screen, xterm and some other non-256color terminals both have the same
+	#    issue and make libvterm emit complains like `Unhandled CSI SGR 3231`.
+	# 3. screen-256color, xterm-256color and other -256color terminals make
+	#    libvterm emit complains about unhandled escapes to stderr.
+	# 4. `st-256color` does not have any of the above problems, but it may be
+	#    not present on the target system because it is installed with 
+	#    x11-terms/st and not with sys-libs/ncurses.
+	#
+	# For the given reasons decision was made: to fix tmux-1.9 tests and not 
+	# make libvterm emit any data to stderr st-256color $TERM should be used, up 
+	# until libvterm has its own terminfo database entry (if it ever will). To 
+	# make sure that relevant terminfo entry is present on the target system it 
+	# should be distributed with powerline test package. To make distribution 
+	# not require modifying anything outside of powerline test directory 
+	# TERMINFO variable is set.
+	#
+	# This fix propagates to non-tmux vterm tests just in case.
+	'TERM': 'st-256color',
+	# Also $TERMINFO definition in get_env
+
+	'POWERLINE_CONFIG_PATHS': os.path.abspath('powerline/config_files'),
+	'POWERLINE_COMMAND': 'powerline-render',
+	'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
+	'PYTHONPATH': os.environ.get('PYTHONPATH', ''),
+}
+
+
+def get_env(vterm_path, test_dir, *args, **kwargs):
+	env = ENV_BASE.copy()
+	env.update({
+		'TERMINFO': os.path.join(test_dir, 'terminfo'),
+		'PATH': vterm_path,
+		'SHELL': os.path.join(vterm_path, 'bash'),
+	})
+	env.update(*args, **kwargs)
+	return env
+
+
+def do_terminal_tests(tests, cmd, lib, dim, args, env, cwd=None, fin_cb=None,
+                      last_attempt_cb=None, attempts=3):
+	while attempts:
+		try:
+			p = ExpectProcess(
+				lib=lib,
+				dim=dim,
+				cmd=cmd,
+				args=args,
+				cwd=cwd,
+				env=env,
+			)
+			p.start()
+
+			ret = True
+
+			for test_prep, expected_result in tests:
+				test_prep(p)
+				ret = (
+					ret
+					and test_expected_result(p, expected_result, attempts == 0,
+					                         last_attempt_cb)
+				)
+
+			if ret:
+				return ret
+		finally:
+			if fin_cb:
+				fin_cb(p=p, cmd=cmd, env=env)
+			p.kill()
+			p.join(10)
+			assert(not p.isAlive())
+
+		attempts -= 1
+
+	return False
