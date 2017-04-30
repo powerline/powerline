@@ -38,7 +38,19 @@ def cell_properties_key_to_shell_escape(cell_properties_key):
 	))
 
 
-def test_expected_result(p, expected_result, print_logs):
+def print_tmux_logs():
+	for f in glob1(VTERM_TEST_DIR, '*.log'):
+		print('_' * 80)
+		print(f + ':')
+		print('=' * 80)
+		full_f = os.path.join(VTERM_TEST_DIR, f)
+		with open(full_f, 'r') as fp:
+			for line in fp:
+				sys.stdout.write(line)
+		os.unlink(full_f)
+
+
+def test_expected_result(p, expected_result, last_attempt, last_attempt_cb):
 	expected_text, attrs = expected_result
 	attempts = 3
 	result = None
@@ -63,16 +75,8 @@ def test_expected_result(p, expected_result, print_logs):
 	print('Diff:')
 	print('=' * 80)
 	print(''.join((u(line) for line in ndiff([actual_text], [expected_text]))))
-	if print_logs:
-		for f in glob1(VTERM_TEST_DIR, '*.log'):
-			print('_' * 80)
-			print(f + ':')
-			print('=' * 80)
-			full_f = os.path.join(VTERM_TEST_DIR, f)
-			with open(full_f, 'r') as fp:
-				for line in fp:
-					sys.stdout.write(line)
-			os.unlink(full_f)
+	if last_attempt:
+		last_attempt_cb()
 	return False
 
 
@@ -308,7 +312,8 @@ def main(attempts=3):
 			test_prep()
 			ret = (
 				ret
-				and test_expected_result(p, expected_result, attempts == 0)
+				and test_expected_result(p, expected_result, attempts == 0,
+				                         print_tmux_logs)
 			)
 
 		if ret or attempts == 0:
