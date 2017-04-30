@@ -22,7 +22,9 @@ enter_suite() {
 }
 
 exit_suite() {
-	rm_tmp_dir
+	if test "$POWERLINE_CURRENT_SUITE" = "$POWERLINE_TMP_DIR_SUITE" ; then
+		rm_test_root
+	fi
 	if test $FAILED -ne 0 ; then
 		echo "Suite ${POWERLINE_CURRENT_SUITE} failed, summary:"
 		echo "${FAIL_SUMMARY}"
@@ -51,10 +53,11 @@ fail() {
 	fi
 }
 
-make_tmp_dir() {
-	local suffix="$1" ; shift
+make_test_root() {
+	local suffix="${POWERLINE_CURRENT_SUITE##*/}"
 
 	local tmpdir="$TMP_ROOT/$suffix/"
+	export POWERLINE_TMP_DIR_SUITE="$POWERLINE_CURRENT_SUITE"
 
 	if test -d "$tmpdir" ; then
 		rm -r "$tmpdir"
@@ -62,15 +65,17 @@ make_tmp_dir() {
 
 	mkdir -p "$tmpdir"
 
-	printf '%s' "$tmpdir"
+	export TEST_ROOT="$tmpdir"
 }
 
-rm_tmp_dir() {
+rm_test_root() {
 	if test -e "$FAILURES_FILE" ; then
 		return 0
 	fi
-	if test -d "$TMP_ROOT" ; then
-		rm -r "$TMP_ROOT"
+	local suffix="${POWERLINE_CURRENT_SUITE##*/}"
+	if test -d "$TMP_ROOT/$suffix" ; then
+		rm -r "$TMP_ROOT/$suffix"
+		rmdir "$TMP_ROOT" &>/dev/null || true
 	fi
 }
 

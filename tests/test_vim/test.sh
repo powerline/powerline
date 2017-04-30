@@ -4,6 +4,8 @@
 
 enter_suite vim
 
+make_test_root
+
 # Define some overrides. These ones must be ignored and do not affect Vim 
 # status/tab lines.
 export POWERLINE_CONFIG_OVERRIDES='common.default_top_theme=ascii'
@@ -28,11 +30,9 @@ test_script() {
 	fi
 }
 
-TMPDIR="$(make_tmp_dir vim)"
-
 TEST_SCRIPT_ROOT="$ROOT/tests/test_vim/tests"
 
-cd "$TMPDIR"
+cd "$TEST_ROOT"
 
 for script in "$TEST_SCRIPT_ROOT"/*.vim ; do
 	if test "${script%.old.vim}" = "${script}" ; then

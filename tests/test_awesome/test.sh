@@ -3,7 +3,8 @@
 
 enter_suite awesome
 
-TEST_ROOT="$(make_tmp_dir awesome)"
+make_test_root
+
 TEST_PATH="$TEST_ROOT/path"
 TEST_STATIC_ROOT="$ROOT/tests/test_awesome"
 

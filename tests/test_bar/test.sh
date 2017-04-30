@@ -3,7 +3,7 @@
 
 enter_suite bar
 
-TEST_ROOT="$(make_tmp_dir bar)"
+make_test_root
 TEST_PATH="$TEST_ROOT/path"
 TEST_STATIC_ROOT="$ROOT/tests/test_bar"
 
