@@ -54,6 +54,7 @@ class TestVimConfig(TestCase):
 			(('bufname', 'NERD_tree_1'), {}),
 			(('bufname', '__Gundo__'), {}),
 			(('bufname', '__Gundo_Preview__'), {}),
+			# No CtrlP tests here: emulation
 			# No Command-T tests here: requires +ruby or emulation
 			# No tabline here: tablines are tested separately
 		)
@@ -61,8 +62,8 @@ class TestVimConfig(TestCase):
 			local_themes_raw = json.load(f)['ext']['vim']['local_themes']
 			# Don’t run tests on external/plugin segments
 			local_themes = dict((k, v) for (k, v) in local_themes_raw.items())
-			# See end of the buffers definition above for `- 2`
-			self.assertEqual(len(buffers), len(local_themes) - 2)
+			# See end of the buffers definition above for `- 3`
+			self.assertEqual(len(buffers), len(local_themes) - 3)
 		outputs = {}
 		i = 0
 
