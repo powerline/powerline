@@ -28,11 +28,13 @@ check_screen_log() {
 	TEST_TYPE="$1"
 	TEST_CLIENT="$2"
 	SH="$3"
-	if test -e "$ROOT/tests/test_shells/${SH}.${TEST_TYPE}.ok" ; then
-		diff -a -u "$ROOT/tests/test_shells/${SH}.${TEST_TYPE}.ok" "$TEST_ROOT/${SH}.${TEST_TYPE}.${TEST_CLIENT}.log"
+	if test -e "$ROOT/tests/test_shells/outputs/${SH}.${TEST_TYPE}.ok" ; then
+		diff -a -u "$ROOT/tests/test_shells/outputs/${SH}.${TEST_TYPE}.ok" \
+		           "$TEST_ROOT/${SH}.${TEST_TYPE}.${TEST_CLIENT}.log"
 		return $?
-	elif test -e "$ROOT/tests/test_shells/${SH}.ok" ; then
-		diff -a -u "$ROOT/tests/test_shells/${SH}.ok" "$TEST_ROOT/${SH}.${TEST_TYPE}.${TEST_CLIENT}.log"
+	elif test -e "$ROOT/tests/test_shells/outputs/${SH}.ok" ; then
+		diff -a -u "$ROOT/tests/test_shells/outputs/${SH}.ok" \
+		           "$TEST_ROOT/${SH}.${TEST_TYPE}.${TEST_CLIENT}.log"
 		return $?
 	else
 		cat "$TEST_ROOT/${SH}.${TEST_TYPE}.${TEST_CLIENT}.log"

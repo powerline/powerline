@@ -89,7 +89,7 @@ def main():
 	sleep(0.5)
 	child.setwinsize(1, 300)
 
-	with open(os.path.join('tests', 'test_shells', 'input.{0}'.format(shell)), 'rb') as F:
+	with open(os.path.join('tests', 'test_shells', 'inputs', shell), 'rb') as F:
 		if not args.wait_for_echo:
 			child.send(F.read())
 		else:
