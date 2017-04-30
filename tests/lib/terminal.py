@@ -17,7 +17,6 @@ class MutableDimensions(Dimensions):
 		return Dimensions.__new__(cls, rows, cols)
 
 	def __init__(self, rows, cols):
-		Dimensions.__init__(self, rows, cols)
 		self._list = [rows, cols]
 
 	def __getitem__(self, idx):
