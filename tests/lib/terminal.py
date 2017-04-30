@@ -5,6 +5,7 @@ import threading
 
 from time import sleep
 from itertools import groupby
+from signal import SIGKILL
 
 import pexpect
 
@@ -24,6 +25,7 @@ class ExpectProcess(threading.Thread):
 		self.env = env
 		self.buffer = []
 		self.child_lock = threading.Lock()
+		self.shutdown_event = threading.Event()
 
 	def run(self):
 		child = pexpect.spawn(self.cmd, self.args, cwd=self.cwd, env=self.env)
@@ -32,7 +34,7 @@ class ExpectProcess(threading.Thread):
 		sleep(0.5)
 		self.child = child
 		status = None
-		while status is None:
+		while status is None and not self.shutdown_event.is_set():
 			try:
 				with self.child_lock:
 					s = child.read_nonblocking(size=1024, timeout=0)
@@ -45,6 +47,12 @@ class ExpectProcess(threading.Thread):
 				with self.lock:
 					self.vterm.push(s)
 					self.buffer.append(s)
+
+		if status is None:
+			child.kill(SIGKILL)
+
+	def kill(self):
+		self.shutdown_event.set()
 
 	def resize(self, rows, cols):
 		with self.child_lock:

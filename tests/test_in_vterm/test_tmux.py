@@ -306,8 +306,9 @@ def main(attempts=3):
 		if ret is not None:
 			return ret
 	finally:
-		check_call([tmux_exe, '-S', socket_path, 'kill-server'], env=env,
-		           cwd=VTERM_TEST_DIR)
+		p.kill()
+		p.join(10)
+		assert(not p.isAlive())
 	return main(attempts=(attempts - 1))
 
 
