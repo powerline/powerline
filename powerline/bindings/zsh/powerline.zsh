@@ -14,6 +14,7 @@ _powerline_columns_fallback() {
 
 _powerline_append_precmd_function() {
 	if test -z "${precmd_functions[(re)$1]}" ; then
+		typeset -ag precmd_functions
 		precmd_functions+=( $1 )
 	fi
 }
@@ -164,7 +165,11 @@ _powerline_setup_prompt() {
 		local add_args_2=$add_args$new_args_2
 		add_args+=' --width=$(( ${COLUMNS:-$(_powerline_columns_fallback)} - ${ZLE_RPROMPT_INDENT:-1} ))'
 		local add_args_r2=$add_args$new_args_2
-		typeset -g PS1='$("$POWERLINE_COMMAND" $=POWERLINE_COMMAND_ARGS shell aboveleft '$add_args')'
+		# If there is above line, but there are no left segments displayed 
+		# output looks like `{above}\n` and $() eats trailing `\n`, effectively 
+		# making above line prompt line. Below hack prevents this.
+		local ps1_cmd='"$POWERLINE_COMMAND" $=POWERLINE_COMMAND_ARGS shell aboveleft '$add_args
+		typeset -g PS1='${${:-"$('$ps1_cmd'; echo -n EOL)"}%EOL}'
 		typeset -g RPS1='$("$POWERLINE_COMMAND" $=POWERLINE_COMMAND_ARGS shell right '$add_args')'
 		typeset -g PS2='$("$POWERLINE_COMMAND" $=POWERLINE_COMMAND_ARGS shell left '$add_args_2')'
 		typeset -g RPS2='$("$POWERLINE_COMMAND" $=POWERLINE_COMMAND_ARGS shell right '$add_args_r2')'
