@@ -35,7 +35,7 @@ fail() {
 	local full_msg="$fail_char $POWERLINE_CURRENT_SUITE|$test_name :: $message"
 	FAIL_SUMMARY="${FAIL_SUMMARY}${NL}${full_msg}"
 	echo "Failed: $full_msg"
-	echo "$full_msg" >> tests/failures
+	echo "$full_msg" >> "$ROOT/tests/failures"
 	if test "x$allow_failure" = "x" ; then
 		FAILED=1
 	fi
