@@ -268,27 +268,28 @@ def main(attempts=3):
 				})),
 		),
 	)
+	args = [
+		# Specify full path to tmux socket (testing tmux instance must not 
+		# interfere with user one)
+		'-S', socket_path,
+		# Force 256-color mode
+		'-2',
+		# Request verbose logging just in case
+		'-v',
+		# Specify configuration file
+		'-f', conf_file,
+		# Run bash three times
+		'new-session', 'bash --norc --noprofile -i', ';',
+		'new-window', 'bash --norc --noprofile -i', ';',
+		'new-window', 'bash --norc --noprofile -i', ';',
+	]
 
 	try:
 		p = ExpectProcess(
 			lib=lib,
 			dim=dim,
 			cmd=tmux_exe,
-			args=[
-				# Specify full path to tmux socket (testing tmux instance must 
-				# not interfere with user one)
-				'-S', socket_path,
-				# Force 256-color mode
-				'-2',
-				# Request verbose logging just in case
-				'-v',
-				# Specify configuration file
-				'-f', conf_file,
-				# Run bash three times
-				'new-session', 'bash --norc --noprofile -i', ';',
-				'new-window', 'bash --norc --noprofile -i', ';',
-				'new-window', 'bash --norc --noprofile -i', ';',
-			],
+			args=args,
 			cwd=VTERM_TEST_DIR,
 			env=env,
 		)
