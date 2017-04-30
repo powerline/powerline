@@ -229,7 +229,7 @@ fi
 
 exes="bash zsh busybox tcsh mksh"
 
-if test -z "$TRAVIS_JOB_NUMBER" ; then
+if test "$TRAVIS" != "true" ; then
 	# For some reason fish does not work on travis
 	exes="$exes fish"
 fi
