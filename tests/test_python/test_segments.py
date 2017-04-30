@@ -1291,7 +1291,11 @@ class TestVim(TestCase):
 		pl = Pl()
 		segment_info = vim_module._get_segment_info()
 		self.assertEqual(self.vim.file_size(pl=pl, segment_info=segment_info), '0 B')
-		with vim_module._with('buffer', os.path.join(os.path.dirname(__file__), 'empty')) as segment_info:
+		with vim_module._with(
+			'buffer',
+			os.path.join(
+				os.path.dirname(os.path.dirname(__file__)), 'empty')
+		) as segment_info:
 			self.assertEqual(self.vim.file_size(pl=pl, segment_info=segment_info), '0 B')
 
 	def test_file_opts(self):
@@ -1599,7 +1603,7 @@ class TestVim(TestCase):
 
 	@classmethod
 	def setUpClass(cls):
-		sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'vim_sys_path')))
+		sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'vim_sys_path')))
 		from powerline.segments import vim
 		cls.vim = vim
 		from powerline.segments.common import vcs
@@ -1664,7 +1668,7 @@ def setUpModule():
 	global __file__
 	old_cwd = os.getcwd()
 	__file__ = os.path.abspath(__file__)
-	os.chdir(os.path.dirname(__file__))
+	os.chdir(os.path.dirname(os.path.dirname(__file__)))
 
 
 def tearDownModule():

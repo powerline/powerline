@@ -704,7 +704,7 @@ class TestVCS(TestCase):
 	@classmethod
 	def setUpClass(cls):
 		cls.powerline_old_cwd = os.getcwd()
-		os.chdir(os.path.dirname(__file__))
+		os.chdir(os.path.dirname(os.path.dirname(__file__)))
 		call(['git', 'init', '--quiet', GIT_REPO])
 		assert os.path.isdir(GIT_REPO)
 		call(['git', 'config', '--local', 'user.name', 'Foo'], cwd=GIT_REPO)

@@ -9,7 +9,7 @@ from tests.modules import TestCase
 from tests.modules.lib.fsconfig import FSTree
 
 
-FILE_ROOT = os.path.join(os.path.dirname(__file__), 'cfglib')
+FILE_ROOT = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'cfglib')
 
 
 class LoadedList(list):

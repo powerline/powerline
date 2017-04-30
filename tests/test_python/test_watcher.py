@@ -231,7 +231,7 @@ old_cwd = None
 def setUpModule():
 	global old_cwd
 	old_cwd = os.getcwd()
-	os.chdir(os.path.dirname(__file__))
+	os.chdir(os.path.dirname(os.path.dirname(__file__)))
 	os.mkdir(INOTIFY_DIR)
 
 

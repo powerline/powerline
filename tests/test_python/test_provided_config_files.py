@@ -46,7 +46,7 @@ def get_logger(stream=None):
 class TestVimConfig(TestCase):
 	def test_vim(self):
 		from powerline.vim import VimPowerline
-		cfg_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'powerline', 'config_files')
+		cfg_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'powerline', 'config_files')
 		buffers = (
 			(('bufoptions',), {'buftype': 'help'}),
 			(('bufname', '[Command Line]'), {}),
@@ -101,7 +101,7 @@ class TestVimConfig(TestCase):
 
 	@classmethod
 	def setUpClass(cls):
-		sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'vim_sys_path')))
+		sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'vim_sys_path')))
 
 	@classmethod
 	def tearDownClass(cls):
@@ -182,7 +182,7 @@ def setUpModule():
 	global saved_get_config_paths
 	import powerline
 	saved_get_config_paths = powerline.get_config_paths
-	path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'powerline', 'config_files')
+	path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'powerline', 'config_files')
 	powerline.get_config_paths = lambda: [path]
 	old_cwd = os.getcwd()
 

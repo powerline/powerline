@@ -22,7 +22,7 @@ class TestVim(TestCase):
 
 	@classmethod
 	def setUpClass(cls):
-		sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'vim_sys_path')))
+		sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'vim_sys_path')))
 		from powerline.selectors import vim
 		cls.vim = vim
 

@@ -454,7 +454,7 @@ def setUpModule():
 	global __file__
 	old_cwd = os.getcwd()
 	__file__ = os.path.abspath(__file__)
-	os.chdir(os.path.dirname(__file__))
+	os.chdir(os.path.dirname(os.path.dirname(__file__)))
 
 
 def tearDownModule():
