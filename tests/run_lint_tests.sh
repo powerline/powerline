@@ -1,5 +1,5 @@
 #!/bin/sh
-. tests/common.sh
+. tests/shlib/common.sh
 
 enter_suite lint
 

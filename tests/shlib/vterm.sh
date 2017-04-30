@@ -1,4 +1,4 @@
-. tests/common.sh
+. tests/shlib/common.sh
 . tests/bot-ci/scripts/common/main.sh
 set +x
 

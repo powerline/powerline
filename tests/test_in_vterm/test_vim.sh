@@ -1,7 +1,7 @@
 #!/bin/sh
-. tests/common.sh
-. tests/vterm.sh
-. tests/vim.sh
+. tests/shlib/common.sh
+. tests/shlib/vterm.sh
+. tests/shlib/vim.sh
 
 enter_suite vim
 

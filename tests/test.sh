@@ -1,5 +1,5 @@
 #!/bin/bash
-. tests/common.sh
+. tests/shlib/common.sh
 
 enter_suite root
 

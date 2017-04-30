@@ -1,6 +1,6 @@
 #!/bin/sh
-. tests/common.sh
-. tests/vterm.sh
+. tests/shlib/common.sh
+. tests/shlib/vterm.sh
 
 enter_suite tmux
 

@@ -1,6 +1,6 @@
 #!/bin/sh
-. tests/common.sh
-. tests/vim.sh
+. tests/shlib/common.sh
+. tests/shlib/vim.sh
 
 enter_suite vim
 
