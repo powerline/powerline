@@ -1,14 +1,11 @@
-scriptencoding utf-8
 set encoding=utf-8
-let g:powerline_config_paths = [expand('<sfile>:p:h:h') . '/powerline/config_files']
+let g:powerline_config_paths = [expand('<sfile>:p:h:h:h:h') . '/powerline/config_files']
 set laststatus=2
+set showtabline=2
+edit `="\xFF"`
 redir => g:messages
 	try
 		source powerline/bindings/vim/plugin/powerline.vim
-		redrawstatus!
-		vsplit
-		redrawstatus!
-		setlocal statusline=«»
 		redrawstatus!
 	catch
 		call writefile(['Unexpected exception', v:exception], 'message.fail')

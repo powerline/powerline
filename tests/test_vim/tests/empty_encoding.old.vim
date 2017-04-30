@@ -11,7 +11,7 @@ if !empty(&encoding)
 	cquit
 endif
 
-let g:powerline_config_paths = [expand('<sfile>:p:h:h') . '/powerline/config_files']
+let g:powerline_config_paths = [expand('<sfile>:p:h:h:h:h') . '/powerline/config_files']
 
 try
 	source powerline/bindings/vim/plugin/powerline.vim

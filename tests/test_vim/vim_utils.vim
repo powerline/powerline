@@ -1,9 +1,10 @@
 let g:powerline_use_var_handler = 1
 
-let g:root=expand('<sfile>:p:h:h')
+let g:pyfiles_root=expand('<sfile>:p:h').'/pyfiles'
+let g:root=expand('<sfile>:p:h:h:h')
 let g:mf=g:root.'/message.fail'
 
-command -nargs=1 LST :call writefile(<args>, g:mf) | cquit
+command -nargs=1 LST :call writefile(<args>, g:mf, 'a') | cquit
 command -nargs=1 ERR :LST [<args>]
 command -nargs=1 EXC :ERR 'Unexpected exception', <q-args>, v:exception, v:throwpoint
 
@@ -76,9 +77,9 @@ function RunPython(s)
 endfunction
 function PyFile(f)
 	if has('python')
-		execute 'pyfile' fnameescape(g:root.'/tests/'.a:f.'.py')
+		execute 'pyfile' fnameescape(g:pyfiles_root.'/'.a:f.'.py')
 	else
-		execute 'py3file' fnameescape(g:root.'/tests/'.a:f.'.py')
+		execute 'py3file' fnameescape(g:pyfiles_root.'/'.a:f.'.py')
 	endif
 endfunction
 

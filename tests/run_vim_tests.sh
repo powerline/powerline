@@ -12,28 +12,33 @@ export POWERLINE_THEME_OVERRIDES='default.segments.left=[]'
 test_script() {
 	local vim="$1"
 	local script="$2"
-	local test_name_prefix="$3"
 	echo "Running script $script with $vim"
 	if ! test -e "$vim" ; then
 		return 0
 	fi
-	if ! "$vim" -u NONE -S "$script" || test -f message.fail ; then
-		local test_name="$test_name_prefix-${script##*/}"
+	if ! script="$script" "$vim" -u NONE -c 'source $script' \
+	   || test -f message.fail
+	then
+		local test_name="${script##*/}"
 		fail "${test_name%.vim}" F "Failed script $script run with $vim"
-		cat message.fail >&2
-		rm message.fail
+		if test -e message.fail ; then
+			cat message.fail >&2
+			rm message.fail
+		fi
 	fi
 }
 
-for script in tests/test_*.vim ; do
+TEST_SCRIPT_ROOT="$ROOT/tests/test_vim/tests"
+
+for script in "$TEST_SCRIPT_ROOT"/*.vim ; do
 	if test "${script%.old.vim}" = "${script}" ; then
-		test_script "$NEW_VIM" "$script" new
+		test_script "$NEW_VIM" "$script"
 	fi
 done
 
 if test -e "$OLD_VIM" ; then
-	for script in tests/test_*.old.vim ; do
-		test_script "$OLD_VIM" "$script" old
+	for script in "$TEST_SCRIPT_ROOT"/*.old.vim ; do
+		test_script "$OLD_VIM" "$script"
 	done
 fi
 

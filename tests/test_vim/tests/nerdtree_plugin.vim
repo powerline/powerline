@@ -1,7 +1,7 @@
 #!/usr/bin/vim -S
 set nocompatible
 set columns=80
-execute 'source' fnameescape(expand('<sfile>:p:h').'/vim_utils.vim')
+execute 'source' fnameescape(expand('<sfile>:p:h:h').'/vim_utils.vim')
 call EnablePlugins('nerdtree')
 call SourcePowerline()
 NERDTree /home

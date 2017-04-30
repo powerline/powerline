@@ -1,6 +1,6 @@
 #!/usr/bin/vim -S
 set encoding=utf-8
-let g:powerline_config_paths = [expand('<sfile>:p:h:h') . '/powerline/config_files']
+let g:powerline_config_paths = [expand('<sfile>:p:h:h:h:h') . '/powerline/config_files']
 tabedit abc
 tabedit def
 try
