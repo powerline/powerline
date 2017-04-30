@@ -38,16 +38,20 @@ def cell_properties_key_to_shell_escape(cell_properties_key):
 	))
 
 
+def tmux_logs_iter(test_dir):
+	for tail in glob1(test_dir, '*.log'):
+		yield os.path.join(test_dir, tail)
+
+
 def print_tmux_logs():
-	for f in glob1(VTERM_TEST_DIR, '*.log'):
+	for f in tmux_logs_iter(VTERM_TEST_DIR):
 		print('_' * 80)
-		print(f + ':')
+		print(os.path.basename(f) + ':')
 		print('=' * 80)
-		full_f = os.path.join(VTERM_TEST_DIR, f)
-		with open(full_f, 'r') as fp:
+		with open(f, 'r') as fp:
 			for line in fp:
 				sys.stdout.write(line)
-		os.unlink(full_f)
+		os.unlink(f)
 
 
 def test_expected_result(p, expected_result, last_attempt, last_attempt_cb):
@@ -328,6 +332,8 @@ def main(attempts=3):
 			print_exc()
 		p.kill()
 		p.join(10)
+		for f in tmux_logs_iter(VTERM_TEST_DIR):
+			os.unlink(f)
 		assert(not p.isAlive())
 	return main(attempts=(attempts - 1))
 
