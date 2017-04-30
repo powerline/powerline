@@ -227,7 +227,17 @@ if which "$POWERLINE_RC_EXE" >/dev/null ; then
 	ln -s "$(which $POWERLINE_RC_EXE)" "$TEST_ROOT/path/rc"
 fi
 
-for exe in bash zsh busybox fish tcsh mksh dash ; do
+exes="bash zsh busybox tcsh mksh"
+
+if test -z "$TRAVIS_JOB_NUMBER" ; then
+	# For some reason fish does not work on travis
+	exes="$exes fish"
+fi
+
+# dash has some problems with job control
+#exes="$exes dash"
+
+for exe in $exes ; do
 	if which $exe >/dev/null ; then
 		if test "$exe" = "fish" ; then
 			fish_version="$(fish --version 2>&1)"
