@@ -3,7 +3,12 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 
 import ctypes
 
+from collections import namedtuple
+
 from powerline.lib.unicode import unicode, unichr, tointiter
+
+
+Dimensions = namedtuple('Dimensions', ('rows', 'cols'))
 
 
 class CTypesFunction(object):
@@ -165,9 +170,9 @@ class VTermScreen(object):
 
 
 class VTerm(object):
-	def __init__(self, lib, rows, cols):
+	def __init__(self, lib, dim):
 		self.functions = get_functions(lib)
-		self.vt = self.functions.vterm_new(rows, cols)
+		self.vt = self.functions.vterm_new(dim.rows, dim.cols)
 		self.vtscreen = VTermScreen(self.functions, self.functions.vterm_obtain_screen(self.vt))
 		self.vtscreen.reset(True)
 
@@ -176,8 +181,8 @@ class VTerm(object):
 			data = data.encode('utf-8')
 		return self.functions.vterm_input_write(self.vt, data, len(data))
 
-	def resize(self, rows, cols):
-		self.functions.vterm_set_size(self.vt, rows, cols)
+	def resize(self, dim):
+		self.functions.vterm_set_size(self.vt, dim.rows, dim.cols)
 
 	def __del__(self):
 		try:
