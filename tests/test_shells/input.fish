@@ -37,7 +37,7 @@ while jobs | grep fish_update_completions
 end
 powerline-setup
 setenv VIRTUAL_ENV
-cd tests/shell/3rd
+cd "$TEST_ROOT"/3rd
 cd .git
 cd ..
 setenv VIRTUAL_ENV "$HOME/.virtenvs/some-virtual-environment"

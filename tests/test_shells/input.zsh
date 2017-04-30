@@ -43,7 +43,7 @@ ABOVE_FULL='[{
 }]'
 set_theme default_leftonly
 export VIRTUAL_ENV=
-cd tests/shell/3rd
+cd "$TEST_ROOT"/3rd
 cd .git
 cd ..
 VIRTUAL_ENV="/home/USER/.virtenvs/some-virtual-environment"

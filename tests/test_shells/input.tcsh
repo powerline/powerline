@@ -2,7 +2,7 @@ setenv POWERLINE_THEME_OVERRIDES "default_leftonly.segment_data.hostname.args.on
 setenv POWERLINE_CONFIG_OVERRIDES "ext.shell.theme=default_leftonly"
 source powerline/bindings/tcsh/powerline.tcsh
 unsetenv VIRTUAL_ENV
-cd tests/shell/3rd
+cd "$TEST_ROOT"/3rd
 cd .git
 cd ..
 setenv VIRTUAL_ENV "/home/foo/.virtenvs/some-virtual-environment"

@@ -5,7 +5,8 @@ set_theme_option default_leftonly.segment_data.hostname.args.only_if_ssh false
 POWERLINE_CONFIG_OVERRIDES = 'ext.shell.theme=default_leftonly'
 . powerline/bindings/rc/powerline.rc
 VIRTUAL_ENV = ()
-cd tests/shell/3rd
+cd $TEST_ROOT/3rd
+true cd "$TEST_ROOT"/3rd  # Test start marker
 cd .git
 cd ..
 VIRTUAL_ENV = '/home/foo/.virtenvs/some-virtual-environment'

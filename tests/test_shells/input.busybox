@@ -8,7 +8,7 @@ set_theme_option default_leftonly.segment_data.hostname.args.only_if_ssh false
 set_theme default_leftonly
 . powerline/bindings/shell/powerline.sh
 export VIRTUAL_ENV=
-cd tests/shell/3rd
+cd "$TEST_ROOT"/3rd
 cd .git
 cd ..
 VIRTUAL_ENV="$HOME/.virtenvs/some-virtual-environment"

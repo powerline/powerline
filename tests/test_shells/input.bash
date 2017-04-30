@@ -32,7 +32,7 @@ ABOVE_FULL='[{
 set_theme default_leftonly
 export VIRTUAL_ENV=
 source powerline/bindings/bash/powerline.sh
-cd tests/shell/3rd
+cd "$TEST_ROOT"/3rd
 cd .git
 cd ..
 VIRTUAL_ENV="$HOME/.virtenvs/some-virtual-environment"
