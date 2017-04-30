@@ -94,6 +94,8 @@ def get_expected_result(tmux_version,
 def main(attempts=3):
 	vterm_path = os.path.join(VTERM_TEST_DIR, 'path')
 	socket_path = os.path.abspath('tmux-socket-{0}'.format(attempts))
+	while os.path.exists(socket_path):
+		socket_path = socket_path + 'x'
 	rows = 50
 	cols = 200
 
