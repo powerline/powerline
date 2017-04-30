@@ -13,7 +13,7 @@ from powerline.lib.watcher.uv import UvNotFound
 from powerline import get_fallback_logger
 from powerline.lib.monotonic import monotonic
 
-from tests import TestCase, SkipTest
+from tests.modules import TestCase, SkipTest
 
 
 INOTIFY_DIR = 'inotify' + os.path.basename(os.environ.get('PYTHON', ''))
@@ -241,5 +241,5 @@ def tearDownModule():
 
 
 if __name__ == '__main__':
-	from tests import main
+	from tests.modules import main
 	main()

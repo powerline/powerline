@@ -6,10 +6,10 @@ import sys
 
 from functools import partial
 
-import tests.vim as vim_module
+import tests.modules.vim as vim_module
 
-from tests.lib import Pl
-from tests import TestCase
+from tests.modules.lib import Pl
+from tests.modules import TestCase
 
 
 class TestVim(TestCase):
@@ -22,7 +22,7 @@ class TestVim(TestCase):
 
 	@classmethod
 	def setUpClass(cls):
-		sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'path')))
+		sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'vim_sys_path')))
 		from powerline.selectors import vim
 		cls.vim = vim
 
@@ -32,5 +32,5 @@ class TestVim(TestCase):
 
 
 if __name__ == '__main__':
-	from tests import main
+	from tests.modules import main
 	main()

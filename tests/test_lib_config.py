@@ -5,8 +5,8 @@ import os
 
 from powerline.lib.config import ConfigLoader
 
-from tests import TestCase
-from tests.lib.fsconfig import FSTree
+from tests.modules import TestCase
+from tests.modules.lib.fsconfig import FSTree
 
 
 FILE_ROOT = os.path.join(os.path.dirname(__file__), 'cfglib')
@@ -48,5 +48,5 @@ class TestLoaderCondition(TestCase):
 
 
 if __name__ == '__main__':
-	from tests import main
+	from tests.modules import main
 	main()

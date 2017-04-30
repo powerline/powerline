@@ -13,10 +13,11 @@ from powerline.segments import shell, tmux, pdb, i3wm
 from powerline.lib.vcs import get_fallback_create_watcher
 from powerline.lib.unicode import out_u
 
-import tests.vim as vim_module
+import tests.modules.vim as vim_module
 
-from tests.lib import Args, urllib_read, replace_attr, new_module, replace_module_module, replace_env, Pl
-from tests import TestCase, SkipTest
+from tests.modules.lib import (Args, urllib_read, replace_attr, new_module,
+                               replace_module_module, replace_env, Pl)
+from tests.modules import TestCase, SkipTest
 
 
 def get_dummy_guess(**kwargs):
@@ -1598,7 +1599,7 @@ class TestVim(TestCase):
 
 	@classmethod
 	def setUpClass(cls):
-		sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'path')))
+		sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'vim_sys_path')))
 		from powerline.segments import vim
 		cls.vim = vim
 		from powerline.segments.common import vcs
@@ -1672,5 +1673,5 @@ def tearDownModule():
 
 
 if __name__ == '__main__':
-	from tests import main
+	from tests.modules import main
 	main()

@@ -9,10 +9,10 @@ import os
 import json
 import logging
 
-import tests.vim as vim_module
+import tests.modules.vim as vim_module
 
-from tests.lib import Args, urllib_read, replace_attr
-from tests import TestCase
+from tests.modules.lib import Args, urllib_read, replace_attr
+from tests.modules import TestCase
 
 from powerline import NotInterceptedError
 from powerline.segments.common import wthr
@@ -101,7 +101,7 @@ class TestVimConfig(TestCase):
 
 	@classmethod
 	def setUpClass(cls):
-		sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'path')))
+		sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'vim_sys_path')))
 
 	@classmethod
 	def tearDownClass(cls):
@@ -197,5 +197,5 @@ def tearDownModule():
 
 
 if __name__ == '__main__':
-	from tests import main
+	from tests.modules import main
 	main()

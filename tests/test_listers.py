@@ -3,8 +3,8 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 
 import powerline.listers.i3wm as i3wm
 
-from tests.lib import Args, replace_attr, Pl
-from tests import TestCase
+from tests.modules.lib import Args, replace_attr, Pl
+from tests.modules import TestCase
 
 
 class TestI3WM(TestCase):
@@ -223,5 +223,5 @@ class TestI3WM(TestCase):
 
 
 if __name__ == '__main__':
-	from tests import main
+	from tests.modules import main
 	main()

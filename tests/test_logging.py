@@ -14,8 +14,8 @@ from shutil import rmtree
 
 from powerline import finish_common_config, create_logger
 
-from tests import TestCase
-from tests.lib import replace_attr
+from tests.modules import TestCase
+from tests.modules.lib import replace_attr
 
 
 TIMESTAMP_RE = r'\d{4}-\d\d-\d\d \d\d:\d\d:\d\d,\d{3}'
@@ -463,5 +463,5 @@ def tearDownModule():
 
 
 if __name__ == '__main__':
-	from tests import main
+	from tests.modules import main
 	main()

@@ -15,8 +15,8 @@ from powerline.lib.dict import updated
 from powerline.bindings.tmux import get_tmux_version
 from powerline import get_fallback_logger
 
-from tests.lib.terminal import (ExpectProcess, MutableDimensions,
-                                do_terminal_tests, get_env)
+from tests.modules.lib.terminal import (ExpectProcess, MutableDimensions,
+                                        do_terminal_tests, get_env)
 
 
 VTERM_TEST_DIR = os.path.abspath('tests/vterm_tmux')

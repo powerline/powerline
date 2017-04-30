@@ -13,7 +13,7 @@ import pexpect
 
 from powerline.lib.unicode import u
 
-from tests.lib.vterm import VTerm, Dimensions
+from tests.modules.lib.vterm import VTerm, Dimensions
 
 
 class MutableDimensions(object):

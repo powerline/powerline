@@ -11,8 +11,8 @@ from subprocess import check_call
 from glob import glob1
 from traceback import print_exc
 
-from tests.lib.terminal import (ExpectProcess, MutableDimensions,
-                                do_terminal_tests, get_env)
+from tests.modules.lib.terminal import (ExpectProcess, MutableDimensions,
+                                        do_terminal_tests, get_env)
 
 
 VTERM_TEST_DIR = os.path.abspath('tests/vterm_vim')

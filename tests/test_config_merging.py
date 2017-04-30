@@ -11,8 +11,8 @@ from shutil import rmtree
 from powerline.lib.dict import mergedicts_copy as mdc
 from powerline import Powerline
 
-from tests import TestCase
-from tests.lib.config_mock import select_renderer, UT
+from tests.modules import TestCase
+from tests.modules.lib.config_mock import select_renderer, UT
 
 
 CONFIG_DIR = 'tests/config'
@@ -139,7 +139,7 @@ class WithConfigTree(object):
 		select_renderer(simpler_renderer=True)
 		self.p = TestPowerline(
 			ext='test',
-			renderer_module='tests.lib.config_mock',
+			renderer_module='tests.modules.lib.config_mock',
 			**self.p_kwargs
 		)
 		if os.environ.get('POWERLINE_RUN_LINT_DURING_TESTS'):
@@ -266,5 +266,5 @@ class TestMerging(TestCase):
 
 
 if __name__ == '__main__':
-	from tests import main
+	from tests.modules import main
 	main()

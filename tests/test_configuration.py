@@ -7,11 +7,12 @@ import os
 from functools import wraps
 from copy import deepcopy
 
-import tests.vim as vim_module
+import tests.modules.vim as vim_module
 
-from tests import TestCase
-from tests.lib.config_mock import get_powerline, get_powerline_raw, swap_attributes, UT
-from tests.lib import Args, replace_item
+from tests.modules import TestCase
+from tests.modules.lib.config_mock import (get_powerline, get_powerline_raw,
+                                           swap_attributes, UT)
+from tests.modules.lib import Args, replace_item
 
 
 def highlighted_string(s, group, **kwargs):
@@ -797,7 +798,6 @@ class TestVim(TestCase):
 	def test_environ_update(self):
 		# Regression test: test that segment obtains environment from vim, not 
 		# from os.environ.
-		import tests.vim as vim_module
 		with vim_module._with('globals', powerline_config_paths=['/']):
 			from powerline.vim import VimPowerline
 			import powerline as powerline_module
@@ -817,7 +817,7 @@ class TestVim(TestCase):
 		import powerline as powerline_module
 		with swap_attributes(config, powerline_module):
 			with get_powerline_raw(config, VimPowerline, replace_gcp=True) as powerline:
-				powerline.add_local_theme('tests.matchers.always_true', {
+				powerline.add_local_theme('tests.modules.matchers.always_true', {
 					'segment_data': {
 						'foo': {
 							'contents': '“bar”'
@@ -840,7 +840,7 @@ class TestVim(TestCase):
 
 	@classmethod
 	def setUpClass(cls):
-		sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'path')))
+		sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'vim_sys_path')))
 
 	@classmethod
 	def tearDownClass(cls):
@@ -873,5 +873,5 @@ class TestLemonbar(TestRender):
 
 
 if __name__ == '__main__':
-	from tests import main
+	from tests.modules import main
 	main()

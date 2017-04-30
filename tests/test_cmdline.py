@@ -13,8 +13,8 @@ else:
 
 from powerline.commands.main import get_argparser, finish_args
 
-from tests import TestCase
-from tests.lib import replace_attr
+from tests.modules import TestCase
+from tests.modules.lib import replace_attr
 
 
 class TestParser(TestCase):
@@ -140,5 +140,5 @@ class TestParser(TestCase):
 
 
 if __name__ == '__main__':
-	from tests import main
+	from tests.modules import main
 	main()

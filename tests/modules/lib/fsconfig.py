@@ -59,7 +59,7 @@ class FSTree(object):
 			self.p = TestPowerline(
 				_paths=self.get_config_paths(self.root),
 				ext='test',
-				renderer_module='tests.lib.config_mock',
+				renderer_module='tests.modules.lib.config_mock',
 				**self.p_kwargs
 			)
 		if os.environ.get('POWERLINE_RUN_LINT_DURING_TESTS'):

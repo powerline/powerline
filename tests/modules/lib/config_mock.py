@@ -12,7 +12,7 @@ from powerline.renderer import Renderer
 from powerline.lib.config import ConfigLoader
 from powerline import Powerline, get_default_theme
 
-from tests.lib import Args, replace_attr
+from tests.modules.lib import Args, replace_attr
 
 
 UT = get_default_theme(is_unicode=True)
@@ -175,7 +175,7 @@ def get_powerline(config, **kwargs):
 		TestPowerline,
 		_helpers=helpers,
 		ext='test',
-		renderer_module='tests.lib.config_mock',
+		renderer_module='tests.modules.lib.config_mock',
 		logger=Logger(),
 		**kwargs
 	)

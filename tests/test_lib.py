@@ -21,8 +21,8 @@ from powerline.lib.shell import run_cmd
 
 import powerline.lib.unicode as plu
 
-from tests.lib import Pl, replace_attr
-from tests import TestCase, SkipTest
+from tests.modules.lib import Pl, replace_attr
+from tests.modules import TestCase, SkipTest
 
 
 try:
@@ -736,5 +736,5 @@ class TestVCS(TestCase):
 
 
 if __name__ == '__main__':
-	from tests import main
+	from tests.modules import main
 	main()

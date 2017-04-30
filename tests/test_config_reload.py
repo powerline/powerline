@@ -5,8 +5,8 @@ from time import sleep
 from copy import deepcopy
 from functools import wraps
 
-from tests import TestCase
-from tests.lib.config_mock import get_powerline, add_watcher_events, UT
+from tests.modules import TestCase
+from tests.modules.lib.config_mock import get_powerline, add_watcher_events, UT
 
 
 config = {
@@ -315,5 +315,5 @@ class TestConfigReload(TestCase):
 
 
 if __name__ == '__main__':
-	from tests import main
+	from tests.modules import main
 	main()
