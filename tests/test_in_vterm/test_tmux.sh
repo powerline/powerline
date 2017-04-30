@@ -1,22 +1,17 @@
 #!/bin/sh
 . tests/common.sh
+. tests/vterm.sh
 
 enter_suite tmux
 
 VTERM_TEST_DIR="$ROOT/tests/vterm_tmux"
 
-rm -rf "$VTERM_TEST_DIR"
-mkdir "$VTERM_TEST_DIR"
-mkdir "$VTERM_TEST_DIR/path"
+vterm_setup "$VTERM_TEST_DIR"
 
-ln -s "$(which "${PYTHON}")" "$VTERM_TEST_DIR/path/python"
-ln -s "$(which bash)" "$VTERM_TEST_DIR/path"
 ln -s "$(which env)" "$VTERM_TEST_DIR/path"
 ln -s "$(which cut)" "$VTERM_TEST_DIR/path"
 ln -s "$ROOT/scripts/powerline-render" "$VTERM_TEST_DIR/path"
 ln -s "$ROOT/scripts/powerline-config" "$VTERM_TEST_DIR/path"
-
-cp -r "$ROOT/tests/terminfo" "$VTERM_TEST_DIR"
 
 test_tmux() {
 	if test "$PYTHON_IMPLEMENTATION" = PyPy; then
@@ -46,10 +41,6 @@ else
 	test_tmux || true
 fi
 
-if test $FAILED -eq 0 ; then
-	rm -rf "$VTERM_TEST_DIR"
-else
-	echo "$FAIL_SUMMARY"
-fi
+vterm_shutdown "$VTERM_TEST_DIR"
 
 exit_suite

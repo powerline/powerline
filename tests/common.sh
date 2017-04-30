@@ -3,9 +3,11 @@ set +x
 
 : ${PYTHON:=python}
 
-FAILED=0
+if test -z "$FAILED" ; then
+	FAILED=0
 
-FAIL_SUMMARY=""
+	FAIL_SUMMARY=""
+fi
 
 enter_suite() {
 	local suite_name="$1"
