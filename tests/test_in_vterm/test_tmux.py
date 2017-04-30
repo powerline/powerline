@@ -22,14 +22,6 @@ from tests.lib.terminal import ExpectProcess, MutableDimensions
 
 VTERM_TEST_DIR = os.path.abspath('tests/vterm_tmux')
 
-class RetValues:
-	# Poor man enum
-	do_restart = ()  # Falsy
-	not_run = ()  # Falsy
-	failed = ()  # Falsy
-	successfull = (1,)  # Truthy
-	partial_success = (1,)  # Truthy
-
 
 def convert_expected_result(p, expected_result):
 	return p.get_highlighted_text(expected_result, {})
@@ -46,12 +38,12 @@ def cell_properties_key_to_shell_escape(cell_properties_key):
 	))
 
 
-def test_expected_result(p, expected_result, dim, print_logs):
+def test_expected_result(p, expected_result, print_logs):
 	expected_text, attrs = expected_result
 	attempts = 3
 	result = None
 	while attempts:
-		actual_text, all_attrs = p.get_row(dim.rows - 1, attrs)
+		actual_text, all_attrs = p.get_row(p.dim.rows - 1, attrs)
 		if actual_text == expected_text:
 			return True
 		attempts -= 1
@@ -74,12 +66,13 @@ def test_expected_result(p, expected_result, dim, print_logs):
 	if print_logs:
 		for f in glob1(VTERM_TEST_DIR, '*.log'):
 			print('_' * 80)
-			print(os.path.basename(f) + ':')
+			print(f + ':')
 			print('=' * 80)
-			with open(f, 'r') as F:
-				for line in F:
+			full_f = os.path.join(VTERM_TEST_DIR, f)
+			with open(full_f, 'r') as fp:
+				for line in fp:
 					sys.stdout.write(line)
-			os.unlink(f)
+			os.unlink(full_f)
 	return False
 
 
@@ -100,10 +93,6 @@ def get_expected_result(tmux_version,
 
 def main(attempts=3):
 	vterm_path = os.path.join(VTERM_TEST_DIR, 'path')
-	socket_path = os.path.abspath('tmux-socket-{0}'.format(attempts))
-	if os.path.exists(socket_path):
-		os.unlink(socket_path)
-	dim = MutableDimensions(rows=50, cols=200)
 
 	tmux_exe = os.path.join(vterm_path, 'tmux')
 
@@ -268,6 +257,19 @@ def main(attempts=3):
 				})),
 		),
 	)
+
+	def prepare_test_1():
+		sleep(5)
+
+	def prepare_test_2():
+		dim.cols = 40
+		p.resize(dim)
+		sleep(5)
+
+	test_preps = (
+		prepare_test_1,
+		prepare_test_2,
+	)
 	args = [
 		# Specify full path to tmux socket (testing tmux instance must not 
 		# interfere with user one)
@@ -284,6 +286,11 @@ def main(attempts=3):
 		'new-window', 'bash --norc --noprofile -i', ';',
 	]
 
+	socket_path = os.path.abspath('tmux-socket-{0}'.format(attempts))
+	if os.path.exists(socket_path):
+		os.unlink(socket_path)
+	dim = MutableDimensions(rows=50, cols=200)
+
 	try:
 		p = ExpectProcess(
 			lib=lib,
@@ -294,33 +301,22 @@ def main(attempts=3):
 			env=env,
 		)
 		p.start()
-		sleep(5)
-		ret = RetValues.not_run
-		if not test_expected_result(p, expected_results[0], dim, not attempts):
-			if attempts:
-				ret = RetValues.do_restart
-			else:
-				ret = RetValues.failed
-		elif ret is RetValues.not_run:
-			ret = RetValues.partial_success
-		dim.cols = 40
-		p.resize(dim)
-		sleep(5)
-		if not test_expected_result(p, expected_results[1], dim, not attempts):
-			if attempts:
-				ret = RetValues.do_restart
-			else:
-				ret = RetValues.failed
-		elif ret is RetValues.partial_success:
-			ret = RetValues.successfull
-		if ret is RetValues.successfull or ret is RetValues.failed:
-			return bool(ret)
+
+		ret = True
+
+		for test_prep, expected_result in zip(test_preps, expected_results):
+			test_prep()
+			ret = (
+				ret
+				and test_expected_result(p, expected_result, attempts == 0)
+			)
+
+		if ret or attempts == 0:
+			return ret
 	finally:
 		try:
-			check_call([tmux_exe, '-S', socket_path, 'kill-server'], env={
-				'PATH': vterm_path,
-				'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
-			}, cwd=VTERM_TEST_DIR)
+			check_call([tmux_exe, '-S', socket_path, 'kill-server'], env=env,
+			           cwd=VTERM_TEST_DIR)
 		except Exception:
 			print_exc()
 		p.kill()

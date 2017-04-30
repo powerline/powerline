@@ -26,6 +26,17 @@ class MutableDimensions(Dimensions):
 	def __setitem__(self, idx, val):
 		self._list[idx] = val
 
+	def __iter__(self):
+		return iter(self._list)
+
+	def __len__(self):
+		return 2
+
+	def __nonzero__(self):
+		return True
+
+	__bool__ = __nonzero__
+
 	rows = property(
 		fget = lambda self: self._list[0],
 		fset = lambda self, val: self._list.__setitem__(0, val),
@@ -41,7 +52,7 @@ class ExpectProcess(threading.Thread):
 		super(ExpectProcess, self).__init__()
 		self.vterm = VTerm(lib, dim)
 		self.lock = threading.Lock()
-		self.dim = dim
+		self.dim = Dimensions(dim[0], dim[1])
 		self.cmd = cmd
 		self.args = args
 		self.cwd = cwd
@@ -79,9 +90,9 @@ class ExpectProcess(threading.Thread):
 
 	def resize(self, dim):
 		with self.child_lock:
-			self.dim = dim
-			self.child.setwinsize(dim.rows, dim.cols)
-			self.vterm.resize(dim)
+			self.dim = Dimensions(dim[0], dim[1])
+			self.child.setwinsize(self.dim.rows, self.dim.cols)
+			self.vterm.resize(self.dim)
 
 	def __getitem__(self, position):
 		with self.lock:
