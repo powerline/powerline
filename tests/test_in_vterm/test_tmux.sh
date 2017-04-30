@@ -22,7 +22,7 @@ test_tmux() {
 	if ! which "${POWERLINE_TMUX_EXE}" ; then
 		return 0
 	fi
-	ln -sf "$(which "${POWERLINE_TMUX_EXE}")" "$VTERM_TEST_DIR/path"
+	ln -sf "$(which "${POWERLINE_TMUX_EXE}")" "$VTERM_TEST_DIR/path/tmux"
 	f="$ROOT/tests/test_in_vterm/test_tmux.py"
 	if ! "${PYTHON}" "$f" ; then
 		local test_name="$("$POWERLINE_TMUX_EXE" -V 2>&1 | cut -d' ' -f2)"
