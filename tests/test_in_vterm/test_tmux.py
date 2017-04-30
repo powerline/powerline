@@ -10,6 +10,7 @@ from time import sleep
 from subprocess import check_call
 from difflib import ndiff
 from glob import glob1
+from traceback import print_exc
 
 from powerline.lib.unicode import u
 from powerline.lib.dict import updated
@@ -308,6 +309,13 @@ def main(attempts=3):
 		if ret is not None:
 			return ret
 	finally:
+		try:
+			check_call([tmux_exe, '-S', socket_path, 'kill-server'], env={
+				'PATH': vterm_path,
+				'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
+			}, cwd=VTERM_TEST_DIR)
+		except Exception:
+			print_exc()
 		p.kill()
 		p.join(10)
 		assert(not p.isAlive())
