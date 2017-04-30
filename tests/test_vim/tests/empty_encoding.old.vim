@@ -14,7 +14,7 @@ endif
 let g:powerline_config_paths = [expand('<sfile>:p:h:h:h:h') . '/powerline/config_files']
 
 try
-	source powerline/bindings/vim/plugin/powerline.vim
+	source <sfile>:p:h:h:h:h/powerline/bindings/vim/plugin/powerline.vim
 catch
 	call writefile(['Unexpected exception:', v:exception], 'message.fail')
 	cquit

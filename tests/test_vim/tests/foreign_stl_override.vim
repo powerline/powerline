@@ -4,7 +4,7 @@ let g:powerline_config_paths = [expand('<sfile>:p:h:h:h:h') . '/powerline/config
 set laststatus=2
 redir => g:messages
 	try
-		source powerline/bindings/vim/plugin/powerline.vim
+		source <sfile>:p:h:h:h:h/powerline/bindings/vim/plugin/powerline.vim
 		redrawstatus!
 		vsplit
 		redrawstatus!

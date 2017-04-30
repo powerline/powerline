@@ -10,8 +10,8 @@ export POWERLINE_CONFIG_OVERRIDES='common.default_top_theme=ascii'
 export POWERLINE_THEME_OVERRIDES='default.segments.left=[]'
 
 test_script() {
-	local vim="$1"
-	local script="$2"
+	local vim="$1" ; shift
+	local script="$1" ; shift
 	echo "Running script $script with $vim"
 	if ! test -e "$vim" ; then
 		return 0
@@ -28,7 +28,11 @@ test_script() {
 	fi
 }
 
+TMPDIR="$(make_tmp_dir vim)"
+
 TEST_SCRIPT_ROOT="$ROOT/tests/test_vim/tests"
+
+cd "$TMPDIR"
 
 for script in "$TEST_SCRIPT_ROOT"/*.vim ; do
 	if test "${script%.old.vim}" = "${script}" ; then

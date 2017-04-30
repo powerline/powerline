@@ -2,7 +2,7 @@ let g:powerline_use_var_handler = 1
 
 let g:pyfiles_root=expand('<sfile>:p:h').'/pyfiles'
 let g:root=expand('<sfile>:p:h:h:h')
-let g:mf=g:root.'/message.fail'
+let g:mf=fnamemodify('message.fail', ':p')
 
 command -nargs=1 LST :call writefile(<args>, g:mf, 'a') | cquit
 command -nargs=1 ERR :LST [<args>]

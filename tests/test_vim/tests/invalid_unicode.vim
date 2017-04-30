@@ -5,7 +5,7 @@ set showtabline=2
 edit `="\xFF"`
 redir => g:messages
 	try
-		source powerline/bindings/vim/plugin/powerline.vim
+		source <sfile>:p:h:h:h:h/powerline/bindings/vim/plugin/powerline.vim
 		redrawstatus!
 	catch
 		call writefile(['Unexpected exception', v:exception], 'message.fail')
