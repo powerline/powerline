@@ -111,7 +111,7 @@ if hasattr(zsh, 'expand') and zsh.expand('${:-}') == '':
 	zsh_expand = zsh.expand
 else:
 	def zsh_expand(s):
-		zsh.eval('_POWERLINE_REPLY="' + s + '"')
+		zsh.eval('local _POWERLINE_REPLY="' + s + '"')
 		ret = zsh.getvalue('_POWERLINE_REPLY')
 		zsh.setvalue('_POWERLINE_REPLY', None)
 		return ret

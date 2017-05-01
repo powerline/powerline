@@ -21,7 +21,7 @@ _powerline_tmux_setenv() {
 }
 
 _powerline_tmux_set_pwd() {
-	if test "x$_POWERLINE_SAVED_PWD" != "x$PWD" ; then
+	if test "$_POWERLINE_SAVED_PWD" != "$PWD" ; then
 		_POWERLINE_SAVED_PWD="$PWD"
 		_powerline_tmux_setenv PWD "$PWD"
 	fi
@@ -39,8 +39,8 @@ _powerline_init_tmux_support() {
 		trap '_powerline_tmux_set_columns' WINCH
 		_powerline_tmux_set_columns
 
-		test "x$PROMPT_COMMAND" != "x${PROMPT_COMMAND/_powerline_tmux_set_pwd}" ||
-			PROMPT_COMMAND="${PROMPT_COMMAND}"$'\n_powerline_tmux_set_pwd'
+		test "$PROMPT_COMMAND" != "${PROMPT_COMMAND/_powerline_tmux_set_pwd}" \
+			|| PROMPT_COMMAND="${PROMPT_COMMAND}"$'\n_powerline_tmux_set_pwd'
 	fi
 }
 
@@ -82,8 +82,8 @@ _powerline_setup_prompt() {
 	if test -z "${POWERLINE_COMMAND}" ; then
 		POWERLINE_COMMAND="$("$POWERLINE_CONFIG_COMMAND" shell command)"
 	fi
-	test "x$PROMPT_COMMAND" != "x${PROMPT_COMMAND%_powerline_set_prompt*}" ||
-		PROMPT_COMMAND=$'_powerline_set_prompt\n'"${PROMPT_COMMAND}"
+	test "$PROMPT_COMMAND" != "${PROMPT_COMMAND%_powerline_set_prompt*}" \
+		|| PROMPT_COMMAND=$'_powerline_set_prompt\n'"${PROMPT_COMMAND}"
 	PS2="$(_powerline_local_prompt left -r.bash 0 0 continuation)"
 	PS3="$(_powerline_local_prompt left '' 0 0 select)"
 }

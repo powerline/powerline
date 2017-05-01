@@ -1,0 +1,33 @@
+fn set_theme_option {
+	POWERLINE_THEME_OVERRIDES = $POWERLINE_THEME_OVERRIDES';'$1'='$2
+}
+set_theme_option default_leftonly.segment_data.hostname.args.only_if_ssh false
+POWERLINE_CONFIG_OVERRIDES = 'ext.shell.theme=default_leftonly'
+. powerline/bindings/rc/powerline.rc
+VIRTUAL_ENV = ()
+cd $TEST_ROOT/3rd
+true cd "$TEST_ROOT"/3rd  # Test start marker
+cd .git
+cd ..
+VIRTUAL_ENV = '/home/foo/.virtenvs/some-virtual-environment'
+VIRTUAL_ENV = ()
+bgscript.sh & waitpid.sh
+false
+kill `{cat pid} ; sleep 1s
+cd $DIR1
+cd ../$DIR2
+cd ../'\[\]'
+cd ../'%%'
+cd ../'#[bold]'
+cd ../'(echo)'
+cd ../'$(echo)'
+cd ../'`echo`'
+cd ../'«Unicode!»'
+false
+set_theme_option default_leftonly.segment_data.hostname.display false
+set_theme_option default_leftonly.segment_data.user.display false
+echo `{
+    echo Continuation!
+}
+true is the last line
+exit

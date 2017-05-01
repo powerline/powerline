@@ -1,6 +1,8 @@
 set -e
+set -x
 . tests/bot-ci/scripts/common/main.sh
-zmodload zpython
+zmodload zpython || zmodload libzpython
+zpython 'import zsh'
 zpython 'import platform'
 zpython 'zsh.setvalue("ZSH_PYTHON_VERSION", platform.python_version())'
 zpython 'zsh.setvalue("ZSH_PYTHON_IMPLEMENTATION", platform.python_implementation())'

@@ -1,0 +1,7 @@
+print ('cd ' + '"$TEST_ROOT"/3rd')  # Start of the test marker
+bool 42
+bool 44
+class Test(object):
+pass
+
+exit

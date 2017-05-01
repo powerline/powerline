@@ -111,7 +111,7 @@ following in ``~/.profile``:
 
 .. code-block:: bash
 
-    if test "x$0" != "x${0#dash}" ; then
+    if test "$0" != "${0#dash}" ; then
         export ENV={repository_root}/powerline/bindings/shell/powerline.sh
     fi
 
