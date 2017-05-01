@@ -16,9 +16,20 @@ if test -z "$FAILED" ; then
 	FAILURES_FILE="$ROOT/tests/failures"
 fi
 
+ANSI_CLEAR="\033[0K"
+
+travis_fold() {
+	local action="$1"
+	local name="$2"
+	name="$(echo -n "$name" | tr '\n\0' '--' | sed -r 's/[^A-Za-z0-9]+/-/g')"
+	name="$(echo -n "$name" | sed -r 's/-$//')"
+	echo -en "travis_fold:${action}:${name}\r${ANSI_CLEAR}"
+}
+
 enter_suite() {
 	local suite_name="$1" ; shift
 	export POWERLINE_CURRENT_SUITE="${POWERLINE_CURRENT_SUITE}/$suite_name"
+	travis_fold start "$POWERLINE_CURRENT_SUITE"
 }
 
 exit_suite() {
@@ -29,6 +40,7 @@ exit_suite() {
 		echo "Suite ${POWERLINE_CURRENT_SUITE} failed, summary:"
 		echo "${FAIL_SUMMARY}"
 	fi
+	travis_fold end "$POWERLINE_CURRENT_SUITE"
 	export POWERLINE_CURRENT_SUITE="${POWERLINE_CURRENT_SUITE%/*}"
 	if test "$1" != "--continue" ; then
 		exit $FAILED
