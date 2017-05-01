@@ -17,7 +17,7 @@ checkout_cached_dir() {
 	fi
 	if ! test -d "$target" ; then
 		git clone --depth=1 "$url" "$target"
-		git rev-parse HEAD > .version
+		git rev-parse HEAD > "$target/.version"
 		rm -rf "$target"/.git
 	fi
 }
