@@ -458,7 +458,7 @@ class Renderer(object):
 					segment is first_segment
 					if side == 'left' else
 					segment is last_segment
-				))
+				)) * theme.outer_padding
 
 				draw_divider = segment['draw_' + divider_type + '_divider']
 				segment_len += outer_padding
@@ -519,7 +519,7 @@ class Renderer(object):
 					segment is first_segment
 					if side == 'left' else
 					segment is last_segment
-				)) * ' '
+				)) * theme.outer_padding * ' '
 				divider_type = 'soft' if compare_segment['highlight']['bg'] == segment['highlight']['bg'] else 'hard'
 
 				divider_highlighted = ''

@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+set -x
 
 remote_master_hex() {
 	local url="$1"
@@ -16,7 +17,7 @@ checkout_cached_dir() {
 	fi
 	if ! test -d "$target" ; then
 		git clone --depth=1 "$url" "$target"
-		mv "$target"/.git/refs/heads/master .version
+		git rev-parse HEAD > "$target/.version"
 		rm -rf "$target"/.git
 	fi
 }

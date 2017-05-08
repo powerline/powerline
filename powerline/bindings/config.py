@@ -99,7 +99,7 @@ class EmptyArgs(object):
 def init_tmux_environment(pl, args, set_tmux_environment=set_tmux_environment):
 	'''Initialize tmux environment from tmux configuration
 	'''
-	powerline = ShellPowerline(finish_args(os.environ, EmptyArgs('tmux', args.config_path)))
+	powerline = ShellPowerline(finish_args(None, os.environ, EmptyArgs('tmux', args.config_path)))
 	# TODO Move configuration files loading out of Powerline object and use it 
 	# directly
 	powerline.update_renderer()

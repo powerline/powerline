@@ -24,8 +24,8 @@ class Repository(object):
 
 	# hg status -> (powerline file status, repo status flag)
 	statuses = {
-		b'M': ('M', 1),	 b'A': ('A', 1), b'R': ('R', 1), b'!': ('D', 1),
-		b'?': ('U', 2), b'I': ('I', 0)
+		b'M': ('M', 1), b'A': ('A', 1), b'R': ('R', 1), b'!': ('D', 1),
+		b'?': ('U', 2), b'I': ('I', 0), b'C': ('', 0),
 	}
 	repo_statuses_str = (None, 'D ', ' U', 'DU')
 
@@ -63,20 +63,20 @@ class Repository(object):
 		return self.do_status(self.directory, path)
 
 	def do_status(self, directory, path):
-		repo = self._repo(directory)
-		if path:
-			path = os.path.join(directory, path)
-			statuses = repo.status(include=path, all=True)
-			for status, paths in statuses:
-				if paths:
-					return self.statuses[status][0]
-			return None
-		else:
-			resulting_status = 0
-			for status, paths in repo.status(all=True):
-				if paths:
-					resulting_status |= self.statuses[status][1]
-			return self.repo_statuses_str[resulting_status]
+		with self._repo(directory) as repo:
+			if path:
+				path = os.path.join(directory, path)
+				statuses = repo.status(include=path, all=True)
+				for status, paths in statuses:
+					if paths:
+						return self.statuses[status][0]
+				return None
+			else:
+				resulting_status = 0
+				for status, paths in repo.status(all=True):
+					if paths:
+						resulting_status |= self.statuses[status][1]
+				return self.repo_statuses_str[resulting_status]
 
 	def branch(self):
 		config_file = join(self.directory, '.hg', 'branch')

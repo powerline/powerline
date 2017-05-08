@@ -25,6 +25,11 @@ _powerline_tmux_pane() {
 	echo "${TMUX_PANE:-`tmux display -p "#D"`}" | tr -d ' %'
 }
 
+_powerline_tmux_pane() {
+	local -x TMUX="$_POWERLINE_TMUX"
+	echo "${TMUX_PANE:-`tmux display -p "#D"`}" | tr -d ' %'
+}
+
 _powerline_init_tmux_support() {
 	emulate -L zsh
 	if test -n "$TMUX" && tmux refresh -S &>/dev/null ; then

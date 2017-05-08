@@ -6,6 +6,9 @@ import socket
 import os
 import errno
 import sys
+import fcntl
+import atexit
+import stat
 
 from argparse import ArgumentParser
 from select import select
@@ -13,21 +16,21 @@ from signal import signal, SIGTERM
 from time import sleep
 from functools import partial
 from io import BytesIO
+from threading import Event
+from itertools import chain
+from logging import StreamHandler
 
 from powerline.shell import ShellPowerline
 from powerline.commands.main import finish_args, write_output
 from powerline.lib.monotonic import monotonic
 from powerline.lib.encoding import get_preferred_output_encoding, get_preferred_arguments_encoding, get_unicode_writer
+from powerline.bindings.wm import wm_threads
 
 from powerline.commands.main import get_argparser as get_main_argparser
 from powerline.commands.daemon import get_argparser as get_daemon_argparser
 
 
-is_daemon = False
-use_filesystem = not sys.platform.lower().startswith('linux')
-
-address = None
-pidfile = None
+USE_FILESYSTEM = not sys.platform.lower().startswith('linux')
 
 
 class NonInteractiveArgParser(ArgumentParser):
@@ -44,31 +47,48 @@ class NonInteractiveArgParser(ArgumentParser):
 		raise Exception(self.format_usage())
 
 
-parser = get_main_argparser(NonInteractiveArgParser)
-
 EOF = b'EOF\0\0'
 
-powerlines = {}
-logger = None
-config_loader = None
-home = os.path.expanduser('~')
+
+class State(object):
+	__slots__ = ('powerlines', 'logger', 'config_loader', 'started_wm_threads',
+	             'ts_shutdown_event')
+
+	def __init__(self, **kwargs):
+		self.logger = None
+		self.config_loader = None
+		self.started_wm_threads = {}
+		self.powerlines = {}
+		self.ts_shutdown_event = Event()
 
 
-class PowerlineDaemon(ShellPowerline):
+HOME = os.path.expanduser('~')
+
+
+class NonDaemonShellPowerline(ShellPowerline):
 	def get_log_handler(self):
-		if not is_daemon:
-			import logging
-			return logging.StreamHandler()
-		return super(PowerlineDaemon, self).get_log_handler()
+		return StreamHandler()
 
 
-def render(args, environ, cwd):
-	global logger
-	global config_loader
-	cwd = cwd or environ.get('PWD', '/')
+def start_wm(args, environ, cwd, is_daemon, state):
+	wm_name = args.ext[0][3:]
+	if wm_name in state.started_wm_threads:
+		return b''
+	thread_shutdown_event = Event()
+	thread = wm_threads[wm_name](
+		thread_shutdown_event=thread_shutdown_event,
+		pl_shutdown_event=state.ts_shutdown_event,
+		pl_config_loader=state.config_loader,
+	)
+	thread.start()
+	state.started_wm_threads[wm_name] = (thread, thread_shutdown_event)
+	return b''
+
+
+def render(args, environ, cwd, is_daemon, state):
 	segment_info = {
 		'getcwd': lambda: cwd,
-		'home': environ.get('HOME', home),
+		'home': environ.get('HOME', HOME),
 		'environ': environ,
 		'args': args,
 	}
@@ -82,22 +102,24 @@ def render(args, environ, cwd):
 		environ.get('POWERLINE_CONFIG_OVERRIDES', ''),
 		environ.get('POWERLINE_CONFIG_PATHS', ''),
 	)
-	finish_args(environ, args)
+
+	PowerlineClass = ShellPowerline if is_daemon else NonDaemonShellPowerline
 	powerline = None
 	try:
-		powerline = powerlines[key]
+		powerline = state.powerlines[key]
 	except KeyError:
 		try:
-			powerline = powerlines[key] = PowerlineDaemon(
+			powerline = state.powerlines[key] = PowerlineClass(
 				args,
-				logger=logger,
-				config_loader=config_loader,
+				logger=state.logger,
+				config_loader=state.config_loader,
 				run_once=False,
+				shutdown_event=state.ts_shutdown_event,
 			)
-			if logger is None:
-				logger = powerline.logger
-			if config_loader is None:
-				config_loader = powerline.config_loader
+			if state.logger is None:
+				state.logger = powerline.logger
+			if state.config_loader is None:
+				state.config_loader = powerline.config_loader
 		except SystemExit:
 			# Somebody thought raising system exit was a good idea,
 			return ''
@@ -168,23 +190,30 @@ def safe_bytes(o, encoding=get_preferred_output_encoding()):
 		return safe_bytes(str(e), encoding)
 
 
-def parse_args(req, encoding=get_preferred_arguments_encoding()):
+def parse_args(req, parser, encoding=get_preferred_arguments_encoding()):
 	args = [x.decode(encoding) for x in req.split(b'\0') if x]
 	numargs = int(args[0], 16)
 	shell_args = parser.parse_args(args[1:numargs + 1])
 	cwd = args[numargs + 1]
 	environ = dict(((k, v) for k, v in (x.partition('=')[0::2] for x in args[numargs + 2:])))
+	cwd = cwd or environ.get('PWD', '/')
 	return shell_args, environ, cwd
 
 
-def do_render(req):
+def get_answer(req, is_daemon, argparser, state):
 	try:
-		return safe_bytes(render(*parse_args(req)))
+		args, environ, cwd = parse_args(req, argparser)
+		finish_args(argparser, environ, args, is_daemon=True)
+		if args.ext[0].startswith('wm.'):
+			return safe_bytes(start_wm(args, environ, cwd, is_daemon, state))
+		else:
+			return safe_bytes(render(args, environ, cwd, is_daemon, state))
 	except Exception as e:
 		return safe_bytes(str(e))
 
 
-def do_one(sock, read_sockets, write_sockets, result_map):
+def do_one(sock, read_sockets, write_sockets, result_map, is_daemon, argparser,
+           state):
 	r, w, e = select(
 		tuple(read_sockets) + (sock,),
 		tuple(write_sockets),
@@ -214,7 +243,7 @@ def do_one(sock, read_sockets, write_sockets, result_map):
 			if req == EOF:
 				raise SystemExit(0)
 			elif req:
-				ans = do_render(req)
+				ans = get_answer(req, is_daemon, argparser, state)
 				result_map[s] = ans
 				write_sockets.add(s)
 			else:
@@ -230,17 +259,61 @@ def do_one(sock, read_sockets, write_sockets, result_map):
 			s.close()
 
 
-def main_loop(sock):
+def shutdown(sock, read_sockets, write_sockets, state):
+	'''Perform operations necessary for nicely shutting down daemon
+
+	Specifically it
+
+	#. Closes all sockets.
+	#. Notifies segments based on 
+	  :py:class:`powerline.lib.threaded.ThreadedSegment` and WM-specific 
+	  threads that daemon is shutting down.
+	#. Waits for threads to finish, but no more then 2 seconds total.
+	#. Waits so that total execution time of this function is 2 seconds in order 
+	   to allow ThreadedSegments to finish.
+	'''
+	total_wait_time = 2
+	shutdown_start_time = monotonic()
+
+	for s in chain((sock,), read_sockets, write_sockets):
+		s.close()
+
+	# Notify ThreadedSegments
+	state.ts_shutdown_event.set()
+	for thread, shutdown_event in state.started_wm_threads.values():
+		shutdown_event.set()
+
+	for thread, shutdown_event in state.started_wm_threads.values():
+		wait_time = total_wait_time - (monotonic() - shutdown_start_time)
+		if wait_time > 0:
+			thread.join(wait_time)
+
+	wait_time = total_wait_time - (monotonic() - shutdown_start_time)
+	sleep(wait_time)
+
+
+def main_loop(sock, is_daemon):
 	sock.listen(128)
 	sock.setblocking(0)
 
 	read_sockets, write_sockets = set(), set()
 	result_map = {}
+	parser = get_main_argparser(NonInteractiveArgParser)
+	state = State()
 	try:
-		while True:
-			do_one(sock, read_sockets, write_sockets, result_map)
-	except KeyboardInterrupt:
-		raise SystemExit(0)
+		try:
+			while True:
+				do_one(
+					sock, read_sockets, write_sockets, result_map,
+					is_daemon=is_daemon,
+					argparser=parser,
+					state=state,
+				)
+		except KeyboardInterrupt:
+			raise SystemExit(0)
+	except SystemExit as e:
+		shutdown(sock, read_sockets, write_sockets, state)
+		raise e
 	return 0
 
 
@@ -249,10 +322,10 @@ def daemonize(stdin=os.devnull, stdout=os.devnull, stderr=os.devnull):
 		pid = os.fork()
 		if pid > 0:
 			# exit first parent
-			sys.exit(0)
+			raise SystemExit(0)
 	except OSError as e:
 		sys.stderr.write("fork #1 failed: %d (%s)\n" % (e.errno, e.strerror))
-		sys.exit(1)
+		raise SystemExit(1)
 
 	# decouple from parent environment
 	os.chdir("/")
@@ -264,10 +337,10 @@ def daemonize(stdin=os.devnull, stdout=os.devnull, stderr=os.devnull):
 		pid = os.fork()
 		if pid > 0:
 			# exit from second parent
-			sys.exit(0)
+			raise SystemExit(0)
 	except OSError as e:
 		sys.stderr.write("fork #2 failed: %d (%s)\n" % (e.errno, e.strerror))
-		sys.exit(1)
+		raise SystemExit(1)
 
 	# Redirect standard file descriptors.
 	si = open(stdin, 'rb')
@@ -276,12 +349,11 @@ def daemonize(stdin=os.devnull, stdout=os.devnull, stderr=os.devnull):
 	os.dup2(si.fileno(), sys.stdin.fileno())
 	os.dup2(so.fileno(), sys.stdout.fileno())
 	os.dup2(se.fileno(), sys.stderr.fileno())
-	global is_daemon
-	is_daemon = True
+	return True
 
 
-def check_existing():
-	if use_filesystem:
+def check_existing(address):
+	if USE_FILESYSTEM:
 		# We cannot bind if the socket file already exists so remove it, we
 		# already have a lock on pidfile, so this should be safe.
 		try:
@@ -299,7 +371,7 @@ def check_existing():
 	return sock
 
 
-def kill_daemon():
+def kill_daemon(address):
 	sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 	try:
 		try:
@@ -313,7 +385,7 @@ def kill_daemon():
 	return True
 
 
-def cleanup_lockfile(fd, *args):
+def cleanup_lockfile(pidfile, fd, *args):
 	try:
 		# Remove the directory entry for the lock file
 		os.unlink(pidfile)
@@ -326,10 +398,7 @@ def cleanup_lockfile(fd, *args):
 		raise SystemExit(1)
 
 
-def lockpidfile():
-	import fcntl
-	import atexit
-	import stat
+def lockpidfile(pidfile):
 	fd = os.open(
 		pidfile,
 		os.O_WRONLY | os.O_CREAT,
@@ -344,24 +413,25 @@ def lockpidfile():
 	os.ftruncate(fd, 0)
 	os.write(fd, ('%d' % os.getpid()).encode('ascii'))
 	os.fsync(fd)
-	cleanup = partial(cleanup_lockfile, fd)
+	cleanup = partial(cleanup_lockfile, pidfile, fd)
 	signal(SIGTERM, cleanup)
 	atexit.register(cleanup)
 	return fd
 
 
 def main():
-	global address
-	global pidfile
 	parser = get_daemon_argparser()
 	args = parser.parse_args()
+	is_daemon = False
+	address = None
+	pidfile = None
 
 	if args.socket:
 		address = args.socket
-		if not use_filesystem:
+		if not USE_FILESYSTEM:
 			address = '\0' + address
 	else:
-		if use_filesystem:
+		if USE_FILESYSTEM:
 			address = '/tmp/powerline-ipc-%d'
 		else:
 			# Use the abstract namespace for sockets rather than the filesystem
@@ -370,13 +440,13 @@ def main():
 
 		address = address % os.getuid()
 
-	if use_filesystem:
+	if USE_FILESYSTEM:
 		pidfile = address + '.pid'
 
 	if args.kill:
 		if args.foreground or args.replace:
 			parser.error('--kill and --foreground/--replace cannot be used together')
-		if kill_daemon():
+		if kill_daemon(address):
 			if not args.quiet:
 				print ('Kill command sent to daemon, if it does not die in a couple of seconds use kill to kill it')
 			raise SystemExit(0)
@@ -386,19 +456,19 @@ def main():
 			raise SystemExit(1)
 
 	if args.replace:
-		while kill_daemon():
+		while kill_daemon(address):
 			if not args.quiet:
 				print ('Kill command sent to daemon, waiting for daemon to exit, press Ctrl-C to terminate wait and exit')
 			sleep(2)
 
-	if use_filesystem and not args.foreground:
+	if USE_FILESYSTEM and not args.foreground:
 		# We must daemonize before creating the locked pidfile, unfortunately,
 		# this means further print statements are discarded
-		daemonize()
+		is_daemon = daemonize()
 
-	if use_filesystem:
+	if USE_FILESYSTEM:
 		# Create a locked pid file containing the daemon’s PID
-		if lockpidfile() is None:
+		if lockpidfile(pidfile) is None:
 			if not args.quiet:
 				sys.stderr.write(
 					'The daemon is already running. Use %s -k to kill it.\n' % (
@@ -406,7 +476,7 @@ def main():
 			raise SystemExit(1)
 
 	# Bind to address or bail if we cannot bind
-	sock = check_existing()
+	sock = check_existing(address)
 	if sock is None:
 		if not args.quiet:
 			sys.stderr.write(
@@ -414,14 +484,11 @@ def main():
 					os.path.basename(sys.argv[0])))
 		raise SystemExit(1)
 
-	if args.foreground:
-		return main_loop(sock)
-
-	if not use_filesystem:
+	if not USE_FILESYSTEM and not args.foreground:
 		# We daemonize on linux
-		daemonize()
+		is_daemon = daemonize()
 
-	main_loop(sock)
+	return main_loop(sock, is_daemon)
 
 
 if __name__ == '__main__':

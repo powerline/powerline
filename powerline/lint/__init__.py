@@ -130,7 +130,8 @@ main_spec = (Spec(
 			local_themes=Spec().unknown_spec(
 				Spec().re('^[0-9A-Za-z-]+$'),
 				ext_theme_spec()
-			).optional()
+			).optional(),
+			update_interval=Spec().cmp('gt', 0.0).optional(),
 		).optional(),
 	).unknown_spec(
 		check_ext,

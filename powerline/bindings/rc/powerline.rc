@@ -37,7 +37,7 @@ fn _powerline_common_setup {
 }
 
 fn _powerline_tmux_pane {
-	if (test x$TMUX_PANE '!=' x) {
+	if (test -n $TMUX_PANE) {
 		echo $TMUX_PANE | tr -d ' %'
 	} else {
 		TMUX=$_POWERLINE_TMUX tmux display -p '#D' | tr -d ' %'
@@ -54,9 +54,9 @@ if (test -z $POWERLINE_CONFIG_COMMAND) {
 		echo powerline-config executable not found, unable to proceed >[2=1]
 	}
 }
-if (test x$POWERLINE_CONFIG_COMMAND '!=' x) {
+if (test -n $POWERLINE_CONFIG_COMMAND) {
 	if ($POWERLINE_CONFIG_COMMAND shell --shell rcsh uses prompt) {
-		if (test x$POWERLINE_COMMAND_ARGS '!=' x) {
+		if (test -n $POWERLINE_COMMAND_ARGS) {
 			# Perform splitting
 			POWERLINE_COMMAND_ARGS=( `{echo $POWERLINE_COMMAND_ARGS} )
 		}
@@ -75,11 +75,11 @@ if (test x$POWERLINE_CONFIG_COMMAND '!=' x) {
 		}
 		_powerline_common_setup
 	}
-	if (test x$TMUX '!=' x) {
+	if (test -n $TMUX) {
 		if ($POWERLINE_CONFIG_COMMAND shell --shell rcsh uses tmux) {
 			_POWERLINE_TMUX=$TMUX
 			fn _powerline_tmux_setenv {
-				if (test x$2 '!=' x) {
+				if (test -n $2) {
 					TMUX=$_POWERLINE_TMUX tmux setenv -g TMUX_$1^_`{
 						_powerline_tmux_pane
 					} $2

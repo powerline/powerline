@@ -10,12 +10,13 @@ import platform
 import re
 
 
+test_root = os.environ['TEST_ROOT']
 test_type = sys.argv[1]
 test_client = sys.argv[2]
 shell = sys.argv[3]
-fname = os.path.join('tests', 'shell', '.'.join((shell, test_type, test_client, 'full.log')))
-new_fname = os.path.join('tests', 'shell', '.'.join((shell, test_type, test_client, 'log')))
-pid_fname = os.path.join('tests', 'shell', '3rd', 'pid')
+fname = os.path.join(test_root, '.'.join((shell, test_type, test_client, 'full.log')))
+new_fname = os.path.join(test_root, '.'.join((shell, test_type, test_client, 'log')))
+pid_fname = os.path.join(test_root, '3rd', 'pid')
 
 is_pypy = platform.python_implementation() == 'PyPy'
 
@@ -32,7 +33,7 @@ REFS_RE = re.compile(r'^\[\d+ refs\]\n')
 IPYPY_DEANSI_RE = re.compile(r'\033(?:\[(?:\?\d+[lh]|[^a-zA-Z]+[a-ln-zA-Z])|[=>])')
 ZSH_HL_RE = re.compile(r'\033\[\?\d+[hl]')
 
-start_str = 'cd tests/shell/3rd'
+start_str = 'cd "$TEST_ROOT"/3rd'
 if shell == 'pdb':
 	start_str = 'class Foo(object):'
 
