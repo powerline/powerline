@@ -82,20 +82,11 @@ All ``powerline-lemonbar.py`` arguments:
 I3 bar
 ======
 
-.. note::
-   As the patch to include background-colors in i3bar is likely not to be 
-   merged, it is recommended to instead run ``bar`` (see above). The source for 
-   i3bgbar is however still available `here 
-   <https://github.com/S0lll0s/i3bgbar>`_.
-
-Add the following to :file:`~/.i3/config`::
+Add the following to :file:`~/.config/i3/config`::
 
     bar {
-        i3bar_command i3bgbar
-
         status_command python /path/to/powerline/bindings/i3/powerline-i3.py
         font pango:PowerlineFont 12
     }
 
-where ``i3bgbar`` may be replaced with the path to the custom i3bar binary and 
-``PowerlineFont`` is any system font with powerline support.
+where ``PowerlineFont`` is any system font with powerline support.
