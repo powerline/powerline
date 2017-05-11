@@ -7,7 +7,7 @@ import time
 
 from threading import Lock
 
-import i3
+from powerline.bindings.wm import get_i3_connection, i3_subscribe
 
 from powerline import Powerline
 from powerline.lib.monotonic import monotonic
@@ -43,7 +43,8 @@ if __name__ == '__main__':
 			print (',[' + powerline.render()[:-1] + ']')
 			sys.stdout.flush()
 
-	sub = i3.Subscription(render, 'workspace')
+	i3 = get_i3_connection()
+	i3_subscribe(i3, 'workspace', render)
 
 	while True:
 		start_time = monotonic()
