@@ -1,25 +1,12 @@
 # vim:fileencoding=utf-8:noet
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
-import sys
-
 from threading import Thread, Event
 from time import sleep
-from subprocess import Popen, PIPE
+import dbus
 
 from powerline import Powerline
 from powerline.lib.monotonic import monotonic
-
-
-def read_to_log(pl, client):
-	for line in client.stdout:
-		if line:
-			pl.info(line, prefix='awesome-client')
-	for line in client.stderr:
-		if line:
-			pl.error(line, prefix='awesome-client')
-	if client.wait():
-		pl.error('Client exited with {0}', client.returncode, prefix='awesome')
 
 
 def run(thread_shutdown_event=None, pl_shutdown_event=None, pl_config_loader=None,
@@ -32,6 +19,18 @@ def run(thread_shutdown_event=None, pl_shutdown_event=None, pl_config_loader=Non
 	)
 	powerline.update_renderer()
 
+	try:
+		session_bus = dbus.SessionBus()
+	except Exception as e:
+		powerline.pl.exception('Failed to connect to session bus: {0}', str(e))
+		raise
+	try:
+		awesome_client = session_bus.get_object('org.naquadah.awesome.awful', '/')
+	except dbus.exceptions.DBusException as e:
+		powerline.pl.exception('Failed to locate Awesome service on dbus: {0}', str(e))
+		raise
+	awesome_eval = awesome_client.get_dbus_method('Eval', dbus_interface='org.naquadah.awesome.awful.Remote')
+
 	if not thread_shutdown_event:
 		thread_shutdown_event = powerline.shutdown_event
 
@@ -41,10 +40,10 @@ def run(thread_shutdown_event=None, pl_shutdown_event=None, pl_config_loader=Non
 		start_time = monotonic()
 		s = powerline.render(side='right')
 		request = 'powerline_widget:set_markup(\'' + s.translate({'\'': '\\\'', '\\': '\\\\'}) + '\')\n'
-		client = Popen(['awesome-client'], shell=False, stdout=PIPE, stderr=PIPE, stdin=PIPE)
-		client.stdin.write(request.encode('utf-8'))
-		client.stdin.close()
-		read_to_log(powerline.pl, client)
+		try:
+			awesome_eval(request.encode('utf-8'))
+		except dbus.exceptions.DBusException as e:
+			powerline.pl.exception('Failure while signaling Awesome on dbus: {0}', str(e))
 		thread_shutdown_event.wait(max(used_interval - (monotonic() - start_time), 0.1))
 
 
