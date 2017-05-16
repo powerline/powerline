@@ -27,6 +27,31 @@ _powerline_tmux_set_pwd() {
 	fi
 }
 
+_powerline_return() {
+	return $1
+}
+
+_powerline_status_wrapper() {
+	local last_exit_code=$? last_pipe_status=( "${PIPESTATUS[@]}" )
+
+	if test "$last_exit_code" != "${last_pipe_status[-1]}" ; then
+		last_pipe_status=()
+	fi
+	"$@" $last_exit_code "${last_pipe_status[*]}"
+	return $last_exit_code
+}
+
+_powerline_add_status_wrapped_command() {
+	local action="$1" ; shift
+	local cmd="$1" ; shift
+	full_cmd="_powerline_status_wrapper $cmd"
+	if test "$action" = "append" ; then
+		PROMPT_COMMAND="$PROMPT_COMMAND"$'\n'"$full_cmd"
+	else
+		PROMPT_COMMAND="$full_cmd"$'\n'"$PROMPT_COMMAND"
+	fi
+}
+
 _powerline_tmux_set_columns() {
 	_powerline_tmux_setenv COLUMNS "${COLUMNS:-`_powerline_columns_fallback`}"
 }
@@ -40,41 +65,53 @@ _powerline_init_tmux_support() {
 		_powerline_tmux_set_columns
 
 		test "$PROMPT_COMMAND" != "${PROMPT_COMMAND/_powerline_tmux_set_pwd}" \
-			|| PROMPT_COMMAND="${PROMPT_COMMAND}"$'\n_powerline_tmux_set_pwd'
+			|| _powerline_add_status_wrapped_command append _powerline_tmux_set_pwd
 	fi
 }
 
 _powerline_local_prompt() {
-	# Arguments: side, renderer_module arg, last_exit_code, jobnum, local theme
+	# Arguments:
+	# 1: side
+	# 2: renderer_module arg
+	# 3: last_exit_code
+	# 4: last_pipe_status
+	# 5: jobnum
+	# 6: local theme
 	"$POWERLINE_COMMAND" $POWERLINE_COMMAND_ARGS shell $1 \
 		$2 \
 		--last-exit-code=$3 \
-		--jobnum=$4 \
+		--last-pipe-status="$4" \
+		--jobnum=$5 \
 		--renderer-arg="client_id=$$" \
-		--renderer-arg="local_theme=$5"
+		--renderer-arg="local_theme=$6"
 }
 
 _powerline_prompt() {
-	# Arguments: side, last_exit_code, jobnum
+	# Arguments:
+	# 1: side
+	# 2: last_exit_code
+	# 3: last_pipe_status
+	# 4: jobnum
 	"$POWERLINE_COMMAND" $POWERLINE_COMMAND_ARGS shell $1 \
 		--width="${COLUMNS:-$(_powerline_columns_fallback)}" \
 		-r.bash \
 		--last-exit-code=$2 \
-		--jobnum=$3 \
+		--last-pipe-status="$3" \
+		--jobnum=$4 \
 		--renderer-arg="client_id=$$"
 }
 
 _powerline_set_prompt() {
-	local last_exit_code=$?
+	local last_exit_code=$1 ; shift
+	local last_pipe_status=$1 ; shift
 	local jobnum="$(jobs -p|wc -l)"
-	PS1="$(_powerline_prompt aboveleft $last_exit_code $jobnum)"
+	PS1="$(_powerline_prompt aboveleft $last_exit_code "$last_pipe_status" $jobnum)"
 	if test -n "$POWERLINE_SHELL_CONTINUATION$POWERLINE_BASH_CONTINUATION" ; then
-		PS2="$(_powerline_local_prompt left -r.bash $last_exit_code $jobnum continuation)"
+		PS2="$(_powerline_local_prompt left -r.bash $last_exit_code "$last_pipe_status" $jobnum continuation)"
 	fi
 	if test -n "$POWERLINE_SHELL_SELECT$POWERLINE_BASH_SELECT" ; then
-		PS3="$(_powerline_local_prompt left '' $last_exit_code $jobnum select)"
+		PS3="$(_powerline_local_prompt left '' $last_exit_code "$last_pipe_status" $jobnum select)"
 	fi
-	return $last_exit_code
 }
 
 _powerline_setup_prompt() {
@@ -83,9 +120,9 @@ _powerline_setup_prompt() {
 		POWERLINE_COMMAND="$("$POWERLINE_CONFIG_COMMAND" shell command)"
 	fi
 	test "$PROMPT_COMMAND" != "${PROMPT_COMMAND%_powerline_set_prompt*}" \
-		|| PROMPT_COMMAND=$'_powerline_set_prompt\n'"${PROMPT_COMMAND}"
-	PS2="$(_powerline_local_prompt left -r.bash 0 0 continuation)"
-	PS3="$(_powerline_local_prompt left '' 0 0 select)"
+		|| _powerline_add_status_wrapped_command prepend _powerline_set_prompt
+	PS2="$(_powerline_local_prompt left -r.bash 0 0 0 continuation)"
+	PS3="$(_powerline_local_prompt left '' 0 0 0 select)"
 }
 
 if test -z "${POWERLINE_CONFIG_COMMAND}" ; then

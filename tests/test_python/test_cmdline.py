@@ -125,6 +125,11 @@ class TestParser(TestCase):
 					'side': 'left',
 					'config_override': {'common': {}},
 				}),
+				(['shell', 'left', '--last-pipe-status='], {
+					'ext': ['shell'],
+					'side': 'left',
+					'last_pipe_status': [],
+				}),
 			]:
 				args = parser.parse_args(argv)
 				finish_args(parser, {}, args)

@@ -39,7 +39,10 @@ def last_pipe_status(pl, segment_info):
 
 	Highlight groups used: ``exit_fail``, ``exit_success``
 	'''
-	last_pipe_status = segment_info['args'].last_pipe_status
+	last_pipe_status = (
+		segment_info['args'].last_pipe_status
+		or (segment_info['args'].last_exit_code,)
+	)
 	if any(last_pipe_status):
 		return [
 			{
