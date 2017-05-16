@@ -52,15 +52,35 @@ class TestShell(TestCase):
 
 	def test_last_pipe_status(self):
 		pl = Pl()
-		segment_info = {'args': Args(last_pipe_status=[])}
+		segment_info = {'args': Args(last_pipe_status=[], last_exit_code=0)}
 		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info), None)
 		segment_info['args'].last_pipe_status = [0, 0, 0]
+		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info), None)
+		segment_info['args'].last_pipe_status = [0, 0]
+		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info), None)
+		segment_info['args'].last_pipe_status = [0]
 		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info), None)
 		segment_info['args'].last_pipe_status = [0, 2, 0]
 		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info), [
 			{'contents': '0', 'highlight_groups': ['exit_success'], 'draw_inner_divider': True},
 			{'contents': '2', 'highlight_groups': ['exit_fail'], 'draw_inner_divider': True},
-			{'contents': '0', 'highlight_groups': ['exit_success'], 'draw_inner_divider': True}
+			{'contents': '0', 'highlight_groups': ['exit_success'], 'draw_inner_divider': True},
+		])
+		segment_info['args'].last_pipe_status = [2, 0, 0]
+		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info), [
+			{'contents': '2', 'highlight_groups': ['exit_fail'], 'draw_inner_divider': True},
+			{'contents': '0', 'highlight_groups': ['exit_success'], 'draw_inner_divider': True},
+			{'contents': '0', 'highlight_groups': ['exit_success'], 'draw_inner_divider': True},
+		])
+		segment_info['args'].last_pipe_status = [0, 0, 2]
+		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info), [
+			{'contents': '0', 'highlight_groups': ['exit_success'], 'draw_inner_divider': True},
+			{'contents': '0', 'highlight_groups': ['exit_success'], 'draw_inner_divider': True},
+			{'contents': '2', 'highlight_groups': ['exit_fail'], 'draw_inner_divider': True},
+		])
+		segment_info['args'].last_pipe_status = [2]
+		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info), [
+			{'contents': '2', 'highlight_groups': ['exit_fail'], 'draw_inner_divider': True},
 		])
 		segment_info['args'].last_pipe_status = [0, 'sigsegv', 'sigsegv+core']
 		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info), [
@@ -79,6 +99,11 @@ class TestShell(TestCase):
 			{'contents': '0', 'highlight_groups': ['exit_success'], 'draw_inner_divider': True},
 			{'contents': 'sigsegv+core', 'highlight_groups': ['exit_fail'], 'draw_inner_divider': True},
 			{'contents': '0', 'highlight_groups': ['exit_success'], 'draw_inner_divider': True}
+		])
+		segment_info['args'].last_pipe_status = []
+		segment_info['args'].last_exit_code = 5
+		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info), [
+			{'contents': '5', 'highlight_groups': ['exit_fail'], 'draw_inner_divider': True},
 		])
 
 	def test_jobnum(self):
