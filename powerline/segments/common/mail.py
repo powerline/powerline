@@ -37,18 +37,18 @@ class EmailIMAPSegment(KwThreadedSegment):
 		return unread_count
 
 	@staticmethod
-	def render_one(unread_count, max_msgs=None, **kwargs):
+	def render_one(unread_count, max_msgs=None, highlight_group='email_alert', highlight_group_gradient='email_alert_gradient', **kwargs):
 		if not unread_count:
 			return None
 		elif type(unread_count) != int or not max_msgs:
 			return [{
 				'contents': str(unread_count),
-				'highlight_groups': ['email_alert'],
+				'highlight_groups': [highlight_group],
 			}]
 		else:
 			return [{
 				'contents': str(unread_count),
-				'highlight_groups': ['email_alert_gradient', 'email_alert'],
+				'highlight_groups': [highlight_group_gradient_, highlight_group],
 				'gradient_level': min(unread_count * 100.0 / max_msgs, 100),
 			}]
 
@@ -73,6 +73,14 @@ email_imap_alert = with_docstring(EmailIMAPSegment(),
 :param bool use_ssl:
 	If ``True`` then use SSL connection. If ``False`` then do not use it. 
 	Default is ``True`` if port is equal to {ssl_port} and ``False`` otherwise.
+:param str highlight_group:
+	Highlight group to use. If not present, ``email_alert`` will be used. This
+	parameter allows you to watch over multiple mailboxes with differently
+	coloured notifications.
+:param str highlight_group_gradient_:
+	Highlight group to use for gradient, i.e. when ``max_msgs`` is given. If
+	not present, ``email_alert_gradient`` will be used.
 
-Highlight groups used: ``email_alert_gradient`` (gradient), ``email_alert``.
+Highlight groups used: ``email_alert_gradient`` (gradient), ``email_alert`` or
+	the given ones.
 ''').format(ssl_port=IMAP4_SSL_PORT))
