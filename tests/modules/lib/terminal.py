@@ -63,11 +63,13 @@ class ExpectProcess(threading.Thread):
 		self.shutdown_event = threading.Event()
 
 	def run(self):
-		child = pexpect.spawn(self.cmd, self.args, cwd=self.cwd, env=self.env)
-		sleep(0.5)
-		child.setwinsize(self.dim.rows, self.dim.cols)
-		sleep(0.5)
-		self.child = child
+		with self.child_lock:
+			child = pexpect.spawn(self.cmd, self.args, cwd=self.cwd,
+			                      env=self.env)
+			sleep(0.5)
+			child.setwinsize(self.dim.rows, self.dim.cols)
+			sleep(0.5)
+			self.child = child
 		status = None
 		while status is None and not self.shutdown_event.is_set():
 			try:
@@ -141,9 +143,8 @@ class ExpectProcess(threading.Thread):
 		return '\n'.join(lines), attrs
 
 
-def test_expected_result(p, test, last_attempt, last_attempt_cb=None):
+def test_expected_result(p, test, last_attempt, last_attempt_cb, attempts):
 	expected_text, attrs = test['expected_result']
-	attempts = 3
 	result = None
 	while attempts:
 		actual_text, all_attrs = p.get_row(test['row'], attrs)
@@ -252,7 +253,8 @@ def do_terminal_tests(tests, cmd, dim, args, env, cwd=None, fin_cb=None,
 				ret = (
 					ret
 					and test_expected_result(p, test, attempts == 0,
-					                         last_attempt_cb)
+					                         last_attempt_cb,
+					                         test.get('attempts', 3))
 				)
 
 			if ret:
