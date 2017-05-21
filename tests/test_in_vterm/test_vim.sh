@@ -3,11 +3,9 @@
 . tests/shlib/vterm.sh
 . tests/shlib/vim.sh
 
-enter_suite vim
+enter_suite vvim
 
-VTERM_TEST_DIR="$ROOT/tests/vterm_vim"
-
-vterm_setup "$VTERM_TEST_DIR"
+vterm_setup
 
 test_vim() {
 	if test "$PYTHON_IMPLEMENTATION" != CPython ; then
@@ -17,7 +15,7 @@ test_vim() {
 	if ! which "$POWERLINE_VIM_EXE" ; then
 		return 0
 	fi
-	ln -sf "$(which "${POWERLINE_VIM_EXE}")" "$VTERM_TEST_DIR/path/vim"
+	ln -sf "$(which "${POWERLINE_VIM_EXE}")" "$TEST_ROOT/path/vim"
 	f="$ROOT/tests/test_in_vterm/test_vim.py"
 	if ! "${PYTHON}" "$f" ; then
 		local test_name="$(LANG=C "$POWERLINE_VIM_EXE" --cmd 'echo version' --cmd qa 2>&1)"
@@ -36,6 +34,6 @@ else
 	test_vim || true
 fi
 
-vterm_shutdown "$VTERM_TEST_DIR"
+vterm_shutdown
 
 exit_suite
