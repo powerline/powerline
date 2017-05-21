@@ -4,7 +4,7 @@
 
 enter_suite tmux
 
-vterm_setup tmux
+vterm_setup
 
 ln -s "$(which env)" "$TEST_ROOT/path"
 ln -s "$(which cut)" "$TEST_ROOT/path"

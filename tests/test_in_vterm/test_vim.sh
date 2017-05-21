@@ -3,9 +3,9 @@
 . tests/shlib/vterm.sh
 . tests/shlib/vim.sh
 
-enter_suite vim
+enter_suite vvim
 
-vterm_setup vim
+vterm_setup
 
 test_vim() {
 	if test "$PYTHON_IMPLEMENTATION" != CPython ; then

@@ -2,9 +2,7 @@
 set +x
 
 vterm_setup() {
-	local vterm_suf="$1" ; shift
-
-	make_test_root "vterm_$vterm_suf"
+	make_test_root
 
 	mkdir "$TEST_ROOT/path"
 
