@@ -1,10 +1,11 @@
 #!/bin/sh
 . tests/shlib/common.sh
+. tests/shlib/vterm.sh
 . tests/shlib/vim.sh
 
 enter_suite vim
 
-make_test_root
+vterm_setup vim
 
 # Define some overrides. These ones must be ignored and do not affect Vim 
 # status/tab lines.
@@ -45,5 +46,7 @@ if test -e "$OLD_VIM" ; then
 		test_script "$OLD_VIM" "$script"
 	done
 fi
+
+vterm_shutdown
 
 exit_suite

@@ -1,26 +1,19 @@
 . tests/shlib/common.sh
-. tests/bot-ci/scripts/common/main.sh
 set +x
 
 vterm_setup() {
-	local test_dir="$1" ; shift
+	local vterm_suf="$1" ; shift
 
-	rm -rf "$test_dir"
-	mkdir "$test_dir"
-	mkdir "$test_dir/path"
+	make_test_root "vterm_$vterm_suf"
 
-	ln -s "$(which "${PYTHON}")" "$test_dir/path/python"
-	ln -s "$(which bash)" "$test_dir/path"
+	mkdir "$TEST_ROOT/path"
 
-	cp -r "$ROOT/tests/terminfo" "$test_dir"
+	ln -s "$(which "${PYTHON}")" "$TEST_ROOT/path/python"
+	ln -s "$(which bash)" "$TEST_ROOT/path"
+
+	cp -r "$ROOT/tests/terminfo" "$TEST_ROOT"
 }
 
 vterm_shutdown() {
-	local test_dir="$1" ; shift
-
-	if test $FAILED -eq 0 ; then
-		rm -rf "$test_dir"
-	else
-		echo "$FAIL_SUMMARY"
-	fi
+	rm_test_root
 }

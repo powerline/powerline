@@ -4,33 +4,54 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 
 import os
 import sys
-import json
 
 from time import sleep
 from subprocess import check_call
 from glob import glob1
 from traceback import print_exc
 
+from powerline.lib.dict import updated
+
 from tests.modules.lib.terminal import (ExpectProcess, MutableDimensions,
                                         do_terminal_tests, get_env)
 
 
-VTERM_TEST_DIR = os.path.abspath('tests/vterm_vim')
+TEST_ROOT = os.path.abspath(os.environ['TEST_ROOT'])
 
 
 def main(attempts=3):
-	vterm_path = os.path.join(VTERM_TEST_DIR, 'path')
+	vterm_path = os.path.join(TEST_ROOT, 'path')
 
 	vim_exe = os.path.join(vterm_path, 'vim')
 
-	env = get_env(vterm_path, VTERM_TEST_DIR)
+	env = get_env(vterm_path, TEST_ROOT)
+	env['ROOT'] = os.path.abspath('.')
 
 	dim = MutableDimensions(rows=50, cols=200)
 
+	vimrc = os.path.join(TEST_ROOT, 'init.vim')
+	vimrc_contents = '''
+		set laststatus=2
+		set runtimepath=$ROOT/powerline/bindings/vim
+	'''
+	with open(vimrc, 'w') as vd:
+		vd.write(vimrc_contents)
+
+	base_attrs = {
+		(( 64,  64, 255), (0, 0, 0), 0, 0, 0): 'NT',  # NonText
+		((240, 240, 240), (0, 0, 0), 0, 0, 0): 'N',   # Normal
+	}
+
+	args = [
+		'-u', vimrc,
+		'-i', 'NONE',
+	]
+
+	def feed(p):
+		p.send(':echo strtrans(eval(&statusline[2:]))\n')
+
 	tests = (
 	)
-
-	args = []
 
 	return do_terminal_tests(
 		tests=tests,
@@ -38,7 +59,7 @@ def main(attempts=3):
 		dim=dim,
 		args=args,
 		env=env,
-		cwd=VTERM_TEST_DIR,
+		cwd=TEST_ROOT,
 	)
 
 

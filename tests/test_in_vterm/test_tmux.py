@@ -19,7 +19,7 @@ from tests.modules.lib.terminal import (ExpectProcess, MutableDimensions,
                                         do_terminal_tests, get_env)
 
 
-VTERM_TEST_DIR = os.path.abspath('tests/vterm_tmux')
+TEST_ROOT = os.path.abspath(os.environ['TEST_ROOT'])
 
 
 def tmux_logs_iter(test_dir):
@@ -28,7 +28,7 @@ def tmux_logs_iter(test_dir):
 
 
 def print_tmux_logs():
-	for f in tmux_logs_iter(VTERM_TEST_DIR):
+	for f in tmux_logs_iter(TEST_ROOT):
 		print('_' * 80)
 		print(os.path.basename(f) + ':')
 		print('=' * 80)
@@ -57,15 +57,15 @@ def tmux_fin_cb(p, cmd, env):
 	try:
 		check_call([
 			cmd, '-S', env['POWERLINE_TMUX_SOCKET_PATH'], 'kill-server'
-		], env=env, cwd=VTERM_TEST_DIR)
+		], env=env, cwd=TEST_ROOT)
 	except Exception:
 		print_exc()
-	for f in tmux_logs_iter(VTERM_TEST_DIR):
+	for f in tmux_logs_iter(TEST_ROOT):
 		os.unlink(f)
 
 
 def main(attempts=3):
-	vterm_path = os.path.join(VTERM_TEST_DIR, 'path')
+	vterm_path = os.path.join(TEST_ROOT, 'path')
 
 	tmux_exe = os.path.join(vterm_path, 'tmux')
 
@@ -73,7 +73,7 @@ def main(attempts=3):
 	if os.path.exists(socket_path):
 		os.unlink(socket_path)
 
-	env = get_env(vterm_path, VTERM_TEST_DIR, {
+	env = get_env(vterm_path, TEST_ROOT, {
 		'POWERLINE_THEME_OVERRIDES': ';'.join((
 			key + '=' + json.dumps(val)
 			for key, val in (
@@ -99,7 +99,7 @@ def main(attempts=3):
 	conf_path = os.path.abspath('powerline/bindings/tmux/powerline.conf')
 	conf_line = 'source "' + (
 		conf_path.replace('\\', '\\\\').replace('"', '\\"')) + '"\n'
-	conf_file = os.path.realpath(os.path.join(VTERM_TEST_DIR, 'tmux.conf'))
+	conf_file = os.path.realpath(os.path.join(TEST_ROOT, 'tmux.conf'))
 	with open(conf_file, 'w') as cf_fd:
 		cf_fd.write(conf_line)
 
@@ -235,7 +235,7 @@ def main(attempts=3):
 		dim=dim,
 		args=args,
 		env=env,
-		cwd=VTERM_TEST_DIR,
+		cwd=TEST_ROOT,
 		fin_cb=tmux_fin_cb,
 		last_attempt_cb=print_tmux_logs,
 	)
