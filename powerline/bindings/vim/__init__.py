@@ -9,39 +9,19 @@ from functools import partial
 from powerline.lib.unicode import unicode
 
 
-def get_vim_encoding(vim):
-	'''Get encoding used for Vim strings
+def get_python_to_vim(vim, encoding='utf-8'):
+	'''Get function which converts some Python objects to VimL expression
 
 	:param module vim:
 		Vim module.
-
-	:return:
-		Value of ``&encoding``. If it is empty (i.e. Vim is compiled 
-		without +multibyte) returns ``'ascii'``. When building documentation 
-		outputs ``'utf-8'`` unconditionally.
+	:param str encoding:
+		Used encoding.
 	'''
-	if (
-		hasattr(vim, 'options')
-		and hasattr(vim, 'vvars')
-		and vim.vvars['version'] > 703
-	):
-		if sys.version_info < (3,):
-			return vim.options['encoding'] or 'ascii'
-		else:
-			return vim.options['encoding'].decode('ascii') or 'ascii'
-	elif hasattr(vim, 'eval'):
-		return vim.eval('&encoding') or 'ascii'
-	else:
-		return 'utf-8'
-
-
-def get_python_to_vim(vim):
-	vim_encoding = get_vim_encoding(vim)
 	python_to_vim_types = {
 		unicode: (
 			lambda o: b'\'' + (o.translate({
 				ord('\''): '\'\'',
-			}).encode(vim_encoding)) + b'\''
+			}).encode(encoding)) + b'\''
 		),
 		list: (
 			lambda o: b'[' + (
@@ -248,16 +228,14 @@ class VimEnviron(object):
 		)
 
 
-def register_powerline_vim_strtrans_error(vim):
-	vim_encoding = get_vim_encoding(vim)
-
+def register_powerline_vim_strtrans_error(vim, encoding='utf_8'):
 	def vim_u(s):
 		'''Return unicode instance assuming vim encoded string.
 		'''
 		if type(s) is unicode:
 			return s
 		else:
-			return unicode(s, vim_encoding)
+			return unicode(s, encoding)
 
 	if hasattr(vim, 'Function'):
 		_vim_strtrans = vim.Function('strtrans')

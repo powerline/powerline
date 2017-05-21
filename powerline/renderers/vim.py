@@ -3,7 +3,7 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 
 import sys
 
-from powerline.bindings.vim import VimEnviron, current_tabpage, get_vim_encoding
+from powerline.bindings.vim import VimEnviron, current_tabpage
 from powerline.renderer import Renderer
 from powerline.colorscheme import ATTR_BOLD, ATTR_ITALIC, ATTR_UNDERLINE
 from powerline.lib.unicode import unichr, register_strwidth_error
@@ -21,7 +21,8 @@ class VimRenderer(Renderer):
 	character_translations = Renderer.character_translations.copy()
 	character_translations[ord('%')] = '%%'
 
-	def __init__(self, vim=None, is_old_vim=False, vim_funcs=None, vim_cls=None, **kwargs):
+	def __init__(self, vim=None, is_old_vim=False, vim_funcs=None, vim_cls=None,
+	             vim_encoding='utf-8', **kwargs):
 		self.vim = vim
 		self.is_old_vim = is_old_vim
 		if hasattr(self.vim, 'strwidth'):
@@ -52,7 +53,7 @@ class VimRenderer(Renderer):
 		self.hl_groups = {}
 		self.prev_highlight = None
 		self.strwidth_error_name = register_strwidth_error(self.strwidth)
-		self.encoding = get_vim_encoding(self.vim)
+		self.encoding = vim_encoding
 		self.uses_vim_python = True
 		if not is_old_vim:
 			self.theme_selector = self.vim_cls.compile_themes_getter(

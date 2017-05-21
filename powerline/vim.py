@@ -21,15 +21,17 @@ class VimVarHandler(logging.Handler, object):
 		Variable where log will be stored.
 	:param module vim:
 		Vim module.
+	:param str encoding:
+		Encoding to use, defaults to UTF-8.
 	'''
-	def __init__(self, vim, varname):
+	def __init__(self, vim, varname, encoding='utf-8'):
 		super(VimVarHandler, self).__init__()
 		utf_varname = u(varname)
 		self.vim_varname = utf_varname.encode('ascii')
 		vim.command('unlet! g:' + utf_varname)
 		vim.command('let g:' + utf_varname + ' = []')
 		self.vim = vim
-		self.python_to_vim = get_python_to_vim(vim)
+		self.python_to_vim = get_python_to_vim(vim, encoding)
 
 	def emit(self, record):
 		message = u(record.message)
@@ -74,6 +76,7 @@ class VimPowerline(Powerline):
 		self.const_tabline_reqs = ['mode']
 		self.renderer_options['vim_cls'] = self.vim_cls
 		self.renderer_options['vim_funcs'] = self.vim_funcs
+		self.renderer_options['vim_encoding'] = self.encoding
 
 	if sys.version_info < (3,):
 		def create_window_statusline_constructor(self):
@@ -308,7 +311,7 @@ class VimPowerline(Powerline):
 		if not pycmd:
 			pycmd = get_default_pycmd()
 
-		register_powerline_vim_strtrans_error(self.vim)
+		register_powerline_vim_strtrans_error(self.vim, self.encoding)
 
 		self.renderer_options['is_old_vim'] = self.is_old_vim
 		self.pycmd = pycmd
