@@ -31,17 +31,13 @@ _powerline_return() {
 	return $1
 }
 
-_POWERLINE_HAS_PIPESTATUS=
+_POWERLINE_HAS_PIPESTATUS="$(
+	_powerline_return 0 | _powerline_return 43
+	test "${PIPESTATUS[*]}" = "0 43"
+	echo "$?"
+)"
 
 _powerline_has_pipestatus() {
-	if test -z "$_POWERLINE_HAS_PIPESTATUS" ; then
-		_powerline_return 0 | _powerline_return 43
-		if test "${PIPESTATUS[*]}" = "0 43" ; then
-			_POWERLINE_HAS_PIPESTATUS=0
-		else
-			_POWERLINE_HAS_PIPESTATUS=1
-		fi
-	fi
 	return $_POWERLINE_HAS_PIPESTATUS
 }
 
