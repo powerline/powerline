@@ -34,7 +34,7 @@ _powerline_return() {
 _powerline_status_wrapper() {
 	local last_exit_code=$? last_pipe_status=( "${PIPESTATUS[@]}" )
 
-	if test "$last_exit_code" != "${last_pipe_status[-1]}" ; then
+	if test "$last_exit_code" != "${last_pipe_status[0]}" ; then
 		last_pipe_status=()
 	fi
 	"$@" $last_exit_code "${last_pipe_status[*]}"
