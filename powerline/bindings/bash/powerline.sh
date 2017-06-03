@@ -31,10 +31,22 @@ _powerline_return() {
 	return $1
 }
 
+_POWERLINE_HAS_PIPESTATUS="$(
+	_powerline_return 0 | _powerline_return 43
+	test "${PIPESTATUS[*]}" = "0 43"
+	echo "$?"
+)"
+
+_powerline_has_pipestatus() {
+	return $_POWERLINE_HAS_PIPESTATUS
+}
+
 _powerline_status_wrapper() {
 	local last_exit_code=$? last_pipe_status=( "${PIPESTATUS[@]}" )
 
-	if test "$last_exit_code" != "${last_pipe_status[-1]}" ; then
+	if ! _powerline_has_pipestatus \
+	   || test "${#last_pipe_status[@]}" -eq "0" \
+	   || test "$last_exit_code" != "${last_pipe_status[-1]}" ; then
 		last_pipe_status=()
 	fi
 	"$@" $last_exit_code "${last_pipe_status[*]}"
