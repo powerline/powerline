@@ -5,7 +5,7 @@ Window manager widgets
 Awesome widget
 ==============
 
-.. note:: Powerline currently only supports awesome 3.5.
+.. note:: Powerline currently only supports awesome 3.5 and 4+.
 
 .. note:: The Powerline widget will spawn a shell script that runs in the 
    background and updates the statusline with ``awesome-client``.
@@ -23,7 +23,17 @@ Then add the ``powerline_widget`` to ``wibox``:
 
 .. code-block:: lua
 
+   -- awesome3.5
    right_layout:add(powerline_widget)
+   
+   -- awesome4+
+   s.mywibox:setup {
+   ...
+     { -- Right widgets
+       ...
+       powerline_widget,
+     },
+   }
 
 Qtile widget
 ============
