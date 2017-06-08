@@ -94,7 +94,7 @@ After downloading font the following should be done:
 
       mv 'SomeFont for Powerline.otf' ~/.fonts/
 
-#. Update font cache for the path the font was moved to (root priveleges may be 
+#. Update font cache for the path the font was moved to (root privileges may be 
    needed for updating font cache for some paths)::
 
       fc-cache -vf ~/.fonts/
