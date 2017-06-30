@@ -124,7 +124,7 @@ setup(
 	packages=find_packages(exclude=('tests', 'tests.*')),
 	include_package_data=True,
 	zip_safe=False,
-	install_requires=[],
+	install_requires=['argparse'] if OLD_PYTHON else [],
 	extras_require={
 		'docs': [
 			'Sphinx',
