@@ -42,7 +42,7 @@ void do_write(int sd, const char *raw, size_t len) {
 	}
 }
 
-inline size_t true_sun_len(const struct sockaddr_un *ptr) {
+static inline size_t true_sun_len(const struct sockaddr_un *ptr) {
 #ifdef __linux__
 	/* Because SUN_LEN uses strlen and abstract namespace paths begin
 	 * with a null byte, SUN_LEN is broken for these. Passing the full
