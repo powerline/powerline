@@ -88,6 +88,7 @@ int main(int argc, char *argv[]) {
 	char *wd = NULL;
 	char **envp;
 	const char *address;
+	int len;
 
 	if (argc < 2) {
 		printf("Must provide at least one argument.\n");
@@ -122,8 +123,8 @@ int main(int argc, char *argv[]) {
 		execvp("powerline-render", newargv);
 	}
 
-	snprintf(num_args, NUM_ARGS_SIZE, "%x", argc - 1);
-	do_write(sd, num_args, strlen(num_args));
+	len = snprintf(num_args, NUM_ARGS_SIZE, "%x", argc - 1);
+	do_write(sd, num_args, len);
 	do_write(sd, eof, 1);
 
 	for (i = 1; i < argc; i++) {
