@@ -71,7 +71,7 @@ inline size_t true_sun_len(const struct sockaddr_un *ptr) {
 #endif
 
 #define ADDRESS_SIZE sizeof(ADDRESS_TEMPLATE) + (sizeof(uid_t) * 4)
-#define NUM_ARGS_SIZE (sizeof(int) * 2)
+#define NUM_ARGS_SIZE (sizeof(int) * 2 + 1)
 #define BUF_SIZE 4096
 #define NEW_ARGV_SIZE 200
 
