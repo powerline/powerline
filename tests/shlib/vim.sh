@@ -19,12 +19,7 @@ if test -z "$POWERLINE_VIM_EXE" ; then
 			NEW_VIM="$ROOT/tests/bot-ci/deps/vim/master-$PYTHON_MM/vim"
 			OLD_VIM="$ROOT/tests/bot-ci/deps/vim/v7.0.112-$PYTHON_MM/vim"
 		else
-			NEW_VIM="vim"
-		fi
-		if test -e "$OLD_VIM" ; then
-			VIMS="NEW_VIM OLD_VIM"
-		else
-			VIMS="NEW_VIM"
+			NEW_VIM="$(which vim)"
 		fi
 	fi
 else
