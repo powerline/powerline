@@ -36,6 +36,9 @@ class MutableDimensions(object):
 	def __nonzero__(self):
 		return True
 
+	def __repr__(self):
+		return self.__class__.__name__ + repr(tuple(self._list))
+
 	__bool__ = __nonzero__
 
 	rows = property(
