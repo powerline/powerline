@@ -115,6 +115,10 @@ def get_functions(lib):
 			('pos', VTermPos_s),
 			('cell', ctypes.POINTER(VTermScreenCell_s))
 		)),
+		vterm_set_utf8=(None, (
+			('vt', VTerm_p),
+			('is_utf8', ctypes.c_int),
+		)),
 		vterm_free=(None, (('vt', VTerm_p),)),
 	)
 
@@ -173,6 +177,7 @@ class VTerm(object):
 	def __init__(self, lib, dim):
 		self.functions = get_functions(lib)
 		self.vt = self.functions.vterm_new(dim.rows, dim.cols)
+		self.functions.vterm_set_utf8(self.vt, 1)
 		self.vtscreen = VTermScreen(self.functions, self.functions.vterm_obtain_screen(self.vt))
 		self.vtscreen.reset(True)
 
