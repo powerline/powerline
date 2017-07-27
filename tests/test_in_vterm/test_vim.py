@@ -39,18 +39,18 @@ def main(attempts=3):
 		# S/   segments
 		# s/   separators
 		#      Vim own highlight
-		(( 64,  64, 255), (0, 0, 0), 0, 0, 0): 'NT',  # NonText
-		((240, 240, 240), (0, 0, 0), 0, 0, 0): 'N',  # Normal
-		((0, 51, 0), (153, 204, 0), 1, 0, 0): 'S/mn',  # Normal mode
-		((153, 204, 0), (44, 44, 44), 0, 0, 0): 's/mn-bg',  # Separator mode-filler
-		((255, 255, 255), (44, 44, 44), 0, 0, 0): 'S/bg',  # Filler segment
-		((166, 166, 166), (44, 44, 44), 0, 0, 0): 'S/ft',  # Filetype
-		((88, 88, 88), (44, 44, 44), 0, 0, 0): 's/ft-ps',  # Separator filetype-position
-		((166, 166, 166), (88, 88, 88), 0, 0, 0): 'S/pc',  # Vertical position (percent)
-		((221, 221, 221), (88, 88, 88), 0, 0, 0): 's/pc-ln',  # Separator position-line number
-		((33, 33, 33), (221, 221, 221), 0, 0, 0): 'S/ln',  # LN text
-		((33, 33, 33), (221, 221, 221), 1, 0, 0): 'S/lN',  # Actual line number
-		((0, 51, 0), (221, 221, 221), 0, 0, 0): 'S/cl',  # Column
+		(( 64,  64, 255), (  0,   0,   0), 0, 0, 0): 'NT',       # NonText
+		((240, 240, 240), (  0,   0,   0), 0, 0, 0): 'N',        # Normal
+		((  0,  51,   0), (153, 204,   0), 1, 0, 0): 'S/mn',     # Normal mode
+		((153, 204,   0), ( 44,  44,  44), 0, 0, 0): 's/mn-bg',  # Separator mode-filler
+		((255, 255, 255), ( 44,  44,  44), 0, 0, 0): 'S/bg',     # Filler segment
+		((166, 166, 166), ( 44,  44,  44), 0, 0, 0): 'S/ft',     # Filetype
+		(( 88,  88,  88), ( 44,  44,  44), 0, 0, 0): 's/ft-ps',  # Separator filetype-position
+		((166, 166, 166), ( 88,  88,  88), 0, 0, 0): 'S/pc',     # Vertical position (percent)
+		((221, 221, 221), ( 88,  88,  88), 0, 0, 0): 's/pc-ln',  # Separator position-line number
+		(( 33,  33,  33), (221, 221, 221), 0, 0, 0): 'S/ln',     # LN text
+		(( 33,  33,  33), (221, 221, 221), 1, 0, 0): 'S/lN',     # Actual line number
+		((  0,  51,   0), (221, 221, 221), 0, 0, 0): 'S/cl',     # Column
 	}
 
 	args = [
