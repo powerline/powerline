@@ -62,33 +62,64 @@ def main(attempts=3):
 		'-i', 'NONE',
 	]
 
-	tests = (
+	testss = (
 		{
-			'expected_result': (
-				'{S/mn: NORMAL }'
-				'{s/mn-bg: }'
-				'{S/bg:' + (' ' * 169) + '}'
-				'{S/ft:unix}'
-				'{s/ft-ps: }'
-				'{S/pc: 100%}'
-				'{s/pc-ln: }'
-				'{S/ln: LN }'
-				'{S/lN:  1}'
-				'{S/cl::1  }',
-				base_attrs
+			'tests': (
+				{
+					'expected_result': (
+						'{S/mn: NORMAL }'
+						'{s/mn-bg: }'
+						'{S/bg:' + (' ' * 169) + '}'
+						'{S/ft:unix}'
+						'{s/ft-ps: }'
+						'{S/pc: 100%}'
+						'{s/pc-ln: }'
+						'{S/ln: LN }'
+						'{S/lN:  1}'
+						'{S/cl::1  }',
+						base_attrs
+					),
+					'row': dim.rows - 2,
+				},
 			),
-			'row': dim.rows - 2,
+		},
+		{
+			'tests': (
+				{
+					'expected_result': (
+						'{S/mn: NORMAL }'
+						'{s/mn-bg: }'
+						'{S/bg:' + (' ' * 169) + '}'
+						'{S/ft:unix}'
+						'{s/ft-ps: }'
+						'{S/pc: 100%}'
+						'{s/pc-ln: }'
+						'{S/ln: LN }'
+						'{S/lN:  1}'
+						'{S/cl::1  }',
+						base_attrs
+					),
+					'row': dim.rows - 2,
+				},
+			),
+			'env': updated(env, LANG='C'),
 		},
 	)
 
-	return do_terminal_tests(
-		tests=tests,
-		cmd=vim_exe,
-		dim=dim,
-		args=args,
-		env=env,
-		cwd=TEST_ROOT,
-	)
+	ret = True
+
+	for additional_test_args in testss:
+		test_args = {
+			'cmd': vim_exe,
+			'dim': dim,
+			'args': args,
+			'env': env,
+			'cwd': TEST_ROOT,
+		}
+		test_args.update(additional_test_args)
+		ret = ret and do_terminal_tests(**test_args)
+
+	return ret
 
 
 if __name__ == '__main__':
