@@ -98,6 +98,27 @@ def main(attempts=3):
 			),
 			'env': updated(env, LANG='C'),
 		},
+		{
+			'tests': (
+				{
+					'expected_result': (
+						'{S/mn: NORMAL }'
+						'{s/mn-bg: }'
+						'{S/bg:' + (' ' * 167) + '}'
+						'{S/ft:unix}'
+						'{s/ft-ps: }'
+						'{S/pc: 100%}'
+						'{s/pc-ln: }'
+						'{S/ln:  }'
+						'{S/lN:  1}'
+						'{S/cl::1  }',
+						base_attrs
+					),
+					'row': dim.rows - 2,
+				},
+			),
+			'env': updated(env, LANG='en_US.UTF-8'),
+		},
 	)
 
 	ret = True
@@ -109,6 +130,7 @@ def main(attempts=3):
 			'args': args,
 			'env': env,
 			'cwd': TEST_ROOT,
+			'attempts': 1,
 		}
 		test_args.update(additional_test_args)
 		ret = ret and do_terminal_tests(**test_args)
