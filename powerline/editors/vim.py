@@ -8,7 +8,7 @@ from collections import defaultdict
 from itertools import chain
 
 from powerline.lib.dict import updated
-from powerline.lib.unicode import unicode
+from powerline.lib.unicode import unicode, u
 from powerline.editors import (Editor, param_updated, iterparam_updated,
                                EditorObj, EditorBinaryOp, EditorTernaryOp,
                                EditorEmpty, EditorIndex, EditorFunc, EditorStr,
@@ -24,6 +24,7 @@ from powerline.editors import (Editor, param_updated, iterparam_updated,
                                EditorTabWindow, EditorTabAmount, EditorNumber,
                                EditorAvailableWidth,
                                toedobj)
+from powerline.bindings.vim import get_vim_to_python
 
 
 def finish_kwargs(kwargs, vval=None, cache=None, buffer_cache=None, paramfunc=(lambda s: s), toed=None):
@@ -545,11 +546,11 @@ ED_TO_VIM = {
 			**kw
 		),
 		'tovimpy': lambda self, toed, **kw: (
-			'{' + (
-				'"config_paths": vim.vars.get("powerline_config_paths", None),'
-				'"theme_overrides": vim.vars.get("powerline_theme_overrides", None),'
-				'"config_overrides": vim.vars.get("powerline_config_overrides", None),'
-			) + '}'
+			'(lambda vim_to_python: {' + (
+				'"config_paths": vim_to_python(vim.vars.get("powerline_config_paths", None)),'
+				'"theme_overrides": vim_to_python(vim.vars.get("powerline_theme_overrides", None)),'
+				'"config_overrides": vim_to_python(vim.vars.get("powerline_config_overrides", None)),'
+			) + '})(get_vim_to_python(vim, u(vim.options["encoding"])))'
 		),
 	},
 	EditorEncoding: {
@@ -928,6 +929,8 @@ class VimPyEditor(VimEditor):
 		gvars = updated(init_globals, {
 			'vim': vim,
 			'vim_funcs': vim_funcs,
+			'get_vim_to_python': get_vim_to_python,
+			'u': u,
 		})
 		for k, v in reqs_dict.items():
 			pyexpr = cls.toed(v[0][0], **kwargs)

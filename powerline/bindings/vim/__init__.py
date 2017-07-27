@@ -6,7 +6,7 @@ import codecs
 
 from functools import partial
 
-from powerline.lib.unicode import unicode
+from powerline.lib.unicode import unicode, safe_unicode
 
 
 def get_python_to_vim(vim, encoding='utf-8'):
@@ -41,6 +41,33 @@ def get_python_to_vim(vim, encoding='utf-8'):
 		return python_to_vim_types[type(o)](o)
 
 	return python_to_vim
+
+
+def get_vim_to_python(vim, encoding='utf-8'):
+	'''Get function which converts Vim types to Python ones
+
+	:param module vim:
+		Vim module.
+	:param str encoding:
+		Used encoding.
+
+	:return: Python object.
+	'''
+	vim_to_python_types = {}
+
+	def vim_to_python(o):
+		return vim_to_python_types.get(type(o), lambda o: o)(o)
+
+	vim_to_python_types.update({
+		vim.Dictionary: lambda o: (
+			dict(((safe_unicode(k, encoding), vim_to_python(v))
+			      for k, v in o.items()))
+		),
+		vim.List: lambda o: [vim_to_python(i) for i in o],
+		bytes: lambda o: safe_unicode(o, encoding),
+	})
+
+	return vim_to_python
 
 
 def vim_global_exists(vim, name):

@@ -118,12 +118,12 @@ def out_u(s):
 		raise TypeError('Expected unicode or bytes instance, got {0}'.format(repr(type(s))))
 
 
-def safe_unicode(s):
+def safe_unicode(s, encoding='utf-8'):
 	'''Return unicode instance without raising an exception.
 
 	Order of assumptions:
 	* ASCII string or unicode object
-	* UTF-8 string
+	* ``encoding``-encoded string
 	* Object with __str__() or __repr__() method that returns UTF-8 string or 
 	  unicode object (depending on python version)
 	* String in powerline.lib.encoding.get_preferred_output_encoding() encoding
@@ -138,9 +138,9 @@ def safe_unicode(s):
 				return unicode(s)
 		except UnicodeDecodeError:
 			try:
-				return unicode(s, 'utf-8')
+				return unicode(s, encoding)
 			except TypeError:
-				return unicode(str(s), 'utf-8')
+				return unicode(str(s), encoding)
 			except UnicodeDecodeError:
 				return unicode(s, get_preferred_output_encoding())
 	except Exception as e:

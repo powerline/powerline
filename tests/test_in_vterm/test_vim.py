@@ -51,6 +51,12 @@ def main(attempts=3):
 		p.send(':echo strtrans(eval(&statusline[2:]))\n')
 
 	tests = (
+		{
+			'expected_result': ('', base_attrs),
+			'row': dim.rows - 2,
+			'prep_cb': feed,
+			'attempts': 1,  # FIXME
+		},
 	)
 
 	return do_terminal_tests(
@@ -60,6 +66,7 @@ def main(attempts=3):
 		args=args,
 		env=env,
 		cwd=TEST_ROOT,
+		attempts=1,  # FIXME
 	)
 
 
