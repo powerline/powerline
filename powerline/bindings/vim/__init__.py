@@ -16,6 +16,10 @@ def get_python_to_vim(vim, encoding='utf-8'):
 		Vim module.
 	:param str encoding:
 		Used encoding.
+
+	:return:
+		Function which does the conversion. Function accepts a single argument 
+		(object to convert) and returns VimL expression (bytes).
 	'''
 	python_to_vim_types = {
 		unicode: (
@@ -35,6 +39,8 @@ def get_python_to_vim(vim, encoding='utf-8'):
 
 	def python_to_vim(o):
 		return python_to_vim_types[type(o)](o)
+
+	return python_to_vim
 
 
 def vim_global_exists(vim, name):
