@@ -18,7 +18,8 @@ test_vim() {
 	ln -sf "$(which "${POWERLINE_VIM_EXE}")" "$TEST_ROOT/path/vim"
 	f="$ROOT/tests/test_in_vterm/test_vim.py"
 	if ! "${PYTHON}" "$f" ; then
-		local test_name="$(LANG=C "$POWERLINE_VIM_EXE" --cmd 'echo version' --cmd qa 2>&1)"
+		local test_name="$(LANG=C "$POWERLINE_VIM_EXE" --cmd 'echo version' --cmd qa 2>&1 \
+		                   | grep -v 'Vim:')"
 		fail "$test_name" F "Failed vterm test $f"
 	fi
 }
