@@ -3,17 +3,11 @@
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 import os
-import sys
-
-from time import sleep
-from subprocess import check_call
-from glob import glob1
-from traceback import print_exc
 
 from powerline.lib.dict import updated
 
-from tests.modules.lib.terminal import (ExpectProcess, MutableDimensions,
-                                        do_terminal_tests, get_env)
+from tests.modules.lib.terminal import (MutableDimensions, do_terminal_tests,
+                                        get_env)
 
 
 TEST_ROOT = os.path.abspath(os.environ['TEST_ROOT'])
