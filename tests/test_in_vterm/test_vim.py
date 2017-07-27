@@ -4,6 +4,8 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 
 import os
 
+from time import sleep
+
 from powerline.lib.dict import updated
 
 from tests.modules.lib.terminal import (MutableDimensions, do_terminal_tests,
@@ -73,7 +75,6 @@ def main(attempts=3):
 						'{S/cl::1  }',
 						base_attrs
 					),
-					'row': dim.rows - 2,
 				},
 			),
 		},
@@ -93,7 +94,6 @@ def main(attempts=3):
 						'{S/cl::1  }',
 						base_attrs
 					),
-					'row': dim.rows - 2,
 				},
 			),
 			'env': updated(env, LANG='C'),
@@ -114,7 +114,6 @@ def main(attempts=3):
 						'{S/cl::1  }',
 						base_attrs
 					),
-					'row': dim.rows - 2,
 				},
 			),
 			'env': updated(env, LANG='en_US.UTF-8'),
@@ -133,6 +132,9 @@ def main(attempts=3):
 			'attempts': 1,
 		}
 		test_args.update(additional_test_args)
+		test_args['tests'][0].setdefault('prep_cb', lambda p: sleep(1.5))
+		for test in test_args['tests']:
+			test.setdefault('row', dim.rows - 2)
 		ret = ret and do_terminal_tests(**test_args)
 
 	return ret
