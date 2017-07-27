@@ -148,7 +148,6 @@ class ExpectProcess(threading.Thread):
 
 def test_expected_result(p, test, last_attempt, last_attempt_cb, attempts):
 	expected_text, attrs = test['expected_result']
-	result = None
 	while attempts:
 		actual_text, all_attrs = p.get_row(test['row'], attrs)
 		if actual_text == expected_text:
