@@ -15,10 +15,10 @@ export POWERLINE_THEME_OVERRIDES='default.segments.left=[]'
 test_script() {
 	local vim="$1" ; shift
 	local script="$1" ; shift
-	echo "Running script $script with $vim"
 	if ! test -e "$vim" ; then
 		return 0
 	fi
+	echo "Running script $script with $vim"
 	if ! script="$script" "$vim" -u NONE -c 'source $script' \
 	   || test -f message.fail
 	then
