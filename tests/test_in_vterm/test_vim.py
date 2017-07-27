@@ -32,14 +32,29 @@ def main(attempts=3):
 	vimrc = os.path.join(TEST_ROOT, 'init.vim')
 	vimrc_contents = '''
 		set laststatus=2
+		let g:powerline_config_paths = [expand("$ROOT/powerline/config_files")]
 		set runtimepath=$ROOT/powerline/bindings/vim
 	'''
 	with open(vimrc, 'w') as vd:
 		vd.write(vimrc_contents)
 
 	base_attrs = {
+		# Pref
+		# S/   segments
+		# s/   separators
+		#      Vim own highlight
 		(( 64,  64, 255), (0, 0, 0), 0, 0, 0): 'NT',  # NonText
-		((240, 240, 240), (0, 0, 0), 0, 0, 0): 'N',   # Normal
+		((240, 240, 240), (0, 0, 0), 0, 0, 0): 'N',  # Normal
+		((0, 51, 0), (153, 204, 0), 1, 0, 0): 'S/mn',  # Normal mode
+		((153, 204, 0), (44, 44, 44), 0, 0, 0): 's/mn-bg',  # Separator mode-filler
+		((255, 255, 255), (44, 44, 44), 0, 0, 0): 'S/bg',  # Filler segment
+		((166, 166, 166), (44, 44, 44), 0, 0, 0): 'S/ft',  # Filetype
+		((88, 88, 88), (44, 44, 44), 0, 0, 0): 's/ft-ps',  # Separator filetype-position
+		((166, 166, 166), (88, 88, 88), 0, 0, 0): 'S/pc',  # Vertical position (percent)
+		((221, 221, 221), (88, 88, 88), 0, 0, 0): 's/pc-ln',  # Separator position-line number
+		((33, 33, 33), (221, 221, 221), 0, 0, 0): 'S/ln',  # LN text
+		((33, 33, 33), (221, 221, 221), 1, 0, 0): 'S/lN',  # Actual line number
+		((0, 51, 0), (221, 221, 221), 0, 0, 0): 'S/cl',  # Column
 	}
 
 	args = [
@@ -47,15 +62,22 @@ def main(attempts=3):
 		'-i', 'NONE',
 	]
 
-	def feed(p):
-		p.send(':echo strtrans(eval(&statusline[2:]))\n')
-
 	tests = (
 		{
-			'expected_result': ('', base_attrs),
+			'expected_result': (
+				'{S/mn: NORMAL }'
+				'{s/mn-bg: }'
+				'{S/bg:' + (' ' * 169) + '}'
+				'{S/ft:unix}'
+				'{s/ft-ps: }'
+				'{S/pc: 100%}'
+				'{s/pc-ln: }'
+				'{S/ln: LN }'
+				'{S/lN:  1}'
+				'{S/cl::1  }',
+				base_attrs
+			),
 			'row': dim.rows - 2,
-			'prep_cb': feed,
-			'attempts': 1,  # FIXME
 		},
 	)
 
@@ -66,7 +88,6 @@ def main(attempts=3):
 		args=args,
 		env=env,
 		cwd=TEST_ROOT,
-		attempts=1,  # FIXME
 	)
 
 
