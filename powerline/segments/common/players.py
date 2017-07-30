@@ -559,7 +559,7 @@ class MocPlayerSegment(PlayerSegment):
 		if not now_playing_str:
 			return
 		ignore_info = (
-		    'File', 'TimeLeft', 'TotalSec', 'Title',
+		    'File', 'TimeLeft', 'Title',
 		    'Bitrate', 'AvgBitrate', 'Rate'
 		)
 		now_playing = dict(
@@ -572,9 +572,9 @@ class MocPlayerSegment(PlayerSegment):
 			'state': state,
 			'album': now_playing.get('Album'),
 			'artist': now_playing.get('Artist'),
-			'title': now_playing.get('Title'),
-			'elapsed': _convert_seconds(now_playing.get('CurrentTime', 0)),
-			'total': _convert_seconds(now_playing.get('TotalTime', 0)),
+			'title': now_playing.get('SongTitle'),
+			'elapsed': _convert_seconds(now_playing.get('CurrentSec', 0)),
+			'total': _convert_seconds(now_playing.get('TotalSec', 0)),
 		}
 
 
