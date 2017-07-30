@@ -26,6 +26,7 @@ matrix:
         - python: "3.3"
         - python: "3.4"
         - python: "3.5"
+        - python: "3.6"
         - python: "pypy"
         - python: "pypy3"
         - python: "2.7"
