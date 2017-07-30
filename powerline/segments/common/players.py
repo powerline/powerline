@@ -564,7 +564,8 @@ class MocPlayerSegment(PlayerSegment):
 		)
 		now_playing = dict(
 		    [line.split(': ') 
-		    for line in now_playing_str.split('\n')[:-1]]
+		    for line in now_playing_str.split('\n')[:-1]
+		    if line.split(': ')[0] not in ignore_info]
 		)
 		state = _convert_state(now_playing.get('State'))
 		return {
