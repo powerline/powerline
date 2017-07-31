@@ -534,7 +534,8 @@ class MocPlayerSegment(PlayerSegment):
 	def get_player_status(self, pl):
 		'''Return Music On Console (mocp) player information.
 
-		mocp -i returns current information i.e.
+		`mocp -i` returns current information i.e.
+		.. code-block::
 		    File: filename.format
 		    Title: full title
 		    Artist: artist name
@@ -562,11 +563,11 @@ class MocPlayerSegment(PlayerSegment):
 		    'File', 'TimeLeft', 'Title',
 		    'Bitrate', 'AvgBitrate', 'Rate'
 		)
-		now_playing = dict(
-		    [line.split(': ') 
+		now_playing = dict((
+		    line.split(': ') 
 		    for line in now_playing_str.split('\n')[:-1]
-		    if line.split(': ')[0] not in ignore_info]
-		)
+		    if line.split(': ')[0] not in ignore_info
+		))
 		state = _convert_state(now_playing.get('State'))
 		return {
 			'state': state,
@@ -581,7 +582,7 @@ class MocPlayerSegment(PlayerSegment):
 mocp = with_docstring(MocPlayerSegment(),
 ('''Return MOC (Music On Console) player information
 
-Requires mocp command be acessible from $PATH.
+Requires version >= 2.3.0 and `mocp` command be acessible from $PATH.
 
 {0}
 ''').format(_common_args.format('mocp')))
