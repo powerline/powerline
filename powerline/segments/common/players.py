@@ -564,16 +564,16 @@ class MocPlayerSegment(PlayerSegment):
 		    'Bitrate', 'AvgBitrate', 'Rate'
 		)
 		now_playing = dict((
-		    line.split(': ') 
+		    line.split(': ', 1) 
 		    for line in now_playing_str.split('\n')[:-1]
-		    if line.split(': ')[0] not in ignore_info
+		    if line.split(': ', 1)[0] not in ignore_info
 		))
-		state = _convert_state(now_playing.get('State'))
+		state = _convert_state(now_playing.get('State', 'stop'))
 		return {
 			'state': state,
-			'album': now_playing.get('Album'),
-			'artist': now_playing.get('Artist'),
-			'title': now_playing.get('SongTitle'),
+			'album': now_playing.get('Album', ''),
+			'artist': now_playing.get('Artist', ''),
+			'title': now_playing.get('SongTitle', ''),
 			'elapsed': _convert_seconds(now_playing.get('CurrentSec', 0)),
 			'total': _convert_seconds(now_playing.get('TotalSec', 0)),
 		}
