@@ -559,14 +559,10 @@ class MocPlayerSegment(PlayerSegment):
 		now_playing_str = run_cmd(pl, ['mocp', '-i'])
 		if not now_playing_str:
 			return
-		ignore_info = (
-		    'File', 'TimeLeft', 'Title',
-		    'Bitrate', 'AvgBitrate', 'Rate'
-		)
+		
 		now_playing = dict((
 		    line.split(': ', 1) 
 		    for line in now_playing_str.split('\n')[:-1]
-		    if line.split(': ', 1)[0] not in ignore_info
 		))
 		state = _convert_state(now_playing.get('State', 'stop'))
 		return {
