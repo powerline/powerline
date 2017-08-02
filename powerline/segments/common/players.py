@@ -551,18 +551,18 @@ class MocPlayerSegment(PlayerSegment):
 		    Rate: 00kHz
 
 		For the information we are looking for we don’t really care if
-		we have extra-timing information or bit rate level. The 
-		dictionary comprehension in this method takes anything in 
+		we have extra-timing information or bit rate level. The
+		dictionary comprehension in this method takes anything in
 		ignore_info and brings the key inside that to the right info of
 		the dictionary.
 		'''
 		now_playing_str = run_cmd(pl, ['mocp', '-i'])
 		if not now_playing_str:
 			return
-		
+
 		now_playing = dict((
-		    line.split(': ', 1) 
-		    for line in now_playing_str.split('\n')[:-1]
+                    line.split(': ', 1)
+                    for line in now_playing_str.split('\n')[:-1]
 		))
 		state = _convert_state(now_playing.get('State', 'stop'))
 		return {
