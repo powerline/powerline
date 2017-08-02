@@ -534,35 +534,36 @@ class MocPlayerSegment(PlayerSegment):
 	def get_player_status(self, pl):
 		'''Return Music On Console (mocp) player information.
 
-		`mocp -i` returns current information i.e.
-		.. code-block::
-		    File: filename.format
-		    Title: full title
-		    Artist: artist name
-		    SongTitle: song title
-		    Album: album name
-		    TotalTime: 00:00
-		    TimeLeft: 00:00
-		    TotalSec: 000
-		    CurrentTime: 00:00
-		    CurrentSec: 000
-		    Bitrate: 000kbps
-		    AvgBitrate: 000kbps
-		    Rate: 00kHz
+		``mocp -i`` returns current information i.e.
 
-		For the information we are looking for we don’t really care if
-		we have extra-timing information or bit rate level. The
-		dictionary comprehension in this method takes anything in
-		ignore_info and brings the key inside that to the right info of
-		the dictionary.
+		.. code-block::
+
+		   File: filename.format
+		   Title: full title
+		   Artist: artist name
+		   SongTitle: song title
+		   Album: album name
+		   TotalTime: 00:00
+		   TimeLeft: 00:00
+		   TotalSec: 000
+		   CurrentTime: 00:00
+		   CurrentSec: 000
+		   Bitrate: 000kbps
+		   AvgBitrate: 000kbps
+		   Rate: 00kHz
+
+		For the information we are looking for we don’t really care if we have 
+		extra-timing information or bit rate level. The dictionary comprehension 
+		in this method takes anything in ignore_info and brings the key inside 
+		that to the right info of the dictionary.
 		'''
 		now_playing_str = run_cmd(pl, ['mocp', '-i'])
 		if not now_playing_str:
 			return
 
 		now_playing = dict((
-                    line.split(': ', 1)
-                    for line in now_playing_str.split('\n')[:-1]
+			line.split(': ', 1)
+			for line in now_playing_str.split('\n')[:-1]
 		))
 		state = _convert_state(now_playing.get('State', 'stop'))
 		return {
@@ -578,7 +579,7 @@ class MocPlayerSegment(PlayerSegment):
 mocp = with_docstring(MocPlayerSegment(),
 ('''Return MOC (Music On Console) player information
 
-Requires version >= 2.3.0 and `mocp` command be acessible from $PATH.
+Requires version >= 2.3.0 and ``mocp`` executable in ``$PATH``.
 
 {0}
 ''').format(_common_args.format('mocp')))
