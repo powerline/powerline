@@ -261,7 +261,7 @@ else:
 			pl.warning('Missing player elapsed time')
 			elapsed = None
 		else:
-			elapsed = _convert_seconds(elapsed / 1e6),
+			elapsed = _convert_seconds(elapsed / 1e6)
 		album = info.get('xesam:album')
 		title = info.get('xesam:title')
 		artist = info.get('xesam:artist')
