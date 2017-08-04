@@ -249,6 +249,7 @@ else:
 			player = bus.get_object(bus_name, player_path)
 			iface = dbus.Interface(player, iface_prop)
 			info = iface.Get(iface_player, 'Metadata')
+			elapsed = iface.Get(iface_player, 'Position')
 			status = iface.Get(iface_player, 'PlaybackStatus')
 		except dbus.exceptions.DBusException:
 			return
@@ -269,6 +270,7 @@ else:
 			'album': album,
 			'artist': artist,
 			'title': title,
+			'elapsed': _convert_seconds(elapsed / 1e6),
 			'total': _convert_seconds(info.get('mpris:length') / 1e6),
 		}
 
