@@ -254,6 +254,14 @@ else:
 			return
 		if not info:
 			return
+
+		try:
+			elapsed = iface.Get(iface_player, 'Position')
+		except dbus.exceptions.DBusException:
+			pl.warning('Missing player elapsed time')
+			elapsed = None
+		else:
+			elapsed = _convert_seconds(elapsed / 1e6)
 		album = info.get('xesam:album')
 		title = info.get('xesam:title')
 		artist = info.get('xesam:artist')
@@ -269,6 +277,7 @@ else:
 			'album': album,
 			'artist': artist,
 			'title': title,
+			'elapsed': elapsed,
 			'total': _convert_seconds(info.get('mpris:length') / 1e6),
 		}
 
