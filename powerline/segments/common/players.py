@@ -249,12 +249,19 @@ else:
 			player = bus.get_object(bus_name, player_path)
 			iface = dbus.Interface(player, iface_prop)
 			info = iface.Get(iface_player, 'Metadata')
-			elapsed = iface.Get(iface_player, 'Position')
 			status = iface.Get(iface_player, 'PlaybackStatus')
 		except dbus.exceptions.DBusException:
 			return
 		if not info:
 			return
+
+		try:
+			elapsed = iface.Get(iface_player, 'Position')
+		except dbus.exceptions.DBusException:
+			pl.warning('Missing player elapsed time')
+			elapsed = None
+		else:
+			elapsed = _convert_seconds(elapsed / 1e6),
 		album = info.get('xesam:album')
 		title = info.get('xesam:title')
 		artist = info.get('xesam:artist')
@@ -270,7 +277,7 @@ else:
 			'album': album,
 			'artist': artist,
 			'title': title,
-			'elapsed': _convert_seconds(elapsed / 1e6),
+			'elapsed': elapsed,
 			'total': _convert_seconds(info.get('mpris:length') / 1e6),
 		}
 
