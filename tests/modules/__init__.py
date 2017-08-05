@@ -2,6 +2,7 @@
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 import sys
+import os
 
 if sys.version_info < (2, 7):
 	from unittest2 import TestCase as _TestCase  # NOQA

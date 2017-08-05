@@ -3,7 +3,6 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 
 import imp
 import sys
-import os
 
 
 class Pl(object):
