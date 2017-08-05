@@ -497,15 +497,7 @@ class TestUnicode(TestCase):
 		if sys.maxunicode < 0x10FFFF:
 			raise SkipTest('Can only test strwidth_ucs_4 in UCS-4 Pythons')
 
-		def east_asian_width(ch):
-			assert (len(ch) == 1)
-			assert ord(ch) == 0x1F48E
-			return 'F'
-
-		with replace_attr(plu, 'east_asian_width', east_asian_width):
-			# Warning: travis unicodedata.east_asian_width for some reason 
-			# thinks this character is 5 symbols wide.
-			self.assertEqual(2, plu.strwidth_ucs_4(width_data, '\U0001F48E'))
+		self.assertEqual(2, plu.strwidth_ucs_4(width_data, '\U0001F48E'))
 
 	def test_strwidth_ucs_2(self):
 		self.assertEqual(4, plu.strwidth_ucs_2(width_data, 'abcd'))
