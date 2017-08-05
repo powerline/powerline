@@ -85,6 +85,7 @@ def main(*args, **kwargs):
 
 
 class TestCase(_TestCase):
-	def fail(self, *args, **kwargs):
+	def fail(self, msg=None):
 		super(TestCase, self).fail(*args, **kwargs)
-		suite.fail(self.__class__.__name__, 'Failed test')
+		suite.fail(self.__class__.__name__,
+		           msg or 'Test failed without message')
