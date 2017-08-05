@@ -17,7 +17,7 @@ from powerline import get_fallback_logger
 
 from tests.modules.lib.terminal import (ExpectProcess, MutableDimensions,
                                         do_terminal_tests, get_env)
-from tests.modules.lib import PowerlineTestSuite
+from tests.modules import PowerlineTestSuite
 
 
 TEST_ROOT = os.path.abspath(os.environ['TEST_ROOT'])
