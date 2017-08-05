@@ -220,7 +220,7 @@ def get_env(vterm_path, test_dir, *args, **kwargs):
 	return env
 
 
-def do_terminal_tests(tests, cmd, dim, args, env, cwd=None, fin_cb=None,
+def do_terminal_tests(tests, cmd, dim, args, env, suite, cwd=None, fin_cb=None,
                       last_attempt_cb=None, attempts=3):
 	lib = os.environ.get('POWERLINE_LIBVTERM')
 	if not lib:
@@ -243,19 +243,21 @@ def do_terminal_tests(tests, cmd, dim, args, env, cwd=None, fin_cb=None,
 
 			ret = True
 
-			for test in tests:
-				try:
-					test_prep = test['prep_cb']
-				except KeyError:
-					pass
-				else:
-					test_prep(p)
-				ret = (
-					ret
-					and test_expected_result(p, test, attempts == 0,
-					                         last_attempt_cb,
-					                         test.get('attempts', 3))
-				)
+			for i, test in enumerate(tests):
+				with suite.test(test.get('name', 'test_{0}'.format(i)),
+				                attempts) as ptest:
+					try:
+						test_prep = test['prep_cb']
+					except KeyError:
+						pass
+					else:
+						test_prep(p)
+					test_result = test_expected_result(p, test, attempts == 0,
+					                                   last_attempt_cb,
+					                                   test.get('attempts', 3))
+					if not test_result:
+						ptest.fail('Result does not match expected')
+				ret = ret and test_result
 
 			if ret:
 				return ret

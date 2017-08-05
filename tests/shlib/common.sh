@@ -13,7 +13,7 @@ if test -z "$FAILED" ; then
 	FAIL_SUMMARY=""
 
 	TMP_ROOT="$ROOT/tests/tmp"
-	FAILURES_FILE="$ROOT/tests/failures"
+	export FAILURES_FILE="$ROOT/tests/failures"
 fi
 
 ANSI_CLEAR="\033[0K"

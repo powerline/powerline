@@ -17,6 +17,7 @@ from powerline import get_fallback_logger
 
 from tests.modules.lib.terminal import (ExpectProcess, MutableDimensions,
                                         do_terminal_tests, get_env)
+from tests.modules.lib import PowerlineTestSuite
 
 
 TEST_ROOT = os.path.abspath(os.environ['TEST_ROOT'])
@@ -229,16 +230,18 @@ def main(attempts=3):
 		'new-window', 'bash --norc --noprofile -i', ';',
 	]
 
-	return do_terminal_tests(
-		tests=tests,
-		cmd=tmux_exe,
-		dim=dim,
-		args=args,
-		env=env,
-		cwd=TEST_ROOT,
-		fin_cb=tmux_fin_cb,
-		last_attempt_cb=print_tmux_logs,
-	)
+	with PowerlineTestSuite('tmux') as suite:
+		return do_terminal_tests(
+			tests=tests,
+			cmd=tmux_exe,
+			dim=dim,
+			args=args,
+			env=env,
+			cwd=TEST_ROOT,
+			fin_cb=tmux_fin_cb,
+			last_attempt_cb=print_tmux_logs,
+			suite=suite,
+		)
 
 
 if __name__ == '__main__':

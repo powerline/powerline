@@ -3,6 +3,7 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 
 import imp
 import sys
+import os
 
 
 class Pl(object):
@@ -161,3 +162,86 @@ def replace_env(key, new, environ=None, **kwargs):
 	r = kwargs.copy()
 	r['environ'] = environ or {}
 	return ItemReplace(r['environ'], key, new, r)
+
+
+class PowerlineSingleTest(object):
+	def __init__(self, suite, name):
+		self.suite = suite
+		self.name = name
+
+	def __enter__(self):
+		return self
+
+	def __exit__(self, exc_type, exc_value, traceback):
+		if exc_type is not None:
+			self.exception('Exception while running test: {0!r}'.format(
+				exc_value))
+
+	def fail(self, message, allow_failure=False):
+		return self.suite.fail(self.name, message, allow_failure)
+
+	def exception(self, message, allow_failure=False):
+		return self.suite.exception(self.name, message, allow_failure)
+
+
+class PowerlineDummyTest(object):
+	def __enter__(self):
+		return self
+
+	def __exit__(self, *args):
+		pass
+
+	def fail(self, *args, **kwargs):
+		pass
+
+	def exception(self, *args, **kwargs):
+		pass
+
+
+class PowerlineTestSuite(object):
+	def __init__(self, name):
+		self.name = name
+
+	def __enter__(self):
+		self.saved_current_suite = os.environ['POWERLINE_CURRENT_SUITE']
+		os.environ['POWERLINE_CURRENT_SUITE'] = (
+			self.saved_current_suite + '/' + self.name)
+		self.suite = self.saved_current_suite + '/' + self.name
+		return self
+
+	def __exit__(self, exc_type, exc_value, traceback):
+		if exc_type is not None:
+			self.exception(
+				'suite_noexcept',
+				'Exception while running test suite: {0!r}'.format(exc_value),
+			)
+		os.environ['POWERLINE_CURRENT_SUITE'] = self.saved_current_suite
+
+	def record_test_failure(self, fail_char, test_name, message, allow_failure=False):
+		if allow_failure:
+			fail_char = 'A' + fail_char
+		full_msg = '{fail_char} {suite}|{test_name} :: {message}'.format(
+			fail_char=fail_char,
+			suite=self.suite,
+			test_name=test_name,
+			message=message,
+		)
+		print('Failed: ' + full_msg)
+		with open(os.environ['FAILURES_FILE'], 'a') as ffd:
+			ffd.write(full_msg + '\n')
+		return False
+
+	def exception(self, test_name, message, allow_failure=False):
+		return self.record_test_failure('E', test_name, message, allow_failure)
+
+	def fail(self, test_name, message, allow_failure=False):
+		return self.record_test_failure('F', test_name, message, allow_failure)
+
+	def test(self, name, attempts=0):
+		if not attempts:
+			return PowerlineSingleTest(self, name)
+		else:
+			return PowerlineDummyTest()
+
+	def subsuite(self, name):
+		return PowerlineTestSuite(name)
