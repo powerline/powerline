@@ -434,7 +434,7 @@ unidata_version = tuple((
 	int(c) for c in unicodedata.unidata_version.split('.')))
 
 U1F48E_WIDTH = (
-	1 if unidata_version >= (6,) else 2
+	1 if unidata_version >= (5, 2) else 2
 )
 
 
