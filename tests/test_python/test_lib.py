@@ -497,14 +497,14 @@ class TestUnicode(TestCase):
 		if sys.maxunicode < 0x10FFFF:
 			raise SkipTest('Can only test strwidth_ucs_4 in UCS-4 Pythons')
 
-		self.assertEqual(2, plu.strwidth_ucs_4(width_data, '\U0001F48E'))
+		self.assertEqual(1, plu.strwidth_ucs_4(width_data, '\U0001F48E'))
 
 	def test_strwidth_ucs_2(self):
 		self.assertEqual(4, plu.strwidth_ucs_2(width_data, 'abcd'))
 		self.assertEqual(4, plu.strwidth_ucs_2(width_data, 'ＡＢ'))
 		if not sys.maxunicode < 0x10FFFF:
 			raise SkipTest('Can only test strwidth_ucs_2 in UCS-2 Pythons')
-		self.assertEqual(2, plu.strwidth_ucs_2(width_data, '\ud83d\udc8e'))
+		self.assertEqual(1, plu.strwidth_ucs_2(width_data, '\ud83d\udc8e'))
 
 
 class TestVCS(TestCase):
