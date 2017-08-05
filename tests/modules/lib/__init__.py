@@ -237,8 +237,8 @@ class PowerlineTestSuite(object):
 	def fail(self, test_name, message, allow_failure=False):
 		return self.record_test_failure('F', test_name, message, allow_failure)
 
-	def test(self, name, attempts=0):
-		if not attempts:
+	def test(self, name, attempts_left=0):
+		if not attempts_left:
 			return PowerlineSingleTest(self, name)
 		else:
 			return PowerlineDummyTest()

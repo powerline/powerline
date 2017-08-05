@@ -245,7 +245,7 @@ def do_terminal_tests(tests, cmd, dim, args, env, suite, cwd=None, fin_cb=None,
 
 			for i, test in enumerate(tests):
 				with suite.test(test.get('name', 'test_{0}'.format(i)),
-				                attempts) as ptest:
+				                attempts - 1) as ptest:
 					try:
 						test_prep = test['prep_cb']
 					except KeyError:
