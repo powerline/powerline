@@ -367,7 +367,7 @@ class SpotifyAppleScriptPlayerSegment(PlayerSegment):
 			'album': spotify_status[1],
 			'artist': spotify_status[2],
 			'title': spotify_status[3],
-			'total': _convert_seconds(int(spotify_status[4]))
+			'total': _convert_seconds(int(spotify_status[4])/1000)
 		}
 
 
