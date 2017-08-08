@@ -380,7 +380,7 @@ Requires ``osascript`` available in $PATH.
 ''').format(_common_args.format('spotify_apple_script')))
 
 
-if 'dbus' in globals() or not sys.platform.startswith('darwin'):
+if not sys.platform.startswith('darwin'):
 	spotify = spotify_dbus
 	_old_name = 'spotify_dbus'
 else:
