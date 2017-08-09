@@ -342,7 +342,7 @@ class SpotifyAppleScriptPlayerSegment(PlayerSegment):
 						set artist_name to artist of current track
 						set album_name to album of current track
 						set track_length to duration of current track
-						set now_playing to "" & player state & "{0}" & album_name & "{0}" & artist_name & "{0}" & track_name & "{0}" & track_length
+						set now_playing to "" & player state & "{0}" & album_name & "{0}" & artist_name & "{0}" & track_name & "{0}" & track_length & "{0}" & player position
 						return now_playing
 					else
 						return player state
@@ -367,7 +367,8 @@ class SpotifyAppleScriptPlayerSegment(PlayerSegment):
 			'album': spotify_status[1],
 			'artist': spotify_status[2],
 			'title': spotify_status[3],
-			'total': _convert_seconds(int(spotify_status[4])/1000)
+			'total': _convert_seconds(int(spotify_status[4])/1000),
+			'elapsed': _convert_seconds(spotify_status[5]),
 		}
 
 
