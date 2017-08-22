@@ -46,7 +46,7 @@ _powerline_status_wrapper() {
 
 	if ! _powerline_has_pipestatus \
 	   || test "${#last_pipe_status[@]}" -eq "0" \
-	   || test "$last_exit_code" != "${last_pipe_status[-1]}" ; then
+	   || test "$last_exit_code" != "${last_pipe_status[$(( ${#last_pipe_status[@]} - 1 ))]}" ; then
 		last_pipe_status=()
 	fi
 	"$@" $last_exit_code "${last_pipe_status[*]}"
