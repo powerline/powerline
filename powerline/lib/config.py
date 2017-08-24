@@ -18,7 +18,12 @@ def open_file(path):
 
 def load_json_config(config_file_path, load=json.load, open_file=open_file):
 	with open_file(config_file_path) as config_file_fp:
-		return load(config_file_fp)
+		try:
+			return load(config_file_fp)
+		except json.JSONDecodeError as err:
+			# Handle empty config file gracefully
+			if str(err) != "Expecting value: line 1 column 1 (char 0)":
+				raise
 
 
 class DummyWatcher(object):

@@ -36,6 +36,10 @@ def mergedicts(d1, d2, remove=True):
 	First dictionary is modified in-place.
 	'''
 	_setmerged(d1, d2)
+
+	if d2 == None:
+		return
+
 	for k in d2:
 		if k in d1 and isinstance(d1[k], dict) and isinstance(d2[k], dict):
 			mergedicts(d1[k], d2[k], remove)
@@ -72,6 +76,10 @@ def mergedicts_copy(d1, d2):
 	'''
 	ret = d1.copy()
 	_setmerged(ret, d2)
+
+	if d2 == None:
+		return ret
+
 	for k in d2:
 		if k in d1 and isinstance(d1[k], dict) and isinstance(d2[k], dict):
 			ret[k] = mergedicts_copy(d1[k], d2[k])
