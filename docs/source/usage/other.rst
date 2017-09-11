@@ -195,7 +195,7 @@ class from :py:class:`pdb.Pdb` and decorate it with
 
 .. code-block:: bash
 
-   python -mpowerline.bindings.pdb path/to/script.py
+   python -m powerline.bindings.pdb path/to/script.py
 
 just like you used ``python -m pdb``.
 
