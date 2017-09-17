@@ -430,13 +430,6 @@ width_data = {
 	'F': 2,          # Fullwidth
 }
 
-unidata_version = tuple((
-	int(c) for c in unicodedata.unidata_version.split('.')))
-
-U1F48E_WIDTH = (
-	1 if unidata_version >= (5, 2) else 2
-)
-
 
 class TestUnicode(TestCase):
 	def assertStringsIdentical(self, s1, s2):
@@ -505,14 +498,14 @@ class TestUnicode(TestCase):
 		if sys.maxunicode < 0x10FFFF:
 			raise SkipTest('Can only test strwidth_ucs_4 in UCS-4 Pythons')
 
-		self.assertEqual(U1F48E_WIDTH, plu.strwidth_ucs_4(width_data, '\U0001F48E'))
+		self.assertEqual(1, plu.strwidth_ucs_4(width_data, '\U0001F063'))
 
 	def test_strwidth_ucs_2(self):
 		self.assertEqual(4, plu.strwidth_ucs_2(width_data, 'abcd'))
 		self.assertEqual(4, plu.strwidth_ucs_2(width_data, 'ＡＢ'))
 		if not sys.maxunicode < 0x10FFFF:
 			raise SkipTest('Can only test strwidth_ucs_2 in UCS-2 Pythons')
-		self.assertEqual(U1F48E_WIDTH, plu.strwidth_ucs_2(width_data, '\ud83d\udc8e'))
+		self.assertEqual(1, plu.strwidth_ucs_2(width_data, '\ud83c\udc30'))
 
 
 class TestVCS(TestCase):
