@@ -9,6 +9,24 @@ vterm_setup
 HAS_SOCAT=
 HAS_C_CLIENT=
 
+git init "$TEST_ROOT/3rd"
+git --git-dir="$TEST_ROOT/3rd/.git" checkout -b BRANCH
+export DIR1="[32m"
+export DIR2=""
+mkdir "$TEST_ROOT/3rd/$DIR1"
+mkdir "$TEST_ROOT/3rd/$DIR2"
+mkdir "$TEST_ROOT"/3rd/'\[\]'
+mkdir "$TEST_ROOT"/3rd/'%%'
+mkdir "$TEST_ROOT"/3rd/'#[bold]'
+mkdir "$TEST_ROOT"/3rd/'(echo)'
+mkdir "$TEST_ROOT"/3rd/'$(echo)'
+mkdir "$TEST_ROOT"/3rd/'`echo`'
+mkdir "$TEST_ROOT"/3rd/'«Unicode!»'
+mkdir "$TEST_ROOT/fish_home"
+mkdir "$TEST_ROOT/fish_home/fish"
+mkdir "$TEST_ROOT/fish_home/fish/generated_completions"
+cp -r "$ROOT/tests/test_shells/ipython_home" "$TEST_ROOT"
+
 ln -s "$(which env)" "$TEST_ROOT/path"
 ln -s "$(which git)" "$TEST_ROOT/path"
 ln -s "$(which sleep)" "$TEST_ROOT/path"

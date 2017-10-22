@@ -159,7 +159,8 @@ username = False
 _geteuid = getattr(os, 'geteuid', lambda: 1)
 
 
-def user(pl, hide_user=None, hide_domain=False):
+@requires_segment_info
+def user(pl, segment_info, hide_user=None, hide_domain=False):
 	'''Return the current user.
 
 	:param str hide_user:
@@ -172,6 +173,11 @@ def user(pl, hide_user=None, hide_domain=False):
 	Highlight groups used: ``superuser`` or ``user``. It is recommended to define all highlight groups.
 	'''
 	global username
+	if (
+		segment_info['environ'].get('_POWERLINE_RUNNING_SHELL_TESTS')
+		== 'ee5bcdc6-b749-11e7-9456-50465d597777'
+	):
+		return 'user'
 	if username is False:
 		username = _get_user()
 	if username is None:
