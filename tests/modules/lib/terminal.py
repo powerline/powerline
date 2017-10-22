@@ -221,7 +221,11 @@ def get_env(vterm_path, test_dir, *args, **kwargs):
 
 
 def do_terminal_tests(tests, cmd, dim, args, env, suite, cwd=None, fin_cb=None,
-                      last_attempt_cb=None, attempts=3):
+                      last_attempt_cb=None, attempts=None):
+	debugging_tests = not not os.environ.get('_POWERLINE_DEBUGGING_TESTS')
+	default_attempts = 1 if debugging_tests else 3
+	if attempts is None:
+		attempts = default_attempts
 	lib = os.environ.get('POWERLINE_LIBVTERM')
 	if not lib:
 		if os.path.exists('tests/bot-ci/deps/libvterm/libvterm.so'):
@@ -252,9 +256,10 @@ def do_terminal_tests(tests, cmd, dim, args, env, suite, cwd=None, fin_cb=None,
 						pass
 					else:
 						test_prep(p)
-					test_result = test_expected_result(p, test, attempts == 0,
-					                                   last_attempt_cb,
-					                                   test.get('attempts', 3))
+					test_result = test_expected_result(
+						p, test, attempts == 0, last_attempt_cb,
+						test.get('attempts', default_attempts)
+					)
 					if not test_result:
 						ptest.fail('Result does not match expected')
 				ret = ret and test_result

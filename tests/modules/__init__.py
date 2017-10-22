@@ -13,6 +13,8 @@ else:
 	from unittest import main as _main  # NOQA
 	from unittest.case import SkipTest  # NOQA
 
+from tests.modules.lib import PowerlineSingleTest
+
 
 class PowerlineDummyTest(object):
 	def __enter__(self):
