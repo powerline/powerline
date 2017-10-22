@@ -11,3 +11,6 @@ build
 message.fail
 
 client/powerline
+
+/tests/tmp
+/tests/failures
