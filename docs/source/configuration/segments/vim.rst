@@ -9,6 +9,12 @@ Vim segments
 Plugin-specific segments
 ========================
 
+Asynchronous Linter Engine (ALE) segments
+-----------------------------------------
+
+.. automodule:: powerline.segments.vim.plugin.ale
+   :members:
+
 Syntastic segments
 ------------------
 
