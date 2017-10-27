@@ -1,3 +1,4 @@
+# vim:fileencoding=utf-8:noet
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 try:
@@ -23,14 +24,14 @@ def ale(segment_info, pl, err_format='ERR: ln {first_line} ({num}) ', warn_forma
 	'''
 	if not (vim_global_exists('ale_enabled') and int(vim.eval('g:ale_enabled'))):
 		return None
-	has_errors = int(vim.eval('ale#statusline#Count('+str(segment_info['bufnr'])+').total'))
+	has_errors = int(vim.eval('ale#statusline#Count(' + str(segment_info['bufnr']) + ').total'))
 	if not has_errors:
 		return
 	error = None
 	warning = None
 	errors_count = 0
 	warnings_count = 0
-	for issue in vim.eval('ale#engine#GetLoclist('+str(segment_info['bufnr'])+')'):
+	for issue in vim.eval('ale#engine#GetLoclist(' + str(segment_info['bufnr']) + ')'):
 		if issue['type'] == 'E':
 			error = error or issue
 			errors_count += 1
