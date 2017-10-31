@@ -85,21 +85,16 @@ else:
 		'vboxnet':  -5,  # VirtualBox bridge interface       : vboxnet0
 	}
 
-	_interface_start_re = re.compile(r'^([a-z]+?)(\d|$)')
-
 	def _interface_key(interface):
-		match = _interface_start_re.match(interface)
-		if match:
-			try:
-				base = _interface_starts[match.group(1)] * 100
-			except KeyError:
-				base = 500
-			if match.group(2):
-				return base - int(match.group(2))
-			else:
-				return base
-		else:
-			return 0
+		for prefix,score in _interface_starts.items():
+			if(interface.startswith(prefix)):
+				try:
+					# This prevents a huge negative when the interface name is a mac address
+					modifier = int(re.sub('[^0-9]+', '', interface)) < 10 or 0
+				except:
+					modifier = 0
+				return score * 100 - modifier
+		return 0
 
 	def internal_ip(pl, interface='auto', ipv=4):
 		family = netifaces.AF_INET6 if ipv == 6 else netifaces.AF_INET
