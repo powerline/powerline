@@ -114,6 +114,21 @@ def _fetch_battery_info(pl):
 				return (energy * 100.0 / energy_full), state
 			return _get_battery_status
 			pl.debug('Not using /sys/class/power_supply as no batteries were found')
+		else:
+			pl.debug("Checking for first capacity battery percentage")
+			for batt in os.listdir('/sys/class/power_supply'):
+				if os.path.exists('/sys/class/power_supply/{0}/capacity'.format(batt)):
+					def _get_battery_perc(pl):
+						state = True
+						with open('/sys/class/power_supply/{0}/capacity'.format(batt), 'r') as f:
+							perc = int(f.readline().split()[0])
+						try:
+							with open(linux_status_fmt.format(batt), 'r') as f:
+								state &= (f.readline().strip() != 'Discharging')
+						except IOError:
+							state = None
+						return perc, state
+					return _get_battery_perc
 	else:
 		pl.debug('Not using /sys/class/power_supply: no directory')
 
