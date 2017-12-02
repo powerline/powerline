@@ -99,7 +99,7 @@ test_shell() {
 		ln -s "$(which "$test_binding")" "$TEST_ROOT/path"
 	fi
 
-	if ! "${PYTHON}" "$ROOT/tests/test_in_vterm/test_shell.py" \
+	if ! "${PYTHON}" "$ROOT/tests/test_in_vterm/test_shells.py" \
 		--type=$test_type \
 		--client=$test_client \
 		--binding=$test_binding \
