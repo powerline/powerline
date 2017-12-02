@@ -47,7 +47,7 @@ exit_suite() {
 	fi
 }
 
-fail() {
+_fail() {
 	local allow_failure=
 	if test "$1" = "--allow-failure" ; then
 		shift
@@ -56,7 +56,7 @@ fail() {
 	local test_name="$1" ; shift
 	local fail_char="$allow_failure$1" ; shift
 	local message="$1" ; shift
-	local verb="${1:-Failed}" ; test $# -ge 1 && shift
+	local verb="$1" ; shift
 	local full_msg="$fail_char $POWERLINE_CURRENT_SUITE|$test_name :: $message"
 	FAIL_SUMMARY="${FAIL_SUMMARY}${NL}${full_msg}"
 	echo "$verb: $full_msg"
@@ -66,10 +66,14 @@ fail() {
 	fi
 }
 
+fail() {
+	_fail "$@" "Failed"
+}
+
 skip() {
 	local test_name="$1" ; shift
 	local message="$1" ; shift
-	fail --allow-failure "$test_name" S "$message" "Skipped"
+	_fail --allow-failure "$test_name" S "$message" "Skipped"
 }
 
 make_test_root() {
