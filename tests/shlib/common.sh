@@ -56,7 +56,7 @@ fail() {
 	local test_name="$1" ; shift
 	local fail_char="$allow_failure$1" ; shift
 	local message="$1" ; shift
-	local verb="${1:-Failed}" ; shift
+	local verb="${1:-Failed}" ; test $# -ge 1 && shift
 	local full_msg="$fail_char $POWERLINE_CURRENT_SUITE|$test_name :: $message"
 	FAIL_SUMMARY="${FAIL_SUMMARY}${NL}${full_msg}"
 	echo "$verb: $full_msg"
