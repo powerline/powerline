@@ -62,6 +62,8 @@ if test -e "$ROOT/scripts/powerline" ; then
 	ln -s "$ROOT/scripts/powerline" "$TEST_ROOT/path"
 elif test -e client/powerline ; then
 	ln -s "$ROOT/client/powerline" "$TEST_ROOT/path"
+elif which powerline ; then
+	ln -s "$(which powerline)" "$TEST_ROOT/path"
 else
 	echo "Executable powerline was not found"
 	exit 1
