@@ -20,10 +20,11 @@ install: tests/install.sh
 script: tests/test.sh
 jobs:
     include:
-        - stage: Old Python and PyPy
+        - stage: Old Python
           python: "2.6"
         - python: "3.2"
-        - python: "pypy"
+        - stage: PyPy
+          python: "pypy"
         - python: "pypy3"
         - stage: Latest Python
           python: "2.7"
