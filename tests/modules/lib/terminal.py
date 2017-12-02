@@ -61,6 +61,7 @@ class ExpectProcess(threading.Thread):
 		self.buffer = []
 		self.child_lock = threading.Lock()
 		self.shutdown_event = threading.Event()
+		self.started_event = threading.Event()
 
 	def run(self):
 		with self.child_lock:
@@ -70,6 +71,7 @@ class ExpectProcess(threading.Thread):
 			child.setwinsize(self.dim.rows, self.dim.cols)
 			sleep(0.5)
 			self.child = child
+			self.started_event.set()
 		status = None
 		while status is None and not self.shutdown_event.is_set():
 			try:
@@ -270,6 +272,7 @@ def do_terminal_tests(tests, cmd, dim, args, env, suite, cwd=None, fin_cb=None,
 				env=env,
 			)
 			p.start()
+			p.started_event.wait()
 
 			ret = True
 
