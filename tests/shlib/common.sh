@@ -5,6 +5,13 @@ set +x
 : ${USER:=`id -un`}
 : ${HOME:=`getent passwd $USER | cut -d: -f6`}
 
+if test -n "$USE_UCS2_PYTHON" && test -n "$BASH_VERSION" ; then
+	set +e
+	. virtualenvwrapper.sh
+	workon cpython-ucs2-$UCS2_PYTHON_VARIANT
+	set -e
+fi
+
 export USER HOME
 
 if test -z "$FAILED" ; then
