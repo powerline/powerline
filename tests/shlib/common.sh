@@ -1,9 +1,24 @@
-. tests/bot-ci/scripts/common/main.sh
 set +x
 
-: ${PYTHON:=python}
 : ${USER:=`id -un`}
 : ${HOME:=`getent passwd $USER | cut -d: -f6`}
+
+if test -z "${PYTHON}" ; then
+	if test -n "$USE_UCS2_PYTHON" ; then
+		PYTHON="$HOME/opt/cpython-ucs2-$UCS2_PYTHON_VARIANT/bin/python$UCS2_PYTHON_VARIANT"
+		LD_LIBRARY_PATH="$HOME/opt/cpython-ucs2-$UCS2_PYTHON_VARIANT/lib${LD_LIBRARY_PATH:+:}${LD_LIBRARY_PATH}"
+	else
+		PYTHON=python
+	fi
+fi
+
+export PYTHON
+export LD_LIBRARY_PATH
+export USER
+export HOME
+
+. tests/bot-ci/scripts/common/main.sh
+set +x
 
 if test -n "$USE_UCS2_PYTHON" && test -n "$BASH_VERSION" ; then
 	set +e
