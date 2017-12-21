@@ -14,12 +14,9 @@ If installed using pip just add
     python from powerline.vim import setup as powerline_setup
     python powerline_setup()
     python del powerline_setup
+    set laststatus=2 # show status by default
 
 (replace ``python`` with ``python3`` if appropriate) to the :file:`vimrc`.
-
-.. note::
-   Status line will not appear by default when there is only a single window
-   displayed. Run ``:h 'laststatus'`` in Vim for more information.
 
 If the repository was just cloned the following line needs to be added to the 
 :file:`vimrc`:
