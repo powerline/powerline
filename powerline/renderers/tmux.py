@@ -44,16 +44,27 @@ class TmuxRenderer(Renderer):
 		if not attrs and not bg and not fg:
 			return ''
 		tmux_attrs = []
+		# Is truecolor supported?
+		is_fbterm = self.used_term_escape_style == 'fbterm'
+		term_truecolor = not is_fbterm and self.term_truecolor
 		if fg is not None:
 			if fg is False or fg[0] is False:
 				tmux_attrs += ['fg=default']
 			else:
-				tmux_attrs += ['fg=colour' + str(fg[0])]
+				if term_truecolor:
+					hex_code = "{0:06x}".format(fg[1])
+					tmux_attrs += ['fg=#' + hex_code]
+				else:
+					tmux_attrs += ['fg=colour' + str(fg[0])]
 		if bg is not None:
 			if bg is False or bg[0] is False:
 				tmux_attrs += ['bg=default']
 			else:
-				tmux_attrs += ['bg=colour' + str(bg[0])]
+				if term_truecolor:
+					hex_code = "{0:06x}".format(bg[1])
+					tmux_attrs += ['bg=#' + hex_code]
+				else:
+					tmux_attrs += ['bg=colour' + str(bg[0])]
 		if attrs is not None:
 			tmux_attrs += attrs_to_tmux_attrs(attrs)
 		return '#[' + ','.join(tmux_attrs) + ']'
