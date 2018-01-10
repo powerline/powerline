@@ -311,10 +311,10 @@ class SpotifyDbusPlayerSegment(PlayerSegment):
 		return _get_dbus_player_status(
 			pl=pl,
 			player_name='Spotify',
-			bus_name='com.spotify.qt',
-			player_path='/',
+			bus_name='org.mpris.MediaPlayer2.spotify',
+			player_path='/org/mpris/MediaPlayer2',
 			iface_prop='org.freedesktop.DBus.Properties',
-			iface_player='org.freedesktop.MediaPlayer2',
+			iface_player='org.mpris.MediaPlayer2.Player',
 		)
 
 
