@@ -164,7 +164,7 @@ def init_tmux_environment(pl, args, set_tmux_environment=set_tmux_environment):
 				# But it does not support empty attributes as well.
 				or 'none'))
 		else:
-			if powerline.common_config['term_truecolor'] is True:
+			if powerline.common_config['term_truecolor']:
 				set_tmux_environment(varname, '#{0:06x}'.format(get_highlighting(group)[attr][1]))
 			else:
 				set_tmux_environment(varname, 'colour' + str(get_highlighting(group)[attr][0]))
