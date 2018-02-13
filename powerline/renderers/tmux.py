@@ -48,12 +48,18 @@ class TmuxRenderer(Renderer):
 			if fg is False or fg[0] is False:
 				tmux_attrs += ['fg=default']
 			else:
-				tmux_attrs += ['fg=colour' + str(fg[0])]
+				if self.term_truecolor and fg[1]:
+					tmux_attrs += ['fg=#{0:06x}'.format(int(fg[1]))]
+				else:
+					tmux_attrs += ['fg=colour' + str(fg[0])]
 		if bg is not None:
 			if bg is False or bg[0] is False:
 				tmux_attrs += ['bg=default']
 			else:
-				tmux_attrs += ['bg=colour' + str(bg[0])]
+				if self.term_truecolor and bg[1]:
+					tmux_attrs += ['bg=#{0:06x}'.format(int(bg[1]))]
+				else:
+					tmux_attrs += ['bg=colour' + str(bg[0])]
 		if attrs is not None:
 			tmux_attrs += attrs_to_tmux_attrs(attrs)
 		return '#[' + ','.join(tmux_attrs) + ']'
