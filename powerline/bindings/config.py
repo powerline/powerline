@@ -164,7 +164,10 @@ def init_tmux_environment(pl, args, set_tmux_environment=set_tmux_environment):
 				# But it does not support empty attributes as well.
 				or 'none'))
 		else:
-			set_tmux_environment(varname, 'colour' + str(get_highlighting(group)[attr][0]))
+			if powerline.common_config['term_truecolor'] is True:
+				set_tmux_environment(varname, '#{0:06x}'.format(get_highlighting(group)[attr][1]))
+			else:
+				set_tmux_environment(varname, 'colour' + str(get_highlighting(group)[attr][0]))
 
 	left_dividers = powerline.renderer.theme.dividers['left']
 	set_tmux_environment('_POWERLINE_LEFT_HARD_DIVIDER', left_dividers['hard'])
