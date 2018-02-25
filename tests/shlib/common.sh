@@ -11,14 +11,18 @@ export LD_LIBRARY_PATH
 export USER
 export HOME
 
-. tests/bot-ci/scripts/common/main.sh silent
-
-if test -n "$USE_UCS2_PYTHON" && test -n "$BASH_VERSION" ; then
-	set +e
-	. virtualenvwrapper.sh
-	workon cpython-ucs2-$UCS2_PYTHON_VARIANT
-	set -e
+if test -n "$USE_UCS2_PYTHON" ; then
+	POWERLINE_VIRTUALENV="cpython-ucs2-$UCS2_PYTHON_VARIANT"
+	PYTHON="$HOME/.virtualenvs/$POWERLINE_VIRTUALENV/bin/python"
+	if test -n "$BASH_VERSION" ; then
+		set +e
+		. virtualenvwrapper.sh
+		workon "$POWERLINE_VIRTUALENV"
+		set -e
+	fi
 fi
+
+. tests/bot-ci/scripts/common/main.sh silent
 
 export USER HOME
 
