@@ -3,14 +3,10 @@
 
 if test -z "${PYTHON}" ; then
 	if test -n "$USE_UCS2_PYTHON" ; then
-		PYTHON="$HOME/opt/cpython-ucs2-$UCS2_PYTHON_VARIANT/bin/python$UCS2_PYTHON_VARIANT"
 		LD_LIBRARY_PATH="$HOME/opt/cpython-ucs2-$UCS2_PYTHON_VARIANT/lib${LD_LIBRARY_PATH:+:}${LD_LIBRARY_PATH}"
-	else
-		PYTHON=python
 	fi
 fi
 
-export PYTHON
 export LD_LIBRARY_PATH
 export USER
 export HOME
