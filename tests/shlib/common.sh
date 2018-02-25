@@ -66,7 +66,7 @@ enter_suite() {
 			fail __suite__/enter/final E "Final suites do not allow nesting"
 		fi
 		export POWERLINE_SUITE_FINAL=1
-		set -x
+		# set -x
 	fi
 }
 
