@@ -83,6 +83,8 @@ exit_suite() {
 	export POWERLINE_CURRENT_SUITE="${POWERLINE_CURRENT_SUITE%/*}"
 	if test "$1" != "--continue" ; then
 		exit $FAILED
+	else
+		unset POWERLINE_SUITE_FINAL
 	fi
 }
 
