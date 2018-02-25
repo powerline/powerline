@@ -94,7 +94,7 @@ if ! test -e "$DEPRECATED_SCRIPT" ; then
 	# skip "deprecated" "Missing deprecated bar bindings script"
 	:
 else
-	enter_suite "deprecated"
+	enter_suite "deprecated" final
 	run python "$DEPRECATED_SCRIPT" $args > "$TEST_ROOT/deprecated.log" 2>&1 &
 	SPID=$!
 	sleep 5
@@ -122,7 +122,7 @@ else
 		sleep 5
 		killscript $SPID
 		sleep 0.5
-		enter_suite "args($args)"
+		enter_suite "args($args)" final
 		fnum=0
 		for file in "$TEST_ROOT/results"/*.log ; do
 			if ! test -e "$file" ; then

@@ -3,7 +3,7 @@
 . tests/shlib/vterm.sh
 . tests/shlib/vim.sh
 
-enter_suite vim
+enter_suite vim final
 
 vterm_setup vim
 

@@ -1,7 +1,7 @@
 #!/bin/sh
 . tests/shlib/common.sh
 
-enter_suite shell
+enter_suite shell final
 
 if test $# -eq 0 ; then
 	FAST=1

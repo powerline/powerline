@@ -53,10 +53,17 @@ print_environ() {
 enter_suite() {
 	set +x
 	local suite_name="$1" ; shift
+	local final="$1"
 	export POWERLINE_CURRENT_SUITE="${POWERLINE_CURRENT_SUITE}/$suite_name"
 	travis_fold start "$POWERLINE_CURRENT_SUITE"
 	print_environ
-	set -x
+	if test "$final" = final ; then
+		if test -n "$POWERLINE_SUITE_FINAL" ; then
+			fail __suite__/enter/final E "Final suites do not allow nesting"
+		fi
+		export POWERLINE_SUITE_FINAL=1
+		set -x
+	fi
 }
 
 exit_suite() {
