@@ -1,5 +1,3 @@
-set +x
-
 : ${USER:=`id -un`}
 : ${HOME:=`getent passwd $USER | cut -d: -f6`}
 
@@ -17,8 +15,7 @@ export LD_LIBRARY_PATH
 export USER
 export HOME
 
-. tests/bot-ci/scripts/common/main.sh
-set +x
+. tests/bot-ci/scripts/common/main.sh silent
 
 if test -n "$USE_UCS2_PYTHON" && test -n "$BASH_VERSION" ; then
 	set +e
@@ -48,10 +45,22 @@ travis_fold() {
 	echo -en "travis_fold:${action}:${name}\r${ANSI_CLEAR}"
 }
 
+print_environ() {
+	echo "Using $PYTHON_IMPLEMENTATION version $PYTHON_VERSION."
+	echo "Path to Python executable: $PYTHON."
+	echo "Root: $ROOT."
+	echo "Branch: $BRANCH_NAME."
+	echo "sys.path:"
+	"$PYTHON" -c "for path in __import__('sys').path: print('  %r' % path)"
+}
+
 enter_suite() {
+	set +x
 	local suite_name="$1" ; shift
 	export POWERLINE_CURRENT_SUITE="${POWERLINE_CURRENT_SUITE}/$suite_name"
 	travis_fold start "$POWERLINE_CURRENT_SUITE"
+	print_environ
+	set -x
 }
 
 exit_suite() {
@@ -62,6 +71,7 @@ exit_suite() {
 		echo "Suite ${POWERLINE_CURRENT_SUITE} failed, summary:"
 		echo "${FAIL_SUMMARY}"
 	fi
+	set +x
 	travis_fold end "$POWERLINE_CURRENT_SUITE"
 	export POWERLINE_CURRENT_SUITE="${POWERLINE_CURRENT_SUITE%/*}"
 	if test "$1" != "--continue" ; then
