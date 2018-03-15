@@ -308,6 +308,17 @@ Requires ``dbus`` python module. Only for players that support specific protocol
 
 class SpotifyDbusPlayerSegment(PlayerSegment):
 	def get_player_status(self, pl):
+		player_status = _get_dbus_player_status(
+			pl=pl,
+			player_name='Spotify',
+			bus_name='org.mpris.MediaPlayer2.spotify',
+			player_path='/org/mpris/MediaPlayer2',
+			iface_prop='org.freedesktop.DBus.Properties',
+			iface_player='org.mpris.MediaPlayer2.Player',
+		)
+		if player_status is not None:
+			return player_status
+		# Fallback for legacy spotify client with different DBus protocol
 		return _get_dbus_player_status(
 			pl=pl,
 			player_name='Spotify',
