@@ -2,14 +2,17 @@
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 from powerline.bindings.tmux import get_tmux_output
 
-# import psutil
+import psutil
 
 _cached_clients = {}
 
 
 def tmux_via_ssh(pl, segment_info, mode):
 	'''Returns True if tmux client is connected via SSH'''
-	current_process = psutil.Process()
+	process_id = segment_info['args'].process_id
+	if process_id is None:
+		return False # or True
+	current_process = psutil.Process(segment_info['args'].process_id)
 	try:
 		return _cached_clients[current_process.pid]
 	except KeyError:

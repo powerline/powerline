@@ -108,6 +108,10 @@ def get_argparser(ArgumentParser=argparse.ArgumentParser):
 		help='Maximum prompt with. Triggers truncation of some segments.'
 	)
 	parser.add_argument(
+		'--process-id', metavar='PID', type=int,
+		help='process_ID for the desired process'
+	)
+	parser.add_argument(
 		'--last-exit-code', metavar='INT', type=int_or_sig,
 		help='Last exit code.'
 	)
