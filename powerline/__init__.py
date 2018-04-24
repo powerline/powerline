@@ -367,7 +367,7 @@ else:
 
 
 def gen_module_attr_getter(pl, import_paths, imported_modules):
-	def get_module_attr(module, attr, prefix='powerline'):
+	def get_module_attr(module, attr, prefix='powerline', ignore_error=False):
 		'''Import module and get its attribute.
 
 		Replaces ``from {module} import {attr}``.
@@ -391,7 +391,8 @@ def gen_module_attr_getter(pl, import_paths, imported_modules):
 			imported_modules.add(module)
 			return getattr(__import__(module, fromlist=(attr,)), attr)
 		except Exception as e:
-			pl.exception('Failed to import attr {0} from module {1}: {2}', attr, module, str(e), prefix=prefix)
+			if not ignore_error:
+				pl.exception('Failed to import attr {0} from module {1}: {2}', attr, module, str(e), prefix=prefix)
 			return None
 		finally:
 			sys.path = oldpath

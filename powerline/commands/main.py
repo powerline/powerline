@@ -109,7 +109,7 @@ def get_argparser(ArgumentParser=argparse.ArgumentParser):
 	)
 	parser.add_argument(
 		'--process-id', metavar='PID', type=int,
-		help='process_ID for the desired process'
+		help='The process ID of process that renders powerline.'
 	)
 	parser.add_argument(
 		'--last-exit-code', metavar='INT', type=int_or_sig,

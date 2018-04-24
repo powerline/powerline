@@ -264,12 +264,19 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, ge
 
 	def get_selector(function_name):
 		if '.' in function_name:
-			module, function_name = function_name.rpartition('.')[::2]
+			search_modules, function_name = function_name.rpartition('.')[::2]
+			search_modules = [search_modules]
 		else:
-			module = 'powerline.selectors.' + ext
-		function = get_module_attr(module, function_name, prefix='segment_generator/selector_function')
-		if not function:
-			pl.error('Failed to get segment selector, ignoring it')
+			search_modules = ['powerline.selectors.' + ext, 'powerline.selectors.common']
+		for module in search_modules:
+			# Ignoring error in the following as they can occur if there is no selector for 'ext'
+			# common would still exist though
+			function = get_module_attr(module, function_name, 
+					prefix='segment_generator/selector_function',
+					ignore_error=True)
+			if function:
+				return function
+		pl.error('Failed to get segment selector, ignoring it')
 		return function
 
 	def get_segment_selector(segment, selector_type):
