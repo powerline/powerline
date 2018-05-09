@@ -26,8 +26,8 @@ The colors look weird in iTerm2!
 --------------------------------
 
 * The arrows may have the wrong colors if you have changed the “minimum 
-  contrast” slider in the color tab of your OS X settings.
-* If you're using transparency, check "Keep background colors opaque"
+  contrast“ slider in the color tab of your OS X settings.
+* If you're using transparency, check “Keep background colors opaque“.
 
 Statusline is getting wrapped to the next line in iTerm2
 --------------------------------------------------------
