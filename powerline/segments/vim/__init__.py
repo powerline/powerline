@@ -63,6 +63,7 @@ vim_modes = {
 	'rm': '-MORE-',
 	'r?': 'CNFIRM',
 	'!': '!SHELL',
+	't': 'TERM  ',
 }
 
 
