@@ -98,10 +98,13 @@ class Theme(object):
 						if not run_once:
 							if segment['startup']:
 								try:
-									segment['startup'](pl, shutdown_event)
+									addons = segment['startup'](pl, shutdown_event)
 								except Exception as e:
 									pl.error('Exception during {0} startup: {1}', segment['name'], str(e))
 									continue
+								else:
+									if addons:
+										segment.update(addons)
 						self.segments[-1][side].append(segment)
 
 	def shutdown(self):

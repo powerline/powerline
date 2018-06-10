@@ -1,16 +1,13 @@
 # vim:fileencoding=utf-8:noet
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
-import os
-
-from powerline.bindings.vim import buffer_name
+from powerline.editors import EditorBufferNameBase
 
 
-def gundo(matcher_info):
-	name = buffer_name(matcher_info)
-	return name and os.path.basename(name) == b'__Gundo__'
+gundo = EditorBufferNameBase().equals('__Gundo__')
+'''Match gundo buffer
+'''
 
-
-def gundo_preview(matcher_info):
-	name = buffer_name(matcher_info)
-	return name and os.path.basename(name) == b'__Gundo_Preview__'
+gundo_preview = EditorBufferNameBase().equals('__Gundo_Preview__')
+'''Match gundo preview buffer
+'''

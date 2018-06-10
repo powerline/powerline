@@ -568,6 +568,7 @@ class Powerline(object):
 		'''
 		common_config_differs = False
 		ext_config_differs = False
+		needs_local_themes = False
 		if load_main:
 			self._purge_configs('main')
 			config = self.load_main_config()
@@ -605,6 +606,7 @@ class Powerline(object):
 					tmux_escape=self.common_config['additional_escapes'] == 'tmux',
 					screen_escape=self.common_config['additional_escapes'] == 'screen',
 					theme_kwargs={
+						'pl': self.pl,
 						'ext': self.ext,
 						'common_config': self.common_config,
 						'run_once': self.run_once,
@@ -643,7 +645,7 @@ class Powerline(object):
 					not self.prev_ext_config
 					or self.ext_config.get('local_themes') != self.prev_ext_config.get('local_themes')
 				):
-					self.renderer_options['local_themes'] = self.get_local_themes(self.ext_config.get('local_themes'))
+					needs_local_themes = True
 				self.update_interval = self.ext_config.get('update_interval', 2)
 				load_colorscheme = (
 					load_colorscheme
@@ -673,6 +675,9 @@ class Powerline(object):
 		if load_theme:
 			self._purge_configs('theme')
 			self.renderer_options['theme_config'] = self.load_theme_config(self.ext_config.get('theme', 'default'))
+
+		if needs_local_themes:
+			self.renderer_options['local_themes'] = self.get_local_themes(self.ext_config.get('local_themes'))
 
 		if create_renderer:
 			Renderer = self.get_module_attr(self.renderer_module, 'renderer')

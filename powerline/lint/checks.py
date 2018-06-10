@@ -16,6 +16,7 @@ from powerline.lint.context import JStr, list_themes
 from powerline.lint.imp import WithPath, import_function, import_segment
 from powerline.lint.spec import Spec
 from powerline.lint.inspect import getconfigargspec
+from powerline.editors.vim import EditorObj
 
 
 list_sep = JStr(', ')
@@ -53,7 +54,7 @@ def get_function_strings(function_name, context, ext):
 	return module, function_name
 
 
-def check_matcher_func(ext, match_name, data, context, echoerr):
+def check_editor_matcher_func(ext, match_name, data, context, echoerr):
 	havemarks(match_name)
 	import_paths = [os.path.expanduser(path) for path in context[0][1].get('common', {}).get('paths', [])]
 
@@ -75,22 +76,35 @@ def check_matcher_func(ext, match_name, data, context, echoerr):
 			        problem_mark=match_name.mark)
 			return True, False, True
 
-	if not callable(func):
-		echoerr(context='Error while loading matcher functions',
-		        problem='loaded “function” {0} is not callable'.format(match_function),
-		        problem_mark=match_name.mark)
+	if callable(func):
+		if hasattr(func, 'func_code') and hasattr(func.func_code, 'co_argcount'):
+			try:
+				argspec = getconfigargspec(func)
+			except Exception:
+				pass
+			else:
+				if len(argspec.args) - len(argspec.defaults) != 1:
+					echoerr(
+						context='Error while loading matcher functions',
+						problem=(
+							'function {0} accepts {1} arguments instead of 1. '
+							'Are you sure it is the proper function?'
+						).format(match_function, func.func_code.co_argcount),
+						problem_mark=match_name.mark
+					)
+				return True, False, True
+	elif isinstance(func, EditorObj):
+		pass
+	else:
+		echoerr(
+			context='Error while loading matcher functions',
+			problem=(
+				'function {0} is expected to be a function or EditorObj object, '
+				'but it is not'
+			).format(match_function),
+			problem_mark=match_name.mark,
+		)
 		return True, False, True
-
-	if hasattr(func, 'func_code') and hasattr(func.func_code, 'co_argcount'):
-		if func.func_code.co_argcount != 1:
-			echoerr(
-				context='Error while loading matcher functions',
-				problem=(
-					'function {0} accepts {1} arguments instead of 1. '
-					'Are you sure it is the proper function?'
-				).format(match_function, func.func_code.co_argcount),
-				problem_mark=match_name.mark
-			)
 
 	return True, False, False
 

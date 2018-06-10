@@ -36,6 +36,9 @@ class MutableDimensions(object):
 	def __nonzero__(self):
 		return True
 
+	def __repr__(self):
+		return self.__class__.__name__ + repr(tuple(self._list))
+
 	__bool__ = __nonzero__
 
 	rows = property(
@@ -145,7 +148,6 @@ class ExpectProcess(threading.Thread):
 
 def test_expected_result(p, test, last_attempt, last_attempt_cb, attempts):
 	expected_text, attrs = test['expected_result']
-	result = None
 	while attempts:
 		actual_text, all_attrs = p.get_row(test['row'], attrs)
 		if actual_text == expected_text:
@@ -157,12 +159,16 @@ def test_expected_result(p, test, last_attempt, last_attempt_cb, attempts):
 	print(actual_text)
 	print('Expected:')
 	print(expected_text)
-	print('Attributes:')
-	print(all_attrs)
 	print('Screen:')
 	screen, screen_attrs = p.get_screen(attrs)
 	print(screen)
 	print(screen_attrs)
+	print('Attributes:')
+	print('{')
+	for k in sorted(all_attrs.keys()):
+		print('\t{k!r}: {v!r}'.format(k=k, v=all_attrs[k]))
+	print('}')
+	print(all_attrs)
 	print('_' * 80)
 	print('Diff:')
 	print('=' * 80)

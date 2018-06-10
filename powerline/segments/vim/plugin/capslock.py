@@ -1,16 +1,11 @@
 # vim:fileencoding=utf-8:noet
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
-try:
-	import vim
-except ImportError:
-	vim = object()
-
-from powerline.bindings.vim import vim_func_exists
-from powerline.theme import requires_segment_info
+from powerline.editors import with_input
+from powerline.editors.vim import VimOptionalFunc
 
 
-@requires_segment_info
+@with_input(('capslock_indicator', (VimOptionalFunc('CapsLockStatusline'),), 'bool'))
 def capslock_indicator(pl, segment_info, text='CAPS'):
 	'''Shows the indicator if tpope/vim-capslock plugin is enabled
 
@@ -23,8 +18,6 @@ def capslock_indicator(pl, segment_info, text='CAPS'):
 		String to show when software capslock presented by this plugin is 
 		active.
 	'''
-	if not vim_func_exists('CapsLockStatusline'):
-		return None
 	# CapsLockStatusline() function returns an empty string when plugin is 
 	# disabled. If it is not then string is non-empty.
-	return text if vim.eval('CapsLockStatusline()') else None
+	return text if segment_info['input']['capslock_indicator'] else None

@@ -33,7 +33,7 @@ _set_thread_id()
 
 def _print_log():
 	for item in _log:
-		print (item)
+		print(item)
 	_log[:] = ()
 
 
@@ -240,7 +240,7 @@ def eval(expr):
 		return '0'
 	elif expr.startswith('getwinvar('):
 		import re
-		match = re.match(r'^getwinvar\((\d+), "(\w+)"\)$', expr)
+		match = re.match(r'^getwinvar\((\d+), ["\'](\w+)["\']\)$', expr)
 		if not match:
 			raise NotImplementedError(expr)
 		winnr = int(match.group(1))
@@ -273,6 +273,17 @@ def eval(expr):
 		bufnr = int(match.group(1))
 		varname = match.group(2)
 		return _emul_getbufvar(bufnr, varname)
+	elif expr == 'bufnr(\'%\')':
+		return current.buffer.number
+	elif expr == '[line("."), col(".")]':
+		return [current.window.cursor[0], current.window.cursor[1] + 1]
+	elif expr.startswith('bufname('):
+		import re
+		match = re.match(r'bufname\((\d+)\)', expr)
+		if not match:
+			raise NotImplementedError(expr)
+		bufnr = int(match.group(1))
+		return _emul_bufname(bufnr)
 	elif expr == 'tabpagenr()':
 		return current.tabpage.number
 	elif expr == 'tabpagenr("$")':
@@ -298,6 +309,44 @@ def eval(expr):
 		match = re.match(r'^type\(function\("([^"]+)"\)\) == 2$', expr)
 		if not match:
 			raise NotImplementedError(expr)
+		return 0
+	elif expr == 'winnr()':
+		return current.window.number
+	elif expr == "[getpos('v')+[virtcol(getpos('v'))[1 : ]],getpos('.')+[virtcol(getpos('.'))[1 : ]]]":
+		vpos = _emul_getpos('v')
+		dpos = _emul_getpos('.')
+		return [vpos + [_emul_virtcol(vpos[1:])], dpos + [_emul_virtcol(dpos[1:])]]
+	elif expr == 'virtcol(\'.\')':
+		return _emul_virtcol('.')
+	elif expr == 'line2byte(line(\'$\')+1)-1':
+		return _emul_line2byte(_emul_line('$') + 1) - 1
+	elif expr.startswith('line('):
+		import re
+		match = re.match(r'line\(\'(.*)\'\)', expr)
+		if not match:
+			raise NotImplementedError(expr)
+		return _emul_line(match.group(1))
+	elif expr == '[line(\'w0\'),line(\'w$\')]':
+		return [_emul_line('w0'), _emul_line('w$')]
+	elif expr == "(!(empty(filter(map(copy(filter(range(1, bufnr('$')), 'bufexists(v:val)')), 'getbufvar(v:val, ''&modified'')'), 'v:val'))))":
+		for buf in buffers:
+			if buf.options['modified']:
+				return 1
+		return 0
+	elif expr == "filter(copy(filter(range(1, bufnr('$')), 'bufexists(v:val)')), 'getbufvar(v:val, ''&modified'')')":
+		ret = []
+		for buf in buffers:
+			if buf.options['modified']:
+				ret.append(buf.number)
+		return ret
+	elif expr.startswith('(buffer_cache'):
+		import re
+		match = re.match(r"^\(buffer_cache\[(\d+)\]\['trailing_whitespace'\]\[0\]==getbufvar\(\1, 'changedtick'\)\)\? \(buffer_cache\[\1\]\['trailing_whitespace'\]\[1\]\): \(extend\(buffer_cache\[\1\], \{'trailing_whitespace':\[getbufvar\(\1, 'changedtick'\),search\('\\m\\C\\s\$', 'nw'\)\]\}\)\['trailing_whitespace'\]\[1\]\)$", expr)
+		if not match:
+			raise NotImplementedError(expr)
+		for line in buffers[int(match.group(1))]:
+			if line.endswith((' ', '\t')):
+				return 1
 		return 0
 	raise NotImplementedError(expr)
 
@@ -429,7 +478,9 @@ def _emul_exists(ident):
 def _emul_line2byte(line):
 	buflines = current.buffer._buf_lines
 	if line == len(buflines) + 1:
-		return sum((len(s) for s in buflines)) + 1
+		if buflines == ['']:
+			return 0
+		return sum((len(s) for s in buflines)) + len(buflines) + 1
 	raise NotImplementedError
 
 
@@ -441,6 +492,8 @@ def _emul_line(expr):
 		return max(cursorline - 5, 1)
 	if expr == 'w$':
 		return min(cursorline + 5, numlines)
+	if expr == '$':
+		return numlines
 	raise NotImplementedError
 
 
@@ -522,6 +575,7 @@ _abuf = None
 class _Buffer(object):
 	def __init__(self, name=None):
 		global _last_bufnr
+		import os
 		_last_bufnr += 1
 		bufnr = _last_bufnr
 		self.number = bufnr
@@ -540,6 +594,7 @@ class _Buffer(object):
 		self._buf_lines = ['']
 		self._undostate = [self._buf_lines[:]]
 		self._undo_written = len(self._undostate)
+		self._cwd = getattr(os, 'getcwdu', os.getcwd)()
 		buffers[bufnr] = self
 
 	@property
@@ -655,6 +710,8 @@ def _get_segment_info():
 	window = current.window
 	buffer = current.buffer
 	tabpage = current.tabpage
+	vpos = _emul_getpos('v')
+	dpos = _emul_getpos('.')
 	return {
 		'window': window,
 		'winnr': window.number,
@@ -665,6 +722,36 @@ def _get_segment_info():
 		'window_id': window._window_id,
 		'mode': mode,
 		'encoding': options['encoding'],
+		'input': {
+			'visual_range': [
+				vpos + [_emul_virtcol(vpos[1:])],
+				dpos + [_emul_virtcol(dpos[1:])]
+			],
+			'modified_indicator': buffer.options['modified'],
+			'paste_indicator': options['paste'],
+			'readonly_indicator': buffer.options['readonly'],
+			'buffer_name': buffer.name,
+			'file_size': _emul_line2byte(_emul_line('$') + 1) - 1,
+			'file_format': buffer.options['fileformat'],
+			'file_encoding': buffer.options['fileencoding'],
+			'file_type': buffer.options['filetype'],
+			'window_title': window.vars.get('quickfix_title', ''),
+			'window_position': [window.cursor[0], window.cursor[1] + 1],
+			'buffer_len': len(buffer),
+			'displayed_lines': [_emul_line('w0'), _emul_line('w$')],
+			'virtcol': _emul_virtcol('.'),
+			'textwidth': buffer.options['textwidth'],
+			'modified_buffers': [buf.number for buf in buffers if buf.options['modified']],
+			'buffer_type': buffer.options['buftype'],
+			'trailing_whitespace': dict(enumerate(list((i + 1 for i, line in enumerate(buffer) if line.endswith((' ', '\t')))))).get(0),
+			'current_tab_number': current.tabpage.number,
+			'current_window_number': current.window.number,
+			'current_buffer_number': current.buffer.number,
+			'tab_modified_indicator': any((win.buffer.options['modified'] for win in tabpage.windows)),
+		},
+		'environ': _environ,
+		'getcwd': lambda: buffer._cwd,
+		'home': _environ.get('HOME'),
 	}
 
 
@@ -813,6 +900,7 @@ class _WithBufOption(object):
 	def __enter__(self):
 		self.buffer = current.buffer
 		self.old = _set_dict(self.buffer.options, self.new, _set_bufoption)[0]
+		return _get_segment_info()
 
 	def __exit__(self, *args):
 		self.buffer.options.update(self.old)
@@ -838,6 +926,7 @@ class _WithDict(object):
 
 	def __enter__(self):
 		self.old, self.na = _set_dict(self.d, self.new)
+		return _get_segment_info()
 
 	def __exit__(self, *args):
 		self.d.update(self.old)
@@ -858,7 +947,6 @@ class _WithBufName(object):
 		self.new = new
 
 	def __enter__(self):
-		import os
 		buffer = current.buffer
 		self.buffer = buffer
 		self.old = buffer.name
@@ -888,6 +976,7 @@ class _WithGlobal(object):
 		self.empty = object()
 		self.old = dict(((key, globals().get(key, self.empty)) for key in self.kwargs))
 		globals().update(self.kwargs)
+		return _get_segment_info()
 
 	def __exit__(self, *args):
 		for k, v in self.old.items():

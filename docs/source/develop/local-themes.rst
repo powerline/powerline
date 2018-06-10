@@ -12,17 +12,24 @@ Vim local themes
 
 Vim is the only available extension that has a wide variaty of options for local 
 themes. It is the only extension where local theme key refers to a function as 
-described in :ref:`local_themes value documentation <config-ext-local_themes>`. 
+described in :ref:`local_themes value documentation <config-ext-local_themes>`.
 
-This function always takes a single value named ``matcher_info`` which is the 
-same dictionary as :ref:`segment_info dictionary <dev-segment_info-vim>`. Unlike 
-segments it takes this single argument as a *positional* argument, not as 
-a keyword one.
+.. warning:: Using functions for matchers is now deprecated.
+
+This function always takes a two values: one named ``matcher_info`` which is the 
+same dictionary as :ref:`segment_info dictionary <dev-segment_info-vim>` and 
+another named ``pl`` which is :py:class:`powerline.PowerlineLogger` instance. 
+All values are keyword ones.
 
 Matcher function should return a boolean value: ``True`` if theme applies for 
 the given ``matcher_info`` dictionary or ``False`` if it is not. When one of the 
 matcher functions returns ``True`` powerline takes the corresponding theme at 
 uses it for the given window. Matchers are not tested in any particular order.
+
+As an alternative for functions matchers may be 
+:py:class:`powerline.editors.EditorObj` subclasses. The AST that represents must 
+compile to some truthy/falsy expression. More details about editor bindings in 
+:ref:`Editor bindings <dev-editors>` document.
 
 In addition to :ref:`local_themes configuration key <config-ext-local_themes>` 
 developer of some plugin which wishes to support powerline without including his 

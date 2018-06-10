@@ -848,6 +848,8 @@ class TestSys(TestCommon):
 
 	def test_system_load(self):
 		pl = Pl()
+		if self.module._cpu_count is None or not hasattr(os, 'getloadavg'):
+			raise SkipTest('Python functions necessary for system_load are not available')
 		with replace_module_module(self.module, 'os', getloadavg=lambda: (7.5, 3.5, 1.5)):
 			with replace_attr(self.module, '_cpu_count', lambda: 2):
 				self.assertEqual(self.module.system_load(pl=pl), [
@@ -1197,42 +1199,42 @@ class TestVim(TestCase):
 		vim_module.current.window.cursor = [0, 0]
 		try:
 			with vim_module._with('mode', 'i') as segment_info:
-				self.assertEqual(vr(segment_info=segment_info), '')
+				self.assertEqual(vr(segment_info=segment_info), None)
 			with vim_module._with('mode', '^V') as segment_info:
 				self.assertEqual(vr(segment_info=segment_info), '1 x 1')
-				with vim_module._with('vpos', line=5, col=5, off=0):
+				with vim_module._with('vpos', line=5, col=5, off=0) as segment_info:
 					self.assertEqual(vr(segment_info=segment_info), '5 x 5')
-				with vim_module._with('vpos', line=5, col=4, off=0):
+				with vim_module._with('vpos', line=5, col=4, off=0) as segment_info:
 					self.assertEqual(vr(segment_info=segment_info), '5 x 4')
 			with vim_module._with('mode', '^S') as segment_info:
 				self.assertEqual(vr(segment_info=segment_info), '1 x 1')
-				with vim_module._with('vpos', line=5, col=5, off=0):
+				with vim_module._with('vpos', line=5, col=5, off=0) as segment_info:
 					self.assertEqual(vr(segment_info=segment_info), '5 x 5')
-				with vim_module._with('vpos', line=5, col=4, off=0):
+				with vim_module._with('vpos', line=5, col=4, off=0) as segment_info:
 					self.assertEqual(vr(segment_info=segment_info), '5 x 4')
 			with vim_module._with('mode', 'V') as segment_info:
 				self.assertEqual(vr(segment_info=segment_info), 'L:1')
-				with vim_module._with('vpos', line=5, col=5, off=0):
+				with vim_module._with('vpos', line=5, col=5, off=0) as segment_info:
 					self.assertEqual(vr(segment_info=segment_info), 'L:5')
-				with vim_module._with('vpos', line=5, col=4, off=0):
+				with vim_module._with('vpos', line=5, col=4, off=0) as segment_info:
 					self.assertEqual(vr(segment_info=segment_info), 'L:5')
 			with vim_module._with('mode', 'S') as segment_info:
 				self.assertEqual(vr(segment_info=segment_info), 'L:1')
-				with vim_module._with('vpos', line=5, col=5, off=0):
+				with vim_module._with('vpos', line=5, col=5, off=0) as segment_info:
 					self.assertEqual(vr(segment_info=segment_info), 'L:5')
-				with vim_module._with('vpos', line=5, col=4, off=0):
+				with vim_module._with('vpos', line=5, col=4, off=0) as segment_info:
 					self.assertEqual(vr(segment_info=segment_info), 'L:5')
 			with vim_module._with('mode', 'v') as segment_info:
 				self.assertEqual(vr(segment_info=segment_info), 'C:1')
-				with vim_module._with('vpos', line=5, col=5, off=0):
+				with vim_module._with('vpos', line=5, col=5, off=0) as segment_info:
 					self.assertEqual(vr(segment_info=segment_info), 'L:5')
-				with vim_module._with('vpos', line=5, col=4, off=0):
+				with vim_module._with('vpos', line=5, col=4, off=0) as segment_info:
 					self.assertEqual(vr(segment_info=segment_info), 'L:5')
 			with vim_module._with('mode', 's') as segment_info:
 				self.assertEqual(vr(segment_info=segment_info), 'C:1')
-				with vim_module._with('vpos', line=5, col=5, off=0):
+				with vim_module._with('vpos', line=5, col=5, off=0) as segment_info:
 					self.assertEqual(vr(segment_info=segment_info), 'L:5')
-				with vim_module._with('vpos', line=5, col=4, off=0):
+				with vim_module._with('vpos', line=5, col=4, off=0) as segment_info:
 					self.assertEqual(vr(segment_info=segment_info), 'L:5')
 		finally:
 			vim_module._close(1)
@@ -1243,6 +1245,7 @@ class TestVim(TestCase):
 		self.assertEqual(self.vim.modified_indicator(pl=pl, segment_info=segment_info), None)
 		segment_info['buffer'][0] = 'abc'
 		try:
+			segment_info = vim_module._get_segment_info()
 			self.assertEqual(self.vim.modified_indicator(pl=pl, segment_info=segment_info), '+')
 			self.assertEqual(self.vim.modified_indicator(pl=pl, segment_info=segment_info, text='-'), '-')
 		finally:
@@ -1252,7 +1255,7 @@ class TestVim(TestCase):
 		pl = Pl()
 		segment_info = vim_module._get_segment_info()
 		self.assertEqual(self.vim.paste_indicator(pl=pl, segment_info=segment_info), None)
-		with vim_module._with('options', paste=1):
+		with vim_module._with('options', paste=1) as segment_info:
 			self.assertEqual(self.vim.paste_indicator(pl=pl, segment_info=segment_info), 'PASTE')
 			self.assertEqual(self.vim.paste_indicator(pl=pl, segment_info=segment_info, text='P'), 'P')
 
@@ -1260,7 +1263,7 @@ class TestVim(TestCase):
 		pl = Pl()
 		segment_info = vim_module._get_segment_info()
 		self.assertEqual(self.vim.readonly_indicator(pl=pl, segment_info=segment_info), None)
-		with vim_module._with('bufoptions', readonly=1):
+		with vim_module._with('bufoptions', readonly=1) as segment_info:
 			self.assertEqual(self.vim.readonly_indicator(pl=pl, segment_info=segment_info), 'RO')
 			self.assertEqual(self.vim.readonly_indicator(pl=pl, segment_info=segment_info, text='L'), 'L')
 
@@ -1277,23 +1280,23 @@ class TestVim(TestCase):
 		pl = Pl()
 		segment_info = vim_module._get_segment_info()
 		self.assertEqual(self.vim.file_directory(pl=pl, segment_info=segment_info), None)
-		with replace_env('HOME', '/home/foo', os.environ):
+		with vim_module._with('environ', HOME='/home/foo') as segment_info:
 			with vim_module._with('buffer', '/tmp/’’/abc') as segment_info:
 				self.assertEqual(self.vim.file_directory(pl=pl, segment_info=segment_info), '/tmp/’’/')
 			with vim_module._with('buffer', b'/tmp/\xFF\xFF/abc') as segment_info:
 				self.assertEqual(self.vim.file_directory(pl=pl, segment_info=segment_info), '/tmp/<ff><ff>/')
 			with vim_module._with('buffer', '/tmp/abc') as segment_info:
 				self.assertEqual(self.vim.file_directory(pl=pl, segment_info=segment_info), '/tmp/')
-				os.environ['HOME'] = '/tmp'
-				self.assertEqual(self.vim.file_directory(pl=pl, segment_info=segment_info), '~/')
+				with vim_module._with('environ', HOME='/tmp') as segment_info:
+					self.assertEqual(self.vim.file_directory(pl=pl, segment_info=segment_info), '~/')
 			with vim_module._with('buffer', 'zipfile:/tmp/abc.zip::abc/abc.vim') as segment_info:
 				self.assertEqual(self.vim.file_directory(pl=pl, segment_info=segment_info, remove_scheme=False), 'zipfile:/tmp/abc.zip::abc/')
 				self.assertEqual(self.vim.file_directory(pl=pl, segment_info=segment_info, remove_scheme=True), '/tmp/abc.zip::abc/')
 				self.assertEqual(self.vim.file_directory(pl=pl, segment_info=segment_info), '/tmp/abc.zip::abc/')
-				os.environ['HOME'] = '/tmp'
-				self.assertEqual(self.vim.file_directory(pl=pl, segment_info=segment_info, remove_scheme=False), 'zipfile:/tmp/abc.zip::abc/')
-				self.assertEqual(self.vim.file_directory(pl=pl, segment_info=segment_info, remove_scheme=True), '/tmp/abc.zip::abc/')
-				self.assertEqual(self.vim.file_directory(pl=pl, segment_info=segment_info), '/tmp/abc.zip::abc/')
+				with vim_module._with('environ', HOME='/tmp') as segment_info:
+					self.assertEqual(self.vim.file_directory(pl=pl, segment_info=segment_info, remove_scheme=False), 'zipfile:/tmp/abc.zip::abc/')
+					self.assertEqual(self.vim.file_directory(pl=pl, segment_info=segment_info, remove_scheme=True), '/tmp/abc.zip::abc/')
+					self.assertEqual(self.vim.file_directory(pl=pl, segment_info=segment_info), '/tmp/abc.zip::abc/')
 
 	def test_file_name(self):
 		pl = Pl()
@@ -1322,6 +1325,9 @@ class TestVim(TestCase):
 				os.path.dirname(os.path.dirname(__file__)), 'empty')
 		) as segment_info:
 			self.assertEqual(self.vim.file_size(pl=pl, segment_info=segment_info), '0 B')
+			vim_module.current.buffer[0] = 'abc'
+			segment_info = vim_module._get_segment_info()
+			self.assertEqual(self.vim.file_size(pl=pl, segment_info=segment_info), '4 B')
 
 	def test_file_opts(self):
 		pl = Pl()
@@ -1333,7 +1339,7 @@ class TestVim(TestCase):
 			{'divider_highlight_group': 'background:divider', 'contents': 'utf-8'}
 		])
 		self.assertEqual(self.vim.file_type(pl=pl, segment_info=segment_info), None)
-		with vim_module._with('bufoptions', filetype='python'):
+		with vim_module._with('bufoptions', filetype='python') as segment_info:
 			self.assertEqual(self.vim.file_type(pl=pl, segment_info=segment_info), [
 				{'divider_highlight_group': 'background:divider', 'contents': 'python'}
 			])
@@ -1342,16 +1348,18 @@ class TestVim(TestCase):
 		pl = Pl()
 		segment_info = vim_module._get_segment_info()
 		self.assertEqual(self.vim.window_title(pl=pl, segment_info=segment_info), None)
-		with vim_module._with('wvars', quickfix_title='Abc'):
+		with vim_module._with('wvars', quickfix_title='Abc') as segment_info:
 			self.assertEqual(self.vim.window_title(pl=pl, segment_info=segment_info), 'Abc')
 
 	def test_line_percent(self):
 		pl = Pl()
 		segment_info = vim_module._get_segment_info()
 		segment_info['buffer'][0:-1] = [str(i) for i in range(100)]
+		segment_info = vim_module._get_segment_info()
 		try:
 			self.assertEqual(self.vim.line_percent(pl=pl, segment_info=segment_info), '1')
 			vim_module._set_cursor(50, 0)
+			segment_info = vim_module._get_segment_info()
 			self.assertEqual(self.vim.line_percent(pl=pl, segment_info=segment_info), '50')
 			self.assertEqual(self.vim.line_percent(pl=pl, segment_info=segment_info, gradient=True), [
 				{'contents': '50', 'highlight_groups': ['line_percent_gradient', 'line_percent'], 'gradient_level': 50 * 100.0 / 101}
@@ -1363,9 +1371,11 @@ class TestVim(TestCase):
 		pl = Pl()
 		segment_info = vim_module._get_segment_info()
 		segment_info['buffer'][0:-1] = [str(i) for i in range(99)]
+		segment_info = vim_module._get_segment_info()
 		try:
 			self.assertEqual(self.vim.line_count(pl=pl, segment_info=segment_info), '100')
 			vim_module._set_cursor(50, 0)
+			segment_info = vim_module._get_segment_info()
 			self.assertEqual(self.vim.line_count(pl=pl, segment_info=segment_info), '100')
 		finally:
 			vim_module._bw(segment_info['bufnr'])
@@ -1376,16 +1386,20 @@ class TestVim(TestCase):
 		try:
 			segment_info['buffer'][0:-1] = [str(i) for i in range(99)]
 			vim_module._set_cursor(49, 0)
+			segment_info = vim_module._get_segment_info()
 			self.assertEqual(self.vim.position(pl=pl, segment_info=segment_info), '50%')
 			self.assertEqual(self.vim.position(pl=pl, segment_info=segment_info, gradient=True), [
 				{'contents': '50%', 'highlight_groups': ['position_gradient', 'position'], 'gradient_level': 50.0}
 			])
 			vim_module._set_cursor(0, 0)
+			segment_info = vim_module._get_segment_info()
 			self.assertEqual(self.vim.position(pl=pl, segment_info=segment_info), 'Top')
 			vim_module._set_cursor(97, 0)
+			segment_info = vim_module._get_segment_info()
 			self.assertEqual(self.vim.position(pl=pl, segment_info=segment_info, position_strings={'top': 'Comienzo', 'bottom': 'Final', 'all': 'Todo'}), 'Final')
 			segment_info['buffer'][0:-1] = [str(i) for i in range(2)]
 			vim_module._set_cursor(0, 0)
+			segment_info = vim_module._get_segment_info()
 			self.assertEqual(self.vim.position(pl=pl, segment_info=segment_info, position_strings={'top': 'Comienzo', 'bottom': 'Final', 'all': 'Todo'}), 'Todo')
 			self.assertEqual(self.vim.position(pl=pl, segment_info=segment_info, gradient=True), [
 				{'contents': 'All', 'highlight_groups': ['position_gradient', 'position'], 'gradient_level': 0.0}
@@ -1407,7 +1421,27 @@ class TestVim(TestCase):
 
 	def test_modified_buffers(self):
 		pl = Pl()
-		self.assertEqual(self.vim.modified_buffers(pl=pl), None)
+		segment_info = vim_module._get_segment_info()
+		self.assertEqual(self.vim.modified_buffers(segment_info=segment_info, pl=pl), None)
+		bufnr1 = segment_info['bufnr']
+		try:
+			segment_info['buffer'][0:-1] = [str(i) for i in range(99)]
+			segment_info = vim_module._get_segment_info()
+			self.assertEqual(self.vim.modified_buffers(segment_info=segment_info, pl=pl), '+ ' + str(bufnr1))
+			self.assertEqual(self.vim.modified_buffers(segment_info=segment_info, pl=pl, text='-'), '-' + str(bufnr1))
+			try:
+				vim_module._new()
+				segment_info = vim_module._get_segment_info()
+				segment_info['buffer'][0:-1] = [str(i) for i in range(99)]
+				segment_info = vim_module._get_segment_info()
+				bufnr2 = segment_info['bufnr']
+				self.assertEqual(self.vim.modified_buffers(segment_info=segment_info, pl=pl), '+ {0},{1}'.format(bufnr1, bufnr2))
+				self.assertEqual(self.vim.modified_buffers(segment_info=segment_info, pl=pl, text='-'), '-{0},{1}'.format(bufnr1, bufnr2))
+				self.assertEqual(self.vim.modified_buffers(segment_info=segment_info, pl=pl, join_str=' '), '+ {0} {1}'.format(bufnr1, bufnr2))
+			finally:
+				vim_module._bw(bufnr2)
+		finally:
+			vim_module._bw(bufnr1)
 
 	def test_branch(self):
 		pl = Pl()
@@ -1481,28 +1515,30 @@ class TestVim(TestCase):
 			with replace_attr(self.vim, 'guess', get_dummy_guess(status=lambda file: None)):
 				self.assertEqual(file_vcs_status(segment_info=segment_info), None)
 		with vim_module._with('buffer', '/bar') as segment_info:
-			with vim_module._with('bufoptions', buftype='nofile'):
+			with vim_module._with('bufoptions', buftype='nofile') as segment_info:
 				with replace_attr(self.vim, 'guess', get_dummy_guess(status=lambda file: 'M')):
 					self.assertEqual(file_vcs_status(segment_info=segment_info), None)
 
 	def test_trailing_whitespace(self):
 		pl = Pl()
 		with vim_module._with('buffer', 'tws') as segment_info:
-			trailing_whitespace = partial(self.vim.trailing_whitespace, pl=pl, segment_info=segment_info)
-			self.assertEqual(trailing_whitespace(), None)
-			self.assertEqual(trailing_whitespace(), None)
+			trailing_whitespace = partial(self.vim.trailing_whitespace, pl=pl)
+			self.assertEqual(trailing_whitespace(segment_info=segment_info), None)
+			self.assertEqual(trailing_whitespace(segment_info=segment_info), None)
 			vim_module.current.buffer[0] = ' '
-			self.assertEqual(trailing_whitespace(), [{
+			segment_info = vim_module._get_segment_info()
+			self.assertEqual(trailing_whitespace(segment_info=segment_info), [{
 				'highlight_groups': ['trailing_whitespace', 'warning'],
 				'contents': '1',
 			}])
-			self.assertEqual(trailing_whitespace(), [{
+			self.assertEqual(trailing_whitespace(segment_info=segment_info), [{
 				'highlight_groups': ['trailing_whitespace', 'warning'],
 				'contents': '1',
 			}])
 			vim_module.current.buffer[0] = ''
-			self.assertEqual(trailing_whitespace(), None)
-			self.assertEqual(trailing_whitespace(), None)
+			segment_info = vim_module._get_segment_info()
+			self.assertEqual(trailing_whitespace(segment_info=segment_info), None)
+			self.assertEqual(trailing_whitespace(segment_info=segment_info), None)
 
 	def test_tabnr(self):
 		pl = Pl()
@@ -1540,17 +1576,20 @@ class TestVim(TestCase):
 			with vim_module._with('buffer', '1') as segment_info:
 				self.assertEqual(self.vim.tab_modified_indicator(pl=pl, segment_info=segment_info), None)
 				vim_module.current.buffer[0] = ' '
+				segment_info = vim_module._get_segment_info()
 				self.assertEqual(self.vim.tab_modified_indicator(pl=pl, segment_info=segment_info), [{
 					'contents': '+',
 					'highlight_groups': ['tab_modified_indicator', 'modified_indicator'],
 				}])
 				vim_module._undo()
+				segment_info = vim_module._get_segment_info()
 				self.assertEqual(self.vim.tab_modified_indicator(pl=pl, segment_info=segment_info), None)
 				old_buffer = vim_module.current.buffer
 				vim_module._new('2')
 				segment_info = vim_module._get_segment_info()
 				self.assertEqual(self.vim.tab_modified_indicator(pl=pl, segment_info=segment_info), None)
 				old_buffer[0] = ' '
+				segment_info = vim_module._get_segment_info()
 				self.assertEqual(self.vim.modified_indicator(pl=pl, segment_info=segment_info), None)
 				self.assertEqual(self.vim.tab_modified_indicator(pl=pl, segment_info=segment_info), [{
 					'contents': '+',
@@ -1563,31 +1602,37 @@ class TestVim(TestCase):
 
 		def csv_col_current(**kwargs):
 			self.vim.csv_cache and self.vim.csv_cache.clear()
-			return self.vim.csv_col_current(pl=pl, segment_info=segment_info, **kwargs)
+			return self.vim.csv_col_current(pl=pl, **kwargs)
 
 		buffer = segment_info['buffer']
+		segment_info = vim_module._get_segment_info()
 		try:
-			self.assertEqual(csv_col_current(), None)
+			self.assertEqual(csv_col_current(segment_info=segment_info), None)
 			buffer.options['filetype'] = 'csv'
-			self.assertEqual(csv_col_current(), None)
+			segment_info = vim_module._get_segment_info()
+			self.assertEqual(csv_col_current(segment_info=segment_info), None)
 			buffer[:] = ['1;2;3', '4;5;6']
 			vim_module._set_cursor(1, 1)
-			self.assertEqual(csv_col_current(), [{
+			segment_info = vim_module._get_segment_info()
+			self.assertEqual(csv_col_current(segment_info=segment_info), [{
 				'contents': '1', 'highlight_groups': ['csv:column_number', 'csv']
 			}])
 			vim_module._set_cursor(2, 3)
-			self.assertEqual(csv_col_current(), [{
+			segment_info = vim_module._get_segment_info()
+			self.assertEqual(csv_col_current(segment_info=segment_info), [{
 				'contents': '2', 'highlight_groups': ['csv:column_number', 'csv']
 			}])
 			vim_module._set_cursor(2, 3)
-			self.assertEqual(csv_col_current(display_name=True), [{
+			segment_info = vim_module._get_segment_info()
+			self.assertEqual(csv_col_current(segment_info=segment_info, display_name=True), [{
 				'contents': '2', 'highlight_groups': ['csv:column_number', 'csv']
 			}, {
 				'contents': ' (2)', 'highlight_groups': ['csv:column_name', 'csv']
 			}])
 			buffer[:0] = ['Foo;Bar;Baz']
 			vim_module._set_cursor(2, 3)
-			self.assertEqual(csv_col_current(), [{
+			segment_info = vim_module._get_segment_info()
+			self.assertEqual(csv_col_current(segment_info=segment_info), [{
 				'contents': '2', 'highlight_groups': ['csv:column_number', 'csv']
 			}, {
 				'contents': ' (Bar)', 'highlight_groups': ['csv:column_name', 'csv']
@@ -1596,31 +1641,33 @@ class TestVim(TestCase):
 				raise SkipTest('csv module in Python-2.6 does not handle multiline csv files well')
 			buffer[len(buffer):] = ['1;"bc', 'def', 'ghi', 'jkl";3']
 			vim_module._set_cursor(5, 1)
-			self.assertEqual(csv_col_current(), [{
+			segment_info = vim_module._get_segment_info()
+			self.assertEqual(csv_col_current(segment_info=segment_info), [{
 				'contents': '2', 'highlight_groups': ['csv:column_number', 'csv']
 			}, {
 				'contents': ' (Bar)', 'highlight_groups': ['csv:column_name', 'csv']
 			}])
 			vim_module._set_cursor(7, 6)
-			self.assertEqual(csv_col_current(), [{
+			segment_info = vim_module._get_segment_info()
+			self.assertEqual(csv_col_current(segment_info=segment_info), [{
 				'contents': '3', 'highlight_groups': ['csv:column_number', 'csv']
 			}, {
 				'contents': ' (Baz)', 'highlight_groups': ['csv:column_name', 'csv']
 			}])
-			self.assertEqual(csv_col_current(name_format=' ({column_name:.1})'), [{
+			self.assertEqual(csv_col_current(segment_info=segment_info, name_format=' ({column_name:.1})'), [{
 				'contents': '3', 'highlight_groups': ['csv:column_number', 'csv']
 			}, {
 				'contents': ' (B)', 'highlight_groups': ['csv:column_name', 'csv']
 			}])
-			self.assertEqual(csv_col_current(display_name=True, name_format=' ({column_name:.1})'), [{
+			self.assertEqual(csv_col_current(segment_info=segment_info, display_name=True, name_format=' ({column_name:.1})'), [{
 				'contents': '3', 'highlight_groups': ['csv:column_number', 'csv']
 			}, {
 				'contents': ' (B)', 'highlight_groups': ['csv:column_name', 'csv']
 			}])
-			self.assertEqual(csv_col_current(display_name=False, name_format=' ({column_name:.1})'), [{
+			self.assertEqual(csv_col_current(segment_info=segment_info, display_name=False, name_format=' ({column_name:.1})'), [{
 				'contents': '3', 'highlight_groups': ['csv:column_number', 'csv']
 			}])
-			self.assertEqual(csv_col_current(display_name=False), [{
+			self.assertEqual(csv_col_current(segment_info=segment_info, display_name=False), [{
 				'contents': '3', 'highlight_groups': ['csv:column_number', 'csv']
 			}])
 		finally:

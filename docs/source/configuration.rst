@@ -144,3 +144,4 @@ References
    configuration/listers
    configuration/selectors
    configuration/local
+   configuration/matchers/vim
