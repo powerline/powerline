@@ -1,8 +1,8 @@
-#!/bin/sh
+#!/bin/bash
 . tests/shlib/common.sh
 . tests/shlib/vterm.sh
 
-enter_suite tmux
+enter_suite tmux final
 
 vterm_setup
 

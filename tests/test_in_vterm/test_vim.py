@@ -14,6 +14,7 @@ from powerline.lib.dict import updated
 
 from tests.modules.lib.terminal import (ExpectProcess, MutableDimensions,
                                         do_terminal_tests, get_env)
+from tests.modules import PowerlineTestSuite
 
 
 TEST_ROOT = os.path.abspath(os.environ['TEST_ROOT'])
@@ -53,14 +54,16 @@ def main(attempts=3):
 	tests = (
 	)
 
-	return do_terminal_tests(
-		tests=tests,
-		cmd=vim_exe,
-		dim=dim,
-		args=args,
-		env=env,
-		cwd=TEST_ROOT,
-	)
+	with PowerlineTestSuite('vim') as suite:
+		return do_terminal_tests(
+			tests=tests,
+			cmd=vim_exe,
+			dim=dim,
+			args=args,
+			env=env,
+			cwd=TEST_ROOT,
+			suite=suite,
+		)
 
 
 if __name__ == '__main__':

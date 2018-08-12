@@ -22,6 +22,11 @@ def hostname(pl, segment_info, only_if_ssh=False, exclude_domain=False):
 	:param bool exclude_domain:
 		return the hostname without domain if there is one
 	'''
+	if (
+		segment_info['environ'].get('_POWERLINE_RUNNING_SHELL_TESTS')
+		== 'ee5bcdc6-b749-11e7-9456-50465d597777'
+	):
+		return 'hostname'
 	if only_if_ssh and not segment_info['environ'].get('SSH_CLIENT'):
 		return None
 	if exclude_domain:
