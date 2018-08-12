@@ -7,10 +7,18 @@ import time
 
 from threading import Lock
 
-import i3
+from powerline.bindings.wm import get_i3_connection, i3_subscribe
 
 from powerline import Powerline
 from powerline.lib.monotonic import monotonic
+
+
+class I3Powerline(Powerline):
+	'''Powerline child for i3bar
+
+	Currently only changes the default log target.
+	'''
+	default_log_stream = sys.stderr
 
 
 if __name__ == '__main__':
@@ -18,26 +26,25 @@ if __name__ == '__main__':
 	if len(sys.argv) > 1:
 		name = sys.argv[1]
 
-	powerline = Powerline(name, renderer_module='i3bar')
+	powerline = I3Powerline(name, renderer_module='i3bar')
 	powerline.update_renderer()
 
 	interval = 0.5
 
-	print ('{"version": 1, "custom_workspace": true}')
+	print ('{"version": 1}')
 	print ('[')
-	print ('\t[[],[]]')
+	print ('[]')
 
 	lock = Lock()
 
 	def render(event=None, data=None, sub=None):
 		global lock
 		with lock:
-			s = '[\n' + powerline.render(side='right')[:-2] + '\n]\n'
-			s += ',[\n' + powerline.render(side='left')[:-2] + '\n]'
-			print (',[\n' + s + '\n]')
+			print (',[' + powerline.render()[:-1] + ']')
 			sys.stdout.flush()
 
-	sub = i3.Subscription(render, 'workspace')
+	i3 = get_i3_connection()
+	i3_subscribe(i3, 'workspace', render)
 
 	while True:
 		start_time = monotonic()

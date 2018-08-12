@@ -41,7 +41,7 @@ Generic requirements
 .. _repository-root:
 
 .. note::
-   When using ``pip`` ``{repository_root}`` directory referenced in 
+   When using ``pip``, the ``{repository_root}`` directory referenced in 
    documentation may be found using ``pip show powerline-status``. In the output 
    of ``pip show`` there is a line like ``Location: {path}``, that ``{path}`` is 
    ``{repository_root}``. Unless it is ``--editable`` installation this is only 

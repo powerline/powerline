@@ -60,12 +60,12 @@ with any coding font.
 #. Move the symbol font to a valid X font path. Valid font paths can be 
    listed with ``xset q``::
 
-      mv PowerlineSymbols.otf ~/.fonts/
+      mv PowerlineSymbols.otf ~/.local/share/fonts/
 
 #. Update font cache for the path the font was moved to (root priveleges may be 
    needed to update cache for the system-wide paths)::
 
-      fc-cache -vf ~/.fonts/
+      fc-cache -vf ~/.local/share/fonts/
 
 #. Install the fontconfig file. For newer versions of fontconfig the config 
    path is ``~/.config/fontconfig/conf.d/``, for older versions it’s  
@@ -92,12 +92,12 @@ After downloading font the following should be done:
 #. Move the patched font to a valid X font path. Valid font paths can be 
    listed with ``xset q``::
 
-      mv 'SomeFont for Powerline.otf' ~/.fonts/
+      mv 'SomeFont for Powerline.otf' ~/.local/share/fonts/
 
-#. Update font cache for the path the font was moved to (root priveleges may be 
+#. Update font cache for the path the font was moved to (root privileges may be 
    needed for updating font cache for some paths)::
 
-      fc-cache -vf ~/.fonts/
+      fc-cache -vf ~/.local/share/fonts/
 
 After installing patched font terminal emulator, GVim or whatever application 
 powerline should work with must be configured to use the patched font. The 

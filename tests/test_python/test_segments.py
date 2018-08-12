@@ -52,15 +52,35 @@ class TestShell(TestCase):
 
 	def test_last_pipe_status(self):
 		pl = Pl()
-		segment_info = {'args': Args(last_pipe_status=[])}
+		segment_info = {'args': Args(last_pipe_status=[], last_exit_code=0)}
 		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info), None)
 		segment_info['args'].last_pipe_status = [0, 0, 0]
+		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info), None)
+		segment_info['args'].last_pipe_status = [0, 0]
+		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info), None)
+		segment_info['args'].last_pipe_status = [0]
 		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info), None)
 		segment_info['args'].last_pipe_status = [0, 2, 0]
 		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info), [
 			{'contents': '0', 'highlight_groups': ['exit_success'], 'draw_inner_divider': True},
 			{'contents': '2', 'highlight_groups': ['exit_fail'], 'draw_inner_divider': True},
-			{'contents': '0', 'highlight_groups': ['exit_success'], 'draw_inner_divider': True}
+			{'contents': '0', 'highlight_groups': ['exit_success'], 'draw_inner_divider': True},
+		])
+		segment_info['args'].last_pipe_status = [2, 0, 0]
+		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info), [
+			{'contents': '2', 'highlight_groups': ['exit_fail'], 'draw_inner_divider': True},
+			{'contents': '0', 'highlight_groups': ['exit_success'], 'draw_inner_divider': True},
+			{'contents': '0', 'highlight_groups': ['exit_success'], 'draw_inner_divider': True},
+		])
+		segment_info['args'].last_pipe_status = [0, 0, 2]
+		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info), [
+			{'contents': '0', 'highlight_groups': ['exit_success'], 'draw_inner_divider': True},
+			{'contents': '0', 'highlight_groups': ['exit_success'], 'draw_inner_divider': True},
+			{'contents': '2', 'highlight_groups': ['exit_fail'], 'draw_inner_divider': True},
+		])
+		segment_info['args'].last_pipe_status = [2]
+		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info), [
+			{'contents': '2', 'highlight_groups': ['exit_fail'], 'draw_inner_divider': True},
 		])
 		segment_info['args'].last_pipe_status = [0, 'sigsegv', 'sigsegv+core']
 		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info), [
@@ -79,6 +99,11 @@ class TestShell(TestCase):
 			{'contents': '0', 'highlight_groups': ['exit_success'], 'draw_inner_divider': True},
 			{'contents': 'sigsegv+core', 'highlight_groups': ['exit_fail'], 'draw_inner_divider': True},
 			{'contents': '0', 'highlight_groups': ['exit_success'], 'draw_inner_divider': True}
+		])
+		segment_info['args'].last_pipe_status = []
+		segment_info['args'].last_exit_code = 5
+		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info), [
+			{'contents': '5', 'highlight_groups': ['exit_fail'], 'draw_inner_divider': True},
 		])
 
 	def test_jobnum(self):
@@ -502,6 +527,11 @@ class TestEnv(TestCommon):
 			if hasattr(self.module, 'psutil') and not callable(self.module.psutil.Process.username):
 				username = property(username)
 
+		segment_info = {'environ': {}}
+
+		def user(*args, **kwargs):
+			return self.module.user(pl=pl, segment_info=segment_info, *args, **kwargs)
+
 		struct_passwd = namedtuple('struct_passwd', ('pw_name',))
 		new_psutil = new_module('psutil', Process=Process)
 		new_pwd = new_module('pwd', getpwuid=lambda uid: struct_passwd(pw_name='def@DOMAIN.COM'))
@@ -512,21 +542,21 @@ class TestEnv(TestCommon):
 				with replace_attr(self.module, 'os', new_os):
 					with replace_attr(self.module, 'psutil', new_psutil):
 						with replace_attr(self.module, '_geteuid', lambda: 5):
-							self.assertEqual(self.module.user(pl=pl), [
+							self.assertEqual(user(), [
 								{'contents': 'def@DOMAIN.COM', 'highlight_groups': ['user']}
 							])
-							self.assertEqual(self.module.user(pl=pl, hide_user='abc'), [
+							self.assertEqual(user(hide_user='abc'), [
 								{'contents': 'def@DOMAIN.COM', 'highlight_groups': ['user']}
 							])
-							self.assertEqual(self.module.user(pl=pl, hide_domain=False), [
+							self.assertEqual(user(hide_domain=False), [
 								{'contents': 'def@DOMAIN.COM', 'highlight_groups': ['user']}
 							])
-							self.assertEqual(self.module.user(pl=pl, hide_user='def@DOMAIN.COM'), None)
-							self.assertEqual(self.module.user(pl=pl, hide_domain=True), [
+							self.assertEqual(user(hide_user='def@DOMAIN.COM'), None)
+							self.assertEqual(user(hide_domain=True), [
 								{'contents': 'def', 'highlight_groups': ['user']}
 							])
 						with replace_attr(self.module, '_geteuid', lambda: 0):
-							self.assertEqual(self.module.user(pl=pl), [
+							self.assertEqual(user(), [
 								{'contents': 'def', 'highlight_groups': ['superuser', 'user']}
 							])
 

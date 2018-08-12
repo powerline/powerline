@@ -42,7 +42,7 @@ void do_write(int sd, const char *raw, size_t len) {
 	}
 }
 
-inline size_t true_sun_len(const struct sockaddr_un *ptr) {
+static inline size_t true_sun_len(const struct sockaddr_un *ptr) {
 #ifdef __linux__
 	/* Because SUN_LEN uses strlen and abstract namespace paths begin
 	 * with a null byte, SUN_LEN is broken for these. Passing the full
@@ -71,7 +71,7 @@ inline size_t true_sun_len(const struct sockaddr_un *ptr) {
 #endif
 
 #define ADDRESS_SIZE sizeof(ADDRESS_TEMPLATE) + (sizeof(uid_t) * 4)
-#define NUM_ARGS_SIZE (sizeof(int) * 2)
+#define NUM_ARGS_SIZE (sizeof(int) * 2 + 1)
 #define BUF_SIZE 4096
 #define NEW_ARGV_SIZE 200
 
@@ -88,6 +88,7 @@ int main(int argc, char *argv[]) {
 	char *wd = NULL;
 	char **envp;
 	const char *address;
+	int len;
 
 	if (argc < 2) {
 		printf("Must provide at least one argument.\n");
@@ -122,8 +123,8 @@ int main(int argc, char *argv[]) {
 		execvp("powerline-render", newargv);
 	}
 
-	snprintf(num_args, NUM_ARGS_SIZE, "%x", argc - 1);
-	do_write(sd, num_args, strlen(num_args));
+	len = snprintf(num_args, NUM_ARGS_SIZE, "%x", argc - 1);
+	do_write(sd, num_args, len);
 	do_write(sd, eof, 1);
 
 	for (i = 1; i < argc; i++) {

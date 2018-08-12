@@ -14,6 +14,44 @@ DEFAULT_UPDATE_INTERVAL = 0.5
 conn = None
 
 
+def i3_subscribe(conn, event, callback):
+	'''Subscribe to i3 workspace event
+
+	:param conn:
+		Connection returned by :py:func:`get_i3_connection`.
+	:param str event:
+		Event to subscribe to, e.g. ``'workspace'``.
+	:param func callback:
+		Function to run on event.
+	'''
+	try:
+		import i3ipc
+	except ImportError:
+		import i3
+		conn.Subscription(callback, event)
+		return
+	else:
+		pass
+
+	conn.on(event, callback)
+
+	from threading import Thread
+
+	class I3Thread(Thread):
+		daemon = True
+
+		def __init__(self, conn):
+			super(I3Thread, self).__init__()
+			self.__conn = conn
+
+		def run(self):
+			self.__conn.main()
+
+	thread = I3Thread(conn=conn)
+
+	thread.start()
+
+
 def get_i3_connection():
 	'''Return a valid, cached i3 Connection instance
 	'''

@@ -161,3 +161,23 @@ def replace_env(key, new, environ=None, **kwargs):
 	r = kwargs.copy()
 	r['environ'] = environ or {}
 	return ItemReplace(r['environ'], key, new, r)
+
+
+class PowerlineSingleTest(object):
+	def __init__(self, suite, name):
+		self.suite = suite
+		self.name = name
+
+	def __enter__(self):
+		return self
+
+	def __exit__(self, exc_type, exc_value, traceback):
+		if exc_type is not None:
+			self.exception('Exception while running test: {0!r}'.format(
+				exc_value))
+
+	def fail(self, message, allow_failure=False):
+		return self.suite.fail(self.name, message, allow_failure)
+
+	def exception(self, message, allow_failure=False):
+		return self.suite.exception(self.name, message, allow_failure)

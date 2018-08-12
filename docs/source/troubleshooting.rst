@@ -143,6 +143,40 @@ started from.*
 Shell issues
 ============
 
+Pipe status segment displays only last value in bash
+----------------------------------------------------
+
+Make sure that powerline command that sets prompt appears the very first in 
+``$PROMPT_COMMAND``. To do this ``powerline.sh`` needs to be sourced the very 
+last, after all other users of ``$PROMPT_COMMAND``.
+
+Bash prompt stopped updating
+----------------------------
+
+Make sure that powerline commands appear in ``$PROMPT_COMMAND``: some users of 
+``$PROMPT_COMMAND`` have a habit of overwriting the value instead of 
+prepending/appending to it. All powerline commands start with ``_powerline`` or 
+``powerline``, e.g. ``_powerline_set_prompt``.
+
+Bash prompt does not show last exit code
+----------------------------------------
+
+There are two possibilities here:
+
+* You are using ``default`` theme in place of ``default_leftonly``. Unlike 
+  ``default_leftonly`` ``default`` theme was designed for shells with right 
+  prompt support (e.g. zsh, tcsh, fish) and status in question is supposed to be 
+  shown on the right side which bash cannot display.
+
+* There is some other user of ``$PROMPT_COMMAND`` which prepended to this 
+  variable, but did not bother keeping the exit code. For the best experience 
+  powerline must appear first in ``$PROMPT_COMMAND`` which may be achieved by 
+  sourcing powerline bindings the last.
+
+  .. note::
+     Resourcing bash bindings will not resolve the problem unless you clear 
+     powerline commands from ``$PROMPT_COMMAND`` first.
+
 When sourcing shell bindings it complains about missing command or file
 -----------------------------------------------------------------------
 

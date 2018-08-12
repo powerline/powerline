@@ -55,6 +55,7 @@ cd ../'(echo)'
 cd ../'$(echo)'
 cd ../'`echo`'
 cd ../'«Unicode!»'
+(exit 42)|(exit 43)
 set_theme_option default_leftonly.segments.above "$ABOVE_LEFT"
 export DISPLAYED_ENV_VAR=foo
 unset DISPLAYED_ENV_VAR

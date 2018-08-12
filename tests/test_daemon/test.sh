@@ -1,7 +1,7 @@
 #!/bin/sh
 . tests/shlib/common.sh
 
-enter_suite daemon
+enter_suite daemon final
 
 export ADDRESS="powerline-ipc-test-$$"
 echo "Powerline address: $ADDRESS"

@@ -29,9 +29,8 @@ class I3barRenderer(Renderer):
 				segment['color'] = '#{0:06x}'.format(fg[1])
 		if bg is not None:
 			if bg is not False and bg[1] is not False:
-				segment['background_color'] = '#{0:06x}'.format(bg[1])
-		# i3bar “pseudo json” requires one line at a time
-		return json.dumps(segment) + ',\n'
+				segment['background'] = '#{0:06x}'.format(bg[1])
+		return json.dumps(segment) + ','
 
 
 renderer = I3barRenderer

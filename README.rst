@@ -6,8 +6,8 @@ Powerline
 :Version: beta
 
 **Powerline is a statusline plugin for vim, and provides statuslines and 
-prompts for several other applications, including zsh, bash, tmux, IPython, 
-Awesome, i3 and Qtile.**
+prompts for several other applications, including zsh, bash, fish, tmux,
+IPython, Awesome, i3 and Qtile.**
 
 * `Support forum`_ (powerline-support@googlegroups.com)
 * `Development discussion`_ (powerline-dev@googlegroups.com)

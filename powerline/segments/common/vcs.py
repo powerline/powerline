@@ -46,7 +46,7 @@ branch = with_docstring(BranchSegment(),
 :param bool status_colors:
 	Determines whether repository status will be used to determine highlighting. 
 	Default: False.
-:param bool ignore_statuses:
+:param list ignore_statuses:
 	List of statuses which will not result in repo being marked as dirty. Most 
 	useful is setting this option to ``["U"]``: this will ignore repository 
 	which has just untracked files (i.e. repository with modified, deleted or 

@@ -102,7 +102,7 @@ if ! test -e "$DEPRECATED_SCRIPT" ; then
 	# skip "deprecated" "Missing deprecated bar bindings script"
 	:
 else
-	enter_suite "deprecated"
+	enter_suite "deprecated" final
 	for args in "" "0.5"; do
 		rm -rf "$TEST_ROOT/results"
 		mkdir "$TEST_ROOT/results"
@@ -132,7 +132,7 @@ else
 	exit_suite --continue
 fi
 
-enter_suite "awesome"
+enter_suite "awesome" final
 ADDRESS="powerline-ipc-test-$$"
 echo "Powerline address: $ADDRESS"
 rm -rf "$TEST_ROOT/results"

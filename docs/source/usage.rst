@@ -8,7 +8,7 @@ Application-specific requirements
 Vim plugin requirements
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-The vim plugin requires a vim version with Python support compiled in. Presense 
+The vim plugin requires a vim version with Python support compiled in. Presence 
 of Python support in Vim can be checked by running ``vim --version | grep 
 +python``.
 

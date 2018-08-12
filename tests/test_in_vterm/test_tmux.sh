@@ -1,17 +1,15 @@
-#!/bin/sh
+#!/bin/bash
 . tests/shlib/common.sh
 . tests/shlib/vterm.sh
 
-enter_suite tmux
+enter_suite tmux final
 
-VTERM_TEST_DIR="$ROOT/tests/vterm_tmux"
+vterm_setup
 
-vterm_setup "$VTERM_TEST_DIR"
-
-ln -s "$(which env)" "$VTERM_TEST_DIR/path"
-ln -s "$(which cut)" "$VTERM_TEST_DIR/path"
-ln -s "$ROOT/scripts/powerline-render" "$VTERM_TEST_DIR/path"
-ln -s "$ROOT/scripts/powerline-config" "$VTERM_TEST_DIR/path"
+ln -s "$(which env)" "$TEST_ROOT/path"
+ln -s "$(which cut)" "$TEST_ROOT/path"
+ln -s "$ROOT/scripts/powerline-render" "$TEST_ROOT/path"
+ln -s "$ROOT/scripts/powerline-config" "$TEST_ROOT/path"
 
 test_tmux() {
 	if test "$PYTHON_IMPLEMENTATION" = PyPy; then
@@ -22,7 +20,7 @@ test_tmux() {
 	if ! which "${POWERLINE_TMUX_EXE}" ; then
 		return 0
 	fi
-	ln -sf "$(which "${POWERLINE_TMUX_EXE}")" "$VTERM_TEST_DIR/path/tmux"
+	ln -sf "$(which "${POWERLINE_TMUX_EXE}")" "$TEST_ROOT/path/tmux"
 	f="$ROOT/tests/test_in_vterm/test_tmux.py"
 	if ! "${PYTHON}" "$f" ; then
 		local test_name="$("$POWERLINE_TMUX_EXE" -V 2>&1 | cut -d' ' -f2)"
@@ -41,6 +39,6 @@ else
 	test_tmux || true
 fi
 
-vterm_shutdown "$VTERM_TEST_DIR"
+vterm_shutdown
 
 exit_suite

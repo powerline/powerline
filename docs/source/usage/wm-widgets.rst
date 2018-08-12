@@ -5,7 +5,7 @@ Window manager widgets
 Awesome widget
 ==============
 
-.. note:: Powerline currently only supports awesome 3.5.
+.. note:: Powerline currently only supports awesome 3.5 and 4+.
 
 .. note:: The Powerline widget will spawn a shell script that runs in the 
    background and updates the statusline with ``awesome-client``.
@@ -23,7 +23,17 @@ Then add the ``powerline_widget`` to ``wibox``:
 
 .. code-block:: lua
 
+   -- awesome3.5
    right_layout:add(powerline_widget)
+   
+   -- awesome4+
+   s.mywibox:setup {
+   ...
+     { -- Right widgets
+       ...
+       powerline_widget,
+     },
+   }
 
 Qtile widget
 ============
@@ -82,20 +92,11 @@ All ``powerline-lemonbar.py`` arguments:
 I3 bar
 ======
 
-.. note::
-   As the patch to include background-colors in i3bar is likely not to be 
-   merged, it is recommended to instead run ``bar`` (see above). The source for 
-   i3bgbar is however still available `here 
-   <https://github.com/S0lll0s/i3bgbar>`_.
-
-Add the following to :file:`~/.i3/config`::
+Add the following to :file:`~/.config/i3/config`::
 
     bar {
-        i3bar_command i3bgbar
-
         status_command python /path/to/powerline/bindings/i3/powerline-i3.py
         font pango:PowerlineFont 12
     }
 
-where ``i3bgbar`` may be replaced with the path to the custom i3bar binary and 
-``PowerlineFont`` is any system font with powerline support.
+where ``PowerlineFont`` is any system font with powerline support.
