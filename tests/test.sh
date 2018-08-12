@@ -33,10 +33,10 @@ for script in "$ROOT"/tests/test_*/test.sh ; do
 	fi
 done
 
-if test -e tests/failures ; then
-	echo "Some tests failed. Summary:"
-	cat tests/failures
-	rm tests/failures
+if test -e "$FAILURES_FILE" ; then
+	echo "Fails and skips summary:"
+	cat "$FAILURES_FILE"
+	rm "$FAILURES_FILE"
 fi
 
 exit_suite

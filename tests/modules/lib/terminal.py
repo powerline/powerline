@@ -61,6 +61,7 @@ class ExpectProcess(threading.Thread):
 		self.buffer = []
 		self.child_lock = threading.Lock()
 		self.shutdown_event = threading.Event()
+		self.started_event = threading.Event()
 
 	def run(self):
 		with self.child_lock:
@@ -70,6 +71,7 @@ class ExpectProcess(threading.Thread):
 			child.setwinsize(self.dim.rows, self.dim.cols)
 			sleep(0.5)
 			self.child = child
+			self.started_event.set()
 		status = None
 		while status is None and not self.shutdown_event.is_set():
 			try:
@@ -111,21 +113,33 @@ class ExpectProcess(threading.Thread):
 		with self.child_lock:
 			self.child.send(data)
 
-	def get_highlighted_text(self, text, attrs, default_props=()):
+	def get_highlighted_text(self, text, attrs, default_props=(),
+	                         use_escapes=False):
 		ret = []
 		new_attrs = attrs.copy()
 		for cell_properties, segment_text in text:
-			segment_text = segment_text.translate({'{': '{{', '}': '}}'})
-			if cell_properties not in new_attrs:
-				new_attrs[cell_properties] = len(new_attrs) + 1
-			props_name = new_attrs[cell_properties]
-			if props_name in default_props:
-				ret.append(segment_text)
+			if use_escapes:
+				escapes = ('\033[38;2;{0};{1};{2};48;2;{3};{4};{5}'.format(
+					*(cell_properties[0] + cell_properties[1]))) + (
+						';1' if cell_properties[2] else ''
+					) + (
+						';3' if cell_properties[3] else ''
+					) + (
+						';4' if cell_properties[4] else ''
+					) + 'm'
+				ret.append(escapes + segment_text + '\033[0m')
 			else:
-				ret.append('{' + str(props_name) + ':' + segment_text + '}')
+				segment_text = segment_text.translate({'{': '{{', '}': '}}'})
+				if cell_properties not in new_attrs:
+					new_attrs[cell_properties] = len(new_attrs) + 1
+				props_name = new_attrs[cell_properties]
+				if props_name in default_props:
+					ret.append(segment_text)
+				else:
+					ret.append('{' + str(props_name) + ':' + segment_text + '}')
 		return ''.join(ret), new_attrs
 
-	def get_row(self, row, attrs, default_props=()):
+	def get_row(self, row, attrs, default_props=(), use_escapes=False):
 		with self.lock:
 			return self.get_highlighted_text((
 				(key, ''.join((cell.text for cell in subline)))
@@ -133,34 +147,48 @@ class ExpectProcess(threading.Thread):
 					self.vterm.vtscreen[row, col]
 					for col in range(self.dim.cols)
 				), lambda cell: cell.cell_properties_key)
-			), attrs, default_props)
+			), attrs, default_props, use_escapes)
 
-	def get_screen(self, attrs, default_props=()):
+	def get_screen(self, attrs, default_props=(), use_escapes=False):
 		lines = []
 		for row in range(self.dim.rows):
-			line, attrs = self.get_row(row, attrs, default_props)
+			line, attrs = self.get_row(row, attrs, default_props, use_escapes)
 			lines.append(line)
 		return '\n'.join(lines), attrs
 
 
 def test_expected_result(p, test, last_attempt, last_attempt_cb, attempts):
+	debugging_tests = not not os.environ.get('_POWERLINE_DEBUGGING_TESTS')
 	expected_text, attrs = test['expected_result']
 	result = None
 	while attempts:
-		actual_text, all_attrs = p.get_row(test['row'], attrs)
+		if 'row' in test:
+			row = test['row']
+		else:
+			row = p.dim.rows - 1
+			while row >= 0 and not p[row, 0].text:
+				row -= 1
+			if row < 0:
+				row = 0
+		actual_text, all_attrs = p.get_row(row, attrs)
 		if actual_text == expected_text:
 			return True
 		attempts -= 1
-		print('Actual result does not match expected. Attempts left: {0}.'.format(attempts))
+		print('Actual result does not match expected for row {0}. Attempts left: {1}.'.format(
+			row, attempts))
 		sleep(2)
-	print('Result:')
+	print('Result (row {0}):'.format(row))
 	print(actual_text)
 	print('Expected:')
 	print(expected_text)
 	print('Attributes:')
-	print(all_attrs)
+	for v, k in sorted(
+		((v, k) for k, v in all_attrs.items()),
+		key=(lambda t: '%02u'.format(t[0]) if isinstance(t[0], int) else t[0]),
+	):
+		print('{k!r}: {v!r},'.format(v=v, k=k))
 	print('Screen:')
-	screen, screen_attrs = p.get_screen(attrs)
+	screen, screen_attrs = p.get_screen(attrs, use_escapes=debugging_tests)
 	print(screen)
 	print(screen_attrs)
 	print('_' * 80)
@@ -220,8 +248,12 @@ def get_env(vterm_path, test_dir, *args, **kwargs):
 	return env
 
 
-def do_terminal_tests(tests, cmd, dim, args, env, cwd=None, fin_cb=None,
-                      last_attempt_cb=None, attempts=3):
+def do_terminal_tests(tests, cmd, dim, args, env, suite, cwd=None, fin_cb=None,
+                      last_attempt_cb=None, attempts=None):
+	debugging_tests = not not os.environ.get('_POWERLINE_DEBUGGING_TESTS')
+	default_attempts = 2 if debugging_tests else 3
+	if attempts is None:
+		attempts = default_attempts
 	lib = os.environ.get('POWERLINE_LIBVTERM')
 	if not lib:
 		if os.path.exists('tests/bot-ci/deps/libvterm/libvterm.so'):
@@ -240,22 +272,26 @@ def do_terminal_tests(tests, cmd, dim, args, env, cwd=None, fin_cb=None,
 				env=env,
 			)
 			p.start()
+			p.started_event.wait()
 
 			ret = True
 
-			for test in tests:
-				try:
-					test_prep = test['prep_cb']
-				except KeyError:
-					pass
-				else:
-					test_prep(p)
-				ret = (
-					ret
-					and test_expected_result(p, test, attempts == 0,
-					                         last_attempt_cb,
-					                         test.get('attempts', 3))
-				)
+			for i, test in enumerate(tests):
+				with suite.test(test.get('name', 'test_{0}'.format(i)),
+				                attempts - 1) as ptest:
+					try:
+						test_prep = test['prep_cb']
+					except KeyError:
+						pass
+					else:
+						test_prep(p)
+					test_result = test_expected_result(
+						p, test, attempts == 0, last_attempt_cb,
+						test.get('attempts', default_attempts)
+					)
+					if not test_result:
+						ptest.fail('Result does not match expected')
+				ret = ret and test_result
 
 			if ret:
 				return ret

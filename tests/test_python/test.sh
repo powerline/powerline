@@ -1,7 +1,7 @@
 #!/bin/sh
 . tests/shlib/common.sh
 
-enter_suite python
+enter_suite python final
 
 for file in "$ROOT"/tests/test_python/test_*.py ; do
 	test_name="${file##*/test_}"
