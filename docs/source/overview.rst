@@ -37,8 +37,8 @@ Features
 hassle for me / what happened to the original vim-powerline project / …*
 
 You should check out some of the Powerline derivatives. The most lightweight
-and feature-rich alternative is currently Bailey Ling’s `vim-airline
-<https://github.com/bling/vim-airline>`_ project.
+and feature-rich alternative is currently the `vim-airline
+<https://github.com/vim-airline/vim-airline>`_ project.
 
 Screenshots
 -----------
