@@ -5,7 +5,7 @@ Shell prompts
 *************
 
 .. note::
-    Powerline daemon is not run automatically by any of my bindings. It is 
+    Powerline daemon is not run automatically by any of my bindings. It is
     advised to add
 
     .. code-block:: bash
@@ -17,32 +17,38 @@ Shell prompts
 Bash prompt
 ===========
 
-Add the following line to the :file:`bashrc`, where ``{repository_root}`` is the 
-absolute path to the Powerline installation directory (see :ref:`repository root 
-<repository-root>`):
+#. Make sure you know your repository root. See
+   :ref:`repository root <repository-root>`.
+#. Add the following line to the :file:`bashrc`, where ``{repository_root}``
+   is the absolute path to the Powerline installation directory :
 
-.. code-block:: bash
+   .. code-block:: bash
 
-   . {repository_root}/powerline/bindings/bash/powerline.sh
+      . {repository_root}/powerline/bindings/bash/powerline.sh
+
+   For example:
+   ``/usr/local/lib/python2.7/site-packages/powerline/bindings/bash/powerline.sh``
+
+#. (Optional but recommended) Add the following code to your :file:`bashrc`
+   before the call to ``powerline.sh``:
+
+   .. code-block:: bash
+
+      powerline-daemon -q
+      POWERLINE_BASH_CONTINUATION=1
+      POWERLINE_BASH_SELECT=1
 
 .. note::
-    Since without powerline daemon bash bindings are very slow PS2 
-    (continuation) and PS3 (select) prompts are not set up. Thus it is advised 
-    to use
+   Without the powerline daemon bash bindings are very slow, PS2
+   (continuation) and PS3 (select) prompts are not set up.
 
-    .. code-block:: bash
-
-       powerline-daemon -q
-       POWERLINE_BASH_CONTINUATION=1
-       POWERLINE_BASH_SELECT=1
-       . {repository_root}/powerline/bindings/bash/powerline.sh
-
-    in the bash configuration file. Without ``POWERLINE_BASH_*`` variables PS2 
-    and PS3 prompts are computed exactly once at bash startup.
+.. note::
+   Without ``POWERLINE_BASH_*`` variables PS2 and PS3 prompts are computed
+   exactly once at bash startup.
 
 .. warning::
-    At maximum bash continuation PS2 and select PS3 prompts are computed each 
-    time main PS1 prompt is computed. Thus putting e.g. current time into PS2 or 
+    At maximum bash continuation PS2 and select PS3 prompts are computed each
+    time main PS1 prompt is computed. Thus putting e.g. current time into PS2 or
     PS3 prompt will not work as expected.
 
     At minimum they are computed once on startup.
@@ -50,8 +56,8 @@ absolute path to the Powerline installation directory (see :ref:`repository root
 Zsh prompt
 ==========
 
-Add the following line to the :file:`zshrc`, where ``{repository_root}`` is the 
-absolute path to the Powerline installation directory (see :ref:`repository root 
+Add the following line to the :file:`zshrc`, where ``{repository_root}`` is the
+absolute path to the Powerline installation directory (see :ref:`repository root
 <repository-root>`):
 
 .. code-block:: bash
@@ -61,8 +67,8 @@ absolute path to the Powerline installation directory (see :ref:`repository root
 Fish prompt
 ===========
 
-Add the following line to :file:`config.fish`, where ``{repository_root}`` is 
-the absolute path to the Powerline installation directory (see :ref:`repository 
+Add the following line to :file:`config.fish`, where ``{repository_root}`` is
+the absolute path to the Powerline installation directory (see :ref:`repository
 root <repository-root>`):
 
 .. code-block:: bash
@@ -75,23 +81,23 @@ root <repository-root>`):
 Rcsh prompt
 ===========
 
-Powerline supports Plan9 rc reimplementation *by Byron Rakitzis* packaged by 
+Powerline supports Plan9 rc reimplementation *by Byron Rakitzis* packaged by
 many \*nix distributions. To use it add
 
 .. code-block:: bash
 
    . {repository_root}/powerline/bindings/rc/powerline.rc
 
-(``{repository_root}`` is the absolute path to the Powerline installation 
-directory, see :ref:`repository root <repository-root>`) to :file:`rcrc` file 
-(usually :file:`~/.rcrc`) and make sure ``rc`` is started as a login shell (with 
+(``{repository_root}`` is the absolute path to the Powerline installation
+directory, see :ref:`repository root <repository-root>`) to :file:`rcrc` file
+(usually :file:`~/.rcrc`) and make sure ``rc`` is started as a login shell (with
 ``-l`` argument): otherwise this configuration file is not read.
 
 .. warning::
-   Original Plan9 shell and its \*nix port are not supported because they are 
-   missing ``prompt`` special function (it is being called once before each 
-   non-continuation prompt). Since powerline could not support shell without 
-   this or equivalent feature some other not-so-critical features of that port 
+   Original Plan9 shell and its \*nix port are not supported because they are
+   missing ``prompt`` special function (it is being called once before each
+   non-continuation prompt). Since powerline could not support shell without
+   this or equivalent feature some other not-so-critical features of that port
    were used.
 
 Busybox (ash), mksh and dash prompt
@@ -103,10 +109,10 @@ After launching busybox run the following command:
 
    . {repository_root}/powerline/bindings/shell/powerline.sh
 
-where ``{repository_root}`` is the absolute path to the Powerline installation 
+where ``{repository_root}`` is the absolute path to the Powerline installation
 directory (see :ref:`repository root <repository-root>`).
 
-Mksh users may put this line into ``~/.mkshrc`` file. Dash users may use the 
+Mksh users may put this line into ``~/.mkshrc`` file. Dash users may use the
 following in ``~/.profile``:
 
 .. code-block:: bash
@@ -116,29 +122,29 @@ following in ``~/.profile``:
     fi
 
 .. note::
-    Dash users that already have ``$ENV`` defined should either put the ``. 
-    …/shell/powerline.sh`` line in the ``$ENV`` file or create a new file which 
-    will source (using ``.`` command) both former ``$ENV`` file and 
+    Dash users that already have ``$ENV`` defined should either put the ``.
+    …/shell/powerline.sh`` line in the ``$ENV`` file or create a new file which
+    will source (using ``.`` command) both former ``$ENV`` file and
     :file:`powerline.sh` files and set ``$ENV`` to the path of this new file.
 
 .. warning::
-    Mksh users have to set ``$POWERLINE_SHELL_CONTINUATION`` and 
-    ``$POWERLINE_SHELL_SELECT`` to 1 to get PS2 and PS3 (continuation and 
-    select) prompts support respectively: as command substitution is not 
-    performed in these shells for these prompts they are updated once each time 
+    Mksh users have to set ``$POWERLINE_SHELL_CONTINUATION`` and
+    ``$POWERLINE_SHELL_SELECT`` to 1 to get PS2 and PS3 (continuation and
+    select) prompts support respectively: as command substitution is not
+    performed in these shells for these prompts they are updated once each time
     PS1 prompt is displayed which may be slow.
 
-    It is also known that while PS2 and PS3 update is triggered at PS1 update it 
-    is *actually performed* only *next* time PS1 is displayed which means that 
+    It is also known that while PS2 and PS3 update is triggered at PS1 update it
+    is *actually performed* only *next* time PS1 is displayed which means that
     PS2 and PS3 prompts will be outdated and may be incorrect for this reason.
 
-    Without these variables PS2 and PS3 prompts will be set once at startup. 
+    Without these variables PS2 and PS3 prompts will be set once at startup.
     This only touches mksh users: busybox and dash both have no such problem.
 
 .. warning::
-    Job count is using some weird hack that uses signals and temporary files for 
+    Job count is using some weird hack that uses signals and temporary files for
     interprocess communication. It may be wrong sometimes. Not the case in mksh.
 
 .. warning::
-    Busybox has two shells: ``ash`` and ``hush``. Second is known to segfault in 
+    Busybox has two shells: ``ash`` and ``hush``. Second is known to segfault in
     busybox 1.22.1 when using :file:`powerline.sh` script.

@@ -1,3 +1,5 @@
+.. _usage:
+
 *****
 Usage
 *****
@@ -8,32 +10,38 @@ Application-specific requirements
 Vim plugin requirements
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-The vim plugin requires a vim version with Python support compiled in. Presence 
-of Python support in Vim can be checked by running ``vim --version | grep 
-+python``.
+The vim plugin requires a vim version with Python support compiled in.
 
-If Python support is absent then Vim needs to be compiled with it. To do this 
-use ``--enable-pythoninterp`` :file:`./configure` flag (Python 3 uses 
-``--enable-python3interp`` flag instead). Note that this also requires the 
-related Python headers to be installed. Please consult distribution’s 
-documentation for details on how to compile and install packages.
+To check if your version of vim supports Python, run:
 
-Vim version 7.4 or newer is recommended for performance reasons, but Powerline 
+.. code-block:: sh
+
+   vim --version | grep +python
+
+
+If no mention of ``+python`` is shown in the command result, Vim needs to be
+recompiled with Python support. To do this see this `Stackexchange thread`_
+and the `Vim wiki`_.
+
+.. _`Stackexchange thread`: https://vi.stackexchange.com/questions/11526/how-to-enable-python-feature-in-vim
+.. _`Vim wiki`: http://vim.wikia.com/wiki/Building_Vim
+
+Vim version 7.4 or newer is recommended for performance reasons, but Powerline
 supports Vim 7.0.112 and higher.
 
 Shell prompts requirements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Due to fish having incorrect code for prompt width calculations up to version 
-2.1 and no way to tell that certain sequence of characters has no width 
-(``%{…%}`` in zsh and ``\[…\]`` in bash prompts serve exactly this purpose) 
+Due to fish having incorrect code for prompt width calculations up to version
+2.1 and no way to tell that certain sequence of characters has no width
+(``%{…%}`` in zsh and ``\[…\]`` in bash prompts serve exactly this purpose)
 users that have fish versions below 2.1 are not supported..
 
 
 WM widgets requirements
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-Awesome is supported starting from version 3.5.1, inclusive. QTile is supported 
+Awesome is supported starting from version 3.5.1, inclusive. QTile is supported
 from version 0.6, inclusive.
 
 .. _usage-terminal-emulators:
@@ -41,19 +49,19 @@ from version 0.6, inclusive.
 Terminal emulator requirements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Powerline uses several special glyphs to get the arrow effect and some custom 
-symbols for developers. This requires either a symbol font or a patched font 
-installed. Used terminal emulator must also support either patched fonts or 
+Powerline uses several special glyphs to get the arrow effect and some custom
+symbols for developers. This requires either a symbol font or a patched font
+installed. Used terminal emulator must also support either patched fonts or
 fontconfig for Powerline to work properly.
 
-:ref:`24-bit color support <config-common-term_truecolor>` can also be enabled 
+:ref:`24-bit color support <config-common-term_truecolor>` can also be enabled
 if terminal emulator supports it.
 
 .. table:: Application/terminal emulator feature support matrix
    :name: term-feature-support-matrix
 
    ===================== ======= ===================== ===================== =====================
-   Name                  OS      Patched font support  Fontconfig support    24-bit color support 
+   Name                  OS      Patched font support  Fontconfig support    24-bit color support
    ===================== ======= ===================== ===================== =====================
    Gvim                  Linux   |i_yes|               |i_no|                |i_yes|
    iTerm2                OS X    |i_yes|               |i_no|                |i_no|
