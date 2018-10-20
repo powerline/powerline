@@ -5,44 +5,44 @@ Installation
 Generic requirements
 ====================
 
-* Python 2.6 or later, 3.2 or later, PyPy 2.0 or later, PyPy3 2.3 or later. It
+* Python 2.6 or later, 3.2 or later, PyPy 2.0 or later, PyPy3 2.3 or later. It 
   is the only non-optional requirement.
 
   .. warning:
-     It is highly advised to use UCS-4 version of Python because UCS-2 version
-     uses significantly slower text processing (length determination and
-     non-printable character replacement) functions due to the need of
-     supporting unicode characters above U+FFFF which are represented as
-     surrogate pairs. This price will be paid even if configuration has no such
+     It is highly advised to use UCS-4 version of Python because UCS-2 version 
+     uses significantly slower text processing (length determination and 
+     non-printable character replacement) functions due to the need of 
+     supporting unicode characters above U+FFFF which are represented as 
+     surrogate pairs. This price will be paid even if configuration has no such 
      characters.
 
-* C compiler. Required to build powerline client on linux. If it is not present
+* C compiler. Required to build powerline client on linux. If it is not present 
   then powerline will fall back to shell script or python client.
-* ``socat`` program. Required for shell variant of client which runs a bit
+* ``socat`` program. Required for shell variant of client which runs a bit 
   faster than python version of the client, but still slower than C version.
-* ``psutil`` python package. Required for some segments like cpu_percent. Some
+* ``psutil`` python package. Required for some segments like cpu_percent. Some 
   segments have linux-only fallbacks for ``psutil`` functionality.
-* ``hglib`` python package *and* mercurial executable. Required to work with
+* ``hglib`` python package *and* mercurial executable. Required to work with 
   mercurial repositories.
-* ``pygit2`` python package or ``git`` executable. Required to work with ``git``
+* ``pygit2`` python package or ``git`` executable. Required to work with ``git`` 
   repositories.
-* ``bzr`` python package (note: *not* standalone executable). Required to work
+* ``bzr`` python package (note: *not* standalone executable). Required to work 
   with bazaar repositories.
-* ``pyuv`` python package. Required for :ref:`libuv-based watcher
+* ``pyuv`` python package. Required for :ref:`libuv-based watcher 
   <config-common-watcher>` to work.
-* ``i3ipc`` python package. Required for i3wm bindings and segments.
-* ``xrandr`` program. Required for the multi-monitor lemonbar binding and the
+* ``i3ipc`` python package. Required for i3wm bindings and segments. 
+* ``xrandr`` program. Required for the multi-monitor lemonbar binding and the 
   :py:func:`powerline.listers.i3wm.output_lister`.
 
 .. note::
-    Until bazaar supports Python-3 or PyPy powerline will not support
+    Until bazaar supports Python-3 or PyPy powerline will not support 
     repository information when running in these interpreters.
 
 
 Pip installation
 ================
 
-Refer to :ref:`install-osx` or :ref:`install-linux` for platform-specific
+Refer to :ref:`install-osx` or :ref:`install-linux` for platform-specific 
 instructions. If these do not apply to you, apply the following steps.
 
 - To install the latest release, run:
@@ -51,7 +51,7 @@ instructions. If these do not apply to you, apply the following steps.
 
      pip install powerline-status
 
-  .. note:: Due to a naming conflict with an unrelated project, Powerline
+  .. note:: Due to a naming conflict with an unrelated project, Powerline 
      is available on PyPi under the ``powerline-status`` name.
 
 - To install the current development version, run:
@@ -66,7 +66,7 @@ instructions. If these do not apply to you, apply the following steps.
 
      pip install --user --editable={path_to_powerline}
 
-  .. note:: In this case ``pip`` will not install ``powerline``
+  .. note:: In this case ``pip`` will not install ``powerline`` 
      executable. You might need to run:
 
      .. code-block:: sh
@@ -77,7 +77,7 @@ instructions. If these do not apply to you, apply the following steps.
      present in ``$PATH``).
 
 .. note::
-   If your ISP blocks the git protocol for some reason, use the following
+   If your ISP blocks the git protocol for some reason, use the following 
    Github protocols:
 
    - ``ssh``: ``git+ssh://git@github.com/powerline/powerline``
@@ -89,7 +89,7 @@ instructions. If these do not apply to you, apply the following steps.
 
 .. rubric:: Repository root
 
-Since you used ``pip`` to install powerline, you will need to know the
+Since you used ``pip`` to install powerline, you will need to know the 
 ``{repository_root}`` directory to set up powerline.
 
 To display the ``{repository_root}``:
@@ -98,28 +98,28 @@ To display the ``{repository_root}``:
 #. Find the output line containing ``Location: {path}``. That ``{path}``
    is the ``{repository_root}``.
 
-Unless you used the ``--editable`` flag during the installation, this is
-only applicable for ``{repository_root}/powerline/…`` paths: something
+Unless you used the ``--editable`` flag during the installation, this is 
+only applicable for ``{repository_root}/powerline/…`` paths: something 
 like ``{repository_root}/scripts/powerline-render`` is not present.
 
-When using other packages referenced paths may not exist, in this case refer
+When using other packages referenced paths may not exist, in this case refer 
 to the package documentation.
 
 Fonts installation
 ==================
 
-Powerline uses several special glyphs to get the arrow effect and some custom
-symbols for developers. This requires having either a symbol font or a patched
+Powerline uses several special glyphs to get the arrow effect and some custom 
+symbols for developers. This requires having either a symbol font or a patched 
 font installed in the system.
 
-The used application (e.g. terminal emulator) must
-also either be configured to use patched fonts (in some cases even support it
-because custom glyphs live in private use area which some applications reserve
-for themselves) or support fontconfig for powerline to work properly with
+The used application (e.g. terminal emulator) must 
+also either be configured to use patched fonts (in some cases even support it 
+because custom glyphs live in private use area which some applications reserve 
+for themselves) or support fontconfig for powerline to work properly with 
 powerline-specific glyphs.
 
-:ref:`24-bit color support <config-common-term_truecolor>` may be enabled if
-used terminal emulator supports it (see :ref:`the terminal emulator support
+:ref:`24-bit color support <config-common-term_truecolor>` may be enabled if 
+used terminal emulator supports it (see :ref:`the terminal emulator support 
 matrix <usage-terminal-emulators>`).
 
 There are 2 ways to get powerline glyphs displayed:
