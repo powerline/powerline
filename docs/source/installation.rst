@@ -38,18 +38,6 @@ Generic requirements
     Until bazaar supports Python-3 or PyPy powerline will not support
     repository information when running in these interpreters.
 
-.. _repository-root:
-
-.. note::
-   When using ``pip``, the ``{repository_root}`` directory referenced in
-   documentation may be found using ``pip show powerline-status``. In the output
-   of ``pip show`` there is a line like ``Location: {path}``, that ``{path}`` is
-   ``{repository_root}``. Unless it is ``--editable`` installation this is only
-   applicable for ``{repository_root}/powerline/…`` paths: something like
-   ``{repository_root}/scripts/powerline-render`` is not present.
-
-   When using other packages referenced paths may not exist, in this case refer
-   to package documentation.
 
 Pip installation
 ================
@@ -96,6 +84,26 @@ instructions. If these do not apply to you, apply the following steps.
    - ``https``: ``git+https://github.com/powerline/powerline``
 
    The ``git`` protocol should be the fastest, but the least secure one.
+
+.. _repository-root:
+
+.. rubric:: Repository root
+
+Since you used ``pip`` to install powerline, you will need to know the
+``{repository_root}`` directory to set up powerline.
+
+To display the ``{repository_root}``:
+
+#. Run ``pip show powerline-status``.
+#. Find the output line containing ``Location: {path}``. That ``{path}``
+   is the ``{repository_root}``.
+
+Unless you used the ``--editable`` flag during the installation, this is
+only applicable for ``{repository_root}/powerline/…`` paths: something
+like ``{repository_root}/scripts/powerline-render`` is not present.
+
+When using other packages referenced paths may not exist, in this case refer
+to the package documentation.
 
 Fonts installation
 ==================
