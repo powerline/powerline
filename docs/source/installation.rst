@@ -54,6 +54,9 @@ Generic requirements
 Pip installation
 ================
 
+Refer to :ref:`install-osx` or :ref:`install-linux` for platform-specific
+instructions. If these do not apply to you, apply the following steps.
+
 - To install the latest release, run:
 
   .. code-block:: sh

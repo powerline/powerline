@@ -1,67 +1,81 @@
+.. _install-osx:
+
 ********************
 Installation on OS X
 ********************
 
-Python package
-==============
+Installing Python
+=================
 
-1. Install a proper Python version (see `issue #39 
-   <https://github.com/powerline/powerline/issues/39>`_ for a discussion 
-   regarding the required Python version on OS X)::
+#. Install a proper Python version (see `issue #39
+   <https://github.com/powerline/powerline/issues/39>`_ for a discussion
+   regarding the required Python version on OS X).
+
+   Use either::
 
        sudo port select python python27-apple
 
-   Homebrew may be used here::
+   Or Homebrew::
 
        brew install python
 
    .. note::
-      In case :file:`powerline.sh` as a client ``socat`` and ``coreutils`` need 
-      to be installed. ``coreutils`` may be installed using ``brew install 
+      In case you use :file:`powerline.sh` as a client, install ``socat`` and
+      ``coreutils``. ``coreutils`` may be installed using ``brew install
       coreutils``.
 
-2. Install Powerline using one of the following commands:
-
-   .. code-block:: sh
-
-       pip install --user powerline-status
-
-   will get current release version and
-
-   .. code-block:: sh
-
-       pip install --user git+git://github.com/powerline/powerline
-
-   will get latest development version.
+#. Install Powerline using one of the following commands:
 
    .. warning::
       When using ``brew install`` to install Python one must not supply
       ``--user`` flag to ``pip``.
 
    .. note::
-      Due to the naming conflict with an unrelated project powerline is named 
+      Due to the naming conflict with an unrelated project, powerline is named
       ``powerline-status`` in PyPI.
 
+   - Latest version:
+
+     .. code-block:: sh
+
+        pip install --user powerline-status
+
+   - Development version:
+
+     .. code-block:: sh
+
+        pip install --user git+git://github.com/powerline/powerline
+
+
    .. note::
-      Powerline developers should be aware that ``pip install --editable`` does 
-      not currently fully work. Installation performed this way are missing 
-      ``powerline`` executable that needs to be symlinked. It will be located in 
+      Powerline developers should be aware that ``pip install --editable`` does
+      not currently fully work. Installation performed this way are missing
+      ``powerline`` executable that needs to be symlinked. It will be located in
       ``scripts/powerline``.
 
-Vim installation
+Installing vim
+==============
+
+Any terminal vim version with Python 3.2+ or Python 2.6+ support should work.
+
+If you use MacVim, install it using the following command:
+
+.. code-block:: sh
+
+   brew install macvim --env-std --with-override-system-vim
+
+Installing fonts
 ================
 
-Any terminal vim version with Python 3.2+ or Python 2.6+ support should work, 
-but MacVim users need to install it using the following command::
+To install a patched font:
 
-    brew install macvim --env-std --with-override-system-vim
+#. Download the font from the `powerline-fonts`_ repository.
+#. Double-click the patched font file in Finder. Patched fonts end with
+   *for Powerline*.
+#. Click :guilabel:`Install this font` in the preview window.
+#. Configure your terminal/MacVim/whatever application powerline should work
+   with to use the patched font.
 
-Fonts installation
-==================
+Powerline is still not enabled. Refer to :ref:`usage` to enable it.
 
-To install patched font double-click the font file in Finder, then click 
-:guilabel:`Install this font` in the preview window.
-
-After installing the patched font MacVim or terminal emulator (whatever 
-application powerline should work with) need to be configured to use the patched 
-font. The correct font usually ends with *for Powerline*.
+.. _powerline-fonts: https://github.com/powerline/fonts
