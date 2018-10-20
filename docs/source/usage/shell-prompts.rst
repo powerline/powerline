@@ -81,7 +81,7 @@ root <repository-root>`):
 Rcsh prompt
 ===========
 
-Powerline supports Plan9 rc reimplementation *by Byron Rakitzis* packaged by  
+Powerline supports Plan9 rc reimplementation *by Byron Rakitzis* packaged by 
 many \*nix distributions. To use it add
 
 .. code-block:: bash

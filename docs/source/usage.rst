@@ -61,7 +61,7 @@ if terminal emulator supports it.
    :name: term-feature-support-matrix
 
    ===================== ======= ===================== ===================== =====================
-   Name                  OS      Patched font support  Fontconfig support    24-bit color support
+   Name                  OS      Patched font support  Fontconfig support    24-bit color support 
    ===================== ======= ===================== ===================== =====================
    Gvim                  Linux   |i_yes|               |i_no|                |i_yes|
    iTerm2                OS X    |i_yes|               |i_no|                |i_no|
