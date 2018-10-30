@@ -42,6 +42,17 @@ should be followed:
       ``powerline`` executable that needs to be symlinked. It will be located in 
       ``scripts/powerline``.
 
+
+Service installation
+===================
+
+Copy ``powerline-daemon.service`` and ``powerline-daemon.socket`` from ``powerline/dist/systemd``
+to ``~/.config/systemd/user`` (per-user) or ``/etc/systemd/user`` (all users).
+
+Then execute ``systemctl --user daemon-reload`` to make systemd aware of the new units and
+run ``systemctl --user enable --now powerline-daemon.socket`` to have ``powerline-daemon``
+automatically run whenever needed.
+
 Fonts installation
 ==================
 
