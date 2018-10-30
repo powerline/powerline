@@ -192,7 +192,9 @@ I am suffering bad lags before displaying shell prompt
 
 To get rid of these lags there currently are two options:
 
-* Run ``powerline-daemon``. Powerline does not automatically start it for you.
+* Run ``powerline-daemon``. Powerline does not automatically start it for you
+  (unless the systemd units were installed/enabled according to the Linux
+  installation documentation).
 * Compile and install ``libzpython`` module that lives in 
   https://bitbucket.org/ZyX_I/zpython. This variant is zsh-specific.
 

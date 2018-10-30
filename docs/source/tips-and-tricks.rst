@@ -59,7 +59,8 @@ Once you have updated powerline you generally have the following options:
    work if the application uses ``powerline-daemon``.
 #. For shell and tmux bindings (except for zsh with libzpython): do not do 
    anything if you do not use ``powerline-daemon``, run ``powerline-daemon 
-   --replace`` if you do.
+   --replace`` if you do or ``systemctl --user stop powerline-daemon`` on
+   Linux/systemd environments, it will be auto-restarted.
 #. Use powerline reloading feature.
 
     .. warning::

@@ -102,7 +102,8 @@ root <repository-root>`)::
 
         run-shell "powerline-daemon -q"
 
-    to :file:`.tmux.conf`.
+    to :file:`.tmux.conf`, unless the systemd units were installed/enabled
+    according to the Linux installation documentation.
 
 .. warning::
     Segments which depend on current working directory (e.g. 
