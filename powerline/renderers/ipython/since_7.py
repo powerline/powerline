@@ -76,7 +76,7 @@ class PowerlinePromptStyle(DynamicStyle):
         return PowerlineStyleDict(fallback)
 
     def invalidation_hash(self):
-        return super(PowerlinePromptStyle, self).invalidation_hash()
+        return (h + 1 for h in tuple(super(PowerlinePromptStyle, self).invalidation_hash()))
 
 
 class IPythonPygmentsRenderer(IPythonRenderer):
