@@ -44,9 +44,9 @@ function powerline-setup
 			set -l addargs "--last-exit-code=\$status"
 			set -l addargs "$addargs --last-pipe-status=\$status"
 			set -l addargs "$addargs --jobnum=(jobs -p | wc -l)"
-			# One random value has an 1/32767 = 0.0031% probability of having 
-			# the same value in two shells
-			set -l addargs "$addargs --renderer-arg=client_id="(random)
+			# Due to the birthday paradox, the chance of having a common
+			# renderer-arg in N shells is (N choose 2) * 1/(2^31 - 1)).
+			set -l addargs "$addargs --renderer-arg=client_id="(random 0 2147483647)
 			set -l addargs "$addargs --width=\$_POWERLINE_COLUMNS"
 			set -l addargs "$addargs --renderer-arg=mode=\$fish_bind_mode"
 			set -l addargs "$addargs --renderer-arg=default_mode=\$_POWERLINE_DEFAULT_MODE"
