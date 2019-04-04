@@ -95,11 +95,11 @@ setup(
 	author_email='kim.silkebaekken+vim@gmail.com',
 	url='https://github.com/powerline/powerline',
 	license='MIT',
-	# XXX Python 3 doesn’t allow compiled C files to be included in the scripts 
-	# list below. This is because Python 3 distutils tries to decode the file to 
+	# XXX Python 3 doesn’t allow compiled C files to be included in the scripts
+	# list below. This is because Python 3 distutils tries to decode the file to
 	# ASCII, and fails when powerline-client is a binary.
 	#
-	# XXX Python 2 fucks up script contents*. Not using it to install scripts 
+	# XXX Python 2 fucks up script contents*. Not using it to install scripts
 	# any longer.
 	# * Consider the following input:
 	#     % alias hex1=$'hexdump -e \'"" 1/1 "%02X\n"\''
@@ -111,7 +111,7 @@ setup(
 	#     > 0A
 	#   (repeated, with diff segment header numbers growing up).
 	#
-	# FIXME Current solution does not work with `pip install -e`. Still better 
+	# FIXME Current solution does not work with `pip install -e`. Still better
 	# then solution that is not working at all.
 	scripts=[
 		'scripts/powerline-lint',
