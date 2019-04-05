@@ -27,6 +27,10 @@ class PowerlinePromptStyle(DynamicStyle):
 class IPythonPygmentsRenderer(IPythonRenderer):
     reduce_initial = []
 
+    def __init__(self, **kwargs):
+        super(IPythonPygmentsRenderer, self).__init__(**kwargs)
+        self.character_translations[ord(' ')] = ' '
+
     def get_segment_info(self, segment_info, mode):
         return super(IPythonPygmentsRenderer, self).get_segment_info(
             IPythonInfo(segment_info), mode)
