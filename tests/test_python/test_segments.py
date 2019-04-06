@@ -37,6 +37,13 @@ class TestShell(TestCase):
 		self.assertEqual(shell.last_status(pl=pl, segment_info=segment_info), [
 			{'contents': '10', 'highlight_groups': ['exit_fail']}
 		])
+		segment_info['args'].last_exit_code = 137
+		self.assertEqual(shell.last_status(pl=pl, segment_info=segment_info), [
+			{'contents': 'SIGKILL', 'highlight_groups': ['exit_fail']}
+		])
+		self.assertEqual(shell.last_status(pl=pl, segment_info=segment_info, signal_names=False), [
+			{'contents': '137', 'highlight_groups': ['exit_fail']}
+		])
 		segment_info['args'].last_exit_code = 0
 		self.assertEqual(shell.last_status(pl=pl, segment_info=segment_info), None)
 		segment_info['args'].last_exit_code = None
@@ -72,6 +79,19 @@ class TestShell(TestCase):
 			{'contents': '0', 'highlight_groups': ['exit_success'], 'draw_inner_divider': True},
 			{'contents': '0', 'highlight_groups': ['exit_success'], 'draw_inner_divider': True},
 		])
+		segment_info['args'].last_pipe_status = [137, 0, 0]
+		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info), [
+			{'contents': 'SIGKILL', 'highlight_groups': ['exit_fail'], 'draw_inner_divider': True},
+			{'contents': '0', 'highlight_groups': ['exit_success'], 'draw_inner_divider': True},
+			{'contents': '0', 'highlight_groups': ['exit_success'], 'draw_inner_divider': True},
+		])
+
+		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info, signal_names=False), [
+			{'contents': '137', 'highlight_groups': ['exit_fail'], 'draw_inner_divider': True},
+			{'contents': '0', 'highlight_groups': ['exit_success'], 'draw_inner_divider': True},
+			{'contents': '0', 'highlight_groups': ['exit_success'], 'draw_inner_divider': True},
+		])
+
 		segment_info['args'].last_pipe_status = [0, 0, 2]
 		self.assertEqual(shell.last_pipe_status(pl=pl, segment_info=segment_info), [
 			{'contents': '0', 'highlight_groups': ['exit_success'], 'draw_inner_divider': True},
