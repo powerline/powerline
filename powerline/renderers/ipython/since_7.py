@@ -48,25 +48,25 @@ class IPythonPygmentsRenderer(IPythonRenderer):
         '''
         guifg = None
         guibg = None
-        attrs = []
+        att = []
         if fg is not None and fg is not False:
             guifg = fg[1]
         if bg is not None and bg is not False:
             guibg = bg[1]
         if attrs:
-            attrs = []
+            att = []
             if attrs & ATTR_BOLD:
-                attrs.append('bold')
+                att.append('bold')
             if attrs & ATTR_ITALIC:
-                attrs.append('italic')
+                att.append('italic')
             if attrs & ATTR_UNDERLINE:
-                attrs.append('underline')
+                att.append('underline')
 
         fg = (('%06x' % guifg) if guifg is not None else '')
         bg = (('%06x' % guibg) if guibg is not None else '')
         name = (
             'pl'
-            + ''.join(('_a' + attr for attr in attrs))
+            + ''.join(('_a' + attr for attr in att))
             + '_f' + fg + '_b' + bg
         )
 
@@ -74,7 +74,7 @@ class IPythonPygmentsRenderer(IPythonRenderer):
         if not (name in seen):
             global used_styles
             used_styles += [('pygments.' + name,
-                ''.join((' ' + attr for attr in attrs))
+                ''.join((' ' + attr for attr in att))
                 + (' fg:#' + fg if fg != '' else ' fg:')
                 + (' bg:#' + bg if bg != '' else ' bg:'))]
             seen.add(name)
