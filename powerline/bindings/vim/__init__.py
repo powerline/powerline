@@ -22,7 +22,8 @@ if (
 			return vim.options['encoding'] or 'ascii'
 	else:
 		def get_vim_encoding():
-			return vim.options['encoding'].decode('ascii') or 'ascii'
+			encoding = vim.options['encoding'] or 'ascii'
+			return encoding if isinstance(encoding, str) else encoding.decode('ascii')
 elif hasattr(vim, 'eval'):
 	def get_vim_encoding():
 		return vim.eval('&encoding') or 'ascii'
