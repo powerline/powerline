@@ -39,6 +39,14 @@ absolute path to the Powerline installation directory (see :ref:`repository root
 
     in the bash configuration file. Without ``POWERLINE_BASH_*`` variables PS2 
     and PS3 prompts are computed exactly once at bash startup.
+    
+    In the case you are using a rolling linux distribution, where python version
+    can change quite often or if you are sharing multiple the same config files
+    across multiple machines, the ``{{repository-root}}`` could be set like this:
+    
+    .. code-block:: bash
+       PYTHON_SITE_PATH=$(python -m site --user-site)
+       . $PYTHON_SITE_PATH/powerline/bindings/bash/powerline.sh
 
 .. warning::
     At maximum bash continuation PS2 and select PS3 prompts are computed each 
