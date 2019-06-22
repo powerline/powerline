@@ -59,6 +59,8 @@ function powerline-setup
 				env \$POWERLINE_COMMAND $POWERLINE_COMMAND_ARGS shell right $addargs
 				$rpromptpast
 			end
+            function fish_mode_prompt
+            end
 			function _powerline_set_columns --on-signal WINCH
 				set -g _POWERLINE_COLUMNS $columnsexpr
 			end
