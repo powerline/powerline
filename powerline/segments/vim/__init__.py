@@ -351,7 +351,7 @@ def file_encoding(pl, segment_info):
 	'''
 	bomstr = vim_getbufoption(segment_info, 'fileencoding') or None
 	if bomstr and vim_getbufoption(segment_info, 'bomb'):
-		bomstr = bomstr + '[BOM]'
+		bomstr = bomstr + ''
 	return bomstr
 
 @requires_segment_info
