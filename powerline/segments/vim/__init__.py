@@ -343,14 +343,16 @@ def file_format(pl, segment_info):
 @requires_segment_info
 @add_divider_highlight_group('background:divider')
 def file_encoding(pl, segment_info):
-	'''Return file encoding/character set.
+	'''Return file encoding/character set. With a "[BOM]" flag added if the file has a byte-order-mark
 
-	:return: file encoding/character set or None if unknown or missing file encoding
+	:return: file encoding/character set (optionally with "[BOM]" flag) or None if unknown or missing file encoding
 
 	Divider highlight group used: ``background:divider``.
 	'''
-	return vim_getbufoption(segment_info, 'fileencoding') or None
-
+	bomstr = vim_getbufoption(segment_info, 'fileencoding') or None
+	if bomstr and vim_getbufoption(segment_info, 'bomb'):
+		bomstr = bomstr + '[BOM]'
+	return bomstr
 
 @requires_segment_info
 @add_divider_highlight_group('background:divider')
