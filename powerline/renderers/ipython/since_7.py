@@ -1,3 +1,4 @@
+# vim:fileencoding=utf-8:noet
 import operator
 
 try:
