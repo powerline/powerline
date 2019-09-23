@@ -2,6 +2,7 @@
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 import sys
+import re
 
 from powerline.lib.shell import asrun, run_cmd
 from powerline.lib.unicode import out_u
@@ -174,19 +175,29 @@ class MpdPlayerSegment(PlayerSegment):
 			if password:
 				host = password + '@' + host
 			now_playing = run_cmd(pl, [
-				'mpc', 'current',
-				'-f', '%album%\n%artist%\n%title%\n%time%',
+				'mpc',
 				'-h', host,
 				'-p', str(port)
 			], strip=False)
-			if not now_playing:
+			album = run_cmd(pl, [
+				'mpc', 'current',
+				'-f', '%album%',
+				'-h', host,
+				'-p', str(port)
+			])
+			if not now_playing or now_playing.count("\n") != 3:
 				return
-			now_playing = now_playing.split('\n')
+			now_playing = re.match(
+				r"(.*) - (.*)\n\[([a-z]+)\] +[#0-9\/]+ +([0-9\:]+)\/([0-9\:]+)",
+				now_playing
+			)
 			return {
-				'album': now_playing[0],
+				'state': _convert_state(now_playing[3]),
+				'album': album,
 				'artist': now_playing[1],
 				'title': now_playing[2],
-				'total': now_playing[3],
+				'elapsed': now_playing[4],
+				'total': now_playing[5]
 			}
 		else:
 			try:
