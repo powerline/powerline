@@ -22,7 +22,7 @@ if __name__ == '__main__':
 	bars = []
 
 	for screen in get_connected_xrandr_outputs(powerline.pl):
-		command = [args.bar_command, '-g', '{0}x{1}+{2}'.format(screen['width'], args.height, screen['x'])] + args.args[1:]
+		command = [args.bar_command, '-g', '{0}x{1}+{2}+{3}'.format(screen['width'], args.height, screen['x'], screen['y'])] + args.args[1:]
 		process = subprocess.Popen(command, stdin=subprocess.PIPE)
 		bars.append((screen['name'], process, int(screen['width']) / 5))
 

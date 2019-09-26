@@ -169,7 +169,7 @@ else
 		if test "${script_args}" = "$args" ; then
 			script_args=
 		fi
-		expected_args="$command -g 1920x$height+0${script_args:+ }$script_args${NL}$command -g 1920x$height+1${script_args:+ }$script_args"
+		expected_args="$command -g 1920x$height+0+0${script_args:+ }$script_args${NL}$command -g 1920x$height+1+0${script_args:+ }$script_args"
 		if test "$expected_args" != "$received_args" ; then
 			echo "args:${NL}<$received_args>"
 			echo "expected:${NL}<$expected_args>"
