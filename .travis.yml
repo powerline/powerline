@@ -20,7 +20,7 @@ script: tests/test.sh
 jobs:
     include:
         - stage: Recent Python
-        - python: "3.7"
+          python: "3.7"
         - stage: PyPy
           python: "pypy"
         - python: "pypy3"
@@ -28,5 +28,4 @@ jobs:
           python: "3.4"
         - python: "3.5"
         - python: "3.6"
-
 # vim: et
