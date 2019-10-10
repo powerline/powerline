@@ -1,5 +1,5 @@
 _powerline_columns_fallback() {
-	if which stty &>/dev/null ; then
+	if command -v stty &>/dev/null ; then
 		local cols="$(stty size 2>/dev/null)"
 		if ! test -z "$cols" ; then
 			echo "${cols#* }"
@@ -138,7 +138,7 @@ _powerline_setup_prompt() {
 }
 
 if test -z "${POWERLINE_CONFIG_COMMAND}" ; then
-	if which powerline-config >/dev/null ; then
+	if command -v powerline-config >/dev/null ; then
 		POWERLINE_CONFIG_COMMAND=powerline-config
 	else
 		POWERLINE_CONFIG_COMMAND="$(dirname "$BASH_SOURCE")/../../../scripts/powerline-config"

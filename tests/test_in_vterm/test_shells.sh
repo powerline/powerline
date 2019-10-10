@@ -27,30 +27,30 @@ mkdir "$TEST_ROOT/fish_home/fish"
 mkdir "$TEST_ROOT/fish_home/fish/generated_completions"
 cp -r "$ROOT/tests/test_shells/ipython_home" "$TEST_ROOT"
 
-ln -s "$(which env)" "$TEST_ROOT/path"
-ln -s "$(which git)" "$TEST_ROOT/path"
-ln -s "$(which sleep)" "$TEST_ROOT/path"
-ln -s "$(which cat)" "$TEST_ROOT/path"
-ln -s "$(which false)" "$TEST_ROOT/path"
-ln -s "$(which true)" "$TEST_ROOT/path"
-ln -s "$(which kill)" "$TEST_ROOT/path"
-ln -s "$(which echo)" "$TEST_ROOT/path"
-ln -s "$(which which)" "$TEST_ROOT/path"
-ln -s "$(which dirname)" "$TEST_ROOT/path"
-ln -s "$(which wc)" "$TEST_ROOT/path"
-ln -s "$(which stty)" "$TEST_ROOT/path"
-ln -s "$(which cut)" "$TEST_ROOT/path"
-ln -s "$(which bc)" "$TEST_ROOT/path"
-ln -s "$(which expr)" "$TEST_ROOT/path"
-ln -s "$(which mktemp)" "$TEST_ROOT/path"
-ln -s "$(which grep)" "$TEST_ROOT/path"
-ln -s "$(which sed)" "$TEST_ROOT/path"
-ln -s "$(which rm)" "$TEST_ROOT/path"
-ln -s "$(which tr)" "$TEST_ROOT/path"
-ln -s "$(which uname)" "$TEST_ROOT/path"
-ln -s "$(which test)" "$TEST_ROOT/path"
-ln -s "$(which pwd)" "$TEST_ROOT/path"
-ln -s "$(which hostname)" "$TEST_ROOT/path"
+ln -s "$(command -v env)" "$TEST_ROOT/path"
+ln -s "$(command -v git)" "$TEST_ROOT/path"
+ln -s "$(command -v sleep)" "$TEST_ROOT/path"
+ln -s "$(command -v cat)" "$TEST_ROOT/path"
+ln -s "$(command -v false)" "$TEST_ROOT/path"
+ln -s "$(command -v true)" "$TEST_ROOT/path"
+ln -s "$(command -v kill)" "$TEST_ROOT/path"
+ln -s "$(command -v echo)" "$TEST_ROOT/path"
+ln -s "$(command -v which)" "$TEST_ROOT/path"
+ln -s "$(command -v dirname)" "$TEST_ROOT/path"
+ln -s "$(command -v wc)" "$TEST_ROOT/path"
+ln -s "$(command -v stty)" "$TEST_ROOT/path"
+ln -s "$(command -v cut)" "$TEST_ROOT/path"
+ln -s "$(command -v bc)" "$TEST_ROOT/path"
+ln -s "$(command -v expr)" "$TEST_ROOT/path"
+ln -s "$(command -v mktemp)" "$TEST_ROOT/path"
+ln -s "$(command -v grep)" "$TEST_ROOT/path"
+ln -s "$(command -v sed)" "$TEST_ROOT/path"
+ln -s "$(command -v rm)" "$TEST_ROOT/path"
+ln -s "$(command -v tr)" "$TEST_ROOT/path"
+ln -s "$(command -v uname)" "$TEST_ROOT/path"
+ln -s "$(command -v test)" "$TEST_ROOT/path"
+ln -s "$(command -v pwd)" "$TEST_ROOT/path"
+ln -s "$(command -v hostname)" "$TEST_ROOT/path"
 ln -s "$ROOT/tests/test_shells/bgscript.sh" "$TEST_ROOT/path"
 ln -s "$ROOT/tests/test_shells/waitpid.sh" "$TEST_ROOT/path"
 
@@ -62,8 +62,8 @@ if test -e "$ROOT/scripts/powerline" ; then
 	ln -s "$ROOT/scripts/powerline" "$TEST_ROOT/path"
 elif test -e client/powerline ; then
 	ln -s "$ROOT/client/powerline" "$TEST_ROOT/path"
-elif which powerline ; then
-	ln -s "$(which powerline)" "$TEST_ROOT/path"
+elif command -v powerline ; then
+	ln -s "$(command -v powerline)" "$TEST_ROOT/path"
 else
 	echo "Executable powerline was not found"
 	exit 1
@@ -75,9 +75,9 @@ if test "$(
 	HAS_C_CLIENT=1
 fi
 
-if which socat ; then
+if command -v socat ; then
 	HAS_SOCAT=1
-	ln -s "$(which socat)" "$TEST_ROOT/path"
+	ln -s "$(command -v socat)" "$TEST_ROOT/path"
 	ln -s "$ROOT/client/powerline.sh" "$TEST_ROOT/path"
 fi
 
@@ -97,8 +97,8 @@ test_shell() {
 		echo "Skipping test, C client not available"
 		return
 	fi
-	if which "$test_binding" ; then
-		ln -s "$(which "$test_binding")" "$TEST_ROOT/path"
+	if command -v "$test_binding" ; then
+		ln -s "$(command -v "$test_binding")" "$TEST_ROOT/path"
 	fi
 
 	if ! "${PYTHON}" "$ROOT/tests/test_in_vterm/test_shells.py" \
