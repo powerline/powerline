@@ -12,11 +12,11 @@ cp -r "$TEST_STATIC_ROOT/powerline" "$TEST_ROOT"
 
 export PYTHONPATH="$ROOT${PYTHONPATH:+:}$PYTHONPATH"
 
-ln -s "$(which "${PYTHON}")" "$TEST_PATH"/python
-ln -s "$(which sed)" "$TEST_PATH"
-ln -s "$(which cat)" "$TEST_PATH"
-ln -s "$(which mkdir)" "$TEST_PATH"
-ln -s "$(which basename)" "$TEST_PATH"
+ln -s "$(command -v "${PYTHON}")" "$TEST_PATH"/python
+ln -s "$(command -v sed)" "$TEST_PATH"
+ln -s "$(command -v cat)" "$TEST_PATH"
+ln -s "$(command -v mkdir)" "$TEST_PATH"
+ln -s "$(command -v basename)" "$TEST_PATH"
 ln -s "$TEST_PATH/lemonbar" "$TEST_PATH/bar-aint-recursive"
 
 DEPRECATED_SCRIPT="$ROOT/powerline/bindings/bar/powerline-bar.py"
