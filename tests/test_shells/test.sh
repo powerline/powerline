@@ -120,7 +120,7 @@ do_run_test() {
 				"$TEST_ROOT/path/${SH}" --version
 				;;
 		esac
-		if command -v dpkg >/dev/null ; then
+		if which dpkg >/dev/null ; then
 			dpkg -s ${SH}
 		fi
 		return 1
@@ -167,43 +167,43 @@ mkdir "$TEST_ROOT/fish_home/fish/generated_completions"
 cp -r "$ROOT/tests/test_shells/ipython_home" "$TEST_ROOT"
 
 mkdir "$TEST_ROOT/path"
-ln -s "$(command -v "${PYTHON}")" "$TEST_ROOT/path/python"
-ln -s "$(command -v env)" "$TEST_ROOT/path"
-ln -s "$(command -v git)" "$TEST_ROOT/path"
-ln -s "$(command -v sleep)" "$TEST_ROOT/path"
-ln -s "$(command -v cat)" "$TEST_ROOT/path"
-ln -s "$(command -v false)" "$TEST_ROOT/path"
-ln -s "$(command -v true)" "$TEST_ROOT/path"
-ln -s "$(command -v kill)" "$TEST_ROOT/path"
-ln -s "$(command -v echo)" "$TEST_ROOT/path"
-ln -s "$(command -v which)" "$TEST_ROOT/path"
-ln -s "$(command -v dirname)" "$TEST_ROOT/path"
-ln -s "$(command -v wc)" "$TEST_ROOT/path"
-ln -s "$(command -v stty)" "$TEST_ROOT/path"
-ln -s "$(command -v cut)" "$TEST_ROOT/path"
-ln -s "$(command -v bc)" "$TEST_ROOT/path"
-ln -s "$(command -v expr)" "$TEST_ROOT/path"
-ln -s "$(command -v mktemp)" "$TEST_ROOT/path"
-ln -s "$(command -v grep)" "$TEST_ROOT/path"
-ln -s "$(command -v sed)" "$TEST_ROOT/path"
-ln -s "$(command -v rm)" "$TEST_ROOT/path"
-ln -s "$(command -v tr)" "$TEST_ROOT/path"
-ln -s "$(command -v uname)" "$TEST_ROOT/path"
-ln -s "$(command -v test)" "$TEST_ROOT/path"
-ln -s "$(command -v pwd)" "$TEST_ROOT/path"
-ln -s "$(command -v hostname)" "$TEST_ROOT/path"
+ln -s "$(which "${PYTHON}")" "$TEST_ROOT/path/python"
+ln -s "$(which env)" "$TEST_ROOT/path"
+ln -s "$(which git)" "$TEST_ROOT/path"
+ln -s "$(which sleep)" "$TEST_ROOT/path"
+ln -s "$(which cat)" "$TEST_ROOT/path"
+ln -s "$(which false)" "$TEST_ROOT/path"
+ln -s "$(which true)" "$TEST_ROOT/path"
+ln -s "$(which kill)" "$TEST_ROOT/path"
+ln -s "$(which echo)" "$TEST_ROOT/path"
+ln -s "$(which which)" "$TEST_ROOT/path"
+ln -s "$(which dirname)" "$TEST_ROOT/path"
+ln -s "$(which wc)" "$TEST_ROOT/path"
+ln -s "$(which stty)" "$TEST_ROOT/path"
+ln -s "$(which cut)" "$TEST_ROOT/path"
+ln -s "$(which bc)" "$TEST_ROOT/path"
+ln -s "$(which expr)" "$TEST_ROOT/path"
+ln -s "$(which mktemp)" "$TEST_ROOT/path"
+ln -s "$(which grep)" "$TEST_ROOT/path"
+ln -s "$(which sed)" "$TEST_ROOT/path"
+ln -s "$(which rm)" "$TEST_ROOT/path"
+ln -s "$(which tr)" "$TEST_ROOT/path"
+ln -s "$(which uname)" "$TEST_ROOT/path"
+ln -s "$(which test)" "$TEST_ROOT/path"
+ln -s "$(which pwd)" "$TEST_ROOT/path"
+ln -s "$(which hostname)" "$TEST_ROOT/path"
 ln -s "$ROOT/tests/test_shells/bgscript.sh" "$TEST_ROOT/path"
 ln -s "$ROOT/tests/test_shells/waitpid.sh" "$TEST_ROOT/path"
-if command -v socat ; then
-	ln -s "$(command -v socat)" "$TEST_ROOT/path"
+if which socat ; then
+	ln -s "$(which socat)" "$TEST_ROOT/path"
 fi
 for pexe in powerline powerline-config powerline-render powerline.sh powerline.py ; do
 	if test -e "$ROOT/scripts/$pexe" ; then
 		ln -s "$ROOT/scripts/$pexe" "$TEST_ROOT/path"
 	elif test -e client/$pexe ; then
 		ln -s "$ROOT/client/$pexe" "$TEST_ROOT/path"
-	elif command -v $pexe ; then
-		ln -s "$(command -v $pexe)" "$TEST_ROOT/path"
+	elif which $pexe ; then
+		ln -s "$(which $pexe)" "$TEST_ROOT/path"
 	else
 		echo "Executable $pexe was not found"
 		exit 1
@@ -216,7 +216,7 @@ ln -s python "$TEST_ROOT/path/ipython"
 IPYTHON_PYTHON=ipython
 
 if test -z "$POWERLINE_RC_EXE" ; then
-	if command -v rc-status >/dev/null ; then
+	if which rc-status >/dev/null ; then
 		# On Gentoo `rc` executable is from OpenRC. Thus app-shells/rc instals 
 		# `rcsh` executable.
 		POWERLINE_RC_EXE=rcsh
@@ -225,8 +225,8 @@ if test -z "$POWERLINE_RC_EXE" ; then
 	fi
 fi
 
-if command -v "$POWERLINE_RC_EXE" >/dev/null ; then
-	ln -s "$(command -v $POWERLINE_RC_EXE)" "$TEST_ROOT/path/rc"
+if which "$POWERLINE_RC_EXE" >/dev/null ; then
+	ln -s "$(which $POWERLINE_RC_EXE)" "$TEST_ROOT/path/rc"
 fi
 
 exes="bash zsh busybox tcsh mksh"
@@ -240,7 +240,7 @@ fi
 #exes="$exes dash"
 
 for exe in $exes ; do
-	if command -v $exe >/dev/null ; then
+	if which $exe >/dev/null ; then
 		if test "$exe" = "fish" ; then
 			fish_version="$(fish --version 2>&1)"
 			fish_version="${fish_version##* }"
@@ -268,7 +268,7 @@ for exe in $exes ; do
 				fi
 			fi
 		fi
-		ln -s "$(command -v $exe)" "$TEST_ROOT/path"
+		ln -s "$(which $exe)" "$TEST_ROOT/path"
 	fi
 done
 
@@ -351,7 +351,7 @@ if ( \
 			I="$(( I + 1 ))"
 			if test "$TEST_CLIENT" = "C" && ! test -x "$ROOT/scripts/powerline"
 			then
-				if command -v powerline >/dev/null ; then
+				if which powerline >/dev/null ; then
 					POWERLINE_COMMAND=powerline
 				else
 					continue
