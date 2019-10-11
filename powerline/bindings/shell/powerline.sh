@@ -1,6 +1,6 @@
 _POWERLINE_SOURCED="$_"
 _powerline_columns_fallback() {
-	if which stty >/dev/null ; then
+	if command -v stty >/dev/null ; then
 		# Ksh does not have “local” built-in
 		_powerline_cols="$(stty size 2>/dev/null)"
 		if ! test -z "$_powerline_cols" ; then
@@ -220,7 +220,7 @@ _powerline_init_tmux_support() {
 }
 
 if test -z "${POWERLINE_CONFIG_COMMAND}" ; then
-	if which powerline-config >/dev/null ; then
+	if command -v powerline-config >/dev/null ; then
 		POWERLINE_CONFIG_COMMAND=powerline-config
 	else
 		POWERLINE_CONFIG_COMMAND="$(dirname "$_POWERLINE_SOURCED")/../../../scripts/powerline-config"

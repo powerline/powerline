@@ -6,8 +6,8 @@ vterm_setup() {
 
 	mkdir "$TEST_ROOT/path"
 
-	ln -s "$(which "${PYTHON}")" "$TEST_ROOT/path/python"
-	ln -s "$(which bash)" "$TEST_ROOT/path"
+	ln -s "$(command -v "${PYTHON}")" "$TEST_ROOT/path/python"
+	ln -s "$(command -v bash)" "$TEST_ROOT/path"
 
 	cp -r "$ROOT/tests/terminfo" "$TEST_ROOT"
 }
