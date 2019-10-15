@@ -87,7 +87,7 @@ class GitRepository(object):
 	def branch(self):
 		directory = git_directory(self.directory)
 		head = join(directory, 'HEAD')
-                # Resolve symlinks when determining branch to avoid cache conflicts issue#1958
+		# Resolve symlinks when determining branch to avoid cache conflicts issue#1958
 		if Path(directory).is_symlink():
 			directory = Path(directory).resolve()
 		return get_branch_name(
