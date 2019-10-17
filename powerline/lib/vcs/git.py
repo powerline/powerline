@@ -6,7 +6,7 @@ import re
 
 from powerline.lib.vcs import get_branch_name, get_file_status
 from powerline.lib.shell import readlines
-from powerline.lib.path import join, realpath
+from powerline.lib.path import join
 from powerline.lib.encoding import (get_preferred_file_name_encoding,
                                     get_preferred_file_contents_encoding)
 from powerline.lib.shell import which
@@ -86,7 +86,6 @@ class GitRepository(object):
 	def branch(self):
 		directory = git_directory(self.directory)
 		head = join(directory, 'HEAD')
-		directory = realpath(directory)
 		return get_branch_name(
 			directory=directory,
 			config_file=head,
