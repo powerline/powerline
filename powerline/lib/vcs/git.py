@@ -4,10 +4,9 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 import os
 import re
 
-from pathlib import Path
 from powerline.lib.vcs import get_branch_name, get_file_status
 from powerline.lib.shell import readlines
-from powerline.lib.path import join
+from powerline.lib.path import join, realpath
 from powerline.lib.encoding import (get_preferred_file_name_encoding,
                                     get_preferred_file_contents_encoding)
 from powerline.lib.shell import which
@@ -87,9 +86,7 @@ class GitRepository(object):
 	def branch(self):
 		directory = git_directory(self.directory)
 		head = join(directory, 'HEAD')
-		# Resolve symlinks when determining branch to avoid cache conflicts issue#1958
-		if Path(directory).is_symlink():
-			directory = Path(directory).resolve()
+		directory = realpath(directory)
 		return get_branch_name(
 			directory=directory,
 			config_file=head,
