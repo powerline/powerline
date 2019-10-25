@@ -150,7 +150,8 @@ else:
 
 
 @add_divider_highlight_group('background:divider')
-def uptime(pl, days_format='{:d}d', hours_format=' {:d}h', minutes_format=' {:02d}m', seconds_format=' {:02d}s', shorten_len=3):
+def uptime(pl, days_format='{days:d}d', hours_format=' {hours:d}h', minutes_format=' {minutes:02d}m',
+		seconds_format=' {seconds:02d}s', shorten_len=3):
 	'''Return system uptime.
 
 	:param str days_format:
@@ -175,13 +176,14 @@ def uptime(pl, days_format='{:d}d', hours_format=' {:d}h', minutes_format=' {:02
 	hours, minutes = divmod(minutes, 60)
 	days, hours = divmod(hours, 24)
 	formats = [days_format, hours_format, minutes_format, seconds_format]
-	times = [days, hours, minutes, seconds]
+	times = [(days, "days"), (hours, "hours"), (minutes, "minutes"), (seconds, "seconds")]
 	show_number = False
 	time_formatted = []
 	for i in range(len(times)):
-		if times[i] != 0:
+		current_time, str_name = times[i]
+		if current_time != 0:
 			show_number = True
 		if show_number:
-			time_formatted.append(formats[i].format(times[i]))
+			time_formatted.append(formats[i].format(**{str_name: current_time}))
 	time_formatted = time_formatted[:shorten_len]
 	return ''.join(time_formatted).strip()
