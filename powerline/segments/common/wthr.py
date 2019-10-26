@@ -13,65 +13,65 @@ from powerline.segments import with_docstring
 
 
 # Weather condition code descriptions available at
-# http://developer.yahoo.com/weather/#codes
-weather_conditions_codes = (
-	('tornado',                 'stormy'),  # 0
-	('tropical_storm',          'stormy'),  # 1
-	('hurricane',               'stormy'),  # 2
-	('severe_thunderstorms',    'stormy'),  # 3
-	('thunderstorms',           'stormy'),  # 4
-	('mixed_rain_and_snow',     'rainy' ),  # 5
-	('mixed_rain_and_sleet',    'rainy' ),  # 6
-	('mixed_snow_and_sleet',    'snowy' ),  # 7
-	('freezing_drizzle',        'rainy' ),  # 8
-	('drizzle',                 'rainy' ),  # 9
-	('freezing_rain',           'rainy' ),  # 10
-	('showers',                 'rainy' ),  # 11
-	('showers',                 'rainy' ),  # 12
-	('snow_flurries',           'snowy' ),  # 13
-	('light_snow_showers',      'snowy' ),  # 14
-	('blowing_snow',            'snowy' ),  # 15
-	('snow',                    'snowy' ),  # 16
-	('hail',                    'snowy' ),  # 17
-	('sleet',                   'snowy' ),  # 18
-	('dust',                    'foggy' ),  # 19
-	('fog',                     'foggy' ),  # 20
-	('haze',                    'foggy' ),  # 21
-	('smoky',                   'foggy' ),  # 22
-	('blustery',                'windy' ),  # 23
-	('windy',                           ),  # 24
-	('cold',                    'day'   ),  # 25
-	('clouds',                  'cloudy'),  # 26
-	('mostly_cloudy_night',     'cloudy'),  # 27
-	('mostly_cloudy_day',       'cloudy'),  # 28
-	('partly_cloudy_night',     'cloudy'),  # 29
-	('partly_cloudy_day',       'cloudy'),  # 30
-	('clear_night',             'night' ),  # 31
-	('sun',                     'sunny' ),  # 32
-	('fair_night',              'night' ),  # 33
-	('fair_day',                'day'   ),  # 34
-	('mixed_rain_and_hail',     'rainy' ),  # 35
-	('hot',                     'sunny' ),  # 36
-	('isolated_thunderstorms',  'stormy'),  # 37
-	('scattered_thunderstorms', 'stormy'),  # 38
-	('scattered_thunderstorms', 'stormy'),  # 39
-	('scattered_showers',       'rainy' ),  # 40
-	('heavy_snow',              'snowy' ),  # 41
-	('scattered_snow_showers',  'snowy' ),  # 42
-	('heavy_snow',              'snowy' ),  # 43
-	('partly_cloudy',           'cloudy'),  # 44
-	('thundershowers',          'rainy' ),  # 45
-	('snow_showers',            'snowy' ),  # 46
-	('isolated_thundershowers', 'rainy' ),  # 47
-)
-# ('day',    (25, 34)),
-# ('rainy',  (5, 6, 8, 9, 10, 11, 12, 35, 40, 45, 47)),
-# ('cloudy', (26, 27, 28, 29, 30, 44)),
-# ('snowy',  (7, 13, 14, 15, 16, 17, 18, 41, 42, 43, 46)),
-# ('stormy', (0, 1, 2, 3, 4, 37, 38, 39)),
-# ('foggy',  (19, 20, 21, 22, 23)),
-# ('sunny',  (32, 36)),
-# ('night',  (31, 33))):
+# https://openweathermap.org/weather-conditions
+weather_conditions_codes = {
+	200: ('stormy',),
+	201: ('stormy',),
+	202: ('stormy',),
+	210: ('stormy',),
+	211: ('stormy',),
+	212: ('stormy',),
+	221: ('stormy',),
+	230: ('stormy',),
+	231: ('stormy',),
+	232: ('stormy',),
+	300: ('rainy',),
+	301: ('rainy',),
+	302: ('rainy',),
+	310: ('rainy',),
+	311: ('rainy',),
+	312: ('rainy',),
+	313: ('rainy',),
+	314: ('rainy',),
+	321: ('rainy',),
+	500: ('rainy',),
+	501: ('rainy',),
+	502: ('rainy',),
+	503: ('rainy',),
+	504: ('rainy',),
+	511: ('snowy',),
+	520: ('rainy',),
+	521: ('rainy',),
+	522: ('rainy',),
+	531: ('rainy',),
+	600: ('snowy',),
+	601: ('snowy',),
+	602: ('snowy',),
+	611: ('snowy',),
+	612: ('snowy',),
+	613: ('snowy',),
+	615: ('snowy',),
+	616: ('snowy',),
+	620: ('snowy',),
+	621: ('snowy',),
+	622: ('snowy',),
+	701: ('foggy',),
+	711: ('foggy',),
+	721: ('foggy',),
+	731: ('foggy',),
+	741: ('foggy',),
+	751: ('foggy',),
+	761: ('foggy',),
+	762: ('foggy',),
+	771: ('foggy',),
+	781: ('foggy',),
+	800: ('sunny',),
+	801: ('cloudy',),
+	802: ('cloudy',),
+	803: ('cloudy',),
+	804: ('cloudy',),
+}
+
 weather_conditions_icons = {
 	'day':           'DAY',
 	'blustery':      'WIND',
@@ -88,9 +88,9 @@ weather_conditions_icons = {
 }
 
 temp_conversions = {
-	'C': lambda temp: temp,
-	'F': lambda temp: (temp * 9 / 5) + 32,
-	'K': lambda temp: temp + 273.15,
+	'C': lambda temp: temp - 273.15,
+	'F': lambda temp: (temp * 9 / 5) - 459.67,
+	'K': lambda temp: temp,
 }
 
 # Note: there are also unicode characters for units: ℃, ℉ and  K
@@ -105,6 +105,7 @@ class WeatherSegment(KwThreadedSegment):
 	interval = 600
 	default_location = None
 	location_urls = {}
+	weather_api_key = "sample_api_key"
 
 	@staticmethod
 	def key(location_query=None, **kwargs):
@@ -114,52 +115,42 @@ class WeatherSegment(KwThreadedSegment):
 		try:
 			return self.location_urls[location_query]
 		except KeyError:
-			if location_query is None:
-				location_data = json.loads(urllib_read('http://geoip.nekudo.com/api/'))
-				location = ','.join((
-					location_data['city'],
-					location_data['country']['name'],
-					location_data['country']['code']
-				))
-				self.info('Location returned by nekudo is {0}', location)
-			else:
-				location = location_query
 			query_data = {
-				'q':
-				'use "https://raw.githubusercontent.com/yql/yql-tables/master/weather/weather.bylocation.xml" as we;'
-				'select * from weather.forecast where woeid in'
-				' (select woeid from geo.places(1) where text="{0}") and u="c"'.format(location).encode('utf-8'),
-				'format': 'json',
+				"appid": self.weather_api_key
 			}
+			if location_query is None:
+				location_data = json.loads(urllib_read('https://freegeoip.app/json/'))
+				query_data["lat"] = location_data["latitude"],
+				query_data["lon"] = location_data["longitude"]
+			else:
+				query_data.update(location_query)
 			self.location_urls[location_query] = url = (
-				'http://query.yahooapis.com/v1/public/yql?' + urllib_urlencode(query_data))
+				"http://api.openweathermap.org/data/2.5/weather?" +
+				urllib_urlencode(query_data))
 			return url
 
 	def compute_state(self, location_query):
 		url = self.get_request_url(location_query)
 		raw_response = urllib_read(url)
+		self.error(url)
 		if not raw_response:
 			self.error('Failed to get response')
 			return None
 
 		response = json.loads(raw_response)
 		try:
-			condition = response['query']['results']['channel']['item']['condition']
-			condition_code = int(condition['code'])
-			temp = float(condition['temp'])
+			condition = response['weather'][0]
+			condition_code = int(condition['id'])
+			temp = float(response['main']['temp'])
 		except (KeyError, ValueError):
-			self.exception('Yahoo returned malformed or unexpected response: {0}', repr(raw_response))
+			self.exception('OpenWeatherMap returned malformed or unexpected response: {0}', repr(raw_response))
 			return None
 
 		try:
 			icon_names = weather_conditions_codes[condition_code]
 		except IndexError:
-			if condition_code == 3200:
-				icon_names = ('not_available',)
-				self.warn('Weather is not available for location {0}', self.location)
-			else:
-				icon_names = ('unknown',)
-				self.error('Unknown condition code: {0}', condition_code)
+			icon_names = ('unknown',)
+			self.error('Unknown condition code: {0}', condition_code)
 
 		return (temp, icon_names)
 
