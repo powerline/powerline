@@ -62,7 +62,7 @@ with any coding font.
 
       mv PowerlineSymbols.otf ~/.local/share/fonts/
 
-#. Update font cache for the path the font was moved to (root priveleges may be 
+#. Update font cache for the path the font was moved to (root privileges may be 
    needed to update cache for the system-wide paths)::
 
       fc-cache -vf ~/.local/share/fonts/
