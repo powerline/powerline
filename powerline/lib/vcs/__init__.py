@@ -154,7 +154,7 @@ def get_file_status(directory, dirstate_file, file_path, ignore_file_name, get_f
 			except OSError as e:
 				if getattr(e, 'errno', None) != errno.ENOENT:
 					raise
-				# Do not call get_func again for a non-existant file
+				# Do not call get_func again for a non-existent file
 				if keypath not in file_status_cache:
 					file_status_cache[keypath] = get_func(directory, file_path)
 				return file_status_cache[keypath]

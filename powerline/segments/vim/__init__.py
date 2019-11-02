@@ -470,7 +470,7 @@ def col_current(pl, segment_info):
 
 @window_cached
 def virtcol_current(pl, gradient=True):
-	'''Return current visual column with concealed characters ingored
+	'''Return current visual column with concealed characters ignored
 
 	:param bool gradient:
 		Determines whether it should show textwidth-based gradient (gradient level is ``virtcol * 100 / textwidth``).
@@ -764,7 +764,7 @@ def csv_col_current(pl, segment_info, display_name='auto', name_format=' ({colum
 	:param bool or str name:
 		May be ``True``, ``False`` and ``"auto"``. In the first case value from
 		the first raw will always be displayed. In the second case it will never
-		be displayed. In thi last case ``csv.Sniffer().has_header()`` will be
+		be displayed. In the last case ``csv.Sniffer().has_header()`` will be
 		used to detect whether current file contains header in the first column.
 	:param str name_format:
 		String used to format column name (in case ``display_name`` is set to

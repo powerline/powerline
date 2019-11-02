@@ -114,7 +114,7 @@ class Renderer(object):
 		Object used for logging.
 	:param int ambiwidth:
 		Width of the characters with east asian width unicode attribute equal to
-		``A`` (Ambigious).
+		``A`` (Ambiguous).
 	:param dict options:
 		Various options. Are normally not used by base renderer, but all options
 		are recorded as attributes.
@@ -173,7 +173,7 @@ class Renderer(object):
 		self.width_data = {
 			'N': 1,          # Neutral
 			'Na': 1,         # Narrow
-			'A': ambiwidth,  # Ambigious
+			'A': ambiwidth,  # Ambiguous
 			'H': 1,          # Half-width
 			'W': 2,          # Wide
 			'F': 2,          # Fullwidth
@@ -356,7 +356,7 @@ class Renderer(object):
 			segments_priority = iter(segments_priority)
 			if current_width > width and len(segments) > 100:
 				# When there are too many segments use faster, but less correct
-				# algorythm for width computation
+				# algorithm for width computation
 				diff = current_width - width
 				for segment in segments_priority:
 					segments.remove(segment)

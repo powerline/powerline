@@ -161,7 +161,7 @@ class CmusPlayerSegment(PlayerSegment):
 cmus = with_docstring(CmusPlayerSegment(),
 ('''Return CMUS player information
 
-Requires cmus-remote command be acessible from $PATH.
+Requires cmus-remote command be accessible from $PATH.
 
 {0}
 ''').format(_common_args.format('cmus')))
@@ -228,7 +228,7 @@ mpd = with_docstring(MpdPlayerSegment(),
 ('''Return Music Player Daemon information
 
 Requires ``mpd`` Python module (e.g. |python-mpd2|_ or |python-mpd|_ Python
-package) or alternatively the ``mpc`` command to be acessible from $PATH.
+package) or alternatively the ``mpc`` command to be accessible from $PATH.
 
 .. |python-mpd| replace:: ``python-mpd``
 .. _python-mpd: https://pypi.python.org/pypi/python-mpd
