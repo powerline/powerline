@@ -227,7 +227,7 @@ _strwidth_documentation = (
 		             character sets because they have explicit fullwidth or wide 
 		             counterparts. All of ASCII is an example of East Asian 
 		             Narrow characters.
-		A    1 or 2  Ambigious: characters that may sometimes be wide and 
+		A    1 or 2  Ambiguous: characters that may sometimes be wide and
 		             sometimes narrow. Ambiguous characters require additional 
 		             information not contained in the character code to further 
 		             resolve their width. This information is usually defined in 

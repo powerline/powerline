@@ -21,7 +21,7 @@ class I3barRenderer(Renderer):
 		segment = {
 			'full_text': contents,
 			'separator': False,
-			'separator_block_width': 0,  # no seperators
+			'separator_block_width': 0,  # no separators
 		}
 
 		if fg is not None:

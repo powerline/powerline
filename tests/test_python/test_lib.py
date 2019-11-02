@@ -424,7 +424,7 @@ class TestLib(TestCase):
 width_data = {
 	'N': 1,          # Neutral
 	'Na': 1,         # Narrow
-	'A': 1,          # Ambigious
+	'A': 1,          # Ambiguous
 	'H': 1,          # Half-width
 	'W': 2,          # Wide
 	'F': 2,          # Fullwidth

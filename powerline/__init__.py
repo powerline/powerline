@@ -375,13 +375,13 @@ def gen_module_attr_getter(pl, import_paths, imported_modules):
 		:param str module:
 			Module name, will be passed as first argument to ``__import__``.
 		:param str attr:
-			Module attribute, will be passed to ``__import__`` as the only value 
+			Module attribute, will be passed to ``__import__`` as the only value
 			in ``fromlist`` tuple.
 
 		:return:
 			Attribute value or ``None``. Note: there is no way to distinguish 
-			between successfull import of attribute equal to ``None`` and 
-			unsuccessfull import.
+			between successful import of attribute equal to ``None`` and
+			unsuccessful import.
 		'''
 		oldpath = sys.path
 		sys.path = import_paths + sys.path
@@ -473,7 +473,7 @@ class Powerline(object):
 
 		__init__ function only stores the arguments and runs this function. This 
 		function exists for powerline to be able to reload itself: it is easier 
-		to make ``__init__`` store arguments and call overriddable ``init`` than 
+		to make ``__init__`` store arguments and call overridable ``init`` than
 		tell developers that each time they override Powerline.__init__ in 
 		subclasses they must store actual arguments.
 		'''
@@ -706,7 +706,7 @@ class Powerline(object):
 		'''Run component-specific setup
 
 		:param set components:
-			Set of the enabled componets or None.
+			Set of the enabled components or None.
 
 		Should be overridden by subclasses.
 		'''

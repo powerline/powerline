@@ -47,7 +47,7 @@ def get_argparser(ArgumentParser=ConfigArgParser):
 	parser.add_argument(
 		'-p', '--config-path', action='append', metavar='PATH',
 		help='Path to configuration directory. If it is present '
-		     'then configuration files will only be seeked in the provided path. '
+		     'then configuration files will only be sought in the provided path. '
 		     'May be provided multiple times to search in a list of directories.'
 	)
 	subparsers = parser.add_subparsers()
