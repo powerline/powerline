@@ -54,7 +54,7 @@ Vim installation
 Any terminal vim version with Python 3.2+ or Python 2.6+ support should work, 
 but MacVim users need to install it using the following command::
 
-    brew install macvim --env-std --with-override-system-vim
+    brew install macvim -- --env-std --with-override-system-vim
 
 Fonts installation
 ==================
