@@ -114,8 +114,8 @@ def load_ipython_extension(ip):
 			'post_0_11 extension is deprecated since IPython 5, use\n'
 			'  from powerline.bindings.ipython.since_7 import PowerlinePrompts\n'
 			'  c.TerminalInteractiveShell.prompts_class = PowerlinePrompts\n'
-			'  or check: \n'
-			'  https://powerline.readthedocs.io/en/master/usage/other.html\n'
+			'or check: \n'
+			'https://powerline.readthedocs.io/en/master/usage/other.html\n'
 		))
 
 
