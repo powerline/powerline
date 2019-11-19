@@ -1,5 +1,6 @@
 # vim:fileencoding=utf-8:noet
-from __future__ import (unicode_literals, division, absolute_import, print_function)
+from __future__ import (unicode_literals, division,
+                        absolute_import, print_function)
 
 from weakref import ref
 from warnings import warn
@@ -80,7 +81,7 @@ if has_prompt_manager:
 			if has_prompt_manager:
 				renderer_module = '.pre_5'
 			else:
-				renderer_module = '.since_5'
+				renderer_module = '.since_7'
 			super(ConfigurableIPythonPowerline, self).init(
 				renderer_module=renderer_module)
 
@@ -106,13 +107,15 @@ def load_ipython_extension(ip):
 		powerline = ConfigurableIPythonPowerline(ip)
 		powerline.setup(ip, shutdown_hook)
 	else:
-		from powerline.bindings.ipython.since_5 import PowerlinePrompts
+		from powerline.bindings.ipython.since_7 import PowerlinePrompts
 		ip.prompts_class = PowerlinePrompts
 		ip.prompts = PowerlinePrompts(ip)
 		warn(DeprecationWarning(
 			'post_0_11 extension is deprecated since IPython 5, use\n'
-			'  from powerline.bindings.ipython.since_5 import PowerlinePrompts\n'
+			'  from powerline.bindings.ipython.since_7 import PowerlinePrompts\n'
 			'  c.TerminalInteractiveShell.prompts_class = PowerlinePrompts\n'
+			'  or check: \n'
+			'  https://powerline.readthedocs.io/en/master/usage/other.html\n'
 		))
 
 
