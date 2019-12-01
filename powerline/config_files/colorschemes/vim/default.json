@@ -31,8 +31,9 @@
 		"error":                    { "fg": "brightestred", "bg": "darkred", "attrs": ["bold"] },
 		"warning":                  { "fg": "brightyellow", "bg": "darkorange", "attrs": ["bold"] },
 		"current_tag":              { "fg": "gray9", "bg": "gray2", "attrs": [] },
-
-		"tab_nc:modified_indicator": { "fg": "brightyellow", "bg": "gray2", "attrs": ["bold"] }
+		"tab_nc:modified_indicator": { "fg": "brightyellow", "bg": "gray2", "attrs": ["bold"] },
+		"coc:error":                { "fg": "brightestred", "bg": "darkred", "attrs": ["bold"] },
+		"coc:warning":              { "fg": "brightyellow", "bg": "darkorange", "attrs": ["bold"] }
 	},
 	"mode_translations": {
 		"nc": {

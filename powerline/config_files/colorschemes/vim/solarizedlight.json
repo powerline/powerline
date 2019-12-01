@@ -32,7 +32,9 @@
 		"col_current":              { "fg": "solarized:base00", "bg": "solarized:base02", "attrs": [] },
 		"error":                    { "fg": "solarized:base03", "bg": "solarized:red", "attrs": ["bold"] },
 		"warning":                  { "fg": "solarized:base03", "bg": "solarized:base2", "attrs": ["bold"] },
-		"current_tag":              { "fg": "solarized:base03", "bg": "solarized:base01", "attrs": ["bold"] }
+		"current_tag":              { "fg": "solarized:base03", "bg": "solarized:base01", "attrs": ["bold"] },
+		"coc:error":                { "fg": "brightestred", "bg": "darkred", "attrs": ["bold"] },
+		"coc:warning":              { "fg": "brightyellow", "bg": "darkorange", "attrs": ["bold"] }
 	},
 	"mode_translations": {
 		"nc": {
