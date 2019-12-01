@@ -59,10 +59,6 @@
 				"priority": 60
 			},
 			{
-				"function": "powerline.segments.vim.plugin.coc.coc",
-				"priority": 50
-			},
-			{
 				"exclude_modes": ["nc"],
 				"function": "powerline.segments.vim.plugin.syntastic.syntastic",
 				"priority": 50

@@ -29,6 +29,10 @@ def parse_coc_status(coc_status):
 
 @requires_segment_info
 def coc(segment_info, pl):
+	'''Show whether coc.nvim has found any errors or warnings
+
+	Highlight groups used: ``coc:warning`` or ``warning``, ``coc:error`` or ``error``.
+	'''
 	segments = []
 	if not vim_command_exists('CocCommand'):
 		return segments
