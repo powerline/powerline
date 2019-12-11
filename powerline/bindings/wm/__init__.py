@@ -24,15 +24,6 @@ def i3_subscribe(conn, event, callback):
 	:param func callback:
 		Function to run on event.
 	'''
-	try:
-		import i3ipc
-	except ImportError:
-		import i3
-		conn.Subscription(callback, event)
-		return
-	else:
-		pass
-
 	conn.on(event, callback)
 
 	from threading import Thread
@@ -57,12 +48,8 @@ def get_i3_connection():
 	'''
 	global conn
 	if not conn:
-		try:
-			import i3ipc
-		except ImportError:
-			import i3 as conn
-		else:
-			conn = i3ipc.Connection()
+		import i3ipc
+		conn = i3ipc.Connection()
 	return conn
 
 
