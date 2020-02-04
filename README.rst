@@ -54,11 +54,35 @@ You should check out some of the Powerline derivatives. The most lightweight
 and feature-rich alternative is currently the `vim-airline 
 <https://github.com/vim-airline/vim-airline>`_ project.
 
-------
+Configuration
+-------------
 
-* Consult the `documentation 
-  <https://powerline.readthedocs.org/en/latest/>`_ for more information and 
-  installation instructions.
+Basic powerline configuration is done via `JSON` files located at `.config/powerline/`. It is a good idea to start by copying the default configuration located at `powerline_root/powerline/config_files/` to `.config/powerline/`.
+If you installed the powerline from the AUR or via pip, `powerline_root` should be `/usr/lib/python3.6/site-packages/` or something similar, depending on your python version.
+
+This should yield you the following directory structure:
+
+    ::
+
+        .config/powerline/
+        ├── colorschemes
+        │   ├── ...
+        │   └── wm
+        |       └── default.json  // Your configuration goes here
+        ├── colors.json
+        ├── config.json
+        └── themes
+            ├── ...
+            └── wm
+                └── default.json  // Your configuration goes here
+
+
+
+The files in the subdirectories of `themes` are used to specify which segments shall be shown; the files in subdirectories of `colorschemes` are used to specify which colors (as defined in `colors.json`) shall be used to display a segment.
+
+Note that your local configuration only overrides the global configuration, it does not replace it, i.e. if you don't configure something locally, the global default will be used instead.
+
+* Consult the `documentation <https://powerline.readthedocs.org/en/latest/configuration.html#quick-setup-guide>`_ for more details. See also the `segment reference <https://powerline.readthedocs.org/en/latest/configuration/segments.html>`_ for available segments and their configuration.
 * Check out `powerline-fonts <https://github.com/powerline/fonts>`_ for 
   pre-patched versions of popular, open source coding fonts.
 
