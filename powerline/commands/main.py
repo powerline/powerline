@@ -146,13 +146,13 @@ def get_argparser(ArgumentParser=argparse.ArgumentParser):
 		help='Like above, but provides argument for renderer. Is supposed '
 		     'to be used only by shell bindings to provide various data like '
 		     'last-exit-code or last-pipe-status (they are not using '
-		     '`--renderer-arg\' for historical resons: `--renderer-arg\' '
+		     '`--renderer-arg\' for historical reasons: `--renderer-arg\' '
 		     'was added later).'
 	)
 	parser.add_argument(
 		'-p', '--config-path', action='append', metavar='PATH',
 		help='Path to configuration directory. If it is present then '
-		     'configuration files will only be seeked in the provided path. '
+		     'configuration files will only be sought in the provided path. '
 		     'May be provided multiple times to search in a list of directories.'
 	)
 	parser.add_argument(

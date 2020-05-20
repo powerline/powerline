@@ -20,20 +20,11 @@ install: tests/install.sh
 script: tests/test.sh
 jobs:
     include:
-        - stage: UCS2 python
-          python: "2.7"
-          env: >-
-            USE_UCS2_PYTHON=1
-            UCS2_PYTHON_VARIANT="2.7"
-        - stage: Old Python
-          python: "2.6"
-        - python: "3.2"
         - stage: PyPy
           python: "pypy"
         - python: "pypy3"
         - stage: Latest Python
-          python: "2.7"
-        - python: "3.6"
+          python: "3.6"
         - stage: Intermediate versions
           python: "3.3"
         - python: "3.4"

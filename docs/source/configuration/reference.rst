@@ -53,7 +53,7 @@ Common configuration is a subdictionary that is a value of ``common`` key in
 
 ``ambiwidth``
     Tells powerline what to do with characters with East Asian Width Class 
-    Ambigious (such as Euro, Registered Sign, Copyright Sign, Greek
+    Ambiguous (such as Euro, Registered Sign, Copyright Sign, Greek
     letters, Cyrillic letters). Valid values: any positive integer; it is 
     suggested that this option is only set it to 1 (default) or 2.
 
@@ -132,7 +132,7 @@ Common configuration is a subdictionary that is a value of ``common`` key in
 
 ``interval``
     Number, determines time (in seconds) between checks for changed 
-    configuration. Checks are done in a seprate thread. Use ``null`` to check 
+    configuration. Checks are done in a separate thread. Use ``null`` to check 
     for configuration changes on ``.render()`` call in main thread.
     Defaults to ``None``.
 
@@ -245,7 +245,7 @@ Color definitions
     gradient, and the value is a list containing one or two items, second item 
     is optional:
 
-    * A list of cterm color indicies.
+    * A list of cterm color indices.
     * A list of hex color strings.
 
     It is expected that gradients are defined from least alert color to most 
@@ -388,7 +388,7 @@ ascii                       Theme without any unicode characters at all
 
 ``cursor_columns``
     Space reserved for user input in shell bindings. Unlike :ref:`cursor_space 
-    <config-themes-cursor_space>` it is measured in absolute amout of columns.
+    <config-themes-cursor_space>` it is measured in absolute amount of columns.
 
 .. _config-themes-segment_data:
 

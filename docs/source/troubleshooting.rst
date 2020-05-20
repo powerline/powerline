@@ -53,7 +53,7 @@ diagnose this problem you may do the following:
    startup or, at least, that it was cleaned after update. While different 
    ``$POWERLINE_COMMAND`` variable should not cause any troubles most of time 
    (and when it will cause troubles are rather trivial) spoiled 
-   ``$PROMPT_COMMAND`` may lead to strange error messages or absense of exit 
+   ``$PROMPT_COMMAND`` may lead to strange error messages or absence of exit 
    code reporting.
 
    These are the sources which may keep outdated environment variables:

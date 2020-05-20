@@ -5,3 +5,4 @@ recursive-include powerline/dist *.*
 recursive-include client *.*
 recursive-include docs/source *.rst *.py
 include docs/Makefile
+include LICENSE

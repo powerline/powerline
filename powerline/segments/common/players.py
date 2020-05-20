@@ -2,6 +2,7 @@
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 import sys
+import re
 
 from powerline.lib.shell import asrun, run_cmd
 from powerline.lib.unicode import out_u
@@ -160,7 +161,7 @@ class CmusPlayerSegment(PlayerSegment):
 cmus = with_docstring(CmusPlayerSegment(),
 ('''Return CMUS player information
 
-Requires cmus-remote command be acessible from $PATH.
+Requires cmus-remote command be accessible from $PATH.
 
 {0}
 ''').format(_common_args.format('cmus')))
@@ -174,19 +175,29 @@ class MpdPlayerSegment(PlayerSegment):
 			if password:
 				host = password + '@' + host
 			now_playing = run_cmd(pl, [
-				'mpc', 'current',
-				'-f', '%album%\n%artist%\n%title%\n%time%',
+				'mpc',
 				'-h', host,
 				'-p', str(port)
 			], strip=False)
-			if not now_playing:
+			album = run_cmd(pl, [
+				'mpc', 'current',
+				'-f', '%album%',
+				'-h', host,
+				'-p', str(port)
+			])
+			if not now_playing or now_playing.count("\n") != 3:
 				return
-			now_playing = now_playing.split('\n')
+			now_playing = re.match(
+				r"(.*) - (.*)\n\[([a-z]+)\] +[#0-9\/]+ +([0-9\:]+)\/([0-9\:]+)",
+				now_playing
+			)
 			return {
-				'album': now_playing[0],
+				'state': _convert_state(now_playing[3]),
+				'album': album,
 				'artist': now_playing[1],
 				'title': now_playing[2],
-				'total': now_playing[3],
+				'elapsed': now_playing[4],
+				'total': now_playing[5]
 			}
 		else:
 			try:
@@ -217,7 +228,7 @@ mpd = with_docstring(MpdPlayerSegment(),
 ('''Return Music Player Daemon information
 
 Requires ``mpd`` Python module (e.g. |python-mpd2|_ or |python-mpd|_ Python
-package) or alternatively the ``mpc`` command to be acessible from $PATH.
+package) or alternatively the ``mpc`` command to be accessible from $PATH.
 
 .. |python-mpd| replace:: ``python-mpd``
 .. _python-mpd: https://pypi.python.org/pypi/python-mpd
@@ -242,9 +253,20 @@ except ImportError:
 		pl.error('Could not add {0} segment: requires dbus module', player_name)
 		return
 else:
-	def _get_dbus_player_status(pl, bus_name, player_path, iface_prop,
-	                            iface_player, player_name='player'):
+	def _get_dbus_player_status(pl,
+				bus_name=None,
+				iface_prop='org.freedesktop.DBus.Properties',
+				iface_player='org.mpris.MediaPlayer2.Player',
+				player_path='/org/mpris/MediaPlayer2',
+				player_name='player'):
 		bus = dbus.SessionBus()
+
+		if bus_name is None:
+			for service in bus.list_names():
+				if re.match('org.mpris.MediaPlayer2.', service):
+					bus_name = service
+					break
+
 		try:
 			player = bus.get_object(bus_name, player_path)
 			iface = dbus.Interface(player, iface_prop)
@@ -272,13 +294,19 @@ else:
 			title = out_u(title)
 		if artist:
 			artist = out_u(artist[0])
+
+		length = info.get('mpris:length')
+		# avoid parsing `None` length values, that would
+		# raise an error otherwise
+		parsed_length = length and _convert_seconds(length / 1e6)
+
 		return {
 			'state': state,
 			'album': album,
 			'artist': artist,
 			'title': title,
 			'elapsed': elapsed,
-			'total': _convert_seconds(info.get('mpris:length') / 1e6),
+			'total': parsed_length,
 		}
 
 
@@ -604,4 +632,3 @@ Requires version >= 2.3.0 and ``mocp`` executable in ``$PATH``.
 
 {0}
 ''').format(_common_args.format('mocp')))
-

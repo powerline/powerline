@@ -12,11 +12,11 @@ cp -r "$TEST_STATIC_ROOT/powerline" "$TEST_ROOT"
 
 export PYTHONPATH="$ROOT${PYTHONPATH:+:}$PYTHONPATH"
 
-ln -s "$(which "${PYTHON}")" "$TEST_PATH"/python
-ln -s "$(which sed)" "$TEST_PATH"
-ln -s "$(which cat)" "$TEST_PATH"
-ln -s "$(which mkdir)" "$TEST_PATH"
-ln -s "$(which basename)" "$TEST_PATH"
+ln -s "$(command -v "${PYTHON}")" "$TEST_PATH"/python
+ln -s "$(command -v sed)" "$TEST_PATH"
+ln -s "$(command -v cat)" "$TEST_PATH"
+ln -s "$(command -v mkdir)" "$TEST_PATH"
+ln -s "$(command -v basename)" "$TEST_PATH"
 ln -s "$TEST_PATH/lemonbar" "$TEST_PATH/bar-aint-recursive"
 
 DEPRECATED_SCRIPT="$ROOT/powerline/bindings/bar/powerline-bar.py"
@@ -169,7 +169,7 @@ else
 		if test "${script_args}" = "$args" ; then
 			script_args=
 		fi
-		expected_args="$command -g 1920x$height+0${script_args:+ }$script_args${NL}$command -g 1920x$height+1${script_args:+ }$script_args"
+		expected_args="$command -g 1920x$height+0+0${script_args:+ }$script_args${NL}$command -g 1920x$height+1+0${script_args:+ }$script_args"
 		if test "$expected_args" != "$received_args" ; then
 			echo "args:${NL}<$received_args>"
 			echo "expected:${NL}<$expected_args>"

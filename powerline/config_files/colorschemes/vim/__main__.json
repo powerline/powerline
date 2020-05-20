@@ -5,6 +5,7 @@
 		"file_size":          "information:unimportant",
 		"file_format":        "information:unimportant",
 		"file_encoding":      "file_format",
+		"file_bom":         "file_format",
 		"file_type":          "file_format",
 		"branch":             "information:additional",
 		"file_scheme":        "file_name",

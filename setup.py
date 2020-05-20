@@ -59,7 +59,7 @@ else:
 
 
 def get_version():
-	base_version = '2.7'
+	base_version = '2.8'
 	base_version += '.dev9999'
 	try:
 		return base_version + '+git.' + str(subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip())
@@ -82,11 +82,10 @@ setup(
 		'Natural Language :: English',
 		'Operating System :: Microsoft :: Windows',
 		'Operating System :: POSIX',
-		'Programming Language :: Python :: 2.6',
-		'Programming Language :: Python :: 2.7',
-		'Programming Language :: Python :: 3.2',
-		'Programming Language :: Python :: 3.3',
 		'Programming Language :: Python :: 3.4',
+		'Programming Language :: Python :: 3.5',
+		'Programming Language :: Python :: 3.6',
+		'Programming Language :: Python :: 3.7',
 		'Programming Language :: Python :: Implementation :: CPython',
 		'Programming Language :: Python :: Implementation :: PyPy',
 	],
@@ -95,11 +94,11 @@ setup(
 	author_email='kim.silkebaekken+vim@gmail.com',
 	url='https://github.com/powerline/powerline',
 	license='MIT',
-	# XXX Python 3 doesn’t allow compiled C files to be included in the scripts 
-	# list below. This is because Python 3 distutils tries to decode the file to 
+	# XXX Python 3 doesn’t allow compiled C files to be included in the scripts
+	# list below. This is because Python 3 distutils tries to decode the file to
 	# ASCII, and fails when powerline-client is a binary.
 	#
-	# XXX Python 2 fucks up script contents*. Not using it to install scripts 
+	# XXX Python 2 fucks up script contents*. Not using it to install scripts
 	# any longer.
 	# * Consider the following input:
 	#     % alias hex1=$'hexdump -e \'"" 1/1 "%02X\n"\''
@@ -111,7 +110,7 @@ setup(
 	#     > 0A
 	#   (repeated, with diff segment header numbers growing up).
 	#
-	# FIXME Current solution does not work with `pip install -e`. Still better 
+	# FIXME Current solution does not work with `pip install -e`. Still better
 	# then solution that is not working at all.
 	scripts=[
 		'scripts/powerline-lint',

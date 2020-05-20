@@ -12,7 +12,7 @@ def jobnum(pl, segment_info, show_zero=False):
 	'''Return the number of jobs.
 
 	:param bool show_zero:
-		If False (default) shows nothing if there are no jobs. Otherwise shows 
+		If False (default) shows nothing if there are no jobs. Otherwise shows
 		zero for no jobs.
 	'''
 	jobnum = segment_info['args'].jobnum
@@ -21,21 +21,39 @@ def jobnum(pl, segment_info, show_zero=False):
 	else:
 		return str(jobnum)
 
+try:
+	import signal
+	exit_codes = dict((k, v) for v, k in reversed(sorted(signal.__dict__.items())) \
+		if v.startswith('SIG') and not v.startswith('SIG_'))
+except ImportError:
+	exit_codes = dict()
 
 @requires_segment_info
-def last_status(pl, segment_info):
+def last_status(pl, segment_info, signal_names=True):
 	'''Return last exit code.
+
+	:param bool signal_names:
+		If True (default), translate signal numbers to human-readable names.
 
 	Highlight groups used: ``exit_fail``
 	'''
 	if not segment_info['args'].last_exit_code:
 		return None
+
+	try:
+		if signal_names and segment_info['args'].last_exit_code - 128 in exit_codes:
+			return [{'contents': exit_codes[segment_info['args'].last_exit_code - 128], 'highlight_groups': ['exit_fail']}]
+	except TypeError:
+		pass
 	return [{'contents': str(segment_info['args'].last_exit_code), 'highlight_groups': ['exit_fail']}]
 
 
 @requires_segment_info
-def last_pipe_status(pl, segment_info):
+def last_pipe_status(pl, segment_info, signal_names=True):
 	'''Return last pipe status.
+
+	:param bool signal_names:
+		If True (default), translate signal numbers to human-readable names.
 
 	Highlight groups used: ``exit_fail``, ``exit_success``
 	'''
@@ -44,17 +62,21 @@ def last_pipe_status(pl, segment_info):
 		or (segment_info['args'].last_exit_code,)
 	)
 	if any(last_pipe_status):
-		return [
-			{
+		try:
+			return [{
+				'contents': exit_codes[status - 128] if signal_names and \
+					status - 128 in exit_codes else str(status),
+				'highlight_groups': ['exit_fail' if status else 'exit_success'],
+				'draw_inner_divider': True
+			} for status in last_pipe_status]
+		except TypeError:
+			return [{
 				'contents': str(status),
 				'highlight_groups': ['exit_fail' if status else 'exit_success'],
 				'draw_inner_divider': True
-			}
-			for status in last_pipe_status
-		]
+			} for status in last_pipe_status]
 	else:
 		return None
-
 
 @requires_segment_info
 def mode(pl, segment_info, override={'vicmd': 'COMMND', 'viins': 'INSERT'}, default=None):
@@ -63,9 +85,9 @@ def mode(pl, segment_info, override={'vicmd': 'COMMND', 'viins': 'INSERT'}, defa
 	:param dict override:
 		dict for overriding mode strings.
 	:param str default:
-		If current mode is equal to this string then this segment will not get 
-		displayed. If not specified the value is taken from 
-		``$POWERLINE_DEFAULT_MODE`` variable. This variable is set by zsh 
+		If current mode is equal to this string then this segment will not get
+		displayed. If not specified the value is taken from
+		``$POWERLINE_DEFAULT_MODE`` variable. This variable is set by zsh
 		bindings for any mode that does not start from ``vi``.
 	'''
 	mode = segment_info.get('mode', None)
@@ -78,11 +100,11 @@ def mode(pl, segment_info, override={'vicmd': 'COMMND', 'viins': 'INSERT'}, defa
 	try:
 		return override[mode]
 	except KeyError:
-		# Note: with zsh line editor you can emulate as much modes as you wish. 
-		# Thus having unknown mode is not an error: maybe just some developer 
-		# added support for his own zle widgets. As there is no built-in mode() 
-		# function like in VimL and mode is likely be defined by our code or by 
-		# somebody knowing what he is doing there is absolutely no need in 
+		# Note: with zsh line editor you can emulate as much modes as you wish.
+		# Thus having unknown mode is not an error: maybe just some developer
+		# added support for his own zle widgets. As there is no built-in mode()
+		# function like in VimL and mode is likely be defined by our code or by
+		# somebody knowing what he is doing there is absolutely no need in
 		# keeping translations dictionary.
 		return mode.upper()
 
@@ -96,7 +118,7 @@ def continuation(pl, segment_info, omit_cmdsubst=True, right_align=False, rename
 	:param bool right_align:
 		Align to the right.
 	:param dict renames:
-		Rename states: ``{old_name : new_name}``. If ``new_name`` is ``None`` 
+		Rename states: ``{old_name : new_name}``. If ``new_name`` is ``None``
 		then given state is not displayed.
 
 	Highlight groups used: ``continuation``, ``continuation:current``.
@@ -152,20 +174,20 @@ cwd = with_docstring(ShellCwdSegment(),
 Returns a segment list to create a breadcrumb-like effect.
 
 :param int dir_shorten_len:
-	shorten parent directory names to this length (e.g. 
+	shorten parent directory names to this length (e.g.
 	:file:`/long/path/to/powerline` → :file:`/l/p/t/powerline`)
 :param int dir_limit_depth:
-	limit directory depth to this number (e.g. 
+	limit directory depth to this number (e.g.
 	:file:`/long/path/to/powerline` → :file:`⋯/to/powerline`)
 :param bool use_path_separator:
 	Use path separator in place of soft divider.
 :param bool use_shortened_path:
-	Use path from shortened_path ``--renderer-arg`` argument. If this argument 
+	Use path from shortened_path ``--renderer-arg`` argument. If this argument
 	is present ``shorten_home`` argument is ignored.
 :param bool shorten_home:
 	Shorten home directory to ``~``.
 :param str ellipsis:
-	Specifies what to use in place of omitted directories. Use None to not 
+	Specifies what to use in place of omitted directories. Use None to not
 	show this subsegment at all.
 
 Divider highlight group used: ``cwd:divider``.
