@@ -14,7 +14,7 @@ from powerline.config import DEFAULT_SYSTEM_CONFIG_DIR
 from powerline.lib.dict import mergedicts
 from powerline.lib.encoding import get_preferred_output_encoding
 from powerline.lib.path import join
-
+from powerline.version import __version__
 
 class NotInterceptedError(BaseException):
 	pass
@@ -55,8 +55,8 @@ class PowerlineLogger(object):
 	``{message}``
 		is the original message passed to one of the logging methods.
 
-	Each of the methods (``critical``, ``exception``, ``info``, ``error``, 
-	``warn``, ``debug``) expects to receive message in an ``str.format`` format, 
+	Each of the methods (``critical``, ``exception``, ``info``, ``error``,
+	``warn``, ``debug``) expects to receive message in an ``str.format`` format,
 	not in printf-like format.
 
 	Log is saved to the location :ref:`specified by user <config-common-log>`.
@@ -159,11 +159,11 @@ def generate_config_finder(get_config_paths=get_config_paths):
 	This function will find .json file given its path.
 
 	:param function get_config_paths:
-		Function that being called with no arguments will return a list of paths 
+		Function that being called with no arguments will return a list of paths
 		that should be searched for configuration files.
 
 	:return:
-		Function that being given configuration file name will return full path 
+		Function that being given configuration file name will return full path
 		to it or raise IOError if it failed to find the file.
 	'''
 	config_paths = get_config_paths()
@@ -178,12 +178,12 @@ def load_config(cfg_path, find_config_files, config_loader, loader_callback=None
 	:param str cfg_path:
 		Path for configuration file that should be loaded.
 	:param function find_config_files:
-		Function that finds configuration file. Check out the description of 
+		Function that finds configuration file. Check out the description of
 		the return value of ``generate_config_finder`` function.
 	:param ConfigLoader config_loader:
 		Configuration file loader class instance.
 	:param function loader_callback:
-		Function that will be called by config_loader when change to 
+		Function that will be called by config_loader when change to
 		configuration file is detected.
 
 	:return: Configuration file contents.
@@ -210,7 +210,7 @@ def _set_log_handlers(common_config, logger, get_module_attr, stream=None):
 	:param func get_module_attr:
 		:py:func:`gen_module_attr_getter` output.
 	:param file stream:
-		Stream to use by default for :py:class:`logging.StreamHandler` in place 
+		Stream to use by default for :py:class:`logging.StreamHandler` in place
 		of :py:attr:`sys.stderr`. May be ``None``.
 	'''
 	log_targets = common_config['log_file']
@@ -266,16 +266,16 @@ def create_logger(common_config, use_daemon_threads=True, ext='__unknown__',
 	:param dict common_config:
 		Common configuration, from :py:func:`finish_common_config`.
 	:param bool use_daemon_threads:
-		Whether daemon threads should be used. Argument to 
+		Whether daemon threads should be used. Argument to
 		:py:class:`PowerlineLogger` constructor.
 	:param str ext:
 		Used extension. Argument to :py:class:`PowerlineLogger` constructor.
 	:param set imported_modules:
-		Set where imported modules are saved. Argument to 
-		:py:func:`gen_module_attr_getter`. May be ``None``, in this case new 
+		Set where imported modules are saved. Argument to
+		:py:func:`gen_module_attr_getter`. May be ``None``, in this case new
 		empty set is used.
 	:param file stream:
-		Stream to use by default for :py:class:`logging.StreamHandler` in place 
+		Stream to use by default for :py:class:`logging.StreamHandler` in place
 		of :py:attr:`sys.stderr`. May be ``None``.
 
 	:return: Three objects:
@@ -302,7 +302,7 @@ def get_default_theme(is_unicode=True):
 	'''Get default theme used by powerline
 
 	:param bool is_unicode:
-		If true, return theme for unicode environments, otherwise return theme 
+		If true, return theme for unicode environments, otherwise return theme
 		that is supposed to be ASCII-only.
 
 	:return: theme name.
@@ -317,7 +317,7 @@ def finish_common_config(encoding, common_config):
 		Common configuration, as it was just loaded.
 
 	:return:
-		Copy of common configuration with all configuration keys and expanded 
+		Copy of common configuration with all configuration keys and expanded
 		paths.
 	'''
 	encoding = encoding.lower()
@@ -379,7 +379,7 @@ def gen_module_attr_getter(pl, import_paths, imported_modules):
 			in ``fromlist`` tuple.
 
 		:return:
-			Attribute value or ``None``. Note: there is no way to distinguish 
+			Attribute value or ``None``. Note: there is no way to distinguish
 			between successful import of attribute equal to ``None`` and
 			unsuccessful import.
 		'''
@@ -411,7 +411,7 @@ def _get_log_keys(common_config):
 		Common configuration.
 
 	:return:
-		:py:class:`dict` instance which has only keys from 
+		:py:class:`dict` instance which has only keys from
 		:py:attr:`powerline.LOG_KEYS` left.
 	'''
 	return dict((
@@ -425,29 +425,29 @@ DEFAULT_UPDATE_INTERVAL = 2
 
 
 class Powerline(object):
-	'''Main powerline class, entrance point for all powerline uses. Sets 
+	'''Main powerline class, entrance point for all powerline uses. Sets
 	powerline up and loads the configuration.
 
 	:param str ext:
-		extension used. Determines where configuration files will 
-		searched and what renderer module will be used. Affected: used ``ext`` 
-		dictionary from :file:`powerline/config.json`, location of themes and 
+		extension used. Determines where configuration files will
+		searched and what renderer module will be used. Affected: used ``ext``
+		dictionary from :file:`powerline/config.json`, location of themes and
 		colorschemes, render module (``powerline.renders.{ext}``).
 	:param str renderer_module:
-		Overrides renderer module (defaults to ``ext``). Should be the name of 
-		the package imported like this: ``powerline.renderers.{render_module}``. 
-		If this parameter contains a dot ``powerline.renderers.`` is not 
-		prepended. There is also a special case for renderers defined in 
-		toplevel modules: ``foo.`` (note: dot at the end) tries to get renderer 
-		from module ``foo`` (because ``foo`` (without dot) tries to get renderer 
-		from module ``powerline.renderers.foo``). When ``.foo`` (with leading 
-		dot) variant is used ``renderer_module`` will be 
+		Overrides renderer module (defaults to ``ext``). Should be the name of
+		the package imported like this: ``powerline.renderers.{render_module}``.
+		If this parameter contains a dot ``powerline.renderers.`` is not
+		prepended. There is also a special case for renderers defined in
+		toplevel modules: ``foo.`` (note: dot at the end) tries to get renderer
+		from module ``foo`` (because ``foo`` (without dot) tries to get renderer
+		from module ``powerline.renderers.foo``). When ``.foo`` (with leading
+		dot) variant is used ``renderer_module`` will be
 		``powerline.renderers.{ext}{renderer_module}``.
 	:param bool run_once:
-		Determines whether :py:meth:`render` method will be run only once 
+		Determines whether :py:meth:`render` method will be run only once
 		during python session.
 	:param Logger logger:
-		If present no new logger will be created and the provided logger will be 
+		If present no new logger will be created and the provided logger will be
 		used.
 	:param bool use_daemon_threads:
 		When creating threads make them daemon ones.
@@ -471,10 +471,10 @@ class Powerline(object):
 	         config_loader=None):
 		'''Do actual initialization.
 
-		__init__ function only stores the arguments and runs this function. This 
-		function exists for powerline to be able to reload itself: it is easier 
+		__init__ function only stores the arguments and runs this function. This
+		function exists for powerline to be able to reload itself: it is easier
 		to make ``__init__`` store arguments and call overridable ``init`` than
-		tell developers that each time they override Powerline.__init__ in 
+		tell developers that each time they override Powerline.__init__ in
 		subclasses they must store actual arguments.
 		'''
 		self.ext = ext
@@ -530,7 +530,7 @@ class Powerline(object):
 	def create_logger(self):
 		'''Create logger
 
-		This function is used to create logger unless it was already specified 
+		This function is used to create logger unless it was already specified
 		at initialization.
 
 		:return: Three objects:
@@ -548,18 +548,18 @@ class Powerline(object):
 		)
 
 	def create_renderer(self, load_main=False, load_colors=False, load_colorscheme=False, load_theme=False):
-		'''(Re)create renderer object. Can be used after Powerline object was 
-		successfully initialized. If any of the below parameters except 
+		'''(Re)create renderer object. Can be used after Powerline object was
+		successfully initialized. If any of the below parameters except
 		``load_main`` is True renderer object will be recreated.
 
 		:param bool load_main:
-			Determines whether main configuration file (:file:`config.json`) 
-			should be loaded. If appropriate configuration changes implies 
-			``load_colorscheme`` and ``load_theme`` and recreation of renderer 
-			object. Won’t trigger recreation if only unrelated configuration 
+			Determines whether main configuration file (:file:`config.json`)
+			should be loaded. If appropriate configuration changes implies
+			``load_colorscheme`` and ``load_theme`` and recreation of renderer
+			object. Won’t trigger recreation if only unrelated configuration
 			changed.
 		:param bool load_colors:
-			Determines whether colors configuration from :file:`colors.json` 
+			Determines whether colors configuration from :file:`colors.json`
 			should be (re)loaded.
 		:param bool load_colorscheme:
 			Determines whether colorscheme configuration should be (re)loaded.
@@ -682,8 +682,8 @@ class Powerline(object):
 				else:
 					raise ImportError('Failed to obtain renderer')
 
-			# Renderer updates configuration file via segments’ .startup thus it 
-			# should be locked to prevent state when configuration was updated, 
+			# Renderer updates configuration file via segments’ .startup thus it
+			# should be locked to prevent state when configuration was updated,
 			# but .render still uses old renderer.
 			try:
 				renderer = Renderer(**self.renderer_options)
@@ -697,8 +697,8 @@ class Powerline(object):
 	default_log_stream = sys.stdout
 	'''Default stream for default log handler
 
-	Usually it is ``sys.stderr``, but there is sometimes a reason to prefer 
-	``sys.stdout`` or a custom file-like object. It is not supposed to be used 
+	Usually it is ``sys.stderr``, but there is sometimes a reason to prefer
+	``sys.stdout`` or a custom file-like object. It is not supposed to be used
 	to write to some file.
 	'''
 
@@ -716,7 +716,7 @@ class Powerline(object):
 	def get_config_paths():
 		'''Get configuration paths.
 
-		Should be overridden in subclasses in order to provide a way to override 
+		Should be overridden in subclasses in order to provide a way to override
 		used paths.
 
 		:return: list of paths
@@ -727,10 +727,10 @@ class Powerline(object):
 		'''Load configuration and setup watches
 
 		:param str cfg_path:
-			Path to the configuration file without any powerline configuration 
+			Path to the configuration file without any powerline configuration
 			directory or ``.json`` suffix.
 		:param str cfg_type:
-			Configuration type. May be one of ``main`` (for ``config.json`` 
+			Configuration type. May be one of ``main`` (for ``config.json``
 			file), ``colors``, ``colorscheme``, ``theme``.
 
 		:return: dictionary with loaded configuration.
@@ -758,15 +758,15 @@ class Powerline(object):
 		'''Load and merge multiple configuration files
 
 		:param str cfg_type:
-			Type of the loaded configuration files (e.g. ``colorscheme``, 
+			Type of the loaded configuration files (e.g. ``colorscheme``,
 			``theme``).
 		:param list levels:
-			Configuration names resembling levels in hierarchy, sorted by 
-			priority. Configuration file names with higher priority should go 
+			Configuration names resembling levels in hierarchy, sorted by
+			priority. Configuration file names with higher priority should go
 			last.
 		:param set ignore_levels:
-			If only files listed in this variable are present then configuration 
-			file is considered not loaded: at least one file on the level not 
+			If only files listed in this variable are present then configuration
+			file is considered not loaded: at least one file on the level not
 			listed in this variable must be present.
 		'''
 		config = {}
@@ -832,16 +832,16 @@ class Powerline(object):
 
 	@staticmethod
 	def get_local_themes(local_themes):
-		'''Get local themes. No-op here, to be overridden in subclasses if 
+		'''Get local themes. No-op here, to be overridden in subclasses if
 		required.
 
 		:param dict local_themes:
-			Usually accepts ``{matcher_name : theme_name}``. May also receive 
+			Usually accepts ``{matcher_name : theme_name}``. May also receive
 			None in case there is no local_themes configuration.
 
 		:return:
-			anything accepted by ``self.renderer.get_theme`` and processable by 
-			``self.renderer.add_local_theme``. Renderer module is determined by 
+			anything accepted by ``self.renderer.get_theme`` and processable by
+			``self.renderer.add_local_theme``. Renderer module is determined by
 			``__init__`` arguments, refer to its documentation.
 		'''
 		return None
@@ -869,7 +869,7 @@ class Powerline(object):
 					self.cr_kwargs.clear()
 
 	def render(self, *args, **kwargs):
-		'''Update/create renderer if needed and pass all arguments further to 
+		'''Update/create renderer if needed and pass all arguments further to
 		``self.renderer.render()``.
 		'''
 		try:
@@ -904,7 +904,7 @@ class Powerline(object):
 	def setup(self, *args, **kwargs):
 		'''Setup the environment to use powerline.
 
-		Must not be overridden by subclasses. This one only saves setup 
+		Must not be overridden by subclasses. This one only saves setup
 		arguments for :py:meth:`reload` method and calls :py:meth:`do_setup`.
 		'''
 		self.shutdown_event.clear()
@@ -916,7 +916,7 @@ class Powerline(object):
 	def do_setup():
 		'''Function that does initialization
 
-		Should be overridden by subclasses. May accept any number of regular or 
+		Should be overridden by subclasses. May accept any number of regular or
 		keyword arguments.
 		'''
 		pass
@@ -926,12 +926,12 @@ class Powerline(object):
 
 		Should handle most (but not all) powerline updates.
 
-		Purges out all powerline modules and modules imported by powerline for 
-		segment and matcher functions. Requires defining ``setup`` function that 
+		Purges out all powerline modules and modules imported by powerline for
+		segment and matcher functions. Requires defining ``setup`` function that
 		updates reference to main powerline object.
 
 		.. warning::
-			Not guaranteed to work properly, use it at your own risk. It 
+			Not guaranteed to work properly, use it at your own risk. It
 			may break your python code.
 		'''
 		import sys
@@ -939,7 +939,7 @@ class Powerline(object):
 		modules_holder = []
 		for module in modules:
 			try:
-				# Needs to hold module to prevent garbage collecting until they 
+				# Needs to hold module to prevent garbage collecting until they
 				# are all reloaded.
 				modules_holder.append(sys.modules.pop(module))
 			except KeyError:
@@ -954,12 +954,12 @@ class Powerline(object):
 		'''Shut down all background threads.
 
 		:param bool set_event:
-			Set ``shutdown_event`` and call ``renderer.shutdown`` which should 
-			shut down all threads. Set it to False unless you are exiting an 
+			Set ``shutdown_event`` and call ``renderer.shutdown`` which should
+			shut down all threads. Set it to False unless you are exiting an
 			application.
 
-			If set to False this does nothing more then resolving reference 
-			cycle ``powerline → config_loader → bound methods → powerline`` by 
+			If set to False this does nothing more then resolving reference
+			cycle ``powerline → config_loader → bound methods → powerline`` by
 			unsubscribing from config_loader events.
 		'''
 		if set_event:
