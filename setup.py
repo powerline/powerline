@@ -6,6 +6,7 @@ import os
 import sys
 import logging
 import shlex
+import subprocess
 
 from setuptools import setup, find_packages
 
