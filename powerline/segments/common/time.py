@@ -5,7 +5,7 @@ from datetime import datetime, tzinfo
 import pytz
 
 
-def date(pl, format='%Y-%m-%d', istime=False, timezone=None):
+def date(pl, format='%Y-%m-%d', istime=False, timezone=None, suffix=None):
 	'''Return the current date.
 
 	:param str format:
@@ -19,6 +19,9 @@ def date(pl, format='%Y-%m-%d', istime=False, timezone=None):
 		see a full list by running `pytz.all_timezones` from your python
 		interpreter. If None is provided, this defaults to your local system's
 		timezone.
+	:param str suffix:
+		A string suffix to add at the end of the time string (after a space).
+		This is usually used to denote the timezone name.
 
 	Divider highlight group used: ``time:divider``.
 
@@ -30,6 +33,9 @@ def date(pl, format='%Y-%m-%d', istime=False, timezone=None):
 		contents = curr_time.strftime(format)
 	except UnicodeEncodeError:
 		contents = curr_time.strftime(format.encode('utf-8')).decode('utf-8')
+
+	if suffix:
+		contents += " " + suffix
 
 	return [{
 		'contents': contents,
@@ -48,7 +54,7 @@ def fuzzy_time(pl, unicode_text=False):
 	'''Display the current time as fuzzy time, e.g. "quarter past six".
 
 	:param bool unicode_text:
-		If true then hyphenminuses (regular ASCII ``-``) and single quotes are 
+		If true then hyphenminuses (regular ASCII ``-``) and single quotes are
 		replaced with unicode dashes and apostrophes.
 	'''
 	hour_str = ['twelve', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven']
