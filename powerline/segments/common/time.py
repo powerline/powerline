@@ -1,25 +1,32 @@
 # vim:fileencoding=utf-8:noet
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
-from datetime import datetime
+from datetime import datetime, tzinfo
 
 
-def date(pl, format='%Y-%m-%d', istime=False):
+def date(pl, format='%Y-%m-%d', istime=False, timezone=None):
 	'''Return the current date.
 
 	:param str format:
 		strftime-style date format string
 	:param bool istime:
 		If true then segment uses ``time`` highlight group.
+	:param str timezone:
+		The name of the timezone to display (per the format used
+		by datetime.tzinfo.tzname():
+		https://docs.python.org/3/library/datetime.html#datetime.tzinfo.tzname).
+		If none is provided, will default to your local system's time
 
 	Divider highlight group used: ``time:divider``.
 
 	Highlight groups used: ``time`` or ``date``.
 	'''
+	curr_time = datetime.now(tz=None if not timezone else tzinfo.tzname(timezone))
+
 	try:
-		contents = datetime.now().strftime(format)
+		contents = curr_time.strftime(format)
 	except UnicodeEncodeError:
-		contents = datetime.now().strftime(format.encode('utf-8')).decode('utf-8')
+		contents = curr_time.strftime(format.encode('utf-8')).decode('utf-8')
 
 	return [{
 		'contents': contents,
