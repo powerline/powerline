@@ -2,6 +2,7 @@
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 from datetime import datetime, tzinfo
+import pytz
 
 
 def date(pl, format='%Y-%m-%d', istime=False, timezone=None):
@@ -12,16 +13,18 @@ def date(pl, format='%Y-%m-%d', istime=False, timezone=None):
 	:param bool istime:
 		If true then segment uses ``time`` highlight group.
 	:param str timezone:
-		The name of the timezone to display (per the format used
-		by datetime.tzinfo.tzname():
-		https://docs.python.org/3/library/datetime.html#datetime.tzinfo.tzname).
-		If none is provided, will default to your local system's time
+		The name of the timezone to display (per the format used by pytz. This
+		includes long-form formats like "US/Pacific" or "Europe/Amsterdam",
+		as well as some timezone abbreviations like "UTC", "EET", etc. You can
+		see a full list by running `pytz.all_timezones` from your python
+		interpreter. If None is provided, this defaults to your local system's
+		timezone.
 
 	Divider highlight group used: ``time:divider``.
 
 	Highlight groups used: ``time`` or ``date``.
 	'''
-	curr_time = datetime.now(tz=None if not timezone else tzinfo.tzname(timezone))
+	curr_time = datetime.now(tz=None if not timezone else pytz.timezone(timezone))
 
 	try:
 		contents = curr_time.strftime(format)
