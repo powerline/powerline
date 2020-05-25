@@ -34,8 +34,8 @@ def date(pl, format='%Y-%m-%d', istime=False, timezone=None, suffix=None):
 	except UnicodeEncodeError:
 		contents = curr_time.strftime(format.encode('utf-8')).decode('utf-8')
 
-	#if suffix:
-	#	contents += " " + suffix
+	if suffix:
+		contents += " " + suffix
 
 	return [{
 		'contents': contents,
