@@ -6,7 +6,7 @@ from datetime import datetime
 import pytz
 
 
-def date(pl, format='%Y-%m-%d', istime=False, timezone=None, suffix=None):
+def date(pl, format='%Y-%m-%d', istime=False, timezone=None):
 	'''Return the current date.
 
 	:param str format:
@@ -20,9 +20,6 @@ def date(pl, format='%Y-%m-%d', istime=False, timezone=None, suffix=None):
 		see a full list by running `pytz.all_timezones` from your python
 		interpreter. If None is provided, this defaults to your local system's
 		timezone.
-	:param str suffix:
-		A string suffix to add at the end of the time string (after a space).
-		This is usually used to denote the timezone name.
 
 	Divider highlight group used: ``time:divider``.
 
@@ -34,9 +31,6 @@ def date(pl, format='%Y-%m-%d', istime=False, timezone=None, suffix=None):
 		contents = curr_time.strftime(format)
 	except UnicodeEncodeError:
 		contents = curr_time.strftime(format.encode('utf-8')).decode('utf-8')
-
-	if suffix:
-		contents += " " + suffix
 
 	return [{
 		'contents': contents,
