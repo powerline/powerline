@@ -95,7 +95,7 @@ def fuzzy_time(pl, format='{minute_str} {hour_str}', unicode_text=False, timezon
 		result = special_case_str[(now.hour, now.minute)]
 		if unicode_text:
 			result = result.translate(UNICODE_TEXT_TRANSLATION)
-		return special_case_str[(now.hour, now.minute)]
+		return result
 	except KeyError:
 		pass
 
