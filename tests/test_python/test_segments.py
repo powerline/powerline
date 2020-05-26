@@ -846,7 +846,7 @@ class TestTime(TestCommon):
 			'(0, 1)': 'round about midnight',
 			'(0, 2)': 'round about midnight',
 			'(12, 0)': 'noon'}
-		with replace_attr(self.module, 'datetime', Args(strptime=lambda timezone, fmt): Args(tzinfo=lambda: timezone), now=lambda tz: time)):
+		with replace_attr(self.module, 'datetime', Args(strptime=lambda timezone, fmt: Args(tzinfo=lambda: timezone), now=lambda tz: time)):
 			self.assertEqual(self.module.fuzzy_time(pl=pl, hour_str=hour_str, minute_str=minute_str, special_case_str=special_case_str), 'quarter to one')
 			self.assertEqual(self.module.fuzzy_time(pl=pl), 'quarter to one')
 			time.hour = 23
