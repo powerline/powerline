@@ -1,5 +1,4 @@
-sudo: false
-dist: trusty
+dist: xenial
 cache:
     directories:
         - $HOME/.cache/pip
@@ -20,14 +19,14 @@ install: tests/install.sh
 script: tests/test.sh
 jobs:
     include:
+        - stage: Recent Python
+        - python: "3.7"
         - stage: PyPy
           python: "pypy"
         - python: "pypy3"
-        - stage: Latest Python
-          python: "3.6"
-        - stage: Intermediate versions
-          python: "3.3"
-        - python: "3.4"
+        - stage: Old Python
+          python: "3.4"
         - python: "3.5"
+        - python: "3.6"
 
 # vim: et
