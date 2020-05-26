@@ -819,9 +819,11 @@ class TestTime(TestCommon):
 
 	def test_date(self):
 		pl = Pl()
-		with replace_attr(self.module, 'datetime', Args(now=lambda: Args(strftime=lambda fmt: fmt))):
+		with replace_attr(self.module, 'datetime', Args(now=lambda tz: Args(strftime=lambda fmt: fmt + tz))):
 			self.assertEqual(self.module.date(pl=pl), [{'contents': '%Y-%m-%d', 'highlight_groups': ['date'], 'divider_highlight_group': None}])
+			self.assertEqual(self.module.date(pl=pl, timezone='+0900'), [{'contents': '%Y-%m-%d+0900', 'highlight_groups': ['date'], 'divider_highlight_group': None}])
 			self.assertEqual(self.module.date(pl=pl, format='%H:%M', istime=True), [{'contents': '%H:%M', 'highlight_groups': ['time', 'date'], 'divider_highlight_group': 'time:divider'}])
+			self.assertEqual(self.module.date(pl=pl, format='%H:%M', istime=True, timezone='-0900'), [{'contents': '%H:%M-0900', 'highlight_groups': ['time', 'date'], 'divider_highlight_group': 'time:divider'}])
 		unicode_date = self.module.date(pl=pl, format='\u231a', istime=True)
 		expected_unicode_date = [{'contents': '\u231a', 'highlight_groups': ['time', 'date'], 'divider_highlight_group': 'time:divider'}]
 		if python_implementation() == 'PyPy' and sys.version_info >= (3,):
@@ -832,7 +834,7 @@ class TestTime(TestCommon):
 	def test_fuzzy_time(self):
 		time = Args(hour=0, minute=45)
 		pl = Pl()
-		with replace_attr(self.module, 'datetime', Args(now=lambda: time)):
+		with replace_attr(self.module, 'datetime', Args(now=lambda tz: time)):
 			self.assertEqual(self.module.fuzzy_time(pl=pl), 'quarter to one')
 			time.hour = 23
 			time.minute = 59
