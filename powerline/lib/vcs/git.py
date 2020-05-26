@@ -179,19 +179,19 @@ except ImportError:
 			return readlines(('git',) + args, directory)
 
 		def stash(self):
-			return sum(1 for _ in self._gitcmd(self.directory, 'stash', 'list'))
+			return sum(1 for _ in self._gitcmd(self.directory, '--no-optional-locks', 'stash', 'list'))
 
 		def do_status(self, directory, path):
 			if path:
 				try:
-					return next(self._gitcmd(directory, 'status', '--porcelain', '--ignored', '--', path))[:2]
+					return next(self._gitcmd(directory, '--no-optional-locks', 'status', '--porcelain', '--ignored', '--', path))[:2]
 				except StopIteration:
 					return None
 			else:
 				wt_column = ' '
 				index_column = ' '
 				untracked_column = ' '
-				for line in self._gitcmd(directory, 'status', '--porcelain'):
+				for line in self._gitcmd(directory, '--no-optional-locks', 'status', '--porcelain'):
 					if line[0] == '?':
 						untracked_column = 'U'
 						continue
