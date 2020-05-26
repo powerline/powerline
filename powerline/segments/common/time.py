@@ -100,7 +100,7 @@ def fuzzy_time(pl, format='{minute_str} {hour_str}', unicode_text=False, timezon
 		pass
 
 	hour = now.hour
-	if now.minute > 32:
+	if now.minute >= 30:
 		hour = hour + 1
 	hour = hour % len(hour_str)
 
@@ -109,12 +109,12 @@ def fuzzy_time(pl, format='{minute_str} {hour_str}', unicode_text=False, timezon
 
 	for mn in minute_str:
 		mn = int(mn)
-	if now.minute >= mn and now.minute - mn < min_dis:
-		min_dis = now.minute - mn
-		min_pos = mn
-	elif now.minute < mn and mn - now.minute < min_dis:
-		min_dis = mn - now.minute
-		min_pos = mn
+		if now.minute >= mn and now.minute - mn < min_dis:
+			min_dis = now.minute - mn
+			min_pos = mn
+		elif now.minute < mn and mn - now.minute < min_dis:
+			min_dis = mn - now.minute
+			min_pos = mn
 	result = format.format(minute_str=minute_str[str(min_pos)], hour_str=hour_str[hour])
 
 	if unicode_text:
