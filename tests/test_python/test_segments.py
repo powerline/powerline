@@ -853,22 +853,28 @@ class TestTime(TestCommon):
 			time.minute = 59
 			self.assertEqual(self.module.fuzzy_time(pl=pl, hour_str=hour_str, minute_str=minute_str, special_case_str=special_case_str), '~ midnight')
 			self.assertEqual(self.module.fuzzy_time(pl=pl), 'round about midnight')
+			time.hour = 11
 			time.minute = 33
 			self.assertEqual(self.module.fuzzy_time(pl=pl, hour_str=hour_str, minute_str=minute_str, special_case_str=special_case_str),'twenty-five to 12')
 			self.assertEqual(self.module.fuzzy_time(pl=pl), 'twenty-five to twelve')
-			time.minute = 60
+			time.hour = 12
+			time.minute = 0
 			self.assertEqual(self.module.fuzzy_time(pl=pl, hour_str=hour_str, minute_str=minute_str, special_case_str=special_case_str), 'twelve o\'clock')
 			self.assertEqual(self.module.fuzzy_time(pl=pl), 'noon')
+			time.hour = 11
 			time.minute = 33
 			self.assertEqual(self.module.fuzzy_time(pl=pl, unicode_text=False, hour_str=hour_str, minute_str=minute_str, special_case_str=special_case_str), 'twenty-five to 12')
 			self.assertEqual(self.module.fuzzy_time(pl=pl, unicode_text=False), 'twenty-five to twelve')
-			time.minute = 60
+			time.hour = 12
+			time.minute = 0
 			self.assertEqual(self.module.fuzzy_time(pl=pl, unicode_text=False, hour_str=hour_str, minute_str=minute_str, special_case_str=special_case_str), 'twelve o\'clock')
 			self.assertEqual(self.module.fuzzy_time(pl=pl, unicode_text=False), 'noon')
+			time.hour = 11
 			time.minute = 33
 			self.assertEqual(self.module.fuzzy_time(pl=pl, unicode_text=True, hour_str=hour_str, minute_str=minute_str, special_case_str=special_case_str), 'twenty‐five to 12')
 			self.assertEqual(self.module.fuzzy_time(pl=pl, unicode_text=True), 'twenty‐five to twelve')
-			time.minute = 60
+			time.hour = 12
+			time.minute = 0
 			self.assertEqual(self.module.fuzzy_time(pl=pl, unicode_text=True, hour_str=hour_str, minute_str=minute_str, special_case_str=special_case_str), 'twelve o’clock')
 			self.assertEqual(self.module.fuzzy_time(pl=pl, unicode_text=True),'noon')
 
