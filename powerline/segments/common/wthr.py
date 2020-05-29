@@ -105,7 +105,7 @@ class WeatherSegment(KwThreadedSegment):
 	interval = 600
 	default_location = None
 	location_urls = {}
-	weather_api_key = "sample_api_key"
+	weather_api_key = "fbc9549d91a5e4b26c15be0dbdac3460"
 
 	@staticmethod
 	def key(location_query=None, **kwargs):
@@ -132,7 +132,6 @@ class WeatherSegment(KwThreadedSegment):
 	def compute_state(self, location_query):
 		url = self.get_request_url(location_query)
 		raw_response = urllib_read(url)
-		self.error(url)
 		if not raw_response:
 			self.error('Failed to get response')
 			return None
