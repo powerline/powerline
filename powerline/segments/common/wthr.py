@@ -120,7 +120,7 @@ class WeatherSegment(KwThreadedSegment):
 			}
 			if location_query is None:
 				location_data = json.loads(urllib_read('https://freegeoip.app/json/'))
-				query_data["lat"] = location_data["latitude"],
+				query_data["lat"] = location_data["latitude"]
 				query_data["lon"] = location_data["longitude"]
 			else:
 				query_data.update(location_query)
