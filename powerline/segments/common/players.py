@@ -31,6 +31,8 @@ def _convert_state(state):
 
 def _convert_seconds(seconds):
 	'''Convert seconds to minutes:seconds format'''
+	if isinstance(seconds, str):
+	        seconds = seconds.replace(",",".")
 	return '{0:.0f}:{1:02.0f}'.format(*divmod(float(seconds), 60))
 
 
