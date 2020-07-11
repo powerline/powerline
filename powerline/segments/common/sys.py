@@ -90,8 +90,6 @@ try:
 					self.exception('Exception while calculating cpu_percent: {0}', str(e))
 
 		def render(self, cpu_percent, format='{0:.0f}%', **kwargs):
-			if not cpu_percent:
-				return None
 			return [{
 				'contents': format.format(cpu_percent),
 				'gradient_level': cpu_percent,
