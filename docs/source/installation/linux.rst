@@ -71,7 +71,7 @@ with any coding font.
    path is ``~/.config/fontconfig/conf.d/``, for older versions it’s  
    ``~/.fonts.conf.d/``::
 
-      mv 10-powerline-symbols.conf ~/.config/fontconfig/conf.d/
+      mv 10-powerline-symbols.conf ~/.config/fontconfig/conf.d
 
 If custom symbols still cannot be seen then try closing all instances of the 
 terminal emulator. Restarting X may be needed for the changes to take effect.
