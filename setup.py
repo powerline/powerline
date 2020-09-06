@@ -46,14 +46,13 @@ except Exception as e:
 	else:
 		sys.path.append(CURRENT_DIR)
 		from powerline.lib.shell import which
+	can_use_scripts = True
 	if which('socat') and which('sed') and which('sh'):
 		print('Using powerline.sh script instead of C version (requires socat, sed and sh)')
 		shutil.copyfile('client/powerline.sh', 'scripts/powerline')
-		can_use_scripts = True
 	else:
 		print('Using powerline.py script instead of C version')
 		shutil.copyfile('client/powerline.py', 'scripts/powerline')
-		can_use_scripts = True
 else:
 	can_use_scripts = False
 
