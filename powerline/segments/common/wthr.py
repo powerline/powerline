@@ -123,7 +123,7 @@ class WeatherSegment(KwThreadedSegment):
 				query_data["lat"] = location_data["latitude"]
 				query_data["lon"] = location_data["longitude"]
 			else:
-				query_data.update(location_query)
+				query_data["q"] = location_query
 			self.location_urls[location_query] = url = (
 				"https://api.openweathermap.org/data/2.5/weather?" +
 				urllib_urlencode(query_data))
@@ -221,5 +221,5 @@ weather conditions.
 Divider highlight group used: ``background:divider``.
 
 Highlight groups used: ``weather_conditions`` or ``weather``, ``weather_temp_gradient`` (gradient) or ``weather``.
-Also uses ``weather_conditions_{condition}`` for all weather conditions supported by Yahoo.
+Also uses ``weather_conditions_{condition}`` for all weather conditions supported by OpenWeatherMap.
 ''')
