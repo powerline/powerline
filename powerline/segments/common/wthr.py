@@ -125,7 +125,7 @@ class WeatherSegment(KwThreadedSegment):
 			else:
 				query_data.update(location_query)
 			self.location_urls[location_query] = url = (
-				"http://api.openweathermap.org/data/2.5/weather?" +
+				"https://api.openweathermap.org/data/2.5/weather?" +
 				urllib_urlencode(query_data))
 			return url
 
@@ -192,9 +192,9 @@ class WeatherSegment(KwThreadedSegment):
 
 
 weather = with_docstring(WeatherSegment(),
-'''Return weather from Yahoo! Weather.
+'''Return weather from OpenWeatherMaps.
 
-Uses GeoIP lookup from http://geoip.nekudo.com to automatically determine
+Uses GeoIP lookup from https://freegeoip.app to automatically determine
 your current location. This should be changed if you’re in a VPN or if your
 IP address is registered at another location.
 
