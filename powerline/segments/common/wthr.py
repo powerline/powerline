@@ -2,10 +2,14 @@
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 import json
+from collections import namedtuple
 
 from powerline.lib.url import urllib_read, urllib_urlencode
 from powerline.lib.threaded import KwThreadedSegment
 from powerline.segments import with_docstring
+
+
+_WeatherKey = namedtuple('Key', 'location_query weather_api_key')
 
 
 # XXX Warning: module name must not be equal to the segment name as long as this
@@ -109,15 +113,20 @@ class WeatherSegment(KwThreadedSegment):
 
 	@staticmethod
 	def key(location_query=None, **kwargs):
-		return location_query
-
-	def get_request_url(self, location_query):
 		try:
-			return self.location_urls[location_query]
+			weather_api_key = kwargs["weather_api_key"]
+		except KeyError:
+			weather_api_key = WeatherSegment.weather_api_key
+		return _WeatherKey(location_query, weather_api_key)
+
+	def get_request_url(self, weather_key: _WeatherKey):
+		try:
+			return self.location_urls[weather_key]
 		except KeyError:
 			query_data = {
-				"appid": self.weather_api_key
+				"appid": weather_key.weather_api_key
 			}
+			location_query = weather_key.location_query
 			if location_query is None:
 				location_data = json.loads(urllib_read('https://freegeoip.app/json/'))
 				query_data["lat"] = location_data["latitude"]
@@ -129,8 +138,8 @@ class WeatherSegment(KwThreadedSegment):
 				urllib_urlencode(query_data))
 			return url
 
-	def compute_state(self, location_query):
-		url = self.get_request_url(location_query)
+	def compute_state(self, weather_key):
+		url = self.get_request_url(weather_key)
 		raw_response = urllib_read(url)
 		if not raw_response:
 			self.error('Failed to get response')
