@@ -119,7 +119,7 @@ class WeatherSegment(KwThreadedSegment):
 			weather_api_key = WeatherSegment.weather_api_key
 		return _WeatherKey(location_query, weather_api_key)
 
-	def get_request_url(self, weather_key: _WeatherKey):
+	def get_request_url(self, weather_key):
 		try:
 			return self.location_urls[weather_key]
 		except KeyError:
