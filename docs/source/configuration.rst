@@ -117,10 +117,14 @@ segments that you may want to customize right away:
     so unless you’re on a VPN you probably won’t have to change the location 
     query.
 
+    It is using OpenWeatherMap as a provider, which can be configured with a
+    personal API key. These can be generated `here
+    <https://home.openweathermap.org/api_keys>`_
+
     If you want to change the location query or the temperature unit you’ll 
     have to update the segment arguments. Open a theme file, scroll down to 
-    the weather segment and update it to include unit/location query 
-    arguments:
+    the weather segment and update it to include unit, location query or
+    api key arguments:
 
     .. code-block:: javascript
 
@@ -129,7 +133,8 @@ segments that you may want to customize right away:
            "priority": 50,
            "args": {
                "unit": "F",
-               "location_query": "oslo, norway"
+               "location_query": "oslo, norway",
+               "weather_api_key": "your_api_key"
            }
        },
 
