@@ -947,46 +947,47 @@ class TestWthr(TestCommon):
 		pl = Pl()
 		with replace_attr(self.module, 'urllib_read', urllib_read):
 			self.assertEqual(self.module.weather(pl=pl), [
-				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_condition_blustery', 'weather_condition_windy', 'weather_conditions', 'weather'], 'contents': 'WINDY '},
-				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '14°C', 'gradient_level': 62.857142857142854}
+				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_condition_sunny', 'weather_conditions', 'weather'], 'contents': 'SUN '},
+				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '20°C', 'gradient_level': 71.42857142857143}
 			])
 			self.assertEqual(self.module.weather(pl=pl, temp_coldest=0, temp_hottest=100), [
-				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_condition_blustery', 'weather_condition_windy', 'weather_conditions', 'weather'], 'contents': 'WINDY '},
-				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '14°C', 'gradient_level': 14.0}
+				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_condition_sunny', 'weather_conditions', 'weather'], 'contents': 'SUN '},
+				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '20°C', 'gradient_level': 20}
 			])
 			self.assertEqual(self.module.weather(pl=pl, temp_coldest=-100, temp_hottest=-50), [
-				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_condition_blustery', 'weather_condition_windy', 'weather_conditions', 'weather'], 'contents': 'WINDY '},
-				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '14°C', 'gradient_level': 100}
+				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_condition_sunny', 'weather_conditions', 'weather'], 'contents': 'SUN '},
+				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '20°C', 'gradient_level': 100}
 			])
-			self.assertEqual(self.module.weather(pl=pl, icons={'blustery': 'o'}), [
-				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_condition_blustery', 'weather_condition_windy', 'weather_conditions', 'weather'], 'contents': 'o '},
-				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '14°C', 'gradient_level': 62.857142857142854}
+			self.assertEqual(self.module.weather(pl=pl, icons={'sunny': 'o'}), [
+				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_condition_sunny', 'weather_conditions', 'weather'], 'contents': 'o '},
+				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '20°C', 'gradient_level': 71.42857142857143}
 			])
-			self.assertEqual(self.module.weather(pl=pl, icons={'windy': 'x'}), [
-				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_condition_blustery', 'weather_condition_windy', 'weather_conditions', 'weather'], 'contents': 'x '},
-				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '14°C', 'gradient_level': 62.857142857142854}
-			])
+			# Test is disabled as no request has more than 1 weather condition associated currently
+			# self.assertEqual(self.module.weather(pl=pl, icons={'windy': 'x'}), [
+			# 	{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_condition_blustery', 'weather_condition_windy', 'weather_conditions', 'weather'], 'contents': 'x '},
+			# 	{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '14°C', 'gradient_level': 62.857142857142854}
+			# ])
 			self.assertEqual(self.module.weather(pl=pl, unit='F'), [
-				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_condition_blustery', 'weather_condition_windy', 'weather_conditions', 'weather'], 'contents': 'WINDY '},
-				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '57°F', 'gradient_level': 62.857142857142854}
+				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_condition_sunny', 'weather_conditions', 'weather'], 'contents': 'SUN '},
+				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '68°F', 'gradient_level': 100}
 			])
 			self.assertEqual(self.module.weather(pl=pl, unit='K'), [
-				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_condition_blustery', 'weather_condition_windy', 'weather_conditions', 'weather'], 'contents': 'WINDY '},
-				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '287K', 'gradient_level': 62.857142857142854}
+				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_condition_sunny', 'weather_conditions', 'weather'], 'contents': 'SUN '},
+				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '293K', 'gradient_level': 100}
 			])
 			self.assertEqual(self.module.weather(pl=pl, temp_format='{temp:.1e}C'), [
-				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_condition_blustery', 'weather_condition_windy', 'weather_conditions', 'weather'], 'contents': 'WINDY '},
-				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '1.4e+01C', 'gradient_level': 62.857142857142854}
+				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_condition_sunny', 'weather_conditions', 'weather'], 'contents': 'SUN '},
+				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '2.0e+01C', 'gradient_level': 71.42857142857143}
 			])
 		with replace_attr(self.module, 'urllib_read', urllib_read):
 			self.module.weather.startup(pl=pl, location_query='Meppen,06,DE')
 			self.assertEqual(self.module.weather(pl=pl), [
-				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_condition_blustery', 'weather_condition_windy', 'weather_conditions', 'weather'], 'contents': 'WINDY '},
-				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '14°C', 'gradient_level': 62.857142857142854}
+				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_condition_sunny', 'weather_conditions', 'weather'], 'contents': 'SUN '},
+				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '20°C', 'gradient_level': 71.42857142857143}
 			])
 			self.assertEqual(self.module.weather(pl=pl, location_query='Moscow,RU'), [
-				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_condition_fair_night', 'weather_condition_night', 'weather_conditions', 'weather'], 'contents': 'NIGHT '},
-				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '9°C', 'gradient_level': 55.714285714285715}
+				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_condition_sunny', 'weather_conditions', 'weather'], 'contents': 'SUN '},
+				{'divider_highlight_group': 'background:divider', 'highlight_groups': ['weather_temp_gradient', 'weather_temp', 'weather'], 'contents': '10°C', 'gradient_level': 57.142857142857146}
 			])
 			self.module.weather.shutdown()
 
