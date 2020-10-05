@@ -175,15 +175,12 @@ def uptime(pl, days_format='{days:d}d', hours_format=' {hours:d}h', minutes_form
 	minutes, seconds = divmod(seconds, 60)
 	hours, minutes = divmod(minutes, 60)
 	days, hours = divmod(hours, 24)
-	formats = [days_format, hours_format, minutes_format, seconds_format]
-	times = [(days, "days"), (hours, "hours"), (minutes, "minutes"), (seconds, "seconds")]
-	show_number = False
-	time_formatted = []
-	for i in range(len(times)):
-		current_time, str_name = times[i]
-		if current_time != 0:
-			show_number = True
-		if show_number:
-			time_formatted.append(formats[i].format(**{str_name: current_time}))
-	time_formatted = time_formatted[:shorten_len]
+	time_formatted = list(filter(None, [
+		days_format.format(days=days) if days_format else None,
+		hours_format.format(hours=hours) if hours_format else None,
+		minutes_format.format(minutes=minutes) if minutes_format else None,
+		seconds_format.format(seconds=seconds) if seconds_format else None,
+	]))
+	first_non_zero = next((i for i, x in enumerate([days, hours, minutes, seconds]) if x != 0))
+	time_formatted = time_formatted[first_non_zero:first_non_zero + shorten_len]
 	return ''.join(time_formatted).strip()
