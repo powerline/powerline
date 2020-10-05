@@ -885,10 +885,10 @@ class TestSys(TestCommon):
 	def test_uptime(self):
 		pl = Pl()
 		with replace_attr(self.module, '_get_uptime', lambda: 259200):
-			self.assertEqual(self.module.uptime(pl=pl), [{'contents': '3d', 'divider_highlight_group': 'background:divider'}])
+			self.assertEqual(self.module.uptime(pl=pl), [{'contents': '3d 0h 00m', 'divider_highlight_group': 'background:divider'}])
 		with replace_attr(self.module, '_get_uptime', lambda: 93784):
-			self.assertEqual(self.module.uptime(pl=pl), [{'contents': '1d 2h 3m', 'divider_highlight_group': 'background:divider'}])
-			self.assertEqual(self.module.uptime(pl=pl, shorten_len=4), [{'contents': '1d 2h 3m 4s', 'divider_highlight_group': 'background:divider'}])
+			self.assertEqual(self.module.uptime(pl=pl), [{'contents': '1d 2h 03m', 'divider_highlight_group': 'background:divider'}])
+			self.assertEqual(self.module.uptime(pl=pl, shorten_len=4), [{'contents': '1d 2h 03m 04s', 'divider_highlight_group': 'background:divider'}])
 		with replace_attr(self.module, '_get_uptime', lambda: 65536):
 			self.assertEqual(self.module.uptime(pl=pl), [{'contents': '18h 12m 16s', 'divider_highlight_group': 'background:divider'}])
 			self.assertEqual(self.module.uptime(pl=pl, shorten_len=2), [{'contents': '18h 12m', 'divider_highlight_group': 'background:divider'}])
