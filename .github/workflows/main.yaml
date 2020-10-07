@@ -38,6 +38,10 @@ jobs:
       run: |
         python setup.py sdist bdist_wheel
 
+    - name: Install powerline
+      run: |
+        pip install .
+
     - name: Test Python tests
       run: |
         pytest --color=yes tests/test_python
