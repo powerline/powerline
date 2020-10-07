@@ -45,9 +45,14 @@ GIT_REPO = 'git_repo'
 HG_REPO = 'hg_repo'
 BZR_REPO = 'bzr_repo'
 
+_thread_number = len(threading.enumerate())
+
 
 def thread_number():
-	return len(list(filter(lambda t: not t.daemon, threading.enumerate())))
+	# The actual thread number depends on the environment, a thread is executed in.
+	# With unittest runners, the runner only occupies 1 Thread. However, with pytest, this is no
+	# longer true. Therefore we are ignoring all threads except 1 from the runner.
+	return len(threading.enumerate()) - _thread_number + 1
 
 
 class TestShell(TestCase):
