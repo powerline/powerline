@@ -114,12 +114,14 @@ Vim statusline
 * .. image:: https://raw.github.com/powerline/powerline/develop/docs/source/_static/img/pl-truncate3.png
      :alt: Truncation illustration
 
-----
-
 The font in the screenshots is `Pragmata Pro`_ by Fabrizio Schiavi.
+
+.. _`Pragmata Pro`: http://www.fsd.it/shop/fonts/pragmatapro
 
 Third party bindings
 --------------------
-* `xontrib-powerline-binding <https://github.com/dyuri/xontrib-powerline-binding>`_ - powerline binding for xonsh shell.
+* `xontrib-powerline-binding`_ - powerline binding for xonsh shell.
 
-.. _`Pragmata Pro`: http://www.fsd.it/shop/fonts/pragmatapro
+.. _`xontrib-powerline-binding`: https://github.com/dyuri/xontrib-powerline-binding
+
+
