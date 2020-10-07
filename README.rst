@@ -7,7 +7,7 @@ Powerline
 
 **Powerline is a statusline plugin for vim, and provides statuslines and 
 prompts for several other applications, including zsh, bash, fish, tmux,
-IPython, Awesome, i3 and Qtile.**
+IPython, Awesome, i3, Qtile and xonsh.**
 
 * `Support forum`_ (powerline-support@googlegroups.com)
 * `Development discussion`_ (powerline-dev@googlegroups.com)
@@ -117,5 +117,9 @@ Vim statusline
 ----
 
 The font in the screenshots is `Pragmata Pro`_ by Fabrizio Schiavi.
+
+Third party bindings
+--------------------
+* `xontrib-powerline-binding <https://github.com/dyuri/xontrib-powerline-binding>`_ - powerline binding for xonsh shell.
 
 .. _`Pragmata Pro`: http://www.fsd.it/shop/fonts/pragmatapro
