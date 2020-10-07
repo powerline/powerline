@@ -47,7 +47,7 @@ BZR_REPO = 'bzr_repo'
 
 
 def thread_number():
-	return len(threading.enumerate())
+	return len(list(filter(lambda t: not t.daemon, threading.enumerate())))
 
 
 class TestShell(TestCase):
