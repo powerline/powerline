@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [2.7, 3.5, 3.6, 3.7, 3.8]
+        python-version: [2.7, 3.5, 3.6, 3.7, 3.8, 3.9]
 
     steps:
     - name: Checkout code
@@ -30,12 +30,16 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install setuptools wheel
+        pip install setuptools wheel pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
     - name: Build
       run: |
         python setup.py sdist bdist_wheel
+
+    - name: Test Python tests
+      run: |
+        pytest tests/test_python
 
     - name: Publish
       if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
