@@ -109,6 +109,7 @@ class TestThreaded(TestCase):
 		block_event.set()
 		updates[0] = (None,)
 		self.assertEqual(segment(pl=pl), None)
+		assert threading.enumerate() == []
 		self.assertEqual(thread_number(), 1)
 		self.assertEqual(log, [
 			('set_state', {}),
