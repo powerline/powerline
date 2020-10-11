@@ -45,7 +45,7 @@ jobs:
 
     - name: Test Python tests
       run: |
-        python -m pytest -v --color=yes tests/test_python
+        python -m pytest --color=yes tests/test_python
 
     - name: Publish
       if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
