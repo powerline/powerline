@@ -545,9 +545,6 @@ class TestEnv(TestCommon):
 			def username(self):
 				return 'def@DOMAIN.COM'
 
-			if hasattr(self.module, 'psutil') and not callable(self.module.psutil.Process.username):
-				username = property(username)
-
 		segment_info = {'environ': {}}
 
 		def user(*args, **kwargs):
