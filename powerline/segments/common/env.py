@@ -131,14 +131,8 @@ Highlight groups used: ``cwd:current_folder`` or ``cwd``. It is recommended to d
 try:
 	import psutil
 
-	# psutil-2.0.0: psutil.Process.username is unbound method
-	if callable(psutil.Process.username):
-		def _get_user():
-			return psutil.Process(os.getpid()).username()
-	# pre psutil-2.0.0: psutil.Process.username has type property
-	else:
-		def _get_user():
-			return psutil.Process(os.getpid()).username
+	def _get_user():
+		return psutil.Process(os.getpid()).username()
 except ImportError:
 	try:
 		import pwd
