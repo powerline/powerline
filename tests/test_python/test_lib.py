@@ -236,7 +236,7 @@ class TestThreaded(TestCase):
 			('update', 'def'),
 		])
 		num_runs = len([e for e in log if e[0] == 'update'])
-		self.assertAlmostEqual(duration / 0.2, num_runs, delta=1)
+		assert duration / 0.2 >= num_runs
 		log[:] = ()
 
 		segment = TestSegment()
@@ -266,7 +266,7 @@ class TestThreaded(TestCase):
 			('update', 'ghi'),
 		])
 		num_runs = len([e for e in log if e[0] == 'update'])
-		self.assertAlmostEqual(duration / 0.2, num_runs, delta=1)
+		assert duration / 0.2 >= num_runs
 		self.assertEqual(num_runs - 1, len(pl.exceptions))
 		log[:] = ()
 
