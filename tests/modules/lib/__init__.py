@@ -93,7 +93,11 @@ def replace_module(name, new=None, **kwargs):
 
 
 def new_module(name, **kwargs):
-	module = types.ModuleType(name)
+	try:
+		module = types.ModuleType(name)
+	except TypeError:
+		import imp
+		module = imp.new_module(name)
 	for k, v in kwargs.items():
 		setattr(module, k, v)
 	return module
