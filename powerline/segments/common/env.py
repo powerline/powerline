@@ -148,7 +148,6 @@ except ImportError:
 			return pwd.getpwuid(getuid()).pw_name
 
 
-username = False
 # os.geteuid is not available on windows
 _geteuid = getattr(os, 'geteuid', lambda: 1)
 
@@ -166,14 +165,12 @@ def user(pl, segment_info, hide_user=None, hide_domain=False):
 
 	Highlight groups used: ``superuser`` or ``user``. It is recommended to define all highlight groups.
 	'''
-	global username
 	if (
 		segment_info['environ'].get('_POWERLINE_RUNNING_SHELL_TESTS')
 		== 'ee5bcdc6-b749-11e7-9456-50465d597777'
 	):
 		return 'user'
-	if username is False:
-		username = _get_user()
+	username = _get_user()
 	if username is None:
 		pl.warn('Failed to get username')
 		return None
