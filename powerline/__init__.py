@@ -252,7 +252,11 @@ def _set_log_handlers(common_config, logger, get_module_attr, stream=None):
 		except IndexError:
 			handler_format = common_config['log_format']
 		handler.setLevel(getattr(logging, handler_level_name))
-		handler.setFormatter(logging.Formatter(handler_format, validate=False))
+		try:
+			handler.setFormatter(logging.Formatter(handler_format, validate=False))
+		except TypeError:
+			# the validate keyword is only supported from Python 3.8 onwards
+			handler.setFormatter(logging.Formatter(handler_format))
 		logger.addHandler(handler)
 		num_handlers += 1
 	if num_handlers == 0 and log_targets:
