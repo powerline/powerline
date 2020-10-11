@@ -220,7 +220,7 @@ class TestThreaded(TestCase):
 		with lock:
 			updates[0] = ('def',)
 		self.assertEqual(thread_number(), thread_count + 1)
-		sleep(0.5)
+		sleep(1)
 		ret2 = segment(**kwargs)
 		segment.shutdown_event.set()
 		segment.thread.join()
@@ -250,7 +250,7 @@ class TestThreaded(TestCase):
 		with lock:
 			updates[0] = TypeError('jkl')
 		self.assertEqual(thread_number(), thread_count + 1)
-		sleep(0.5)
+		sleep(1)
 		ret2 = segment(**kwargs)
 		segment.shutdown_event.set()
 		segment.thread.join()
