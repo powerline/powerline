@@ -49,7 +49,7 @@ jobs:
 
     - name: Run awesome tests
       run: |
-        sh tests/test_awesome/test.sh
+        python -m pytest --color=yes tests/test_awesome
 
     - name: Run bar tests
       run: |
