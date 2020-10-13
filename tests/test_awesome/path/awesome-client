@@ -1,3 +1,4 @@
 #!/bin/sh
-echo "$@" >> "$TEST_ROOT/results/args"
-cat >> "$TEST_ROOT/results/requests"
+mkdir -p results
+echo "$@" >> "results/args"
+cat >> "results/requests"
