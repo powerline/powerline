@@ -64,10 +64,12 @@ def test_lemonbar(lemonbar_cmd, daemon_env, args, xprocess):
     script_args.lstrip(" ")
     if script_args == " ".join(args):
         script_args = ""
-    script_args_empty = " " if script_args else ""
+    if script_args:
+        script_args = " " + script_args
     expected_args = \
-        "{command} -g 1920x{height}+0+0{script_args_empty}{script_args}\n" \
-        "{command} -g 1920x{height}+1+0{script_args_empty}{script_args}".format(command=bar_command, script_args=script_args, script_args_empty=script_args_empty, height=height)
+        "{command} -g 1920x{height}+0+0{script_args}\n" \
+        "{command} -g 1920x{height}+1+0{script_args}".format(
+            command=bar_command, script_args=script_args, height=height)
     assert "\n".join(sorted(argslog)) == expected_args
 
 
