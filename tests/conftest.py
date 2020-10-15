@@ -15,12 +15,11 @@ def __init__(self):
 
 
 def start_daemon(xprocess, daemon, daemon_env):
-    address = "/tmp/powerline-ipc-test-{}".format(os.getpid())
 
     class Starter(ProcessStarter):
         env = daemon_env
         pattern = ""
-        args = [daemon, "--socket", address, "--foreground"]
+        args = [daemon, "--foreground"]
 
         def wait(self, log_file):
             time.sleep(0.5)
@@ -35,7 +34,6 @@ def stop_daemon(xprocess):
     shutil.rmtree(cleanup_folder)
 
 
-
 @pytest.fixture(scope="session")
 def command():
     return Path(os.path.abspath(os.path.dirname(__file__))).parent / "scripts" / "powerline"
@@ -46,6 +44,17 @@ def daemon():
     return Path(os.path.abspath(os.path.dirname(__file__))).parent / "scripts" / "powerline-daemon"
 
 
+@pytest.fixture(scope="session")
+def rootdir():
+    return Path(os.path.abspath(os.path.dirname(__file__))).parent
+
+
+@pytest.fixture(scope="session")
+def lemonbar_cmd():
+    return Path(os.path.abspath(os.path.dirname(__file__))).parent / \
+           "powerline" / "bindings" / "lemonbar" / "powerline-lemonbar.py"
+
+
 @pytest.fixture(autouse=True, scope="module")
 def daemon_process(xprocess, daemon, daemon_env):
     global seekpos
@@ -53,8 +62,6 @@ def daemon_process(xprocess, daemon, daemon_env):
     start_daemon(xprocess, daemon, daemon_env)
     yield
     stop_daemon(xprocess)
-
-
 
 
 @pytest.fixture(autouse=True, scope="function")

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-RES_DIR="$TEST_ROOT/results"
+RES_DIR="results"
 mkdir -p "$RES_DIR"
 RES_FILE="$RES_DIR/$$"
 while test -e "$RES_FILE.log" ; do
