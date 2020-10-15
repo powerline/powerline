@@ -51,29 +51,29 @@ jobs:
       run: |
         python -m pytest --color=yes tests/test_awesome
 
-    - name: Run bar tests
+    - name: Run lemonbar tests
       run: |
-        sh tests/test_bar/test.sh
+        python -m pytest --color=yes tests/test_bar
 
     - name: Run daemon tests
       run: |
-        sh tests/test_daemon/test.sh
+        python -m pytest --color=yes tests/test_daemon
 
     - name: Run tests in vterm
       run: |
-        sh tests/test_in_vterm/test.sh
+        python -m pytest --color=yes tests/test_in_vterm
 
     - name: Run lint tests
       run: |
-        sh tests/test_lint/test.sh
+        python -m pytest --color=yes tests/test_lint
 
     - name: Run shell tests
       run: |
-        sh tests/test_shells/test.sh
+        python -m pytest --color=yes tests/test_in_shell
 
     - name: Run vim tests
       run: |
-        sh tests/test_vim/test.sh
+        python -m pytest --color=yes tests/test_in_vim
 
     - name: Publish
       if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
