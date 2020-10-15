@@ -55,7 +55,7 @@ def lemonbar_cmd():
            "powerline" / "bindings" / "lemonbar" / "powerline-lemonbar.py"
 
 
-@pytest.fixture(autouse=True, scope="module")
+@pytest.fixture(scope="module")
 def daemon_process(xprocess, daemon, daemon_env):
     global seekpos
     seekpos = 0
@@ -64,7 +64,7 @@ def daemon_process(xprocess, daemon, daemon_env):
     stop_daemon(xprocess)
 
 
-@pytest.fixture(autouse=True, scope="function")
+@pytest.fixture(scope="function")
 def print_daemon_logs(xprocess):
     global seekpos
     yield
