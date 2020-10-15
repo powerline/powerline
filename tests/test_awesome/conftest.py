@@ -10,7 +10,7 @@ seekpos = 0
 
 
 def start_daemon(xprocess, daemon, daemon_env):
-    address = "powerline-ipc-test-{}".format(os.getpid())
+    address = "/tmp/powerline-ipc-test-{}".format(os.getpid())
 
     class Starter(ProcessStarter):
         env = daemon_env
