@@ -9,7 +9,7 @@ def test_wm_awesome(command, daemon_env):
     time.sleep(2)
     for _ in range(5):
         output = subprocess.run(
-            [command, "wm.awesome"],
+            [command, "--socket", "/tmp/powerline-ipc-test-{}".format(os.getpid()), "wm.awesome"],
             stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=daemon_env)
         logs_empty(output)
 
@@ -17,7 +17,7 @@ def test_wm_awesome(command, daemon_env):
 def test_kill_log(daemon, daemon_logs, daemon_env):
     time.sleep(5)
     output = subprocess.run(
-        [daemon, "--quiet", "--kill"],
+        [daemon, "--socket", "/tmp/powerline-ipc-test-{}".format(os.getpid()), "--quiet", "--kill"],
         stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=daemon_env)
     logs_empty(output)
     logs = daemon_logs()

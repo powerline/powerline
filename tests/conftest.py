@@ -19,7 +19,7 @@ def start_daemon(xprocess, daemon, daemon_env):
     class Starter(ProcessStarter):
         env = daemon_env
         pattern = ""
-        args = [daemon, "--foreground"]
+        args = [daemon, "--socket", "/tmp/powerline-ipc-test-{}".format(os.getpid()), "--foreground"]
 
         def wait(self, log_file):
             time.sleep(0.5)
