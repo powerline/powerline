@@ -29,11 +29,14 @@ def test_proper_config(rootdir):
 
 
 def test_cwd(rootdir):
+    env = os.environ.copy()
+    workdir = os.path.join(rootdir, "tests", "test_daemon")
+    env["PWD"] = workdir
     result = subprocess.run([
         os.path.join(rootdir, "client", "powerline.py"), "--socket",
         "/tmp/powerline-ipc-test-{}".format(os.getpid()), "-p{}".format(
             os.path.join(rootdir, "powerline", "config_files")
         ), "shell", "left"
-    ], stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=os.path.abspath(os.path.dirname(__file__)))
+    ], stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=workdir, env=env)
     assert "test_daemon" in result.stdout.decode()
 
