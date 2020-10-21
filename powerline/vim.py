@@ -262,6 +262,7 @@ class VimPowerline(Powerline):
 
 	def new_win_idx(self, window_id):
 		r = None
+
 		for window in vim.windows:
 			try:
 				curwindow_id = window.vars['powerline_window_id']
@@ -302,7 +303,18 @@ class VimPowerline(Powerline):
 		return self.render(window, window_id, winnr)
 
 	def tabline(self):
-		return self.render(*self.win_idx(None), is_tabline=True)
+		r = self.win_idx(None)
+
+		if r:
+		    return self.render(*r, is_tabline=True)
+		else:
+		    win = vim.current.window
+		    r = (
+			win,
+			win.vars.get('powerline_window_id', self.last_window_id),
+			win.number,
+		    )
+		    return self.render(*r, is_tabline=True)
 
 	def new_window(self):
 		return self.render(*self.win_idx(None))
