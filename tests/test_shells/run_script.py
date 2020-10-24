@@ -15,19 +15,17 @@ from io import BytesIO
 import pexpect
 
 
-def run_main(shell, test_type, test_root, commands, wait_for_echo):
+def run_main(shell, test_type, test_root, commands, wait_for_echo, client):
 
 	local_paths = [
 		os.path.abspath(os.path.join(test_root, 'path')),
 		os.path.abspath('scripts'),
+		os.path.abspath('client'),
 		os.path.abspath(os.path.dirname(__file__))
 	]
 
 	if test_type == 'fish':
 		local_paths += ['/usr/bin', '/bin']
-
-	if test_type == "daemon":
-		commands.extend(["--socket", "/tmp/powerline-ipc-test-{}".format(os.getpid())])
 
 	python_paths = os.environ.get('PYTHONPATH', '')
 	if python_paths:
@@ -48,12 +46,13 @@ def run_main(shell, test_type, test_root, commands, wait_for_echo):
 		'POWERLINE_THEME_OVERRIDES': os.environ.get('POWERLINE_THEME_OVERRIDES', ''),
 		'POWERLINE_CONFIG_PATHS': os.path.abspath(os.path.join('powerline', 'config_files')),
 		'POWERLINE_COMMAND_ARGS': os.environ.get('POWERLINE_COMMAND_ARGS', ''),
-		'POWERLINE_COMMAND': os.environ.get('POWERLINE_COMMAND', ''),
+		'POWERLINE_COMMAND': client,
 		'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
 		'TEST_ROOT': test_root,
 	}
 
 	if test_type == 'daemon':
+		environ["POWERLINE_COMMAND_ARGS"] = "--socket /tmp/powerline-ipc-test-{}".format(os.getpid())
 		environ['POWERLINE_SHELL_CONTINUATION'] = '1'
 		environ['POWERLINE_SHELL_SELECT'] = '1'
 

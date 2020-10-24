@@ -14,11 +14,23 @@ def autouse_daemon(daemon_process):
 
 
 @pytest.fixture(scope="module")
-def daemon_env():
-    env = os.environ.copy()
-    env["XDG_CONFIG_HOME"] = os.path.abspath(os.path.dirname(__file__))
-    env["LANG"] = "C"
-    env["PATH"] = "{}:{}".format(os.path.join(os.path.abspath(os.path.dirname(__file__)), "path"), env["PATH"])
+def daemon_env(test_root):
+    env = {
+        'LANG': 'en_US.UTF-8',
+        'TERM': 'screen-256color',
+        'DIR1': "[32m",
+        'DIR2': "",
+        'IPYTHONDIR': os.path.abspath(os.path.join(test_root, 'ipython_home')),
+        'POWERLINE_CONFIG_OVERRIDES': os.environ.get('POWERLINE_CONFIG_OVERRIDES', ''),
+        'POWERLINE_THEME_OVERRIDES': os.environ.get('POWERLINE_THEME_OVERRIDES', ''),
+        'POWERLINE_CONFIG_PATHS': os.path.abspath(os.path.join('powerline', 'config_files')),
+        'POWERLINE_COMMAND_ARGS': os.environ.get('POWERLINE_COMMAND_ARGS', ''),
+        'POWERLINE_COMMAND': os.environ.get('POWERLINE_COMMAND', ''),
+        'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
+        'TEST_ROOT': test_root,
+        "XDG_CONFIG_HOME": os.path.abspath(os.path.dirname(__file__)),
+        "PATH": "{}:{}".format(os.path.join(os.path.abspath(os.path.dirname(__file__)), "path"), os.environ["PATH"])
+    }
     return env
 
 
