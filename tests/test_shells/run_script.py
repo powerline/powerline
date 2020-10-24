@@ -20,6 +20,7 @@ def run_main(shell, test_type, test_root, commands, wait_for_echo):
 	local_paths = [
 		os.path.abspath(os.path.join(test_root, 'path')),
 		os.path.abspath('scripts'),
+		os.path.abspath(os.path.dirname(__file__))
 	]
 
 	if test_type == 'fish':
