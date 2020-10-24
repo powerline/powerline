@@ -26,6 +26,9 @@ def run_main(shell, test_type, test_root, commands, wait_for_echo):
 	if test_type == 'fish':
 		local_paths += ['/usr/bin', '/bin']
 
+	if test_type == "daemon":
+		commands.extend(["--socket", "/tmp/powerline-ipc-test-{}".format(os.getpid())])
+
 	python_paths = os.environ.get('PYTHONPATH', '')
 	if python_paths:
 		python_paths = ':' + python_paths
@@ -49,8 +52,6 @@ def run_main(shell, test_type, test_root, commands, wait_for_echo):
 		'LD_LIBRARY_PATH': os.environ.get('LD_LIBRARY_PATH', ''),
 		'TEST_ROOT': test_root,
 	}
-
-	os.environ['PATH'] = environ['PATH']
 
 	if test_type == 'daemon':
 		environ['POWERLINE_SHELL_CONTINUATION'] = '1'
@@ -84,9 +85,6 @@ def run_main(shell, test_type, test_root, commands, wait_for_echo):
 	output = child.read().decode('utf-8')
 	child.close(force=True)
 
-	pidfile = os.path.join(test_root, '3rd', 'pid')
-	if os.path.exists(pidfile):
-		os.unlink(pidfile)
 	return output
 
 
@@ -112,11 +110,9 @@ def postprocess_output(shell, output, test_root):
 		start_str = 'class Foo(object):'
 
 	found_cd = False
-	i = -1
 	postprocessed = ""
 	for line in output.split("\n"):
 		line += "\n"
-		i += 1
 		if not found_cd:
 			found_cd = (start_str in line)
 			continue
