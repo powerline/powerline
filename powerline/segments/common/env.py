@@ -21,7 +21,7 @@ def environment(pl, segment_info, variable=None):
 @requires_segment_info
 def virtualenv(pl, segment_info, ignore_venv=False, ignore_conda=False, ignored_names=("venv", ".venv")):
 	'''Return the name of the current Python or conda virtualenv.
-	:param Iterable ignored_names:
+	:param list ignored_names:
 		Names of venvs to ignore. Will then get the name of the venv by ascending to the parent directory
 	:param bool ignore_venv:
 		Whether to ignore virtual environments. Default is False.
@@ -36,6 +36,7 @@ def virtualenv(pl, segment_info, ignore_venv=False, ignore_conda=False, ignored_
 		for candidate in reversed(segment_info['environ'].get('CONDA_DEFAULT_ENV', '').split("/")):
 			if candidate and candidate not in ignored_names:
 				return candidate
+	return None
 
 
 @requires_segment_info
