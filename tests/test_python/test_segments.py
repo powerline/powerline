@@ -687,6 +687,10 @@ class TestEnv(TestCommon):
 			self.assertEqual(self.module.virtualenv(pl=pl, segment_info=segment_info, ignore_conda=True), 'ghi')
 			self.assertEqual(self.module.virtualenv(pl=pl, segment_info=segment_info, ignore_venv=True), None)
 			self.assertEqual(self.module.virtualenv(pl=pl, segment_info=segment_info, ignore_venv=True, ignore_conda=True), None)
+			self.assertEqual(self.module.virtualenv(pl=pl, segment_info=segment_info, ignored_names=["aaa"]), "ghi")
+			self.assertEqual(self.module.virtualenv(pl=pl, segment_info=segment_info, ignored_names=["ghi"]), "def")
+			self.assertEqual(self.module.virtualenv(pl=pl, segment_info=segment_info, ignored_names=["def", "ghi"]), "abc")
+			self.assertEqual(self.module.virtualenv(pl=pl, segment_info=segment_info, ignored_names=["abc", "def", "ghi"]), None)
 
 			segment_info['environ'].pop('VIRTUAL_ENV')
 			self.assertEqual(self.module.virtualenv(pl=pl, segment_info=segment_info), None)
@@ -696,6 +700,7 @@ class TestEnv(TestCommon):
 
 		with replace_env('CONDA_DEFAULT_ENV', 'foo') as segment_info:
 			self.assertEqual(self.module.virtualenv(pl=pl, segment_info=segment_info), 'foo')
+			self.assertEqual(self.module.virtualenv(pl=pl, segment_info=segment_info, ignored_names=["foo"]), None)
 			self.assertEqual(self.module.virtualenv(pl=pl, segment_info=segment_info, ignore_conda=True), None)
 			self.assertEqual(self.module.virtualenv(pl=pl, segment_info=segment_info, ignore_venv=True), 'foo')
 			self.assertEqual(self.module.virtualenv(pl=pl, segment_info=segment_info, ignore_venv=True, ignore_conda=True), None)
@@ -717,6 +722,9 @@ class TestEnv(TestCommon):
 			self.assertEqual(self.module.virtualenv(pl=pl, segment_info=segment_info, ignore_conda=True), 'ghi')
 			self.assertEqual(self.module.virtualenv(pl=pl, segment_info=segment_info, ignore_venv=True), None)
 			self.assertEqual(self.module.virtualenv(pl=pl, segment_info=segment_info, ignore_venv=True, ignore_conda=True), None)
+
+		with replace_env('VIRTUAL_ENV', '/abc/def/venv') as segment_info:
+			self.assertEqual(self.module.virtualenv(pl=pl, segment_info=segment_info), 'def')
 
 	def test_environment(self):
 		pl = Pl()
