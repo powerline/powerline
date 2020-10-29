@@ -55,9 +55,6 @@ def run_main(shell, test_type, test_root, commands, wait_for_echo, client):
 		environ['POWERLINE_SHELL_CONTINUATION'] = '1'
 		environ['POWERLINE_SHELL_SELECT'] = '1'
 
-	if shell == 'zsh':
-		environ['POWERLINE_NO_ZSH_ZPYTHON'] = '1'
-
 	sio = BytesIO()
 
 	child = pexpect.spawn(
