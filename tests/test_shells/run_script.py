@@ -9,7 +9,6 @@ import re
 import socket
 
 from time import sleep
-from subprocess import check_call
 from io import BytesIO
 
 import pexpect
@@ -56,7 +55,7 @@ def run_main(shell, test_type, test_root, commands, wait_for_echo, client):
 		environ['POWERLINE_SHELL_CONTINUATION'] = '1'
 		environ['POWERLINE_SHELL_SELECT'] = '1'
 
-	if test_type != 'zpython' and shell == 'zsh':
+	if shell == 'zsh':
 		environ['POWERLINE_NO_ZSH_ZPYTHON'] = '1'
 
 	sio = BytesIO()
