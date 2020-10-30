@@ -41,7 +41,7 @@ def test_root():
 
 @pytest.fixture(scope="module", autouse=True)
 def create_folders(test_root):
-    for foldername in ("[32m", "", "\[\]", "%%", "#[bold]", "(echo)", "$(echo)", "`echo`", "«Unicode!»"):
+    for foldername in ("[32m", "", r"\[\]", "%%", "#[bold]", "(echo)", "$(echo)", "`echo`", "«Unicode!»"):
         folder = pathlib.Path(test_root) / "3rd" / foldername
         folder.mkdir(parents=True, exist_ok=True)
     (pathlib.Path(os.path.dirname(__file__)) / "fish_home" / "fish" /
@@ -52,6 +52,3 @@ def create_folders(test_root):
                     "checkout",
                     "-b",
                     "BRANCH"])
-
-
-

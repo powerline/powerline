@@ -26,7 +26,8 @@ def run_main(shell, test_type, test_root, commands, wait_for_echo, client):
 	if test_type == 'fish':
 		local_paths += ['/usr/bin', '/bin']
 
-	python_paths = os.environ.get('PYTHONPATH', '')
+	# python_paths = os.environ.get('PYTHONPATH', '')
+	python_paths = ""
 	if python_paths:
 		python_paths = ':' + python_paths
 	python_paths = os.path.abspath('.') + python_paths
@@ -62,7 +63,7 @@ def run_main(shell, test_type, test_root, commands, wait_for_echo, client):
 		commands[1:],
 		env=environ,
 		logfile=sio,
-		timeout=30,
+		timeout=60,
 	)
 	child.expect(re.compile(b'.*'))
 	sleep(0.5)

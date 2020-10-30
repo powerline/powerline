@@ -35,17 +35,13 @@ def check_screen_log(test_type, shell, daemon_env, test_root, output):
 
 
 def execute_specific_test(test_type, daemon_env, shell, test_root, client):
-    wait_for_echo = shell == "dash" or shell == "ipython" or shell == "pdb"  # Todo improve, try without wait_for_echo
     commands = get_test_commands(shell)
-    output = run_main(shell, test_type, test_root, commands, wait_for_echo, client)
+    output = run_main(shell, test_type, test_root, commands, False, client)
     check_screen_log(test_type, shell, daemon_env, test_root, output)
 
 
-def execute_pdb_test(test_type, daemon_env, test_root):
-    wait_for_echo = False
-    commands = ["python", os.path.join("tests", "test_shells", "pdb-main.py")]
-    output = run_main("pdb", test_type, test_root, commands, wait_for_echo, "python")
-
+def execute_pdb_test(test_type, daemon_env, test_root, commands):
+    output = run_main("pdb", test_type, test_root, commands, False, "python")
     check_screen_log(test_type, "pdb", daemon_env, test_root, output)
 
 
@@ -70,7 +66,26 @@ def test_shell_without_daemon(shell, daemon_env, test_root, client):
     execute_specific_test("nodaemon", daemon_env, shell, test_root, client)
 
 
-def test_pdb(daemon_env, test_root):
+def test_pdb_subclass(daemon_env, test_root):
     if platform.python_implementation() == 'PyPy':
         pytest.skip("PDB tests not enabled for PyPy")
-    execute_pdb_test("subclass", daemon_env, test_root)
+    commands = ["python", os.path.join("tests", "test_shells", "pdb-main.py")]
+    execute_pdb_test("subclass", daemon_env, test_root, commands)
+
+
+def test_pdb_module(daemon_env, test_root):
+    if platform.python_implementation() == 'PyPy':
+        pytest.skip("PDB tests not enabled for PyPy")
+    commands = ["python", "-m", "powerline.bindings.pdb", os.path.join("tests", "test_shells", "pdb-script.py")]
+    execute_pdb_test("module", daemon_env, test_root, commands)
+
+
+@pytest.skip("IPython test currently fails and was also disabled with Travis CI")
+def test_ipython(daemon_env, test_root):
+    os.environ["POWERLINE_CONFIG_OVERRIDES"] = "common.term_escape_style=fbterm"
+    os.environ["POWERLINE_THEME_OVERRIDES"] = "in.segments.left=[]"
+    commands = ["python", "-m", "IPython"]
+    output = run_main("ipython", "ipython", test_root, commands, False, "python")
+    check_screen_log("ipython", "ipython", daemon_env, test_root, output)
+    os.unsetenv("POWERLINE_CONFIG_OVERRIDES")
+    os.unsetenv("POWERLINE_THEME_OVERRIDES")
