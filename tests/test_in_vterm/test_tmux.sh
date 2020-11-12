@@ -6,8 +6,8 @@ enter_suite tmux final
 
 vterm_setup
 
-ln -s "$(which env)" "$TEST_ROOT/path"
-ln -s "$(which cut)" "$TEST_ROOT/path"
+ln -s "$(command -v env)" "$TEST_ROOT/path"
+ln -s "$(command -v cut)" "$TEST_ROOT/path"
 ln -s "$ROOT/scripts/powerline-render" "$TEST_ROOT/path"
 ln -s "$ROOT/scripts/powerline-config" "$TEST_ROOT/path"
 
@@ -17,10 +17,10 @@ test_tmux() {
 		# occasionally.
 		return 0
 	fi
-	if ! which "${POWERLINE_TMUX_EXE}" ; then
+	if ! command -v "${POWERLINE_TMUX_EXE}" ; then
 		return 0
 	fi
-	ln -sf "$(which "${POWERLINE_TMUX_EXE}")" "$TEST_ROOT/path/tmux"
+	ln -sf "$(command -v "${POWERLINE_TMUX_EXE}")" "$TEST_ROOT/path/tmux"
 	f="$ROOT/tests/test_in_vterm/test_tmux.py"
 	if ! "${PYTHON}" "$f" ; then
 		local test_name="$("$POWERLINE_TMUX_EXE" -V 2>&1 | cut -d' ' -f2)"

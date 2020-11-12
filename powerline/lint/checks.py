@@ -401,7 +401,7 @@ def check_segment_function(function_name, data, context, echoerr):
 							context='Error while checking theme (key {key})'.format(key=context.key),
 							context_mark=function_name.mark,
 							problem=(
-								'found highlight group definition in addition to sentense stating that '
+								'found highlight group definition in addition to sentence stating that '
 								'no highlight groups are used'
 							),
 							problem_mark=mark,
@@ -425,7 +425,7 @@ def check_segment_function(function_name, data, context, echoerr):
 							context='Error while checking theme (key {key})'.format(key=context.key),
 							context_mark=function_name.mark,
 							problem=(
-								'found sentense stating that no highlight groups are used '
+								'found sentence stating that no highlight groups are used '
 								'in addition to highlight group definition'
 							),
 							problem_mark=mark,

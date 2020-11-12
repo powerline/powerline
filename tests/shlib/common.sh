@@ -143,7 +143,7 @@ rm_test_root() {
 	fi
 }
 
-if ! which realpath ; then
+if ! command -v realpath ; then
 	realpath() {
 		$PYTHON -c 'import os, sys; print(os.path.realpath(sys.argv[1]))' "$1"
 	}

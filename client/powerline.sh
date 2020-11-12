@@ -10,7 +10,7 @@ if test -n "$OSTYPE" ; then
 	elif test "${OSTYPE#darwin}" ; then
 		darwin=1
 	fi
-elif which uname >/dev/null ; then
+elif command -v uname >/dev/null ; then
 	if uname -o | grep -iqF linux ; then
 		use_filesystem=
 	elif uname -o | grep -iqF darwin ; then

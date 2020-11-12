@@ -130,6 +130,46 @@ root <repository-root>`)::
 IPython prompt
 ==============
 
+For IPython>=7.0, add the following line to
+:file:`~/.ipython/profile_default/ipython_config.py` file in the used profile:
+
+
+.. code-block:: Python
+
+    from powerline.bindings.ipython.since_7 import PowerlinePrompts
+    c.TerminalInteractiveShell.prompts_class = PowerlinePrompts
+
+.. note::
+    If certain graphical/colored elements are not showing, make sure `c.TerminalInteractiveShell.simple_prompt`
+    is set to `False` in your config. 
+    Setting ``simple_prompt`` to False after IPython-5.0 is required regardless 
+    of whether you use ``c.InteractiveShellApp.extensions`` setting or 
+    ``c.TerminalInteractiveShell.prompts_class``. But you probably already have 
+    this line because ``simple_prompt`` is set to ``False`` by default and IPython
+    is not very useful without it.
+
+For IPython>=5.0 and <7.0 it is suggested to use
+
+.. code-block:: Python
+
+    from powerline.bindings.ipython.since_5 import PowerlinePrompts
+    c = get_config()
+    c.TerminalInteractiveShell.simple_prompt = False
+    c.TerminalInteractiveShell.prompts_class = PowerlinePrompts
+    
+
+    
+For IPython>=5.0 and <7.0 you may use the below set up, but it is deprecated.    
+For IPython>=0.11 add the following line to
+:file:`~/.ipython/profile_default/ipython_config.py` file in the used profile:
+
+.. code-block:: Python
+
+    c = get_config()
+    c.InteractiveShellApp.extensions = [
+        'powerline.bindings.ipython.post_0_11'
+    ]
+
 For IPython<0.11 add the following lines to :file:`.ipython/ipy_user_conf.py`:
 
 .. code-block:: Python
@@ -141,31 +181,6 @@ For IPython<0.11 add the following lines to :file:`.ipython/ipy_user_conf.py`:
     # create skeleton ipy_user_conf.py file):
     powerline_setup()
 
-For IPython>=0.11 add the following line to
-:file:`~/.ipython/profile_default/ipython_config.py` file in the used profile:
-
-.. code-block:: Python
-
-    c = get_config()
-    c.InteractiveShellApp.extensions = [
-        'powerline.bindings.ipython.post_0_11'
-    ]
-
-For IPython>=5.0 you may use the above set up, but it is deprecated. It is 
-suggested to use
-
-.. code-block:: Python
-
-    from powerline.bindings.ipython.since_5 import PowerlinePrompts
-    c = get_config()
-    c.TerminalInteractiveShell.simple_prompt = False
-    c.TerminalInteractiveShell.prompts_class = PowerlinePrompts
-
-.. note::
-    Setting ``simple_prompt`` to False after IPython-5.0 is required regardless 
-    of whether you use ``c.InteractiveShellApp.extensions`` setting or 
-    ``c.TerminalInteractiveShell.prompts_class``. But you probably already have 
-    this line because IPython is not very useful without it.
 
 IPython=0.11* is not supported and does not work. IPython<0.10 was not 
 tested (not installable by pip).

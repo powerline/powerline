@@ -21,25 +21,25 @@ np_control_character_translations = dict((
 ))
 '''Control character translations
 
-Dictionary that maps characters in range 0x00–0x1F (inclusive) to strings 
+Dictionary that maps characters in range 0x00–0x1F (inclusive) to strings
 ``'^@'``, ``'^A'`` and so on.
 
 .. note: maps tab to ``^I`` and newline to ``^J``.
 '''
 
 np_invalid_character_translations = dict((
-	# Invalid unicode characters obtained using 'surrogateescape' error 
+	# Invalid unicode characters obtained using 'surrogateescape' error
 	# handler.
 	(i2, '<{0:02x}>'.format(i2 - 0xDC00)) for i2 in range(0xDC80, 0xDD00)
 ))
 '''Invalid unicode character translations
 
-When using ``surrogateescape`` encoding error handling method characters in 
-range 0x80–0xFF (inclusive) are transformed into unpaired surrogate escape 
-unicode codepoints 0xDC80–0xDD00. This dictionary maps such characters to 
-``<80>``, ``<81>``, and so on: in Python-3 they cannot be printed or 
-converted to UTF-8 because UTF-8 standard does not allow surrogate escape 
-characters, not even paired ones. Python-2 contains a bug that allows such 
+When using ``surrogateescape`` encoding error handling method characters in
+range 0x80–0xFF (inclusive) are transformed into unpaired surrogate escape
+unicode codepoints 0xDC80–0xDD00. This dictionary maps such characters to
+``<80>``, ``<81>``, and so on: in Python-3 they cannot be printed or
+converted to UTF-8 because UTF-8 standard does not allow surrogate escape
+characters, not even paired ones. Python-2 contains a bug that allows such
 action, but printing them in any case makes no sense.
 '''
 
@@ -47,20 +47,20 @@ action, but printing them in any case makes no sense.
 np_invalid_character_re = re.compile('(?<![\uD800-\uDBFF])[\uDC80-\uDD00]')
 '''Regex that finds unpaired surrogate escape characters
 
-Search is only limited to the ones obtained from ``surrogateescape`` error 
-handling method. This regex is only used for UCS-2 Python variants because 
-in this case characters above 0xFFFF are represented as surrogate escapes 
-characters and are thus subject to partial transformation if 
+Search is only limited to the ones obtained from ``surrogateescape`` error
+handling method. This regex is only used for UCS-2 Python variants because
+in this case characters above 0xFFFF are represented as surrogate escapes
+characters and are thus subject to partial transformation if
 ``np_invalid_character_translations`` translation table is used.
 '''
 
 np_character_translations = np_control_character_translations.copy()
 '''Dictionary that contains non-printable character translations
 
-In UCS-4 versions of Python this is a union of 
-``np_invalid_character_translations`` and ``np_control_character_translations`` 
-dictionaries. In UCS-2 for technical reasons ``np_invalid_character_re`` is used 
-instead and this dictionary only contains items from 
+In UCS-4 versions of Python this is a union of
+``np_invalid_character_translations`` and ``np_control_character_translations``
+dictionaries. In UCS-2 for technical reasons ``np_invalid_character_re`` is used
+instead and this dictionary only contains items from
 ``np_control_character_translations``.
 '''
 
@@ -81,10 +81,10 @@ translate_np = (
 )
 '''Function that translates non-printable characters into printable strings
 
-Is used to translate control characters and surrogate escape characters 
-obtained from ``surrogateescape`` encoding errors handling method into some 
-printable sequences. See documentation for 
-``np_invalid_character_translations`` and 
+Is used to translate control characters and surrogate escape characters
+obtained from ``surrogateescape`` encoding errors handling method into some
+printable sequences. See documentation for
+``np_invalid_character_translations`` and
 ``np_control_character_translations`` for more details.
 '''
 
@@ -106,17 +106,17 @@ class Renderer(object):
 	:param dict theme_config:
 		Main theme configuration.
 	:param local_themes:
-		Local themes. Is to be used by subclasses from ``.get_theme()`` method, 
+		Local themes. Is to be used by subclasses from ``.get_theme()`` method,
 		base class only records this parameter to a ``.local_themes`` attribute.
 	:param dict theme_kwargs:
 		Keyword arguments for ``Theme`` class constructor.
 	:param PowerlineLogger pl:
 		Object used for logging.
 	:param int ambiwidth:
-		Width of the characters with east asian width unicode attribute equal to 
-		``A`` (Ambigious).
+		Width of the characters with east asian width unicode attribute equal to
+		``A`` (Ambiguous).
 	:param dict options:
-		Various options. Are normally not used by base renderer, but all options 
+		Various options. Are normally not used by base renderer, but all options
 		are recorded as attributes.
 	'''
 
@@ -127,23 +127,23 @@ class Renderer(object):
 	}
 	'''Basic segment info
 
-	Is merged with local segment information by :py:meth:`get_segment_info` 
+	Is merged with local segment information by :py:meth:`get_segment_info`
 	method. Keys:
 
 	``environ``
-		Object containing environment variables. Must define at least the 
-		following methods: ``.__getitem__(var)`` that raises ``KeyError`` in 
-		case requested environment variable is not present, ``.get(var, 
-		default=None)`` that works like ``dict.get`` and be able to be passed to 
+		Object containing environment variables. Must define at least the
+		following methods: ``.__getitem__(var)`` that raises ``KeyError`` in
+		case requested environment variable is not present, ``.get(var,
+		default=None)`` that works like ``dict.get`` and be able to be passed to
 		``Popen``.
 
 	``getcwd``
-		Function that returns current working directory. Will be called without 
-		any arguments, should return ``unicode`` or (in python-2) regular 
+		Function that returns current working directory. Will be called without
+		any arguments, should return ``unicode`` or (in python-2) regular
 		string.
 
 	``home``
-		String containing path to home directory. Should be ``unicode`` or (in 
+		String containing path to home directory. Should be ``unicode`` or (in
 		python-2) regular string or ``None``.
 	'''
 
@@ -173,7 +173,7 @@ class Renderer(object):
 		self.width_data = {
 			'N': 1,          # Neutral
 			'Na': 1,         # Narrow
-			'A': ambiwidth,  # Ambigious
+			'A': ambiwidth,  # Ambiguous
 			'H': 1,          # Half-width
 			'W': 2,          # Wide
 			'F': 2,          # Fullwidth
@@ -185,8 +185,8 @@ class Renderer(object):
 	)
 	'''Function that returns string width.
 
-	Is used to calculate the place given string occupies when handling 
-	``width`` argument to ``.render()`` method. Must take east asian width 
+	Is used to calculate the place given string occupies when handling
+	``width`` argument to ``.render()`` method. Must take east asian width
 	into account.
 
 	:param unicode string:
@@ -198,18 +198,18 @@ class Renderer(object):
 	def get_theme(self, matcher_info):
 		'''Get Theme object.
 
-		Is to be overridden by subclasses to support local themes, this variant 
+		Is to be overridden by subclasses to support local themes, this variant
 		only returns ``.theme`` attribute.
 
 		:param matcher_info:
-			Parameter ``matcher_info`` that ``.render()`` method received. 
+			Parameter ``matcher_info`` that ``.render()`` method received.
 			Unused.
 		'''
 		return self.theme
 
 	def shutdown(self):
-		'''Prepare for interpreter shutdown. The only job it is supposed to do 
-		is calling ``.shutdown()`` method for all theme objects. Should be 
+		'''Prepare for interpreter shutdown. The only job it is supposed to do
+		is calling ``.shutdown()`` method for all theme objects. Should be
 		overridden by subclasses in case they support local themes.
 		'''
 		self.theme.shutdown()
@@ -217,12 +217,12 @@ class Renderer(object):
 	def get_segment_info(self, segment_info, mode):
 		'''Get segment information.
 
-		Must return a dictionary containing at least ``home``, ``environ`` and 
-		``getcwd`` keys (see documentation for ``segment_info`` attribute). This 
-		implementation merges ``segment_info`` dictionary passed to 
-		``.render()`` method with ``.segment_info`` attribute, preferring keys 
-		from the former. It also replaces ``getcwd`` key with function returning 
-		``segment_info['environ']['PWD']`` in case ``PWD`` variable is 
+		Must return a dictionary containing at least ``home``, ``environ`` and
+		``getcwd`` keys (see documentation for ``segment_info`` attribute). This
+		implementation merges ``segment_info`` dictionary passed to
+		``.render()`` method with ``.segment_info`` attribute, preferring keys
+		from the former. It also replaces ``getcwd`` key with function returning
+		``segment_info['environ']['PWD']`` in case ``PWD`` variable is
 		available.
 
 		:param dict segment_info:
@@ -241,7 +241,7 @@ class Renderer(object):
 	def render_above_lines(self, **kwargs):
 		'''Render all segments in the {theme}/segments/above list
 
-		Rendering happens in the reversed order. Parameters are the same as in 
+		Rendering happens in the reversed order. Parameters are the same as in
 		.render() method.
 
 		:yield: rendered line.
@@ -254,37 +254,37 @@ class Renderer(object):
 	def render(self, mode=None, width=None, side=None, line=0, output_raw=False, output_width=False, segment_info=None, matcher_info=None):
 		'''Render all segments.
 
-		When a width is provided, low-priority segments are dropped one at 
-		a time until the line is shorter than the width, or only segments 
-		with a negative priority are left. If one or more segments with 
-		``"width": "auto"`` are provided they will fill the remaining space 
+		When a width is provided, low-priority segments are dropped one at
+		a time until the line is shorter than the width, or only segments
+		with a negative priority are left. If one or more segments with
+		``"width": "auto"`` are provided they will fill the remaining space
 		until the desired width is reached.
 
 		:param str mode:
-			Mode string. Affects contents (colors and the set of segments) of 
+			Mode string. Affects contents (colors and the set of segments) of
 			rendered string.
 		:param int width:
-			Maximum width text can occupy. May be exceeded if there are too much 
+			Maximum width text can occupy. May be exceeded if there are too much
 			non-removable segments.
 		:param str side:
-			One of ``left``, ``right``. Determines which side will be rendered. 
+			One of ``left``, ``right``. Determines which side will be rendered.
 			If not present all sides are rendered.
 		:param int line:
-			Line number for which segments should be obtained. Is counted from 
+			Line number for which segments should be obtained. Is counted from
 			zero (botmost line).
 		:param bool output_raw:
-			Changes the output: if this parameter is ``True`` then in place of 
-			one string this method outputs a pair ``(colored_string, 
+			Changes the output: if this parameter is ``True`` then in place of
+			one string this method outputs a pair ``(colored_string,
 			colorless_string)``.
 		:param bool output_width:
-			Changes the output: if this parameter is ``True`` then in place of 
-			one string this method outputs a pair ``(colored_string, 
-			string_width)``. Returns a three-tuple if ``output_raw`` is also 
+			Changes the output: if this parameter is ``True`` then in place of
+			one string this method outputs a pair ``(colored_string,
+			string_width)``. Returns a three-tuple if ``output_raw`` is also
 			``True``: ``(colored_string, colorless_string, string_width)``.
 		:param dict segment_info:
 			Segment information. See also :py:meth:`get_segment_info` method.
 		:param matcher_info:
-			Matcher information. Is processed in :py:meth:`get_segment_info` 
+			Matcher information. Is processed in :py:meth:`get_segment_info`
 			method.
 		'''
 		theme = self.get_theme(matcher_info)
@@ -314,11 +314,11 @@ class Renderer(object):
 	hl_join = staticmethod(''.join)
 	'''Join a list of rendered segments into a resulting string
 
-	This method exists to deal with non-string render outputs, so `segments` 
+	This method exists to deal with non-string render outputs, so `segments`
 	may actually be not an iterable with strings.
 
 	:param list segments:
-		Iterable containing rendered segments. By “rendered segments” 
+		Iterable containing rendered segments. By “rendered segments”
 		:py:meth:`Renderer.hl` output is meant.
 
 	:return: Results of joining these segments.
@@ -355,8 +355,8 @@ class Renderer(object):
 
 			segments_priority = iter(segments_priority)
 			if current_width > width and len(segments) > 100:
-				# When there are too many segments use faster, but less correct 
-				# algorythm for width computation
+				# When there are too many segments use faster, but less correct
+				# algorithm for width computation
 				diff = current_width - width
 				for segment in segments_priority:
 					segments.remove(segment)
@@ -365,8 +365,8 @@ class Renderer(object):
 						break
 				current_width = self._render_length(theme, segments, divider_widths)
 			if current_width > width:
-				# When there are not too much use more precise, but much slower 
-				# width computation. It also finishes computations in case 
+				# When there are not too much use more precise, but much slower
+				# width computation. It also finishes computations in case
 				# previous variant did not free enough space.
 				for segment in segments_priority:
 					segments.remove(segment)
@@ -386,7 +386,7 @@ class Renderer(object):
 						distribute_len + (1 if distribute_len_remainder > 0 else 0),
 						segment))
 				distribute_len_remainder -= 1
-			# `_len` key is not needed anymore, but current_width should have an 
+			# `_len` key is not needed anymore, but current_width should have an
 			# actual value for various bindings.
 			current_width = width
 		elif output_width:
@@ -527,7 +527,7 @@ class Renderer(object):
 				contents_highlighted = ''
 				draw_divider = segment['draw_' + divider_type + '_divider']
 
-				# XXX Make sure self.hl() calls are called in the same order 
+				# XXX Make sure self.hl() calls are called in the same order
 				# segments are displayed. This is needed for Vim renderer to work.
 				if draw_divider:
 					divider_raw = self.escape(theme.get_divider(side, divider_type))
@@ -579,8 +579,8 @@ class Renderer(object):
 	def hlstyle(fg=None, bg=None, attrs=None):
 		'''Output highlight style string.
 
-		Assuming highlighted string looks like ``{style}{contents}`` this method 
-		should output ``{style}``. If it is called without arguments this method 
+		Assuming highlighted string looks like ``{style}{contents}`` this method
+		should output ``{style}``. If it is called without arguments this method
 		is supposed to reset style to its default.
 		'''
 		raise NotImplementedError
@@ -588,7 +588,7 @@ class Renderer(object):
 	def hl(self, contents, fg=None, bg=None, attrs=None):
 		'''Output highlighted chunk.
 
-		This implementation just outputs :py:meth:`hlstyle` joined with 
+		This implementation just outputs :py:meth:`hlstyle` joined with
 		``contents``.
 		'''
 		return self.hlstyle(fg, bg, attrs) + (contents or '')

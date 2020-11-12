@@ -92,8 +92,8 @@ def window_cached(func):
 def mode(pl, segment_info, override=None):
 	'''Return the current vim mode.
 
-	If mode (returned by ``mode()`` VimL function, see ``:h mode()`` in Vim) 
-	consists of multiple characters and necessary mode is not known to powerline 
+	If mode (returned by ``mode()`` VimL function, see ``:h mode()`` in Vim)
+	consists of multiple characters and necessary mode is not known to powerline
 	then it will fall back to mode with last character(s) ignored.
 
 	:param dict override:
@@ -123,10 +123,10 @@ def visual_range(pl, segment_info, CTRL_V_text='{rows} x {vcols}', v_text_onelin
 	:param str CTRL_V_text:
 		Text to display when in block visual or select mode.
 	:param str v_text_oneline:
-		Text to display when in charaterwise visual or select mode, assuming 
+		Text to display when in charaterwise visual or select mode, assuming
 		selection occupies only one line.
 	:param str v_text_multiline:
-		Text to display when in charaterwise visual or select mode, assuming 
+		Text to display when in charaterwise visual or select mode, assuming
 		selection occupies more then one line.
 	:param str V_text:
 		Text to display when in linewise visual or select mode.
@@ -223,18 +223,18 @@ SCHEME_RE = re.compile(b'^\\w[\\w\\d+\\-.]*(?=:)')
 def file_scheme(pl, segment_info):
 	'''Return the protocol part of the file.
 
-	Protocol is the part of the full filename just before the colon which 
-	starts with a latin letter and contains only latin letters, digits, plus, 
-	period or hyphen (refer to `RFC3986 
-	<http://tools.ietf.org/html/rfc3986#section-3.1>`_ for the description of 
-	URI scheme). If there is no such a thing ``None`` is returned, effectively 
+	Protocol is the part of the full filename just before the colon which
+	starts with a latin letter and contains only latin letters, digits, plus,
+	period or hyphen (refer to `RFC3986
+	<http://tools.ietf.org/html/rfc3986#section-3.1>`_ for the description of
+	URI scheme). If there is no such a thing ``None`` is returned, effectively
 	removing segment.
 
 	.. note::
-		Segment will not check  whether there is ``//`` just after the 
-		colon or if there is at least one slash after the scheme. Reason: it is 
-		not always present. E.g. when opening file inside a zip archive file 
-		name will look like :file:`zipfile:/path/to/archive.zip::file.txt`. 
+		Segment will not check  whether there is ``//`` just after the
+		colon or if there is at least one slash after the scheme. Reason: it is
+		not always present. E.g. when opening file inside a zip archive file
+		name will look like :file:`zipfile:/path/to/archive.zip::file.txt`.
 		``file_scheme`` segment will catch ``zipfile`` part here.
 	'''
 	name = buffer_name(segment_info)
@@ -250,20 +250,20 @@ def file_directory(pl, segment_info, remove_scheme=True, shorten_user=True, shor
 	'''Return file directory (head component of the file path).
 
 	:param bool remove_scheme:
-		Remove scheme part from the segment name, if present. See documentation 
-		of file_scheme segment for the description of what scheme is. Also 
+		Remove scheme part from the segment name, if present. See documentation
+		of file_scheme segment for the description of what scheme is. Also
 		removes the colon.
 
 	:param bool shorten_user:
-		Shorten ``$HOME`` directory to :file:`~/`. Does not work for files with 
+		Shorten ``$HOME`` directory to :file:`~/`. Does not work for files with
 		scheme.
 
 	:param bool shorten_cwd:
-		Shorten current directory to :file:`./`. Does not work for files with 
+		Shorten current directory to :file:`./`. Does not work for files with
 		scheme present.
 
 	:param bool shorten_home:
-		Shorten all directories in :file:`/home/` to :file:`~user/` instead of 
+		Shorten all directories in :file:`/home/` to :file:`~user/` instead of
 		:file:`/home/user/`. Does not work for files with scheme present.
 	'''
 	name = buffer_name(segment_info)
@@ -320,7 +320,7 @@ def file_size(pl, suffix='B', si_prefix=False):
 		use SI prefix, e.g. MB instead of MiB
 	:return: file size or None if the file isn’t saved or if the size is too big to fit in a number
 	'''
-	# Note: returns file size in &encoding, not in &fileencoding. But returned 
+	# Note: returns file size in &encoding, not in &fileencoding. But returned
 	# size is updated immediately; and it is valid for any buffer
 	file_size = vim_funcs['line2byte'](len(vim.current.buffer) + 1) - 1
 	if file_size < 0:
@@ -353,6 +353,18 @@ def file_encoding(pl, segment_info):
 	if bomstr and vim_getbufoption(segment_info, 'bomb'):
 		bomstr = bomstr + ''
 	return bomstr
+
+@requires_segment_info
+@add_divider_highlight_group('background:divider')
+def file_bom(pl, segment_info):
+	'''Return BOM of the current file
+
+	:return: Byte order mark or None if unknown or missing BOM
+
+	Divider highlight group used: ``background:divider``.
+	'''
+	return 'bom' if vim_getbufoption(segment_info, 'bomb') else None
+
 
 @requires_segment_info
 @add_divider_highlight_group('background:divider')
@@ -460,7 +472,7 @@ def col_current(pl, segment_info):
 
 @window_cached
 def virtcol_current(pl, gradient=True):
-	'''Return current visual column with concealed characters ingored
+	'''Return current visual column with concealed characters ignored
 
 	:param bool gradient:
 		Determines whether it should show textwidth-based gradient (gradient level is ``virtcol * 100 / textwidth``).
@@ -510,14 +522,14 @@ branch = with_docstring(VimBranchSegment(),
 '''Return the current working branch.
 
 :param bool status_colors:
-	Determines whether repository status will be used to determine highlighting. 
+	Determines whether repository status will be used to determine highlighting.
 	Default: False.
 :param bool ignore_statuses:
-	List of statuses which will not result in repo being marked as dirty. Most 
-	useful is setting this option to ``["U"]``: this will ignore repository 
-	which has just untracked files (i.e. repository with modified, deleted or 
-	removed files will be marked as dirty, while just untracked files will make 
-	segment show clean repository). Only applicable if ``status_colors`` option 
+	List of statuses which will not result in repo being marked as dirty. Most
+	useful is setting this option to ``["U"]``: this will ignore repository
+	which has just untracked files (i.e. repository with modified, deleted or
+	removed files will be marked as dirty, while just untracked files will make
+	segment show clean repository). Only applicable if ``status_colors`` option
 	is True.
 
 Highlight groups used: ``branch_clean``, ``branch_dirty``, ``branch``.
@@ -577,9 +589,9 @@ trailing_whitespace_cache = None
 def trailing_whitespace(pl, segment_info):
 	'''Return the line number for trailing whitespaces
 
-	It is advised not to use this segment in insert mode: in Insert mode it will 
-	iterate over all lines in buffer each time you happen to type a character 
-	which may cause lags. It will also show you whitespace warning each time you 
+	It is advised not to use this segment in insert mode: in Insert mode it will
+	iterate over all lines in buffer each time you happen to type a character
+	which may cause lags. It will also show you whitespace warning each time you
 	happen to type space.
 
 	Highlight groups used: ``trailing_whitespace`` or ``warning``.
@@ -627,7 +639,7 @@ def tabnr(pl, segment_info, show_current=True):
 	'''Show tabpage number
 
 	:param bool show_current:
-		If False do not show current tabpage number. This is default because 
+		If False do not show current tabpage number. This is default because
 		tabnr is by default only present in tabline.
 	'''
 	try:
@@ -683,7 +695,7 @@ if sys.version_info < (2, 7):
 			return fin(csv.reader(l, dialect))
 		except csv.Error as e:
 			if str(e) == 'newline inside string' and dialect.quotechar:
-				# Maybe we are inside an unfinished quoted string. Python-2.6 
+				# Maybe we are inside an unfinished quoted string. Python-2.6
 				# does not handle this fine
 				return fin(csv.reader(l[:-1] + [l[-1] + dialect.quotechar]))
 			else:
@@ -752,12 +764,12 @@ def csv_col_current(pl, segment_info, display_name='auto', name_format=' ({colum
 	Requires filetype to be set to ``csv``.
 
 	:param bool or str name:
-		May be ``True``, ``False`` and ``"auto"``. In the first case value from 
-		the first raw will always be displayed. In the second case it will never 
-		be displayed. In thi last case ``csv.Sniffer().has_header()`` will be 
+		May be ``True``, ``False`` and ``"auto"``. In the first case value from
+		the first raw will always be displayed. In the second case it will never
+		be displayed. In the last case ``csv.Sniffer().has_header()`` will be
 		used to detect whether current file contains header in the first column.
 	:param str name_format:
-		String used to format column name (in case ``display_name`` is set to 
+		String used to format column name (in case ``display_name`` is set to
 		``True`` or ``"auto"``). Accepts ``column_name`` keyword argument.
 
 	Highlight groups used: ``csv:column_number`` or ``csv``, ``csv:column_name`` or ``csv``.

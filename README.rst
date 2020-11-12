@@ -1,24 +1,24 @@
 Powerline
 =========
 
-:Author: Kim Silkebækken (kim.silkebaekken+vim@gmail.com)
-:Source: https://github.com/powerline/powerline
-:Version: beta
+.. image:: https://api.travis-ci.org/powerline/powerline.svg?branch=develop
+   :target: `travis-build-status`_
+   :alt: Build status
+.. _travis-build-status: https://travis-ci.org/powerline/powerline
 
 **Powerline is a statusline plugin for vim, and provides statuslines and 
 prompts for several other applications, including zsh, bash, fish, tmux,
 IPython, Awesome, i3 and Qtile.**
 
-* `Support forum`_ (powerline-support@googlegroups.com)
-* `Development discussion`_ (powerline-dev@googlegroups.com)
++---------+---------------------------------------------------+
+| Author  | Kim Silkebækken (kim.silkebaekken+vim@gmail.com)  |
++---------+---------------------------------------------------+
+| Source  | https://github.com/powerline/powerline            |
++---------+---------------------------------------------------+
+| Version | beta                                              |
++---------+---------------------------------------------------+
 
-.. image:: https://api.travis-ci.org/powerline/powerline.svg?branch=develop
-   :target: `travis-build-status`_
-   :alt: Build status
-
-.. _travis-build-status: https://travis-ci.org/powerline/powerline
-.. _`Support forum`: https://groups.google.com/forum/#!forum/powerline-support
-.. _`Development discussion`: https://groups.google.com/forum/#!forum/powerline-dev
+**Powerline does not support python2 anymore and powerline will stop working with python2 in the near future.**
 
 Features
 --------
@@ -29,8 +29,7 @@ Features
   config files, and a structured, object-oriented codebase with no mandatory
   third-party dependencies other than a Python interpreter.
 * **Stable and testable code base.** Using Python has allowed unit testing 
-  of all the project code. The code is tested to work in Python 2.6+ and 
-  Python 3.
+  of all the project code. The code is tested to work in Python 3.6+.
 * **Support for prompts and statuslines in many applications.** Originally 
   created exclusively for vim statuslines, the project has evolved to 
   provide statuslines in tmux and several WMs, and prompts for shells like 
@@ -54,11 +53,37 @@ You should check out some of the Powerline derivatives. The most lightweight
 and feature-rich alternative is currently the `vim-airline 
 <https://github.com/vim-airline/vim-airline>`_ project.
 
-------
+Configuration
+-------------
 
-* Consult the `documentation 
-  <https://powerline.readthedocs.org/en/latest/>`_ for more information and 
-  installation instructions.
+Basic powerline configuration is done via `JSON` files located at `.config/powerline/`. It is a good idea to start by copying the default configuration located at `powerline_root/powerline/config_files/` to `.config/powerline/`.
+If you installed the powerline from the AUR or via pip, `powerline_root` should be `/usr/lib/python3.6/site-packages/` or something similar, depending on your python version.
+
+If you installed powerline via apt-get 'powerline_root' should be '/usr/share/powerline/'.
+
+This should yield you the following directory structure:
+
+    ::
+
+        .config/powerline/
+        ├── colorschemes
+        │   ├── ...
+        │   └── wm
+        |       └── default.json  // Your configuration goes here
+        ├── colors.json
+        ├── config.json
+        └── themes
+            ├── ...
+            └── wm
+                └── default.json  // Your configuration goes here
+
+
+
+The files in the subdirectories of `themes` are used to specify which segments shall be shown; the files in subdirectories of `colorschemes` are used to specify which colors (as defined in `colors.json`) shall be used to display a segment.
+
+Note that your local configuration only overrides the global configuration, it does not replace it, i.e. if you don't configure something locally, the global default will be used instead.
+
+* Consult the `documentation <https://powerline.readthedocs.org/en/latest/configuration.html#quick-setup-guide>`_ for more details. See also the `segment reference <https://powerline.readthedocs.org/en/latest/configuration/segments.html>`_ for available segments and their configuration.
 * Check out `powerline-fonts <https://github.com/powerline/fonts>`_ for 
   pre-patched versions of popular, open source coding fonts.
 

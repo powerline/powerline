@@ -17,6 +17,22 @@ statusline:
    set showtabline=2 " Always display the tabline, even if there is only one tab
    set noshowmode " Hide the default mode text (e.g. -- INSERT -- below the statusline)
 
+.. _tips-and-tricks-vscode:
+
+VS-Code
+=======
+
+Useful settings
+---------------
+
+To make powerline work in the internal terminal, add the following settings;
+where the shell command needs to be adjusted according to your preferred shell.
+
+.. code-block:: json
+
+   "terminal.integrated.shell.linux": "/bin/bash"
+   "terminal.integrated.inheritEnv": true
+
 .. _tips-and-tricks-urxvt:
 
 Rxvt-unicode

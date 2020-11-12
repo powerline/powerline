@@ -4,13 +4,13 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 
 import os
 import sys
-import subprocess
 import logging
 import shlex
+import subprocess
 
-from traceback import print_exc
 from setuptools import setup, find_packages
 
+from powerline.version import get_version
 
 CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
 try:
@@ -46,27 +46,15 @@ except Exception as e:
 	else:
 		sys.path.append(CURRENT_DIR)
 		from powerline.lib.shell import which
+	can_use_scripts = True
 	if which('socat') and which('sed') and which('sh'):
 		print('Using powerline.sh script instead of C version (requires socat, sed and sh)')
 		shutil.copyfile('client/powerline.sh', 'scripts/powerline')
-		can_use_scripts = True
 	else:
 		print('Using powerline.py script instead of C version')
 		shutil.copyfile('client/powerline.py', 'scripts/powerline')
-		can_use_scripts = True
 else:
 	can_use_scripts = False
-
-
-def get_version():
-	base_version = '2.7'
-	base_version += '.dev9999'
-	try:
-		return base_version + '+git.' + str(subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip())
-	except Exception:
-		print_exc()
-		return base_version
-
 
 setup(
 	name='powerline-status',
@@ -82,11 +70,10 @@ setup(
 		'Natural Language :: English',
 		'Operating System :: Microsoft :: Windows',
 		'Operating System :: POSIX',
-		'Programming Language :: Python :: 2.6',
-		'Programming Language :: Python :: 2.7',
-		'Programming Language :: Python :: 3.2',
-		'Programming Language :: Python :: 3.3',
 		'Programming Language :: Python :: 3.4',
+		'Programming Language :: Python :: 3.5',
+		'Programming Language :: Python :: 3.6',
+		'Programming Language :: Python :: 3.7',
 		'Programming Language :: Python :: Implementation :: CPython',
 		'Programming Language :: Python :: Implementation :: PyPy',
 	],
@@ -95,11 +82,11 @@ setup(
 	author_email='kim.silkebaekken+vim@gmail.com',
 	url='https://github.com/powerline/powerline',
 	license='MIT',
-	# XXX Python 3 doesn’t allow compiled C files to be included in the scripts 
-	# list below. This is because Python 3 distutils tries to decode the file to 
+	# XXX Python 3 doesn’t allow compiled C files to be included in the scripts
+	# list below. This is because Python 3 distutils tries to decode the file to
 	# ASCII, and fails when powerline-client is a binary.
 	#
-	# XXX Python 2 fucks up script contents*. Not using it to install scripts 
+	# XXX Python 2 fucks up script contents*. Not using it to install scripts
 	# any longer.
 	# * Consider the following input:
 	#     % alias hex1=$'hexdump -e \'"" 1/1 "%02X\n"\''
@@ -111,7 +98,7 @@ setup(
 	#     > 0A
 	#   (repeated, with diff segment header numbers growing up).
 	#
-	# FIXME Current solution does not work with `pip install -e`. Still better 
+	# FIXME Current solution does not work with `pip install -e`. Still better
 	# then solution that is not working at all.
 	scripts=[
 		'scripts/powerline-lint',

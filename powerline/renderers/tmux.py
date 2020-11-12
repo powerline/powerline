@@ -68,7 +68,9 @@ class TmuxRenderer(Renderer):
 		r = self.segment_info.copy()
 		if segment_info:
 			r.update(segment_info)
-		if 'pane_id' in r:
+		if 'pane_current_path' in r:
+			r['getcwd'] = lambda: r['pane_current_path']
+		elif 'pane_id' in r:
 			varname = 'TMUX_PWD_' + str(r['pane_id'])
 			if varname in r['environ']:
 				r['getcwd'] = lambda: r['environ'][varname]
