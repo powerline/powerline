@@ -47,6 +47,9 @@ BZR_REPO = 'bzr_repo'
 
 
 def thread_number():
+	# The actual thread number depends on the environment, a thread is executed in.
+	# With unittest runners, the runner only occupies 1 Thread. However, with pytest, this is no
+	# longer true. Therefore we are ignoring all threads except 1 from the runner.
 	return len(threading.enumerate())
 
 
@@ -70,6 +73,7 @@ class TestShell(TestCase):
 
 class TestThreaded(TestCase):
 	def test_threaded_segment(self):
+		thread_count = thread_number()
 		log = []
 		pl = Pl()
 		updates = [(None,)]
@@ -109,7 +113,7 @@ class TestThreaded(TestCase):
 		block_event.set()
 		updates[0] = (None,)
 		self.assertEqual(segment(pl=pl), None)
-		self.assertEqual(thread_number(), 1)
+		self.assertEqual(thread_number(), thread_count)
 		self.assertEqual(log, [
 			('set_state', {}),
 			('update', None),
@@ -121,7 +125,7 @@ class TestThreaded(TestCase):
 		block_event.set()
 		updates[0] = ('abc',)
 		self.assertEqual(segment(pl=pl), 'abc')
-		self.assertEqual(thread_number(), 1)
+		self.assertEqual(thread_number(), thread_count)
 		self.assertEqual(log, [
 			('set_state', {}),
 			('update', None),
@@ -133,7 +137,7 @@ class TestThreaded(TestCase):
 		block_event.set()
 		updates[0] = ('abc',)
 		self.assertEqual(segment(pl=pl, update_first=False), 'abc')
-		self.assertEqual(thread_number(), 1)
+		self.assertEqual(thread_number(), thread_count)
 		self.assertEqual(log, [
 			('set_state', {}),
 			('update', None),
@@ -145,7 +149,7 @@ class TestThreaded(TestCase):
 		block_event.set()
 		updates[0] = ValueError('abc')
 		self.assertEqual(segment(pl=pl), None)
-		self.assertEqual(thread_number(), 1)
+		self.assertEqual(thread_number(), thread_count)
 		self.assertEqual(len(pl.exceptions), 1)
 		self.assertEqual(log, [
 			('set_state', {}),
@@ -158,7 +162,7 @@ class TestThreaded(TestCase):
 		block_event.set()
 		updates[0] = (TypeError('def'),)
 		self.assertRaises(TypeError, segment, pl=pl)
-		self.assertEqual(thread_number(), 1)
+		self.assertEqual(thread_number(), thread_count)
 		self.assertEqual(log, [
 			('set_state', {}),
 			('update', None),
@@ -174,7 +178,7 @@ class TestThreaded(TestCase):
 			updates[0] = ('abc',)
 		segment.startup(**kwargs)
 		ret = segment(**kwargs)
-		self.assertEqual(thread_number(), 2)
+		self.assertEqual(thread_number(), thread_count + 1)
 		block_event.set()
 		event.wait()
 		segment.shutdown_event.set()
@@ -194,7 +198,7 @@ class TestThreaded(TestCase):
 			updates[0] = ('def',)
 		segment.startup(**kwargs)
 		ret = segment(**kwargs)
-		self.assertEqual(thread_number(), 2)
+		self.assertEqual(thread_number(), thread_count + 1)
 		segment.shutdown_event.set()
 		segment.thread.join()
 		self.assertEqual(ret, 'def')
@@ -215,8 +219,8 @@ class TestThreaded(TestCase):
 		ret1 = segment(**kwargs)
 		with lock:
 			updates[0] = ('def',)
-		self.assertEqual(thread_number(), 2)
-		sleep(0.5)
+		self.assertEqual(thread_number(), thread_count + 1)
+		sleep(1)
 		ret2 = segment(**kwargs)
 		segment.shutdown_event.set()
 		segment.thread.join()
@@ -232,7 +236,7 @@ class TestThreaded(TestCase):
 			('update', 'def'),
 		])
 		num_runs = len([e for e in log if e[0] == 'update'])
-		self.assertAlmostEqual(duration / 0.2, num_runs, delta=1)
+		assert duration / 0.2 >= num_runs - 1
 		log[:] = ()
 
 		segment = TestSegment()
@@ -245,8 +249,8 @@ class TestThreaded(TestCase):
 		ret1 = segment(**kwargs)
 		with lock:
 			updates[0] = TypeError('jkl')
-		self.assertEqual(thread_number(), 2)
-		sleep(0.5)
+		self.assertEqual(thread_number(), thread_count + 1)
+		sleep(1)
 		ret2 = segment(**kwargs)
 		segment.shutdown_event.set()
 		segment.thread.join()
@@ -262,11 +266,12 @@ class TestThreaded(TestCase):
 			('update', 'ghi'),
 		])
 		num_runs = len([e for e in log if e[0] == 'update'])
-		self.assertAlmostEqual(duration / 0.2, num_runs, delta=1)
+		assert duration / 0.2 >= num_runs - 1
 		self.assertEqual(num_runs - 1, len(pl.exceptions))
 		log[:] = ()
 
 	def test_kw_threaded_segment(self):
+		thread_count = thread_number()
 		log = []
 		pl = Pl()
 		event = threading.Event()
@@ -300,7 +305,7 @@ class TestThreaded(TestCase):
 		segment = TestSegment()
 		event.clear()
 		self.assertEqual(segment(pl=pl), None)
-		self.assertEqual(thread_number(), 1)
+		self.assertEqual(thread_number(), thread_count)
 		self.assertEqual(log, [
 			('key', (None,), {'pl': pl}),
 			('compute_state', (None,)),
@@ -314,7 +319,7 @@ class TestThreaded(TestCase):
 		self.assertEqual(segment(**kwargs), 'abc')
 		kwargs.update(_key=('def',))
 		self.assertEqual(segment(**kwargs), 'def')
-		self.assertEqual(thread_number(), 1)
+		self.assertEqual(thread_number(), thread_count)
 		self.assertEqual(log, [
 			('key', ('abc',), {'pl': pl}),
 			('compute_state', ('abc',)),
@@ -329,7 +334,7 @@ class TestThreaded(TestCase):
 		kwargs = {'pl': pl, '_key': ValueError('xyz'), 'update_first': False}
 		event.clear()
 		self.assertEqual(segment(**kwargs), None)
-		self.assertEqual(thread_number(), 1)
+		self.assertEqual(thread_number(), thread_count)
 		self.assertEqual(log, [
 			('key', kwargs['_key'], {'pl': pl}),
 			('compute_state', kwargs['_key']),
@@ -340,7 +345,7 @@ class TestThreaded(TestCase):
 		kwargs = {'pl': pl, '_key': (ValueError('abc'),), 'update_first': False}
 		event.clear()
 		self.assertRaises(ValueError, segment, **kwargs)
-		self.assertEqual(thread_number(), 1)
+		self.assertEqual(thread_number(), thread_count)
 		self.assertEqual(log, [
 			('key', kwargs['_key'], {'pl': pl}),
 			('compute_state', kwargs['_key']),
@@ -354,7 +359,7 @@ class TestThreaded(TestCase):
 		event.clear()
 		segment.startup(**kwargs)
 		ret = segment(**kwargs)
-		self.assertEqual(thread_number(), 2)
+		self.assertEqual(thread_number(), thread_count + 1)
 		segment.shutdown_event.set()
 		segment.thread.join()
 		self.assertEqual(ret, None)
@@ -374,7 +379,7 @@ class TestThreaded(TestCase):
 		ret1 = segment(**kwargs)
 		kwargs.update(_key=('_def',))
 		ret2 = segment(**kwargs)
-		self.assertEqual(thread_number(), 2)
+		self.assertEqual(thread_number(), thread_count + 1)
 		segment.shutdown_event.set()
 		segment.thread.join()
 		self.assertEqual(ret1, '_abc')

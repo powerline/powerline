@@ -113,7 +113,7 @@ def mkdir_recursive(directory):
 	os.mkdir(directory)
 
 
-class TestPowerline(Powerline):
+class PowerlineTest(Powerline):
 	def get_config_paths(self):
 		return tuple(sorted([
 			os.path.join(CONFIG_DIR, d)
@@ -137,7 +137,7 @@ class WithConfigTree(object):
 			with open(fname, 'w') as F:
 				json.dump(v, F)
 		select_renderer(simpler_renderer=True)
-		self.p = TestPowerline(
+		self.p = PowerlineTest(
 			ext='test',
 			renderer_module='tests.modules.lib.config_mock',
 			**self.p_kwargs

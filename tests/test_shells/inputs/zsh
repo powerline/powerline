@@ -11,9 +11,7 @@ function set_theme() {
 	export POWERLINE_CONFIG_OVERRIDES="ext.shell.theme=$1"
 	powerline-reload-config
 }
-if test -n "$POWERLINE_NO_ZSH_ZPYTHON" ; then
-	powerline-reload-config():
-fi
+powerline-reload-config():
 source powerline/bindings/zsh/powerline.zsh
 set_theme_option default_leftonly.segment_data.hostname.args.only_if_ssh false
 set_theme_option default.segment_data.hostname.args.only_if_ssh false

@@ -52,7 +52,10 @@ class TestParser(TestCase):
 			]:
 				self.assertRaises(SystemExit, parser.parse_args, raising_args)
 				self.assertFalse(out.getvalue())
-				self.assertRegexpMatches(err.getvalue(), raising_reg)
+				try:
+					self.assertRegexpMatches(err.getvalue(), raising_reg)
+				except AttributeError:
+					self.assertRegex(err.getvalue(), raising_reg)
 				flush()
 
 	def test_main_normal(self):

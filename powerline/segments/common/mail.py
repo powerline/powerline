@@ -33,7 +33,7 @@ class EmailIMAPSegment(KwThreadedSegment):
 		mail.login(key.username, key.password)
 		rc, message = mail.status(key.folder, '(UNSEEN)')
 		unread_str = message[0].decode('utf-8')
-		unread_count = int(re.search('UNSEEN (\d+)', unread_str).group(1))
+		unread_count = int(re.search(r'UNSEEN (\d+)', unread_str).group(1))
 		return unread_count
 
 	@staticmethod

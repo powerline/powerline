@@ -17,8 +17,8 @@ import tests.modules.vim as vim_module
 
 from tests.modules.lib import (Args, urllib_read, replace_attr, new_module,
                                replace_module_module, replace_env, Pl)
-from tests.modules import TestCase, SkipTest
-
+from tests.modules import SkipTest
+from unittest import TestCase
 
 def get_dummy_guess(**kwargs):
 	if 'directory' in kwargs:
@@ -545,9 +545,6 @@ class TestEnv(TestCommon):
 			def username(self):
 				return 'def@DOMAIN.COM'
 
-			if hasattr(self.module, 'psutil') and not callable(self.module.psutil.Process.username):
-				username = property(username)
-
 		segment_info = {'environ': {}}
 
 		def user(*args, **kwargs):
@@ -578,7 +575,7 @@ class TestEnv(TestCommon):
 							])
 						with replace_attr(self.module, '_geteuid', lambda: 0):
 							self.assertEqual(user(), [
-								{'contents': 'def', 'highlight_groups': ['superuser', 'user']}
+								{'contents': 'def@DOMAIN.COM', 'highlight_groups': ['superuser', 'user']}
 							])
 
 	def test_cwd(self):

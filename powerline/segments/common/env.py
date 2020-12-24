@@ -135,14 +135,8 @@ Highlight groups used: ``cwd:current_folder`` or ``cwd``. It is recommended to d
 try:
 	import psutil
 
-	# psutil-2.0.0: psutil.Process.username is unbound method
-	if callable(psutil.Process.username):
-		def _get_user():
-			return psutil.Process(os.getpid()).username()
-	# pre psutil-2.0.0: psutil.Process.username has type property
-	else:
-		def _get_user():
-			return psutil.Process(os.getpid()).username
+	def _get_user():
+		return psutil.Process(os.getpid()).username()
 except ImportError:
 	try:
 		import pwd
@@ -158,7 +152,6 @@ except ImportError:
 			return pwd.getpwuid(getuid()).pw_name
 
 
-username = False
 # os.geteuid is not available on windows
 _geteuid = getattr(os, 'geteuid', lambda: 1)
 
@@ -176,14 +169,12 @@ def user(pl, segment_info, hide_user=None, hide_domain=False):
 
 	Highlight groups used: ``superuser`` or ``user``. It is recommended to define all highlight groups.
 	'''
-	global username
 	if (
 		segment_info['environ'].get('_POWERLINE_RUNNING_SHELL_TESTS')
 		== 'ee5bcdc6-b749-11e7-9456-50465d597777'
 	):
 		return 'user'
-	if username is False:
-		username = _get_user()
+	username = _get_user()
 	if username is None:
 		pl.warn('Failed to get username')
 		return None

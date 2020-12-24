@@ -5,11 +5,11 @@ import sys
 import os
 
 if sys.version_info < (2, 7):
-	from unittest2 import TestCase as _TestCase  # NOQA
+	from unittest2 import TestCase as TestCase  # NOQA
 	from unittest2 import main as _main  # NOQA
 	from unittest2.case import SkipTest  # NOQA
 else:
-	from unittest import TestCase as _TestCase  # NOQA
+	from unittest import TestCase as TestCase  # NOQA
 	from unittest import main as _main  # NOQA
 	from unittest.case import SkipTest  # NOQA
 
@@ -50,16 +50,24 @@ class PowerlineTestSuite(object):
 		os.environ['POWERLINE_CURRENT_SUITE'] = self.saved_current_suite
 
 	def record_test_failure(self, fail_char, test_name, message, allow_failure=False):
+		try:
+			suite_obj = self.suite
+		except AttributeError:
+			suite_obj = "unknown"
 		if allow_failure:
 			fail_char = 'A' + fail_char
 		full_msg = '{fail_char} {suite}|{test_name} :: {message}'.format(
 			fail_char=fail_char,
-			suite=self.suite,
+			suite=suite_obj,
 			test_name=test_name,
 			message=message,
 		)
-		with open(os.environ['FAILURES_FILE'], 'a') as ffd:
-			ffd.write(full_msg + '\n')
+		try:
+			with open(os.environ['FAILURES_FILE'], 'a') as ffd:
+				ffd.write(full_msg + '\n')
+		except KeyError:
+			# Ignore writing to FAILURES_FILE if this is not defined in OS_ENVIRON
+			pass
 		return False
 
 	def exception(self, test_name, message, allow_failure=False):
@@ -85,10 +93,3 @@ def main(*args, **kwargs):
 	global suite
 	suite = PowerlineTestSuite(sys.argv[0])
 	_main(*args, **kwargs)
-
-
-class TestCase(_TestCase):
-	def fail(self, msg=None):
-		suite.fail(self.__class__.__name__,
-		           msg or 'Test failed without message')
-		super(TestCase, self).fail(*args, **kwargs)
