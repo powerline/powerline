@@ -4,6 +4,7 @@ set_theme_option() {
 set_theme() {
 	export POWERLINE_CONFIG_OVERRIDES="ext.shell.theme=$1"
 }
+set_theme_option default.segment_data.hostname.args.only_if_ssh false
 set_theme_option default_leftonly.segment_data.hostname.args.only_if_ssh false
 ABOVE_LEFT='[{
     "left": [
@@ -40,7 +41,9 @@ VIRTUAL_ENV=
 bgscript.sh & waitpid.sh
 false
 kill `cat pid` ; sleep 1s
+set_theme_option default.segment_data.hostname.display false
 set_theme_option default_leftonly.segment_data.hostname.display false
+set_theme_option default.segment_data.user.display false
 set_theme_option default_leftonly.segment_data.user.display false
 echo '
 abc
@@ -56,14 +59,15 @@ cd ../'$(echo)'
 cd ../'`echo`'
 cd ../'«Unicode!»'
 (exit 42)|(exit 43)
-set_theme_option default_leftonly.segments.above "$ABOVE_LEFT"
+set_theme default
+set_theme_option default.segments.above "$ABOVE_LEFT"
 export DISPLAYED_ENV_VAR=foo
 unset DISPLAYED_ENV_VAR
-set_theme_option default_leftonly.segments.above "$ABOVE_FULL"
+set_theme_option default.segments.above "$ABOVE_FULL"
 export DISPLAYED_ENV_VAR=foo
 unset DISPLAYED_ENV_VAR
-set_theme_option default_leftonly.segments.above
-set_theme_option default_leftonly.dividers.left.hard \$ABC
+set_theme_option default.segments.above
+set_theme_option default.dividers.left.hard \$ABC
 false
 true is the last line
 exit
