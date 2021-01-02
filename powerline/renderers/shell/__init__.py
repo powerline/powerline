@@ -105,7 +105,7 @@ class ShellRenderer(PromptRenderer):
 			self.used_term_escape_style = self.term_escape_style
 		return super(ShellRenderer, self).do_render(segment_info=segment_info, **kwargs)
 
-	def hlstyle(self, fg=None, bg=None, attrs=None):
+	def hlstyle(self, fg=None, bg=None, attrs=None, **kwargs):
 		'''Highlight a segment.
 
 		If an argument is None, the argument is ignored. If an argument is

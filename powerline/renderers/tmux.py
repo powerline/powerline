@@ -38,7 +38,7 @@ class TmuxRenderer(Renderer):
 				width = 10
 		return super(TmuxRenderer, self).render(width=width, segment_info=segment_info, **kwargs)
 
-	def hlstyle(self, fg=None, bg=None, attrs=None):
+	def hlstyle(self, fg=None, bg=None, attrs=None, **kwargs):
 		'''Highlight a segment.'''
 		# We don’t need to explicitly reset attributes, so skip those calls
 		if not attrs and not bg and not fg:

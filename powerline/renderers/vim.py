@@ -123,7 +123,7 @@ class VimRenderer(Renderer):
 	def reset_highlight(self):
 		self.hl_groups.clear()
 
-	def hlstyle(self, fg=None, bg=None, attrs=None):
+	def hlstyle(self, fg=None, bg=None, attrs=None, **kwargs):
 		'''Highlight a segment.
 
 		If an argument is None, the argument is ignored. If an argument is
