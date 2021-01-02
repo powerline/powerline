@@ -105,7 +105,7 @@ class ShellRenderer(PromptRenderer):
 			self.used_term_escape_style = self.term_escape_style
 		return super(ShellRenderer, self).do_render(segment_info=segment_info, **kwargs)
 
-	def hlstyle(self, fg=None, bg=None, attrs=None, **kwargs):
+	def hlstyle(self, fg=None, bg=None, attrs=None, escape=True, **kwargs):
 		'''Highlight a segment.
 
 		If an argument is None, the argument is ignored. If an argument is
@@ -162,7 +162,7 @@ class ShellRenderer(PromptRenderer):
 			r = '\033Ptmux;' + r.replace('\033', '\033\033') + '\033\\'
 		elif self.screen_escape:
 			r = '\033P' + r.replace('\033', '\033\033') + '\033\\'
-		return self.escape_hl_start + r + self.escape_hl_end
+		return self.escape_hl_start + r + self.escape_hl_end if escape else r
 
 	def get_theme(self, matcher_info):
 		if not matcher_info:
