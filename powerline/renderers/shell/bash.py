@@ -6,8 +6,8 @@ from powerline.renderers.shell import ShellRenderer
 
 class BashPromptRenderer(ShellRenderer):
 	'''Powerline bash prompt segment renderer.'''
-	escape_hl_start = '\['
-	escape_hl_end = '\]'
+	escape_hl_start = '\\['
+	escape_hl_end = '\\]'
 
 	character_translations = ShellRenderer.character_translations.copy()
 	character_translations[ord('$')] = '\\$'
