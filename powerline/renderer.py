@@ -286,6 +286,11 @@ class Renderer(object):
 		:param matcher_info:
 			Matcher information. Is processed in :py:meth:`get_segment_info`
 			method.
+		:param dict hl_args:
+			Additional arguments to pass on the :py:meth:`hl` and
+			:py:meth`hlstyle` methods. They are ignored in the default
+			implementation, but renderer-specific overrides can make use of
+			them as run-time "configuration" information.
 		'''
 		theme = self.get_theme(matcher_info)
 		return self.do_render(
