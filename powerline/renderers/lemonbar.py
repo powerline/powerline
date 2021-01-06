@@ -21,7 +21,7 @@ class LemonbarRenderer(Renderer):
 		# We don’t need to explicitly reset attributes, so skip those calls
 		return ''
 
-	def hl(self, contents, fg=None, bg=None, attrs=None):
+	def hl(self, contents, fg=None, bg=None, attrs=None, **kwargs):
 		text = ''
 
 		if fg is not None:
