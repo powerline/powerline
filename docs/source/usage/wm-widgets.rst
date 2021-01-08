@@ -77,8 +77,7 @@ to run with i3, simply ``exec`` this in the i3 config file and set the ``--i3`` 
 
     exec python /path/to/powerline/bindings/lemonbar/powerline-lemonbar.py --i3
 
-Running the binding in i3-mode will require `i3ipc <https://github.com/acrisci/i3ipc-python>`_
-(or the outdated `i3-py <https://github.com/ziberna/i3-py>`_).
+Running the binding in i3-mode will require `i3ipc <https://github.com/acrisci/i3ipc-python>`_.
 
 See the `lemonbar documentation <https://github.com/LemonBoy/bar>`_ for more 
 information and options.

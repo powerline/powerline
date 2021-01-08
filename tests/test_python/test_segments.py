@@ -1004,10 +1004,10 @@ class TestI3WM(TestCase):
 	@staticmethod
 	def get_workspaces():
 		return iter([
-			{'name': '1: w1', 'output': 'LVDS1', 'focused': False, 'urgent': False, 'visible': False},
-			{'name': '2: w2', 'output': 'LVDS1', 'focused': False, 'urgent': False, 'visible': True},
-			{'name': '3: w3', 'output': 'HDMI1', 'focused': False, 'urgent': True, 'visible': True},
-			{'name': '4: w4', 'output': 'DVI01', 'focused': True, 'urgent': True, 'visible': True},
+			Args(name='1: w1', output='LVDS1', focused = False, urgent = False, visible = False),
+			Args(name='2: w2', output='LVDS1', focused = False, urgent = False, visible = True),
+			Args(name='3: w3', output='HDMI1', focused = False, urgent = True, visible = True),
+			Args(name='4: w4', output='DVI01', focused = True, urgent = True, visible = True),
 		])
 
 	def test_workspaces(self):
@@ -1093,7 +1093,7 @@ class TestI3WM(TestCase):
 			def get_tree(self):
 				return self
 
-			def descendents(self):
+			def descendants(self):
 				nodes_unfocused = [Args(focused = False)]
 				nodes_focused = [Args(focused = True)]
 
