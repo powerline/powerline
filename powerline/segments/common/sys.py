@@ -90,8 +90,6 @@ try:
 					self.exception('Exception while calculating cpu_percent: {0}', str(e))
 
 		def render(self, cpu_percent, format='{0:.0f}%', **kwargs):
-			if not cpu_percent:
-				return None
 			return [{
 				'contents': format.format(cpu_percent),
 				'gradient_level': cpu_percent,
@@ -150,7 +148,8 @@ else:
 
 
 @add_divider_highlight_group('background:divider')
-def uptime(pl, days_format='{days:d}d', hours_format=' {hours:d}h', minutes_format=' {minutes:d}m', seconds_format=' {seconds:d}s', shorten_len=3):
+def uptime(pl, days_format='{days:d}d', hours_format=' {hours:d}h', minutes_format=' {minutes:02d}m',
+		seconds_format=' {seconds:02d}s', shorten_len=3):
 	'''Return system uptime.
 
 	:param str days_format:
@@ -175,9 +174,11 @@ def uptime(pl, days_format='{days:d}d', hours_format=' {hours:d}h', minutes_form
 	hours, minutes = divmod(minutes, 60)
 	days, hours = divmod(hours, 24)
 	time_formatted = list(filter(None, [
-		days_format.format(days=days) if days and days_format else None,
-		hours_format.format(hours=hours) if hours and hours_format else None,
-		minutes_format.format(minutes=minutes) if minutes and minutes_format else None,
-		seconds_format.format(seconds=seconds) if seconds and seconds_format else None,
-	]))[0:shorten_len]
+		days_format.format(days=days) if days_format else None,
+		hours_format.format(hours=hours) if hours_format else None,
+		minutes_format.format(minutes=minutes) if minutes_format else None,
+		seconds_format.format(seconds=seconds) if seconds_format else None,
+	]))
+	first_non_zero = next((i for i, x in enumerate([days, hours, minutes, seconds]) if x != 0))
+	time_formatted = time_formatted[first_non_zero:first_non_zero + shorten_len]
 	return ''.join(time_formatted).strip()

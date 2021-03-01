@@ -90,7 +90,7 @@ class IPythonPygmentsRenderer(IPythonRenderer):
 	def hl_join(segments):
 		return reduce(operator.iadd, segments, [])
 
-	def hl(self, contents, fg=None, bg=None, attrs=None):
+	def hl(self, contents, fg=None, bg=None, attrs=None, **kwargs):
 		'''Output highlighted chunk.
 
 		This implementation outputs a list containing a single pair 

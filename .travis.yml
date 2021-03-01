@@ -26,8 +26,7 @@ jobs:
         - stage: Latest Python
           python: "3.6"
         - stage: Intermediate versions
-          python: "3.3"
+          python: "3.5"
         - python: "3.4"
-        - python: "3.5"
 
 # vim: et

@@ -101,10 +101,7 @@ class Environment(object):
 			return False
 
 
-if hasattr(getattr(zsh, 'environ', None), '__contains__'):
-	environ = zsh.environ
-else:
-	environ = Environment()
+environ = Environment()
 
 
 if hasattr(zsh, 'expand') and zsh.expand('${:-}') == '':

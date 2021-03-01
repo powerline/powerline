@@ -251,7 +251,7 @@ class Renderer(object):
 		for line in range(theme.get_line_number() - 1, 0, -1):
 			yield self.render(side=None, line=line, **kwargs)
 
-	def render(self, mode=None, width=None, side=None, line=0, output_raw=False, output_width=False, segment_info=None, matcher_info=None):
+	def render(self, mode=None, width=None, side=None, line=0, output_raw=False, output_width=False, segment_info=None, matcher_info=None, hl_args=None):
 		'''Render all segments.
 
 		When a width is provided, low-priority segments are dropped one at
@@ -286,6 +286,11 @@ class Renderer(object):
 		:param matcher_info:
 			Matcher information. Is processed in :py:meth:`get_segment_info`
 			method.
+		:param dict hl_args:
+			Additional arguments to pass on the :py:meth:`hl` and
+			:py:meth`hlstyle` methods. They are ignored in the default
+			implementation, but renderer-specific overrides can make use of
+			them as run-time "configuration" information.
 		'''
 		theme = self.get_theme(matcher_info)
 		return self.do_render(
@@ -297,6 +302,7 @@ class Renderer(object):
 			output_width=output_width,
 			segment_info=self.get_segment_info(segment_info, mode),
 			theme=theme,
+			hl_args=hl_args
 		)
 
 	def compute_divider_widths(self, theme):
@@ -324,7 +330,7 @@ class Renderer(object):
 	:return: Results of joining these segments.
 	'''
 
-	def do_render(self, mode, width, side, line, output_raw, output_width, segment_info, theme):
+	def do_render(self, mode, width, side, line, output_raw, output_width, segment_info, theme, hl_args):
 		'''Like Renderer.render(), but accept theme in place of matcher_info
 		'''
 		segments = list(theme.get_segments(side, line, segment_info, mode))
@@ -333,14 +339,16 @@ class Renderer(object):
 
 		self._prepare_segments(segments, output_width or width)
 
+		hl_args = hl_args or dict()
+
 		if not width:
 			# No width specified, so we don’t need to crop or pad anything
 			if output_width:
 				current_width = self._render_length(theme, segments, self.compute_divider_widths(theme))
 			return construct_returned_value(self.hl_join([
 				segment['_rendered_hl']
-				for segment in self._render_segments(theme, segments)
-			]) + self.hlstyle(), segments, current_width, output_raw, output_width)
+				for segment in self._render_segments(theme, segments, hl_args)
+			]) + self.hlstyle(**hl_args), segments, current_width, output_raw, output_width)
 
 		divider_widths = self.compute_divider_widths(theme)
 
@@ -394,10 +402,10 @@ class Renderer(object):
 
 		rendered_highlighted = self.hl_join([
 			segment['_rendered_hl']
-			for segment in self._render_segments(theme, segments)
+			for segment in self._render_segments(theme, segments, hl_args)
 		])
 		if rendered_highlighted:
-			rendered_highlighted += self.hlstyle()
+			rendered_highlighted += self.hlstyle(**hl_args)
 
 		return construct_returned_value(rendered_highlighted, segments, current_width, output_raw, output_width)
 
@@ -470,7 +478,7 @@ class Renderer(object):
 			ret += segment_len
 		return ret
 
-	def _render_segments(self, theme, segments, render_highlighted=True):
+	def _render_segments(self, theme, segments, hl_args, render_highlighted=True):
 		'''Internal segment rendering method.
 
 		This method loops through the segment array and compares the
@@ -527,6 +535,10 @@ class Renderer(object):
 				contents_highlighted = ''
 				draw_divider = segment['draw_' + divider_type + '_divider']
 
+				segment_hl_args = {}
+				segment_hl_args.update(segment['highlight'])
+				segment_hl_args.update(hl_args)
+
 				# XXX Make sure self.hl() calls are called in the same order
 				# segments are displayed. This is needed for Vim renderer to work.
 				if draw_divider:
@@ -546,14 +558,14 @@ class Renderer(object):
 
 					if side == 'left':
 						if render_highlighted:
-							contents_highlighted = self.hl(self.escape(contents_raw), **segment['highlight'])
-							divider_highlighted = self.hl(divider_raw, divider_fg, divider_bg, False)
+							contents_highlighted = self.hl(self.escape(contents_raw), **segment_hl_args)
+							divider_highlighted = self.hl(divider_raw, divider_fg, divider_bg, False, **hl_args)
 						segment['_rendered_raw'] = contents_raw + divider_raw
 						segment['_rendered_hl'] = contents_highlighted + divider_highlighted
 					else:
 						if render_highlighted:
-							divider_highlighted = self.hl(divider_raw, divider_fg, divider_bg, False)
-							contents_highlighted = self.hl(self.escape(contents_raw), **segment['highlight'])
+							divider_highlighted = self.hl(divider_raw, divider_fg, divider_bg, False, **hl_args)
+							contents_highlighted = self.hl(self.escape(contents_raw), **segment_hl_args)
 						segment['_rendered_raw'] = divider_raw + contents_raw
 						segment['_rendered_hl'] = divider_highlighted + contents_highlighted
 				else:
@@ -562,7 +574,7 @@ class Renderer(object):
 					else:
 						contents_raw = contents_raw + outer_padding
 
-					contents_highlighted = self.hl(self.escape(contents_raw), **segment['highlight'])
+					contents_highlighted = self.hl(self.escape(contents_raw), **segment_hl_args)
 					segment['_rendered_raw'] = contents_raw
 					segment['_rendered_hl'] = contents_highlighted
 				prev_segment = segment
@@ -576,7 +588,7 @@ class Renderer(object):
 		'''
 		return string.translate(self.character_translations)
 
-	def hlstyle(fg=None, bg=None, attrs=None):
+	def hlstyle(fg=None, bg=None, attrs=None, **kwargs):
 		'''Output highlight style string.
 
 		Assuming highlighted string looks like ``{style}{contents}`` this method
@@ -585,10 +597,10 @@ class Renderer(object):
 		'''
 		raise NotImplementedError
 
-	def hl(self, contents, fg=None, bg=None, attrs=None):
+	def hl(self, contents, fg=None, bg=None, attrs=None, **kwargs):
 		'''Output highlighted chunk.
 
 		This implementation just outputs :py:meth:`hlstyle` joined with
 		``contents``.
 		'''
-		return self.hlstyle(fg, bg, attrs) + (contents or '')
+		return self.hlstyle(fg, bg, attrs, **kwargs) + (contents or '')

@@ -26,14 +26,14 @@ if exists('g:powerline_pycmd')
 		let s:pyeval = g:powerline_pyeval
 		let s:has_python = 1
 	endif
-elseif has('python')
-	let s:has_python = 1
-	let s:pycmd = 'py'
-	let s:pyeval = get(g:, 'powerline_pyeval', 'pyeval')
 elseif has('python3')
 	let s:has_python = 1
 	let s:pycmd = 'py3'
 	let s:pyeval = get(g:, 'powerline_pyeval', 'py3eval')
+elseif has('python')
+	let s:has_python = 1
+	let s:pycmd = 'py'
+	let s:pyeval = get(g:, 'powerline_pyeval', 'pyeval')
 else
 	let s:has_python = 0
 endif
