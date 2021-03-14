@@ -42,7 +42,7 @@ def get_icon(workspace, separator, icons, show_multiple_icons, ws_containers):
 	icons_tmp.update(icons)
 	icons = icons_tmp
 
-	wins = [win for win in ws_containers[w.name].leaves() \
+	wins = [win for win in ws_containers[workspace.name].leaves() \
 		if win.parent.scratchpad_state == 'none']
 	if len(wins) == 0:
 		return ''
@@ -130,8 +130,7 @@ def workspaces(pl, segment_info, only_show=None, output=None, strip=0, format='{
 		result = []
 		for n in priority_workspaces:
 			result += [w for w in ws if w.name == n]
-		return result + [w for w in ws if not w.name in priority_workspaces] \
-			+ (get_next_ws(ws, output) if show_dummy_workspace else [])
+		return result + [w for w in ws if not w.name in priority_workspaces]
 
 	ws_containers = {w_con.name : w_con for w_con in conn.get_tree().workspaces()}
 
