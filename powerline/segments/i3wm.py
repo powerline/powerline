@@ -6,21 +6,19 @@ import re
 from powerline.theme import requires_segment_info
 from powerline.bindings.wm import get_i3_connection
 
-
 WORKSPACE_REGEX = re.compile(r'^[0-9]+: ?')
-
 
 def workspace_groups(w):
 	group = []
 	if w.focused:
-		group.append('w_focused')
 		group.append('workspace:focused')
+		group.append('w_focused')
 	if w.urgent:
-		group.append('w_urgent')
 		group.append('workspace:urgent')
+		group.append('w_urgent')
 	if w.visible:
-		group.append('w_visible')
 		group.append('workspace:visible')
+		group.append('w_visible')
 	group.append('workspace')
 	return group
 
@@ -54,13 +52,13 @@ def get_icon(workspace, separator, icons, show_multiple_icons, ws_containers):
 	for key in icons:
 		if not icons[key] or len(icons[key]) < 1:
 		continue
-        if any(key in win.window_class for win in wins if win.window_class):
+		if any(key in win.window_class for win in wins if win.window_class):
 		result += (separator if cnt > 0 else '') + icons[key]
 		cnt += 1
 	if not show_multiple_icons and cnt > 1:
 		if 'multiple' in icons:
 			return icons['multiple']
-        else:
+		else:
 		return ''
     return result
 
@@ -145,16 +143,16 @@ def workspaces(pl, segment_info, only_show=None, output=None, strip=0, format='{
 				'highlight_groups': ['output']
 			}]
 		res += [{
-		    'contents': format.format(name = w.name[min(len(w.name), strip):],
-			stripped_name = format_name(w.name, strip=True),
-			number = w.num,
-		        icon = get_icon(w, '', icons, False, ws_containers),
-			multi_icon = get_icon(w, ' ', icons, True, ws_containers)),
-		    'highlight_groups': workspace_groups(w)
-		    } for w in sort_ws(conn.get_workspaces()) \
-			    if (not only_show or any(getattr(w, tp) for tp in only_show)) \
-			    if w.output == output[0] \
-			    if not (hide_empty_workspaces and is_empty_workspace(w, ws_containers))]
+			'contents': format.format(name = w.name[min(len(w.name), strip):],
+				stripped_name = format_name(w.name, strip=True),
+				number = w.num,
+				icon = get_icon(w, '', icons, False, ws_containers),
+				multi_icon = get_icon(w, ' ', icons, True, ws_containers)),
+			'highlight_groups': workspace_groups(w)
+			} for w in sort_ws(conn.get_workspaces()) \
+					if (not only_show or any(getattr(w, tp) for tp in only_show)) \
+					if w.output == output[0] \
+					if not (hide_empty_workspaces and is_empty_workspace(w, ws_containers))]
 		return res
 	else:
 		res = []
@@ -164,16 +162,16 @@ def workspaces(pl, segment_info, only_show=None, output=None, strip=0, format='{
 				'highlight_groups': ['output']
 			}]
 			res += [{
-			    'contents': format.format(name = w.name[min(len(w.name), strip):],
-				stripped_name = format_name(w.name, strip=True),
-				number = w.num,
-				icon = get_icon(w, '', icons, False, ws_containers),
-				multi_icon = get_icon(w, ' ', icons, True, ws_containers)),
-			    'highlight_groups': workspace_groups(w)
-			    } for w in sort_ws(conn.get_workspaces()) \
-				    if (not only_show or any(getattr(w, tp) for tp in only_show)) \
-				    if w.output == n \
-				    if not (hide_empty_workspaces and is_empty_workspace(w, ws_containers))]
+				'contents': format.format(name = w.name[min(len(w.name), strip):],
+					stripped_name = format_name(w.name, strip=True),
+					number = w.num,
+					icon = get_icon(w, '', icons, False, ws_containers),
+					multi_icon = get_icon(w, ' ', icons, True, ws_containers)),
+				'highlight_groups': workspace_groups(w)
+				} for w in sort_ws(conn.get_workspaces()) \
+						if (not only_show or any(getattr(w, tp) for tp in only_show)) \
+						if w.output == n \
+						if not (hide_empty_workspaces and is_empty_workspace(w, ws_containers))]
 		return res
 
 @requires_segment_info
@@ -234,10 +232,10 @@ def workspace(pl, segment_info, workspace=None, strip=False, format=None, icons=
 
 	return [{
 		'contents': format.format(name = w.name,
-		    stripped_name = format_name(w.name, strip=True),
-		    number = w.num,
-		    icon = get_icon(w, '', icons, False, ws_containers),
-		    multi_icon = get_icon(w, ' ', icons, True, ws_containers)),
+			stripped_name = format_name(w.name, strip=True),
+			number = w.num,
+			icon = get_icon(w, '', icons, False, ws_containers),
+			multi_icon = get_icon(w, ' ', icons, True, ws_containers)),
 		'highlight_groups': workspace_groups(w)
 		}]
 

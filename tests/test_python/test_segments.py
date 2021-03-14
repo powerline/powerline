@@ -1017,45 +1017,45 @@ class TestI3WM(TestCase):
 
 			self.assertEqual(i3wm.workspaces(pl=pl, segment_info=segment_info), [
 				{'contents': '1: w1', 'highlight_groups': ['workspace']},
-				{'contents': '2: w2', 'highlight_groups': ['w_visible', 'workspace']},
-				{'contents': '3: w3', 'highlight_groups': ['w_urgent', 'w_visible', 'workspace']},
-				{'contents': '4: w4', 'highlight_groups': ['w_focused', 'w_urgent', 'w_visible', 'workspace']},
+				{'contents': '2: w2', 'highlight_groups': ['workspace:visible', 'w_visible', 'workspace']},
+				{'contents': '3: w3', 'highlight_groups': ['workspace:urgent', 'w_urgent', 'workspace:visible', 'w_visible', 'workspace']},
+				{'contents': '4: w4', 'highlight_groups': ['workspace:focused', 'w_focused', 'workspace:urgent', 'w_urgent', 'workspace:visible', 'w_visible', 'workspace']},
 			])
 			self.assertEqual(i3wm.workspaces(pl=pl, segment_info=segment_info, only_show=None), [
 				{'contents': '1: w1', 'highlight_groups': ['workspace']},
-				{'contents': '2: w2', 'highlight_groups': ['w_visible', 'workspace']},
-				{'contents': '3: w3', 'highlight_groups': ['w_urgent', 'w_visible', 'workspace']},
-				{'contents': '4: w4', 'highlight_groups': ['w_focused', 'w_urgent', 'w_visible', 'workspace']},
+				{'contents': '2: w2', 'highlight_groups': ['workspace:visible', 'w_visible', 'workspace']},
+				{'contents': '3: w3', 'highlight_groups': ['workspace:urgent', 'w_urgent', 'workspace:visible', 'w_visible', 'workspace']},
+				{'contents': '4: w4', 'highlight_groups': ['workspace:focused', 'w_focused', 'workspace:urgent', 'w_urgent', 'workspace:visible', 'w_visible', 'workspace']},
 			])
 			self.assertEqual(i3wm.workspaces(pl=pl, segment_info=segment_info, only_show=['focused', 'urgent']), [
-				{'contents': '3: w3', 'highlight_groups': ['w_urgent', 'w_visible', 'workspace']},
-				{'contents': '4: w4', 'highlight_groups': ['w_focused', 'w_urgent', 'w_visible', 'workspace']},
+				{'contents': '3: w3', 'highlight_groups': ['workspace:urgent', 'w_urgent', 'workspace:visible', 'w_visible', 'workspace']},
+				{'contents': '4: w4', 'highlight_groups': ['workspace:focused', 'w_focused', 'workspace:urgent', 'w_urgent', 'workspace:visible', 'w_visible', 'workspace']},
 			])
 			self.assertEqual(i3wm.workspaces(pl=pl, segment_info=segment_info, only_show=['visible']), [
-				{'contents': '2: w2', 'highlight_groups': ['w_visible', 'workspace']},
-				{'contents': '3: w3', 'highlight_groups': ['w_urgent', 'w_visible', 'workspace']},
-				{'contents': '4: w4', 'highlight_groups': ['w_focused', 'w_urgent', 'w_visible', 'workspace']},
+				{'contents': '2: w2', 'highlight_groups': ['workspace:visible', 'w_visible', 'workspace']},
+				{'contents': '3: w3', 'highlight_groups': ['workspace:urgent', 'w_urgent', 'workspace:visible', 'w_visible', 'workspace']},
+				{'contents': '4: w4', 'highlight_groups': ['workspace:focused', 'w_focused', 'workspace:urgent', 'w_urgent', 'workspace:visible', 'w_visible', 'workspace']},
 			])
 			self.assertEqual(i3wm.workspaces(pl=pl, segment_info=segment_info, only_show=['visible'], strip=3), [
-				{'contents': 'w2', 'highlight_groups': ['w_visible', 'workspace']},
-				{'contents': 'w3', 'highlight_groups': ['w_urgent', 'w_visible', 'workspace']},
-				{'contents': 'w4', 'highlight_groups': ['w_focused', 'w_urgent', 'w_visible', 'workspace']},
+				{'contents': 'w2', 'highlight_groups': ['workspace:visible', 'w_visible', 'workspace']},
+				{'contents': 'w3', 'highlight_groups': ['workspace:urgent', 'w_urgent', 'workspace:visible', 'w_visible', 'workspace']},
+				{'contents': 'w4', 'highlight_groups': ['workspace:focused', 'w_focused', 'workspace:urgent', 'w_urgent', 'workspace:visible', 'w_visible', 'workspace']},
 			])
 			self.assertEqual(i3wm.workspaces(pl=pl, segment_info=segment_info, only_show=['focused', 'urgent'], output='DVI01'), [
-				{'contents': '4: w4', 'highlight_groups': ['w_focused', 'w_urgent', 'w_visible', 'workspace']},
+				{'contents': '4: w4', 'highlight_groups': ['workspace:focused', 'w_focused', 'workspace:urgent', 'w_urgent', 'workspace:visible', 'w_visible', 'workspace']},
 			])
 			self.assertEqual(i3wm.workspaces(pl=pl, segment_info=segment_info, only_show=['visible'], output='HDMI1'), [
-				{'contents': '3: w3', 'highlight_groups': ['w_urgent', 'w_visible', 'workspace']},
+				{'contents': '3: w3', 'highlight_groups': ['workspace:urgent', 'w_urgent', 'workspace:visible', 'w_visible', 'workspace']},
 			])
 			self.assertEqual(i3wm.workspaces(pl=pl, segment_info=segment_info, only_show=['visible'], strip=3, output='LVDS1'), [
-				{'contents': 'w2', 'highlight_groups': ['w_visible', 'workspace']},
+				{'contents': 'w2', 'highlight_groups': ['workspace:visible', 'w_visible', 'workspace']},
 			])
 			segment_info['output'] = 'LVDS1'
 			self.assertEqual(i3wm.workspaces(pl=pl, segment_info=segment_info, only_show=['visible'], output='HDMI1'), [
-				{'contents': '3: w3', 'highlight_groups': ['w_urgent', 'w_visible', 'workspace']},
+				{'contents': '3: w3', 'highlight_groups': ['workspace:urgent', 'w_urgent', 'workspace:visible', 'w_visible', 'workspace']},
 			])
 			self.assertEqual(i3wm.workspaces(pl=pl, segment_info=segment_info, only_show=['visible'], strip=3), [
-				{'contents': 'w2', 'highlight_groups': ['w_visible', 'workspace']},
+				{'contents': 'w2', 'highlight_groups': ['workspace:visible', 'w_visible', 'workspace']},
 			])
 
 	def test_workspace(self):
@@ -1067,15 +1067,15 @@ class TestI3WM(TestCase):
 				{'contents': '1: w1', 'highlight_groups': ['workspace']},
 			])
 			self.assertEqual(i3wm.workspace(pl=pl, segment_info=segment_info, workspace='3: w3', strip=True), [
-				{'contents': 'w3', 'highlight_groups': ['w_urgent', 'w_visible', 'workspace']},
+				{'contents': 'w3', 'highlight_groups': ['workspace:urgent', 'w_urgent', 'workspace:visible', 'w_visible', 'workspace']},
 			])
 			self.assertEqual(i3wm.workspace(pl=pl, segment_info=segment_info, workspace='9: w9'), None)
 			self.assertEqual(i3wm.workspace(pl=pl, segment_info=segment_info), [
-				{'contents': '4: w4', 'highlight_groups': ['w_focused', 'w_urgent', 'w_visible', 'workspace']},
+				{'contents': '4: w4', 'highlight_groups': ['workspace:focused', 'w_focused', 'workspace:urgent', 'w_urgent', 'workspace:visible', 'w_visible', 'workspace']},
 			])
 			segment_info['workspace'] = next(self.get_workspaces())
 			self.assertEqual(i3wm.workspace(pl=pl, segment_info=segment_info, workspace='4: w4'), [
-				{'contents': '4: w4', 'highlight_groups': ['w_focused', 'w_urgent', 'w_visible', 'workspace']},
+				{'contents': '4: w4', 'highlight_groups': ['workspace:focused', 'w_focused', 'workspace:urgent', 'w_urgent', 'workspace:visible', 'w_visible', 'workspace']},
 			])
 			self.assertEqual(i3wm.workspace(pl=pl, segment_info=segment_info, strip=True), [
 				{'contents': 'w1', 'highlight_groups': ['workspace']},
