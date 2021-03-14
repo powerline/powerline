@@ -1028,18 +1028,18 @@ class TestI3WM(TestCase):
 
 			def get_workspaces(self):
 				return iter([
-					{'name': '1: w1', 'output': 'LVDS1', 'focused': False, 'urgent': False, 'visible': False, 'number': 1},
-					{'name': '2: w2', 'output': 'LVDS1', 'focused': False, 'urgent': False, 'visible': True, 'number': 2},
-					{'name': '3: w3', 'output': 'HDMI1', 'focused': False, 'urgent': True, 'visible': True, 'number': 3},
-					{'name': '4: w4', 'output': 'DVI01', 'focused': True, 'urgent': True, 'visible': True, 'number': None},
+					Args(name='1: w1', output='LVDS1', focused=False, urgent=False, visible=False, number=1),
+					Args(name='2: w2', output='LVDS1', focused=False, urgent=False, visible=True, number=2),
+					Args(name='3: w3', output='HDMI1', focused=False, urgent=True, visible=True, number=3),
+					Args(name='4: w4', output='DVI01', focused=True, urgent=True, visible=True, number=None)
 				])
 
 			def get_outputs(self):
 				return iter([
-					{'name': 'LVDS1', 'active': True},
-					{'name': 'HDMI1', 'active': True},
-					{'name': 'DVI01', 'active': True},
-					{'name': 'HDMI2', 'active': False}
+					Args(name='LVDS1', active=True),
+					Args(name='HDMI1', active=True),
+					Args(name='DVI01', active=True),
+					Args(name='HDMI2', active=False),
 				])
 
 		pl = Pl()
@@ -1116,18 +1116,18 @@ class TestI3WM(TestCase):
 
 			def get_workspaces(self):
 				return iter([
-					{'name': '1: w1', 'output': 'LVDS1', 'focused': False, 'urgent': False, 'visible': False, 'number': 1},
-					{'name': '2: w2', 'output': 'LVDS1', 'focused': False, 'urgent': False, 'visible': True, 'number': 2},
-					{'name': '3: w3', 'output': 'HDMI1', 'focused': False, 'urgent': True, 'visible': True, 'number': 3},
-					{'name': '4: w4', 'output': 'DVI01', 'focused': True, 'urgent': True, 'visible': True, 'number': None},
+					Args(name='1: w1', output='LVDS1', focused=False, urgent=False, visible=False, number=1),
+					Args(name='2: w2', output='LVDS1', focused=False, urgent=False, visible=True, number=2),
+					Args(name='3: w3', output='HDMI1', focused=False, urgent=True, visible=True, number=3),
+					Args(name='4: w4', output='DVI01', focused=True, urgent=True, visible=True, number=None)
 				])
 
 			def get_outputs(self):
 				return iter([
-					{'name': 'LVDS1', 'active': True},
-					{'name': 'HDMI1', 'active': True},
-					{'name': 'DVI01', 'active': True},
-					{'name': 'HDMI2', 'active': False}
+					Args(name='LVDS1', active=True),
+					Args(name='HDMI1', active=True),
+					Args(name='DVI01', active=True),
+					Args(name='HDMI2', active=False),
 				])
 
 		pl = Pl()
