@@ -109,7 +109,6 @@ def workspaces(pl, segment_info, only_show=None, output=None, strip=0, format='{
 	'''
 	conn = get_i3_connection()
 
-	output_count = 1
 	if not output == "__all__":
 		output = output or segment_info.get('output')
 	else:
@@ -136,7 +135,7 @@ def workspaces(pl, segment_info, only_show=None, output=None, strip=0, format='{
 
 	if len(output) <= 1:
 		res = []
-		if output_count > 1:
+		if show_output:
 			res += [{
 				'contents': output[0],
 				'highlight_groups': ['output']
@@ -156,10 +155,11 @@ def workspaces(pl, segment_info, only_show=None, output=None, strip=0, format='{
 	else:
 		res = []
 		for n in output:
-			res += [{
-				'contents': n,
-				'highlight_groups': ['output']
-			}]
+			if show_output:
+				res += [{
+					'contents': n,
+					'highlight_groups': ['output']
+				}]
 			res += [{
 				'contents': format.format(name = w.name[min(len(w.name), strip):],
 					stripped_name = format_name(w.name, strip=True),
