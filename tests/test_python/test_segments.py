@@ -1011,14 +1011,14 @@ class TestI3WM(TestCase):
 
 			workspace_scratch = lambda: Args(name='__i3_scratch')
 			workspace_noscratch = lambda: Args(name='2: w2')
-		    	return [
-	    			Args(scratchpad_state='fresh', urgent=False, workspace=workspace_scratch, nodes=nodes_unfocused),
-    				Args(scratchpad_state='changed', urgent=True, workspace=workspace_noscratch, nodes=nodes_focused),
-				Args(scratchpad_state='fresh', urgent=False, workspace=workspace_scratch, nodes=nodes_unfocused),
-			    	Args(scratchpad_state=None, urgent=False, workspace=workspace_noscratch, nodes=nodes_unfocused),
-		    		Args(scratchpad_state='fresh', urgent=False, workspace=workspace_scratch, nodes=nodes_focused),
-	    			Args(scratchpad_state=None, urgent=True, workspace=workspace_noscratch, nodes=nodes_unfocused),
-    			]
+				return [
+						Args(scratchpad_state='fresh', urgent=False, workspace=workspace_scratch, nodes=nodes_unfocused),
+						Args(scratchpad_state='changed', urgent=True, workspace=workspace_noscratch, nodes=nodes_focused),
+						Args(scratchpad_state='fresh', urgent=False, workspace=workspace_scratch, nodes=nodes_unfocused),
+						Args(scratchpad_state=None, urgent=False, workspace=workspace_noscratch, nodes=nodes_unfocused),
+						Args(scratchpad_state='fresh', urgent=False, workspace=workspace_scratch, nodes=nodes_focused),
+						Args(scratchpad_state=None, urgent=True, workspace=workspace_noscratch, nodes=nodes_unfocused),
+						]
 
 		def workspaces(self):
 			return iter([
