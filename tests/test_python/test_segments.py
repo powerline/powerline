@@ -1028,10 +1028,10 @@ class TestI3WM(TestCase):
 
 			def get_workspaces(self):
 				return iter([
-					Args(name='1: w1', output='LVDS1', focused=False, urgent=False, visible=False, number=1),
-					Args(name='2: w2', output='LVDS1', focused=False, urgent=False, visible=True, number=2),
-					Args(name='3: w3', output='HDMI1', focused=False, urgent=True, visible=True, number=3),
-					Args(name='4: w4', output='DVI01', focused=True, urgent=True, visible=True, number=None)
+					Args(name='1: w1', output='LVDS1', focused=False, urgent=False, visible=False, num=1),
+					Args(name='2: w2', output='LVDS1', focused=False, urgent=False, visible=True, num=2),
+					Args(name='3: w3', output='HDMI1', focused=False, urgent=True, visible=True, num=3),
+					Args(name='4: w4', output='DVI01', focused=True, urgent=True, visible=True, num=None)
 				])
 
 			def get_outputs(self):
@@ -1116,10 +1116,10 @@ class TestI3WM(TestCase):
 
 			def get_workspaces(self):
 				return iter([
-					Args(name='1: w1', output='LVDS1', focused=False, urgent=False, visible=False, number=1),
-					Args(name='2: w2', output='LVDS1', focused=False, urgent=False, visible=True, number=2),
-					Args(name='3: w3', output='HDMI1', focused=False, urgent=True, visible=True, number=3),
-					Args(name='4: w4', output='DVI01', focused=True, urgent=True, visible=True, number=None)
+					Args(name='1: w1', output='LVDS1', focused=False, urgent=False, visible=False, num=1),
+					Args(name='2: w2', output='LVDS1', focused=False, urgent=False, visible=True, num=2),
+					Args(name='3: w3', output='HDMI1', focused=False, urgent=True, visible=True, num=3),
+					Args(name='4: w4', output='DVI01', focused=True, urgent=True, visible=True, num=None)
 				])
 
 			def get_outputs(self):
