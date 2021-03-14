@@ -1150,7 +1150,7 @@ class TestI3WM(TestCase):
 			self.assertEqual(i3wm.workspace(pl=pl, segment_info=segment_info), [
 				{'contents': '4: w4', 'highlight_groups': ['workspace:focused', 'w_focused', 'workspace:urgent', 'w_urgent', 'workspace:visible', 'w_visible', 'workspace']},
 			])
-			segment_info['workspace'] = next(self.get_workspaces())
+			segment_info['workspace'] = next(Conn().get_workspaces())
 			self.assertEqual(i3wm.workspace(pl=pl, segment_info=segment_info, workspace='4: w4'), [
 				{'contents': '4: w4', 'highlight_groups': ['workspace:focused', 'w_focused', 'workspace:urgent', 'w_urgent', 'workspace:visible', 'w_visible', 'workspace']},
 			])
