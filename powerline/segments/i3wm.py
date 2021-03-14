@@ -51,15 +51,15 @@ def get_icon(workspace, separator, icons, show_multiple_icons, ws_containers):
 	cnt = 0
 	for key in icons:
 		if not icons[key] or len(icons[key]) < 1:
-		continue
+			continue
 		if any(key in win.window_class for win in wins if win.window_class):
-		result += (separator if cnt > 0 else '') + icons[key]
-		cnt += 1
+			result += (separator if cnt > 0 else '') + icons[key]
+			cnt += 1
 	if not show_multiple_icons and cnt > 1:
 		if 'multiple' in icons:
 			return icons['multiple']
 		else:
-		return ''
+			return ''
 	return result
 
 @requires_segment_info
