@@ -60,7 +60,7 @@ def get_icon(workspace, separator, icons, show_multiple_icons, ws_containers):
 			return icons['multiple']
 		else:
 		return ''
-    return result
+	return result
 
 @requires_segment_info
 def workspaces(pl, segment_info, only_show=None, output=None, strip=0, format='{name}',
