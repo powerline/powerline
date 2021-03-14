@@ -1001,81 +1001,158 @@ class TestWthr(TestCommon):
 
 
 class TestI3WM(TestCase):
-	@staticmethod
-	def get_workspaces():
-		return iter([
-			Args(name='1: w1', output='LVDS1', focused = False, urgent = False, visible = False),
-			Args(name='2: w2', output='LVDS1', focused = False, urgent = False, visible = True),
-			Args(name='3: w3', output='HDMI1', focused = False, urgent = True, visible = True),
-			Args(name='4: w4', output='DVI01', focused = True, urgent = True, visible = True),
-		])
-
 	def test_workspaces(self):
+		class Conn(object):
+			def get_tree(self):
+				return self
+
+			def descendents(self):
+				nodes_unfocused = [Args(focused = False)]
+				nodes_focused = [Args(focused = True)]
+
+				workspace_scratch = lambda: Args(name='__i3_scratch')
+				workspace_noscratch = lambda: Args(name='2: w2')
+				return [
+						Args(scratchpad_state='fresh', urgent=False, workspace=workspace_scratch, nodes=nodes_unfocused),
+						Args(scratchpad_state='changed', urgent=True, workspace=workspace_noscratch, nodes=nodes_focused),
+						Args(scratchpad_state='fresh', urgent=False, workspace=workspace_scratch, nodes=nodes_unfocused),
+						Args(scratchpad_state=None, urgent=False, workspace=workspace_noscratch, nodes=nodes_unfocused),
+						Args(scratchpad_state='fresh', urgent=False, workspace=workspace_scratch, nodes=nodes_focused),
+						Args(scratchpad_state=None, urgent=True, workspace=workspace_noscratch, nodes=nodes_unfocused),
+						]
+
+			def workspaces(self):
+				return iter([
+					Args(name='1: w1', output='LVDS1', focused=False, urgent=False, visible=False, num=1, leaves=lambda: []),
+					Args(name='2: w2', output='LVDS1', focused=False, urgent=False, visible=True, num=2, leaves=lambda: []),
+					Args(name='3: w3', output='HDMI1', focused=False, urgent=True, visible=True, num=3, leaves=lambda: []),
+					Args(name='4: w4', output='DVI01', focused=True, urgent=True, visible=True, num=None, leaves=lambda: [])
+				])
+
+			def get_workspaces(self):
+				return iter([
+					Args(name='1: w1', output='LVDS1', focused=False, urgent=False, visible=False, num=1, leaves=lambda: []),
+					Args(name='2: w2', output='LVDS1', focused=False, urgent=False, visible=True, num=2, leaves=lambda: []),
+					Args(name='3: w3', output='HDMI1', focused=False, urgent=True, visible=True, num=3, leaves=lambda: []),
+					Args(name='4: w4', output='DVI01', focused=True, urgent=True, visible=True, num=None, leaves=lambda: [])
+				])
+
+			def get_outputs(self):
+				return iter([
+					Args(name='LVDS1', active=True),
+					Args(name='HDMI1', active=True),
+					Args(name='DVI01', active=True),
+					Args(name='HDMI2', active=False),
+				])
+
 		pl = Pl()
-		with replace_attr(i3wm, 'get_i3_connection', lambda: Args(get_workspaces=self.get_workspaces)):
+		with replace_attr(i3wm, 'get_i3_connection', lambda: Conn()):
 			segment_info = {}
 
 			self.assertEqual(i3wm.workspaces(pl=pl, segment_info=segment_info), [
 				{'contents': '1: w1', 'highlight_groups': ['workspace']},
-				{'contents': '2: w2', 'highlight_groups': ['w_visible', 'workspace']},
-				{'contents': '3: w3', 'highlight_groups': ['w_urgent', 'w_visible', 'workspace']},
-				{'contents': '4: w4', 'highlight_groups': ['w_focused', 'w_urgent', 'w_visible', 'workspace']},
+				{'contents': '2: w2', 'highlight_groups': ['workspace:visible', 'w_visible', 'workspace']},
+				{'contents': '3: w3', 'highlight_groups': ['workspace:urgent', 'w_urgent', 'workspace:visible', 'w_visible', 'workspace']},
+				{'contents': '4: w4', 'highlight_groups': ['workspace:focused', 'w_focused', 'workspace:urgent', 'w_urgent', 'workspace:visible', 'w_visible', 'workspace']},
 			])
 			self.assertEqual(i3wm.workspaces(pl=pl, segment_info=segment_info, only_show=None), [
 				{'contents': '1: w1', 'highlight_groups': ['workspace']},
-				{'contents': '2: w2', 'highlight_groups': ['w_visible', 'workspace']},
-				{'contents': '3: w3', 'highlight_groups': ['w_urgent', 'w_visible', 'workspace']},
-				{'contents': '4: w4', 'highlight_groups': ['w_focused', 'w_urgent', 'w_visible', 'workspace']},
+				{'contents': '2: w2', 'highlight_groups': ['workspace:visible', 'w_visible', 'workspace']},
+				{'contents': '3: w3', 'highlight_groups': ['workspace:urgent', 'w_urgent', 'workspace:visible', 'w_visible', 'workspace']},
+				{'contents': '4: w4', 'highlight_groups': ['workspace:focused', 'w_focused', 'workspace:urgent', 'w_urgent', 'workspace:visible', 'w_visible', 'workspace']},
 			])
 			self.assertEqual(i3wm.workspaces(pl=pl, segment_info=segment_info, only_show=['focused', 'urgent']), [
-				{'contents': '3: w3', 'highlight_groups': ['w_urgent', 'w_visible', 'workspace']},
-				{'contents': '4: w4', 'highlight_groups': ['w_focused', 'w_urgent', 'w_visible', 'workspace']},
+				{'contents': '3: w3', 'highlight_groups': ['workspace:urgent', 'w_urgent', 'workspace:visible', 'w_visible', 'workspace']},
+				{'contents': '4: w4', 'highlight_groups': ['workspace:focused', 'w_focused', 'workspace:urgent', 'w_urgent', 'workspace:visible', 'w_visible', 'workspace']},
 			])
 			self.assertEqual(i3wm.workspaces(pl=pl, segment_info=segment_info, only_show=['visible']), [
-				{'contents': '2: w2', 'highlight_groups': ['w_visible', 'workspace']},
-				{'contents': '3: w3', 'highlight_groups': ['w_urgent', 'w_visible', 'workspace']},
-				{'contents': '4: w4', 'highlight_groups': ['w_focused', 'w_urgent', 'w_visible', 'workspace']},
+				{'contents': '2: w2', 'highlight_groups': ['workspace:visible', 'w_visible', 'workspace']},
+				{'contents': '3: w3', 'highlight_groups': ['workspace:urgent', 'w_urgent', 'workspace:visible', 'w_visible', 'workspace']},
+				{'contents': '4: w4', 'highlight_groups': ['workspace:focused', 'w_focused', 'workspace:urgent', 'w_urgent', 'workspace:visible', 'w_visible', 'workspace']},
 			])
 			self.assertEqual(i3wm.workspaces(pl=pl, segment_info=segment_info, only_show=['visible'], strip=3), [
-				{'contents': 'w2', 'highlight_groups': ['w_visible', 'workspace']},
-				{'contents': 'w3', 'highlight_groups': ['w_urgent', 'w_visible', 'workspace']},
-				{'contents': 'w4', 'highlight_groups': ['w_focused', 'w_urgent', 'w_visible', 'workspace']},
+				{'contents': 'w2', 'highlight_groups': ['workspace:visible', 'w_visible', 'workspace']},
+				{'contents': 'w3', 'highlight_groups': ['workspace:urgent', 'w_urgent', 'workspace:visible', 'w_visible', 'workspace']},
+				{'contents': 'w4', 'highlight_groups': ['workspace:focused', 'w_focused', 'workspace:urgent', 'w_urgent', 'workspace:visible', 'w_visible', 'workspace']},
 			])
 			self.assertEqual(i3wm.workspaces(pl=pl, segment_info=segment_info, only_show=['focused', 'urgent'], output='DVI01'), [
-				{'contents': '4: w4', 'highlight_groups': ['w_focused', 'w_urgent', 'w_visible', 'workspace']},
+				{'contents': '4: w4', 'highlight_groups': ['workspace:focused', 'w_focused', 'workspace:urgent', 'w_urgent', 'workspace:visible', 'w_visible', 'workspace']},
 			])
 			self.assertEqual(i3wm.workspaces(pl=pl, segment_info=segment_info, only_show=['visible'], output='HDMI1'), [
-				{'contents': '3: w3', 'highlight_groups': ['w_urgent', 'w_visible', 'workspace']},
+				{'contents': '3: w3', 'highlight_groups': ['workspace:urgent', 'w_urgent', 'workspace:visible', 'w_visible', 'workspace']},
 			])
 			self.assertEqual(i3wm.workspaces(pl=pl, segment_info=segment_info, only_show=['visible'], strip=3, output='LVDS1'), [
-				{'contents': 'w2', 'highlight_groups': ['w_visible', 'workspace']},
+				{'contents': 'w2', 'highlight_groups': ['workspace:visible', 'w_visible', 'workspace']},
 			])
 			segment_info['output'] = 'LVDS1'
 			self.assertEqual(i3wm.workspaces(pl=pl, segment_info=segment_info, only_show=['visible'], output='HDMI1'), [
-				{'contents': '3: w3', 'highlight_groups': ['w_urgent', 'w_visible', 'workspace']},
+				{'contents': '3: w3', 'highlight_groups': ['workspace:urgent', 'w_urgent', 'workspace:visible', 'w_visible', 'workspace']},
 			])
 			self.assertEqual(i3wm.workspaces(pl=pl, segment_info=segment_info, only_show=['visible'], strip=3), [
-				{'contents': 'w2', 'highlight_groups': ['w_visible', 'workspace']},
+				{'contents': 'w2', 'highlight_groups': ['workspace:visible', 'w_visible', 'workspace']},
 			])
 
 	def test_workspace(self):
+		class Conn(object):
+			def get_tree(self):
+				return self
+
+			def descendents(self):
+				nodes_unfocused = [Args(focused = False)]
+				nodes_focused = [Args(focused = True)]
+
+				workspace_scratch = lambda: Args(name='__i3_scratch')
+				workspace_noscratch = lambda: Args(name='2: w2')
+				return [
+						Args(scratchpad_state='fresh', urgent=False, workspace=workspace_scratch, nodes=nodes_unfocused),
+						Args(scratchpad_state='changed', urgent=True, workspace=workspace_noscratch, nodes=nodes_focused),
+						Args(scratchpad_state='fresh', urgent=False, workspace=workspace_scratch, nodes=nodes_unfocused),
+						Args(scratchpad_state=None, urgent=False, workspace=workspace_noscratch, nodes=nodes_unfocused),
+						Args(scratchpad_state='fresh', urgent=False, workspace=workspace_scratch, nodes=nodes_focused),
+						Args(scratchpad_state=None, urgent=True, workspace=workspace_noscratch, nodes=nodes_unfocused),
+						]
+
+			def workspaces(self):
+				return iter([
+					Args(name='1: w1', output='LVDS1', focused=False, urgent=False, visible=False, num=1, leaves=lambda: []),
+					Args(name='2: w2', output='LVDS1', focused=False, urgent=False, visible=True, num=2, leaves=lambda: []),
+					Args(name='3: w3', output='HDMI1', focused=False, urgent=True, visible=True, num=3, leaves=lambda: []),
+					Args(name='4: w4', output='DVI01', focused=True, urgent=True, visible=True, num=None, leaves=lambda: [])
+				])
+
+			def get_workspaces(self):
+				return iter([
+					Args(name='1: w1', output='LVDS1', focused=False, urgent=False, visible=False, num=1, leaves=lambda: []),
+					Args(name='2: w2', output='LVDS1', focused=False, urgent=False, visible=True, num=2, leaves=lambda: []),
+					Args(name='3: w3', output='HDMI1', focused=False, urgent=True, visible=True, num=3, leaves=lambda: []),
+					Args(name='4: w4', output='DVI01', focused=True, urgent=True, visible=True, num=None, leaves=lambda: [])
+				])
+
+			def get_outputs(self):
+				return iter([
+					Args(name='LVDS1', active=True),
+					Args(name='HDMI1', active=True),
+					Args(name='DVI01', active=True),
+					Args(name='HDMI2', active=False),
+				])
+
 		pl = Pl()
-		with replace_attr(i3wm, 'get_i3_connection', lambda: Args(get_workspaces=self.get_workspaces)):
+		with replace_attr(i3wm, 'get_i3_connection', lambda: Conn()):
 			segment_info = {}
 
 			self.assertEqual(i3wm.workspace(pl=pl, segment_info=segment_info, workspace='1: w1'), [
 				{'contents': '1: w1', 'highlight_groups': ['workspace']},
 			])
 			self.assertEqual(i3wm.workspace(pl=pl, segment_info=segment_info, workspace='3: w3', strip=True), [
-				{'contents': 'w3', 'highlight_groups': ['w_urgent', 'w_visible', 'workspace']},
+				{'contents': 'w3', 'highlight_groups': ['workspace:urgent', 'w_urgent', 'workspace:visible', 'w_visible', 'workspace']},
 			])
 			self.assertEqual(i3wm.workspace(pl=pl, segment_info=segment_info, workspace='9: w9'), None)
 			self.assertEqual(i3wm.workspace(pl=pl, segment_info=segment_info), [
-				{'contents': '4: w4', 'highlight_groups': ['w_focused', 'w_urgent', 'w_visible', 'workspace']},
+				{'contents': '4: w4', 'highlight_groups': ['workspace:focused', 'w_focused', 'workspace:urgent', 'w_urgent', 'workspace:visible', 'w_visible', 'workspace']},
 			])
-			segment_info['workspace'] = next(self.get_workspaces())
+			segment_info['workspace'] = next(Conn().get_workspaces())
 			self.assertEqual(i3wm.workspace(pl=pl, segment_info=segment_info, workspace='4: w4'), [
-				{'contents': '4: w4', 'highlight_groups': ['w_focused', 'w_urgent', 'w_visible', 'workspace']},
+				{'contents': '4: w4', 'highlight_groups': ['workspace:focused', 'w_focused', 'workspace:urgent', 'w_urgent', 'workspace:visible', 'w_visible', 'workspace']},
 			])
 			self.assertEqual(i3wm.workspace(pl=pl, segment_info=segment_info, strip=True), [
 				{'contents': 'w1', 'highlight_groups': ['workspace']},
