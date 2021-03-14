@@ -1001,18 +1001,49 @@ class TestWthr(TestCommon):
 
 
 class TestI3WM(TestCase):
-	@staticmethod
-	def get_workspaces():
-		return iter([
-			Args(name='1: w1', output='LVDS1', focused = False, urgent = False, visible = False),
-			Args(name='2: w2', output='LVDS1', focused = False, urgent = False, visible = True),
-			Args(name='3: w3', output='HDMI1', focused = False, urgent = True, visible = True),
-			Args(name='4: w4', output='DVI01', focused = True, urgent = True, visible = True),
-		])
+	class Conn(object):
+		def get_tree(self):
+			return self
+
+		def descendents(self):
+			nodes_unfocused = [Args(focused = False)]
+			nodes_focused = [Args(focused = True)]
+
+			workspace_scratch = lambda: Args(name='__i3_scratch')
+			workspace_noscratch = lambda: Args(name='2: w2')
+		    	return [
+	    			Args(scratchpad_state='fresh', urgent=False, workspace=workspace_scratch, nodes=nodes_unfocused),
+    				Args(scratchpad_state='changed', urgent=True, workspace=workspace_noscratch, nodes=nodes_focused),
+				Args(scratchpad_state='fresh', urgent=False, workspace=workspace_scratch, nodes=nodes_unfocused),
+			    	Args(scratchpad_state=None, urgent=False, workspace=workspace_noscratch, nodes=nodes_unfocused),
+		    		Args(scratchpad_state='fresh', urgent=False, workspace=workspace_scratch, nodes=nodes_focused),
+	    			Args(scratchpad_state=None, urgent=True, workspace=workspace_noscratch, nodes=nodes_unfocused),
+    			]
+
+		def workspaces(self):
+			return iter([
+			    ## TODO
+			])
+
+		def get_workspaces(self):
+			return iter([
+				{'name': '1: w1', 'output': 'LVDS1', 'focused': False, 'urgent': False, 'visible': False, 'number': 1},
+				{'name': '2: w2', 'output': 'LVDS1', 'focused': False, 'urgent': False, 'visible': True, 'number': 2},
+				{'name': '3: w3', 'output': 'HDMI1', 'focused': False, 'urgent': True, 'visible': True, 'number': 3},
+				{'name': '4: w4', 'output': 'DVI01', 'focused': True, 'urgent': True, 'visible': True, 'number': None},
+			])
+
+		def get_outputs(self):
+			return iter([
+				{'name': 'LVDS1', 'active': True},
+				{'name': 'HDMI1', 'active': True},
+				{'name': 'DVI01', 'active': True},
+				{'name': 'HDMI2', 'active': False}
+			])
 
 	def test_workspaces(self):
 		pl = Pl()
-		with replace_attr(i3wm, 'get_i3_connection', lambda: Args(get_workspaces=self.get_workspaces)):
+		with replace_attr(i3wm, 'get_i3_connection', lambda: Conn()):
 			segment_info = {}
 
 			self.assertEqual(i3wm.workspaces(pl=pl, segment_info=segment_info), [
@@ -1060,7 +1091,7 @@ class TestI3WM(TestCase):
 
 	def test_workspace(self):
 		pl = Pl()
-		with replace_attr(i3wm, 'get_i3_connection', lambda: Args(get_workspaces=self.get_workspaces)):
+		with replace_attr(i3wm, 'get_i3_connection', lambda: Conn()):
 			segment_info = {}
 
 			self.assertEqual(i3wm.workspace(pl=pl, segment_info=segment_info, workspace='1: w1'), [
