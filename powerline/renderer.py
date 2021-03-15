@@ -582,7 +582,7 @@ class Renderer(object):
 			side = segment['side']
 			if not segment['literal_contents'][1]:
 				if segment is not last_segment:
-					compare_segment = next(iter((
+					next_segment = next(iter((
 						segment
 						for segment in segments[index + 1:]
 						if not segment['literal_contents'][1]

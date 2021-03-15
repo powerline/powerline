@@ -112,7 +112,7 @@ class Colorscheme(object):
 	def get_gradient(self, gradient, gradient_level):
 		if gradient in self.gradients:
 			# cterm, hex
-			col = pick_gradient_value(self.gradients[gradient], gradient_level, is_hsv = (self.         gradient_types[gradient] == "hsv"))
+			col = pick_gradient_value(self.gradients[gradient], gradient_level, is_hsv = (self.gradient_types[gradient] == "hsv"))
 			return (cterm_color(*hex_to_rgb(col)), col)
 		else:
 			return self.colors[gradient]
@@ -157,9 +157,9 @@ class Colorscheme(object):
 			raise KeyError('Highlighting groups not found in colorscheme: ' + ', '.join(groups))
 
 		if gradient_level is None:
-			pick_color = lambda str: (hex_to_cterm(str), int(add_transparency(str), 16)) if str.        startswith('0x') or str.startswith('0X') else self.colors[str]
+			pick_color = lambda str: (hex_to_cterm(str), int(add_transparency(str), 16)) if str.startswith('0x') or str.startswith('0X') else self.colors[str]
 		else:
-			pick_color = lambda str: (hex_to_cterm(str), int(add_transparency(str), 16)) if str.        startswith('0x') or str.startswith('0X') else self.get_gradient(str, gradient_level)
+			pick_color = lambda str: (hex_to_cterm(str), int(add_transparency(str), 16)) if str.startswith('0x') or str.startswith('0X') else self.get_gradient(str, gradient_level)
 
 		# attrs and click are optional
 		return {

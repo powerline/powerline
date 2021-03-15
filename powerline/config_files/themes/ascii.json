@@ -5,6 +5,10 @@
 			"hard": " ",
 			"soft": "| "
 		},
+		"center": {
+			"hard": " ",
+			"soft": "| "
+		},
 		"right": {
 			"hard": " ",
 			"soft": " |"
