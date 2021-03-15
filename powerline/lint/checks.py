@@ -16,7 +16,7 @@ from powerline.lint.context import JStr, list_themes
 from powerline.lint.imp import WithPath, import_function, import_segment
 from powerline.lint.spec import Spec
 from powerline.lint.inspect import getconfigargspec
-
+from powerline.colorscheme import hex_to_cterm
 
 list_sep = JStr(', ')
 
@@ -152,13 +152,18 @@ def check_top_theme(theme, data, context, echoerr):
 def check_color(color, data, context, echoerr):
 	havemarks(color)
 	if (color not in data['colors_config'].get('colors', {})
-		and color not in data['colors_config'].get('gradients', {})):
+			and color not in data['colors_config'].get('gradients', {})):
+		try:
+			if hex_to_cterm(color) != -1:
+				return True, False, False
+		except Exception:
+			pass
 		echoerr(
-			context='Error while checking highlight group in colorscheme (key {key})'.format(
-				key=context.key),
-			problem='found unexistent color or gradient {0}'.format(color),
-			problem_mark=color.mark
-		)
+				context='Error while checking highlight group in colorscheme (key {key})'.format(
+					key=context.key),
+				problem='found unexistent color or gradient {0}'.format(color),
+				problem_mark=color.mark
+			)
 		return True, False, True
 	return True, False, False
 
@@ -256,7 +261,7 @@ def check_key_compatibility(segment, data, context, echoerr):
 	hadproblem = False
 
 	keys = set(segment)
-	if not ((keys - generic_keys) < type_keys[segment_type]):
+	if not ((keys - generic_keys) <= type_keys[segment_type]):
 		unknown_keys = keys - generic_keys - type_keys[segment_type]
 		echoerr(
 			context='Error while checking segments (key {key})'.format(key=context.key),
@@ -542,7 +547,7 @@ def hl_group_in_colorscheme(hl_group, cconfig, allow_gradients, data, context, e
 			try:
 				group_config = cconfig['groups'][group_config]
 			except KeyError:
-				# No such group. Error was already reported when checking 
+				# No such group. Error was already reported when checking
 				# colorschemes.
 				return True
 		havemarks(group_config)
@@ -550,12 +555,12 @@ def hl_group_in_colorscheme(hl_group, cconfig, allow_gradients, data, context, e
 		for ckey in ('fg', 'bg'):
 			color = group_config.get(ckey)
 			if not color:
-				# No color. Error was already reported when checking 
+				# No color. Error was already reported when checking
 				# colorschemes.
 				return True
 			havemarks(color)
-			# Gradients are only allowed for function segments. Note that 
-			# whether *either* color or gradient exists should have been 
+			# Gradients are only allowed for function segments. Note that
+			# whether *either* color or gradient exists should have been
 			# already checked
 			hascolor = color in data['colors_config'].get('colors', {})
 			hasgradient = color in data['colors_config'].get('gradients', {})
@@ -570,15 +575,6 @@ def hl_group_in_colorscheme(hl_group, cconfig, allow_gradients, data, context, e
 					problem_mark=color.mark
 				)
 				return False
-		if allow_gradients == 'force' and not hadgradient:
-			echoerr(
-				context='Error while checking highlight group in theme (key {key})'.format(
-					key=context.key),
-				context_mark=hl_group.mark,
-				problem='group {0} should have at least one gradient color, but it has no'.format(hl_group),
-				problem_mark=group_config.mark
-			)
-			return False
 	return True
 
 
@@ -586,7 +582,7 @@ def hl_exists(hl_group, data, context, echoerr, allow_gradients=False):
 	havemarks(hl_group)
 	ext = data['ext']
 	if ext not in data['colorscheme_configs']:
-		# No colorschemes. Error was already reported, no need to report it 
+		# No colorschemes. Error was already reported, no need to report it
 		# twice
 		return []
 	r = []
@@ -805,7 +801,7 @@ def check_exinclude_function(name, data, context, echoerr):
 def check_log_file_level(this_level, data, context, echoerr):
 	'''Check handler level specified in :ref:`log_file key <config-common-log>`
 
-	This level must be greater or equal to the level in :ref:`log_level key 
+	This level must be greater or equal to the level in :ref:`log_level key
 	<config-common-log_level>`.
 	'''
 	havemarks(this_level)

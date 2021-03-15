@@ -66,7 +66,7 @@ main_spec = (Spec(
 		default_top_theme=top_theme_spec().optional(),
 		term_truecolor=Spec().type(bool).optional(),
 		term_escape_style=Spec().type(unicode).oneof(set(('auto', 'xterm', 'fbterm'))).optional(),
-		# Python is capable of loading from zip archives. Thus checking path 
+		# Python is capable of loading from zip archives. Thus checking path
 		# only for existence of the path, not for it being a directory
 		paths=Spec().list(
 			(lambda value, *args: (True, True, not os.path.exists(os.path.expanduser(value.value)))),
@@ -144,19 +144,33 @@ true_color_spec = Spec().re(
 	'^[0-9a-fA-F]{6}$',
 	(lambda value: '"{0}" is not a six-digit hexadecimal unsigned integer written as a string'.format(value))
 ).copy
+hex_color_spec = Spec().re(
+	'0x[0-9a-fA-F]{6}$',
+	(lambda value: '"{0}" is not a six-digit hexadecimal unsigned integer written as a string'.format(value))
+).copy
+hex_color_spec_long = Spec().re(
+	'0x[0-9a-fA-F]{8}$',
+	(lambda value: '"{0}" is not a eight-digit hexadecimal unsigned integer written as a string'.format(value))
+).copy
+
 colors_spec = (Spec(
 	colors=Spec().unknown_spec(
 		Spec().ident(),
 		Spec().either(
 			Spec().tuple(term_color_spec(), true_color_spec()),
-			term_color_spec()
+			term_color_spec(),
+			hex_color_spec(),
+			hex_color_spec_long()
 		)
 	).context_message('Error while checking colors (key {key})'),
 	gradients=Spec().unknown_spec(
 		Spec().ident(),
-		Spec().tuple(
-			Spec().len('gt', 1).list(term_color_spec()),
-			Spec().len('gt', 1).list(true_color_spec()).optional(),
+		Spec().either(
+			Spec().tuple(
+				Spec().len('gt', 1).list(term_color_spec()),
+				Spec().len('gt', 1).list(true_color_spec()).optional(),
+			),
+			Spec().len('gt', 1).list(hex_color_spec())
 		)
 	).context_message('Error while checking gradients (key {key})'),
 ).context_message('Error while loading colors configuration'))
@@ -168,7 +182,8 @@ group_name_spec = Spec().ident().copy
 group_spec = Spec().either(Spec(
 	fg=color_spec(),
 	bg=color_spec(),
-	attrs=Spec().list(Spec().type(unicode).oneof(set(('bold', 'italic', 'underline')))),
+	attrs=Spec().list(Spec().type(unicode).oneof(set(('bold', 'italic', 'underline', 'overline')))).optional(),
+	click=Spec().optional(),
 ), group_name_spec().func(check_group)).copy
 groups_spec = Spec().unknown_spec(
 	group_name_spec(),
@@ -214,19 +229,37 @@ shell_colorscheme_spec = (Spec(
 		mode_translations_value_spec(),
 	).optional().context_message('Error while loading mode translations (key {key})'),
 ).context_message('Error while loading shell colorscheme'))
-
+ipython_mode_spec = Spec().oneof(set(['vi-navigation', 'vi-insert', 'vi-insert-multiple',
+	'vi-replace'])).copy
+ipython_colorscheme_spec = (Spec(
+	name=name_spec(),
+	groups=groups_spec(),
+	mode_translations=Spec().unknown_spec(
+		ipython_mode_spec(),
+		mode_translations_value_spec(),
+	).optional().context_message('Error while loading mode translations (key {key})'),
+).context_message('Error while loading vim colorscheme'))
 
 args_spec = Spec(
 	pl=Spec().error('pl object must be set by powerline').optional(),
 	segment_info=Spec().error('Segment info dictionary must be set by powerline').optional(),
 ).unknown_spec(Spec(), Spec()).optional().copy
 segment_module_spec = Spec().type(unicode).func(check_segment_module).optional().copy
-exinclude_spec = Spec().re(function_name_re).func(check_exinclude_function).copy
+exinclude_spec = Spec().either(
+	Spec(
+		function=Spec().re(function_name_re).func(check_segment_function),
+		args=Spec().unknown_spec(Spec(), Spec()).func(
+			lambda *args, **kwargs: check_args(get_one_segment_function, *args, **kwargs)
+		)
+	).func(lambda *args, **kwargs: (True, True, False)),
+	Spec().re(function_name_re).func(check_exinclude_function)
+).copy
+
 segment_spec_base = Spec(
 	name=Spec().re('^[a-zA-Z_]\w*$').optional(),
 	function=Spec().re(function_name_re).func(check_segment_function).optional(),
-	exclude_modes=Spec().list(vim_mode_spec()).optional(),
-	include_modes=Spec().list(vim_mode_spec()).optional(),
+	exclude_modes=Spec().optional(),
+	include_modes=Spec().optional(),
 	exclude_function=exinclude_spec().optional(),
 	include_function=exinclude_spec().optional(),
 	draw_hard_divider=Spec().type(bool).optional(),
@@ -263,9 +296,10 @@ segments_spec = Spec().optional().list(segment_spec).copy
 segdict_spec = Spec(
 	left=segments_spec().context_message('Error while loading segments from left side (key {key})'),
 	right=segments_spec().context_message('Error while loading segments from right side (key {key})'),
+	center=segments_spec().context_message('Error while loading segments from center side (key {key})'),
 ).func(
-	(lambda value, *args: (True, True, not (('left' in value) or ('right' in value)))),
-	(lambda value: 'segments dictionary must contain either left, right or both keys')
+	(lambda value, *args: (True, True, not (('left' in value) or ('right' in value) or ('center' in value)))),
+	(lambda value: 'segments dictionary must contain either left, right, center or all keys')
 ).context_message('Error while loading segments (key {key})').copy
 divside_spec = Spec(
 	hard=divider_spec(),
@@ -281,6 +315,7 @@ segment_data_value_spec = Spec(
 dividers_spec = Spec(
 	left=divside_spec(),
 	right=divside_spec(),
+	center=divside_spec(),
 ).copy
 spaces_spec = Spec().unsigned().cmp(
 	'le', 2, (lambda value: 'Are you sure you need such a big ({0}) number of spaces?'.format(value))
@@ -396,17 +431,17 @@ def check(paths=None, debug=False, echoerr=echoerr, require_ext=None):
 	:param list paths:
 		Paths from which configuration should be loaded.
 	:param bool debug:
-		Determines whether some information useful for debugging linter should 
+		Determines whether some information useful for debugging linter should
 		be output.
 	:param function echoerr:
-		Function that will be used to echo the error(s). Should accept four 
-		optional keyword parameters: ``problem`` and ``problem_mark``, and 
+		Function that will be used to echo the error(s). Should accept four
+		optional keyword parameters: ``problem`` and ``problem_mark``, and
 		``context`` and ``context_mark``.
 	:param str require_ext:
 		Require configuration for some extension to be present.
 
 	:return:
-		``False`` if user configuration seems to be completely sane and ``True`` 
+		``False`` if user configuration seems to be completely sane and ``True``
 		if some problems were found.
 	'''
 	hadproblem = False
@@ -556,8 +591,10 @@ def check(paths=None, debug=False, echoerr=echoerr, require_ext=None):
 				spec = vim_colorscheme_spec
 			elif ext == 'shell':
 				spec = shell_colorscheme_spec
+			elif ext == 'ipython':
+				spec = ipython_colorscheme_spec
 			else:
-				spec = colorscheme_spec
+				spec = top_colorscheme_spec
 			if spec.match(config, context=Context(config), data=data, echoerr=ee)[1]:
 				hadproblem = True
 
