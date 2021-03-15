@@ -16,11 +16,20 @@ def requires_filesystem_watcher(func):
 	func.powerline_requires_filesystem_watcher = True
 	return func
 
+def layered_selector(func):
+	func.powerline_layered_selector = True
+	return func
+
+def recursive_selector(func):
+	func.powerline_recursive_selector = True
+	return func
+
 
 def new_empty_segment_line():
 	return {
 		'left': [],
-		'right': []
+		'right': [],
+		'center': []
 	}
 
 
@@ -91,7 +100,7 @@ class Theme(object):
 		for segdict in itertools.chain((theme_config['segments'],),
 		                               theme_config['segments'].get('above', ())):
 			self.segments.append(new_empty_segment_line())
-			for side in ['left', 'right']:
+			for side in ['left', 'right', 'center']:
 				for segment in segdict.get(side, []):
 					segment = get_segment(segment, side)
 					if segment:
@@ -130,10 +139,10 @@ class Theme(object):
 		and ljust/rjust properties applied.
 
 		:param int line:
-			Line number for which segments should be obtained. Is counted from 
+			Line number for which segments should be obtained. Is counted from
 			zero (botmost line).
 		'''
-		for side in [side] if side else ['left', 'right']:
+		for side in [side] if side else ['left', 'right', 'center']:
 			parsed_segments = []
 			for segment in self.segments[line][side]:
 				if segment['display_condition'](self.pl, segment_info, mode):

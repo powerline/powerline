@@ -901,6 +901,23 @@ class Powerline(object):
 				exc = e
 			yield FailedUnicode(safe_unicode(exc))
 
+	def force_update(self, *args, **kwargs):
+		'''Force a segment to update itself.
+		'''
+		try:
+			self.update_renderer()
+			return self.renderer.force_update(*args, **kwargs)
+		except Exception as e:
+			exc = e
+			try:
+				self.exception('Failed to force segment update: {0}', str(e))
+			except Exception as e:
+				exc = e
+			ret = FailedUnicode(safe_unicode(exc))
+			if kwargs.get('output_width', False):
+				ret = ret, len(ret)
+			return ret
+
 	def setup(self, *args, **kwargs):
 		'''Setup the environment to use powerline.
 

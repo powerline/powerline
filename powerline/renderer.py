@@ -267,7 +267,7 @@ class Renderer(object):
 			Maximum width text can occupy. May be exceeded if there are too much
 			non-removable segments.
 		:param str side:
-			One of ``left``, ``right``. Determines which side will be rendered.
+			One of ``left``, ``right``, ``center``. Determines which side will be rendered.
 			If not present all sides are rendered.
 		:param int line:
 			Line number for which segments should be obtained. Is counted from
@@ -315,6 +315,10 @@ class Renderer(object):
 				'hard': self.strwidth(theme.get_divider('right', 'hard')),
 				'soft': self.strwidth(theme.get_divider('right', 'soft')),
 			},
+			'center': {
+				'hard': self.strwidth(theme.get_divider('center', 'hard')),
+				'soft': self.strwidth(theme.get_divider('center', 'soft')),
+			},
 		}
 
 	hl_join = staticmethod(''.join)
@@ -353,23 +357,28 @@ class Renderer(object):
 		divider_widths = self.compute_divider_widths(theme)
 
 		# Create an ordered list of segments that can be dropped
-		segments_priority = sorted((segment for segment in segments if segment['priority'] is not None), key=lambda segment: segment['priority'], reverse=True)
+		segments_priority = sorted((segment for segment in segments if segment['priority'] is not None), key=lambda segment: (-segment['priority'], segment['_len']))
 		no_priority_segments = filter(lambda segment: segment['priority'] is None, segments)
 		current_width = self._render_length(theme, segments, divider_widths)
+
 		if current_width > width:
 			for segment in chain(segments_priority, no_priority_segments):
 				if segment['truncate'] is not None:
 					segment['contents'] = segment['truncate'](self.pl, current_width - width, segment)
+					self._prepare_segments(segments, output_width or width)
+					current_width = self._render_length(theme, segments, divider_widths)
+					if current_width <= width:
+						break
 
+		if current_width > width:
 			segments_priority = iter(segments_priority)
 			if current_width > width and len(segments) > 100:
 				# When there are too many segments use faster, but less correct
 				# algorithm for width computation
-				diff = current_width - width
 				for segment in segments_priority:
 					segments.remove(segment)
-					diff -= segment['_len']
-					if diff <= 0:
+					current_width -= segment['_len']
+					if current_width <= width:
 						break
 				current_width = self._render_length(theme, segments, divider_widths)
 			if current_width > width:
@@ -409,6 +418,54 @@ class Renderer(object):
 
 		return construct_returned_value(rendered_highlighted, segments, current_width, output_raw, output_width)
 
+	def force_update(self, mode, segment_name, matcher_info, segment_info = None, *args, **kwargs):
+		'''Force the first segment with name ``segment_name`` to update its content.
+		'''
+		theme = self.get_theme(matcher_info)
+		self.do_force_update(
+				mode,
+				segment_name,
+				theme,
+				segment_info=self.get_segment_info(segment_info, mode),
+				*args,
+				**kwargs)
+
+	def do_force_update(self, mode, segment_name, theme, segment_info = None, *args, **kwargs):
+		'''Force the first segment with name ``segment_name`` to update its content.
+		May silently render segment to obtain their ``payload_name``.
+		Only works for ThreadedSegments
+		'''
+		for i in range(0, len(theme.segments)):
+			for side in theme.segments[i]:
+				target = [segment for segment in theme.segments[i][side]
+						if 'type' in segment and segment['type'] == 'function' and
+						'name' in segment and segment['name'] == segment_name]
+				if len(target) > 0:
+					try:
+						target[0]['contents_func'](theme.pl, segment_info, force_update=True)
+					except TypeError:
+						pass
+					return
+
+		# Some segments have differing name and payload_name, so compute the latter
+		for i in range(0, len(theme.segments)):
+			for side in theme.segments[i]:
+				for segment in theme.segments[i][side]:
+					if segment['type'] != 'function':
+						continue
+					contents = segment['contents_func'](theme.pl, segment_info)
+					if contents == None:
+						continue
+					pns = [True for seg in contents if 'payload_name' in seg
+							and seg['payload_name'] == segment_name]
+					if len(pns):
+						try:
+							segment['contents_func'](theme.pl, segment_info, force_update=True)
+						except TypeError:
+							pass
+						return
+		return
+
 	def _prepare_segments(self, segments, calculate_contents_len):
 		'''Translate non-printable characters and calculate segment width
 		'''
@@ -420,6 +477,13 @@ class Renderer(object):
 					segment['_contents_len'] = segment['literal_contents'][0]
 				else:
 					segment['_contents_len'] = self.strwidth(segment['contents'])
+
+	def _compare_bg(self, first_bg, second_bg):
+		if not first_bg and not second_bg:
+			return True
+		if not first_bg or not second_bg:
+			return False
+		return first_bg[0] == second_bg[0] and first_bg[1] == second_bg[1]
 
 	def _render_length(self, theme, segments, divider_widths):
 		'''Update segments lengths and return them
@@ -448,7 +512,7 @@ class Renderer(object):
 			side = segment['side']
 			segment_len = segment['_contents_len']
 			if not segment['literal_contents'][1]:
-				if side == 'left':
+				if side != 'right':
 					if segment is not last_segment:
 						compare_segment = next(iter((
 							segment
@@ -460,12 +524,16 @@ class Renderer(object):
 				else:
 					compare_segment = prev_segment
 
-				divider_type = 'soft' if compare_segment['highlight']['bg'] == segment['highlight']['bg'] else 'hard'
+				divider_type = 'soft' if self._compare_bg(compare_segment['highlight']['bg'], segment['highlight']['bg']) else 'hard'
 
 				outer_padding = int(bool(
 					segment is first_segment
 					if side == 'left' else
 					segment is last_segment
+					if side == 'right' else
+					segment is first_segment or segment is last_segment
+					if side == 'center' else
+					False
 				)) * theme.outer_padding
 
 				draw_divider = segment['draw_' + divider_type + '_divider']
@@ -492,6 +560,7 @@ class Renderer(object):
 		segments_len = len(segments)
 		divider_spaces = theme.get_spaces()
 		prev_segment = theme.EMPTY_SEGMENT
+		next_segment = theme.EMPTY_SEGMENT
 		try:
 			first_segment = next(iter((
 				segment
@@ -512,23 +581,28 @@ class Renderer(object):
 		for index, segment in enumerate(segments):
 			side = segment['side']
 			if not segment['literal_contents'][1]:
-				if side == 'left':
-					if segment is not last_segment:
-						compare_segment = next(iter((
-							segment
-							for segment in segments[index + 1:]
-							if not segment['literal_contents'][1]
-						)))
-					else:
-						compare_segment = theme.EMPTY_SEGMENT
+				if segment is not last_segment:
+					compare_segment = next(iter((
+						segment
+						for segment in segments[index + 1:]
+						if not segment['literal_contents'][1]
+					)))
+				else:
+					next_segment = theme.EMPTY_SEGMENT
+				if side != 'right':
+					compare_segment = next_segment
 				else:
 					compare_segment = prev_segment
 				outer_padding = int(bool(
 					segment is first_segment
 					if side == 'left' else
 					segment is last_segment
+					if side == 'right' else
+					segment is first_segment or segment is last_segment
+					if side == 'center' else
+					False
 				)) * theme.outer_padding * ' '
-				divider_type = 'soft' if compare_segment['highlight']['bg'] == segment['highlight']['bg'] else 'hard'
+				divider_type = 'soft' if self._compare_bg(compare_segment['highlight']['bg'], segment['highlight']['bg']) else 'hard'
 
 				divider_highlighted = ''
 				contents_raw = segment['contents']
@@ -541,9 +615,9 @@ class Renderer(object):
 
 				# XXX Make sure self.hl() calls are called in the same order
 				# segments are displayed. This is needed for Vim renderer to work.
-				if draw_divider:
+				if draw_divider and (side != 'center' or segment != last_segment):
 					divider_raw = self.escape(theme.get_divider(side, divider_type))
-					if side == 'left':
+					if side != 'right':
 						contents_raw = outer_padding + contents_raw + (divider_spaces * ' ')
 					else:
 						contents_raw = (divider_spaces * ' ') + contents_raw + outer_padding
@@ -556,25 +630,31 @@ class Renderer(object):
 						divider_fg = segment['highlight']['bg']
 						divider_bg = compare_segment['highlight']['bg']
 
-					if side == 'left':
+					if side != 'right':
 						if render_highlighted:
-							contents_highlighted = self.hl(self.escape(contents_raw), **segment_hl_args)
+							contents_highlighted = self.hl(self.escape(contents_raw),
+									next_segment=next_segment,
+									**segment_hl_args)
 							divider_highlighted = self.hl(divider_raw, divider_fg, divider_bg, False, **hl_args)
 						segment['_rendered_raw'] = contents_raw + divider_raw
 						segment['_rendered_hl'] = contents_highlighted + divider_highlighted
 					else:
 						if render_highlighted:
 							divider_highlighted = self.hl(divider_raw, divider_fg, divider_bg, False, **hl_args)
-							contents_highlighted = self.hl(self.escape(contents_raw), **segment_hl_args)
+							contents_highlighted = self.hl(self.escape(contents_raw),
+									next_segment=next_segment,
+									**segment_hl_args)
 						segment['_rendered_raw'] = divider_raw + contents_raw
 						segment['_rendered_hl'] = divider_highlighted + contents_highlighted
 				else:
-					if side == 'left':
+					if side == 'left' or (side == 'center' and segment != last_segment):
 						contents_raw = outer_padding + contents_raw
 					else:
 						contents_raw = contents_raw + outer_padding
 
-					contents_highlighted = self.hl(self.escape(contents_raw), **segment_hl_args)
+					contents_highlighted = self.hl(self.escape(contents_raw),
+							next_segment=next_segment,
+							**segment_hl_args)
 					segment['_rendered_raw'] = contents_raw
 					segment['_rendered_hl'] = contents_highlighted
 				prev_segment = segment

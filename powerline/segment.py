@@ -2,6 +2,7 @@
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 from powerline.lib.watcher import create_file_watcher
+from powerline.lib.dict import mergedicts_copy
 
 
 def list_segment_key_values(segment, theme_configs, segment_data, key, function_name=None, name=None, module=None, default=None):
@@ -181,7 +182,7 @@ def process_segment(pl, side, segment_info, parsed_segments, segment, mode, colo
 			return
 
 		if isinstance(contents, list):
-			# Needs copying here, but it was performed at the very start of the 
+			# Needs copying here, but it was performed at the very start of the
 			# function
 			segment_base = segment
 			if contents:
@@ -262,14 +263,48 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, ge
 		return get_segment_key(merge, segment, theme_configs, data['segment_data'], key, function_name, name, module, default)
 	data['get_key'] = get_key
 
-	def get_selector(function_name):
+	def get_selector(function_details):
+		function_name = None
+		simple_mode = True
+		if isinstance(function_details, str):
+			# simple definition of include/exclude function
+			function_name = function_details
+		if isinstance(function_details, dict):
+			function_details = dict((
+				(str(k), v)
+				for k, v in
+				function_details.items()
+				))
+			function_name = function_details.get('function')
+			simple_mode = False
+
+		if not function_name:
+			pl.error('Failed to get segment selector name, ignoring the selector')
+			return None
+
 		if '.' in function_name:
 			module, function_name = function_name.rpartition('.')[::2]
 		else:
 			module = 'powerline.selectors.' + ext
 		function = get_module_attr(module, function_name, prefix='segment_generator/selector_function')
+
+		if getattr(function, 'powerline_layered_selector', False):
+			if simple_mode or not 'args' in function_details:
+				# simple mode doesn't support args for include/exclude functions
+				function = None
+			else:
+				layered_args = dict((
+					(str(k), v) if not getattr(function, 'powerline_recursive_selector', False)
+					else (str(k), get_selector(v))
+					for k, v in
+					function_details.get('args').items()
+					))
+				try:
+					function = function(**layered_args)
+				except TypeError:
+					function = None
 		if not function:
-			pl.error('Failed to get segment selector, ignoring it')
+			pl.error('Failed to get segment selector "{0}", ignoring it'.format(function_name))
 		return function
 
 	def get_segment_selector(segment, selector_type):
@@ -370,12 +405,13 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, ge
 				'divider_highlight_group': None,
 				'before': None,
 				'after': None,
-				'contents_func': lambda pl, segment_info, parsed_segments, side, mode, colorscheme: (
+				'contents_func': lambda pl, segment_info, parsed_segments, side, mode, colorscheme, **opt: (
 					process_segment_lister(
 						pl, segment_info, parsed_segments, side, mode, colorscheme,
 						patcher_args=args,
 						subsegments=subsegments,
 						lister=_contents_func,
+						**opt
 					)
 				),
 				'contents': None,
@@ -409,9 +445,9 @@ def gen_segment_getter(pl, ext, common_config, theme_configs, default_module, ge
 				args[str('create_watcher')] = create_watcher
 
 			if hasattr(_contents_func, 'powerline_requires_segment_info'):
-				contents_func = lambda pl, segment_info: _contents_func(pl=pl, segment_info=segment_info, **args)
+				contents_func = lambda pl, segment_info, **opt: _contents_func(pl=pl, segment_info=segment_info, **mergedicts_copy(args, opt))
 			else:
-				contents_func = lambda pl, segment_info: _contents_func(pl=pl, **args)
+				contents_func = lambda pl, segment_info, **opt: _contents_func(pl=pl, **mergedicts_copy(args, opt))
 		else:
 			startup_func = None
 			shutdown_func = None
