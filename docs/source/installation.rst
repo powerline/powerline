@@ -54,7 +54,7 @@ Generic requirements
 Pip installation
 ================
 
-Due to a naming conflict with an unrelated project powerline is available on 
+Due to a naming conflict with an unrelated project, powerline is available on 
 PyPI under the ``powerline-status`` name:
 
 .. code-block:: sh
