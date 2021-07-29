@@ -1,0 +1,8 @@
+[Unit]
+Description=Socket for powerline-daemon
+
+[Socket]
+ListenStream=@powerline-ipc-%U
+
+[Install]
+WantedBy=default.target

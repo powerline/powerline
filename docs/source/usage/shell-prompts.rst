@@ -40,6 +40,9 @@ absolute path to the Powerline installation directory (see :ref:`repository root
     in the bash configuration file. Without ``POWERLINE_BASH_*`` variables PS2 
     and PS3 prompts are computed exactly once at bash startup.
 
+    In case the systemd units were installed/enabled according to the Linux
+    installation documentation, omit the `powerline-daemon -q` line.
+
 .. warning::
     At maximum bash continuation PS2 and select PS3 prompts are computed each 
     time main PS1 prompt is computed. Thus putting e.g. current time into PS2 or 

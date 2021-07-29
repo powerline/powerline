@@ -361,13 +361,16 @@ def check_existing(address):
 		except EnvironmentError:
 			pass
 
-	sock = socket.socket(family=socket.AF_UNIX)
 	try:
-		sock.bind(address)
-	except socket.error as e:
-		if getattr(e, 'errno', None) == errno.EADDRINUSE:
-			return None
-		raise
+		sock = socket.fromfd(3, socket.AF_UNIX, socket.SOCK_STREAM)
+	except socket.error as fdse:
+		sock = socket.socket(family=socket.AF_UNIX)
+		try:
+			sock.bind(address)
+		except socket.error as e:
+			if getattr(e, 'errno', None) == errno.EADDRINUSE:
+				return None
+			raise
 	return sock
 
 
