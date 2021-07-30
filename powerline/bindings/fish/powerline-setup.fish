@@ -31,11 +31,19 @@ function powerline-setup
 		end
 		function _powerline_update --on-variable POWERLINE_COMMAND
 			set -l addargs "--last-exit-code=\$status"
-			set -l addargs "$addargs --last-pipe-status=\$status"
+			if test -z "$pipestatus"
+				set addargs "$addargs --last-pipe-status=\$status"
+			else
+				set addargs "$addargs --last-pipe-status=\"\$pipestatus\""
+			end
 			set -l addargs "$addargs --jobnum=(jobs -p | wc -l)"
-			# One random value has an 1/32767 = 0.0031% probability of having
-			# the same value in two shells
-			set -l addargs "$addargs --renderer-arg=client_id="(random)
+			if test -z "$fish_pid"
+				# One random value has an 1/32767 = 0.0031% probability of having
+				# the same value in two shells
+				set addargs "$addargs --renderer-arg=client_id="(random)
+			else
+				set addargs "$addargs --renderer-arg=client_id=\$fish_pid"
+			end
 			set -l addargs "$addargs --width=\$_POWERLINE_COLUMNS"
 			set -l addargs "$addargs --renderer-arg=mode=\$fish_bind_mode"
 			set -l addargs "$addargs --renderer-arg=default_mode=\$_POWERLINE_DEFAULT_MODE"
@@ -59,8 +67,8 @@ function powerline-setup
 				env \$POWERLINE_COMMAND $POWERLINE_COMMAND_ARGS shell right $addargs
 				$rpromptpast
 			end
-            function fish_mode_prompt
-            end
+			function fish_mode_prompt
+			end
 			function _powerline_set_columns --on-signal WINCH
 				set -g _POWERLINE_COLUMNS $columnsexpr
 			end
@@ -96,5 +104,7 @@ function powerline-setup
 			end
 		end
 	end
+
+	return 0
 end
 # vim: ft=fish
