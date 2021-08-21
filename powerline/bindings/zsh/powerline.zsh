@@ -197,7 +197,7 @@ _powerline_add_widget() {
 }
 
 if test -z "${POWERLINE_CONFIG_COMMAND}" ; then
-	if which powerline-config >/dev/null ; then
+	if which powerline-config >/dev/null 2>/dev/null ; then
 		typeset -g POWERLINE_CONFIG_COMMAND=powerline-config
 	else
 		typeset -g POWERLINE_CONFIG_COMMAND="${_POWERLINE_SOURCED:h:h:h:h}/scripts/powerline-config"
