@@ -52,7 +52,7 @@ class CwdSegment(Segment):
 		else:
 			return super(CwdSegment, self).omitted_args(name, method)
 
-	def get_shortened_path(self, pl, segment_info, shorten_home=True, **kwargs):
+	def get_shortened_path(self, pl, segment_info, shorten_home=True):
 		try:
 			path = out_u(segment_info['getcwd']())
 		except OSError as e:
@@ -75,9 +75,9 @@ class CwdSegment(Segment):
 	             dir_shorten_len=None,
 	             dir_limit_depth=None,
 	             use_path_separator=False,
-	             ellipsis='...',
-	             **kwargs):
-		cwd = self.get_shortened_path(pl, segment_info, **kwargs)
+				 shorten_home=True,
+	             ellipsis='...',):
+		cwd = self.get_shortened_path(pl, segment_info, shorten_home)
 		cwd_split = cwd.split(os.sep)
 		cwd_split_len = len(cwd_split)
 		cwd = [i[0:dir_shorten_len] if dir_shorten_len and i else i for i in cwd_split[:-1]] + [cwd_split[-1]]
