@@ -75,7 +75,7 @@ class CwdSegment(Segment):
 	             dir_shorten_len=None,
 	             dir_limit_depth=None,
 	             use_path_separator=False,
-				 shorten_home=True,
+	             shorten_home=True,
 	             ellipsis='...',):
 		cwd = self.get_shortened_path(pl, segment_info, shorten_home)
 		cwd_split = cwd.split(os.sep)
