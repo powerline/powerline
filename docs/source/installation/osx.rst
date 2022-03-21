@@ -34,7 +34,7 @@ Python package
 
    .. code-block:: sh
 
-       pip install --user git+git://github.com/powerline/powerline
+       pip install --user git+https://github.com/powerline/powerline
 
    will get latest development version.
 
