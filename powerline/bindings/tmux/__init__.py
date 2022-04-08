@@ -76,7 +76,7 @@ def get_tmux_version(pl):
 	version_string = get_tmux_output(pl, '-V')
 	_, version_string = version_string.split(' ')
 	version_string = version_string.strip()
-	if version_string == 'master':
+	if version_string == 'master' or str(version_string).startswith('next'):
 		return TmuxVersionInfo(float('inf'), 0, version_string)
 	major, minor = version_string.split('.')
 	major = NON_DIGITS.subn('', major)[0]
