@@ -1,14 +1,13 @@
 # vim:fileencoding=utf-8:noet
-from __future__ import (unicode_literals, division, absolute_import, print_function)
-
 from weakref import ref
+from atexit import register as atexit
 
 from IPython.terminal.prompts import Prompts
 from pygments.token import Token  # NOQA
 
 from powerline.ipython import IPythonPowerline
 from powerline.renderers.ipython.since_7 import PowerlinePromptStyle
-from powerline.bindings.ipython.post_0_11 import PowerlineMagics, ShutdownHook
+from powerline.bindings.ipython.post_0_11 import PowerlineMagics
 
 
 class ConfigurableIPythonPowerline(IPythonPowerline):
@@ -20,7 +19,7 @@ class ConfigurableIPythonPowerline(IPythonPowerline):
         super(ConfigurableIPythonPowerline, self).init(
             renderer_module='.since_7')
 
-    def do_setup(self, ip, prompts, shutdown_hook):
+    def do_setup(self, ip, prompts):
         prompts.powerline = self
 
         msfn_missing = ()
@@ -50,18 +49,16 @@ class ConfigurableIPythonPowerline(IPythonPowerline):
         magics = PowerlineMagics(ip, self)
         ip.register_magics(magics)
 
-        if shutdown_hook:
-            shutdown_hook.powerline = ref(self)
+        atexit(self.shutdown)
 
 
 class PowerlinePrompts(Prompts):
     '''Class that returns powerline prompts
     '''
     def __init__(self, shell):
-        shutdown_hook = ShutdownHook(shell)
         powerline = ConfigurableIPythonPowerline(shell)
         self.shell = shell
-        powerline.do_setup(shell, self, shutdown_hook)
+        powerline.do_setup(shell, self)
         self.last_output_count = None
         self.last_output = {}
 

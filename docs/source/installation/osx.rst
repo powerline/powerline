@@ -16,9 +16,13 @@ Python package
        brew install python
 
    .. note::
-      In case :file:`powerline.sh` as a client ``socat`` and ``coreutils`` need 
-      to be installed. ``coreutils`` may be installed using ``brew install 
-      coreutils``.
+      There are three variants of the powerline client.  The fastest is
+      written in C and will be compiled if the compiler and libraries are
+      detected during installation.  The second fastest option is
+      :file:`powerline.sh` which requires ``socat`` and ``coreutils``.
+      ``coreutils`` may be installed using ``brew install 
+      coreutils``.  If neither of these are viable, then Powerline will
+      utilize a fallback client written in Python.
 
 2. Install Powerline using one of the following commands:
 
@@ -30,7 +34,7 @@ Python package
 
    .. code-block:: sh
 
-       pip install --user git+git://github.com/powerline/powerline
+       pip install --user git+https://github.com/powerline/powerline
 
    will get latest development version.
 

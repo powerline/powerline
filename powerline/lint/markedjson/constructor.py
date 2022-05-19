@@ -122,7 +122,7 @@ class BaseConstructor:
 		mapping = {}
 		for key_node, value_node in node.value:
 			key = self.construct_object(key_node, deep=deep)
-			if not isinstance(key, collections.Hashable):
+			if not isinstance(key, collections.abc.Hashable):
 				self.echoerr(
 					'While constructing a mapping', node.start_mark,
 					'found unhashable key', key_node.start_mark
