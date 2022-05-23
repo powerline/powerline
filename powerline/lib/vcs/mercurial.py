@@ -86,3 +86,8 @@ class Repository(object):
 			get_func=branch_name_from_config_file,
 			create_watcher=self.create_watcher,
 		)
+
+	@staticmethod
+	def ignore_event(path, name):
+		# Ignore temporary files created during mercurial commands
+		return path.endswith('.hg') and name.startswith(b'tmp')
