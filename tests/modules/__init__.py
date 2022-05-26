@@ -33,6 +33,7 @@ class PowerlineDummyTest(object):
 class PowerlineTestSuite(object):
 	def __init__(self, name):
 		self.name = name
+		self.suite = ''
 
 	def __enter__(self):
 		self.saved_current_suite = os.environ['POWERLINE_CURRENT_SUITE']

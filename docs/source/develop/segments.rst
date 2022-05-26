@@ -528,10 +528,10 @@ i3wm
     in lemonbar bindings.
 
 ``workspace``
-    dictionary containing the workspace name under the key ``"name"`` and 
-    boolean values for the ``"visible"``, ``"urgent"`` and ``"focused"`` 
-    keys, indicating the state of the workspace. Currently only provided by 
-    the :py:func:`powerline.listers.i3wm.workspace_lister` lister.
+	   the `i3-ipc` workspace object corresponding to this workspace.
+	   Contains string attributes ``name`` and ``output``, as well as boolean
+	   attributes for ``visible``, ``urgent`` and ``focused``. Currently only
+    provided by  the :py:func:`powerline.listers.i3wm.workspace_lister` lister.
 
 Segment class
 =============

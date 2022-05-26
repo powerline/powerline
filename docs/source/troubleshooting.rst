@@ -193,8 +193,12 @@ I am suffering bad lags before displaying shell prompt
 To get rid of these lags there currently are two options:
 
 * Run ``powerline-daemon``. Powerline does not automatically start it for you.
+  See installation instructions for more details.
 * Compile and install ``libzpython`` module that lives in 
   https://bitbucket.org/ZyX_I/zpython. This variant is zsh-specific.
+* If you are a python package manager, be sure to set ``POWERLINE_COMMAND``
+  to your Powerline command.  See installation instructions for details.
+  
 
 Prompt is spoiled after completing files in ksh
 -----------------------------------------------

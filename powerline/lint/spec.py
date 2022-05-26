@@ -163,7 +163,7 @@ class Spec(object):
 		'''Define message which will be used when unknown key was found
 
 		“Unknown” is a key that was not provided at the initialization and via 
-		:py:meth:`Spec.update` and did not match any ``keyfunc`` proided via 
+		:py:meth:`Spec.update` and did not match any ``keyfunc`` provided via 
 		:py:meth:`Spec.unknown_spec`.
 
 		:param msgfunc:

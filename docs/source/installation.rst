@@ -54,7 +54,7 @@ Generic requirements
 Pip installation
 ================
 
-Due to a naming conflict with an unrelated project powerline is available on 
+Due to a naming conflict with an unrelated project, powerline is available on 
 PyPI under the ``powerline-status`` name:
 
 .. code-block:: sh
@@ -66,7 +66,7 @@ development version
 
 .. code-block:: sh
 
-    pip install --user git+git://github.com/powerline/powerline
+    pip install --user git+https://github.com/powerline/powerline
 
 may be used. If powerline was already checked out into some directory
 
@@ -85,10 +85,9 @@ will have to be done (:file:`~/.local/bin` should be replaced with some path
 present in ``$PATH``).
 
 .. note::
-    If ISP blocks git protocol for some reason github also provides ``ssh`` 
-    (``git+ssh://git@github.com/powerline/powerline``) and ``https`` 
-    (``git+https://github.com/powerline/powerline``) protocols. ``git`` protocol 
-    should be the fastest, but least secure one though.
+    We can use either ``https``(``git+ssh://git@github.com/powerline/powerline``)
+    or ``https``(``git+https://github.com/powerline/powerline``) protocols.
+    ``git`` protocol is deprecated by Github.
 
 Fonts installation
 ==================
