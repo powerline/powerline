@@ -61,10 +61,10 @@ function powerline-setup
 			end
 			echo "
 			function fish_prompt
-				eval \$POWERLINE_COMMAND $POWERLINE_COMMAND_ARGS shell $promptside $addargs
+				env \$POWERLINE_COMMAND $POWERLINE_COMMAND_ARGS shell $promptside $addargs
 			end
 			function fish_right_prompt
-				eval \$POWERLINE_COMMAND $POWERLINE_COMMAND_ARGS shell right $addargs
+				env \$POWERLINE_COMMAND $POWERLINE_COMMAND_ARGS shell right $addargs
 				$rpromptpast
 			end
 			function fish_mode_prompt
@@ -78,7 +78,7 @@ function powerline-setup
 		_powerline_set_default_mode
 		_powerline_update
 	end
-	if eval $POWERLINE_CONFIG_COMMAND shell --shell=fish uses tmux
+	if env $POWERLINE_CONFIG_COMMAND shell --shell=fish uses tmux
 		if set -q TMUX
 			if tmux refresh -S ^/dev/null
 				set -g _POWERLINE_TMUX "$TMUX"
