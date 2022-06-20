@@ -21,6 +21,7 @@ def environment(pl, segment_info, variable=None):
 @requires_segment_info
 def virtualenv(pl, segment_info, ignore_venv=False, ignore_conda=False, ignored_names=("venv", ".venv")):
 	'''Return the name of the current Python or conda virtualenv.
+
 	:param list ignored_names:
 		Names of venvs to ignore. Will then get the name of the venv by ascending to the parent directory
 	:param bool ignore_venv:
