@@ -3,11 +3,9 @@ from __future__ import (unicode_literals, division, absolute_import, print_funct
 
 import os
 
-from inspect import formatargspec
-
 from sphinx.ext import autodoc
 
-from powerline.lint.inspect import getconfigargspec
+from powerline.lint.inspect import formatconfigargspec, getconfigargspec
 from powerline.segments import Segment
 from powerline.lib.unicode import unicode
 
@@ -28,7 +26,7 @@ class ThreadedDocumenter(autodoc.FunctionDocumenter):
 
 	def format_args(self):
 		argspec = getconfigargspec(self.object)
-		return formatargspec(*argspec, formatvalue=formatvalue).replace('\\', '\\\\')
+		return formatconfigargspec(*argspec, formatvalue=formatvalue).replace('\\', '\\\\')
 
 
 class Repr(object):
