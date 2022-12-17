@@ -1,6 +1,8 @@
 # vim:fileencoding=utf-8:noet
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
+import os
+
 import re
 
 from imaplib import IMAP4_SSL_PORT, IMAP4_SSL, IMAP4
@@ -17,9 +19,15 @@ class EmailIMAPSegment(KwThreadedSegment):
 	interval = 60
 
 	@staticmethod
-	def key(username, password, server='imap.gmail.com', port=IMAP4_SSL_PORT, folder='INBOX', use_ssl=None, **kwargs):
+	def key(username, password, username_variable, password_variable, server='imap.gmail.com', port=IMAP4_SSL_PORT, folder='INBOX', use_ssl=None, **kwargs):
 		if use_ssl is None:
 			use_ssl = (port == IMAP4_SSL_PORT)
+		# catch if user set custom mail credential env variables
+		if username_variable:
+			username = os.environ.get(username_variable, None)
+		if password_variable:
+			password = os.environ.get(password_variable, None)
+
 		return _IMAPKey(username, password, server, port, folder, use_ssl)
 
 	def compute_state(self, key):
@@ -60,6 +68,10 @@ email_imap_alert = with_docstring(EmailIMAPSegment(),
 	login username
 :param str password:
 	login password
+:param str username_variable:
+	name of environment variable to check for login username
+:param str password_variable:
+	name of environment variable to check for login password
 :param str server:
 	e-mail server
 :param int port:
