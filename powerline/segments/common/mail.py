@@ -19,7 +19,7 @@ class EmailIMAPSegment(KwThreadedSegment):
 	interval = 60
 
 	@staticmethod
-	def key(username, password, username_variable, password_variable, server='imap.gmail.com', port=IMAP4_SSL_PORT, folder='INBOX', use_ssl=None, **kwargs):
+	def key(username, password, server='imap.gmail.com', port=IMAP4_SSL_PORT, folder='INBOX', use_ssl=None, **kwargs):
 		if use_ssl is None:
 			use_ssl = (port == IMAP4_SSL_PORT)
 		# catch if user set custom mail credential env variables
@@ -27,6 +27,8 @@ class EmailIMAPSegment(KwThreadedSegment):
 			username = os.environ.get(username_variable, None)
 		if password_variable:
 			password = os.environ.get(password_variable, None)
+		if server_variable:
+			server = os.enviorn.get(server_variable, server)
 
 		return _IMAPKey(username, password, server, port, folder, use_ssl)
 
@@ -68,12 +70,14 @@ email_imap_alert = with_docstring(EmailIMAPSegment(),
 	login username
 :param str password:
 	login password
+:param str server:
+	e-mail server
 :param str username_variable:
 	name of environment variable to check for login username
 :param str password_variable:
 	name of environment variable to check for login password
-:param str server:
-	e-mail server
+:param str server_variable:
+	name of environment variable to check for email server
 :param int port:
 	e-mail server port
 :param str folder:
