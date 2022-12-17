@@ -1,6 +1,8 @@
 # vim:fileencoding=utf-8:noet
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
+import os
+
 import re
 
 from imaplib import IMAP4_SSL_PORT, IMAP4_SSL, IMAP4
@@ -24,8 +26,15 @@ class EmailIMAPSegment(KwThreadedSegment):
 
 	def compute_state(self, key):
 		if not key.username or not key.password:
-			self.warn('Username and password are not configured')
-			return None
+			# check environmental variables for username and password
+			mail_user = os.environ.get('MAIL_USER', None)
+			mail_pass = os.environ.get('MAIL_PASSWORD', None)
+			if mail_user and mail_password:
+				key.username = mail_user
+				key.password = mail_password
+			else:
+				self.warn('Username and password are not configured')
+				return None
 		if key.use_ssl:
 			mail = IMAP4_SSL(key.server, key.port)
 		else:
