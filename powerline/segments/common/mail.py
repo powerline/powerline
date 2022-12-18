@@ -29,7 +29,7 @@ class EmailIMAPSegment(KwThreadedSegment):
 			password = os.environ[password_variable]
 		if server_variable:
 			server = os.environ[server_variable]
-		if port:
+		if port_variable:
 			port = os.environ[port_variable]
 
 		return _IMAPKey(username, password, server, port, folder, use_ssl)
