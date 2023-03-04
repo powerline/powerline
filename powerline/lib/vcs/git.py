@@ -13,6 +13,7 @@ from powerline.lib.shell import which
 
 
 _ref_pat = re.compile(br'ref:\s*refs/heads/(.+)')
+_sha_pat = re.compile(r'[0-9a-f]{40}')
 
 
 def branch_name_from_config_file(directory, config_file):
@@ -23,8 +24,10 @@ def branch_name_from_config_file(directory, config_file):
 		return os.path.basename(directory)
 	m = _ref_pat.match(raw)
 	if m is not None:
-		return m.group(1).decode(get_preferred_file_contents_encoding(), 'replace')
-	return raw[:7]
+		b = m.group(1)
+	else:
+		b = raw
+	return b.decode(get_preferred_file_contents_encoding(), 'replace')
 
 
 def git_directory(directory):
@@ -89,7 +92,7 @@ class GitRepository(object):
 		return get_branch_name(
 			directory=directory,
 			config_file=head,
-			get_func=branch_name_from_config_file,
+			get_func=self.do_describe,
 			create_watcher=self.create_watcher,
 		)
 
@@ -161,6 +164,19 @@ try:
 						index_column = 'I'
 				r = wt_column + index_column + untracked_column
 				return r if r != '   ' else None
+
+		def do_describe(self, directory, config_file):
+			branch = branch_name_from_config_file(directory, config_file)
+			if _sha_pat.match(branch):
+				try:
+					return "(" + git.Repository(directory).describe(branch.strip(),
+						describe_strategy=git.GIT_DESCRIBE_TAGS,
+						max_candidates_tags=0).strip() + ")"
+				except KeyError:
+					return branch[:7]
+			else:
+				return branch
+
 except ImportError:
 	class Repository(GitRepository):
 		def __init__(self, *args, **kwargs):
@@ -206,3 +222,13 @@ except ImportError:
 
 				r = wt_column + index_column + untracked_column
 				return r if r != '   ' else None
+
+		def do_describe(self, directory, config_file):
+			branch = branch_name_from_config_file(directory, config_file)
+			if _sha_pat.match(branch):
+				try:
+					return "(" + next(self._gitcmd(directory, 'describe', '--tags', '--exact-match', 'HEAD')) + ")"
+				except StopIteration:
+					return branch[:7]
+			else:
+				return branch
