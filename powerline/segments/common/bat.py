@@ -270,7 +270,7 @@ def battery(pl, format='{ac_state} {capacity:3.0%}', steps=5, gamify=False, full
 	ret = []
 	if gamify:
 		denom = int(steps)
-		numer = int(denom * capacity / 100)
+		numer = int(round(denom * capacity / 100.0, 0))
 		ret.append({
 			'contents': online if ac_powered else offline,
 			'draw_inner_divider': False,
