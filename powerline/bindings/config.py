@@ -176,7 +176,7 @@ def init_tmux_environment(pl, args, set_tmux_environment=set_tmux_environment):
 		' ' * powerline.renderer.strwidth(left_dividers['hard'])))
 
 
-TMUX_VAR_RE = re.compile('\$(_POWERLINE_\w+)')
+TMUX_VAR_RE = re.compile(r'\$(_POWERLINE_\w+)')
 
 
 def tmux_setup(pl, args):
