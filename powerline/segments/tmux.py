@@ -19,4 +19,4 @@ def attached_clients(pl, minimum=1):
 	attached_clients_output = get_tmux_output(pl, 'list-clients', '-t', session_name)
 	attached_count = len(attached_clients_output.rstrip().split('\n'))
 
-	return None if attached_count < minimum else str(attached_count)
+	return None if attached_count < int(minimum) else str(attached_count)
