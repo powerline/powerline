@@ -1,7 +1,6 @@
 # vim:fileencoding=utf-8:noet
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
-import imp
 import sys
 
 
@@ -100,7 +99,7 @@ def replace_module(name, new=None, **kwargs):
 
 
 def new_module(name, **kwargs):
-	module = imp.new_module(name)
+	module = types.ModuleType(name)
 	for k, v in kwargs.items():
 		setattr(module, k, v)
 	return module
