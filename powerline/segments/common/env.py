@@ -15,7 +15,10 @@ def environment(pl, segment_info, variable=None):
 	:param string variable:
 		The environment variable to return if found
 	'''
-	return segment_info['environ'].get(variable, None)
+	return [{
+		'contents': segment_info['environ'].get(variable, None),
+		'highlight_groups': ['environment_variable']
+	}]
 
 
 @requires_segment_info
