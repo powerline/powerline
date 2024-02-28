@@ -14,3 +14,6 @@ message.fail
 
 /tests/tmp
 /tests/status
+
+# editor-specific settings dirs (add yours!)
+.vscode
