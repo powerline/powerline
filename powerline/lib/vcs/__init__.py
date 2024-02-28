@@ -16,7 +16,9 @@ def generate_directories(path):
 	if os.path.isdir(path):
 		yield path
 	while True:
-		if os.path.ismount(path):
+		# Work around https://github.com/python/cpython/issues/96192
+		_path = os.fsdecode(path) if isinstance(path, bytes) else path
+		if os.path.ismount(_path):
 			break
 		old_path = path
 		path = os.path.dirname(path)
