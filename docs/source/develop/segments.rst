@@ -531,7 +531,7 @@ i3wm
 	   the `i3-ipc` workspace object corresponding to this workspace.
 	   Contains string attributes ``name`` and ``output``, as well as boolean
 	   attributes for ``visible``, ``urgent`` and ``focused``. Currently only
-    provided by  the :py:func:`powerline.listers.i3wm.workspace_lister` lister.
+	   provided by  the :py:func:`powerline.listers.i3wm.workspace_lister` lister.
 
 Segment class
 =============
