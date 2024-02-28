@@ -53,6 +53,11 @@ You should check out some of the Powerline derivatives. The most lightweight
 and feature-rich alternative is currently the `vim-airline 
 <https://github.com/vim-airline/vim-airline>`_ project.
 
+Installation
+-------------
+
+See in documentation here https://powerline.readthedocs.io/en/latest/installation.html
+
 Configuration
 -------------
 
