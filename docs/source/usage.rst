@@ -58,7 +58,6 @@ if terminal emulator supports it.
    Gvim                  Linux   |i_yes|               |i_no|                |i_yes|
    iTerm2                OS X    |i_yes|               |i_no|                |i_no|
    Konsole               Linux   |i_yes|               |i_yes|               |i_yes|
-   lxterminal            Linux   |i_yes|               |i_yes|               |i_no|
    MacVim                OS X    |i_yes|               |i_no|                |i_yes|
    rxvt-unicode          Linux   |i_partial| [#]_      |i_no|                |i_no|
    st                    Linux   |i_yes|               |i_yes|               |i_yes| [#]_
@@ -74,7 +73,7 @@ if terminal emulator supports it.
 
 .. [#] Must be compiled with ``--enable-unicode3`` for the patched font to work.
 .. [#] Since version 0.5.
-.. [#] Including XFCE terminal and GNOME terminal.
+.. [#] Including lxterminal, XFCE terminal and GNOME terminal.
 .. [#] Since version 0.36.
 .. [#] Uses nearest color from 8-bit palette.
 
