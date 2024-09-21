@@ -73,7 +73,7 @@ Divider highlight group used: ``background:divider``.
 try:
 	import netifaces
 except ImportError:
-	def internal_ip(pl, interface='auto', ipv=4):
+	def internal_ip(pl, interface='auto', ipv=4, ip_format='u{addr}'):
 		return None
 else:
 	_interface_starts = {
@@ -106,7 +106,7 @@ else:
 		else:
 			return 0
 
-	def internal_ip(pl, interface='auto', ipv=4):
+	def internal_ip(pl, interface='auto', ipv=4, ip_format=u'{addr}'):
 		family = netifaces.AF_INET6 if ipv == 6 else netifaces.AF_INET
 		if interface == 'auto':
 			try:
@@ -122,7 +122,8 @@ else:
 				return None
 		addrs = netifaces.ifaddresses(interface)
 		try:
-			return addrs[family][0]['addr']
+			addr = addrs[family][0]['addr']
+			return ip_format.format(addr=addr, interface=interface)
 		except (KeyError, IndexError):
 			pl.info("No IPv{0} address found for interface {1}", ipv, interface)
 			return None
@@ -152,6 +153,10 @@ Requires ``netifaces`` module to work properly.
 :param int ipv:
 	4 or 6 for ipv4 and ipv6 respectively, depending on which IP address you 
 	need exactly.
+
+:param str ip_format:
+	address format string, will be passed ``addr`` and ``interface`` as the
+	arguments.
 ''')
 
 
