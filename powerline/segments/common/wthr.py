@@ -2,6 +2,7 @@
 from __future__ import (unicode_literals, division, absolute_import, print_function)
 
 import json
+import re
 from collections import namedtuple
 
 from powerline.lib.url import urllib_read, urllib_urlencode
@@ -16,85 +17,45 @@ _WeatherKey = namedtuple('Key', 'location_query weather_api_key')
 # segment is imported into powerline.segments.common module.
 
 
-# Weather condition code descriptions available at
+# Weather condition categories available at
 # https://openweathermap.org/weather-conditions
-weather_conditions_codes = {
-	200: ('stormy',),
-	201: ('stormy',),
-	202: ('stormy',),
-	210: ('stormy',),
-	211: ('stormy',),
-	212: ('stormy',),
-	221: ('stormy',),
-	230: ('stormy',),
-	231: ('stormy',),
-	232: ('stormy',),
-	300: ('rainy',),
-	301: ('rainy',),
-	302: ('rainy',),
-	310: ('rainy',),
-	311: ('rainy',),
-	312: ('rainy',),
-	313: ('rainy',),
-	314: ('rainy',),
-	321: ('rainy',),
-	500: ('rainy',),
-	501: ('rainy',),
-	502: ('rainy',),
-	503: ('rainy',),
-	504: ('rainy',),
-	511: ('snowy',),
-	520: ('rainy',),
-	521: ('rainy',),
-	522: ('rainy',),
-	531: ('rainy',),
-	600: ('snowy',),
-	601: ('snowy',),
-	602: ('snowy',),
-	611: ('snowy',),
-	612: ('snowy',),
-	613: ('snowy',),
-	615: ('snowy',),
-	616: ('snowy',),
-	620: ('snowy',),
-	621: ('snowy',),
-	622: ('snowy',),
-	701: ('foggy',),
-	711: ('foggy',),
-	721: ('foggy',),
-	731: ('foggy',),
-	741: ('foggy',),
-	751: ('foggy',),
-	761: ('foggy',),
-	762: ('foggy',),
-	771: ('foggy',),
-	781: ('foggy',),
-	800: ('sunny',),
-	801: ('cloudy',),
-	802: ('cloudy',),
-	803: ('cloudy',),
-	804: ('cloudy',),
-}
-
 weather_conditions_icons = {
-	'day':           'DAY',
-	'blustery':      'WIND',
-	'rainy':         'RAIN',
-	'cloudy':        'CLOUDS',
-	'snowy':         'SNOW',
-	'stormy':        'STORM',
-	'foggy':         'FOG',
-	'sunny':         'SUN',
-	'night':         'NIGHT',
-	'windy':         'WINDY',
-	'not_available': 'NA',
-	'unknown':       'UKN',
+	# group 2xx: thunderstorm
+	'thunderstorm': 'STORM',
+
+	# group 3xx: drizzle
+	'drizzle':      'RAIN',
+
+	# group 5xx: rain
+	'rain':         'RAIN',
+
+	# group 6xx: snow
+	'snow':         'SNOW',
+
+	# group 7xx: atmosphere
+	'ash':          'FOG',
+	'dust':         'FOG',
+	'fog':          'FOG',
+	'haze':         'FOG',
+	'mist':         'FOG',
+	'sand':         'FOG',
+	'smoke':        'FOG',
+	'squall':       'FOG',
+	'tornado':      'TORNADO',
+
+	# group 800: clear
+	'clear':        'CLEAR',
+
+	#group 80x: clouds
+	'clouds':       'CLOUDS',
+
+	'unknown':      'UKN',
 }
 
 temp_conversions = {
-	'C': lambda temp: temp - 273.15,
-	'F': lambda temp: (temp * 9 / 5) - 459.67,
-	'K': lambda temp: temp,
+	'C': lambda temp: temp,
+	'F': lambda temp: (temp * 9 / 5) + 32,
+	'K': lambda temp: temp + 273.15,
 }
 
 # Note: there are also unicode characters for units: ℃, ℉ and  K
@@ -124,7 +85,8 @@ class WeatherSegment(KwThreadedSegment):
 			return self.location_urls[weather_key]
 		except KeyError:
 			query_data = {
-				"appid": weather_key.weather_api_key
+				"appid": weather_key.weather_api_key,
+				"units": "metric",
 			}
 			location_query = weather_key.location_query
 			if location_query is None:
@@ -147,22 +109,23 @@ class WeatherSegment(KwThreadedSegment):
 
 		response = json.loads(raw_response)
 		try:
-			condition = response['weather'][0]
-			condition_code = int(condition['id'])
+			weather = response['weather'][0]
+			condition = weather['main'].lower()
+			desc = re.sub(r'[^A-Za-z0-9]+', '_', weather['description'])
 			temp = float(response['main']['temp'])
 		except (KeyError, ValueError):
 			self.exception('OpenWeatherMap returned malformed or unexpected response: {0}', repr(raw_response))
 			return None
 
 		try:
-			icon_names = weather_conditions_codes[condition_code]
+			icon_names = (desc, condition)
 		except IndexError:
 			icon_names = ('unknown',)
 			self.error('Unknown condition code: {0}', condition_code)
 
 		return (temp, icon_names)
 
-	def render_one(self, weather, icons=None, unit='C', temp_format=None, temp_coldest=-30, temp_hottest=40, **kwargs):
+	def render_one(self, weather, icons=None, unit='C', temp_format=None, temp_coldest=None, temp_hottest=None, **kwargs):
 		if not weather:
 			return None
 
@@ -178,6 +141,10 @@ class WeatherSegment(KwThreadedSegment):
 
 		temp_format = temp_format or ('{temp:.0f}' + temp_units[unit])
 		converted_temp = temp_conversions[unit](temp)
+		if not temp_coldest:
+			temp_coldest = temp_conversions[unit](-30)
+		if not temp_hottest:
+			temp_hottest = temp_conversions[unit](40)
 		if converted_temp <= temp_coldest:
 			gradient_level = 0
 		elif converted_temp >= temp_hottest:
@@ -206,6 +173,13 @@ weather = with_docstring(WeatherSegment(),
 Uses GeoIP lookup from https://freegeoip.app to automatically determine
 your current location. This should be changed if you’re in a VPN or if your
 IP address is registered at another location.
+
+Icons can be overridden with a dict (see below). Names for the icons can be
+either the main category name or the description with any non-alphanumeric
+characters replaced with ``_``. Names should be lowercase.
+
+See https://openweathermap.org/weather-conditions for weather condition
+categories and descriptions.
 
 Returns a list of colorized icon and temperature segments depending on
 weather conditions.
