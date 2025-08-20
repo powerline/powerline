@@ -8,7 +8,7 @@ Powerline
 
 **Powerline is a statusline plugin for vim, and provides statuslines and 
 prompts for several other applications, including zsh, bash, fish, tmux,
-IPython, Awesome, i3 and Qtile.**
+IPython, Awesome, i3, and Qtile.**
 
 +---------+---------------------------------------------------+
 | Author  | Kim Silkebækken (kim.silkebaekken+vim@gmail.com)  |
@@ -18,7 +18,7 @@ IPython, Awesome, i3 and Qtile.**
 | Version | beta                                              |
 +---------+---------------------------------------------------+
 
-**Powerline does not support python2 anymore and powerline will stop working with python2 in the near future.**
+**Powerline does not support python2 any more. Powerline will stop working with python2 in the near future.**
 
 Features
 --------
@@ -36,7 +36,7 @@ Features
   bash/zsh and other applications. It’s simple to write renderers for any 
   other applications that Powerline doesn’t yet support.
 * **Configuration and colorschemes written in JSON.** JSON is 
-  a standardized, simple and easy to use file format that allows for easy 
+  a standardized, simple, and easy-to-use file format that allows for easy 
   user configuration across all of Powerline’s supported applications.
 * **Fast and lightweight, with daemon support for even better performance.**
   Although the code base spans a couple of thousand lines of code with no 
@@ -46,8 +46,8 @@ Features
   launched for prompts and statuslines, which provides excellent 
   performance.
 
-*But I hate Python / I don’t need shell prompts / this is just too much 
-hassle for me / what happened to the original vim-powerline project / …*
+*“But I hate Python!” / “I don’t need shell prompts!” / “This is just too much 
+hassle for me…” / “What happened to the original vim-powerline project?” / …*
 
 You should check out some of the Powerline derivatives. The most lightweight
 and feature-rich alternative is currently the `vim-airline 
@@ -56,10 +56,10 @@ and feature-rich alternative is currently the `vim-airline
 Configuration
 -------------
 
-Basic powerline configuration is done via `JSON` files located at `.config/powerline/`. It is a good idea to start by copying the default configuration located at `powerline_root/powerline/config_files/` to `.config/powerline/`.
-If you installed the powerline from the AUR or via pip, `powerline_root` should be `/usr/lib/python3.6/site-packages/` or something similar, depending on your python version.
+Basic powerline configuration is done via `JSON` files located at ``.config/powerline/``. It is a good idea to start by copying the default configuration located at ``powerline_root/powerline/config_files/`` to ``.config/powerline/``.
+If you installed the powerline from the AUR or via pip, ``powerline_root`` should be `/usr/lib/python3.6/site-packages/` or something similar, depending on your python version.
 
-If you installed powerline via apt-get 'powerline_root' should be '/usr/share/powerline/'.
+If you installed powerline via apt-get, ``powerline_root`` should be ``/usr/share/powerline/``.
 
 This should yield you the following directory structure:
 
@@ -79,9 +79,9 @@ This should yield you the following directory structure:
 
 
 
-The files in the subdirectories of `themes` are used to specify which segments shall be shown; the files in subdirectories of `colorschemes` are used to specify which colors (as defined in `colors.json`) shall be used to display a segment.
+The files in the subdirectories of ``themes`` are used to specify which segments shall be shown; the files in subdirectories of ``colorschemes`` are used to specify which colors (as defined in ``colors.json``) shall be used to display a segment.
 
-Note that your local configuration only overrides the global configuration, it does not replace it, i.e. if you don't configure something locally, the global default will be used instead.
+Note that your local configuration only overrides the global configuration, it does not replace it (i.e. if you don’t configure something locally, the global default will be used instead).
 
 * Consult the `documentation <https://powerline.readthedocs.org/en/latest/configuration.html#quick-setup-guide>`_ for more details. See also the `segment reference <https://powerline.readthedocs.org/en/latest/configuration/segments.html>`_ for available segments and their configuration.
 * Check out `powerline-fonts <https://github.com/powerline/fonts>`_ for 
