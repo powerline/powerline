@@ -37,7 +37,7 @@ def _convert_seconds(seconds):
 
 
 class PlayerSegment(Segment):
-	def __call__(self, format='{state_symbol} {artist} - {title} ({total})', state_symbols=STATE_SYMBOLS, **kwargs):
+	def __call__(self, format='{state_symbol} {artist} - {title} ({total})', state_symbols=STATE_SYMBOLS, player_inactive_override=None, **kwargs):
 		stats = {
 			'state': 'fallback',
 			'album': None,
@@ -51,8 +51,12 @@ class PlayerSegment(Segment):
 			return None
 		stats.update(func_stats)
 		stats['state_symbol'] = state_symbols.get(stats['state'])
+		player_string = format.format(**stats)
+		player_inactive = stats["state"] == "stop" and not stats["artist"] and not stats["title"]
+		if player_inactive and player_inactive_override is not None:
+			player_string = str(player_inactive_override)
 		return [{
-			'contents': format.format(**stats),
+			'contents': player_string,
 			'highlight_groups': ['player_' + (stats['state'] or 'fallback'), 'player'],
 		}]
 
