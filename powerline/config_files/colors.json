@@ -77,7 +77,24 @@
 		"solarized:violet": [13, "6c71c4"],
 		"solarized:blue": [4, "268bd2"],
 		"solarized:cyan": [6, "2aa198"],
-		"solarized:green": [2, "859900"]
+		"solarized:green": [2, "859900"],
+
+		"nord:nord0": [8, "2e3440"],
+		"nord:nord1": [0, "3b4252"],
+		"nord:nord2": [10, "434c5e"],
+		"nord:nord3": [8, "4c566a"],
+		"nord:nord4": [12, "d8dee9"],
+		"nord:nord5": [7, "e5e9f0"],
+		"nord:nord6": [15, "eceff4"],
+		"nord:nord7": [14, "8fbcbb"],
+		"nord:nord8": [6, "88c0d0"],
+		"nord:nord9": [4, "81a1c1"],
+		"nord:nord10": [12, "5e81ac"],
+		"nord:nord11": [1, "bf616a"],
+		"nord:nord12": [11, "d08770"],
+		"nord:nord13": [3, "ebcb8b"],
+		"nord:nord14": [2, "a3be8c"],
+		"nord:nord15": [5, "a3be8c"]
 	},
 	"gradients": {
 		"dark_GREEN_Orange_red": [
