@@ -10,7 +10,7 @@ function powerline-setup
 		return 0
 	end
 
-	if test -z "$POWERLINE_CONFIG_COMMAND"
+	if not set -q POWERLINE_CONFIG_COMMAND
 		if which powerline-config >/dev/null
 			set -g POWERLINE_CONFIG_COMMAND powerline-config
 		else
@@ -18,9 +18,9 @@ function powerline-setup
 		end
 	end
 
-	if env $POWERLINE_CONFIG_COMMAND shell --shell=fish uses prompt
-		if test -z "$POWERLINE_COMMAND"
-			set -g POWERLINE_COMMAND (env $POWERLINE_CONFIG_COMMAND shell command)
+	if eval $POWERLINE_CONFIG_COMMAND shell --shell=fish uses prompt
+		if not set -q POWERLINE_COMMAND
+			set -g POWERLINE_COMMAND (eval $POWERLINE_CONFIG_COMMAND shell command)
 		end
 		function _powerline_set_default_mode --on-variable fish_key_bindings
 			if test $fish_key_bindings != fish_vi_key_bindings
@@ -31,25 +31,33 @@ function powerline-setup
 		end
 		function _powerline_update --on-variable POWERLINE_COMMAND
 			set -l addargs "--last-exit-code=\$status"
-			set -l addargs "$addargs --last-pipe-status=\$status"
+			if set -q pipestatus
+				set addargs "$addargs --last-pipe-status=\"\$pipestatus\""
+			else
+				set addargs "$addargs --last-pipe-status=\$status"
+			end
 			set -l addargs "$addargs --jobnum=(jobs -p | wc -l)"
-			# One random value has an 1/32767 = 0.0031% probability of having
-			# the same value in two shells
-			set -l addargs "$addargs --renderer-arg=client_id="(random)
+			if set -q fish_pid
+				set addargs "$addargs --renderer-arg=client_id=\$fish_pid"
+			else
+				# One random value has an 1/32767 = 0.0031% probability of having
+				# the same value in two shells
+				set addargs "$addargs --renderer-arg=client_id="(random)
+			end
 			set -l addargs "$addargs --width=\$_POWERLINE_COLUMNS"
 			set -l addargs "$addargs --renderer-arg=mode=\$fish_bind_mode"
 			set -l addargs "$addargs --renderer-arg=default_mode=\$_POWERLINE_DEFAULT_MODE"
 			set -l promptside
 			set -l rpromptpast
 			set -l columnsexpr
-			if test -z "$POWERLINE_NO_FISH_ABOVE$POWERLINE_NO_SHELL_ABOVE"
-				set promptside aboveleft
-				set rpromptpast 'echo -n " "'
-				set columnsexpr '(math (_powerline_columns) - 1)'
-			else
+			if begin set -q POWERLINE_NO_FISH_ABOVE; or set -q POWERLINE_NO_SHELL_ABOVE; end
 				set promptside left
 				set rpromptpast
 				set columnsexpr '(_powerline_columns)'
+			else
+				set promptside aboveleft
+				set rpromptpast 'echo -n " "'
+				set columnsexpr '(math (_powerline_columns) - 1)'
 			end
 			echo "
 			function fish_prompt
@@ -59,8 +67,8 @@ function powerline-setup
 				env \$POWERLINE_COMMAND $POWERLINE_COMMAND_ARGS shell right $addargs
 				$rpromptpast
 			end
-            function fish_mode_prompt
-            end
+			function fish_mode_prompt
+			end
 			function _powerline_set_columns --on-signal WINCH
 				set -g _POWERLINE_COLUMNS $columnsexpr
 			end
@@ -71,14 +79,14 @@ function powerline-setup
 		_powerline_update
 	end
 	if env $POWERLINE_CONFIG_COMMAND shell --shell=fish uses tmux
-		if test -n "$TMUX"
+		if set -q TMUX
 			if tmux refresh -S ^/dev/null
 				set -g _POWERLINE_TMUX "$TMUX"
 				function _powerline_tmux_pane
-					if test -z "$TMUX_PANE"
-						env TMUX="$_POWERLINE_TMUX" tmux display -p "#D" | tr -d ' %'
-					else
+					if set -q TMUX_PANE
 						echo "$TMUX_PANE" | tr -d ' %'
+					else
+						env TMUX="$_POWERLINE_TMUX" tmux display -p "#D" | tr -d ' %'
 					end
 				end
 				function _powerline_tmux_setenv
@@ -96,5 +104,7 @@ function powerline-setup
 			end
 		end
 	end
+
+	return 0
 end
 # vim: ft=fish
