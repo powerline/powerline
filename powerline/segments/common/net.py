@@ -27,7 +27,7 @@ def hostname(pl, segment_info, only_if_ssh=False, exclude_domain=False):
 		== 'ee5bcdc6-b749-11e7-9456-50465d597777'
 	):
 		return 'hostname'
-	if only_if_ssh and not segment_info['environ'].get('SSH_CLIENT'):
+	if only_if_ssh and not segment_info['environ'].get('SSH_CONNECTION'):
 		return None
 	if exclude_domain:
 		return socket.gethostname().split('.')[0]
