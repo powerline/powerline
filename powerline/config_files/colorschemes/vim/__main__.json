@@ -20,6 +20,7 @@
 		"winnr":              "information:unimportant",
 		"tabnr":              "file_directory",
 		"capslock_indicator": "paste_indicator",
+		"obsession_indicator": "information:unimportant",
 
 		"csv:column_number": "line_current",
 		"csv:column_name":   "line_current_symbol",
