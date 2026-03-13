@@ -9,7 +9,7 @@ from collections import defaultdict
 
 from powerline.lib.watcher import create_tree_watcher
 from powerline.lib.unicode import out_u
-from powerline.lib.path import join
+from powerline.lib.path import join, realpath
 
 
 def generate_directories(path):
@@ -53,6 +53,8 @@ file_status_lock = Lock()
 def get_branch_name(directory, config_file, get_func, create_watcher):
 	global branch_name_cache
 	with branch_lock:
+                # Remove any symlinks (if any) along the path
+		directory = realpath(directory)
 		# Check if the repo directory was moved/deleted
 		fw = branch_watcher(create_watcher)
 		is_watched = fw.is_watching(directory)
