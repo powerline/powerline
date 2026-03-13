@@ -296,6 +296,8 @@ else:
 			title = out_u(title)
 		if artist:
 			artist = out_u(artist[0])
+		else:
+			artist = ""
 
 		length = info.get('mpris:length')
 		# avoid parsing `None` length values, that would
