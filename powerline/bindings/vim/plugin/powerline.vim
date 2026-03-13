@@ -61,6 +61,8 @@ function s:rcmd(s)
 endfunction
 try
 	let s:can_replace_pyeval = !exists('g:powerline_pyeval')
+	call s:rcmd('import sys')
+	call s:rcmd('sys.path.append(f"/usr/lib/python{sys.version_info.major}.{sys.version_info.minor}/site-packages")')
 	call s:rcmd('try:')
 	call s:rcmd('	powerline_appended_path = None')
 	call s:rcmd('	try:')
