@@ -82,4 +82,8 @@ def get_tmux_version(pl):
 	major = NON_DIGITS.subn('', major)[0]
 	suffix = DIGITS.subn('', minor)[0] or None
 	minor = NON_DIGITS.subn('', minor)[0]
+
+	if major.startswith('next-'):
+		major = major.replace('next-', '')
+
 	return TmuxVersionInfo(int(major), int(minor), suffix)
