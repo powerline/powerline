@@ -1,0 +1,11 @@
+{
+	"default_module": "powerline.segments.psql",
+	"segments": {
+		"left": [
+			{
+				"function": "transaction",
+				"priority": 50
+			}
+		]
+	}
+}

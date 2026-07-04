@@ -126,6 +126,11 @@ main_spec = (Spec(
 				select=ext_theme_spec(),
 			),
 		).optional(),
+		psql=ext_spec().update(
+			local_themes=Spec(
+				continuation=ext_theme_spec(),
+			).optional(),
+		).optional(),
 		wm=ext_spec().update(
 			local_themes=Spec().unknown_spec(
 				Spec().re('^[0-9A-Za-z-]+$'),

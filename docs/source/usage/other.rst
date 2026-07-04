@@ -185,6 +185,41 @@ For IPython<0.11 add the following lines to :file:`.ipython/ipy_user_conf.py`:
 IPython=0.11* is not supported and does not work. IPython<0.10 was not 
 tested (not installable by pip).
 
+.. _psql-prompt:
+
+psql prompt
+===========
+
+Powerline can render the psql prompt via :varname:`PROMPT_COMMAND` and the
+``%D`` escape in :varname:`PROMPT1` / :varname:`PROMPT2`.  This requires a
+recent psql that exports standard :envvar:`PG*` connection variables and
+:envvar:`PSQL_SHELL_EXIT`, :envvar:`PSQL_TXN`, :envvar:`PSQL_ROW_COUNT`, and
+:envvar:`PSQL_SUPERUSER` before each :varname:`PROMPT_COMMAND` run.  The
+``user`` segment uses the ``superuser`` highlight group when
+:envvar:`PSQL_SUPERUSER` is ``1`` (same test as psql's ``%#`` escape).
+
+Example :file:`~/.psqlrc` configuration:
+
+.. code-block:: sql
+
+   \\set PROMPT_COMMAND 'powerline-render psql left --last-exit-code ${PSQL_SHELL_EXIT:-0} -w ${COLUMNS:-120} 2>/dev/null'
+   \\set PROMPT1 '%D %x%# '
+   \\set PROMPT2 '%w%R%x%# '
+
+The ``psql`` extension uses the readline renderer (non-printing ``\\x01`` /
+``\\x02`` markers) so color sequences do not affect cursor position.  Do not
+wrap ``%D`` in ``%[`` … ``%]``: that marks the *entire* powerline bar as
+non-printing and breaks readline editing (spaces swallowed, ``\\c postgres``
+received as ``\\cpostgres``).
+
+See :ref:`psql-postgres-integration` for the companion PostgreSQL patch,
+backward-compatibility switches, and packaging notes.
+
+.. toctree::
+   :hidden:
+
+   psql-postgres-integration
+
 .. _pdb-prompt:
 
 PDB prompt

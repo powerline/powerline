@@ -1,0 +1,15 @@
+{
+	"groups": {
+		"superuser":          "warning:regular",
+		"database":           { "fg": "white", "bg": "darkestgreen", "attrs": ["bold"] },
+		"host":                 "hostname",
+		"port":                 "information:additional",
+		"transaction":          "information:priority",
+		"transaction:active":   { "fg": "darkestgreen", "bg": "brightgreen", "attrs": ["bold"] },
+		"transaction:error":    "warning:regular",
+		"row_count":            "information:highlighted",
+		"txid":                 "information:additional",
+		"exit_fail":            "critical:failure",
+		"exit_success":         "critical:success"
+	}
+}

@@ -16,6 +16,10 @@
 			"colorscheme": "default",
 			"theme": "default"
 		},
+		"psql": {
+			"colorscheme": "default",
+			"theme": "default"
+		},
 		"shell": {
 			"colorscheme": "default",
 			"theme": "default",

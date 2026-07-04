@@ -1,0 +1,48 @@
+{
+	"default_module": "powerline.segments.psql",
+	"segments": {
+		"left": [
+			{
+				"function": "user",
+				"priority": 50
+			},
+			{
+				"function": "database",
+				"priority": 40
+			},
+			{
+				"function": "host",
+				"priority": 30,
+				"args": {
+					"localhost_is_local": true
+				}
+			},
+			{
+				"function": "port",
+				"priority": 28,
+				"args": {
+					"show_default": false
+				}
+			},
+			{
+				"function": "transaction",
+				"priority": 25
+			},
+			{
+				"function": "row_count",
+				"priority": 15,
+				"args": {
+					"show_zero": false
+				}
+			},
+			{
+				"function": "txid",
+				"priority": 12
+			},
+			{
+				"function": "powerline.segments.shell.last_status",
+				"priority": 8
+			}
+		]
+	}
+}
