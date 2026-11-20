@@ -127,6 +127,8 @@ class Renderer(object):
 	}
 	'''Basic segment info
 
+	:meta hide-value:
+
 	Is merged with local segment information by :py:meth:`get_segment_info`
 	method. Keys:
 
